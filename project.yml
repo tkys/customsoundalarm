@@ -1,0 +1,79 @@
+name: CustomSoundAlarm
+options:
+  bundleIdPrefix: com.tkysdev
+  deploymentTarget:
+    iOS: "26.0"
+  xcodeVersion: "26.0"
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "6.2"
+    TARGETED_DEVICE_FAMILY: "1"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: "F8ZP855SM2"
+    GENERATE_INFOPLIST_FILE: true
+    SWIFT_EMIT_LOC_STRINGS: true
+
+targets:
+  CustomSoundAlarm:
+    type: application
+    platform: iOS
+    sources:
+      - path: CustomSoundAlarm
+        excludes:
+          - "**/.DS_Store"
+          - Info.plist
+      - path: Shared
+    info:
+      path: CustomSoundAlarm/Info.plist
+      properties:
+        CFBundleDisplayName: Custom Alarm
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations~iPhone:
+          - UIInterfaceOrientationPortrait
+        NSAlarmKitUsageDescription: "お気に入りの音でアラームを鳴らすために使用します。"
+        NSMicrophoneUsageDescription: "アラーム音を録音するためにマイクを使用します。"
+        UIBackgroundModes:
+          - audio
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tkysdev.customsoundalarm
+        GENERATE_INFOPLIST_FILE: false
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    scheme:
+      testPlans: []
+    dependencies:
+      - target: CustomSoundAlarmWidget
+        embed: true
+    entitlements:
+      path: CustomSoundAlarm/CustomSoundAlarm.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.tkysdev.customsoundalarm
+
+  CustomSoundAlarmWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: CustomSoundAlarmWidget
+      - path: Shared
+    info:
+      path: CustomSoundAlarmWidget/Info.plist
+      properties:
+        CFBundleDisplayName: Custom Alarm Widget
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tkysdev.customsoundalarm.widget
+        GENERATE_INFOPLIST_FILE: false
+    entitlements:
+      path: CustomSoundAlarmWidget/CustomSoundAlarmWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.tkysdev.customsoundalarm
