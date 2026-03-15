@@ -95,8 +95,7 @@ targets:
           NSExtensionPointIdentifier: com.apple.share-services
           NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).ShareViewController"
           NSExtensionAttributes:
-            NSExtensionActivationRule:
-              NSExtensionActivationSupportsFileWithMaxCount: 1
+            NSExtensionActivationRule: "SUBQUERY(extensionItems, $item, SUBQUERY($item.attachments, $att, ANY $att.registeredTypeIdentifiers UTI-CONFORMS-TO \"public.audio\" OR ANY $att.registeredTypeIdentifiers UTI-CONFORMS-TO \"public.movie\").@count > 0).@count > 0"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.tkysdev.customsoundalarm.share
