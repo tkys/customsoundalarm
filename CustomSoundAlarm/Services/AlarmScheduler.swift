@@ -75,7 +75,7 @@ final class AlarmScheduler {
                 textColor: .blue,
                 systemImageName: "clock.fill"
             ),
-            secondaryButtonBehavior: .snooze
+            secondaryButtonBehavior: .custom
         )
 
         let attributes = AlarmAttributes<CustomAlarmMetadata>(
@@ -114,24 +114,19 @@ final class AlarmScheduler {
             schedule = .relative(.init(time: alarmTime, repeats: recurrence))
         }
 
-        // カスタム音源を指定（Library/Sounds内のCAFファイル）
-        let sound: AlertConfiguration.AlertSound = entry.soundFileName.isEmpty
-            ? .default
-            : .named(entry.soundFileName)
-
         let config: AlarmManager.AlarmConfiguration<CustomAlarmMetadata> = .alarm(
             schedule: schedule,
             attributes: attributes,
             stopIntent: DismissAlarmIntent(),
             secondaryIntent: SnoozeAlarmIntent(),
-            sound: sound
+            sound: entry.soundFileName.isEmpty ? .default : .named(entry.soundFileName)
         )
 
         do {
             let alarmID = Alarm.ID()
             _ = try await manager.schedule(id: alarmID, configuration: config)
             scheduledAlarmCount += 1
-            logger.info("Scheduled alarm: \(entry.timeString) - \(entry.label)")
+            logger.info("Scheduled alarm: \(entry.timeString) - \(entry.label) - sound: \(entry.soundFileName.isEmpty ? "default" : entry.soundFileName)")
         } catch {
             logger.error("Failed to schedule alarm: \(error.localizedDescription)")
         }

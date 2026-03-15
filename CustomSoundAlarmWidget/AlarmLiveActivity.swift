@@ -4,38 +4,42 @@ import AlarmKit
 
 struct AlarmLiveActivity: Widget {
     var body: some WidgetConfiguration {
-        AlarmActivityConfiguration(for: CustomAlarmMetadata.self) { context in
+        ActivityConfiguration(for: AlarmAttributes<CustomAlarmMetadata>.self) { context in
             // Lock Screen UI
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Image(systemName: "alarm.fill")
-                        .foregroundStyle(.orange)
-                    Text(context.state.metadata.label)
-                        .font(.headline)
-                }
+            if let metadata = context.attributes.metadata {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Image(systemName: "alarm.fill")
+                            .foregroundStyle(.orange)
+                        Text(metadata.label)
+                            .font(.headline)
+                    }
 
-                if !context.state.metadata.soundFileName.isEmpty {
-                    Text(context.state.metadata.soundFileName)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    if !metadata.soundFileName.isEmpty {
+                        Text(metadata.soundFileName)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
+                .padding()
             }
-            .padding()
         } dynamicIsland: { context in
-            DynamicIsland {
+            let metadata = context.attributes.metadata
+
+            return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     Image(systemName: "alarm.fill")
                         .foregroundStyle(.orange)
                 }
                 DynamicIslandExpandedRegion(.center) {
-                    Text(context.state.metadata.label)
+                    Text(metadata?.label ?? "")
                         .font(.headline)
                 }
             } compactLeading: {
                 Image(systemName: "alarm.fill")
                     .foregroundStyle(.orange)
             } compactTrailing: {
-                Text(context.state.metadata.label)
+                Text(metadata?.label ?? "")
                     .font(.caption)
             } minimal: {
                 Image(systemName: "alarm.fill")

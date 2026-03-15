@@ -68,6 +68,17 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("Custom Alarm")
+            .onAppear {
+                // プリセット音が未登録なら追加
+                if !soundStore.sounds.contains(where: { $0.fileName == "PresetAlarm.caf" }) {
+                    let preset = AlarmSound(
+                        name: "プリセット",
+                        fileName: "PresetAlarm.caf",
+                        isPreset: true
+                    )
+                    soundStore.add(preset)
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {

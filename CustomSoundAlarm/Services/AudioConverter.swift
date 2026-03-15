@@ -1,5 +1,5 @@
 import Foundation
-import AVFoundation
+@preconcurrency import AVFoundation
 import os
 
 /// 音声ファイルをAlarmKit互換のCAF形式に変換し、Library/Soundsに配置する
@@ -50,16 +50,6 @@ final class AudioConverter {
             interleaved: true
         )
 
-        // バッファを使って変換コピー
-        let bufferSize: AVAudioFrameCount = 4096
-        guard let buffer = AVAudioPCMBuffer(
-            pcmFormat: sourceFile.processingFormat,
-            frameCapacity: bufferSize
-        ) else {
-            throw AudioConverterError.bufferCreationFailed
-        }
-
-        // フォーマット変換用のコンバーター
         guard let converter = AVAudioConverter(
             from: sourceFile.processingFormat,
             to: outputFile.processingFormat
@@ -67,34 +57,70 @@ final class AudioConverter {
             throw AudioConverterError.converterCreationFailed
         }
 
-        let outputBuffer = AVAudioPCMBuffer(
-            pcmFormat: outputFile.processingFormat,
+        let bufferSize: AVAudioFrameCount = 4096
+        let inputBuffer = AVAudioPCMBuffer(
+            pcmFormat: sourceFile.processingFormat,
             frameCapacity: bufferSize
         )!
 
-        while true {
-            do {
-                try sourceFile.read(into: buffer)
-            } catch {
-                break
+        // inputブロック内でソースファイルから読み込む（コンバーターが必要時に呼ぶ）
+        var reachedEnd = false
+
+        while !reachedEnd {
+            let outputBuffer = AVAudioPCMBuffer(
+                pcmFormat: outputFile.processingFormat,
+                frameCapacity: bufferSize
+            )!
+
+            var conversionError: NSError?
+            let status = converter.convert(to: outputBuffer, error: &conversionError) { _, outStatus in
+                do {
+                    try sourceFile.read(into: inputBuffer)
+                    if inputBuffer.frameLength == 0 {
+                        outStatus.pointee = .endOfStream
+                        return nil
+                    }
+                    outStatus.pointee = .haveData
+                    return inputBuffer
+                } catch {
+                    outStatus.pointee = .endOfStream
+                    return nil
+                }
             }
 
-            if buffer.frameLength == 0 { break }
-
-            var error: NSError?
-            converter.convert(to: outputBuffer, error: &error) { _, outStatus in
-                outStatus.pointee = .haveData
-                return buffer
+            if let conversionError {
+                throw AudioConverterError.conversionFailed(conversionError.localizedDescription)
             }
 
-            if let error {
-                throw AudioConverterError.conversionFailed(error.localizedDescription)
+            switch status {
+            case .haveData:
+                if outputBuffer.frameLength > 0 {
+                    try outputFile.write(from: outputBuffer)
+                }
+            case .endOfStream:
+                if outputBuffer.frameLength > 0 {
+                    try outputFile.write(from: outputBuffer)
+                }
+                reachedEnd = true
+            case .error:
+                throw AudioConverterError.conversionFailed("変換ステータスエラー")
+            case .inputRanDry:
+                if outputBuffer.frameLength > 0 {
+                    try outputFile.write(from: outputBuffer)
+                }
+            @unknown default:
+                reachedEnd = true
             }
-
-            try outputFile.write(from: outputBuffer)
         }
 
-        logger.info("Converted audio to CAF: \(fileName)")
+        // 変換結果を検証
+        let attrs = try FileManager.default.attributesOfItem(atPath: outputURL.path)
+        let fileSize = attrs[.size] as? Int ?? 0
+        guard fileSize > 0 else {
+            throw AudioConverterError.conversionFailed("変換後のファイルが空です")
+        }
+
+        logger.info("Converted audio to CAF: \(fileName) (\(fileSize) bytes)")
         return fileName
     }
 
