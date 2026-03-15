@@ -1,82 +1,125 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// 音源追加画面
-/// - Files appから音声ファイルを選択（MP3, AAC, WAV, M4A, CAF）
-/// - マイク録音（将来Phase）
-struct SoundPickerView: View {
-    @Environment(\.dismiss) private var dismiss
+/// サウンド選択画面
+/// OOUI: アラームのプロパティとしてナビゲーション遷移で表示
+/// 選択 + インポートを同一画面で完結させる
+struct SoundSelectionView: View {
+    @Binding var selectedSound: AlarmSound?
     @State private var soundStore = SoundStore.shared
     @State private var isImporting = false
     @State private var isConverting = false
     @State private var errorMessage: String?
 
     var body: some View {
-        NavigationStack {
-            List {
-                // MARK: - ファイル読み込み
-                Section {
-                    Button {
-                        isImporting = true
-                    } label: {
-                        Label("音声ファイルを選択", systemImage: "doc.badge.plus")
-                    }
-                    .disabled(isConverting)
-                } footer: {
-                    Text("対応形式: MP3, AAC, WAV, M4A, CAF")
-                }
+        List {
+            presetSection
+            importedSection
+            addSection
+            errorSection
+        }
+        .navigationTitle("サウンド")
+        .navigationBarTitleDisplayMode(.inline)
+        .fileImporter(
+            isPresented: $isImporting,
+            allowedContentTypes: Self.supportedTypes,
+            allowsMultipleSelection: false
+        ) { result in
+            handleImport(result)
+        }
+    }
 
-                // MARK: - 録音（Phase 2）
-                Section {
-                    Label("録音する", systemImage: "mic")
-                        .foregroundStyle(.secondary)
-                } footer: {
-                    Text("まもなく対応予定")
-                }
+    // MARK: - Preset Sounds
 
-                // MARK: - 変換中
-                if isConverting {
-                    Section {
-                        HStack {
-                            ProgressView()
-                            Text("変換中...")
-                                .padding(.leading, 8)
-                        }
-                    }
-                }
+    private var presetSection: some View {
+        Section("プリセット") {
+            // 「なし」選択肢（デフォルト音）
+            soundRow(name: "デフォルト", sound: nil)
 
-                // MARK: - エラー
-                if let errorMessage {
-                    Section {
-                        Text(errorMessage)
-                            .foregroundStyle(.red)
-                    }
-                }
-            }
-            .navigationTitle("サウンドを追加")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("閉じる") { dismiss() }
-                }
-            }
-            .fileImporter(
-                isPresented: $isImporting,
-                allowedContentTypes: Self.supportedTypes,
-                allowsMultipleSelection: false
-            ) { result in
-                handleImport(result)
+            ForEach(soundStore.sounds.filter(\.isPreset), id: \.id) { sound in
+                soundRow(name: sound.name, sound: sound)
             }
         }
     }
 
-    // 対応する音声ファイルタイプ
+    // MARK: - Imported Sounds
+
+    @ViewBuilder
+    private var importedSection: some View {
+        let imported = soundStore.sounds.filter { !$0.isPreset }
+        if !imported.isEmpty {
+            Section("追加した音") {
+                ForEach(imported, id: \.id) { sound in
+                    soundRow(name: sound.name, sound: sound)
+                }
+                .onDelete { indexSet in
+                    let targets = imported
+                    for index in indexSet {
+                        soundStore.remove(targets[index])
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Add Sound
+
+    private var addSection: some View {
+        Section {
+            if isConverting {
+                HStack {
+                    ProgressView()
+                    Text("変換中...")
+                        .padding(.leading, 8)
+                }
+            } else {
+                Button {
+                    isImporting = true
+                } label: {
+                    Label("音声ファイルから追加", systemImage: "doc.badge.plus")
+                }
+            }
+        } footer: {
+            Text("MP3, AAC, WAV, M4A 形式に対応")
+        }
+    }
+
+    // MARK: - Error
+
+    @ViewBuilder
+    private var errorSection: some View {
+        if let errorMessage {
+            Section {
+                Text(errorMessage)
+                    .foregroundStyle(.red)
+                    .font(.caption)
+            }
+        }
+    }
+
+    // MARK: - Sound Row
+
+    private func soundRow(name: String, sound: AlarmSound?) -> some View {
+        Button {
+            selectedSound = sound
+        } label: {
+            HStack {
+                Text(name)
+                Spacer()
+                if selectedSound?.id == sound?.id {
+                    Image(systemName: "checkmark")
+                        .foregroundStyle(Color.accentColor)
+                }
+            }
+        }
+        .foregroundStyle(.primary)
+    }
+
+    // MARK: - Import
+
     private static let supportedTypes: [UTType] = [
-        .mp3,
-        .aiff,
-        .wav,
-        .mpeg4Audio,
-        UTType("com.apple.coreaudio-format") ?? .audio, // CAF
+        .mp3, .aiff, .wav, .mpeg4Audio,
+        UTType("com.apple.coreaudio-format") ?? .audio,
         .audio
     ]
 
@@ -115,7 +158,7 @@ struct SoundPickerView: View {
 
                 let sound = AlarmSound(name: name, fileName: fileName)
                 soundStore.add(sound)
-                dismiss()
+                selectedSound = sound
             } catch {
                 errorMessage = error.localizedDescription
             }

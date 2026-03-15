@@ -29,6 +29,12 @@ final class SoundStore {
         save()
     }
 
+    /// ファイル名からサウンドの表示名を返す
+    func displayName(for fileName: String) -> String {
+        if fileName.isEmpty { return "" }
+        return sounds.first { $0.fileName == fileName }?.name ?? fileName
+    }
+
     // MARK: - Persistence
 
     private func load() {

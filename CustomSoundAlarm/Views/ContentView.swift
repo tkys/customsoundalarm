@@ -1,84 +1,23 @@
 import SwiftUI
 
-/// メイン画面：アラーム一覧 + 音源管理
+/// メイン画面：アラーム一覧
+/// OOUIの原則に従い、主オブジェクト（アラーム）のみを表示
 struct ContentView: View {
     @State private var alarmStore = AlarmStore.shared
     @State private var soundStore = SoundStore.shared
+    @State private var selectedAlarm: AlarmEntry?
     @State private var showingAddAlarm = false
-    @State private var showingSoundPicker = false
 
     var body: some View {
         NavigationStack {
-            List {
-                // MARK: - アラーム一覧
-                Section {
-                    if alarmStore.alarms.isEmpty {
-                        ContentUnavailableView(
-                            "アラームなし",
-                            systemImage: "alarm",
-                            description: Text("＋ボタンからアラームを追加")
-                        )
-                    } else {
-                        ForEach(alarmStore.alarms) { alarm in
-                            AlarmRow(alarm: alarm) {
-                                alarmStore.toggleEnabled(alarm)
-                                Task {
-                                    await AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
-                                }
-                            }
-                        }
-                        .onDelete { indexSet in
-                            for index in indexSet {
-                                alarmStore.remove(alarmStore.alarms[index])
-                            }
-                            Task {
-                                await AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
-                            }
-                        }
-                    }
-                } header: {
-                    Text("アラーム")
-                }
-
-                // MARK: - サウンド一覧
-                Section {
-                    if soundStore.sounds.isEmpty {
-                        Text("音源を追加してください")
-                            .foregroundStyle(.secondary)
-                    } else {
-                        ForEach(soundStore.sounds) { sound in
-                            Label(sound.name, systemImage: sound.isPreset ? "speaker.wave.2" : "waveform")
-                        }
-                        .onDelete { indexSet in
-                            for index in indexSet {
-                                soundStore.remove(soundStore.sounds[index])
-                            }
-                        }
-                    }
-                } header: {
-                    HStack {
-                        Text("サウンド")
-                        Spacer()
-                        Button {
-                            showingSoundPicker = true
-                        } label: {
-                            Image(systemName: "plus.circle")
-                        }
-                    }
+            Group {
+                if alarmStore.alarms.isEmpty {
+                    emptyState
+                } else {
+                    alarmList
                 }
             }
-            .navigationTitle("Custom Alarm")
-            .onAppear {
-                // プリセット音が未登録なら追加
-                if !soundStore.sounds.contains(where: { $0.fileName == "PresetAlarm.caf" }) {
-                    let preset = AlarmSound(
-                        name: "プリセット",
-                        fileName: "PresetAlarm.caf",
-                        isPreset: true
-                    )
-                    soundStore.add(preset)
-                }
-            }
+            .navigationTitle("アラーム")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -89,11 +28,69 @@ struct ContentView: View {
                 }
             }
             .sheet(isPresented: $showingAddAlarm) {
-                AddAlarmView()
+                AlarmDetailView(mode: .add)
             }
-            .sheet(isPresented: $showingSoundPicker) {
-                SoundPickerView()
+            .sheet(item: $selectedAlarm) { alarm in
+                AlarmDetailView(mode: .edit(alarm))
             }
+            .onAppear {
+                registerPresetSounds()
+            }
+        }
+    }
+
+    // MARK: - Empty State
+
+    private var emptyState: some View {
+        ContentUnavailableView {
+            Label("お気に入りの音で目覚めよう", systemImage: "alarm")
+        } description: {
+            Text("アラームを追加して、好きな音を設定できます")
+        } actions: {
+            Button {
+                showingAddAlarm = true
+            } label: {
+                Text("アラームを追加")
+            }
+            .buttonStyle(.borderedProminent)
+        }
+    }
+
+    // MARK: - Alarm List
+
+    private var alarmList: some View {
+        List {
+            ForEach(alarmStore.alarms, id: \.id) { alarm in
+                AlarmRow(
+                    alarm: alarm,
+                    soundName: soundStore.displayName(for: alarm.soundFileName),
+                    onToggle: {
+                        alarmStore.toggleEnabled(alarm)
+                        Task { await AlarmScheduler.shared.syncAlarms(alarmStore.alarms) }
+                    },
+                    onTap: {
+                        selectedAlarm = alarm
+                    }
+                )
+            }
+            .onDelete { indexSet in
+                for index in indexSet {
+                    alarmStore.remove(alarmStore.alarms[index])
+                }
+                Task { await AlarmScheduler.shared.syncAlarms(alarmStore.alarms) }
+            }
+        }
+    }
+
+    // MARK: - Preset Registration
+
+    private func registerPresetSounds() {
+        if !soundStore.sounds.contains(where: { $0.fileName == "PresetAlarm.caf" }) {
+            soundStore.add(AlarmSound(
+                name: "ジャズ",
+                fileName: "PresetAlarm.caf",
+                isPreset: true
+            ))
         }
     }
 }
@@ -102,31 +99,54 @@ struct ContentView: View {
 
 struct AlarmRow: View {
     let alarm: AlarmEntry
+    let soundName: String
     let onToggle: () -> Void
+    let onTap: () -> Void
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(alarm.timeString)
-                    .font(.system(size: 40, weight: .light, design: .rounded))
-                HStack(spacing: 4) {
-                    Text(alarm.label)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    if !alarm.soundFileName.isEmpty {
-                        Text("・\(alarm.soundFileName)")
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
+        Button(action: onTap) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(alarm.timeString)
+                        .font(.system(size: 44, weight: .light, design: .rounded))
+                        .foregroundStyle(alarm.isEnabled ? .primary : .tertiary)
+
+                    HStack(spacing: 6) {
+                        Text(alarm.label)
+                        if !soundName.isEmpty {
+                            Text("・")
+                            Text(soundName)
+                        }
+                        if !alarm.repeatWeekdays.isEmpty {
+                            Text("・")
+                            Text(repeatSummary)
+                        }
                     }
+                    .font(.caption)
+                    .foregroundStyle(alarm.isEnabled ? .secondary : .tertiary)
                 }
+
+                Spacer()
+
+                Toggle("", isOn: Binding(
+                    get: { alarm.isEnabled },
+                    set: { _ in onToggle() }
+                ))
+                .labelsHidden()
             }
-            Spacer()
-            Toggle("", isOn: Binding(
-                get: { alarm.isEnabled },
-                set: { _ in onToggle() }
-            ))
-            .labelsHidden()
+            .padding(.vertical, 4)
         }
-        .padding(.vertical, 4)
+        .foregroundStyle(.primary)
+    }
+
+    private var repeatSummary: String {
+        let labels = ["日", "月", "火", "水", "木", "金", "土"]
+        let days = alarm.repeatWeekdays.sorted()
+        if days.count == 7 { return "毎日" }
+        if days == [2, 3, 4, 5, 6] { return "平日" }
+        if days == [1, 7] { return "週末" }
+        return days.compactMap { d in
+            (1...7).contains(d) ? labels[d - 1] : nil
+        }.joined(separator: " ")
     }
 }
