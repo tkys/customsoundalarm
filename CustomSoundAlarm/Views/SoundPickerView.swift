@@ -75,14 +75,22 @@ struct SoundSelectionView: View {
                         .padding(.leading, 8)
                 }
             } else {
+                NavigationLink {
+                    VideoImportFlow(selectedSound: $selectedSound)
+                } label: {
+                    Label("動画から音声を追加", systemImage: "video.badge.waveform")
+                }
+
                 Button {
                     isImporting = true
                 } label: {
                     Label("音声ファイルから追加", systemImage: "doc.badge.plus")
                 }
             }
+        } header: {
+            Text("追加")
         } footer: {
-            Text("MP3, AAC, WAV, M4A 形式に対応")
+            Text("動画: カメラロールから選択してトリム\n音声ファイル: MP3, AAC, WAV, M4A 形式に対応")
         }
     }
 

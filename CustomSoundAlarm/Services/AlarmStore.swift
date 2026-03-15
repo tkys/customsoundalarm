@@ -41,7 +41,7 @@ final class AlarmStore {
     // MARK: - Persistence
 
     private func load() {
-        guard let data = UserDefaults.standard.data(forKey: key),
+        guard let data = AppGroup.userDefaults.data(forKey: key),
               let decoded = try? JSONDecoder().decode([AlarmEntry].self, from: data) else {
             return
         }
@@ -51,6 +51,6 @@ final class AlarmStore {
 
     private func save() {
         guard let data = try? JSONEncoder().encode(alarms) else { return }
-        UserDefaults.standard.set(data, forKey: key)
+        AppGroup.userDefaults.set(data, forKey: key)
     }
 }

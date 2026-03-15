@@ -37,6 +37,7 @@ targets:
           - UIInterfaceOrientationPortrait
         NSAlarmKitUsageDescription: "お気に入りの音でアラームを鳴らすために使用します。"
         NSMicrophoneUsageDescription: "アラーム音を録音するためにマイクを使用します。"
+        NSPhotoLibraryUsageDescription: "動画から音声を抽出するためにフォトライブラリを使用します。"
         UIBackgroundModes:
           - audio
     settings:
@@ -49,6 +50,8 @@ targets:
       testPlans: []
     dependencies:
       - target: CustomSoundAlarmWidget
+        embed: true
+      - target: ShareExtension
         embed: true
     entitlements:
       path: CustomSoundAlarm/CustomSoundAlarm.entitlements
@@ -74,6 +77,32 @@ targets:
         GENERATE_INFOPLIST_FILE: false
     entitlements:
       path: CustomSoundAlarmWidget/CustomSoundAlarmWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.tkysdev.customsoundalarm
+
+  ShareExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: ShareExtension
+      - path: Shared
+    info:
+      path: ShareExtension/Info.plist
+      properties:
+        CFBundleDisplayName: Custom Alarm
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).ShareViewController"
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsFileWithMaxCount: 1
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tkysdev.customsoundalarm.share
+        GENERATE_INFOPLIST_FILE: false
+    entitlements:
+      path: ShareExtension/ShareExtension.entitlements
       properties:
         com.apple.security.application-groups:
           - group.com.tkysdev.customsoundalarm

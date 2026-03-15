@@ -24,6 +24,8 @@
 	<string>お気に入りの音でアラームを鳴らすために使用します。</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>アラーム音を録音するためにマイクを使用します。</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>動画から音声を抽出するためにフォトライブラリを使用します。</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

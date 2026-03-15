@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 struct CustomSoundAlarmApp: App {
+    @Environment(\.scenePhase) private var scenePhase
     @State private var hasRequestedAuth = false
 
     var body: some Scene {
@@ -11,6 +12,11 @@ struct CustomSoundAlarmApp: App {
                     guard !hasRequestedAuth else { return }
                     hasRequestedAuth = true
                     _ = await AlarmScheduler.shared.requestAuthorization()
+                }
+                .onChange(of: scenePhase) { _, newPhase in
+                    if newPhase == .active {
+                        SoundStore.shared.reload()
+                    }
                 }
         }
     }
