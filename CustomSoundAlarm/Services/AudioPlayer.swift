@@ -36,6 +36,8 @@ final class AudioPlayer {
         }
 
         do {
+            try AVAudioSession.sharedInstance().setCategory(.playback)
+            try AVAudioSession.sharedInstance().setActive(true)
             player = try AVAudioPlayer(contentsOf: url)
             player?.numberOfLoops = 0
             player?.play()
