@@ -7,6 +7,7 @@ import UniformTypeIdentifiers
 struct SoundSelectionView: View {
     @Binding var selectedSound: AlarmSound?
     @State private var soundStore = SoundStore.shared
+    @State private var audioPlayer = AudioPlayer.shared
     @State private var isImporting = false
     @State private var isConverting = false
     @State private var errorMessage: String?
@@ -20,6 +21,7 @@ struct SoundSelectionView: View {
         }
         .navigationTitle("サウンド")
         .navigationBarTitleDisplayMode(.inline)
+        .onDisappear { audioPlayer.stop() }
         .fileImporter(
             isPresented: $isImporting,
             allowedContentTypes: Self.supportedTypes,
@@ -102,11 +104,20 @@ struct SoundSelectionView: View {
     private func soundRow(name: String, sound: AlarmSound?) -> some View {
         Button {
             selectedSound = sound
+            if let sound {
+                audioPlayer.play(sound)
+            } else {
+                audioPlayer.stop()
+            }
         } label: {
             HStack {
                 Text(name)
                 Spacer()
-                if selectedSound?.id == sound?.id {
+                if let sound, audioPlayer.playingFileName == sound.fileName {
+                    Image(systemName: "speaker.wave.2.fill")
+                        .foregroundStyle(Color.accentColor)
+                        .symbolEffect(.variableColor.iterative)
+                } else if selectedSound?.id == sound?.id {
                     Image(systemName: "checkmark")
                         .foregroundStyle(Color.accentColor)
                 }

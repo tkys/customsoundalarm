@@ -10,6 +10,7 @@
 		1199524F1AF81748B8D10430 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9BB3A7C3D6A98F224779C5 /* AlarmSound.swift */; };
 		1D51CFD3A640B15B6272B13A /* AlarmMetadataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C8C1415F3825EA19A5F8714 /* AlarmMetadataModel.swift */; };
 		23DA87EF8C3F2F9F829BC18F /* AlarmEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A90C5CB204A2C060BFDFD18D /* AlarmEntry.swift */; };
+		28A5C3EDD2A11E6FFFCDD154 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070B386CACF0CF5F1B4FD824 /* AudioPlayer.swift */; };
 		31E6EC0D1595D7B5C31CC87D /* CustomSoundAlarmApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649ACDAAA65ED0A4EAB4A593 /* CustomSoundAlarmApp.swift */; };
 		442664997A989CFE11611D8B /* AlarmScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE105D13EE2FE60FAE50F6C7 /* AlarmScheduler.swift */; };
 		5717CF51374257EEE0B2AF88 /* AlarmStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D75262D4EB4101D764EEED /* AlarmStore.swift */; };
@@ -23,6 +24,7 @@
 		CC7A9B0476BC22807767F442 /* CustomSoundAlarmWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 450DEB40FC22DF70FD2EEE04 /* CustomSoundAlarmWidgetBundle.swift */; };
 		CDF4D89400A501DF1265B58E /* AlarmEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A90C5CB204A2C060BFDFD18D /* AlarmEntry.swift */; };
 		D87B7C4687B99C1AE18947C5 /* CustomSoundAlarmWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4825530FCF833BE90C91E68E /* CustomSoundAlarmWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D9DFA2B45BA2D540D349018A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F63C69F723DEF9E2780F11B8 /* Assets.xcassets */; };
 		E47416EAAA11DB6231D9B9E0 /* SoundPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177D78CF60700582FA34F061 /* SoundPickerView.swift */; };
 		FCE8653DBFC19A413125A2AA /* AddAlarmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEEBEBF4DB690A293B406484 /* AddAlarmView.swift */; };
 		FF6104B0D449CD52F0C14499 /* AlarmMetadataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C8C1415F3825EA19A5F8714 /* AlarmMetadataModel.swift */; };
@@ -54,6 +56,7 @@
 
 /* Begin PBXFileReference section */
 		06D75262D4EB4101D764EEED /* AlarmStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmStore.swift; sourceTree = "<group>"; };
+		070B386CACF0CF5F1B4FD824 /* AudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
 		0F469B6BCD7F9DD28F6B8B2E /* CustomSoundAlarm.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CustomSoundAlarm.entitlements; sourceTree = "<group>"; };
 		177D78CF60700582FA34F061 /* SoundPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundPickerView.swift; sourceTree = "<group>"; };
 		225524FA5A69D50318058FBA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -73,6 +76,7 @@
 		DDEC29ADE0634B68AAFBD5CC /* CustomSoundAlarmWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CustomSoundAlarmWidget.entitlements; sourceTree = "<group>"; };
 		E385B754D493555537FB767D /* SoundStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundStore.swift; sourceTree = "<group>"; };
 		EE105D13EE2FE60FAE50F6C7 /* AlarmScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmScheduler.swift; sourceTree = "<group>"; };
+		F63C69F723DEF9E2780F11B8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -98,6 +102,7 @@
 		4ED47B610998EF3CF4F35B71 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				F63C69F723DEF9E2780F11B8 /* Assets.xcassets */,
 				F523831A6349440177E48E14 /* Sounds */,
 			);
 			path = Resources;
@@ -109,6 +114,7 @@
 				EE105D13EE2FE60FAE50F6C7 /* AlarmScheduler.swift */,
 				06D75262D4EB4101D764EEED /* AlarmStore.swift */,
 				B310D26A852FF2128CE87241 /* AudioConverter.swift */,
+				070B386CACF0CF5F1B4FD824 /* AudioPlayer.swift */,
 				E385B754D493555537FB767D /* SoundStore.swift */,
 			);
 			path = Services;
@@ -272,6 +278,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D9DFA2B45BA2D540D349018A /* Assets.xcassets in Resources */,
 				648C64C81F89B294320DB7D7 /* PresetAlarm.caf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -291,6 +298,7 @@
 				1199524F1AF81748B8D10430 /* AlarmSound.swift in Sources */,
 				5717CF51374257EEE0B2AF88 /* AlarmStore.swift in Sources */,
 				98E5E2041DFF10AA899AF19D /* AudioConverter.swift in Sources */,
+				28A5C3EDD2A11E6FFFCDD154 /* AudioPlayer.swift in Sources */,
 				907E1AC28A0FA1AEEC8F463A /* ContentView.swift in Sources */,
 				31E6EC0D1595D7B5C31CC87D /* CustomSoundAlarmApp.swift in Sources */,
 				E47416EAAA11DB6231D9B9E0 /* SoundPickerView.swift in Sources */,
