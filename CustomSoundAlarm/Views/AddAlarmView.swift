@@ -122,19 +122,26 @@ struct AlarmDetailView: View {
 
     // MARK: - Delete
 
+    @State private var showingDeleteConfirmation = false
+
     private var deleteSection: some View {
         Section {
             Button(role: .destructive) {
-                if case .edit(let entry) = mode {
-                    alarmStore.remove(entry)
-                    Task { await AlarmScheduler.shared.syncAlarms(alarmStore.alarms) }
-                }
-                dismiss()
+                showingDeleteConfirmation = true
             } label: {
                 HStack {
                     Spacer()
                     Text("アラームを削除")
                     Spacer()
+                }
+            }
+            .confirmationDialog("このアラームを削除しますか？", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
+                Button("削除", role: .destructive) {
+                    if case .edit(let entry) = mode {
+                        alarmStore.remove(entry)
+                        Task { await AlarmScheduler.shared.syncAlarms(alarmStore.alarms) }
+                    }
+                    dismiss()
                 }
             }
         }

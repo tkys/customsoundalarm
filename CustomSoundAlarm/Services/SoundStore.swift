@@ -16,10 +16,17 @@ final class SoundStore {
     private init() {
         migrateFromStandard()
         load()
+        registerPresets()
     }
 
     func add(_ sound: AlarmSound) {
         sounds.append(sound)
+        save()
+    }
+
+    func rename(_ sound: AlarmSound, to newName: String) {
+        guard let index = sounds.firstIndex(where: { $0.id == sound.id }) else { return }
+        sounds[index].name = newName
         save()
     }
 
@@ -46,8 +53,12 @@ final class SoundStore {
             return
         }
 
-        // メタデータファイル(.json)を読み込み
-        for file in files where file.pathExtension == "json" {
+        let jsonFiles = files.filter { $0.pathExtension == "json" }
+        guard !jsonFiles.isEmpty else { return }
+
+        logger.info("Found \(jsonFiles.count) pending imports in staging")
+
+        for file in jsonFiles {
             guard let data = try? Data(contentsOf: file),
                   let pending = try? JSONDecoder().decode(PendingSoundImport.self, from: data) else {
                 continue
@@ -56,21 +67,35 @@ final class SoundStore {
             let audioFile = staging.appendingPathComponent(pending.stagedFileName)
             guard fm.fileExists(atPath: audioFile.path) else { continue }
 
-            // CAFに変換してLibrary/Soundsへ
+            // 動画の場合は先に音声抽出、その後CAF変換
+            let videoExtensions: Set<String> = ["mov", "mp4", "m4v", "avi"]
+            let isVideo = videoExtensions.contains(audioFile.pathExtension.lowercased())
+
             Task {
                 do {
+                    var sourceForCAF = audioFile
+                    var tempAudioURL: URL?
+
+                    if isVideo {
+                        let extracted = try await VideoAudioExtractor.shared.extractAudio(from: audioFile)
+                        sourceForCAF = extracted
+                        tempAudioURL = extracted
+                    }
+
                     let cafName = try await AudioConverter.shared.convertToCAF(
-                        from: audioFile,
+                        from: sourceForCAF,
                         outputName: UUID().uuidString
                     )
                     let sound = AlarmSound(name: pending.displayName, fileName: cafName)
                     add(sound)
-                    // ステージングをクリーンアップ
                     try? fm.removeItem(at: file)
                     try? fm.removeItem(at: audioFile)
-                    logger.info("Imported from staging: \(pending.displayName)")
+                    if let tempAudioURL {
+                        try? fm.removeItem(at: tempAudioURL)
+                    }
+                    logger.info("Imported from share: \(pending.displayName)")
                 } catch {
-                    logger.error("Failed to import from staging: \(error.localizedDescription)")
+                    logger.error("Import failed for \(pending.displayName): \(error.localizedDescription)")
                 }
             }
         }
@@ -96,6 +121,13 @@ final class SoundStore {
     private func save() {
         guard let data = try? JSONEncoder().encode(sounds) else { return }
         AppGroup.userDefaults.set(data, forKey: key)
+    }
+
+    /// プリセット音源を登録（未登録時のみ）
+    private func registerPresets() {
+        if !sounds.contains(where: { $0.fileName == "PresetAlarm.caf" }) {
+            add(AlarmSound(name: "ジャズ", fileName: "PresetAlarm.caf", isPreset: true))
+        }
     }
 
     /// 旧UserDefaults.standardからの一回限りマイグレーション

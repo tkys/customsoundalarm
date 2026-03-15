@@ -11,6 +11,8 @@ struct SoundSelectionView: View {
     @State private var isImporting = false
     @State private var isConverting = false
     @State private var errorMessage: String?
+    @State private var renamingSound: AlarmSound?
+    @State private var renameText = ""
 
     var body: some View {
         List {
@@ -28,6 +30,22 @@ struct SoundSelectionView: View {
             allowsMultipleSelection: false
         ) { result in
             handleImport(result)
+        }
+        .alert("名前を変更", isPresented: Binding(
+            get: { renamingSound != nil },
+            set: { if !$0 { renamingSound = nil } }
+        )) {
+            TextField("サウンド名", text: $renameText)
+            Button("保存") {
+                if let sound = renamingSound, !renameText.isEmpty {
+                    soundStore.rename(sound, to: renameText)
+                    if selectedSound?.id == sound.id {
+                        selectedSound = soundStore.sounds.first { $0.id == sound.id }
+                    }
+                }
+                renamingSound = nil
+            }
+            Button("キャンセル", role: .cancel) { renamingSound = nil }
         }
     }
 
@@ -53,6 +71,19 @@ struct SoundSelectionView: View {
             Section("追加した音") {
                 ForEach(imported, id: \.id) { sound in
                     soundRow(name: sound.name, sound: sound)
+                        .contextMenu {
+                            Button {
+                                renameText = sound.name
+                                renamingSound = sound
+                            } label: {
+                                Label("名前を変更", systemImage: "pencil")
+                            }
+                            Button(role: .destructive) {
+                                soundStore.remove(sound)
+                            } label: {
+                                Label("削除", systemImage: "trash")
+                            }
+                        }
                 }
                 .onDelete { indexSet in
                     let targets = imported
@@ -110,28 +141,41 @@ struct SoundSelectionView: View {
     // MARK: - Sound Row
 
     private func soundRow(name: String, sound: AlarmSound?) -> some View {
-        Button {
-            selectedSound = sound
-            if let sound {
-                audioPlayer.play(sound)
-            } else {
+        HStack {
+            Button {
+                selectedSound = sound
                 audioPlayer.stop()
-            }
-        } label: {
-            HStack {
-                Text(name)
-                Spacer()
-                if let sound, audioPlayer.playingFileName == sound.fileName {
-                    Image(systemName: "speaker.wave.2.fill")
-                        .foregroundStyle(Color.accentColor)
-                        .symbolEffect(.variableColor.iterative)
-                } else if selectedSound?.id == sound?.id {
-                    Image(systemName: "checkmark")
-                        .foregroundStyle(Color.accentColor)
+            } label: {
+                HStack {
+                    Text(name)
+                    Spacer()
+                    if selectedSound?.id == sound?.id {
+                        Image(systemName: "checkmark")
+                            .foregroundStyle(Color.accentColor)
+                    }
                 }
+                .contentShape(Rectangle())
+            }
+            .foregroundStyle(.primary)
+
+            if let sound {
+                Button {
+                    if audioPlayer.playingFileName == sound.fileName {
+                        audioPlayer.stop()
+                    } else {
+                        audioPlayer.play(sound)
+                    }
+                } label: {
+                    Image(systemName: audioPlayer.playingFileName == sound.fileName
+                        ? "stop.circle.fill" : "play.circle")
+                        .font(.title3)
+                        .foregroundStyle(Color.accentColor)
+                        .symbolEffect(.variableColor.iterative,
+                                      isActive: audioPlayer.playingFileName == sound.fileName)
+                }
+                .buttonStyle(.plain)
             }
         }
-        .foregroundStyle(.primary)
     }
 
     // MARK: - Import

@@ -1,0 +1,25 @@
+Set your favorite music or video audio as your alarm sound.
+
+KEY FEATURES
+
+Custom Alarm Sounds
+Import audio files or extract audio from videos to use as your alarm. Wake up every morning to the sound you love.
+
+Extract Audio from Videos
+Select any part of a video from your Camera Roll and extract the audio. Adjust start and end points while previewing, so you can find the perfect clip.
+
+Audio File Import
+Supports MP3, AAC, WAV, and M4A formats. Import directly from the Files app.
+
+Share Sheet Integration
+Add audio or video directly from other apps using the share sheet.
+
+Repeat Scheduling
+Set alarms to repeat on specific days of the week. Weekdays only, weekends only, or any combination.
+
+SUPPORTED FORMATS
+MP3 / AAC / WAV / M4A / Video (MOV, MP4) audio extraction
+
+NOTES
+- Requires iOS 26 or later (AlarmKit)
+- Alarm sounds of 30 seconds or less are recommended

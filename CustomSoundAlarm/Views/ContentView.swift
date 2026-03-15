@@ -33,9 +33,6 @@ struct ContentView: View {
             .sheet(item: $selectedAlarm) { alarm in
                 AlarmDetailView(mode: .edit(alarm))
             }
-            .onAppear {
-                registerPresetSounds()
-            }
         }
     }
 
@@ -82,17 +79,6 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - Preset Registration
-
-    private func registerPresetSounds() {
-        if !soundStore.sounds.contains(where: { $0.fileName == "PresetAlarm.caf" }) {
-            soundStore.add(AlarmSound(
-                name: "ジャズ",
-                fileName: "PresetAlarm.caf",
-                isPreset: true
-            ))
-        }
-    }
 }
 
 // MARK: - AlarmRow
@@ -113,10 +99,8 @@ struct AlarmRow: View {
 
                     HStack(spacing: 6) {
                         Text(alarm.label)
-                        if !soundName.isEmpty {
-                            Text("・")
-                            Text(soundName)
-                        }
+                        Text("・")
+                        Text(soundName.isEmpty ? "デフォルト" : soundName)
                         if !alarm.repeatWeekdays.isEmpty {
                             Text("・")
                             Text(repeatSummary)

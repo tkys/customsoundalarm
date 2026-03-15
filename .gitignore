@@ -21,3 +21,8 @@ Pods/
 .env
 .env.*
 secrets/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/test_output/

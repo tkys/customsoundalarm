@@ -1,10 +1,12 @@
 import UIKit
 import UniformTypeIdentifiers
+import os
 
 /// Share Extension: 他アプリから音声ファイルを受け取りステージングに保存
 /// メインアプリがフォアグラウンド復帰時にCAF変換を行う
 class ShareViewController: UIViewController {
 
+    private let logger = Logger(subsystem: "com.tkysdev.customsoundalarm.share", category: "ShareExt")
     private let statusLabel = UILabel()
     private let spinner = UIActivityIndicatorView(style: .large)
 
@@ -68,40 +70,45 @@ class ShareViewController: UIViewController {
         let uti = typeIdentifier ?? UTType.audio.identifier
 
         provider.loadFileRepresentation(forTypeIdentifier: uti) { [weak self] url, error in
-            DispatchQueue.main.async {
-                if let url {
-                    self?.stageFile(from: url)
-                } else {
-                    self?.finish(error: error?.localizedDescription ?? "ファイルの読み込みに失敗しました")
+            guard let self else { return }
+            if let url {
+                // temp fileはこのcallback終了後に削除されるため、ここでコピーする
+                let staging = AppGroup.stagingDirectory
+                let ext = url.pathExtension
+                let stagedFileName = "\(UUID().uuidString).\(ext)"
+                let destURL = staging.appendingPathComponent(stagedFileName)
+                let originalName = url.deletingPathExtension().lastPathComponent
+
+                do {
+                    try FileManager.default.copyItem(at: url, to: destURL)
+
+                    let pending = PendingSoundImport(
+                        displayName: originalName,
+                        stagedFileName: stagedFileName
+                    )
+                    let metadataURL = staging.appendingPathComponent("\(UUID().uuidString).json")
+                    let data = try JSONEncoder().encode(pending)
+                    try data.write(to: metadataURL)
+
+                    self.logger.info("Staged: \(originalName)")
+
+                    DispatchQueue.main.async {
+                        self.finish(success: originalName)
+                    }
+                } catch {
+                    self.logger.error("Staging failed: \(error.localizedDescription)")
+                    DispatchQueue.main.async {
+                        self.finish(error: error.localizedDescription)
+                    }
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.finish(error: error?.localizedDescription ?? "ファイルの読み込みに失敗しました")
                 }
             }
         }
     }
 
-    private func stageFile(from tempURL: URL) {
-        let staging = AppGroup.stagingDirectory
-        let originalName = tempURL.deletingPathExtension().lastPathComponent
-        let ext = tempURL.pathExtension
-        let stagedFileName = "\(UUID().uuidString).\(ext)"
-        let destURL = staging.appendingPathComponent(stagedFileName)
-
-        do {
-            try FileManager.default.copyItem(at: tempURL, to: destURL)
-
-            // メタデータを書き込み
-            let pending = PendingSoundImport(
-                displayName: originalName,
-                stagedFileName: stagedFileName
-            )
-            let metadataURL = staging.appendingPathComponent("\(UUID().uuidString).json")
-            let data = try JSONEncoder().encode(pending)
-            try data.write(to: metadataURL)
-
-            finish(success: originalName)
-        } catch {
-            finish(error: error.localizedDescription)
-        }
-    }
 
     // MARK: - Completion
 
