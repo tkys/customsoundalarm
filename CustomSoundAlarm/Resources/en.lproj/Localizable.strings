@@ -1,0 +1,107 @@
+/* ContentView */
+"alarm_title" = "Alarms";
+"empty_title" = "Wake Up to Your Favorite Sound";
+"empty_description" = "Import sounds from videos or audio files\nand set them as your alarm";
+"empty_tip" = "Import from videos & audio files";
+"add_alarm" = "Add Alarm";
+"default_sound" = "Default";
+
+/* Day labels (short) */
+"day_sun" = "Sun";
+"day_mon" = "Mon";
+"day_tue" = "Tue";
+"day_wed" = "Wed";
+"day_thu" = "Thu";
+"day_fri" = "Fri";
+"day_sat" = "Sat";
+
+/* Repeat summaries */
+"every_day" = "Every Day";
+"weekdays" = "Weekdays";
+"weekends" = "Weekends";
+"never" = "Never";
+
+/* AlarmDetailView */
+"edit_alarm" = "Edit Alarm";
+"cancel" = "Cancel";
+"save" = "Save";
+"time" = "Time";
+"sound" = "Sound";
+"none" = "None";
+"repeat" = "Repeat";
+"label" = "Label";
+"alarm_placeholder" = "Alarm";
+"delete_alarm" = "Delete Alarm";
+"delete_alarm_confirm" = "Are you sure you want to delete this alarm?";
+"delete" = "Delete";
+
+/* RepeatSelectionView - Weekday labels (full) */
+"every_monday" = "Every Monday";
+"every_tuesday" = "Every Tuesday";
+"every_wednesday" = "Every Wednesday";
+"every_thursday" = "Every Thursday";
+"every_friday" = "Every Friday";
+"every_saturday" = "Every Saturday";
+"every_sunday" = "Every Sunday";
+
+/* SoundPickerView */
+"rename" = "Rename";
+"sound_name_placeholder" = "Sound Name";
+"presets" = "Presets";
+"imported_sounds" = "My Sounds";
+"converting" = "Converting...";
+"add_from_video" = "Add from Video";
+"add_from_audio" = "Add Audio File";
+"add_section" = "Add";
+"add_section_footer" = "Video: Select from Camera Roll and trim\nAudio File: Supports MP3, AAC, WAV, M4A";
+"my_sounds_empty_title" = "Make Any Sound Your Alarm";
+"my_sounds_empty_description" = "Import music from videos or your favorite\naudio files to use as alarm sounds";
+"file_access_denied" = "File access denied";
+
+/* VideoTrimView */
+"add_from_video_title" = "Add Audio from Video";
+"loading" = "Loading...";
+"select_video" = "Select a video";
+"preview" = "Preview";
+"selected_duration" = "Selected: %@";
+"stop" = "Stop";
+"preview_selection" = "Preview Selection";
+"start" = "Start";
+"end" = "End";
+"range" = "Range";
+"duration_warning" = "Selection exceeds 30 seconds. Alarm sounds of 30 seconds or less are recommended.";
+"total_duration" = "Total: %@";
+"name" = "Name";
+"enter_name_to_save" = "Enter a name to save";
+"extract_and_save" = "Extract & Save Audio";
+
+/* ShareExtension */
+"saving" = "Saving...";
+"no_data_received" = "No data received";
+"no_audio_found" = "No compatible audio file found";
+"file_load_failed" = "Failed to load file";
+"saved_format" = "Saved \"%@\"";
+
+/* AlarmScheduler */
+"stop_alarm" = "Stop";
+"snooze" = "Snooze";
+
+/* AlarmIntents */
+"dismiss_alarm_intent" = "Stop Alarm";
+"snooze_intent" = "Snooze";
+
+/* AudioConverter errors */
+"error_buffer_creation" = "Failed to create audio buffer";
+"error_converter_creation" = "Failed to create audio converter";
+"error_conversion_failed" = "Audio conversion failed: %@";
+"error_conversion_status" = "Conversion status error";
+"error_empty_file" = "Converted file is empty";
+
+/* VideoAudioExtractor errors */
+"error_no_audio_track" = "This video has no audio track";
+"error_export_session" = "Failed to create export session";
+"error_extraction_failed" = "Audio extraction failed: %@";
+"error_unknown" = "Unknown error";
+
+/* Preset sound names */
+"preset_jazz" = "Jazz";

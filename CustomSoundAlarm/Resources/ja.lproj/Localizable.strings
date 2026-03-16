@@ -1,0 +1,107 @@
+/* ContentView */
+"alarm_title" = "アラーム";
+"empty_title" = "お気に入りの音で目覚めよう";
+"empty_description" = "動画やファイルから好きな音を取り込んで\nアラームに設定できます";
+"empty_tip" = "動画・音声ファイルから取り込めます";
+"add_alarm" = "アラームを追加";
+"default_sound" = "デフォルト";
+
+/* Day labels (short) */
+"day_sun" = "日";
+"day_mon" = "月";
+"day_tue" = "火";
+"day_wed" = "水";
+"day_thu" = "木";
+"day_fri" = "金";
+"day_sat" = "土";
+
+/* Repeat summaries */
+"every_day" = "毎日";
+"weekdays" = "平日";
+"weekends" = "週末";
+"never" = "しない";
+
+/* AlarmDetailView */
+"edit_alarm" = "アラームを編集";
+"cancel" = "キャンセル";
+"save" = "保存";
+"time" = "時刻";
+"sound" = "サウンド";
+"none" = "なし";
+"repeat" = "繰り返し";
+"label" = "ラベル";
+"alarm_placeholder" = "アラーム";
+"delete_alarm" = "アラームを削除";
+"delete_alarm_confirm" = "このアラームを削除しますか？";
+"delete" = "削除";
+
+/* RepeatSelectionView - Weekday labels (full) */
+"every_monday" = "毎週月曜日";
+"every_tuesday" = "毎週火曜日";
+"every_wednesday" = "毎週水曜日";
+"every_thursday" = "毎週木曜日";
+"every_friday" = "毎週金曜日";
+"every_saturday" = "毎週土曜日";
+"every_sunday" = "毎週日曜日";
+
+/* SoundPickerView */
+"rename" = "名前を変更";
+"sound_name_placeholder" = "サウンド名";
+"presets" = "プリセット";
+"imported_sounds" = "追加した音";
+"converting" = "変換中...";
+"add_from_video" = "動画から音声を追加";
+"add_from_audio" = "音声ファイルから追加";
+"add_section" = "追加";
+"add_section_footer" = "動画: カメラロールから選択してトリム\n音声ファイル: MP3, AAC, WAV, M4A 形式に対応";
+"my_sounds_empty_title" = "好きな音をアラームにしよう";
+"my_sounds_empty_description" = "動画の音楽やお気に入りの音声ファイルを\n取り込んでアラーム音に設定できます";
+"file_access_denied" = "ファイルへのアクセスが拒否されました";
+
+/* VideoTrimView */
+"add_from_video_title" = "動画から音声を追加";
+"loading" = "読み込み中...";
+"select_video" = "動画を選択してください";
+"preview" = "試聴";
+"selected_duration" = "選択: %@";
+"stop" = "停止";
+"preview_selection" = "選択範囲を試聴";
+"start" = "開始";
+"end" = "終了";
+"range" = "範囲";
+"duration_warning" = "選択範囲が30秒を超えています。アラーム音は30秒以内を推奨します。";
+"total_duration" = "動画全体: %@";
+"name" = "名前";
+"enter_name_to_save" = "保存するには名前を入力してください";
+"extract_and_save" = "音声を抽出して保存";
+
+/* ShareExtension */
+"saving" = "保存中...";
+"no_data_received" = "データを受け取れませんでした";
+"no_audio_found" = "対応する音声ファイルが見つかりませんでした";
+"file_load_failed" = "ファイルの読み込みに失敗しました";
+"saved_format" = "「%@」を保存しました";
+
+/* AlarmScheduler */
+"stop_alarm" = "止める";
+"snooze" = "スヌーズ";
+
+/* AlarmIntents */
+"dismiss_alarm_intent" = "アラームを止める";
+"snooze_intent" = "スヌーズ";
+
+/* AudioConverter errors */
+"error_buffer_creation" = "音声バッファの作成に失敗しました";
+"error_converter_creation" = "音声コンバーターの作成に失敗しました";
+"error_conversion_failed" = "音声変換に失敗しました: %@";
+"error_conversion_status" = "変換ステータスエラー";
+"error_empty_file" = "変換後のファイルが空です";
+
+/* VideoAudioExtractor errors */
+"error_no_audio_track" = "この動画には音声トラックがありません";
+"error_export_session" = "エクスポートセッションの作成に失敗しました";
+"error_extraction_failed" = "音声の抽出に失敗しました: %@";
+"error_unknown" = "不明なエラー";
+
+/* Preset sound names */
+"preset_jazz" = "ジャズ";

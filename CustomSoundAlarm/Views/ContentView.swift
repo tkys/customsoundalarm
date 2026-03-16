@@ -17,7 +17,7 @@ struct ContentView: View {
                     alarmList
                 }
             }
-            .navigationTitle("アラーム")
+            .navigationTitle(String(localized: "alarm_title"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -40,14 +40,29 @@ struct ContentView: View {
 
     private var emptyState: some View {
         ContentUnavailableView {
-            Label("お気に入りの音で目覚めよう", systemImage: "alarm")
+            Label {
+                Text("empty_title")
+            } icon: {
+                SoundWaveDecoration()
+                    .padding(.bottom, 4)
+            }
         } description: {
-            Text("アラームを追加して、好きな音を設定できます")
+            VStack(spacing: 8) {
+                Text("empty_description")
+                HStack(spacing: 4) {
+                    Image(systemName: "video.badge.waveform")
+                    Text("・")
+                    Image(systemName: "doc.badge.plus")
+                    Text("empty_tip")
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
         } actions: {
             Button {
                 showingAddAlarm = true
             } label: {
-                Text("アラームを追加")
+                Text("add_alarm")
             }
             .buttonStyle(.borderedProminent)
         }
@@ -63,20 +78,22 @@ struct ContentView: View {
                     soundName: soundStore.displayName(for: alarm.soundFileName),
                     onToggle: {
                         alarmStore.toggleEnabled(alarm)
-                        Task { await AlarmScheduler.shared.syncAlarms(alarmStore.alarms) }
+                        AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
                     },
                     onTap: {
                         selectedAlarm = alarm
                     }
                 )
+                .warmCard()
             }
             .onDelete { indexSet in
                 for index in indexSet {
                     alarmStore.remove(alarmStore.alarms[index])
                 }
-                Task { await AlarmScheduler.shared.syncAlarms(alarmStore.alarms) }
+                AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
             }
         }
+        .warmListBackground()
     }
 
 }
@@ -95,12 +112,17 @@ struct AlarmRow: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(alarm.timeString)
                         .font(.system(size: 44, weight: .light, design: .rounded))
-                        .foregroundStyle(alarm.isEnabled ? .primary : .tertiary)
+                        .foregroundStyle(
+                            alarm.isEnabled
+                                ? AnyShapeStyle(Brand.warmGoldGradient)
+                                : AnyShapeStyle(.tertiary)
+                        )
 
                     HStack(spacing: 6) {
                         Text(alarm.label)
                         Text("・")
-                        Text(soundName.isEmpty ? "デフォルト" : soundName)
+                        SoundIndicator(isCustom: !alarm.soundFileName.isEmpty, size: 10)
+                        Text(soundName.isEmpty ? String(localized: "default_sound") : soundName)
                         if !alarm.repeatWeekdays.isEmpty {
                             Text("・")
                             Text(repeatSummary)
@@ -124,11 +146,16 @@ struct AlarmRow: View {
     }
 
     private var repeatSummary: String {
-        let labels = ["日", "月", "火", "水", "木", "金", "土"]
+        let labels = [
+            String(localized: "day_sun"), String(localized: "day_mon"),
+            String(localized: "day_tue"), String(localized: "day_wed"),
+            String(localized: "day_thu"), String(localized: "day_fri"),
+            String(localized: "day_sat")
+        ]
         let days = alarm.repeatWeekdays.sorted()
-        if days.count == 7 { return "毎日" }
-        if days == [2, 3, 4, 5, 6] { return "平日" }
-        if days == [1, 7] { return "週末" }
+        if days.count == 7 { return String(localized: "every_day") }
+        if days == [2, 3, 4, 5, 6] { return String(localized: "weekdays") }
+        if days == [1, 7] { return String(localized: "weekends") }
         return days.compactMap { d in
             (1...7).contains(d) ? labels[d - 1] : nil
         }.joined(separator: " ")

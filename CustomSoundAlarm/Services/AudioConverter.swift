@@ -103,7 +103,7 @@ final class AudioConverter {
                 }
                 reachedEnd = true
             case .error:
-                throw AudioConverterError.conversionFailed("変換ステータスエラー")
+                throw AudioConverterError.conversionFailed(String(localized: "error_conversion_status"))
             case .inputRanDry:
                 if outputBuffer.frameLength > 0 {
                     try outputFile.write(from: outputBuffer)
@@ -117,7 +117,7 @@ final class AudioConverter {
         let attrs = try FileManager.default.attributesOfItem(atPath: outputURL.path)
         let fileSize = attrs[.size] as? Int ?? 0
         guard fileSize > 0 else {
-            throw AudioConverterError.conversionFailed("変換後のファイルが空です")
+            throw AudioConverterError.conversionFailed(String(localized: "error_empty_file"))
         }
 
         logger.info("Converted audio to CAF: \(fileName) (\(fileSize) bytes)")
@@ -151,11 +151,11 @@ enum AudioConverterError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .bufferCreationFailed:
-            "音声バッファの作成に失敗しました"
+            String(localized: "error_buffer_creation")
         case .converterCreationFailed:
-            "音声コンバーターの作成に失敗しました"
+            String(localized: "error_converter_creation")
         case .conversionFailed(let detail):
-            "音声変換に失敗しました: \(detail)"
+            String(format: String(localized: "error_conversion_failed"), detail)
         }
     }
 }

@@ -30,7 +30,7 @@ struct VideoImportFlow: View {
                 loadingView
             }
         }
-        .navigationTitle("動画から音声を追加")
+        .navigationTitle(String(localized: "add_from_video_title"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { showingPicker = videoURL == nil }
         .onDisappear { previewer.stop() }
@@ -57,7 +57,7 @@ struct VideoImportFlow: View {
         VStack(spacing: 16) {
             if isProcessing {
                 ProgressView()
-                Text("読み込み中...")
+                Text("loading")
                     .foregroundStyle(.secondary)
             } else if let errorMessage {
                 Image(systemName: "exclamationmark.triangle")
@@ -67,7 +67,7 @@ struct VideoImportFlow: View {
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             } else {
-                Text("動画を選択してください")
+                Text("select_video")
                     .foregroundStyle(.secondary)
             }
         }
@@ -82,7 +82,7 @@ struct VideoImportFlow: View {
     private func trimView(url: URL) -> some View {
         Form {
             // 1. 試聴 + タイムライン
-            Section("試聴") {
+            Section {
                 VStack(spacing: 12) {
                     // タイムライン表示（再生位置インジケーター付き）
                     timelineBar
@@ -91,7 +91,7 @@ struct VideoImportFlow: View {
                     HStack {
                         Text(formatTime(startTime))
                         Spacer()
-                        Text("選択: \(formatTime(selectedDuration))")
+                        Text(String(format: String(localized: "selected_duration"), formatTime(selectedDuration)))
                             .foregroundStyle(durationExceeds30s ? .orange : Color.accentColor)
                             .fontWeight(.medium)
                         Spacer()
@@ -111,7 +111,7 @@ struct VideoImportFlow: View {
                             }
                         } label: {
                             Label(
-                                previewer.isPlaying ? "停止" : "選択範囲を試聴",
+                                previewer.isPlaying ? String(localized: "stop") : String(localized: "preview_selection"),
                                 systemImage: previewer.isPlaying ? "stop.fill" : "play.fill"
                             )
                             .font(.subheadline.weight(.medium))
@@ -130,6 +130,8 @@ struct VideoImportFlow: View {
                     }
                 }
                 .padding(.vertical, 4)
+            } header: {
+                WarmSectionHeader(title: String(localized: "preview"))
             }
 
             // 2. 範囲選択
@@ -140,13 +142,13 @@ struct VideoImportFlow: View {
                             .monospacedDigit()
                             .foregroundStyle(.secondary)
                     } label: {
-                        Text("開始")
+                        Text("start")
                     }
                     Slider(
                         value: $startTime,
                         in: 0...max(videoDuration - 1, 0)
                     ) {
-                        Text("開始")
+                        Text("start")
                     } onEditingChanged: { editing in
                         if !editing && endTime <= startTime {
                             endTime = min(startTime + 30, videoDuration)
@@ -161,13 +163,13 @@ struct VideoImportFlow: View {
                             .monospacedDigit()
                             .foregroundStyle(.secondary)
                     } label: {
-                        Text("終了")
+                        Text("end")
                     }
                     Slider(
                         value: $endTime,
                         in: 0...videoDuration
                     ) {
-                        Text("終了")
+                        Text("end")
                     } onEditingChanged: { editing in
                         if !editing && endTime <= startTime {
                             startTime = max(endTime - 30, 0)
@@ -178,26 +180,26 @@ struct VideoImportFlow: View {
                 }
                 .padding(.vertical, 4)
             } header: {
-                Text("範囲")
+                WarmSectionHeader(title: String(localized: "range"))
             } footer: {
                 if durationExceeds30s {
-                    Text("選択範囲が30秒を超えています。アラーム音は30秒以内を推奨します。")
+                    Text("duration_warning")
                         .foregroundStyle(.orange)
                 } else {
-                    Text("動画全体: \(formatTime(videoDuration))")
+                    Text(String(format: String(localized: "total_duration"), formatTime(videoDuration)))
                 }
             }
 
             // 3. サウンド名
             Section {
                 HStack {
-                    Text("名前")
-                    TextField("サウンド名", text: $soundName)
+                    Text("name")
+                    TextField("sound_name_placeholder", text: $soundName)
                         .multilineTextAlignment(.trailing)
                 }
             } footer: {
                 if soundName.isEmpty {
-                    Text("保存するには名前を入力してください")
+                    Text("enter_name_to_save")
                 }
             }
 
@@ -212,17 +214,25 @@ struct VideoImportFlow: View {
                         if isProcessing {
                             ProgressView()
                                 .padding(.trailing, 8)
-                            Text("変換中...")
+                            Text("converting")
                         } else {
-                            Label("音声を抽出して保存", systemImage: "waveform.badge.plus")
+                            Label("extract_and_save", systemImage: "waveform.badge.plus")
                                 .fontWeight(.semibold)
                         }
                         Spacer()
                     }
+                    .padding(.vertical, 4)
                 }
-                .buttonStyle(.borderedProminent)
-                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                .listRowBackground(Color.clear)
+                .foregroundStyle(.white)
+                .listRowBackground(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(
+                            (isProcessing || endTime <= startTime || soundName.isEmpty)
+                                ? AnyShapeStyle(Color.gray.opacity(0.4))
+                                : AnyShapeStyle(Brand.saveButtonGradient)
+                        )
+                        .padding(.horizontal, 4)
+                )
                 .disabled(isProcessing || endTime <= startTime || soundName.isEmpty)
             }
 
@@ -234,6 +244,7 @@ struct VideoImportFlow: View {
                 }
             }
         }
+        .warmListBackground()
     }
 
     // MARK: - Timeline Bar
@@ -247,34 +258,61 @@ struct VideoImportFlow: View {
             let selectedWidth = width * (endFraction - startFraction)
 
             ZStack(alignment: .leading) {
-                // 全体バー
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(Color.secondary.opacity(0.15))
-                    .frame(height: 36)
+                // 全体バー（inner shadow effect）
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.secondary.opacity(0.12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .strokeBorder(Color.secondary.opacity(0.08), lineWidth: 1)
+                    )
+                    .frame(height: 40)
 
-                // 選択範囲
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(Color.accentColor.opacity(0.25))
-                    .frame(width: max(selectedWidth, 2), height: 36)
+                // 選択範囲（warm gradient）
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color.accentColor.opacity(0.3),
+                                Color.accentColor.opacity(0.15)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .frame(width: max(selectedWidth, 2), height: 40)
                     .offset(x: leading)
 
                 // 選択範囲の枠線
-                RoundedRectangle(cornerRadius: 6)
-                    .strokeBorder(Color.accentColor.opacity(0.5), lineWidth: 1.5)
-                    .frame(width: max(selectedWidth, 2), height: 36)
+                RoundedRectangle(cornerRadius: 8)
+                    .strokeBorder(Color.accentColor.opacity(0.6), lineWidth: 1.5)
+                    .frame(width: max(selectedWidth, 2), height: 40)
                     .offset(x: leading)
+
+                // 左ハンドル
+                handleMark(at: leading)
+
+                // 右ハンドル
+                handleMark(at: leading + selectedWidth)
 
                 // 再生位置インジケーター
                 if previewer.isPlaying, videoDuration > 0 {
                     let playFraction = previewer.currentTime / videoDuration
                     RoundedRectangle(cornerRadius: 1)
                         .fill(Color.red)
-                        .frame(width: 2, height: 28)
+                        .frame(width: 2.5, height: 30)
                         .offset(x: width * playFraction)
+                        .shadow(color: .red.opacity(0.4), radius: 3)
                 }
             }
         }
-        .frame(height: 36)
+        .frame(height: 40)
+    }
+
+    private func handleMark(at x: CGFloat) -> some View {
+        RoundedRectangle(cornerRadius: 1)
+            .fill(Color.accentColor)
+            .frame(width: 3, height: 24)
+            .offset(x: x)
     }
 
     // MARK: - Actions
@@ -288,7 +326,7 @@ struct VideoImportFlow: View {
 
             do {
                 guard let movie = try await item.loadTransferable(type: VideoTransferable.self) else {
-                    errorMessage = "動画の読み込みに失敗しました"
+                    errorMessage = String(localized: "file_load_failed")
                     return
                 }
 

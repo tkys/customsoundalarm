@@ -5,6 +5,10 @@ options:
     iOS: "26.0"
   xcodeVersion: "26.0"
   generateEmptyDirectories: true
+  developmentLanguage: en
+  knownRegions:
+    - en
+    - ja
 
 settings:
   base:
@@ -29,10 +33,15 @@ targets:
     info:
       path: CustomSoundAlarm/Info.plist
       properties:
-        CFBundleDisplayName: Custom Alarm
+        CFBundleDisplayName: My Sound Alarm
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
         UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
         UISupportedInterfaceOrientations~iPhone:
           - UIInterfaceOrientationPortrait
         NSAlarmKitUsageDescription: "お気に入りの音でアラームを鳴らすために使用します。"
@@ -69,7 +78,7 @@ targets:
     info:
       path: CustomSoundAlarmWidget/Info.plist
       properties:
-        CFBundleDisplayName: Custom Alarm Widget
+        CFBundleDisplayName: My Sound Alarm Widget
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
@@ -91,7 +100,7 @@ targets:
     info:
       path: ShareExtension/Info.plist
       properties:
-        CFBundleDisplayName: Custom Alarm
+        CFBundleDisplayName: My Sound Alarm
         NSExtension:
           NSExtensionPointIdentifier: com.apple.share-services
           NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).ShareViewController"

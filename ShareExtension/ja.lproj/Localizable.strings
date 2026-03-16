@@ -1,0 +1,5 @@
+"saving" = "保存中...";
+"no_data_received" = "データを受け取れませんでした";
+"no_audio_found" = "対応する音声ファイルが見つかりませんでした";
+"file_load_failed" = "ファイルの読み込みに失敗しました";
+"saved_format" = "「%@」を保存しました";

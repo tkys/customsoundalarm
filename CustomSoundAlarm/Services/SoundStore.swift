@@ -126,7 +126,7 @@ final class SoundStore {
     /// プリセット音源を登録（未登録時のみ）
     private func registerPresets() {
         if !sounds.contains(where: { $0.fileName == "PresetAlarm.caf" }) {
-            add(AlarmSound(name: "ジャズ", fileName: "PresetAlarm.caf", isPreset: true))
+            add(AlarmSound(name: String(localized: "preset_jazz"), fileName: "PresetAlarm.caf", isPreset: true))
         }
     }
 

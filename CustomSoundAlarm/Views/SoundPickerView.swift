@@ -21,7 +21,8 @@ struct SoundSelectionView: View {
             addSection
             errorSection
         }
-        .navigationTitle("サウンド")
+        .warmListBackground()
+        .navigationTitle(String(localized: "sound"))
         .navigationBarTitleDisplayMode(.inline)
         .onDisappear { audioPlayer.stop() }
         .fileImporter(
@@ -31,12 +32,12 @@ struct SoundSelectionView: View {
         ) { result in
             handleImport(result)
         }
-        .alert("名前を変更", isPresented: Binding(
+        .alert(String(localized: "rename"), isPresented: Binding(
             get: { renamingSound != nil },
             set: { if !$0 { renamingSound = nil } }
         )) {
-            TextField("サウンド名", text: $renameText)
-            Button("保存") {
+            TextField("sound_name_placeholder", text: $renameText)
+            Button("save") {
                 if let sound = renamingSound, !renameText.isEmpty {
                     soundStore.rename(sound, to: renameText)
                     if selectedSound?.id == sound.id {
@@ -45,20 +46,21 @@ struct SoundSelectionView: View {
                 }
                 renamingSound = nil
             }
-            Button("キャンセル", role: .cancel) { renamingSound = nil }
+            Button("cancel", role: .cancel) { renamingSound = nil }
         }
     }
 
     // MARK: - Preset Sounds
 
     private var presetSection: some View {
-        Section("プリセット") {
-            // 「なし」選択肢（デフォルト音）
-            soundRow(name: "デフォルト", sound: nil)
+        Section {
+            soundRow(name: String(localized: "default_sound"), sound: nil, isPreset: true)
 
             ForEach(soundStore.sounds.filter(\.isPreset), id: \.id) { sound in
-                soundRow(name: sound.name, sound: sound)
+                soundRow(name: sound.name, sound: sound, isPreset: true)
             }
+        } header: {
+            WarmSectionHeader(title: String(localized: "presets"))
         }
     }
 
@@ -67,21 +69,35 @@ struct SoundSelectionView: View {
     @ViewBuilder
     private var importedSection: some View {
         let imported = soundStore.sounds.filter { !$0.isPreset }
-        if !imported.isEmpty {
-            Section("追加した音") {
+        Section {
+            if imported.isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: "waveform.badge.plus")
+                        .font(.title2)
+                        .foregroundStyle(Brand.purpleLight)
+                    Text("my_sounds_empty_title")
+                        .font(.subheadline.weight(.medium))
+                    Text("my_sounds_empty_description")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+            } else {
                 ForEach(imported, id: \.id) { sound in
-                    soundRow(name: sound.name, sound: sound)
+                    soundRow(name: sound.name, sound: sound, isPreset: false)
                         .contextMenu {
                             Button {
                                 renameText = sound.name
                                 renamingSound = sound
                             } label: {
-                                Label("名前を変更", systemImage: "pencil")
+                                Label("rename", systemImage: "pencil")
                             }
                             Button(role: .destructive) {
                                 soundStore.remove(sound)
                             } label: {
-                                Label("削除", systemImage: "trash")
+                                Label("delete", systemImage: "trash")
                             }
                         }
                 }
@@ -92,6 +108,8 @@ struct SoundSelectionView: View {
                     }
                 }
             }
+        } header: {
+            WarmSectionHeader(title: String(localized: "imported_sounds"))
         }
     }
 
@@ -102,26 +120,46 @@ struct SoundSelectionView: View {
             if isConverting {
                 HStack {
                     ProgressView()
-                    Text("変換中...")
+                    Text("converting")
                         .padding(.leading, 8)
                 }
             } else {
                 NavigationLink {
                     VideoImportFlow(selectedSound: $selectedSound)
                 } label: {
-                    Label("動画から音声を追加", systemImage: "video.badge.waveform")
+                    Label {
+                        Text("add_from_video")
+                    } icon: {
+                        Image(systemName: "video.badge.waveform")
+                            .foregroundStyle(Brand.purpleLight)
+                            .padding(4)
+                            .background(
+                                Circle()
+                                    .fill(Brand.purpleLight.opacity(0.12))
+                            )
+                    }
                 }
 
                 Button {
                     isImporting = true
                 } label: {
-                    Label("音声ファイルから追加", systemImage: "doc.badge.plus")
+                    Label {
+                        Text("add_from_audio")
+                    } icon: {
+                        Image(systemName: "doc.badge.plus")
+                            .foregroundStyle(Color.accentColor)
+                            .padding(4)
+                            .background(
+                                Circle()
+                                    .fill(Color.accentColor.opacity(0.12))
+                            )
+                    }
                 }
             }
         } header: {
-            Text("追加")
+            WarmSectionHeader(title: String(localized: "add_section"))
         } footer: {
-            Text("動画: カメラロールから選択してトリム\n音声ファイル: MP3, AAC, WAV, M4A 形式に対応")
+            Text("add_section_footer")
         }
     }
 
@@ -140,8 +178,35 @@ struct SoundSelectionView: View {
 
     // MARK: - Sound Row
 
-    private func soundRow(name: String, sound: AlarmSound?) -> some View {
-        HStack {
+    private func soundRow(name: String, sound: AlarmSound?, isPreset: Bool) -> some View {
+        let isPlaying = sound != nil && audioPlayer.playingFileName == sound?.fileName
+
+        return HStack {
+            // Leading icon with glow when playing
+            ZStack {
+                if isPlaying {
+                    Circle()
+                        .fill(Color.accentColor.opacity(0.25))
+                        .frame(width: 32, height: 32)
+                        .blur(radius: 4)
+                }
+
+                Circle()
+                    .fill(
+                        isPlaying
+                            ? Color.accentColor.opacity(0.18)
+                            : (isPreset ? Brand.purpleLight.opacity(0.12) : Color.accentColor.opacity(0.12))
+                    )
+                    .frame(width: 28, height: 28)
+
+                if isPlaying {
+                    MiniWaveformBars(color: .accentColor, barWidth: 2, height: 12)
+                } else {
+                    SoundIndicator(isCustom: !isPreset, size: 13)
+                }
+            }
+            .frame(width: 32)
+
             Button {
                 selectedSound = sound
                 audioPlayer.stop()
@@ -152,6 +217,7 @@ struct SoundSelectionView: View {
                     if selectedSound?.id == sound?.id {
                         Image(systemName: "checkmark")
                             .foregroundStyle(Color.accentColor)
+                            .fontWeight(.semibold)
                     }
                 }
                 .contentShape(Rectangle())
@@ -166,12 +232,14 @@ struct SoundSelectionView: View {
                         audioPlayer.play(sound)
                     }
                 } label: {
-                    Image(systemName: audioPlayer.playingFileName == sound.fileName
-                        ? "stop.circle.fill" : "play.circle")
+                    Image(systemName: isPlaying ? "stop.circle.fill" : "play.circle")
                         .font(.title3)
-                        .foregroundStyle(Color.accentColor)
-                        .symbolEffect(.variableColor.iterative,
-                                      isActive: audioPlayer.playingFileName == sound.fileName)
+                        .foregroundStyle(
+                            isPlaying
+                                ? AnyShapeStyle(Brand.warmGoldGradient)
+                                : AnyShapeStyle(Color.accentColor)
+                        )
+                        .symbolEffect(.variableColor.iterative, isActive: isPlaying)
                 }
                 .buttonStyle(.plain)
             }
@@ -198,7 +266,7 @@ struct SoundSelectionView: View {
 
     private func importSound(from url: URL) {
         guard url.startAccessingSecurityScopedResource() else {
-            errorMessage = "ファイルへのアクセスが拒否されました"
+            errorMessage = String(localized: "file_access_denied")
             return
         }
 

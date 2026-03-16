@@ -12,6 +12,9 @@ final class AlarmStore {
 
     private(set) var alarms: [AlarmEntry] = []
 
+    /// データ変更検知用（reload 前後で比較し、変化があった場合のみ sync するために使用）
+    private(set) var contentHash: Int = 0
+
     private init() {
         load()
     }
@@ -38,6 +41,15 @@ final class AlarmStore {
         save()
     }
 
+    /// 外部変更（Share Extension等）後にデータを再読み込み
+    /// - Returns: データが変更されたかどうか
+    @discardableResult
+    func reload() -> Bool {
+        let oldHash = contentHash
+        load()
+        return contentHash != oldHash
+    }
+
     // MARK: - Persistence
 
     private func load() {
@@ -46,11 +58,13 @@ final class AlarmStore {
             return
         }
         alarms = decoded
+        contentHash = data.hashValue
         logger.info("Loaded \(self.alarms.count) alarms")
     }
 
     private func save() {
         guard let data = try? JSONEncoder().encode(alarms) else { return }
         AppGroup.userDefaults.set(data, forKey: key)
+        contentHash = data.hashValue
     }
 }

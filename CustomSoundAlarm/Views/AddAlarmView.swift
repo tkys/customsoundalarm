@@ -25,10 +25,31 @@ struct AlarmDetailView: View {
 
     let mode: AlarmDetailMode
 
-    @State private var selectedTime = Date()
-    @State private var label = "アラーム"
+    @State private var selectedTime: Date
+    @State private var label: String
     @State private var selectedSound: AlarmSound?
-    @State private var repeatWeekdays: Set<Int> = []
+    @State private var repeatWeekdays: Set<Int>
+
+    init(mode: AlarmDetailMode) {
+        self.mode = mode
+
+        if case .edit(let entry) = mode {
+            var components = DateComponents()
+            components.hour = entry.hour
+            components.minute = entry.minute
+            _selectedTime = State(initialValue: Calendar.current.date(from: components) ?? Date())
+            _label = State(initialValue: entry.label)
+            _repeatWeekdays = State(initialValue: Set(entry.repeatWeekdays))
+            _selectedSound = State(
+                initialValue: SoundStore.shared.sounds.first { $0.fileName == entry.soundFileName }
+            )
+        } else {
+            _selectedTime = State(initialValue: Date())
+            _label = State(initialValue: String(localized: "alarm_placeholder"))
+            _selectedSound = State(initialValue: nil)
+            _repeatWeekdays = State(initialValue: [])
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -41,17 +62,17 @@ struct AlarmDetailView: View {
                     deleteSection
                 }
             }
-            .navigationTitle(isEditing ? "アラームを編集" : "アラームを追加")
+            .warmListBackground()
+            .navigationTitle(isEditing ? String(localized: "edit_alarm") : String(localized: "add_alarm"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("キャンセル") { dismiss() }
+                    Button("cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") { save() }
+                    Button("save") { save() }
                 }
             }
-            .onAppear { loadFromMode() }
         }
     }
 
@@ -65,7 +86,7 @@ struct AlarmDetailView: View {
     private var timeSection: some View {
         Section {
             DatePicker(
-                "時刻",
+                "time",
                 selection: $selectedTime,
                 displayedComponents: .hourAndMinute
             )
@@ -82,10 +103,16 @@ struct AlarmDetailView: View {
                 SoundSelectionView(selectedSound: $selectedSound)
             } label: {
                 HStack {
-                    Text("サウンド")
+                    Text("sound")
                     Spacer()
-                    Text(selectedSound?.name ?? "なし")
-                        .foregroundStyle(.secondary)
+                    HStack(spacing: 4) {
+                        SoundIndicator(
+                            isCustom: selectedSound != nil && !(selectedSound?.isPreset ?? true),
+                            size: 12
+                        )
+                        Text(selectedSound?.name ?? String(localized: "none"))
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
         }
@@ -99,7 +126,7 @@ struct AlarmDetailView: View {
                 RepeatSelectionView(selectedDays: $repeatWeekdays)
             } label: {
                 HStack {
-                    Text("繰り返し")
+                    Text("repeat")
                     Spacer()
                     Text(repeatSummary)
                         .foregroundStyle(.secondary)
@@ -113,8 +140,8 @@ struct AlarmDetailView: View {
     private var labelSection: some View {
         Section {
             HStack {
-                Text("ラベル")
-                TextField("アラーム", text: $label)
+                Text("label")
+                TextField("alarm_placeholder", text: $label)
                     .multilineTextAlignment(.trailing)
             }
         }
@@ -131,15 +158,15 @@ struct AlarmDetailView: View {
             } label: {
                 HStack {
                     Spacer()
-                    Text("アラームを削除")
+                    Text("delete_alarm")
                     Spacer()
                 }
             }
-            .confirmationDialog("このアラームを削除しますか？", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
-                Button("削除", role: .destructive) {
+            .confirmationDialog("delete_alarm_confirm", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
+                Button("delete", role: .destructive) {
                     if case .edit(let entry) = mode {
                         alarmStore.remove(entry)
-                        Task { await AlarmScheduler.shared.syncAlarms(alarmStore.alarms) }
+                        AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
                     }
                     dismiss()
                 }
@@ -147,18 +174,7 @@ struct AlarmDetailView: View {
         }
     }
 
-    // MARK: - Load / Save
-
-    private func loadFromMode() {
-        guard case .edit(let entry) = mode else { return }
-        var components = DateComponents()
-        components.hour = entry.hour
-        components.minute = entry.minute
-        selectedTime = Calendar.current.date(from: components) ?? Date()
-        label = entry.label
-        repeatWeekdays = Set(entry.repeatWeekdays)
-        selectedSound = soundStore.sounds.first { $0.fileName == entry.soundFileName }
-    }
+    // MARK: - Save
 
     private func save() {
         let components = Calendar.current.dateComponents([.hour, .minute], from: selectedTime)
@@ -183,17 +199,22 @@ struct AlarmDetailView: View {
             alarmStore.update(updated)
         }
 
-        Task { await AlarmScheduler.shared.syncAlarms(alarmStore.alarms) }
+        AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
         dismiss()
     }
 
     private var repeatSummary: String {
-        if repeatWeekdays.isEmpty { return "しない" }
-        let labels = ["日", "月", "火", "水", "木", "金", "土"]
+        if repeatWeekdays.isEmpty { return String(localized: "never") }
+        let labels = [
+            String(localized: "day_sun"), String(localized: "day_mon"),
+            String(localized: "day_tue"), String(localized: "day_wed"),
+            String(localized: "day_thu"), String(localized: "day_fri"),
+            String(localized: "day_sat")
+        ]
         let days = repeatWeekdays.sorted()
-        if days.count == 7 { return "毎日" }
-        if repeatWeekdays == Set([2, 3, 4, 5, 6]) { return "平日" }
-        if repeatWeekdays == Set([1, 7]) { return "週末" }
+        if days.count == 7 { return String(localized: "every_day") }
+        if repeatWeekdays == Set([2, 3, 4, 5, 6]) { return String(localized: "weekdays") }
+        if repeatWeekdays == Set([1, 7]) { return String(localized: "weekends") }
         return days.compactMap { d in
             (1...7).contains(d) ? labels[d - 1] : nil
         }.joined(separator: " ")
@@ -206,9 +227,9 @@ struct AlarmDetailView: View {
 struct RepeatSelectionView: View {
     @Binding var selectedDays: Set<Int>
 
-    private let weekdays: [(id: Int, label: String)] = [
-        (2, "月曜日"), (3, "火曜日"), (4, "水曜日"),
-        (5, "木曜日"), (6, "金曜日"), (7, "土曜日"), (1, "日曜日")
+    private let weekdays: [(id: Int, labelKey: String)] = [
+        (2, "every_monday"), (3, "every_tuesday"), (4, "every_wednesday"),
+        (5, "every_thursday"), (6, "every_friday"), (7, "every_saturday"), (1, "every_sunday")
     ]
 
     var body: some View {
@@ -222,7 +243,7 @@ struct RepeatSelectionView: View {
                     }
                 } label: {
                     HStack {
-                        Text("毎週\(day.label)")
+                        Text(String(localized: String.LocalizationValue(day.labelKey)))
                         Spacer()
                         if selectedDays.contains(day.id) {
                             Image(systemName: "checkmark")
@@ -233,7 +254,8 @@ struct RepeatSelectionView: View {
                 .foregroundStyle(.primary)
             }
         }
-        .navigationTitle("繰り返し")
+        .warmListBackground()
+        .navigationTitle(String(localized: "repeat"))
         .navigationBarTitleDisplayMode(.inline)
     }
 }

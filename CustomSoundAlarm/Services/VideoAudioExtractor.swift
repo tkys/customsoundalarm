@@ -59,7 +59,7 @@ final class VideoAudioExtractor {
 
         guard exportSession.status == .completed else {
             throw VideoExtractionError.exportFailed(
-                exportSession.error?.localizedDescription ?? "不明なエラー"
+                exportSession.error?.localizedDescription ?? String(localized: "error_unknown")
             )
         }
 
@@ -83,11 +83,11 @@ enum VideoExtractionError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .noAudioTrack:
-            "この動画には音声トラックがありません"
+            String(localized: "error_no_audio_track")
         case .exportSessionFailed:
-            "エクスポートセッションの作成に失敗しました"
+            String(localized: "error_export_session")
         case .exportFailed(let detail):
-            "音声の抽出に失敗しました: \(detail)"
+            String(format: String(localized: "error_extraction_failed"), detail)
         }
     }
 }

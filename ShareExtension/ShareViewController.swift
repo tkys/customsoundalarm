@@ -26,7 +26,7 @@ class ShareViewController: UIViewController {
         view.addSubview(spinner)
 
         statusLabel.translatesAutoresizingMaskIntoConstraints = false
-        statusLabel.text = "保存中..."
+        statusLabel.text = NSLocalizedString("saving", comment: "")
         statusLabel.textAlignment = .center
         statusLabel.font = .preferredFont(forTextStyle: .headline)
         view.addSubview(statusLabel)
@@ -44,7 +44,7 @@ class ShareViewController: UIViewController {
 
     private func processSharedItems() {
         guard let items = extensionContext?.inputItems as? [NSExtensionItem] else {
-            finish(error: "データを受け取れませんでした")
+            finish(error: NSLocalizedString("no_data_received", comment: ""))
             return
         }
 
@@ -63,7 +63,7 @@ class ShareViewController: UIViewController {
             }
         }
 
-        finish(error: "対応する音声ファイルが見つかりませんでした")
+        finish(error: NSLocalizedString("no_audio_found", comment: ""))
     }
 
     private func loadAudio(from provider: NSItemProvider, typeIdentifier: String? = nil) {
@@ -103,7 +103,7 @@ class ShareViewController: UIViewController {
                 }
             } else {
                 DispatchQueue.main.async {
-                    self.finish(error: error?.localizedDescription ?? "ファイルの読み込みに失敗しました")
+                    self.finish(error: error?.localizedDescription ?? NSLocalizedString("file_load_failed", comment: ""))
                 }
             }
         }
@@ -114,7 +114,7 @@ class ShareViewController: UIViewController {
 
     private func finish(success name: String) {
         spinner.stopAnimating()
-        statusLabel.text = "「\(name)」を保存しました"
+        statusLabel.text = String(format: NSLocalizedString("saved_format", comment: ""), name)
 
         let checkmark = UIImageView(image: UIImage(systemName: "checkmark.circle.fill"))
         checkmark.tintColor = .systemGreen

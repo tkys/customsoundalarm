@@ -1,0 +1,5 @@
+"saving" = "Saving...";
+"no_data_received" = "No data received";
+"no_audio_found" = "No compatible audio file found";
+"file_load_failed" = "Failed to load file";
+"saved_format" = "Saved \"%@\"";

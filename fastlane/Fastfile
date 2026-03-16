@@ -1,13 +1,11 @@
 default_platform(:ios)
 
 platform :ios do
-  # API Key は環境変数またはファイルから読み込み
-  # ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_FILEPATH を設定すること
   def api_key
     app_store_connect_api_key(
-      key_id: ENV["ASC_KEY_ID"],
-      issuer_id: ENV["ASC_ISSUER_ID"],
-      key_filepath: ENV["ASC_KEY_FILEPATH"] || "#{ENV['HOME']}/Downloads/AuthKey_#{ENV['ASC_KEY_ID']}.p8",
+      key_id: "HQ762J84KW",
+      issuer_id: "f4fe1f90-e544-4676-afe7-207553e56612",
+      key_filepath: "#{ENV['HOME']}/Downloads/AuthKey_HQ762J84KW.p8",
       duration: 1200,
       in_house: false
     )
@@ -50,7 +48,6 @@ platform :ios do
 
   desc "ビルド番号をインクリメント"
   lane :bump do |options|
-    # project.yml の CURRENT_PROJECT_VERSION を更新
     version = options[:build] || "2"
     sh("cd .. && sed -i '' 's/CURRENT_PROJECT_VERSION: .*/CURRENT_PROJECT_VERSION: \"#{version}\"/' project.yml")
     sh("cd .. && xcodegen generate")
