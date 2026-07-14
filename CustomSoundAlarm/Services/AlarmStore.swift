@@ -33,6 +33,8 @@ final class AlarmStore {
     func remove(_ alarm: AlarmEntry) {
         alarms.removeAll { $0.id == alarm.id }
         save()
+
+        AnalyticsService.shared.capture(.alarmDeleted)
     }
 
     func toggleEnabled(_ alarm: AlarmEntry) {

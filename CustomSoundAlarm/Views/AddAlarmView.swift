@@ -204,6 +204,13 @@ struct AlarmDetailView: View {
             updated.repeatWeekdays = Array(repeatWeekdays).sorted()
             updated.soundFileName = selectedSound?.fileName ?? ""
             alarmStore.update(updated)
+
+            AnalyticsService.shared.capture(
+                .alarmEdited(
+                    hasCustomSound: selectedSound.map { !$0.isPreset } ?? false,
+                    isRepeating: !repeatWeekdays.isEmpty
+                )
+            )
         }
 
         AlarmScheduler.shared.syncAlarms(alarmStore.alarms)

@@ -27,6 +27,11 @@ final class AlarmScheduler {
     /// ID マッピングの永続化キー
     private let idMapKey = "alarm_id_map"
 
+    /// 計測用: 直近で報告した権限状態（同一セッション内の重複送信防止。
+    /// `performSync` が毎回 `requestAuthorization` を呼ぶため、状態変化時のみ送る）
+    @ObservationIgnored
+    private var lastReportedPermissionStatus: AlarmPermissionStatus?
+
     private init() {
         loadIDMap()
     }
@@ -38,18 +43,36 @@ final class AlarmScheduler {
         case .notDetermined:
             do {
                 let state = try await manager.requestAuthorization()
-                return state == .authorized
+                if state == .authorized {
+                    recordPermissionStatus(.authorized)
+                    return true
+                } else {
+                    recordPermissionStatus(.denied)
+                    return false
+                }
             } catch {
                 logger.error("AlarmKit authorization failed: \(error.localizedDescription)")
+                recordPermissionStatus(.requestFailed)
                 return false
             }
         case .authorized:
+            recordPermissionStatus(.authorized)
             return true
         case .denied:
+            recordPermissionStatus(.denied)
             return false
         @unknown default:
+            recordPermissionStatus(.unknown)
             return false
         }
+    }
+
+    /// 権限状態を計測する。同一セッション内で状態が変化した場合のみ送信し、
+    /// 頻発する sync ごとの重複イベントを避ける。
+    private func recordPermissionStatus(_ status: AlarmPermissionStatus) {
+        guard lastReportedPermissionStatus != status else { return }
+        lastReportedPermissionStatus = status
+        AnalyticsService.shared.capture(.alarmPermission(status: status))
     }
 
     // MARK: - Reconciliation (起動時の整合性チェック)
