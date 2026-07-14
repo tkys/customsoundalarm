@@ -26,6 +26,12 @@
 	<string>アラーム音を録音するためにマイクを使用します。</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>動画から音声を抽出するためにフォトライブラリを使用します。</string>
+	<key>PostHogAPIKey</key>
+	<string>$(POSTHOG_API_KEY)</string>
+	<key>PostHogHost</key>
+	<string>$(POSTHOG_HOST)</string>
+	<key>PostHogDebug</key>
+	<string>$(POSTHOG_DEBUG)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

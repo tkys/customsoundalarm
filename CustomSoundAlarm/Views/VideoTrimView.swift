@@ -368,6 +368,8 @@ struct VideoImportFlow: View {
                 )
                 soundStore.add(sound)
                 selectedSound = sound
+
+                AnalyticsService.shared.capture(.customSoundImported(source: .video))
                 dismiss()
             } catch {
                 errorMessage = error.localizedDescription

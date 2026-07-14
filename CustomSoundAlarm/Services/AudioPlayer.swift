@@ -44,6 +44,8 @@ final class AudioPlayer {
             isPlaying = true
             playingFileName = sound.fileName
 
+            AnalyticsService.shared.capture(.soundPreviewPlayed)
+
             // 5秒後に自動停止（プレビュー用）
             Task {
                 try? await Task.sleep(for: .seconds(5))

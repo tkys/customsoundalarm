@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		00826992D978945FB8E00376 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30144856E697293FF8124FFB /* Theme.swift */; };
 		1199524F1AF81748B8D10430 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9BB3A7C3D6A98F224779C5 /* AlarmSound.swift */; };
+		13F64E29621686CC70130A49 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8617DE7DDFD767CAB2A28B9E /* AnalyticsService.swift */; };
 		1D51CFD3A640B15B6272B13A /* AlarmMetadataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C8C1415F3825EA19A5F8714 /* AlarmMetadataModel.swift */; };
 		23DA87EF8C3F2F9F829BC18F /* AlarmEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A90C5CB204A2C060BFDFD18D /* AlarmEntry.swift */; };
 		28A5C3EDD2A11E6FFFCDD154 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070B386CACF0CF5F1B4FD824 /* AudioPlayer.swift */; };
@@ -31,10 +32,12 @@
 		98E5E2041DFF10AA899AF19D /* AudioConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B310D26A852FF2128CE87241 /* AudioConverter.swift */; };
 		A7DA5D96014B46FD3C91A138 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 38AF579920FBD3A19098540F /* Localizable.strings */; };
 		AA144C6C0F1774A7355590DA /* AlarmIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7023AEAF15F5D0D792D217E3 /* AlarmIntents.swift */; };
+		B870DC3743B1E92F43B5E614 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 93DE9488BAAC2252B4E6513D /* PrivacyInfo.xcprivacy */; };
 		BD27D06C47ECF2AB1EC1CCF4 /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E62C58F84E3B37BAF9FC14C /* AppGroup.swift */; };
 		BE7638DF04B5634591B9B7CB /* AlarmLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1771C15D3FEF8C2ECC1509 /* AlarmLiveActivity.swift */; };
 		C4CC98722FBE4B800784E5A6 /* SoundStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E385B754D493555537FB767D /* SoundStore.swift */; };
 		C6B768B7246257C8EE0725FB /* PendingSoundImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CBACC275B5CC8C65DB386E6 /* PendingSoundImport.swift */; };
+		CA0EEECA616D5FD95C77EF8E /* AnalyticsServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9D35522AC999425CF7052E /* AnalyticsServiceTests.swift */; };
 		CC7A9B0476BC22807767F442 /* CustomSoundAlarmWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 450DEB40FC22DF70FD2EEE04 /* CustomSoundAlarmWidgetBundle.swift */; };
 		CDF4D89400A501DF1265B58E /* AlarmEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A90C5CB204A2C060BFDFD18D /* AlarmEntry.swift */; };
 		D87B7C4687B99C1AE18947C5 /* CustomSoundAlarmWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4825530FCF833BE90C91E68E /* CustomSoundAlarmWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -43,6 +46,7 @@
 		E0E42D2892CB93B1953EC10A /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 69B7A661B212236384ECBE05 /* Localizable.strings */; };
 		E17F8A2662BF0D60BC3DBB3E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA13D117730C6D5910D58FD4 /* InfoPlist.strings */; };
 		E47416EAAA11DB6231D9B9E0 /* SoundPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177D78CF60700582FA34F061 /* SoundPickerView.swift */; };
+		FB09AF3122E802F2E7227043 /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = 1F39A85D2D50B8401865D3FC /* PostHog */; };
 		FCE8653DBFC19A413125A2AA /* AddAlarmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEEBEBF4DB690A293B406484 /* AddAlarmView.swift */; };
 		FF6104B0D449CD52F0C14499 /* AlarmMetadataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C8C1415F3825EA19A5F8714 /* AlarmMetadataModel.swift */; };
 /* End PBXBuildFile section */
@@ -61,6 +65,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 635C3C4F9B19DBA663726404;
 			remoteInfo = CustomSoundAlarmWidget;
+		};
+		CCCC87AEB435DAB08555DC35 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A74EC63AC1D2D43F1AAE7F1C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EC7118D09A87FB9C67C22B4C;
+			remoteInfo = CustomSoundAlarm;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -89,6 +100,7 @@
 		225524FA5A69D50318058FBA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		24379AD8FA9D85958FCF6612 /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
 		30144856E697293FF8124FFB /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		3F9D35522AC999425CF7052E /* AnalyticsServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsServiceTests.swift; sourceTree = "<group>"; };
 		43235842F39385B82B212B62 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		450DEB40FC22DF70FD2EEE04 /* CustomSoundAlarmWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSoundAlarmWidgetBundle.swift; sourceTree = "<group>"; };
 		47E1971D8C3CA1BFD9E60604 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -100,8 +112,11 @@
 		6C8C1415F3825EA19A5F8714 /* AlarmMetadataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmMetadataModel.swift; sourceTree = "<group>"; };
 		7023AEAF15F5D0D792D217E3 /* AlarmIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmIntents.swift; sourceTree = "<group>"; };
 		7B785B0AA836FD95FBE5E416 /* CustomSoundAlarm.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CustomSoundAlarm.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8617DE7DDFD767CAB2A28B9E /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
 		8EBEEA911580D9582E865DD7 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		93DE9488BAAC2252B4E6513D /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		94E10DA64FE9792F8E216743 /* VideoAudioExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoAudioExtractor.swift; sourceTree = "<group>"; };
+		94EB9A9C7A37D92AA962D445 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		9E62C58F84E3B37BAF9FC14C /* AppGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroup.swift; sourceTree = "<group>"; };
 		A90C5CB204A2C060BFDFD18D /* AlarmEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmEntry.swift; sourceTree = "<group>"; };
 		AA1771C15D3FEF8C2ECC1509 /* AlarmLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmLiveActivity.swift; sourceTree = "<group>"; };
@@ -110,6 +125,7 @@
 		BD1878E5099FBE066AAAE7F3 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		BE932E485F167BB33E9C66C0 /* ShareExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		C5C2A02E12D039E82B55921A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		D5292BE58490AFA80F233CC2 /* CustomSoundAlarmTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CustomSoundAlarmTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB07A1233B68A402D5B950F4 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		DDEC29ADE0634B68AAFBD5CC /* CustomSoundAlarmWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CustomSoundAlarmWidget.entitlements; sourceTree = "<group>"; };
 		E385B754D493555537FB767D /* SoundStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundStore.swift; sourceTree = "<group>"; };
@@ -119,11 +135,39 @@
 		F88E972FEE942DB8F1BF0239 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFrameworksBuildPhase section */
+		4F8D806E63DAE7699B7DB922 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FB09AF3122E802F2E7227043 /* PostHog in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
 /* Begin PBXGroup section */
+		0D084D462AC55950BA713396 /* CustomSoundAlarmTests */ = {
+			isa = PBXGroup;
+			children = (
+				1E9B4C6A716D10464E9E3C72 /* Services */,
+			);
+			path = CustomSoundAlarmTests;
+			sourceTree = "<group>";
+		};
+		1E9B4C6A716D10464E9E3C72 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				3F9D35522AC999425CF7052E /* AnalyticsServiceTests.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
 		3A61F4A7D2A81A428986366D /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				7B785B0AA836FD95FBE5E416 /* CustomSoundAlarm.app */,
+				D5292BE58490AFA80F233CC2 /* CustomSoundAlarmTests.xctest */,
 				4825530FCF833BE90C91E68E /* CustomSoundAlarmWidget.appex */,
 				BE932E485F167BB33E9C66C0 /* ShareExtension.appex */,
 			);
@@ -134,6 +178,8 @@
 			isa = PBXGroup;
 			children = (
 				A3C533A61126660D3EEFBD5E /* CustomSoundAlarm */,
+				8BA5404BDAD23E53BB16D329 /* CustomSoundAlarm */,
+				0D084D462AC55950BA713396 /* CustomSoundAlarmTests */,
 				E9EB6BD8AA28D577540D29B7 /* CustomSoundAlarmWidget */,
 				DB117268A44BDB5AF82F44B6 /* Shared */,
 				DF16CA3AB0A467B5B838F835 /* ShareExtension */,
@@ -157,6 +203,7 @@
 			children = (
 				EE105D13EE2FE60FAE50F6C7 /* AlarmScheduler.swift */,
 				06D75262D4EB4101D764EEED /* AlarmStore.swift */,
+				8617DE7DDFD767CAB2A28B9E /* AnalyticsService.swift */,
 				B310D26A852FF2128CE87241 /* AudioConverter.swift */,
 				070B386CACF0CF5F1B4FD824 /* AudioPlayer.swift */,
 				E385B754D493555537FB767D /* SoundStore.swift */,
@@ -173,10 +220,20 @@
 			path = App;
 			sourceTree = "<group>";
 		};
+		8BA5404BDAD23E53BB16D329 /* CustomSoundAlarm */ = {
+			isa = PBXGroup;
+			children = (
+				94EB9A9C7A37D92AA962D445 /* Secrets.xcconfig */,
+			);
+			name = CustomSoundAlarm;
+			path = .;
+			sourceTree = "<group>";
+		};
 		A3C533A61126660D3EEFBD5E /* CustomSoundAlarm */ = {
 			isa = PBXGroup;
 			children = (
 				0F469B6BCD7F9DD28F6B8B2E /* CustomSoundAlarm.entitlements */,
+				93DE9488BAAC2252B4E6513D /* PrivacyInfo.xcprivacy */,
 				651DC06E83B312B2E4FF4A0E /* App */,
 				C15EA1AF6015F263DCB92FEB /* Intents */,
 				D35C9171077CFADAD99CF8E4 /* Models */,
@@ -259,6 +316,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		5E74DC1F8D999032428FE8F8 /* CustomSoundAlarmTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 64CBA3E43706661E31584788 /* Build configuration list for PBXNativeTarget "CustomSoundAlarmTests" */;
+			buildPhases = (
+				E07403D17687FD2495425796 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C5273E2CEFFB99522DA9FB9F /* PBXTargetDependency */,
+			);
+			name = CustomSoundAlarmTests;
+			packageProductDependencies = (
+			);
+			productName = CustomSoundAlarmTests;
+			productReference = D5292BE58490AFA80F233CC2 /* CustomSoundAlarmTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		635C3C4F9B19DBA663726404 /* CustomSoundAlarmWidget */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 956B207EC4E80B32E323CE8D /* Build configuration list for PBXNativeTarget "CustomSoundAlarmWidget" */;
@@ -300,6 +375,7 @@
 			buildPhases = (
 				1BBA2E4F6BCB63073DB0392D /* Sources */,
 				649994B4D6F0018C7F895FE1 /* Resources */,
+				4F8D806E63DAE7699B7DB922 /* Frameworks */,
 				B293D986475EA4E7505C6D09 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
@@ -310,6 +386,7 @@
 			);
 			name = CustomSoundAlarm;
 			packageProductDependencies = (
+				1F39A85D2D50B8401865D3FC /* PostHog */,
 			);
 			productName = CustomSoundAlarm;
 			productReference = 7B785B0AA836FD95FBE5E416 /* CustomSoundAlarm.app */;
@@ -324,6 +401,9 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
+					5E74DC1F8D999032428FE8F8 = {
+						DevelopmentTeam = F8ZP855SM2;
+					};
 					635C3C4F9B19DBA663726404 = {
 						DevelopmentTeam = F8ZP855SM2;
 					};
@@ -346,11 +426,15 @@
 			);
 			mainGroup = 4EA1E92D7338F6EDA96ED5FB;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D12EE8BC0DC3CEEE44A6E5F8 /* XCRemoteSwiftPackageReference "posthog-ios" */,
+			);
 			preferredProjectObjectVersion = 54;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				EC7118D09A87FB9C67C22B4C /* CustomSoundAlarm */,
+				5E74DC1F8D999032428FE8F8 /* CustomSoundAlarmTests */,
 				635C3C4F9B19DBA663726404 /* CustomSoundAlarmWidget */,
 				DBA663D93A2EB37C7DA237DE /* ShareExtension */,
 			);
@@ -366,6 +450,7 @@
 				E17F8A2662BF0D60BC3DBB3E /* InfoPlist.strings in Resources */,
 				A7DA5D96014B46FD3C91A138 /* Localizable.strings in Resources */,
 				648C64C81F89B294320DB7D7 /* PresetAlarm.caf in Resources */,
+				B870DC3743B1E92F43B5E614 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -391,6 +476,7 @@
 				442664997A989CFE11611D8B /* AlarmScheduler.swift in Sources */,
 				1199524F1AF81748B8D10430 /* AlarmSound.swift in Sources */,
 				5717CF51374257EEE0B2AF88 /* AlarmStore.swift in Sources */,
+				13F64E29621686CC70130A49 /* AnalyticsService.swift in Sources */,
 				3A6E302E4D885A46C64EA98A /* AppGroup.swift in Sources */,
 				98E5E2041DFF10AA899AF19D /* AudioConverter.swift in Sources */,
 				28A5C3EDD2A11E6FFFCDD154 /* AudioPlayer.swift in Sources */,
@@ -432,6 +518,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E07403D17687FD2495425796 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA0EEECA616D5FD95C77EF8E /* AnalyticsServiceTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -444,6 +538,11 @@
 			isa = PBXTargetDependency;
 			target = 635C3C4F9B19DBA663726404 /* CustomSoundAlarmWidget */;
 			targetProxy = 4B481E8C5B5B26DE419570D8 /* PBXContainerItemProxy */;
+		};
+		C5273E2CEFFB99522DA9FB9F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EC7118D09A87FB9C67C22B4C /* CustomSoundAlarm */;
+			targetProxy = CCCC87AEB435DAB08555DC35 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -512,6 +611,23 @@
 			};
 			name = Debug;
 		};
+		488D351E888102881B96F918 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.tkysdev.CustomSoundAlarmTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CustomSoundAlarm.app/CustomSoundAlarm";
+			};
+			name = Debug;
+		};
 		7786A77C19A7710FE417E8D8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -531,6 +647,7 @@
 		};
 		77ECEE071B9B56F3B1690269 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 94EB9A9C7A37D92AA962D445 /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
@@ -635,8 +752,26 @@
 			};
 			name = Release;
 		};
+		9BB03F913F98DEEC2B5D45A4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.tkysdev.CustomSoundAlarmTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CustomSoundAlarm.app/CustomSoundAlarm";
+			};
+			name = Release;
+		};
 		D89907F4FAAA42AE6A67D447 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 94EB9A9C7A37D92AA962D445 /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
@@ -720,6 +855,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		64CBA3E43706661E31584788 /* Build configuration list for PBXNativeTarget "CustomSoundAlarmTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				488D351E888102881B96F918 /* Debug */,
+				9BB03F913F98DEEC2B5D45A4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		956B207EC4E80B32E323CE8D /* Build configuration list for PBXNativeTarget "CustomSoundAlarmWidget" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -757,6 +901,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D12EE8BC0DC3CEEE44A6E5F8 /* XCRemoteSwiftPackageReference "posthog-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/PostHog/posthog-ios.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.56.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1F39A85D2D50B8401865D3FC /* PostHog */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D12EE8BC0DC3CEEE44A6E5F8 /* XCRemoteSwiftPackageReference "posthog-ios" */;
+			productName = PostHog;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A74EC63AC1D2D43F1AAE7F1C /* Project object */;
 }

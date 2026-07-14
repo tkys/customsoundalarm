@@ -189,6 +189,13 @@ struct AlarmDetailView: View {
                 soundFileName: selectedSound?.fileName ?? ""
             )
             alarmStore.add(entry)
+
+            AnalyticsService.shared.capture(
+                .alarmCreated(
+                    hasCustomSound: selectedSound.map { !$0.isPreset } ?? false,
+                    isRepeating: !repeatWeekdays.isEmpty
+                )
+            )
         case .edit(let existing):
             var updated = existing
             updated.hour = components.hour ?? existing.hour
