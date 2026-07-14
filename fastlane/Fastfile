@@ -54,7 +54,15 @@ platform :ios do
       export_method: "app-store",
       output_directory: "./build",
       output_name: "CustomSoundAlarm.ipa",
-      clean: true
+      clean: false,
+      xcargs: "-allowProvisioningUpdates " \
+              "-authenticationKeyPath #{ENV['HOME']}/Downloads/AuthKey_HQ762J84KW.p8 " \
+              "-authenticationKeyID HQ762J84KW " \
+              "-authenticationKeyIssuerID f4fe1f90-e544-4676-afe7-207553e56612",
+      export_options: {
+        signingStyle: "automatic",
+        teamID: "F8ZP855SM2"
+      }
     )
     upload_to_app_store(
       api_key: api_key,
