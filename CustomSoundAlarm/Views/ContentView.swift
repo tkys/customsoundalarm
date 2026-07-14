@@ -8,6 +8,9 @@ struct ContentView: View {
     @State private var selectedAlarm: AlarmEntry?
     @State private var showingAddAlarm = false
 
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.requestReview) private var requestReview
+
     var body: some View {
         NavigationStack {
             Group {
@@ -32,6 +35,15 @@ struct ContentView: View {
             }
             .sheet(item: $selectedAlarm) { alarm in
                 AlarmDetailView(mode: .edit(alarm))
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            // ユーザーが自ら落ち着いてアプリを前面に出したタイミングで、
+            // 定着ユーザー（発火実績あり・同一バージョン未依頼・当セッションで発火なし）にのみ
+            // App Store レビューを依頼する。実際に表示するか否かは OS が最終判断する。
+            guard phase == .active else { return }
+            ReviewRequestManager.shared.requestReviewIfAppropriate {
+                requestReview()
             }
         }
     }
