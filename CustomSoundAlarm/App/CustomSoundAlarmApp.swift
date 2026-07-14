@@ -12,6 +12,9 @@ struct CustomSoundAlarmApp: App {
                     guard !hasLaunched else { return }
                     hasLaunched = true
 
+                    // PostHog 計測の初期化（Info.plist にキーが無い場合は安全に無効化）
+                    AnalyticsService.shared.configure()
+
                     let authorized = await AlarmScheduler.shared.requestAuthorization()
                     if authorized {
                         // 起動時: AlarmKit と AlarmStore の整合性チェック

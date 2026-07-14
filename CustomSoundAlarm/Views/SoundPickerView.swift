@@ -290,6 +290,8 @@ struct SoundSelectionView: View {
                 let sound = AlarmSound(name: name, fileName: fileName)
                 soundStore.add(sound)
                 selectedSound = sound
+
+                AnalyticsService.shared.capture(.customSoundImported(source: .audio))
             } catch {
                 errorMessage = error.localizedDescription
             }

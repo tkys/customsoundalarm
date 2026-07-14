@@ -10,6 +10,11 @@ options:
     - en
     - ja
 
+packages:
+  PostHog:
+    url: https://github.com/PostHog/posthog-ios.git
+    from: 3.56.0
+
 settings:
   base:
     SWIFT_VERSION: "6.2"
@@ -49,6 +54,9 @@ targets:
         NSPhotoLibraryUsageDescription: "動画から音声を抽出するためにフォトライブラリを使用します。"
         UIBackgroundModes:
           - audio
+        PostHogAPIKey: $(POSTHOG_API_KEY)
+        PostHogHost: $(POSTHOG_HOST)
+        PostHogDebug: $(POSTHOG_DEBUG)
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.tkysdev.customsoundalarm
@@ -56,13 +64,19 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: NO
+    configFiles:
+      Debug: Secrets.xcconfig
+      Release: Secrets.xcconfig
     scheme:
-      testPlans: []
+      testTargets:
+        - CustomSoundAlarmTests
+      gatherCoverageData: true
     dependencies:
       - target: CustomSoundAlarmWidget
         embed: true
       - target: ShareExtension
         embed: true
+      - package: PostHog
     entitlements:
       path: CustomSoundAlarm/CustomSoundAlarm.entitlements
       properties:
@@ -115,3 +129,14 @@ targets:
       properties:
         com.apple.security.application-groups:
           - group.com.tkysdev.customsoundalarm
+
+  CustomSoundAlarmTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: CustomSoundAlarmTests
+    dependencies:
+      - target: CustomSoundAlarm
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: true

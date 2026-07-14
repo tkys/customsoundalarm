@@ -22,6 +22,10 @@ Pods/
 .env.*
 secrets/
 
+# PostHog credentials (local only)
+# Copy Secrets.xcconfig.example -> Secrets.xcconfig and fill in real values
+Secrets.xcconfig
+
 # Fastlane
 fastlane/report.xml
 fastlane/Preview.html
