@@ -1,4 +1,5 @@
 import SwiftUI
+import StoreKit
 
 /// メイン画面：アラーム一覧
 /// OOUIの原則に従い、主オブジェクト（アラーム）のみを表示
