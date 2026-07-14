@@ -269,6 +269,9 @@ final class AlarmScheduler {
             return
         }
 
+        // 定着ユーザー判定用に発火実績を記録（同一日は1回、鳴動中は毎tick呼ばれるが日単位で冪等）
+        ReviewRequestManager.shared.recordAlarmFired()
+
         if alarm.repeatWeekdays.isEmpty && alarm.isEnabled {
             store.toggleEnabled(alarm)
             alarmIDMap.removeValue(forKey: entryID)

@@ -1,1 +1,1 @@
-Initial release.
+Stability improvements and under-the-hood refinements. Thanks for using My Sound Alarm!
