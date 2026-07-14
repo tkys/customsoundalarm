@@ -8,6 +8,8 @@ import PostHog
 /// 新規イベントはこの enum に case を追加し、`name` / `properties` を実装すること。
 /// 呼び出し側が文字列でイベント名やプロパティキーを指定する必要がない（typo 防止）。
 enum AnalyticsEvent: Sendable {
+    // MARK: Phase 1（中核3イベント）
+
     /// アラーム新規作成（編集は除く）
     /// - has_custom_sound: カスタムサウンドを割り当てたか（プリセット/空は false）
     /// - is_repeating: 繰り返し曜日が設定されたか
@@ -20,12 +22,37 @@ enum AnalyticsEvent: Sendable {
     /// サウンドプレビュー再生
     case soundPreviewPlayed
 
+    // MARK: Phase 2（リテンション/運用拡張）
+
+    /// アラーム編集（既存アラームの更新）
+    /// - props は alarm_created と揃える
+    case alarmEdited(hasCustomSound: Bool, isRepeating: Bool)
+
+    /// アラーム削除
+    case alarmDeleted
+
+    /// AlarmKit 権限要求の結果
+    /// - status: 安定識別子（authorized / denied / notDetermined / requestFailed / unknown）
+    case alarmPermission(status: AlarmPermissionStatus)
+
+    /// 動画からの音声抽出・変換フローの開始
+    case videoImportStarted
+
+    /// 動画からの音声抽出・変換フローの失敗
+    /// - reason: 安定識別子。`error.localizedDescription` は絶対に含めない（PII/パス混入リスク）
+    case videoImportFailed(reason: VideoImportFailureReason)
+
     /// PostHog に送信するイベント名
     var name: String {
         switch self {
         case .alarmCreated: return "alarm_created"
         case .customSoundImported: return "custom_sound_imported"
         case .soundPreviewPlayed: return "sound_preview_played"
+        case .alarmEdited: return "alarm_edited"
+        case .alarmDeleted: return "alarm_deleted"
+        case .alarmPermission: return "alarm_permission"
+        case .videoImportStarted: return "video_import_started"
+        case .videoImportFailed: return "video_import_failed"
         }
     }
 
@@ -42,6 +69,19 @@ enum AnalyticsEvent: Sendable {
             return ["source": source.rawValue]
         case .soundPreviewPlayed:
             return [:]
+        case let .alarmEdited(hasCustomSound, isRepeating):
+            return [
+                "has_custom_sound": hasCustomSound,
+                "is_repeating": isRepeating
+            ]
+        case .alarmDeleted:
+            return [:]
+        case let .alarmPermission(status):
+            return ["status": status.rawValue]
+        case .videoImportStarted:
+            return [:]
+        case let .videoImportFailed(reason):
+            return ["reason": reason.rawValue]
         }
     }
 }
@@ -51,6 +91,53 @@ enum AnalyticsEvent: Sendable {
 enum SoundImportSource: String, Sendable {
     case video
     case audio
+}
+
+// MARK: - AlarmPermissionStatus
+
+/// AlarmKit 権限状態の安定識別子。
+/// `error.localizedDescription` 等は使わず、ダッシュボードで安定して集計できる文字列のみ。
+enum AlarmPermissionStatus: String, Sendable {
+    case authorized
+    case denied
+    case notDetermined = "not_determined"
+    case requestFailed = "request_failed"
+    case unknown
+}
+
+// MARK: - VideoImportFailureReason
+
+/// 動画インポート失敗理由の安定識別子。
+/// **PII 安全**: `error.localizedDescription`（ファイルパス等が混入しうる）を
+/// そのまま送信せず、発生したエラーの case を固定文字列にマップする。
+/// 想定外エラーは `.unknown` に集約。
+enum VideoImportFailureReason: String, Sendable {
+    case noAudioTrack = "no_audio_track"
+    case exportSessionFailed = "export_session_failed"
+    case exportFailed = "export_failed"
+    case converterSetupFailed = "converter_setup_failed"
+    case conversionFailed = "conversion_failed"
+    case unknown
+
+    /// 任意の Error を安定識別子にマップする。
+    /// 既知の case は個別の識別子に、それ以外は `.unknown` に集約される。
+    static func from(_ error: Error) -> VideoImportFailureReason {
+        switch error {
+        case VideoExtractionError.noAudioTrack:
+            return .noAudioTrack
+        case VideoExtractionError.exportSessionFailed:
+            return .exportSessionFailed
+        case VideoExtractionError.exportFailed:
+            return .exportFailed
+        case AudioConverterError.bufferCreationFailed,
+             AudioConverterError.converterCreationFailed:
+            return .converterSetupFailed
+        case AudioConverterError.conversionFailed:
+            return .conversionFailed
+        default:
+            return .unknown
+        }
+    }
 }
 
 // MARK: - AnalyticsBackend
@@ -138,10 +225,11 @@ final class AnalyticsService: @unchecked Sendable {
 
         let posthogConfig = PostHogConfig(projectToken: config.apiKey, host: config.host)
         posthogConfig.debug = config.isDebug
-        // Phase 1 では中核3イベントのみ計測。自動計測系はすべて無効化（拡張は次Phase）。
+        // Phase 2: ライフサイクル自動計測を有効化（Application Opened 等 → PostHog 標準 Insights で
+        // リテンション/DAU/MAU を取るため）。画面遷移は不要なので screen views は引き続き false。
         posthogConfig.captureScreenViews = false
-        posthogConfig.captureApplicationLifecycleEvents = false
-        // Feature Flags / A-B / Session Replay / Surveys は Phase 1 では無効
+        posthogConfig.captureApplicationLifecycleEvents = true
+        // Feature Flags / A-B / Session Replay / Surveys は引き続き無効
         posthogConfig.preloadFeatureFlags = false
         posthogConfig.sendFeatureFlagEvent = false
         posthogConfig.sessionReplay = false

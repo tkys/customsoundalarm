@@ -345,6 +345,8 @@ struct VideoImportFlow: View {
         isProcessing = true
         errorMessage = nil
 
+        AnalyticsService.shared.capture(.videoImportStarted)
+
         Task {
             defer { isProcessing = false }
 
@@ -373,6 +375,8 @@ struct VideoImportFlow: View {
                 dismiss()
             } catch {
                 errorMessage = error.localizedDescription
+                // 計測: reason は安定識別子のみ（PII/パス混入を避けるため localizedDescription 不使用）
+                AnalyticsService.shared.capture(.videoImportFailed(reason: .from(error)))
             }
         }
     }
