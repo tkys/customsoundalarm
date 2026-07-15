@@ -138,12 +138,17 @@ struct AlarmRow: View {
                                 ? AnyShapeStyle(Brand.warmGoldGradient)
                                 : AnyShapeStyle(.tertiary)
                         )
+                        // 長い音名のキャプションが幅を奪っても時刻は必ず自然サイズで描画されるよう優先
+                        .layoutPriority(1)
 
                     HStack(spacing: 6) {
                         Text(alarm.label)
                         Text("・")
                         SoundIndicator(isCustom: !alarm.soundFileName.isEmpty, size: 10)
                         Text(soundName.isEmpty ? String(localized: "default_sound") : soundName)
+                            // 音名が最も長くなりがちなので、まず音名自体を1行・末尾省略にしておく
+                            .lineLimit(1)
+                            .truncationMode(.tail)
                         if !alarm.repeatWeekdays.isEmpty {
                             Text("・")
                             Text(repeatSummary)
@@ -155,6 +160,9 @@ struct AlarmRow: View {
                     }
                     .font(.caption)
                     .foregroundStyle(alarm.isEnabled ? .secondary : .tertiary)
+                    // キャプション全体を1行に制限（「・」区切りの要素がまとめて1行、あふれは末尾「…」）
+                    .lineLimit(1)
+                    .truncationMode(.tail)
                 }
 
                 Spacer()
