@@ -48,6 +48,7 @@
 "rename" = "名前を変更";
 "sound_name_placeholder" = "サウンド名";
 "presets" = "プリセット";
+"recent_sounds" = "最近使った";
 "imported_sounds" = "追加した音";
 "converting" = "変換中...";
 "add_from_video" = "動画から音声を追加";
