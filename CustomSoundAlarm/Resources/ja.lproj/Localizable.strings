@@ -105,3 +105,11 @@
 
 /* Preset sound names */
 "preset_jazz" = "ジャズ";
+
+/* Convenience Phase 1 (duplicate / countdown / save toast) */
+"duplicate_alarm" = "複製";
+"countdown_minutes" = "%ld分";
+"countdown_hours_minutes" = "%1$ld時間%2$ld分";
+"countdown_days_hours" = "%1$ld日%2$ld時間";
+"countdown_until" = "あと%@";
+"alarm_will_ring_in" = "%@後に鳴ります";

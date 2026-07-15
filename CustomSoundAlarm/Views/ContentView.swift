@@ -98,6 +98,14 @@ struct ContentView: View {
                     }
                 )
                 .warmCard()
+                .contextMenu {
+                    Button {
+                        alarmStore.duplicate(alarm)
+                        AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
+                    } label: {
+                        Label("duplicate_alarm", systemImage: "plus.square.on.square")
+                    }
+                }
             }
             .onDelete { indexSet in
                 for index in indexSet {
@@ -140,6 +148,10 @@ struct AlarmRow: View {
                             Text("・")
                             Text(repeatSummary)
                         }
+                        if let countdown = nextAlarmCountdown {
+                            Text("・")
+                            Text(countdown)
+                        }
                     }
                     .font(.caption)
                     .foregroundStyle(alarm.isEnabled ? .secondary : .tertiary)
@@ -172,5 +184,13 @@ struct AlarmRow: View {
         return days.compactMap { d in
             (1...7).contains(d) ? labels[d - 1] : nil
         }.joined(separator: " ")
+    }
+
+    /// 有効なアラームの「あと◯時間◯分」表示。無効・計算不能時は nil（表示しない）。
+    /// 表示の瞬間に基準日時 `Date()` で算出する（フォアグラウンド描画時に更新される）。
+    private var nextAlarmCountdown: String? {
+        guard alarm.isEnabled else { return nil }
+        guard let fireDate = alarm.nextFireDate(from: Date()) else { return nil }
+        return AlarmCountdown.untilString(from: Date(), to: fireDate)
     }
 }

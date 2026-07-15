@@ -46,7 +46,11 @@ struct AlarmDetailView: View {
         } else {
             _selectedTime = State(initialValue: Date())
             _label = State(initialValue: String(localized: "alarm_placeholder"))
-            _selectedSound = State(initialValue: nil)
+            // 前回保存時に使った音をデフォルト選択（存在しない/削除済みなら nil）
+            let initialSound = LastUsedSound.fileName.flatMap { fileName in
+                SoundStore.shared.sounds.first { $0.fileName == fileName }
+            }
+            _selectedSound = State(initialValue: initialSound)
             _repeatWeekdays = State(initialValue: [])
         }
     }
@@ -71,8 +75,17 @@ struct AlarmDetailView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("save") { save() }
+                        .disabled(saveConfirmation != nil)
                 }
             }
+            .overlay(alignment: .top) {
+                if let saveConfirmation {
+                    SaveConfirmationToast(text: saveConfirmation)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .padding(.top, 12)
+                }
+            }
+            .animation(.easeInOut(duration: 0.25), value: saveConfirmation)
         }
     }
 
@@ -176,45 +189,73 @@ struct AlarmDetailView: View {
 
     // MARK: - Save
 
+    /// 保存確定時の確認メッセージ（「7時間30分後に鳴ります」）。nil なら即時閉じる。
+    @State private var saveConfirmation: String?
+
     private func save() {
         let components = Calendar.current.dateComponents([.hour, .minute], from: selectedTime)
+        let resolvedHour = components.hour ?? 7
+        let resolvedMinute = components.minute ?? 0
+        let soundFileName = selectedSound?.fileName ?? ""
+        let hasCustomSound = selectedSound.map { !$0.isPreset } ?? false
+        let isRepeating = !repeatWeekdays.isEmpty
+
+        // 前回使った音を記憶（新規作成時のデフォルト選択用）
+        LastUsedSound.save(soundFileName)
+
+        let savedEntry: AlarmEntry
 
         switch mode {
         case .add:
             let entry = AlarmEntry(
-                hour: components.hour ?? 7,
-                minute: components.minute ?? 0,
+                hour: resolvedHour,
+                minute: resolvedMinute,
                 label: label,
                 repeatWeekdays: Array(repeatWeekdays).sorted(),
-                soundFileName: selectedSound?.fileName ?? ""
+                soundFileName: soundFileName
             )
             alarmStore.add(entry)
-
             AnalyticsService.shared.capture(
-                .alarmCreated(
-                    hasCustomSound: selectedSound.map { !$0.isPreset } ?? false,
-                    isRepeating: !repeatWeekdays.isEmpty
-                )
+                .alarmCreated(hasCustomSound: hasCustomSound, isRepeating: isRepeating),
+                properties: hoursUntilProperties(for: entry)
             )
+            savedEntry = entry
         case .edit(let existing):
             var updated = existing
-            updated.hour = components.hour ?? existing.hour
-            updated.minute = components.minute ?? existing.minute
+            updated.hour = resolvedHour
+            updated.minute = resolvedMinute
             updated.label = label
             updated.repeatWeekdays = Array(repeatWeekdays).sorted()
-            updated.soundFileName = selectedSound?.fileName ?? ""
+            updated.soundFileName = soundFileName
             alarmStore.update(updated)
-
             AnalyticsService.shared.capture(
-                .alarmEdited(
-                    hasCustomSound: selectedSound.map { !$0.isPreset } ?? false,
-                    isRepeating: !repeatWeekdays.isEmpty
-                )
+                .alarmEdited(hasCustomSound: hasCustomSound, isRepeating: isRepeating),
+                properties: hoursUntilProperties(for: updated)
             )
+            savedEntry = updated
         }
 
         AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
-        dismiss()
+
+        // 有効なら「◯時間◯分後に鳴ります」を短暂表示してから閉じる。無効なら即時閉じる。
+        if savedEntry.isEnabled, let fire = savedEntry.nextFireDate(from: Date()) {
+            let duration = AlarmCountdown.durationString(from: Date(), to: fire)
+            saveConfirmation = String(format: String(localized: "alarm_will_ring_in"), duration)
+            Task {
+                try? await Task.sleep(for: .seconds(1.6))
+                saveConfirmation = nil
+                dismiss()
+            }
+        } else {
+            dismiss()
+        }
+    }
+
+    /// 保存したアラームの次回発火までの時間（整数時間）をアナリティクス用に返す。
+    /// 計算不能・無効時は空（プロパティを付与しない）。
+    private func hoursUntilProperties(for entry: AlarmEntry) -> [String: Any]? {
+        guard entry.isEnabled, let fire = entry.nextFireDate(from: Date()) else { return nil }
+        return ["hours_until": AlarmCountdown.hoursUntil(from: Date(), to: fire)]
     }
 
     private var repeatSummary: String {
@@ -271,5 +312,28 @@ struct RepeatSelectionView: View {
         .warmListBackground()
         .navigationTitle(String(localized: "repeat"))
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// MARK: - SaveConfirmationToast
+
+/// 保存確定時の「◯時間◯分後に鳴ります」短促トースト。Warm Glow トーンで控えめに。
+struct SaveConfirmationToast: View {
+    let text: String
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "alarm.waveform.fill")
+                .foregroundStyle(Brand.warmGoldGradient)
+            Text(text)
+                .font(.subheadline.weight(.medium))
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(
+            Capsule()
+                .fill(.regularMaterial)
+                .shadow(color: .black.opacity(0.12), radius: 8, y: 2)
+        )
     }
 }
