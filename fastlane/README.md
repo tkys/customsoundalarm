@@ -31,6 +31,22 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 メタデータ + スクリーンショットをアップロード
 
+### ios release
+
+```sh
+[bundle exec] fastlane ios release
+```
+
+リリースビルドを作成し App Store Connect にアップロード＆審査提出（v1.1.0）
+
+### ios submit_only
+
+```sh
+[bundle exec] fastlane ios submit_only
+```
+
+アップロード済みビルドを（処理完了後に）審査提出する（署名不要・API のみ）
+
 ### ios bump
 
 ```sh
