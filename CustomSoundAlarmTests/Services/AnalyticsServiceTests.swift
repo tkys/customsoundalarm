@@ -42,6 +42,7 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.alarmPermission(status: .authorized).name == "alarm_permission")
         #expect(AnalyticsEvent.videoImportStarted.name == "video_import_started")
         #expect(AnalyticsEvent.videoImportFailed(reason: .unknown).name == "video_import_failed")
+        #expect(AnalyticsEvent.alarmDuplicated.name == "alarm_duplicated")
     }
 
     // MARK: alarm_created
@@ -109,7 +110,8 @@ struct AnalyticsEventTests {
             .alarmDeleted,
             .alarmPermission(status: .authorized),
             .videoImportStarted,
-            .videoImportFailed(reason: .unknown)
+            .videoImportFailed(reason: .unknown),
+            .alarmDuplicated
         ]
 
         for event in events {
@@ -180,6 +182,13 @@ struct AnalyticsEventTests {
         let props = AnalyticsEvent.videoImportFailed(reason: .exportFailed).properties
         #expect(props.count == 1)
         #expect(props["reason"] as? String == "export_failed")
+    }
+
+    // MARK: alarm_duplicated
+
+    @Test
+    func alarmDuplicatedProperties_areEmpty() {
+        #expect(AnalyticsEvent.alarmDuplicated.properties.isEmpty)
     }
 
     @Test
@@ -333,6 +342,18 @@ struct AnalyticsServiceCaptureTests {
         #expect(mock.captureCount == 1)
         #expect(mock.captures[0].event == "video_import_failed")
         #expect(mock.captures[0].properties?["reason"] as? String == "no_audio_track")
+    }
+
+    @Test
+    func captureForwardsAlarmDuplicatedWithNilProperties() {
+        let mock = MockBackend()
+        let service = AnalyticsService(backend: mock)
+
+        service.capture(.alarmDuplicated)
+
+        #expect(mock.captureCount == 1)
+        #expect(mock.captures[0].event == "alarm_duplicated")
+        #expect(mock.captures[0].properties == nil)
     }
 }
 

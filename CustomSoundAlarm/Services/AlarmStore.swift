@@ -37,6 +37,15 @@ final class AlarmStore {
         AnalyticsService.shared.capture(.alarmDeleted)
     }
 
+    /// アラームを複製する。新しい id・`isEnabled = true` で追加し、
+    /// 元のアラームの設定（時刻/ラベル/繰り返し/サウンド）を引き継ぐ。
+    func duplicate(_ alarm: AlarmEntry) {
+        alarms.append(alarm.duplicated())
+        save()
+
+        AnalyticsService.shared.capture(.alarmDuplicated)
+    }
+
     func toggleEnabled(_ alarm: AlarmEntry) {
         guard let index = alarms.firstIndex(where: { $0.id == alarm.id }) else { return }
         alarms[index].isEnabled.toggle()

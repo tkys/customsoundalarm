@@ -42,6 +42,9 @@ enum AnalyticsEvent: Sendable {
     /// - reason: 安定識別子。`error.localizedDescription` は絶対に含めない（PII/パス混入リスク）
     case videoImportFailed(reason: VideoImportFailureReason)
 
+    /// アラーム複製
+    case alarmDuplicated
+
     /// PostHog に送信するイベント名
     var name: String {
         switch self {
@@ -53,6 +56,7 @@ enum AnalyticsEvent: Sendable {
         case .alarmPermission: return "alarm_permission"
         case .videoImportStarted: return "video_import_started"
         case .videoImportFailed: return "video_import_failed"
+        case .alarmDuplicated: return "alarm_duplicated"
         }
     }
 
@@ -82,6 +86,8 @@ enum AnalyticsEvent: Sendable {
             return [:]
         case let .videoImportFailed(reason):
             return ["reason": reason.rawValue]
+        case .alarmDuplicated:
+            return [:]
         }
     }
 }

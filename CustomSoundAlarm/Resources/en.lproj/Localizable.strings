@@ -105,3 +105,11 @@
 
 /* Preset sound names */
 "preset_jazz" = "Jazz";
+
+/* Convenience Phase 1 (duplicate / countdown / save toast) */
+"duplicate_alarm" = "Duplicate";
+"countdown_minutes" = "%ldm";
+"countdown_hours_minutes" = "%1$ldh %2$ldm";
+"countdown_days_hours" = "%1$ldd %2$ldh";
+"countdown_until" = "in %@";
+"alarm_will_ring_in" = "Rings in %@";
