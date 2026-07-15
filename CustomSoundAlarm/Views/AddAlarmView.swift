@@ -47,7 +47,7 @@ struct AlarmDetailView: View {
             _selectedTime = State(initialValue: Date())
             _label = State(initialValue: String(localized: "alarm_placeholder"))
             // 前回保存時に使った音をデフォルト選択（存在しない/削除済みなら nil）
-            let initialSound = LastUsedSound.fileName.flatMap { fileName in
+            let initialSound = SoundUsageHistory.lastUsedFileName.flatMap { fileName in
                 SoundStore.shared.sounds.first { $0.fileName == fileName }
             }
             _selectedSound = State(initialValue: initialSound)
@@ -200,8 +200,8 @@ struct AlarmDetailView: View {
         let hasCustomSound = selectedSound.map { !$0.isPreset } ?? false
         let isRepeating = !repeatWeekdays.isEmpty
 
-        // 前回使った音を記憶（新規作成時のデフォルト選択用）
-        LastUsedSound.save(soundFileName)
+        // サウンド使用履歴を記録（新規作成時のデフォルト選択 + ピッカーの「最近使った」表示用）
+        SoundUsageHistory.recordUsage(soundFileName)
 
         let savedEntry: AlarmEntry
 

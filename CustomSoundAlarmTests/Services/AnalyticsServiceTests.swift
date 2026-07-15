@@ -43,6 +43,7 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.videoImportStarted.name == "video_import_started")
         #expect(AnalyticsEvent.videoImportFailed(reason: .unknown).name == "video_import_failed")
         #expect(AnalyticsEvent.alarmDuplicated.name == "alarm_duplicated")
+        #expect(AnalyticsEvent.soundPickerRecentUsed.name == "sound_picker_recent_used")
     }
 
     // MARK: alarm_created
@@ -111,7 +112,8 @@ struct AnalyticsEventTests {
             .alarmPermission(status: .authorized),
             .videoImportStarted,
             .videoImportFailed(reason: .unknown),
-            .alarmDuplicated
+            .alarmDuplicated,
+            .soundPickerRecentUsed
         ]
 
         for event in events {
@@ -189,6 +191,13 @@ struct AnalyticsEventTests {
     @Test
     func alarmDuplicatedProperties_areEmpty() {
         #expect(AnalyticsEvent.alarmDuplicated.properties.isEmpty)
+    }
+
+    // MARK: sound_picker_recent_used
+
+    @Test
+    func soundPickerRecentUsedProperties_areEmpty() {
+        #expect(AnalyticsEvent.soundPickerRecentUsed.properties.isEmpty)
     }
 
     @Test
@@ -353,6 +362,18 @@ struct AnalyticsServiceCaptureTests {
 
         #expect(mock.captureCount == 1)
         #expect(mock.captures[0].event == "alarm_duplicated")
+        #expect(mock.captures[0].properties == nil)
+    }
+
+    @Test
+    func captureForwardsSoundPickerRecentUsedWithNilProperties() {
+        let mock = MockBackend()
+        let service = AnalyticsService(backend: mock)
+
+        service.capture(.soundPickerRecentUsed)
+
+        #expect(mock.captureCount == 1)
+        #expect(mock.captures[0].event == "sound_picker_recent_used")
         #expect(mock.captures[0].properties == nil)
     }
 }

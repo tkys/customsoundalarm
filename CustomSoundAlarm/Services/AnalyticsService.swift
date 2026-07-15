@@ -45,6 +45,9 @@ enum AnalyticsEvent: Sendable {
     /// アラーム複製
     case alarmDuplicated
 
+    /// サウンドピッカーの「最近使った」セクションから音を選択した
+    case soundPickerRecentUsed
+
     /// PostHog に送信するイベント名
     var name: String {
         switch self {
@@ -57,6 +60,7 @@ enum AnalyticsEvent: Sendable {
         case .videoImportStarted: return "video_import_started"
         case .videoImportFailed: return "video_import_failed"
         case .alarmDuplicated: return "alarm_duplicated"
+        case .soundPickerRecentUsed: return "sound_picker_recent_used"
         }
     }
 
@@ -87,6 +91,8 @@ enum AnalyticsEvent: Sendable {
         case let .videoImportFailed(reason):
             return ["reason": reason.rawValue]
         case .alarmDuplicated:
+            return [:]
+        case .soundPickerRecentUsed:
             return [:]
         }
     }

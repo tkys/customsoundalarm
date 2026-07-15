@@ -16,6 +16,7 @@ struct SoundSelectionView: View {
 
     var body: some View {
         List {
+            recentSection
             presetSection
             importedSection
             addSection
@@ -50,13 +51,59 @@ struct SoundSelectionView: View {
         }
     }
 
+    // MARK: - Recent Sounds（最近使った音を上部に・混在OK）
+
+    /// 現存する音のうち最近使ったもの（新しい順、最大5件）。
+    /// 削除済み音は `recentFileNames` の existingFileNames フィルタで自然に除外される。
+    private var recentSounds: [AlarmSound] {
+        let existing = Set(soundStore.sounds.map(\.fileName))
+        return SoundUsageHistory.recentFileNames(limit: 5, existingFileNames: existing)
+            .compactMap { name in soundStore.sounds.first { $0.fileName == name } }
+    }
+
+    /// Recent に表示中の fileName（カテゴリセクションでの重複排除用）。
+    private var recentFileNamesSet: Set<String> {
+        Set(recentSounds.map(\.fileName))
+    }
+
+    @ViewBuilder
+    private var recentSection: some View {
+        let recents = recentSounds
+        if !recents.isEmpty {
+            Section {
+                ForEach(recents, id: \.id) { sound in
+                    soundRow(name: sound.name, sound: sound, isPreset: sound.isPreset, fromRecent: true)
+                        .contextMenu {
+                            if !sound.isPreset {
+                                Button {
+                                    renameText = sound.name
+                                    renamingSound = sound
+                                } label: {
+                                    Label("rename", systemImage: "pencil")
+                                }
+                                Button(role: .destructive) {
+                                    soundStore.remove(sound)
+                                } label: {
+                                    Label("delete", systemImage: "trash")
+                                }
+                            }
+                        }
+                }
+            } header: {
+                WarmSectionHeader(title: String(localized: "recent_sounds"))
+            }
+        }
+    }
+
     // MARK: - Preset Sounds
 
+    @ViewBuilder
     private var presetSection: some View {
+        let excluded = recentFileNamesSet
         Section {
             soundRow(name: String(localized: "default_sound"), sound: nil, isPreset: true)
 
-            ForEach(soundStore.sounds.filter(\.isPreset), id: \.id) { sound in
+            ForEach(soundStore.sounds.filter { $0.isPreset && !excluded.contains($0.fileName) }, id: \.id) { sound in
                 soundRow(name: sound.name, sound: sound, isPreset: true)
             }
         } header: {
@@ -68,7 +115,8 @@ struct SoundSelectionView: View {
 
     @ViewBuilder
     private var importedSection: some View {
-        let imported = soundStore.sounds.filter { !$0.isPreset }
+        let excluded = recentFileNamesSet
+        let imported = soundStore.sounds.filter { !$0.isPreset && !excluded.contains($0.fileName) }
         Section {
             if imported.isEmpty {
                 VStack(spacing: 8) {
@@ -178,7 +226,7 @@ struct SoundSelectionView: View {
 
     // MARK: - Sound Row
 
-    private func soundRow(name: String, sound: AlarmSound?, isPreset: Bool) -> some View {
+    private func soundRow(name: String, sound: AlarmSound?, isPreset: Bool, fromRecent: Bool = false) -> some View {
         let isPlaying = sound != nil && audioPlayer.playingFileName == sound?.fileName
 
         return HStack {
@@ -210,6 +258,9 @@ struct SoundSelectionView: View {
             Button {
                 selectedSound = sound
                 audioPlayer.stop()
+                if fromRecent {
+                    AnalyticsService.shared.capture(.soundPickerRecentUsed)
+                }
             } label: {
                 HStack {
                     Text(name)

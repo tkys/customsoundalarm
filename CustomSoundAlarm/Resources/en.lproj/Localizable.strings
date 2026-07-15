@@ -48,6 +48,7 @@
 "rename" = "Rename";
 "sound_name_placeholder" = "Sound Name";
 "presets" = "Presets";
+"recent_sounds" = "Recent";
 "imported_sounds" = "My Sounds";
 "converting" = "Converting...";
 "add_from_video" = "Add from Video";
