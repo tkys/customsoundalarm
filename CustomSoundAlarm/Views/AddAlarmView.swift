@@ -29,6 +29,7 @@ struct AlarmDetailView: View {
     @State private var label: String
     @State private var selectedSound: AlarmSound?
     @State private var repeatWeekdays: Set<Int>
+    @State private var snoozeMinutes: Int
 
     init(mode: AlarmDetailMode) {
         self.mode = mode
@@ -43,6 +44,7 @@ struct AlarmDetailView: View {
             _selectedSound = State(
                 initialValue: SoundStore.shared.sounds.first { $0.fileName == entry.soundFileName }
             )
+            _snoozeMinutes = State(initialValue: entry.snoozeMinutes)
         } else {
             _selectedTime = State(initialValue: Date())
             _label = State(initialValue: String(localized: "alarm_placeholder"))
@@ -52,6 +54,7 @@ struct AlarmDetailView: View {
             }
             _selectedSound = State(initialValue: initialSound)
             _repeatWeekdays = State(initialValue: [])
+            _snoozeMinutes = State(initialValue: 9)
         }
     }
 
@@ -61,6 +64,7 @@ struct AlarmDetailView: View {
                 timeSection
                 soundSection
                 repeatSection
+                snoozeSection
                 labelSection
                 if case .edit = mode {
                     deleteSection
@@ -148,6 +152,27 @@ struct AlarmDetailView: View {
         }
     }
 
+    // MARK: - Snooze
+
+    private var snoozeSection: some View {
+        Section {
+            NavigationLink {
+                SnoozeSelectionView(selectedMinutes: $snoozeMinutes)
+            } label: {
+                HStack {
+                    Text("snooze")
+                    Spacer()
+                    Text(snoozeSummaryText)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    private var snoozeSummaryText: String {
+        SnoozeOption.label(for: snoozeMinutes)
+    }
+
     // MARK: - Label
 
     private var labelSection: some View {
@@ -212,11 +237,12 @@ struct AlarmDetailView: View {
                 minute: resolvedMinute,
                 label: label,
                 repeatWeekdays: Array(repeatWeekdays).sorted(),
-                soundFileName: soundFileName
+                soundFileName: soundFileName,
+                snoozeMinutes: snoozeMinutes
             )
             alarmStore.add(entry)
             AnalyticsService.shared.capture(
-                .alarmCreated(hasCustomSound: hasCustomSound, isRepeating: isRepeating),
+                .alarmCreated(hasCustomSound: hasCustomSound, isRepeating: isRepeating, snoozeMinutes: snoozeMinutes),
                 properties: hoursUntilProperties(for: entry)
             )
             savedEntry = entry
@@ -227,9 +253,10 @@ struct AlarmDetailView: View {
             updated.label = label
             updated.repeatWeekdays = Array(repeatWeekdays).sorted()
             updated.soundFileName = soundFileName
+            updated.snoozeMinutes = snoozeMinutes
             alarmStore.update(updated)
             AnalyticsService.shared.capture(
-                .alarmEdited(hasCustomSound: hasCustomSound, isRepeating: isRepeating),
+                .alarmEdited(hasCustomSound: hasCustomSound, isRepeating: isRepeating, snoozeMinutes: snoozeMinutes),
                 properties: hoursUntilProperties(for: updated)
             )
             savedEntry = updated
@@ -311,6 +338,60 @@ struct RepeatSelectionView: View {
         }
         .warmListBackground()
         .navigationTitle(String(localized: "repeat"))
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// MARK: - SnoozeOption
+
+/// スヌーズ時間選択肢の単一情報源。
+/// AlarmDetailView のサマリ表示と SnoozeSelectionView の双方がこれを参照する。
+struct SnoozeOption {
+    let minutes: Int
+    let labelKey: String
+
+    static let all: [SnoozeOption] = [
+        SnoozeOption(minutes: 0, labelKey: "snooze_off"),
+        SnoozeOption(minutes: 5, labelKey: "snooze_5min"),
+        SnoozeOption(minutes: 9, labelKey: "snooze_9min"),
+        SnoozeOption(minutes: 10, labelKey: "snooze_10min"),
+        SnoozeOption(minutes: 15, labelKey: "snooze_15min"),
+        SnoozeOption(minutes: 20, labelKey: "snooze_20min"),
+        SnoozeOption(minutes: 30, labelKey: "snooze_30min")
+    ]
+
+    static func label(for minutes: Int) -> String {
+        let key = all.first { $0.minutes == minutes }?.labelKey ?? "snooze_9min"
+        return String(localized: String.LocalizationValue(key))
+    }
+}
+
+// MARK: - SnoozeSelectionView
+
+/// スヌーズ時間選択（Apple Clock 準拠のチェックリスト形式）
+struct SnoozeSelectionView: View {
+    @Binding var selectedMinutes: Int
+
+    var body: some View {
+        List {
+            ForEach(SnoozeOption.all, id: \.minutes) { option in
+                Button {
+                    selectedMinutes = option.minutes
+                } label: {
+                    HStack {
+                        Text(String(localized: String.LocalizationValue(option.labelKey)))
+                        Spacer()
+                        if selectedMinutes == option.minutes {
+                            Image(systemName: "checkmark")
+                                .foregroundStyle(Color.accentColor)
+                        }
+                    }
+                }
+                .foregroundStyle(.primary)
+            }
+        }
+        .warmListBackground()
+        .navigationTitle(String(localized: "snooze"))
         .navigationBarTitleDisplayMode(.inline)
     }
 }

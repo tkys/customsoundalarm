@@ -107,6 +107,15 @@
 /* Preset sound names */
 "preset_jazz" = "Jazz";
 
+/* Snooze */
+"snooze_off" = "Off";
+"snooze_5min" = "5 minutes";
+"snooze_9min" = "9 minutes";
+"snooze_10min" = "10 minutes";
+"snooze_15min" = "15 minutes";
+"snooze_20min" = "20 minutes";
+"snooze_30min" = "30 minutes";
+
 /* Convenience Phase 1 (duplicate / countdown / save toast) */
 "duplicate_alarm" = "Duplicate";
 "countdown_minutes" = "%ldm";

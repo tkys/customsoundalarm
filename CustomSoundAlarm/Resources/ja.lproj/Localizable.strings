@@ -107,6 +107,15 @@
 /* Preset sound names */
 "preset_jazz" = "ジャズ";
 
+/* Snooze */
+"snooze_off" = "オフ";
+"snooze_5min" = "5分";
+"snooze_9min" = "9分";
+"snooze_10min" = "10分";
+"snooze_15min" = "15分";
+"snooze_20min" = "20分";
+"snooze_30min" = "30分";
+
 /* Convenience Phase 1 (duplicate / countdown / save toast) */
 "duplicate_alarm" = "複製";
 "countdown_minutes" = "%ld分";

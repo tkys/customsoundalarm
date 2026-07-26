@@ -192,4 +192,71 @@ struct AlarmEntryTests {
         #expect(original.label == "Original")
         #expect(original.repeatWeekdays == [1])
     }
+
+    // MARK: - snoozeMinutes
+
+    @Test
+    func snoozeMinutes_defaultIsNine() {
+        let alarm = AlarmEntry()
+        #expect(alarm.snoozeMinutes == 9, "既定値は 9 であるべき")
+    }
+
+    @Test
+    func snoozeMinutes_oldFormatJSON_decodeSucceedsWithDefaultNine() throws {
+        let json = """
+        {
+            "id": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
+            "hour": 7,
+            "minute": 0,
+            "isEnabled": true,
+            "label": "Test",
+            "repeatWeekdays": [],
+            "soundFileName": ""
+        }
+        """
+        let data = try #require(json.data(using: .utf8))
+        let decoder = JSONDecoder()
+        let alarm = try decoder.decode(AlarmEntry.self, from: data)
+        #expect(alarm.snoozeMinutes == 9, "snoozeMinutes が無い旧JSONでもデコードでき、既定値 9 になるべき")
+        #expect(alarm.hour == 7)
+        #expect(alarm.label == "Test")
+    }
+
+    @Test
+    func snoozeMinutes_newFormatJSON_roundTripPreservesValue() throws {
+        let original = AlarmEntry(
+            hour: 8, minute: 30,
+            label: "Snooze Test",
+            snoozeMinutes: 15
+        )
+
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(original)
+
+        let decoder = JSONDecoder()
+        let decoded = try decoder.decode(AlarmEntry.self, from: data)
+
+        #expect(decoded.snoozeMinutes == 15)
+        #expect(decoded.hour == 8)
+        #expect(decoded.minute == 30)
+        #expect(decoded.label == "Snooze Test")
+        #expect(decoded.id == original.id)
+    }
+
+    @Test
+    func snoozeMinutes_roundTripZero() throws {
+        let original = AlarmEntry(snoozeMinutes: 0)
+
+        let data = try JSONEncoder().encode(original)
+        let decoded = try JSONDecoder().decode(AlarmEntry.self, from: data)
+
+        #expect(decoded.snoozeMinutes == 0)
+    }
+
+    @Test
+    func snoozeMinutes_duplicatedCopiesValue() {
+        let original = AlarmEntry(snoozeMinutes: 20)
+        let copy = original.duplicated()
+        #expect(copy.snoozeMinutes == 20)
+    }
 }

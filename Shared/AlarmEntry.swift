@@ -11,6 +11,8 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
     var repeatWeekdays: [Int]
     /// 使用するアラーム音のファイル名
     var soundFileName: String
+    /// スヌーズ時間（分）。0 = スヌーズ無効。既定 9分（iOS標準）
+    var snoozeMinutes: Int
 
     init(
         id: UUID = UUID(),
@@ -19,7 +21,8 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
         isEnabled: Bool = true,
         label: String = "アラーム",
         repeatWeekdays: [Int] = [],
-        soundFileName: String = ""
+        soundFileName: String = "",
+        snoozeMinutes: Int = 9
     ) {
         self.id = id
         self.hour = hour
@@ -28,6 +31,23 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
         self.label = label
         self.repeatWeekdays = repeatWeekdays
         self.soundFileName = soundFileName
+        self.snoozeMinutes = snoozeMinutes
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, hour, minute, isEnabled, label, repeatWeekdays, soundFileName, snoozeMinutes
+    }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        hour = try container.decode(Int.self, forKey: .hour)
+        minute = try container.decode(Int.self, forKey: .minute)
+        isEnabled = try container.decode(Bool.self, forKey: .isEnabled)
+        label = try container.decode(String.self, forKey: .label)
+        repeatWeekdays = try container.decode([Int].self, forKey: .repeatWeekdays)
+        soundFileName = try container.decode(String.self, forKey: .soundFileName)
+        snoozeMinutes = try container.decodeIfPresent(Int.self, forKey: .snoozeMinutes) ?? 9
     }
 
     var timeString: String {
@@ -96,7 +116,8 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
             isEnabled: true,
             label: label,
             repeatWeekdays: repeatWeekdays,
-            soundFileName: soundFileName
+            soundFileName: soundFileName,
+            snoozeMinutes: snoozeMinutes
         )
     }
 }

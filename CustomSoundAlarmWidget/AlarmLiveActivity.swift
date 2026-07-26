@@ -20,6 +20,17 @@ struct AlarmLiveActivity: Widget {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+
+                    switch context.state.mode {
+                    case .countdown(let mode):
+                        Text(mode.fireDate, style: .timer)
+                            .font(.title2.monospacedDigit())
+                            .foregroundStyle(.orange)
+                    case .alert, .paused:
+                        EmptyView()
+                    @unknown default:
+                        EmptyView()
+                    }
                 }
                 .padding()
             }
@@ -35,15 +46,46 @@ struct AlarmLiveActivity: Widget {
                     Text(metadata?.label ?? "")
                         .font(.headline)
                 }
+                DynamicIslandExpandedRegion(.trailing) {
+                    switch context.state.mode {
+                    case .countdown(let mode):
+                        Text(mode.fireDate, style: .timer)
+                            .font(.callout.monospacedDigit())
+                            .foregroundStyle(.orange)
+                    case .alert, .paused:
+                        EmptyView()
+                    @unknown default:
+                        EmptyView()
+                    }
+                }
             } compactLeading: {
                 Image(systemName: "alarm.fill")
                     .foregroundStyle(.orange)
             } compactTrailing: {
-                Text(metadata?.label ?? "")
-                    .font(.caption)
+                switch context.state.mode {
+                case .countdown(let mode):
+                    Text(mode.fireDate, style: .timer)
+                        .font(.caption.monospacedDigit())
+                        .foregroundStyle(.orange)
+                case .alert, .paused:
+                    Text(metadata?.label ?? "")
+                        .font(.caption)
+                @unknown default:
+                    Text(metadata?.label ?? "")
+                        .font(.caption)
+                }
             } minimal: {
-                Image(systemName: "alarm.fill")
-                    .foregroundStyle(.orange)
+                switch context.state.mode {
+                case .countdown:
+                    Image(systemName: "alarm.fill")
+                        .foregroundStyle(.orange)
+                case .alert, .paused:
+                    Image(systemName: "alarm.fill")
+                        .foregroundStyle(.red)
+                @unknown default:
+                    Image(systemName: "alarm.fill")
+                        .foregroundStyle(.orange)
+                }
             }
         }
     }
