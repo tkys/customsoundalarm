@@ -125,6 +125,13 @@ final class AlarmScheduler {
             AnalyticsService.shared.capture(.alarmSnoozed(from: "reconcile"))
             logger.info("Reconcile: detected snoozing alarm: \(alarm.id)")
         }
+        // .countdown でなくなったアラームをクリーンアップ
+        for alarm in (try? manager.alarms) ?? [] {
+            guard let entryID = alarmIDMap.first(where: { $0.value == alarm.id })?.key,
+                  alarm.state != .countdown
+            else { continue }
+            snoozedIDs.remove(entryID)
+        }
         AppGroup.snoozedAlarmEntryIDs = snoozedIDs
     }
 
@@ -344,7 +351,12 @@ final class AlarmScheduler {
                         logger.info("Alarm snoozed: \(alarm.id)")
                         AnalyticsService.shared.capture(.alarmSnoozed(from: "observer"))
                     default:
-                        break
+                        // スヌーズ解除の検知: .countdown でなくなったアラームをクリーンアップ
+                        guard let entryID = alarmIDMap.first(where: { $0.value == alarm.id })?.key else { continue }
+                        var snoozedIDs = AppGroup.snoozedAlarmEntryIDs
+                        if snoozedIDs.remove(entryID) != nil {
+                            AppGroup.snoozedAlarmEntryIDs = snoozedIDs
+                        }
                     }
                 }
             }

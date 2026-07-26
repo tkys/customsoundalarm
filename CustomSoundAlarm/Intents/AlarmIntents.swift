@@ -10,7 +10,8 @@ struct DismissAlarmIntent: LiveActivityIntent {
         let hour = Calendar.current.component(.hour, from: now)
         let event = PendingAlarmEvent(
             name: AnalyticsEvent.alarmStopped(hour: hour).name,
-            properties: ["hour": String(hour)],
+            properties: [:],
+            hour: hour,
             timestamp: now
         )
         AlarmEventBuffer.enqueue(event)

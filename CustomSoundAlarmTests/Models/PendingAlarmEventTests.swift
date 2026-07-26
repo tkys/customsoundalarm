@@ -63,18 +63,18 @@ struct AlarmEventBufferTests {
     @Test
     func flushPendingAlarmEvents_sendsBufferedEvents() {
         let now = Date()
-        AlarmEventBuffer.enqueue(PendingAlarmEvent(name: "alarm_stopped", properties: ["alarm_id": "123"], timestamp: now), defaults: testDefaults)
-        AlarmEventBuffer.enqueue(PendingAlarmEvent(name: "alarm_stopped", properties: ["alarm_id": "456"], timestamp: now), defaults: testDefaults)
+        AlarmEventBuffer.enqueue(PendingAlarmEvent(name: "alarm_stopped", properties: [:], hour: 7, timestamp: now), defaults: testDefaults)
+        AlarmEventBuffer.enqueue(PendingAlarmEvent(name: "alarm_stopped", properties: [:], hour: 8, timestamp: now), defaults: testDefaults)
 
         let mock = MockBackend()
         let service = AnalyticsService(backend: mock)
 
-        // 隔離された defaults を使って flush させるために、AnalyticsService に直接渡せない
-        // 代わりに内部の flushPendingAlarmEvents が使う AppGroup.userDefaults を
-        // 差し替えるのは難しい。ここでは enqueue/dequeueAll の連携を検証する。
         let dequeued = AlarmEventBuffer.dequeueAll(defaults: testDefaults)
         for event in dequeued {
             var props: [String: Any] = ["timestamp": event.timestamp.timeIntervalSince1970]
+            if let hour = event.hour {
+                props["hour"] = hour
+            }
             for (k, v) in event.properties {
                 props[k] = v
             }
@@ -83,8 +83,40 @@ struct AlarmEventBufferTests {
 
         #expect(mock.captureCount == 2)
         #expect(mock.captures[0].event == "alarm_stopped")
+        #expect(mock.captures[0].properties?["hour"] as? Int == 7)
         #expect(mock.captures[1].event == "alarm_stopped")
+        #expect(mock.captures[1].properties?["hour"] as? Int == 8)
         #expect(AlarmEventBuffer.dequeueAll(defaults: testDefaults).isEmpty)
+    }
+
+    @Test
+    func snoozedEntryID_roundTripThroughAppGroup() {
+        // Regression test for C: entryID must survive removal and re-insert
+        // (.countdown → release → .countdown should record 2x)
+        let uid = UUID()
+        defer {
+            var cleanup = AppGroup.snoozedAlarmEntryIDs
+            cleanup.remove(uid)
+            AppGroup.snoozedAlarmEntryIDs = cleanup
+        }
+
+        // First insertion (simulates .countdown)
+        var ids = AppGroup.snoozedAlarmEntryIDs
+        ids.insert(uid)
+        AppGroup.snoozedAlarmEntryIDs = ids
+        #expect(AppGroup.snoozedAlarmEntryIDs.contains(uid))
+
+        // Removal (simulates .countdown released)
+        ids = AppGroup.snoozedAlarmEntryIDs
+        ids.remove(uid)
+        AppGroup.snoozedAlarmEntryIDs = ids
+        #expect(!AppGroup.snoozedAlarmEntryIDs.contains(uid))
+
+        // Re-insertion (simulates .countdown again)
+        ids = AppGroup.snoozedAlarmEntryIDs
+        ids.insert(uid)
+        AppGroup.snoozedAlarmEntryIDs = ids
+        #expect(AppGroup.snoozedAlarmEntryIDs.contains(uid))
     }
 
     @Test

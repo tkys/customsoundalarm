@@ -10,6 +10,8 @@ struct PendingAlarmEvent: Codable, Sendable {
     var name: String
     /// String / Int / Bool のみ（JSON で安全にシリアライズできる値）
     var properties: [String: String]
+    /// 停止時刻の「時」（alarm_fired と型を揃えるため Int）。nil 使用時は hour を持たないイベント
+    var hour: Int? = nil
     /// PII 安全な時刻情報（アラーム発火想定時刻等）。デバッグ/分析以外の用途には使わない
     var timestamp: Date
 }

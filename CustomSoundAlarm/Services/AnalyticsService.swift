@@ -346,6 +346,9 @@ final class AnalyticsService: @unchecked Sendable {
         guard !events.isEmpty else { return }
         for event in events {
             var props: [String: Any] = ["timestamp": event.timestamp.timeIntervalSince1970]
+            if let hour = event.hour {
+                props["hour"] = hour
+            }
             for (k, v) in event.properties {
                 props[k] = v
             }
