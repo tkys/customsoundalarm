@@ -130,3 +130,6 @@
 "countdown_days_hours" = "%1$ldd %2$ldh";
 "countdown_until" = "in %@";
 "alarm_will_ring_in" = "Rings in %@";
+
+/* Video Trimmer */
+"no_video" = "No video";

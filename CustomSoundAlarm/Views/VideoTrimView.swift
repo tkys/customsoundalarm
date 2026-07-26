@@ -77,29 +77,19 @@ struct VideoImportFlow: View {
     // MARK: - Trim View
 
     private var selectedDuration: Double { endTime - startTime }
-    private var durationExceeds30s: Bool { selectedDuration > 30 }
 
     private func trimView(url: URL) -> some View {
         Form {
-            // 1. 試聴 + タイムライン
+            // 1. トリムバー + 試聴
             Section {
                 VStack(spacing: 12) {
-                    // タイムライン表示（再生位置インジケーター付き）
-                    timelineBar
-
-                    // タイムラインマーカー
-                    HStack {
-                        Text(formatTime(startTime))
-                        Spacer()
-                        Text(String(format: String(localized: "selected_duration"), formatTime(selectedDuration)))
-                            .foregroundStyle(durationExceeds30s ? .orange : Color.accentColor)
-                            .fontWeight(.medium)
-                        Spacer()
-                        Text(formatTime(endTime))
-                    }
-                    .font(.caption)
-                    .monospacedDigit()
-                    .foregroundStyle(.secondary)
+                    VideoTrimmerBar(
+                        startTime: $startTime,
+                        endTime: $endTime,
+                        videoURL: url,
+                        videoDuration: videoDuration,
+                        previewer: previewer
+                    )
 
                     // プレビューボタン
                     HStack {
@@ -131,66 +121,12 @@ struct VideoImportFlow: View {
                 }
                 .padding(.vertical, 4)
             } header: {
-                WarmSectionHeader(title: String(localized: "preview"))
-            }
-
-            // 2. 範囲選択
-            Section {
-                VStack(spacing: 12) {
-                    LabeledContent {
-                        Text(formatTime(startTime))
-                            .monospacedDigit()
-                            .foregroundStyle(.secondary)
-                    } label: {
-                        Text("start")
-                    }
-                    Slider(
-                        value: $startTime,
-                        in: 0...max(videoDuration - 1, 0)
-                    ) {
-                        Text("start")
-                    } onEditingChanged: { editing in
-                        if !editing && endTime <= startTime {
-                            endTime = min(startTime + 30, videoDuration)
-                        }
-                        if editing { previewer.stop() }
-                    }
-
-                    Divider()
-
-                    LabeledContent {
-                        Text(formatTime(endTime))
-                            .monospacedDigit()
-                            .foregroundStyle(.secondary)
-                    } label: {
-                        Text("end")
-                    }
-                    Slider(
-                        value: $endTime,
-                        in: 0...videoDuration
-                    ) {
-                        Text("end")
-                    } onEditingChanged: { editing in
-                        if !editing && endTime <= startTime {
-                            startTime = max(endTime - 30, 0)
-                        }
-                        if editing { previewer.stop() }
-                    }
-                    .tint(durationExceeds30s ? .orange : nil)
-                }
-                .padding(.vertical, 4)
-            } header: {
                 WarmSectionHeader(title: String(localized: "range"))
             } footer: {
-                if durationExceeds30s {
-                    Text("duration_warning")
-                        .foregroundStyle(.orange)
-                } else {
-                    Text(String(format: String(localized: "total_duration"), formatTime(videoDuration)))
-                }
+                Text(String(format: String(localized: "total_duration"), formatTime(videoDuration)))
             }
 
-            // 3. サウンド名
+            // 2. サウンド名
             Section {
                 HStack {
                     Text("name")
@@ -203,7 +139,7 @@ struct VideoImportFlow: View {
                 }
             }
 
-            // 4. 保存ボタン
+            // 3. 保存ボタン
             Section {
                 Button {
                     previewer.stop()
@@ -245,74 +181,6 @@ struct VideoImportFlow: View {
             }
         }
         .warmListBackground()
-    }
-
-    // MARK: - Timeline Bar
-
-    private var timelineBar: some View {
-        GeometryReader { geo in
-            let width = geo.size.width
-            let startFraction = videoDuration > 0 ? startTime / videoDuration : 0
-            let endFraction = videoDuration > 0 ? endTime / videoDuration : 1
-            let leading = width * startFraction
-            let selectedWidth = width * (endFraction - startFraction)
-
-            ZStack(alignment: .leading) {
-                // 全体バー（inner shadow effect）
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.secondary.opacity(0.12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .strokeBorder(Color.secondary.opacity(0.08), lineWidth: 1)
-                    )
-                    .frame(height: 40)
-
-                // 選択範囲（warm gradient）
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color.accentColor.opacity(0.3),
-                                Color.accentColor.opacity(0.15)
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    .frame(width: max(selectedWidth, 2), height: 40)
-                    .offset(x: leading)
-
-                // 選択範囲の枠線
-                RoundedRectangle(cornerRadius: 8)
-                    .strokeBorder(Color.accentColor.opacity(0.6), lineWidth: 1.5)
-                    .frame(width: max(selectedWidth, 2), height: 40)
-                    .offset(x: leading)
-
-                // 左ハンドル
-                handleMark(at: leading)
-
-                // 右ハンドル
-                handleMark(at: leading + selectedWidth)
-
-                // 再生位置インジケーター
-                if previewer.isPlaying, videoDuration > 0 {
-                    let playFraction = previewer.currentTime / videoDuration
-                    RoundedRectangle(cornerRadius: 1)
-                        .fill(Color.red)
-                        .frame(width: 2.5, height: 30)
-                        .offset(x: width * playFraction)
-                        .shadow(color: .red.opacity(0.4), radius: 3)
-                }
-            }
-        }
-        .frame(height: 40)
-    }
-
-    private func handleMark(at x: CGFloat) -> some View {
-        RoundedRectangle(cornerRadius: 1)
-            .fill(Color.accentColor)
-            .frame(width: 3, height: 24)
-            .offset(x: x)
     }
 
     // MARK: - Actions
