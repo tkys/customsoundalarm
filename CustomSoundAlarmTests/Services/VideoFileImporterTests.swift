@@ -127,4 +127,70 @@ struct VideoFileImporterTests {
     func supportedVideoTypes_includesQuickTimeMovie() {
         #expect(VideoFileImporter.supportedVideoTypes.contains(.quickTimeMovie))
     }
+
+    // MARK: - defaultSoundName
+
+    @Test
+    func defaultSoundName_normalFilename() {
+        let url = URL(fileURLWithPath: "/Documents/concert.mp4")
+        let name = VideoFileImporter.defaultSoundName(from: url)
+        #expect(name == "concert")
+    }
+
+    @Test
+    func defaultSoundName_stripsExtension() {
+        let url = URL(fileURLWithPath: "/Movies/vacation.mov")
+        let name = VideoFileImporter.defaultSoundName(from: url)
+        #expect(name == "vacation")
+        #expect(!name.contains("."))
+        #expect(!name.contains(".mov"))
+    }
+
+    @Test
+    func defaultSoundName_uuid_returnsEmpty() {
+        let uuid = UUID().uuidString
+        let url = URL(fileURLWithPath: "/tmp/\(uuid).mov")
+        let name = VideoFileImporter.defaultSoundName(from: url)
+        #expect(name.isEmpty)
+    }
+
+    @Test
+    func defaultSoundName_uuidDoesNotLeak() {
+        let uuid = UUID().uuidString
+        let url = URL(fileURLWithPath: "/tmp/\(uuid).mp4")
+        let name = VideoFileImporter.defaultSoundName(from: url)
+        #expect(!name.contains(uuid))
+        #expect(!name.hasSuffix(".mp4"))
+        #expect(!name.hasSuffix(".mov"))
+    }
+
+    @Test
+    func defaultSoundName_photoLibraryFormat() {
+        // 写真ライブラリの標準的な命名（IMG_1234）
+        let url = URL(fileURLWithPath: "/Photo/IMG_1234.MOV")
+        let name = VideoFileImporter.defaultSoundName(from: url)
+        #expect(name == "IMG_1234")
+    }
+
+    @Test
+    func defaultSoundName_japaneseFilename() {
+        let url = URL(fileURLWithPath: "/Videos/演奏録画.m4v")
+        let name = VideoFileImporter.defaultSoundName(from: url)
+        #expect(name == "演奏録画")
+    }
+
+    @Test
+    func defaultSoundName_noExtension() {
+        let url = URL(fileURLWithPath: "/tmp/filewithoutextension")
+        let name = VideoFileImporter.defaultSoundName(from: url)
+        #expect(name == "filewithoutextension")
+    }
+
+    @Test
+    func defaultSoundName_lowercaseUuid_returnsEmpty() {
+        // UUID() は大文字小文字両方を受理する
+        let url = URL(fileURLWithPath: "/tmp/550e8400-e29b-41d4-a716-446655440000.mov")
+        let name = VideoFileImporter.defaultSoundName(from: url)
+        #expect(name.isEmpty)
+    }
 }

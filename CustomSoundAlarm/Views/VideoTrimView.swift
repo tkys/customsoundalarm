@@ -248,7 +248,7 @@ struct VideoImportFlow: View {
                 videoDuration = duration
                 endTime = min(30, duration)
                 videoURL = movie.url
-                soundName = movie.url.deletingPathExtension().lastPathComponent
+                soundName = movie.displayName
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -264,6 +264,9 @@ struct VideoImportFlow: View {
             errorMessage = String(localized: "error_file_access_denied")
             return
         }
+
+        // temp コピー前に元ファイル名を控える（temp URL は UUID になるため）
+        let originalName = VideoFileImporter.defaultSoundName(from: url)
 
         isProcessing = true
         errorMessage = nil
@@ -290,7 +293,7 @@ struct VideoImportFlow: View {
                     videoDuration = duration
                     endTime = min(30, duration)
                     videoURL = tempURL
-                    soundName = tempURL.deletingPathExtension().lastPathComponent
+                    soundName = originalName
                     isProcessing = false
                 }
             } catch {
@@ -426,6 +429,8 @@ final class TrimPreviewer {
 
 struct VideoTransferable: Transferable {
     let url: URL
+    /// 元ファイル名（拡張子なし）。temp コピーで UUID 名になるのを防ぐため保持。
+    let displayName: String
 
     static var transferRepresentation: some TransferRepresentation {
         FileRepresentation(contentType: .movie) { video in
@@ -434,7 +439,9 @@ struct VideoTransferable: Transferable {
             let tempURL = FileManager.default.temporaryDirectory
                 .appendingPathComponent("\(UUID().uuidString).mov")
             try FileManager.default.copyItem(at: received.file, to: tempURL)
-            return Self(url: tempURL)
+            // 元ファイル名を保持（IMG_1234 等）。UUID なら空になる。
+            let originalName = VideoFileImporter.defaultSoundName(from: received.file)
+            return Self(url: tempURL, displayName: originalName)
         }
     }
 }

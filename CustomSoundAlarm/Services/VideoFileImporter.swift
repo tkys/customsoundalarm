@@ -41,6 +41,18 @@ enum VideoFileImporter {
         return supportedVideoTypes.contains { type.conforms(to: $0) }
     }
 
+    /// 元ファイルの URL から既定のサウンド名を導出する。
+    /// - 拡張子を除去
+    /// - UUID 形式のファイル名（`XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX`）は
+    ///   `VideoFileImporter.copyToTemp` が生成した temp 名なので空文字を返す
+    ///   （呼び出し元でフォールバックさせる）
+    static func defaultSoundName(from url: URL) -> String {
+        let name = url.deletingPathExtension().lastPathComponent
+        // UUID 形式チェック（temp コピーで生成された名前を弾く）
+        if UUID(uuidString: name) != nil { return "" }
+        return name
+    }
+
     // MARK: - File Copy（I/O）
 
     /// security-scoped URL から temp へコピーする。
