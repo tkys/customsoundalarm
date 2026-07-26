@@ -32,11 +32,7 @@ final class AlarmScheduler {
     @ObservationIgnored
     private var lastReportedPermissionStatus: AlarmPermissionStatus?
 
-    /// 同一 Alarm.ID に対して alarm_snoozed を1回だけ送るための記録
-    @ObservationIgnored
-    private var snoozedReported: Set<Alarm.ID> = []
-
-    /// 同一 Alarm.ID に対して alarm_fired を1回だけ送るための記録（observer 系）
+    /// 同一 AlarmEntry.ID に対して alarm_fired を1回だけ送るための記録（observer 系）
     @ObservationIgnored
     private var firedReportedThisSession: Set<Alarm.ID> = []
 
@@ -119,13 +115,17 @@ final class AlarmScheduler {
             saveIDMap()
         }
 
-        // スヌーズ待機中（.countdown）のアラームを遡及記録
+        // スヌーズ待機中（.countdown）のアラームを遡及記録（App Group 永続化で二重計上防止）
+        var snoozedIDs = AppGroup.snoozedAlarmEntryIDs
         for alarm in (try? manager.alarms) ?? [] where alarm.state == .countdown {
-            guard !snoozedReported.contains(alarm.id) else { continue }
-            snoozedReported.insert(alarm.id)
+            guard let entryID = alarmIDMap.first(where: { $0.value == alarm.id })?.key,
+                  !snoozedIDs.contains(entryID)
+            else { continue }
+            snoozedIDs.insert(entryID)
             AnalyticsService.shared.capture(.alarmSnoozed(from: "reconcile"))
             logger.info("Reconcile: detected snoozing alarm: \(alarm.id)")
         }
+        AppGroup.snoozedAlarmEntryIDs = snoozedIDs
     }
 
     // MARK: - Scheduling
@@ -335,9 +335,12 @@ final class AlarmScheduler {
                         logger.info("Alarm alerting: \(alarm.id)")
                         handleAlarmFired(alarmKitID: alarm.id)
                     case .countdown:
-                        // スヌーズ待機中への遷移を検知（同一 Alarm.ID につき1回だけ）
-                        guard !snoozedReported.contains(alarm.id) else { continue }
-                        snoozedReported.insert(alarm.id)
+                        // スヌーズ待機中への遷移を検知（App Group 永続化で二重計上防止）
+                        guard let entryID = alarmIDMap.first(where: { $0.value == alarm.id })?.key else { continue }
+                        var snoozedIDs = AppGroup.snoozedAlarmEntryIDs
+                        guard !snoozedIDs.contains(entryID) else { continue }
+                        snoozedIDs.insert(entryID)
+                        AppGroup.snoozedAlarmEntryIDs = snoozedIDs
                         logger.info("Alarm snoozed: \(alarm.id)")
                         AnalyticsService.shared.capture(.alarmSnoozed(from: "observer"))
                     default:

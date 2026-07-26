@@ -59,8 +59,9 @@ enum AnalyticsEvent: Sendable {
     case alarmFired(wasAppForeground: Bool, hour: Int, isRepeating: Bool, detection: String)
 
     /// アラーム停止（DismissAlarmIntent の buffer 経由）
-    /// - seconds_to_stop: 発火から停止までの秒数（取得不能時は nil）
-    case alarmStopped(secondsToStop: Int?)
+    /// - hour: 停止時刻の「時」（PII なし・時刻帯のみ）。アプリ起動時にフラッシュされるため
+    ///   PostHog のイベント時刻は信頼できない、明示的に送出する
+    case alarmStopped(hour: Int)
 
     /// アラームスヌーズ（状態遷移 .alerting → .countdown を検知）
     /// - from: "observer" または "reconcile"
@@ -124,11 +125,8 @@ enum AnalyticsEvent: Sendable {
                 "is_repeating": isRepeating,
                 "detection": detection
             ]
-        case let .alarmStopped(secondsToStop):
-            if let seconds = secondsToStop {
-                return ["seconds_to_stop": seconds]
-            }
-            return [:]
+        case let .alarmStopped(hour):
+            return ["hour": hour]
         case let .alarmSnoozed(from):
             return ["from": from]
         }

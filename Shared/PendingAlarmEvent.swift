@@ -17,11 +17,16 @@ struct PendingAlarmEvent: Codable, Sendable {
 /// App Group UserDefaults をバッファにしたアラームイベントキュー。
 enum AlarmEventBuffer {
     private static let key = "pending_alarm_events"
+    /// 上限件数。超えた場合は古いものから削除する。PostHog 未設定環境で無制限に増えるのを防ぐ。
+    private static let maxCount = 100
 
     /// イベントをキューに追加する（Intent 実行時など、PostHog SDK が使えない文脈で呼ぶ）
     static func enqueue(_ event: PendingAlarmEvent, defaults: UserDefaults = AppGroup.userDefaults) {
         var queue = readAll(defaults: defaults)
         queue.append(event)
+        if queue.count > maxCount {
+            queue = Array(queue.suffix(maxCount))
+        }
         guard let data = try? JSONEncoder().encode(queue) else { return }
         defaults.set(data, forKey: key)
     }

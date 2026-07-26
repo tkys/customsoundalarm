@@ -57,7 +57,7 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.soundPickerRecentUsed.name == "sound_picker_recent_used")
         // Phase 3
         #expect(AnalyticsEvent.alarmFired(wasAppForeground: true, hour: 8, isRepeating: false, detection: "observer").name == "alarm_fired")
-        #expect(AnalyticsEvent.alarmStopped(secondsToStop: nil).name == "alarm_stopped")
+        #expect(AnalyticsEvent.alarmStopped(hour: 8).name == "alarm_stopped")
         #expect(AnalyticsEvent.alarmSnoozed(from: "observer").name == "alarm_snoozed")
     }
 
@@ -132,7 +132,7 @@ struct AnalyticsEventTests {
             .alarmDuplicated,
             .soundPickerRecentUsed,
             .alarmFired(wasAppForeground: true, hour: 8, isRepeating: false, detection: "observer"),
-            .alarmStopped(secondsToStop: nil),
+            .alarmStopped(hour: 8),
             .alarmSnoozed(from: "observer"),
         ]
 
@@ -256,16 +256,16 @@ struct AnalyticsEventTests {
     // MARK: alarm_stopped
 
     @Test
-    func alarmStoppedProperties_withSeconds() {
-        let props = AnalyticsEvent.alarmStopped(secondsToStop: 42).properties
+    func alarmStoppedProperties_hasHour() {
+        let props = AnalyticsEvent.alarmStopped(hour: 7).properties
         #expect(props.count == 1)
-        #expect(props["seconds_to_stop"] as? Int == 42)
+        #expect(props["hour"] as? Int == 7)
     }
 
     @Test
-    func alarmStoppedProperties_withoutSeconds() {
-        let props = AnalyticsEvent.alarmStopped(secondsToStop: nil).properties
-        #expect(props.isEmpty)
+    func alarmStoppedProperties_midnight() {
+        let props = AnalyticsEvent.alarmStopped(hour: 0).properties
+        #expect(props["hour"] as? Int == 0)
     }
 
     // MARK: alarm_snoozed
@@ -470,11 +470,11 @@ struct AnalyticsServiceCaptureTests {
         let mock = MockBackend()
         let service = AnalyticsService(backend: mock)
 
-        service.capture(.alarmStopped(secondsToStop: 60))
+        service.capture(.alarmStopped(hour: 14))
 
         #expect(mock.captureCount == 1)
         #expect(mock.captures[0].event == "alarm_stopped")
-        #expect(mock.captures[0].properties?["seconds_to_stop"] as? Int == 60)
+        #expect(mock.captures[0].properties?["hour"] as? Int == 14)
     }
 
     @Test
@@ -482,11 +482,11 @@ struct AnalyticsServiceCaptureTests {
         let mock = MockBackend()
         let service = AnalyticsService(backend: mock)
 
-        service.capture(.alarmStopped(secondsToStop: nil))
+        service.capture(.alarmStopped(hour: 6))
 
         #expect(mock.captureCount == 1)
         #expect(mock.captures[0].event == "alarm_stopped")
-        #expect(mock.captures[0].properties == nil)
+        #expect(mock.captures[0].properties?["hour"] as? Int == 6)
     }
 
     @Test

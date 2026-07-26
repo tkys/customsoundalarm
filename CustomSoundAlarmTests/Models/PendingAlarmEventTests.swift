@@ -88,6 +88,28 @@ struct AlarmEventBufferTests {
     }
 
     @Test
+    func enqueueBeyondCapacity_prunesOldest() {
+        // 上限100件を超えたら古いものが削除される
+        for i in 0..<110 {
+            AlarmEventBuffer.enqueue(
+                PendingAlarmEvent(name: "test", properties: ["i": String(i)], timestamp: Date()),
+                defaults: testDefaults
+            )
+        }
+
+        let dequeued = AlarmEventBuffer.dequeueAll(defaults: testDefaults)
+        #expect(dequeued.count == 100)
+
+        // 最初の10件は削除されているので、"0" は無い
+        let firstI = dequeued[0].properties["i"]
+        #expect(firstI == "10")
+
+        // 最後の1件は "109"
+        let lastI = dequeued[99].properties["i"]
+        #expect(lastI == "109")
+    }
+
+    @Test
     func flushPendingAlarmEvents_whenEmpty_isNoOp() {
         let mock = MockBackend()
         let service = AnalyticsService(backend: mock)
