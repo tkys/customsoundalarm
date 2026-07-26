@@ -32,12 +32,12 @@ struct AnalyticsEventTests {
 
     @Test
     func eventNameMapping() {
-        #expect(AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: false).name == "alarm_created")
+        #expect(AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: false, snoozeMinutes: 0).name == "alarm_created")
         #expect(AnalyticsEvent.customSoundImported(source: .video).name == "custom_sound_imported")
         #expect(AnalyticsEvent.customSoundImported(source: .audio).name == "custom_sound_imported")
         #expect(AnalyticsEvent.soundPreviewPlayed.name == "sound_preview_played")
         // Phase 2
-        #expect(AnalyticsEvent.alarmEdited(hasCustomSound: true, isRepeating: false).name == "alarm_edited")
+        #expect(AnalyticsEvent.alarmEdited(hasCustomSound: true, isRepeating: false, snoozeMinutes: 0).name == "alarm_edited")
         #expect(AnalyticsEvent.alarmDeleted.name == "alarm_deleted")
         #expect(AnalyticsEvent.alarmPermission(status: .authorized).name == "alarm_permission")
         #expect(AnalyticsEvent.videoImportStarted.name == "video_import_started")
@@ -50,19 +50,21 @@ struct AnalyticsEventTests {
 
     @Test
     func alarmCreatedProperties_whenCustomAndRepeating() {
-        let props = AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: true).properties
+        let props = AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: true, snoozeMinutes: 9).properties
 
-        #expect(props.count == 2)
+        #expect(props.count == 3)
         #expect(props["has_custom_sound"] as? Bool == true)
         #expect(props["is_repeating"] as? Bool == true)
+        #expect(props["snooze_minutes"] as? Int == 9)
     }
 
     @Test
     func alarmCreatedProperties_whenPresetAndOneShot() {
-        let props = AnalyticsEvent.alarmCreated(hasCustomSound: false, isRepeating: false).properties
+        let props = AnalyticsEvent.alarmCreated(hasCustomSound: false, isRepeating: false, snoozeMinutes: 0).properties
 
         #expect(props["has_custom_sound"] as? Bool == false)
         #expect(props["is_repeating"] as? Bool == false)
+        #expect(props["snooze_minutes"] as? Int == 0)
     }
 
     // MARK: custom_sound_imported
@@ -103,11 +105,11 @@ struct AnalyticsEventTests {
     @Test
     func everyEventProducesNonEmptyName() {
         let events: [AnalyticsEvent] = [
-            .alarmCreated(hasCustomSound: true, isRepeating: true),
+            .alarmCreated(hasCustomSound: true, isRepeating: true, snoozeMinutes: 0),
             .customSoundImported(source: .video),
             .customSoundImported(source: .audio),
             .soundPreviewPlayed,
-            .alarmEdited(hasCustomSound: true, isRepeating: true),
+            .alarmEdited(hasCustomSound: true, isRepeating: true, snoozeMinutes: 0),
             .alarmDeleted,
             .alarmPermission(status: .authorized),
             .videoImportStarted,
@@ -125,19 +127,20 @@ struct AnalyticsEventTests {
 
     @Test
     func alarmEditedProperties_matchAlarmCreatedShape() {
-        // 仕様: alarm_created と props を揃える（has_custom_sound / is_repeating）
-        let edited = AnalyticsEvent.alarmEdited(hasCustomSound: true, isRepeating: false).properties
-        let created = AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: false).properties
+        // 仕様: alarm_created と props を揃える（has_custom_sound / is_repeating / snooze_minutes）
+        let edited = AnalyticsEvent.alarmEdited(hasCustomSound: true, isRepeating: false, snoozeMinutes: 9).properties
+        let created = AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: false, snoozeMinutes: 9).properties
 
-        #expect(edited.count == 2)
+        #expect(edited.count == 3)
         #expect(Set(edited.keys) == Set(created.keys))
         #expect(edited["has_custom_sound"] as? Bool == true)
         #expect(edited["is_repeating"] as? Bool == false)
+        #expect(edited["snooze_minutes"] as? Int == 9)
     }
 
     @Test
     func alarmEditedProperties_presetOneShot() {
-        let props = AnalyticsEvent.alarmEdited(hasCustomSound: false, isRepeating: false).properties
+        let props = AnalyticsEvent.alarmEdited(hasCustomSound: false, isRepeating: false, snoozeMinutes: 0).properties
         #expect(props["has_custom_sound"] as? Bool == false)
         #expect(props["is_repeating"] as? Bool == false)
     }
@@ -222,7 +225,7 @@ struct AnalyticsServiceCaptureTests {
         let mock = MockBackend()
         let service = AnalyticsService(backend: mock)
 
-        service.capture(.alarmCreated(hasCustomSound: true, isRepeating: false))
+        service.capture(.alarmCreated(hasCustomSound: true, isRepeating: false, snoozeMinutes: 0))
 
         #expect(mock.captureCount == 1)
         let captured = mock.captures[0]
@@ -238,7 +241,7 @@ struct AnalyticsServiceCaptureTests {
 
         // 同名キーは追加プロパティ側で上書きされるべき
         service.capture(
-            .alarmCreated(hasCustomSound: false, isRepeating: false),
+            .alarmCreated(hasCustomSound: false, isRepeating: false, snoozeMinutes: 0),
             properties: ["has_custom_sound": true, "extra": 42]
         )
 
@@ -268,7 +271,7 @@ struct AnalyticsServiceCaptureTests {
         let service = AnalyticsService(backend: nil)
 
         service.capture(.soundPreviewPlayed)
-        service.capture(.alarmCreated(hasCustomSound: true, isRepeating: true))
+        service.capture(.alarmCreated(hasCustomSound: true, isRepeating: true, snoozeMinutes: 0))
 
         // クラッシュしないこと自体が検証基準
         #expect(Bool(true))
@@ -297,7 +300,7 @@ struct AnalyticsServiceCaptureTests {
         let mock = MockBackend()
         let service = AnalyticsService(backend: mock)
 
-        service.capture(.alarmEdited(hasCustomSound: true, isRepeating: true))
+        service.capture(.alarmEdited(hasCustomSound: true, isRepeating: true, snoozeMinutes: 0))
 
         #expect(mock.captureCount == 1)
         #expect(mock.captures[0].event == "alarm_edited")

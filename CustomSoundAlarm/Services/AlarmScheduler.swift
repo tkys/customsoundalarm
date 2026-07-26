@@ -152,24 +152,69 @@ final class AlarmScheduler {
     private func scheduleAlarm(for entry: AlarmEntry) async -> Alarm.ID? {
         let metadata = CustomAlarmMetadata(entry: entry)
 
-        let alert = AlarmPresentation.Alert(
-            title: LocalizedStringResource(stringLiteral: entry.label),
-            stopButton: AlarmButton(
-                text: "stop_alarm",
-                textColor: .red,
-                systemImageName: "stop.fill"
-            ),
-            secondaryButton: AlarmButton(
-                text: "snooze",
-                textColor: .blue,
-                systemImageName: "clock.fill"
-            ),
-            // .countdown: AlarmKit がスヌーズを自動処理
-            secondaryButtonBehavior: .countdown
-        )
+        let hasSnooze = entry.snoozeMinutes > 0
+
+        let alert: AlarmPresentation.Alert
+        if hasSnooze {
+            if #available(iOS 26.1, *) {
+                alert = AlarmPresentation.Alert(
+                    title: LocalizedStringResource(stringLiteral: entry.label),
+                    secondaryButton: AlarmButton(
+                        text: "snooze",
+                        textColor: .blue,
+                        systemImageName: "clock.fill"
+                    ),
+                    secondaryButtonBehavior: .countdown
+                )
+            } else {
+                alert = AlarmPresentation.Alert(
+                    title: LocalizedStringResource(stringLiteral: entry.label),
+                    stopButton: AlarmButton(
+                        text: "stop_alarm",
+                        textColor: .red,
+                        systemImageName: "stop.fill"
+                    ),
+                    secondaryButton: AlarmButton(
+                        text: "snooze",
+                        textColor: .blue,
+                        systemImageName: "clock.fill"
+                    ),
+                    secondaryButtonBehavior: .countdown
+                )
+            }
+        } else {
+            if #available(iOS 26.1, *) {
+                alert = AlarmPresentation.Alert(
+                    title: LocalizedStringResource(stringLiteral: entry.label)
+                )
+            } else {
+                alert = AlarmPresentation.Alert(
+                    title: LocalizedStringResource(stringLiteral: entry.label),
+                    stopButton: AlarmButton(
+                        text: "stop_alarm",
+                        textColor: .red,
+                        systemImageName: "stop.fill"
+                    )
+                )
+            }
+        }
+
+        let countdownPresentation: AlarmPresentation.Countdown?
+        if hasSnooze {
+            countdownPresentation = AlarmPresentation.Countdown(
+                title: LocalizedStringResource(stringLiteral: entry.label),
+                pauseButton: nil
+            )
+        } else {
+            countdownPresentation = nil
+        }
 
         let attributes = AlarmAttributes<CustomAlarmMetadata>(
-            presentation: AlarmPresentation(alert: alert),
+            presentation: AlarmPresentation(
+                alert: alert,
+                countdown: countdownPresentation,
+                paused: nil
+            ),
             metadata: metadata,
             tintColor: .orange
         )
@@ -199,7 +244,18 @@ final class AlarmScheduler {
             schedule = .relative(.init(time: alarmTime, repeats: recurrence))
         }
 
-        let config: AlarmManager.AlarmConfiguration<CustomAlarmMetadata> = .alarm(
+        let countdownDuration: Alarm.CountdownDuration?
+        if hasSnooze {
+            countdownDuration = Alarm.CountdownDuration(
+                preAlert: nil,
+                postAlert: TimeInterval(entry.snoozeMinutes * 60)
+            )
+        } else {
+            countdownDuration = nil
+        }
+
+        let config = AlarmManager.AlarmConfiguration<CustomAlarmMetadata>(
+            countdownDuration: countdownDuration,
             schedule: schedule,
             attributes: attributes,
             stopIntent: DismissAlarmIntent(),
@@ -219,15 +275,19 @@ final class AlarmScheduler {
 
     // MARK: - Cancellation
 
-    /// スケジュール済みアラームをキャンセル（alerting 中のアラームは保護）
+    /// スケジュール済みアラームをキャンセル（alerting / countdown / paused 中のアラームは保護）
     private func cancelScheduledAlarms() {
         do {
             let alarms = try manager.alarms
             for alarm in alarms {
-                // 鳴っている最中のアラームはキャンセルしない
-                if case .alerting = alarm.state {
-                    logger.info("Skipping cancel for alerting alarm: \(alarm.id)")
+                switch alarm.state {
+                case .alerting, .countdown, .paused:
+                    logger.info("Skipping cancel for active alarm: \(alarm.id)")
                     continue
+                case .scheduled:
+                    break
+                @unknown default:
+                    break
                 }
                 do {
                     try manager.cancel(id: alarm.id)

@@ -13,7 +13,8 @@ enum AnalyticsEvent: Sendable {
     /// アラーム新規作成（編集は除く）
     /// - has_custom_sound: カスタムサウンドを割り当てたか（プリセット/空は false）
     /// - is_repeating: 繰り返し曜日が設定されたか
-    case alarmCreated(hasCustomSound: Bool, isRepeating: Bool)
+    /// - snooze_minutes: スヌーズ時間（分）
+    case alarmCreated(hasCustomSound: Bool, isRepeating: Bool, snoozeMinutes: Int)
 
     /// カスタムサウンドのインポート成功
     /// - source: "video" または "audio"
@@ -26,7 +27,7 @@ enum AnalyticsEvent: Sendable {
 
     /// アラーム編集（既存アラームの更新）
     /// - props は alarm_created と揃える
-    case alarmEdited(hasCustomSound: Bool, isRepeating: Bool)
+    case alarmEdited(hasCustomSound: Bool, isRepeating: Bool, snoozeMinutes: Int)
 
     /// アラーム削除
     case alarmDeleted
@@ -68,19 +69,21 @@ enum AnalyticsEvent: Sendable {
     /// ここを単一情報源とすることで、送信内容のテストが SDK 非依存で可能。
     var properties: [String: Any] {
         switch self {
-        case let .alarmCreated(hasCustomSound, isRepeating):
+        case let .alarmCreated(hasCustomSound, isRepeating, snoozeMinutes):
             return [
                 "has_custom_sound": hasCustomSound,
-                "is_repeating": isRepeating
+                "is_repeating": isRepeating,
+                "snooze_minutes": snoozeMinutes
             ]
         case let .customSoundImported(source):
             return ["source": source.rawValue]
         case .soundPreviewPlayed:
             return [:]
-        case let .alarmEdited(hasCustomSound, isRepeating):
+        case let .alarmEdited(hasCustomSound, isRepeating, snoozeMinutes):
             return [
                 "has_custom_sound": hasCustomSound,
-                "is_repeating": isRepeating
+                "is_repeating": isRepeating,
+                "snooze_minutes": snoozeMinutes
             ]
         case .alarmDeleted:
             return [:]
