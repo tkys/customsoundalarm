@@ -15,36 +15,60 @@ struct AlarmLiveActivity: Widget {
                             .font(.headline)
                     }
 
-                    if !metadata.soundFileName.isEmpty {
-                        Text(metadata.soundFileName)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
                     switch context.state.mode {
                     case .countdown(let mode):
+                        Text("snoozing")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
                         Text(mode.fireDate, style: .timer)
                             .font(.title2.monospacedDigit())
                             .foregroundStyle(.orange)
                     case .alert, .paused:
-                        EmptyView()
+                        if !metadata.soundDisplayName.isEmpty {
+                            Text(metadata.soundDisplayName)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     @unknown default:
-                        EmptyView()
+                        if !metadata.soundDisplayName.isEmpty {
+                            Text(metadata.soundDisplayName)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
                 .padding()
             }
         } dynamicIsland: { context in
             let metadata = context.attributes.metadata
-
             return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     Image(systemName: "alarm.fill")
                         .foregroundStyle(.orange)
                 }
                 DynamicIslandExpandedRegion(.center) {
-                    Text(metadata?.label ?? "")
-                        .font(.headline)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(metadata?.label ?? "")
+                            .font(.headline)
+                        switch context.state.mode {
+                        case .countdown:
+                            Text("snoozing")
+                                .font(.caption2)
+                                .foregroundStyle(.orange)
+                        case .alert, .paused:
+                            if let name = metadata?.soundDisplayName, !name.isEmpty {
+                                Text(name)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                        @unknown default:
+                            if let name = metadata?.soundDisplayName, !name.isEmpty {
+                                Text(name)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     switch context.state.mode {
