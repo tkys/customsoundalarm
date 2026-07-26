@@ -115,6 +115,7 @@
 
 /* Snooze */
 "snooze_off" = "オフ";
+"snooze_1min" = "1分";
 "snooze_5min" = "5分";
 "snooze_9min" = "9分";
 "snooze_10min" = "10分";

@@ -274,9 +274,14 @@ final class AlarmScheduler {
 
         let countdownDuration: Alarm.CountdownDuration?
         if hasSnooze {
+            #if DEBUG
+            let useSeconds = UserDefaults.standard.bool(forKey: "SnoozeDebugUseSeconds")
+            #else
+            let useSeconds = false
+            #endif
             countdownDuration = Alarm.CountdownDuration(
                 preAlert: nil,
-                postAlert: TimeInterval(entry.snoozeMinutes * 60)
+                postAlert: snoozeInterval(minutes: entry.snoozeMinutes, useSeconds: useSeconds)
             )
         } else {
             countdownDuration = nil
