@@ -1,9 +1,10 @@
 import SwiftUI
 import AVFoundation
 import PhotosUI
+import UniformTypeIdentifiers
 
 /// 動画から音声を抽出するフロー
-/// PhotosPicker → トリム → 抽出 → CAF変換
+/// ソース選択（写真ライブラリ / ファイル）→ トリム → 抽出 → CAF変換
 struct VideoImportFlow: View {
     @Binding var selectedSound: AlarmSound?
     @Environment(\.dismiss) private var dismiss
@@ -17,7 +18,12 @@ struct VideoImportFlow: View {
     @State private var soundName = ""
     @State private var isProcessing = false
     @State private var errorMessage: String?
-    @State private var showingPicker = false
+    @State private var showingSourceDialog = false
+    @State private var showingPhotoPicker = false
+    @State private var showingFilePicker = false
+
+    // インポートソース（計測用）
+    @State private var importSource: VideoImportSource = .photoLibrary
 
     // プレビュー再生
     @State private var previewer = TrimPreviewer()
@@ -32,10 +38,31 @@ struct VideoImportFlow: View {
         }
         .navigationTitle(String(localized: "add_from_video_title"))
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear { showingPicker = videoURL == nil }
+        .onAppear {
+            if videoURL == nil { showingSourceDialog = true }
+        }
         .onDisappear { previewer.stop() }
+        // ソース選択ダイアログ
+        .confirmationDialog(
+            String(localized: "video_source_title"),
+            isPresented: $showingSourceDialog,
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "video_source_photo")) {
+                showingPhotoPicker = true
+                importSource = .photoLibrary
+            }
+            Button(String(localized: "video_source_file")) {
+                showingFilePicker = true
+                importSource = .file
+            }
+            Button("cancel", role: .cancel) {
+                if videoURL == nil { dismiss() }
+            }
+        }
+        // 写真ライブラリ
         .photosPicker(
-            isPresented: $showingPicker,
+            isPresented: $showingPhotoPicker,
             selection: $selectedItem,
             matching: .videos
         )
@@ -44,9 +71,28 @@ struct VideoImportFlow: View {
                 loadVideo(from: newItem)
             }
         }
-        .onChange(of: showingPicker) { _, isPresented in
-            if !isPresented && videoURL == nil && selectedItem == nil {
-                dismiss()
+        // ファイル（iCloud Drive / 他アプリ）
+        .fileImporter(
+            isPresented: $showingFilePicker,
+            allowedContentTypes: VideoFileImporter.supportedVideoTypes,
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                guard let url = urls.first else { return }
+                loadVideoFromFile(url: url)
+            case .failure(let error):
+                errorMessage = error.localizedDescription
+            }
+        }
+        .onChange(of: showingPhotoPicker) { _, isPresented in
+            if !isPresented && videoURL == nil && selectedItem == nil && !showingFilePicker {
+                showingSourceDialog = true
+            }
+        }
+        .onChange(of: showingFilePicker) { _, isPresented in
+            if !isPresented && videoURL == nil && !showingPhotoPicker {
+                showingSourceDialog = true
             }
         }
     }
@@ -202,9 +248,59 @@ struct VideoImportFlow: View {
                 videoDuration = duration
                 endTime = min(30, duration)
                 videoURL = movie.url
-                soundName = movie.url.deletingPathExtension().lastPathComponent
+                soundName = movie.displayName
             } catch {
                 errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    /// `.fileImporter` 経由で選択された動画を読み込む。
+    /// security-scoped resource の寿命を最小化するため、
+    /// 選択直後に temp へコピー → 即解放する（罠1 対策）。
+    /// iCloud Drive の未ダウンロードファイルは NSFileCoordinator が待機する（罠2 対策）。
+    private func loadVideoFromFile(url: URL) {
+        guard url.startAccessingSecurityScopedResource() else {
+            errorMessage = String(localized: "error_file_access_denied")
+            return
+        }
+
+        // temp コピー前に元ファイル名を控える（temp URL は UUID になるため）
+        let originalName = VideoFileImporter.defaultSoundName(from: url)
+
+        isProcessing = true
+        errorMessage = nil
+
+        Task {
+            // 罠1: temp コピー完了直後に security scope を解放。
+            // 重い処理（duration 取得・抽出）は temp URL で行う。
+            let tempURL: URL
+            do {
+                tempURL = try await VideoFileImporter.copyToTemp(from: url)
+            } catch {
+                url.stopAccessingSecurityScopedResource()
+                await MainActor.run {
+                    isProcessing = false
+                    errorMessage = error.localizedDescription
+                }
+                return
+            }
+            url.stopAccessingSecurityScopedResource()
+
+            do {
+                let duration = try await VideoAudioExtractor.shared.getDuration(from: tempURL)
+                await MainActor.run {
+                    videoDuration = duration
+                    endTime = min(30, duration)
+                    videoURL = tempURL
+                    soundName = originalName
+                    isProcessing = false
+                }
+            } catch {
+                await MainActor.run {
+                    isProcessing = false
+                    errorMessage = error.localizedDescription
+                }
             }
         }
     }
@@ -213,7 +309,7 @@ struct VideoImportFlow: View {
         isProcessing = true
         errorMessage = nil
 
-        AnalyticsService.shared.capture(.videoImportStarted)
+        AnalyticsService.shared.capture(.videoImportStarted(source: importSource))
 
         Task {
             defer { isProcessing = false }
@@ -333,6 +429,8 @@ final class TrimPreviewer {
 
 struct VideoTransferable: Transferable {
     let url: URL
+    /// 元ファイル名（拡張子なし）。temp コピーで UUID 名になるのを防ぐため保持。
+    let displayName: String
 
     static var transferRepresentation: some TransferRepresentation {
         FileRepresentation(contentType: .movie) { video in
@@ -341,7 +439,9 @@ struct VideoTransferable: Transferable {
             let tempURL = FileManager.default.temporaryDirectory
                 .appendingPathComponent("\(UUID().uuidString).mov")
             try FileManager.default.copyItem(at: received.file, to: tempURL)
-            return Self(url: tempURL)
+            // 元ファイル名を保持（IMG_1234 等）。UUID なら空になる。
+            let originalName = VideoFileImporter.defaultSoundName(from: received.file)
+            return Self(url: tempURL, displayName: originalName)
         }
     }
 }

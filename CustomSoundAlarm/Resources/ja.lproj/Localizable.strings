@@ -133,3 +133,11 @@
 
 /* Video Trimmer */
 "no_video" = "動画がありません";
+
+/* Video Import Source */
+"video_source_title" = "動画の選択元";
+"video_source_photo" = "写真ライブラリ";
+"video_source_file" = "ファイル";
+"error_file_access_denied" = "ファイルへのアクセスが拒否されました。";
+"error_file_copy_failed" = "ファイルのコピーに失敗しました。";
+"error_unsupported_video_format" = "サポートされていない動画形式です。";

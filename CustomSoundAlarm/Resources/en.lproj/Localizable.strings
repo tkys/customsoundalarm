@@ -133,3 +133,11 @@
 
 /* Video Trimmer */
 "no_video" = "No video";
+
+/* Video Import Source */
+"video_source_title" = "Select Video Source";
+"video_source_photo" = "Photo Library";
+"video_source_file" = "Files";
+"error_file_access_denied" = "Access to the file was denied.";
+"error_file_copy_failed" = "Failed to copy the file.";
+"error_unsupported_video_format" = "Unsupported video format.";

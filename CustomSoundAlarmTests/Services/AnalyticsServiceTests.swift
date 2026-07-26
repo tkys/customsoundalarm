@@ -51,7 +51,7 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.alarmEdited(hasCustomSound: true, isRepeating: false, snoozeMinutes: 0).name == "alarm_edited")
         #expect(AnalyticsEvent.alarmDeleted.name == "alarm_deleted")
         #expect(AnalyticsEvent.alarmPermission(status: .authorized).name == "alarm_permission")
-        #expect(AnalyticsEvent.videoImportStarted.name == "video_import_started")
+        #expect(AnalyticsEvent.videoImportStarted(source: .photoLibrary).name == "video_import_started")
         #expect(AnalyticsEvent.videoImportFailed(reason: .unknown).name == "video_import_failed")
         #expect(AnalyticsEvent.alarmDuplicated.name == "alarm_duplicated")
         #expect(AnalyticsEvent.soundPickerRecentUsed.name == "sound_picker_recent_used")
@@ -127,7 +127,7 @@ struct AnalyticsEventTests {
             .alarmEdited(hasCustomSound: true, isRepeating: true, snoozeMinutes: 0),
             .alarmDeleted,
             .alarmPermission(status: .authorized),
-            .videoImportStarted,
+            .videoImportStarted(source: .photoLibrary),
             .videoImportFailed(reason: .unknown),
             .alarmDuplicated,
             .soundPickerRecentUsed,
@@ -194,8 +194,12 @@ struct AnalyticsEventTests {
     // MARK: video_import_started
 
     @Test
-    func videoImportStartedProperties_areEmpty() {
-        #expect(AnalyticsEvent.videoImportStarted.properties.isEmpty)
+    func videoImportStartedProperties_containsSource() {
+        let photoProps = AnalyticsEvent.videoImportStarted(source: .photoLibrary).properties
+        #expect(photoProps["source"] as? String == "photo_library")
+
+        let fileProps = AnalyticsEvent.videoImportStarted(source: .file).properties
+        #expect(fileProps["source"] as? String == "file")
     }
 
     // MARK: video_import_failed
@@ -402,15 +406,15 @@ struct AnalyticsServiceCaptureTests {
     }
 
     @Test
-    func captureForwardsVideoImportStartedWithNilProperties() {
+    func captureForwardsVideoImportStartedWithSource() {
         let mock = MockBackend()
         let service = AnalyticsService(backend: mock)
 
-        service.capture(.videoImportStarted)
+        service.capture(.videoImportStarted(source: .file))
 
         #expect(mock.captureCount == 1)
         #expect(mock.captures[0].event == "video_import_started")
-        #expect(mock.captures[0].properties == nil)
+        #expect(mock.captures[0].properties?["source"] as? String == "file")
     }
 
     @Test
