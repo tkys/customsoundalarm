@@ -49,6 +49,23 @@ enum AnalyticsEvent: Sendable {
     /// サウンドピッカーの「最近使った」セクションから音を選択した
     case soundPickerRecentUsed
 
+    // MARK: Phase 3（中核指標）
+
+    /// アラーム発火（起動中の observer または起動時の reconcile で検知）
+    /// - was_app_foreground: 発火時にアプリがフォアグラウンドだったか
+    /// - hour: 発火時刻の時（PII なし・時刻帯のみ）
+    /// - is_repeating: 繰り返しアラームか
+    /// - detection: "observer" または "reconcile"
+    case alarmFired(wasAppForeground: Bool, hour: Int, isRepeating: Bool, detection: String)
+
+    /// アラーム停止（DismissAlarmIntent の buffer 経由）
+    /// - seconds_to_stop: 発火から停止までの秒数（取得不能時は nil）
+    case alarmStopped(secondsToStop: Int?)
+
+    /// アラームスヌーズ（状態遷移 .alerting → .countdown を検知）
+    /// - from: "observer" または "reconcile"
+    case alarmSnoozed(from: String)
+
     /// PostHog に送信するイベント名
     var name: String {
         switch self {
@@ -62,6 +79,9 @@ enum AnalyticsEvent: Sendable {
         case .videoImportFailed: return "video_import_failed"
         case .alarmDuplicated: return "alarm_duplicated"
         case .soundPickerRecentUsed: return "sound_picker_recent_used"
+        case .alarmFired: return "alarm_fired"
+        case .alarmStopped: return "alarm_stopped"
+        case .alarmSnoozed: return "alarm_snoozed"
         }
     }
 
@@ -97,6 +117,20 @@ enum AnalyticsEvent: Sendable {
             return [:]
         case .soundPickerRecentUsed:
             return [:]
+        case let .alarmFired(wasAppForeground, hour, isRepeating, detection):
+            return [
+                "was_app_foreground": wasAppForeground,
+                "hour": hour,
+                "is_repeating": isRepeating,
+                "detection": detection
+            ]
+        case let .alarmStopped(secondsToStop):
+            if let seconds = secondsToStop {
+                return ["seconds_to_stop": seconds]
+            }
+            return [:]
+        case let .alarmSnoozed(from):
+            return ["from": from]
         }
     }
 }
@@ -162,6 +196,8 @@ enum VideoImportFailureReason: String, Sendable {
 /// 「正しいイベント名・プロパティが渡されるか」を検証できる。
 protocol AnalyticsBackend: AnyObject, Sendable {
     func capture(_ event: String, properties: [String: Any]?)
+    /// ユーザープロパティを設定する（identify）。PII は絶対に含めないこと。
+    func setUserProperties(_ properties: [String: Any])
 }
 
 // MARK: - AnalyticsConfig
@@ -196,6 +232,10 @@ struct AnalyticsConfig: Equatable, Sendable {
 final class PostHogAnalyticsBackend: AnalyticsBackend {
     func capture(_ event: String, properties: [String: Any]?) {
         PostHogSDK.shared.capture(event, properties: properties)
+    }
+
+    func setUserProperties(_ properties: [String: Any]) {
+        PostHogSDK.shared.identify(PostHogSDK.shared.getDistinctId(), userProperties: properties)
     }
 }
 
@@ -257,6 +297,9 @@ final class AnalyticsService: @unchecked Sendable {
         backend = PostHogAnalyticsBackend()
         isEnabled = true
         logger.info("PostHog configured (host=\(config.host, privacy: .public), debug=\(config.isDebug))")
+
+        // configure 後に保留中のアラームイベント（Intent 経由）をフラッシュ
+        flushPendingAlarmEvents()
     }
 
     /// イベントを送信する。
@@ -285,5 +328,31 @@ final class AnalyticsService: @unchecked Sendable {
         }
 
         backend.capture(event.name, properties: payload)
+    }
+
+    /// PostHog ユーザープロパティを設定する（identify）。
+    /// PII は絶対に含めないこと。起動時に1回呼べば十分。
+    func setUserProperties(_ properties: [String: Any]) {
+        lock.lock()
+        let backend = self.backend
+        lock.unlock()
+
+        guard let backend else { return }
+        backend.setUserProperties(properties)
+    }
+
+    /// PendingAlarmEvent キューをフラッシュする。configure() 完了後に自動で呼ばれる。
+    /// Intent 実行時にバッファされたイベント（alarm_stopped 等）を PostHog へ送信する。
+    func flushPendingAlarmEvents() {
+        let events = AlarmEventBuffer.dequeueAll()
+        guard !events.isEmpty else { return }
+        for event in events {
+            var props: [String: Any] = ["timestamp": event.timestamp.timeIntervalSince1970]
+            for (k, v) in event.properties {
+                props[k] = v
+            }
+            backend?.capture(event.name, properties: props)
+        }
+        logger.info("Flushed \(events.count) pending alarm events")
     }
 }

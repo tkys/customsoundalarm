@@ -9,6 +9,7 @@ import Foundation
 private final class MockBackend: AnalyticsBackend, @unchecked Sendable {
     private let lock = NSLock()
     private var _captures: [(event: String, properties: [String: Any]?)] = []
+    private var _userProperties: [String: Any] = [:]
 
     var captures: [(event: String, properties: [String: Any]?)] {
         lock.withLock { _captures }
@@ -18,9 +19,19 @@ private final class MockBackend: AnalyticsBackend, @unchecked Sendable {
         lock.withLock { _captures.count }
     }
 
+    var userProperties: [String: Any] {
+        lock.withLock { _userProperties }
+    }
+
     func capture(_ event: String, properties: [String: Any]?) {
         lock.withLock {
             _captures.append((event, properties))
+        }
+    }
+
+    func setUserProperties(_ properties: [String: Any]) {
+        lock.withLock {
+            _userProperties = properties
         }
     }
 }
@@ -44,6 +55,10 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.videoImportFailed(reason: .unknown).name == "video_import_failed")
         #expect(AnalyticsEvent.alarmDuplicated.name == "alarm_duplicated")
         #expect(AnalyticsEvent.soundPickerRecentUsed.name == "sound_picker_recent_used")
+        // Phase 3
+        #expect(AnalyticsEvent.alarmFired(wasAppForeground: true, hour: 8, isRepeating: false, detection: "observer").name == "alarm_fired")
+        #expect(AnalyticsEvent.alarmStopped(secondsToStop: nil).name == "alarm_stopped")
+        #expect(AnalyticsEvent.alarmSnoozed(from: "observer").name == "alarm_snoozed")
     }
 
     // MARK: alarm_created
@@ -115,7 +130,10 @@ struct AnalyticsEventTests {
             .videoImportStarted,
             .videoImportFailed(reason: .unknown),
             .alarmDuplicated,
-            .soundPickerRecentUsed
+            .soundPickerRecentUsed,
+            .alarmFired(wasAppForeground: true, hour: 8, isRepeating: false, detection: "observer"),
+            .alarmStopped(secondsToStop: nil),
+            .alarmSnoozed(from: "observer"),
         ]
 
         for event in events {
@@ -213,6 +231,57 @@ struct AnalyticsEventTests {
         #expect(VideoImportFailureReason.unknown.rawValue == "unknown")
     }
 }
+
+    // MARK: alarm_fired
+
+    @Test
+    func alarmFiredProperties_foregroundRepeatingObserver() {
+        let props = AnalyticsEvent.alarmFired(wasAppForeground: true, hour: 14, isRepeating: true, detection: "observer").properties
+        #expect(props.count == 4)
+        #expect(props["was_app_foreground"] as? Bool == true)
+        #expect(props["hour"] as? Int == 14)
+        #expect(props["is_repeating"] as? Bool == true)
+        #expect(props["detection"] as? String == "observer")
+    }
+
+    @Test
+    func alarmFiredProperties_backgroundOneShotReconcile() {
+        let props = AnalyticsEvent.alarmFired(wasAppForeground: false, hour: 7, isRepeating: false, detection: "reconcile").properties
+        #expect(props["was_app_foreground"] as? Bool == false)
+        #expect(props["hour"] as? Int == 7)
+        #expect(props["is_repeating"] as? Bool == false)
+        #expect(props["detection"] as? String == "reconcile")
+    }
+
+    // MARK: alarm_stopped
+
+    @Test
+    func alarmStoppedProperties_withSeconds() {
+        let props = AnalyticsEvent.alarmStopped(secondsToStop: 42).properties
+        #expect(props.count == 1)
+        #expect(props["seconds_to_stop"] as? Int == 42)
+    }
+
+    @Test
+    func alarmStoppedProperties_withoutSeconds() {
+        let props = AnalyticsEvent.alarmStopped(secondsToStop: nil).properties
+        #expect(props.isEmpty)
+    }
+
+    // MARK: alarm_snoozed
+
+    @Test
+    func alarmSnoozedProperties_fromObserver() {
+        let props = AnalyticsEvent.alarmSnoozed(from: "observer").properties
+        #expect(props.count == 1)
+        #expect(props["from"] as? String == "observer")
+    }
+
+    @Test
+    func alarmSnoozedProperties_fromReconcile() {
+        let props = AnalyticsEvent.alarmSnoozed(from: "reconcile").properties
+        #expect(props["from"] as? String == "reconcile")
+    }
 
 // MARK: - AnalyticsServiceCaptureTests
 
@@ -379,6 +448,73 @@ struct AnalyticsServiceCaptureTests {
         #expect(mock.captures[0].event == "sound_picker_recent_used")
         #expect(mock.captures[0].properties == nil)
     }
+
+    // MARK: Phase 3 events
+
+    @Test
+    func captureForwardsAlarmFired() {
+        let mock = MockBackend()
+        let service = AnalyticsService(backend: mock)
+
+        service.capture(.alarmFired(wasAppForeground: true, hour: 10, isRepeating: false, detection: "observer"))
+
+        #expect(mock.captureCount == 1)
+        #expect(mock.captures[0].event == "alarm_fired")
+        #expect(mock.captures[0].properties?["was_app_foreground"] as? Bool == true)
+        #expect(mock.captures[0].properties?["hour"] as? Int == 10)
+        #expect(mock.captures[0].properties?["detection"] as? String == "observer")
+    }
+
+    @Test
+    func captureForwardsAlarmStoppedWithSeconds() {
+        let mock = MockBackend()
+        let service = AnalyticsService(backend: mock)
+
+        service.capture(.alarmStopped(secondsToStop: 60))
+
+        #expect(mock.captureCount == 1)
+        #expect(mock.captures[0].event == "alarm_stopped")
+        #expect(mock.captures[0].properties?["seconds_to_stop"] as? Int == 60)
+    }
+
+    @Test
+    func captureForwardsAlarmStoppedWithoutSeconds() {
+        let mock = MockBackend()
+        let service = AnalyticsService(backend: mock)
+
+        service.capture(.alarmStopped(secondsToStop: nil))
+
+        #expect(mock.captureCount == 1)
+        #expect(mock.captures[0].event == "alarm_stopped")
+        #expect(mock.captures[0].properties == nil)
+    }
+
+    @Test
+    func captureForwardsAlarmSnoozed() {
+        let mock = MockBackend()
+        let service = AnalyticsService(backend: mock)
+
+        service.capture(.alarmSnoozed(from: "observer"))
+
+        #expect(mock.captureCount == 1)
+        #expect(mock.captures[0].event == "alarm_snoozed")
+        #expect(mock.captures[0].properties?["from"] as? String == "observer")
+    }
+
+    // MARK: setUserProperties
+
+    @Test
+    func setUserPropertiesForwardsToBackend() {
+        let mock = MockBackend()
+        let service = AnalyticsService(backend: mock)
+
+        service.setUserProperties(["alarm_count": 5, "custom_sound_count": 2])
+
+        #expect(mock.userProperties["alarm_count"] as? Int == 5)
+        #expect(mock.userProperties["custom_sound_count"] as? Int == 2)
+        #expect(mock.userProperties.count == 2)
+    }
+
 }
 
 // MARK: - VideoImportFailureReasonMappingTests

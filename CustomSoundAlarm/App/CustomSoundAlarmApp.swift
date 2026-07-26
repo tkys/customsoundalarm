@@ -14,6 +14,7 @@ struct CustomSoundAlarmApp: App {
 
                     // PostHog 計測の初期化（Info.plist にキーが無い場合は安全に無効化）
                     AnalyticsService.shared.configure()
+                    setUserProperties()
 
                     let authorized = await AlarmScheduler.shared.requestAuthorization()
                     if authorized {
@@ -39,4 +40,25 @@ struct CustomSoundAlarmApp: App {
                 }
         }
     }
+}
+
+// MARK: - User Properties
+
+@MainActor
+private func setUserProperties() {
+    // 初回インストールバージョンを記録（一度だけ）
+    if AppGroup.firstInstallVersion == nil {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
+        AppGroup.firstInstallVersion = version
+    }
+
+    let customSoundCount = SoundStore.shared.sounds.filter { !$0.isPreset }.count
+    let alarmCount = AlarmStore.shared.alarms.count
+    let firstVersion = AppGroup.firstInstallVersion ?? "unknown"
+
+    AnalyticsService.shared.setUserProperties([
+        "custom_sound_count": customSoundCount,
+        "alarm_count": alarmCount,
+        "first_install_version": firstVersion
+    ])
 }

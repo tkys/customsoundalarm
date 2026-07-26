@@ -32,6 +32,14 @@ final class AlarmScheduler {
     @ObservationIgnored
     private var lastReportedPermissionStatus: AlarmPermissionStatus?
 
+    /// 同一 Alarm.ID に対して alarm_snoozed を1回だけ送るための記録
+    @ObservationIgnored
+    private var snoozedReported: Set<Alarm.ID> = []
+
+    /// 同一 Alarm.ID に対して alarm_fired を1回だけ送るための記録（observer 系）
+    @ObservationIgnored
+    private var firedReportedThisSession: Set<Alarm.ID> = []
+
     private init() {
         loadIDMap()
     }
@@ -92,19 +100,31 @@ final class AlarmScheduler {
         var didChange = false
 
         for alarm in store.alarms where alarm.isEnabled && alarm.repeatWeekdays.isEmpty {
-            // 一回限りアラームが enabled なのに AlarmKit にない → 発火済み
             if let mappedID = alarmIDMap[alarm.id], !activeAlarmIDs.contains(mappedID) {
+                // 発火済みの一回限りアラーム → 遡及記録してから無効化
+                AnalyticsService.shared.capture(.alarmFired(
+                    wasAppForeground: false,
+                    hour: alarm.hour,
+                    isRepeating: false,
+                    detection: "reconcile"
+                ))
                 store.toggleEnabled(alarm)
                 alarmIDMap.removeValue(forKey: alarm.id)
                 didChange = true
                 logger.info("Reconcile: one-time alarm auto-disabled: \(alarm.label)")
             }
-            // マッピングがない場合（初回起動 or マップ破損）はスキップ
-            // → syncAlarms で新しいマッピングが作られる
         }
 
         if didChange {
             saveIDMap()
+        }
+
+        // スヌーズ待機中（.countdown）のアラームを遡及記録
+        for alarm in (try? manager.alarms) ?? [] where alarm.state == .countdown {
+            guard !snoozedReported.contains(alarm.id) else { continue }
+            snoozedReported.insert(alarm.id)
+            AnalyticsService.shared.capture(.alarmSnoozed(from: "reconcile"))
+            logger.info("Reconcile: detected snoozing alarm: \(alarm.id)")
         }
     }
 
@@ -310,9 +330,18 @@ final class AlarmScheduler {
             for await alarms in manager.alarmUpdates {
                 guard !Task.isCancelled else { break }
                 for alarm in alarms {
-                    if case .alerting = alarm.state {
+                    switch alarm.state {
+                    case .alerting:
                         logger.info("Alarm alerting: \(alarm.id)")
                         handleAlarmFired(alarmKitID: alarm.id)
+                    case .countdown:
+                        // スヌーズ待機中への遷移を検知（同一 Alarm.ID につき1回だけ）
+                        guard !snoozedReported.contains(alarm.id) else { continue }
+                        snoozedReported.insert(alarm.id)
+                        logger.info("Alarm snoozed: \(alarm.id)")
+                        AnalyticsService.shared.capture(.alarmSnoozed(from: "observer"))
+                    default:
+                        break
                     }
                 }
             }
@@ -332,6 +361,17 @@ final class AlarmScheduler {
 
         // 定着ユーザー判定用に発火実績を記録（同一日は1回、鳴動中は毎tick呼ばれるが日単位で冪等）
         ReviewRequestManager.shared.recordAlarmFired()
+
+        // alarm_fired 計測（同一 Alarm.ID につきセッション中1回のみ）
+        if !firedReportedThisSession.contains(alarmKitID) {
+            firedReportedThisSession.insert(alarmKitID)
+            AnalyticsService.shared.capture(.alarmFired(
+                wasAppForeground: true,
+                hour: alarm.hour,
+                isRepeating: !alarm.repeatWeekdays.isEmpty,
+                detection: "observer"
+            ))
+        }
 
         if alarm.repeatWeekdays.isEmpty && alarm.isEnabled {
             store.toggleEnabled(alarm)
