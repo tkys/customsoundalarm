@@ -128,9 +128,11 @@
 		49D88547F68818249FD38901 /* PresetAlarm.caf */ = {isa = PBXFileReference; path = PresetAlarm.caf; sourceTree = "<group>"; };
 		4B9BB3A7C3D6A98F224779C5 /* AlarmSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSound.swift; sourceTree = "<group>"; };
 		54FD1BD5F2EF03A3A1C568D3 /* VideoTrimView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTrimView.swift; sourceTree = "<group>"; };
+		620C3FAD18DF246E0FE6A3FC /* ja.lproj */ = {isa = PBXFileReference; path = ja.lproj; sourceTree = "<group>"; };
 		649ACDAAA65ED0A4EAB4A593 /* CustomSoundAlarmApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSoundAlarmApp.swift; sourceTree = "<group>"; };
 		6C8C1415F3825EA19A5F8714 /* AlarmMetadataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmMetadataModel.swift; sourceTree = "<group>"; };
 		7023AEAF15F5D0D792D217E3 /* AlarmIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmIntents.swift; sourceTree = "<group>"; };
+		70CC8F029E16B696E2F1D700 /* en.lproj */ = {isa = PBXFileReference; path = en.lproj; sourceTree = "<group>"; };
 		7B785B0AA836FD95FBE5E416 /* CustomSoundAlarm.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CustomSoundAlarm.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		85A905CD44F94EC80ECDCA40 /* SoundStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundStoreTests.swift; sourceTree = "<group>"; };
 		8617DE7DDFD767CAB2A28B9E /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
@@ -238,6 +240,8 @@
 			isa = PBXGroup;
 			children = (
 				F63C69F723DEF9E2780F11B8 /* Assets.xcassets */,
+				70CC8F029E16B696E2F1D700 /* en.lproj */,
+				620C3FAD18DF246E0FE6A3FC /* ja.lproj */,
 				AA13D117730C6D5910D58FD4 /* InfoPlist.strings */,
 				38AF579920FBD3A19098540F /* Localizable.strings */,
 				F523831A6349440177E48E14 /* Sounds */,

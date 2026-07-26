@@ -91,6 +91,12 @@ targets:
     sources:
       - path: CustomSoundAlarmWidget
       - path: Shared
+      - path: CustomSoundAlarm/Resources/en.lproj
+        excludes:
+          - "InfoPlist.strings"
+      - path: CustomSoundAlarm/Resources/ja.lproj
+        excludes:
+          - "InfoPlist.strings"
     info:
       path: CustomSoundAlarmWidget/Info.plist
       properties:
