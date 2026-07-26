@@ -104,8 +104,14 @@
 "error_extraction_failed" = "Audio extraction failed: %@";
 "error_unknown" = "Unknown error";
 
+/* Sound missing (fallback when the referenced sound is deleted) */
+"sound_missing" = "Sound not found";
+
 /* Preset sound names */
 "preset_jazz" = "Jazz";
+
+/* Live Activity */
+"snoozing" = "Snoozing";
 
 /* Snooze */
 "snooze_off" = "Off";
