@@ -150,7 +150,8 @@ final class AlarmScheduler {
 
     /// 単一アラームをスケジュール（成功時に Alarm.ID を返す）
     private func scheduleAlarm(for entry: AlarmEntry) async -> Alarm.ID? {
-        let metadata = CustomAlarmMetadata(entry: entry)
+        let displayName = SoundStore.shared.displayName(for: entry.soundFileName)
+        let metadata = CustomAlarmMetadata(entry: entry, soundDisplayName: displayName)
 
         let hasSnooze = entry.snoozeMinutes > 0
 

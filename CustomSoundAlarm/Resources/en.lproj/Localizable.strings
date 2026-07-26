@@ -107,6 +107,9 @@
 /* Preset sound names */
 "preset_jazz" = "Jazz";
 
+/* Live Activity */
+"snoozing" = "Snoozing";
+
 /* Snooze */
 "snooze_off" = "Off";
 "snooze_5min" = "5 minutes";
