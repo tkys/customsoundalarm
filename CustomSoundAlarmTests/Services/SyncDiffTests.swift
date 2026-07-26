@@ -131,6 +131,8 @@ struct SyncDiffTests {
         #expect(diff.keptMap.isEmpty)
         #expect(diff.scheduleEntries.count == 1)
         #expect(diff.scheduleEntries[0].id == e.id)
+        #expect(diff.rescheduleAlarmIDs.count == 1)
+        #expect(diff.rescheduleAlarmIDs[e.id] == alarmID)
     }
 
     // MARK: - Protected BUT disabled → cancel
@@ -169,6 +171,46 @@ struct SyncDiffTests {
         #expect(diff.keptMap.isEmpty)
         #expect(diff.scheduleEntries.count == 1)
         #expect(diff.scheduleEntries[0].id == e.id)
+        #expect(diff.rescheduleAlarmIDs.count == 1)
+        #expect(diff.rescheduleAlarmIDs[e.id] == alarmID)
+    }
+
+    // MARK: - rescheduleAlarmIDs empty for new entries
+
+    @Test
+    func rescheduleAlarmIDs_emptyForNewEntry() {
+        let e = AlarmEntry(hour: 7, minute: 0)
+
+        let diff = computeSyncDiff(
+            oldMap: [:],
+            entries: [e],
+            activeStates: [:]
+        )
+
+        #expect(diff.scheduleEntries.count == 1)
+        #expect(diff.rescheduleAlarmIDs.isEmpty)
+    }
+
+    // MARK: - Double-sync regression test
+
+    @Test
+    func doubleSync_doesNotIncreaseAlarmCount() {
+        let e = AlarmEntry(hour: 7, minute: 0)
+        let firstAlarmID = Alarm.ID()
+        let entries = [e]
+
+        let diff = computeSyncDiff(
+            oldMap: [e.id: firstAlarmID],
+            entries: entries,
+            activeStates: [firstAlarmID: .scheduled]
+        )
+
+        #expect(diff.scheduleEntries.count == 1)
+        #expect(diff.scheduleEntries[0].id == e.id)
+        #expect(diff.rescheduleAlarmIDs.count == 1)
+        #expect(diff.rescheduleAlarmIDs[e.id] == firstAlarmID)
+        #expect(diff.cancelEntryIDs.count + diff.rescheduleAlarmIDs.count >= diff.scheduleEntries.count,
+                "Each schedule must cancel one old alarm → no net increase")
     }
 
     // MARK: - Mixed: keep + cancel + schedule

@@ -135,66 +135,76 @@ final class AlarmScheduler {
         AppGroup.snoozedAlarmEntryIDs = snoozedIDs
     }
 
-// MARK: - Scheduling
+    // MARK: - Scheduling
 
-/// 全アラームを同期（直列化: 連続呼び出し時は前回をキャンセルし最新のみ実行）
-func syncAlarms(_ entries: [AlarmEntry]) {
-    syncTask?.cancel()
-    syncTask = Task {
-        await performSync(entries)
-    }
-}
-
-private func performSync(_ entries: [AlarmEntry]) async {
-    guard !Task.isCancelled else { return }
-
-    guard await requestAuthorization() else {
-        logger.warning("AlarmKit not authorized, skipping alarm sync")
-        return
-    }
-
-    let activeStates: [Alarm.ID: Alarm.State]
-    do {
-        activeStates = Dictionary(uniqueKeysWithValues: try manager.alarms.map { ($0.id, $0.state) })
-    } catch {
-        logger.error("Failed to fetch alarm states: \(error.localizedDescription)")
-        return
-    }
-
-    let diff = computeSyncDiff(
-        oldMap: alarmIDMap,
-        entries: entries,
-        activeStates: activeStates
-    )
-
-    // Cancel alarms for disabled/deleted entries
-    for entryID in diff.cancelEntryIDs {
-        guard let alarmID = alarmIDMap[entryID] else { continue }
-        do {
-            try manager.cancel(id: alarmID)
-            logger.info("Cancelled alarm for removed entry: \(entryID)")
-        } catch {
-            logger.error("Failed to cancel alarm \(alarmID): \(error.localizedDescription)")
+    /// 全アラームを同期（直列化: 連続呼び出し時は前回をキャンセルし最新のみ実行）
+    func syncAlarms(_ entries: [AlarmEntry]) {
+        syncTask?.cancel()
+        syncTask = Task {
+            await performSync(entries)
         }
     }
 
-    // Schedule new/changed entries
-    var newMap = diff.keptMap
-    for entry in diff.scheduleEntries {
+    private func performSync(_ entries: [AlarmEntry]) async {
         guard !Task.isCancelled else { return }
-        if let alarmID = await scheduleAlarm(for: entry) {
-            newMap[entry.id] = alarmID
+
+        guard await requestAuthorization() else {
+            logger.warning("AlarmKit not authorized, skipping alarm sync")
+            return
         }
+
+        let activeStates: [Alarm.ID: Alarm.State]
+        do {
+            activeStates = Dictionary(uniqueKeysWithValues: try manager.alarms.map { ($0.id, $0.state) })
+        } catch {
+            logger.error("Failed to fetch alarm states: \(error.localizedDescription)")
+            return
+        }
+
+        let diff = computeSyncDiff(
+            oldMap: alarmIDMap,
+            entries: entries,
+            activeStates: activeStates
+        )
+
+        // Cancel alarms for disabled/deleted entries
+        for entryID in diff.cancelEntryIDs {
+            guard let alarmID = alarmIDMap[entryID] else { continue }
+            do {
+                try manager.cancel(id: alarmID)
+                logger.info("Cancelled alarm for removed entry: \(entryID)")
+            } catch {
+                logger.error("Failed to cancel alarm \(alarmID): \(error.localizedDescription)")
+            }
+        }
+
+        // Cancel old alarms for entries being rescheduled (before scheduling new ones)
+        for (_, oldAlarmID) in diff.rescheduleAlarmIDs {
+            do {
+                try manager.cancel(id: oldAlarmID)
+                logger.info("Cancelled old alarm for reschedule: \(oldAlarmID)")
+            } catch {
+                logger.error("Failed to cancel old alarm \(oldAlarmID): \(error.localizedDescription)")
+            }
+        }
+
+        // Schedule new/changed entries
+        var newMap = diff.keptMap
+        for entry in diff.scheduleEntries {
+            guard !Task.isCancelled else { return }
+            if let alarmID = await scheduleAlarm(for: entry) {
+                newMap[entry.id] = alarmID
+            }
+        }
+
+        guard !Task.isCancelled else { return }
+
+        alarmIDMap = newMap
+        scheduledAlarmCount = newMap.count
+        saveIDMap()
+
+        logger.info("Synced \(self.scheduledAlarmCount) alarms (\(diff.keptMap.count) kept, \(diff.scheduleEntries.count) scheduled, \(diff.cancelEntryIDs.count) cancelled, \(diff.rescheduleAlarmIDs.count) rescheduled)")
     }
-
-    guard !Task.isCancelled else { return }
-
-    alarmIDMap = newMap
-    scheduledAlarmCount = newMap.count
-    saveIDMap()
-
-    logger.info("Synced \(self.scheduledAlarmCount) alarms (\(diff.keptMap.count) kept, \(diff.scheduleEntries.count) scheduled, \(diff.cancelEntryIDs.count) cancelled)")
-}
 
     /// 単一アラームをスケジュール（成功時に Alarm.ID を返す）
     private func scheduleAlarm(for entry: AlarmEntry) async -> Alarm.ID? {
@@ -427,17 +437,14 @@ struct SyncDiff: Sendable {
     var keptMap: [UUID: Alarm.ID]
     /// 削除/無効化されたためキャンセルが必要な entryID
     var cancelEntryIDs: Set<UUID>
+    /// 再スケジュール前にキャンセルすべき旧 Alarm（scheduleEntries のうち oldMap に存在したもの）
+    var rescheduleAlarmIDs: [UUID: Alarm.ID]
     /// 新規または変更があったためスケジュールが必要な AlarmEntry
     var scheduleEntries: [AlarmEntry]
 }
 
 /// 差分同期のための alarmIDMap 遷移を計算する純粋関数。
 /// 副作用がなく、単体テスト可能。
-/// - Parameters:
-///   - oldMap: 現在の alarmIDMap
-///   - entries: 保存されている全 AlarmEntry
-///   - activeStates: AlarmKit の各 Alarm.ID の現在の状態
-/// - Returns: 差分同期の指示（keep / cancel / schedule）
 func computeSyncDiff(
     oldMap: [UUID: Alarm.ID],
     entries: [AlarmEntry],
@@ -446,6 +453,7 @@ func computeSyncDiff(
     let enabledEntryIDs = Set(entries.filter(\.isEnabled).map(\.id))
     var keptMap: [UUID: Alarm.ID] = [:]
     var cancelEntryIDs = Set<UUID>()
+    var rescheduleAlarmIDs: [UUID: Alarm.ID] = [:]
     var scheduleEntries: [AlarmEntry] = []
 
     for entryID in oldMap.keys where !enabledEntryIDs.contains(entryID) {
@@ -458,6 +466,9 @@ func computeSyncDiff(
            state == .countdown || state == .alerting || state == .paused {
             keptMap[entry.id] = alarmID
         } else {
+            if let oldAlarmID = oldMap[entry.id] {
+                rescheduleAlarmIDs[entry.id] = oldAlarmID
+            }
             scheduleEntries.append(entry)
         }
     }
@@ -465,6 +476,7 @@ func computeSyncDiff(
     return SyncDiff(
         keptMap: keptMap,
         cancelEntryIDs: cancelEntryIDs,
+        rescheduleAlarmIDs: rescheduleAlarmIDs,
         scheduleEntries: scheduleEntries
     )
 }
