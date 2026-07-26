@@ -66,4 +66,28 @@ struct TrimRange: Equatable, Sendable {
         }
         return TrimRange(start: start, end: clamped, duration: duration, maxRange: maxRange)
     }
+
+    /// 選択範囲全体を平行移動する（幅を保つ）。
+    /// 写真アプリのトリマーと同様、選択範囲の内側をドラッグしたときに呼ばれる。
+    ///
+    /// - Parameter delta: 移動量（秒）。正=右方向、負=左方向。
+    /// - Returns: 幅を保ったまま `[0, duration]` にクランプされた新しい TrimRange。
+    ///   範囲の幅が `duration` より大きい（異常状態）場合は移動しない。
+    func movingRange(by delta: Double) -> TrimRange {
+        guard isValid else { return self }
+        let w = width
+        guard w <= duration else { return self }
+        // 移動後の start/end を計算 → [0, duration] にクランプ
+        var newStart = start + delta
+        var newEnd = end + delta
+        if newStart < 0 {
+            newStart = 0
+            newEnd = w
+        }
+        if newEnd > duration {
+            newEnd = duration
+            newStart = duration - w
+        }
+        return TrimRange(start: newStart, end: newEnd, duration: duration, maxRange: maxRange)
+    }
 }

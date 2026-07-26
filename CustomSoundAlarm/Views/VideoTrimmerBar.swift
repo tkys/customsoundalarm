@@ -20,6 +20,11 @@ struct VideoTrimmerBar: View {
     /// ドラッグ中のハンドルを識別（ハンドルのスケール/Haptic 用）
     @State private var draggingHandle: Handle?
 
+    /// パン開始時の範囲。累積移動量（translation）をこの基準に適用する。
+    /// onChanged で currentRange を再計算して使うと、毎フレーム累積量が
+    /// 既に動いた位置に足され二次関数的に加速する（#36 review の累積バグ）。
+    @State private var panBaseRange: TrimRange?
+
     /// バーの描画幅（GeometryReader から取得）。座標→時間の変換に使う
     @State private var barWidth: CGFloat = 0
 
@@ -29,7 +34,7 @@ struct VideoTrimmerBar: View {
     private let thumbnailCount = 12
     private let coordinateSpaceName = "trimBar"
 
-    enum Handle: Hashable { case start, end }
+    enum Handle: Hashable { case start, end, pan }
 
     var body: some View {
         GeometryReader { geo in
@@ -155,20 +160,53 @@ struct VideoTrimmerBar: View {
         }
     }
 
-    // MARK: - Scrub Area
+    // MARK: - Scrub / Pan Area
 
-    /// 選択範囲内をタップしてプレビュー開始位置を指定（スクラブ）。
+    /// 選択範囲内の操作:
+    /// - 短いタップ（minimumDistance 未満）→ スクラブ（再生位置指定）
+    /// - ドラッグ（minimumDistance 以上）→ 選択範囲全体の平行移動
+    ///
+    /// タップとドラッグの切り分けは `DragGesture(minimumDistance:)` で行う。
+    /// `onEnded` で `translation.width` が thresholds に満たなければタップ扱い（スクラブ）、
+    /// そうでなければ移動量に応じて `TrimRange.movingRange(by:)` を適用する。
     private func scrubArea(width: CGFloat, offset: CGFloat, range: TrimRange) -> some View {
-        Color.clear
+        let tapThreshold: CGFloat = 8
+
+        return Color.clear
             .frame(width: width, height: barHeight)
             .offset(x: offset)
             .contentShape(Rectangle())
             .gesture(
-                SpatialTapGesture()
+                DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpaceName))
+                    .onChanged { value in
+                        if abs(value.translation.width) >= tapThreshold {
+                            if draggingHandle != .pan {
+                                draggingHandle = .pan
+                                // panBaseRange を1度だけ固定する。
+                                // onChanged は毎回呼ばれるが、基準は変化させない。
+                                panBaseRange = currentRange
+                                previewer.stop()
+                            }
+                            // translation（ドラッグ開始からの累積移動量）を
+                            // 固定した基準に適用する（currentRange ではない）。
+                            let delta = value.translation.width / max(barWidth, 1) * videoDuration
+                            let base = panBaseRange ?? currentRange
+                            let clamped = base.movingRange(by: delta)
+                            startTime = clamped.start
+                            endTime = clamped.end
+                        }
+                    }
                     .onEnded { value in
-                        let fraction = (value.location.x - offset) / max(width, 1)
-                        let scrubTime = range.start + min(max(fraction, 0), 1) * range.width
-                        previewer.play(url: videoURL, from: scrubTime, to: range.end)
+                        if draggingHandle == .pan {
+                            // 範囲移動だった → 終了
+                            draggingHandle = nil
+                            panBaseRange = nil
+                        } else {
+                            // タップだった → スクラブ（再生位置指定）
+                            let fraction = (value.location.x - offset) / max(width, 1)
+                            let scrubTime = range.start + min(max(fraction, 0), 1) * range.width
+                            previewer.play(url: videoURL, from: scrubTime, to: range.end)
+                        }
                     }
             )
     }
@@ -177,11 +215,15 @@ struct VideoTrimmerBar: View {
 
     /// 左ハンドル: 開始位置をドラッグで移動。`coordinateSpace(.named)` で
     /// バー全体の座標系を取得し、`location.x` を時間に変換する。
+    ///
+    /// ⚠️ `.frame` / `.contentShape` を `.offset` より前に適用すること。
+    /// `.offset` はレイアウト境界を変えないため、後に `.frame` を付けると
+    /// 当たり判定が ZStack の x=0 に取り残される（#36 原因1）。
     private func startHandle(x: CGFloat) -> some View {
         handleShape(isActive: draggingHandle == .start)
-            .offset(x: x - handleWidth / 2)
             .frame(width: handleWidth * 3, height: barHeight)
             .contentShape(Rectangle())
+            .offset(x: x - handleWidth * 3 / 2)
             .gesture(
                 DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpaceName))
                     .onChanged { value in
@@ -200,9 +242,9 @@ struct VideoTrimmerBar: View {
     /// 右ハンドル: 終了位置をドラッグで移動。
     private func endHandle(x: CGFloat) -> some View {
         handleShape(isActive: draggingHandle == .end)
-            .offset(x: x - handleWidth / 2)
             .frame(width: handleWidth * 3, height: barHeight)
             .contentShape(Rectangle())
+            .offset(x: x - handleWidth * 3 / 2)
             .gesture(
                 DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpaceName))
                     .onChanged { value in
