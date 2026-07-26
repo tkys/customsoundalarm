@@ -38,6 +38,8 @@ targets:
     info:
       path: CustomSoundAlarm/Info.plist
       properties:
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleDisplayName: My Sound Alarm
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
@@ -92,6 +94,8 @@ targets:
     info:
       path: CustomSoundAlarmWidget/Info.plist
       properties:
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleDisplayName: My Sound Alarm Widget
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
@@ -114,6 +118,8 @@ targets:
     info:
       path: ShareExtension/Info.plist
       properties:
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleDisplayName: My Sound Alarm
         NSExtension:
           NSExtensionPointIdentifier: com.apple.share-services
