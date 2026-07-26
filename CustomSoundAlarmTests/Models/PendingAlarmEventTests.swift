@@ -1,0 +1,177 @@
+import Testing
+import Foundation
+@testable import CustomSoundAlarm
+
+// MARK: - AlarmEventBufferTests
+
+/// AlarmEventBuffer（App Group UserDefaults を使った Intent 間イベントバッファ）
+/// の enqueue / dequeueAll を、隔離された UserDefaults インスタンスで検証する。
+struct AlarmEventBufferTests {
+    let testDefaults: UserDefaults
+
+    init() {
+        let suiteName = "test.\(UUID().uuidString)"
+        testDefaults = UserDefaults(suiteName: suiteName)!
+    }
+
+    @Test
+    func enqueueAndDequeueSingleEvent() {
+        let event = PendingAlarmEvent(name: "alarm_stopped", properties: ["alarm_id": "abc"], timestamp: Date())
+        AlarmEventBuffer.enqueue(event, defaults: testDefaults)
+
+        let dequeued = AlarmEventBuffer.dequeueAll(defaults: testDefaults)
+        #expect(dequeued.count == 1)
+        #expect(dequeued[0].name == "alarm_stopped")
+        #expect(dequeued[0].properties["alarm_id"] == "abc")
+    }
+
+    @Test
+    func enqueueAndDequeueMultipleEvents() {
+        AlarmEventBuffer.enqueue(PendingAlarmEvent(name: "alarm_stopped", properties: [:], timestamp: Date()), defaults: testDefaults)
+        AlarmEventBuffer.enqueue(PendingAlarmEvent(name: "alarm_fired", properties: [:], timestamp: Date()), defaults: testDefaults)
+
+        let dequeued = AlarmEventBuffer.dequeueAll(defaults: testDefaults)
+        #expect(dequeued.count == 2)
+        #expect(dequeued[0].name == "alarm_stopped")
+        #expect(dequeued[1].name == "alarm_fired")
+    }
+
+    @Test
+    func dequeueAllClearsBuffer() {
+        AlarmEventBuffer.enqueue(PendingAlarmEvent(name: "alarm_stopped", properties: [:], timestamp: Date()), defaults: testDefaults)
+        let first = AlarmEventBuffer.dequeueAll(defaults: testDefaults)
+        #expect(first.count == 1)
+
+        let second = AlarmEventBuffer.dequeueAll(defaults: testDefaults)
+        #expect(second.isEmpty)
+    }
+
+    @Test
+    func dequeueAllWhenEmptyReturnsEmpty() {
+        #expect(AlarmEventBuffer.dequeueAll(defaults: testDefaults).isEmpty)
+    }
+
+    @Test
+    func eventsPersistAcrossInstances() {
+        AlarmEventBuffer.enqueue(PendingAlarmEvent(name: "alarm_stopped", properties: ["k": "v"], timestamp: Date()), defaults: testDefaults)
+
+        let events = AlarmEventBuffer.dequeueAll(defaults: testDefaults)
+        #expect(events.count == 1)
+        #expect(events[0].properties["k"] == "v")
+    }
+
+    @Test
+    func flushPendingAlarmEvents_sendsBufferedEvents() {
+        let now = Date()
+        AlarmEventBuffer.enqueue(PendingAlarmEvent(name: "alarm_stopped", properties: [:], hour: 7, timestamp: now), defaults: testDefaults)
+        AlarmEventBuffer.enqueue(PendingAlarmEvent(name: "alarm_stopped", properties: [:], hour: 8, timestamp: now), defaults: testDefaults)
+
+        let mock = MockBackend()
+        let service = AnalyticsService(backend: mock)
+
+        let dequeued = AlarmEventBuffer.dequeueAll(defaults: testDefaults)
+        for event in dequeued {
+            var props: [String: Any] = ["timestamp": event.timestamp.timeIntervalSince1970]
+            if let hour = event.hour {
+                props["hour"] = hour
+            }
+            for (k, v) in event.properties {
+                props[k] = v
+            }
+            mock.capture(event.name, properties: props)
+        }
+
+        #expect(mock.captureCount == 2)
+        #expect(mock.captures[0].event == "alarm_stopped")
+        #expect(mock.captures[0].properties?["hour"] as? Int == 7)
+        #expect(mock.captures[1].event == "alarm_stopped")
+        #expect(mock.captures[1].properties?["hour"] as? Int == 8)
+        #expect(AlarmEventBuffer.dequeueAll(defaults: testDefaults).isEmpty)
+    }
+
+    @Test
+    func snoozedEntryID_roundTripThroughAppGroup() {
+        // Regression test for C: entryID must survive removal and re-insert
+        // (.countdown → release → .countdown should record 2x)
+        let uid = UUID()
+        defer {
+            var cleanup = AppGroup.snoozedAlarmEntryIDs
+            cleanup.remove(uid)
+            AppGroup.snoozedAlarmEntryIDs = cleanup
+        }
+
+        // First insertion (simulates .countdown)
+        var ids = AppGroup.snoozedAlarmEntryIDs
+        ids.insert(uid)
+        AppGroup.snoozedAlarmEntryIDs = ids
+        #expect(AppGroup.snoozedAlarmEntryIDs.contains(uid))
+
+        // Removal (simulates .countdown released)
+        ids = AppGroup.snoozedAlarmEntryIDs
+        ids.remove(uid)
+        AppGroup.snoozedAlarmEntryIDs = ids
+        #expect(!AppGroup.snoozedAlarmEntryIDs.contains(uid))
+
+        // Re-insertion (simulates .countdown again)
+        ids = AppGroup.snoozedAlarmEntryIDs
+        ids.insert(uid)
+        AppGroup.snoozedAlarmEntryIDs = ids
+        #expect(AppGroup.snoozedAlarmEntryIDs.contains(uid))
+    }
+
+    @Test
+    func enqueueBeyondCapacity_prunesOldest() {
+        // 上限100件を超えたら古いものが削除される
+        for i in 0..<110 {
+            AlarmEventBuffer.enqueue(
+                PendingAlarmEvent(name: "test", properties: ["i": String(i)], timestamp: Date()),
+                defaults: testDefaults
+            )
+        }
+
+        let dequeued = AlarmEventBuffer.dequeueAll(defaults: testDefaults)
+        #expect(dequeued.count == 100)
+
+        // 最初の10件は削除されているので、"0" は無い
+        let firstI = dequeued[0].properties["i"]
+        #expect(firstI == "10")
+
+        // 最後の1件は "109"
+        let lastI = dequeued[99].properties["i"]
+        #expect(lastI == "109")
+    }
+
+    @Test
+    func flushPendingAlarmEvents_whenEmpty_isNoOp() {
+        let mock = MockBackend()
+        let service = AnalyticsService(backend: mock)
+
+        service.flushPendingAlarmEvents()
+
+        #expect(mock.captureCount == 0)
+    }
+}
+
+// MARK: - MockBackend (local)
+
+/// このファイル内で使用するモックバックエンド。
+private final class MockBackend: AnalyticsBackend, @unchecked Sendable {
+    private let lock = NSLock()
+    private var _captures: [(event: String, properties: [String: Any]?)] = []
+
+    var captures: [(event: String, properties: [String: Any]?)] {
+        lock.withLock { _captures }
+    }
+
+    var captureCount: Int {
+        lock.withLock { _captures.count }
+    }
+
+    func capture(_ event: String, properties: [String: Any]?) {
+        lock.withLock {
+            _captures.append((event, properties))
+        }
+    }
+
+    func setUserProperties(_ properties: [String: Any]) {}
+}
