@@ -38,10 +38,13 @@ final class SoundStore {
         save()
     }
 
-    /// ファイル名からサウンドの表示名を返す
+    /// ファイル名からサウンドの表示名を返す。
+    /// 未登録のファイル名の場合はローカライズされた「見つかりません」文言を返し、
+    /// 生ファイル名（UUID.caf）が表示されることを防ぐ。
     func displayName(for fileName: String) -> String {
         if fileName.isEmpty { return "" }
-        return sounds.first { $0.fileName == fileName }?.name ?? fileName
+        return sounds.first { $0.fileName == fileName }?.name
+            ?? String(localized: "sound_missing")
     }
 
     /// Share Extensionが追加したサウンドを取り込む
