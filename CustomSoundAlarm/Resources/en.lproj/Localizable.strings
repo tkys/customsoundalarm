@@ -131,6 +131,10 @@
 "countdown_until" = "in %@";
 "alarm_will_ring_in" = "Rings in %@";
 
+/* Alarm Edit */
+"alarm_enabled" = "Alarm Enabled";
+"alarm_is_off" = "This alarm is off";
+
 /* Video Trimmer */
 "no_video" = "No video";
 
