@@ -76,7 +76,8 @@ platform :ios do
       force: true,
       run_precheck_before_submit: false,
       submit_for_review: true,
-      automatic_release: false,
+      # 審査通過後に自動公開する（手動リリース待ちにしない）
+      automatic_release: true,
       submission_information: {
         add_id_info_uses_idfa: false,
         # Export Compliance: Info.plist に ITSAppUsesNonExemptEncryption が無いため
@@ -101,7 +102,8 @@ platform :ios do
       force: true,
       run_precheck_before_submit: false,
       submit_for_review: true,
-      automatic_release: false,
+      # 審査通過後に自動公開する（手動リリース待ちにしない）
+      automatic_release: true,
       submission_information: {
         add_id_info_uses_idfa: false,
         export_compliance_uses_encryption: false,
