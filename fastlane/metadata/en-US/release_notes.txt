@@ -1,1 +1,17 @@
-Stability improvements and under-the-hood refinements. Thanks for using My Sound Alarm!
+■ Major snooze improvements
+• Fixed an issue where snooze did not work correctly
+• You can now choose your snooze interval (Off / 1, 5, 9, 10, 15, 20, 30 minutes)
+• The remaining snooze time now appears on the Lock Screen
+
+■ Easier audio capture from videos
+• A redesigned trimmer lets you pick a range while browsing video thumbnails
+• Drag the handles to set your clip intuitively
+• You can now pick videos from the Files app and iCloud Drive
+
+■ Display and reliability
+• Sound names now display correctly on the Lock Screen
+• Alarm scheduling was reworked so alarms ring more reliably
+• You can now toggle an alarm on or off from the edit screen
+
+Thanks for using My Sound Alarm!
+We'd love to hear your feedback — please reach out through support.

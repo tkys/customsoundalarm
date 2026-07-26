@@ -23,7 +23,7 @@ platform :ios do
       run_precheck_before_submit: false,
       submit_for_review: false,
       primary_category: "UTILITIES",
-      app_version: "1.1.0",
+      app_version: "1.2.0",
       languages: ["en-US", "ja"]
     )
   end
@@ -41,12 +41,12 @@ platform :ios do
       run_precheck_before_submit: false,
       submit_for_review: false,
       primary_category: "UTILITIES",
-      app_version: "1.1.0",
+      app_version: "1.2.0",
       languages: ["en-US", "ja"]
     )
   end
 
-  desc "リリースビルドを作成し App Store Connect にアップロード＆審査提出（v1.1.0）"
+  desc "リリースビルドを作成し App Store Connect にアップロード＆審査提出（v1.2.0）"
   lane :release do
     build_app(
       scheme: "CustomSoundAlarm",
@@ -78,9 +78,13 @@ platform :ios do
       submit_for_review: true,
       automatic_release: false,
       submission_information: {
-        add_id_info_uses_idfa: false
+        add_id_info_uses_idfa: false,
+        # Export Compliance: Info.plist に ITSAppUsesNonExemptEncryption が無いため
+        # ここで明示しないと提出が暗号化の質問で止まる（submit_only と同じ指定）
+        export_compliance_uses_encryption: false,
+        export_compliance_is_exempt: false
       },
-      app_version: "1.1.0",
+      app_version: "1.2.0",
       languages: ["en-US", "ja"]
     )
   end
@@ -103,8 +107,8 @@ platform :ios do
         export_compliance_uses_encryption: false,
         export_compliance_is_exempt: false
       },
-      app_version: "1.1.0",
-      build_number: "2",
+      app_version: "1.2.0",
+      build_number: "3",
       languages: ["en-US", "ja"]
     )
   end
