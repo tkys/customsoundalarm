@@ -16,6 +16,12 @@ struct CustomSoundAlarmApp: App {
                     AnalyticsService.shared.configure()
                     setUserProperties()
 
+                    // 課金権利の監視開始（Transaction.updates）と最新化
+                    // StoreKit の作法: 起動のできるだけ早い段階で監視を開始し、
+                    // アプリ外で完了したトランザクション（Ask to Buy 等）を受け取る
+                    Entitlements.shared.startObservingUpdates()
+                    await Entitlements.shared.refresh()
+
                     let authorized = await AlarmScheduler.shared.requestAuthorization()
                     if authorized {
                         // 起動時: AlarmKit と AlarmStore の整合性チェック
