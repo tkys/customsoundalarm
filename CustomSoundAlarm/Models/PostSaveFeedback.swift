@@ -18,7 +18,7 @@ enum PostSaveFeedback: Equatable, Sendable {
 
     /// 保存確定時のフィードバックを判定する。純粋関数（ローカライズ非依存）。
     static func resolve(for entry: AlarmEntry, currentDate: Date) -> PostSaveFeedback {
-        if entry.isEnabled, let fire = entry.nextFireDate(from: currentDate) {
+        if entry.isEnabled, entry.nextFireDate(from: currentDate) != nil {
             return .willRing
         } else if !entry.isEnabled {
             return .isOff
