@@ -352,6 +352,7 @@ struct SnoozeOption {
 
     static let all: [SnoozeOption] = [
         SnoozeOption(minutes: 0, labelKey: "snooze_off"),
+        SnoozeOption(minutes: 1, labelKey: "snooze_1min"),
         SnoozeOption(minutes: 5, labelKey: "snooze_5min"),
         SnoozeOption(minutes: 9, labelKey: "snooze_9min"),
         SnoozeOption(minutes: 10, labelKey: "snooze_10min"),
