@@ -130,3 +130,6 @@
 "countdown_days_hours" = "%1$ld日%2$ld時間";
 "countdown_until" = "あと%@";
 "alarm_will_ring_in" = "%@後に鳴ります";
+
+/* Video Trimmer */
+"no_video" = "動画がありません";
