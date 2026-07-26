@@ -104,6 +104,9 @@
 "error_extraction_failed" = "音声の抽出に失敗しました: %@";
 "error_unknown" = "不明なエラー";
 
+/* Sound missing (fallback when the referenced sound is deleted) */
+"sound_missing" = "サウンドが見つかりません";
+
 /* Preset sound names */
 "preset_jazz" = "ジャズ";
 
