@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		00826992D978945FB8E00376 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30144856E697293FF8124FFB /* Theme.swift */; };
 		02F994FB6922008DE5AD6E34 /* SnoozeDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 909CC0BDDAC75CCB1B88CB13 /* SnoozeDebug.swift */; };
+		09591C8F94E7D65C2407B130 /* PostSaveFeedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA17D126F33619A4E3697AF3 /* PostSaveFeedback.swift */; };
 		1199524F1AF81748B8D10430 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9BB3A7C3D6A98F224779C5 /* AlarmSound.swift */; };
 		13F64E29621686CC70130A49 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8617DE7DDFD767CAB2A28B9E /* AnalyticsService.swift */; };
 		1D51CFD3A640B15B6272B13A /* AlarmMetadataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C8C1415F3825EA19A5F8714 /* AlarmMetadataModel.swift */; };
@@ -32,6 +33,7 @@
 		648C64C81F89B294320DB7D7 /* PresetAlarm.caf in Resources */ = {isa = PBXBuildFile; fileRef = 49D88547F68818249FD38901 /* PresetAlarm.caf */; };
 		7637ACACD7A7BD504F3BBD37 /* AlarmEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A90C5CB204A2C060BFDFD18D /* AlarmEntry.swift */; };
 		843DF8A93E4FB88919995FCC /* PendingSoundImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CBACC275B5CC8C65DB386E6 /* PendingSoundImport.swift */; };
+		84E3E333E64E1002BB13067E /* PostSaveFeedbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67B419A7C166A0C68EA15ECC /* PostSaveFeedbackTests.swift */; };
 		891ED003471E04F591082F81 /* ReviewRequestManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15FECDD6D248960DF6FAE7B /* ReviewRequestManagerTests.swift */; };
 		8A585E588C19181D73579247 /* ReviewRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A71D3FC6920B80C0C3ECD04E /* ReviewRequestManager.swift */; };
 		8D4870F8036FC3B0F82CE28E /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E62C58F84E3B37BAF9FC14C /* AppGroup.swift */; };
@@ -135,6 +137,7 @@
 		4B9BB3A7C3D6A98F224779C5 /* AlarmSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSound.swift; sourceTree = "<group>"; };
 		54FD1BD5F2EF03A3A1C568D3 /* VideoTrimView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTrimView.swift; sourceTree = "<group>"; };
 		649ACDAAA65ED0A4EAB4A593 /* CustomSoundAlarmApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSoundAlarmApp.swift; sourceTree = "<group>"; };
+		67B419A7C166A0C68EA15ECC /* PostSaveFeedbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostSaveFeedbackTests.swift; sourceTree = "<group>"; };
 		680A6054B3E702FD00B5AFB1 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		6C8C1415F3825EA19A5F8714 /* AlarmMetadataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmMetadataModel.swift; sourceTree = "<group>"; };
 		7023AEAF15F5D0D792D217E3 /* AlarmIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmIntents.swift; sourceTree = "<group>"; };
@@ -160,6 +163,7 @@
 		B12EC528B64B6A6F5D389E5B /* SnoozeDebugTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozeDebugTests.swift; sourceTree = "<group>"; };
 		B310D26A852FF2128CE87241 /* AudioConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioConverter.swift; sourceTree = "<group>"; };
 		B3C5F122CB36A012C496D3F1 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		BA17D126F33619A4E3697AF3 /* PostSaveFeedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostSaveFeedback.swift; sourceTree = "<group>"; };
 		BD1878E5099FBE066AAAE7F3 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		BE932E485F167BB33E9C66C0 /* ShareExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		C490E295A56C64361EFB9EA9 /* AlarmCountdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmCountdown.swift; sourceTree = "<group>"; };
@@ -197,6 +201,7 @@
 				A97BBC92B3E7D7CBE6ADC54C /* AlarmEntryTests.swift */,
 				08EAAA2A211BCB98598A3FB2 /* CustomAlarmMetadataTests.swift */,
 				9B8729BF3CEBACB08F2782F0 /* PendingAlarmEventTests.swift */,
+				67B419A7C166A0C68EA15ECC /* PostSaveFeedbackTests.swift */,
 				171400DBA98E9AB1A2F8A3EF /* SoundUsageHistoryTests.swift */,
 				D2EDEE904CEA28891E63DDB4 /* TrimRangeTests.swift */,
 			);
@@ -334,6 +339,7 @@
 			isa = PBXGroup;
 			children = (
 				C490E295A56C64361EFB9EA9 /* AlarmCountdown.swift */,
+				BA17D126F33619A4E3697AF3 /* PostSaveFeedback.swift */,
 				D620CC2A8B9C10399A403D9E /* SoundUsageHistory.swift */,
 				7FDFF3E0BB74C0B6C048D867 /* TrimRange.swift */,
 			);
@@ -565,6 +571,7 @@
 				31E6EC0D1595D7B5C31CC87D /* CustomSoundAlarmApp.swift in Sources */,
 				5F6C4264DD4D8B3FD6A493B8 /* PendingAlarmEvent.swift in Sources */,
 				8F21CEB2AF87F7747B941689 /* PendingSoundImport.swift in Sources */,
+				09591C8F94E7D65C2407B130 /* PostSaveFeedback.swift in Sources */,
 				8A585E588C19181D73579247 /* ReviewRequestManager.swift in Sources */,
 				02F994FB6922008DE5AD6E34 /* SnoozeDebug.swift in Sources */,
 				E47416EAAA11DB6231D9B9E0 /* SoundPickerView.swift in Sources */,
@@ -617,6 +624,7 @@
 				CA0EEECA616D5FD95C77EF8E /* AnalyticsServiceTests.swift in Sources */,
 				E30958483AC7255DECF60F65 /* CustomAlarmMetadataTests.swift in Sources */,
 				95E98B35A83A93DB04F7B99B /* PendingAlarmEventTests.swift in Sources */,
+				84E3E333E64E1002BB13067E /* PostSaveFeedbackTests.swift in Sources */,
 				891ED003471E04F591082F81 /* ReviewRequestManagerTests.swift in Sources */,
 				5382328DBE970BF786EEC79F /* SnoozeDebugTests.swift in Sources */,
 				F3D0F247826AD236FB66E949 /* SoundStoreTests.swift in Sources */,

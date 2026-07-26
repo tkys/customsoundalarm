@@ -131,6 +131,10 @@
 "countdown_until" = "あと%@";
 "alarm_will_ring_in" = "%@後に鳴ります";
 
+/* Alarm Edit */
+"alarm_enabled" = "アラームをオン";
+"alarm_is_off" = "このアラームはオフです";
+
 /* Video Trimmer */
 "no_video" = "動画がありません";
 

@@ -30,6 +30,7 @@ struct AlarmDetailView: View {
     @State private var selectedSound: AlarmSound?
     @State private var repeatWeekdays: Set<Int>
     @State private var snoozeMinutes: Int
+    @State private var isEnabled: Bool
 
     init(mode: AlarmDetailMode) {
         self.mode = mode
@@ -45,6 +46,7 @@ struct AlarmDetailView: View {
                 initialValue: SoundStore.shared.sounds.first { $0.fileName == entry.soundFileName }
             )
             _snoozeMinutes = State(initialValue: entry.snoozeMinutes)
+            _isEnabled = State(initialValue: entry.isEnabled)
         } else {
             _selectedTime = State(initialValue: Date())
             _label = State(initialValue: String(localized: "alarm_placeholder"))
@@ -55,6 +57,7 @@ struct AlarmDetailView: View {
             _selectedSound = State(initialValue: initialSound)
             _repeatWeekdays = State(initialValue: [])
             _snoozeMinutes = State(initialValue: 9)
+            _isEnabled = State(initialValue: true)
         }
     }
 
@@ -67,6 +70,7 @@ struct AlarmDetailView: View {
                 snoozeSection
                 labelSection
                 if case .edit = mode {
+                    toggleSection
                     deleteSection
                 }
             }
@@ -173,6 +177,16 @@ struct AlarmDetailView: View {
         SnoozeOption.label(for: snoozeMinutes)
     }
 
+    // MARK: - Toggle
+
+    private var toggleSection: some View {
+        Section {
+            Toggle(isOn: $isEnabled) {
+                Text("alarm_enabled")
+            }
+        }
+    }
+
     // MARK: - Label
 
     private var labelSection: some View {
@@ -254,6 +268,7 @@ struct AlarmDetailView: View {
             updated.repeatWeekdays = Array(repeatWeekdays).sorted()
             updated.soundFileName = soundFileName
             updated.snoozeMinutes = snoozeMinutes
+            updated.isEnabled = isEnabled
             alarmStore.update(updated)
             AnalyticsService.shared.capture(
                 .alarmEdited(hasCustomSound: hasCustomSound, isRepeating: isRepeating, snoozeMinutes: snoozeMinutes),
@@ -264,10 +279,10 @@ struct AlarmDetailView: View {
 
         AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
 
-        // 有効なら「◯時間◯分後に鳴ります」を短暂表示してから閉じる。無効なら即時閉じる。
-        if savedEntry.isEnabled, let fire = savedEntry.nextFireDate(from: Date()) {
-            let duration = AlarmCountdown.durationString(from: Date(), to: fire)
-            saveConfirmation = String(format: String(localized: "alarm_will_ring_in"), duration)
+        // 保存後のフィードバック（ON: 発火までの時間 / OFF: このアラームはオフです）
+        let feedback = PostSaveFeedback.resolve(for: savedEntry, currentDate: Date())
+        if let message = feedback.localizedMessage(entry: savedEntry, currentDate: Date()) {
+            saveConfirmation = message
             Task {
                 try? await Task.sleep(for: .seconds(1.6))
                 saveConfirmation = nil
