@@ -1,3 +1,4 @@
+// widget のローカライズ文字列は CustomSoundAlarmWidget/{en,ja}.lproj/Localizable.strings に追記すること
 import WidgetKit
 import SwiftUI
 import AlarmKit

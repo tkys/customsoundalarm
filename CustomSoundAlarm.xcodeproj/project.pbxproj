@@ -53,6 +53,7 @@
 		CDF4D89400A501DF1265B58E /* AlarmEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A90C5CB204A2C060BFDFD18D /* AlarmEntry.swift */; };
 		D87B7C4687B99C1AE18947C5 /* CustomSoundAlarmWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4825530FCF833BE90C91E68E /* CustomSoundAlarmWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D9DFA2B45BA2D540D349018A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F63C69F723DEF9E2780F11B8 /* Assets.xcassets */; };
+		D9F9C8678905613AA468E74F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E286EE2BC8963A81867E5A14 /* Localizable.strings */; };
 		DFA060844B237AD0B731661E /* VideoTrimView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54FD1BD5F2EF03A3A1C568D3 /* VideoTrimView.swift */; };
 		E0E42D2892CB93B1953EC10A /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 69B7A661B212236384ECBE05 /* Localizable.strings */; };
 		E17F8A2662BF0D60BC3DBB3E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA13D117730C6D5910D58FD4 /* InfoPlist.strings */; };
@@ -129,6 +130,7 @@
 		4B9BB3A7C3D6A98F224779C5 /* AlarmSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSound.swift; sourceTree = "<group>"; };
 		54FD1BD5F2EF03A3A1C568D3 /* VideoTrimView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTrimView.swift; sourceTree = "<group>"; };
 		649ACDAAA65ED0A4EAB4A593 /* CustomSoundAlarmApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSoundAlarmApp.swift; sourceTree = "<group>"; };
+		680A6054B3E702FD00B5AFB1 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		6C8C1415F3825EA19A5F8714 /* AlarmMetadataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmMetadataModel.swift; sourceTree = "<group>"; };
 		7023AEAF15F5D0D792D217E3 /* AlarmIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmIntents.swift; sourceTree = "<group>"; };
 		7B785B0AA836FD95FBE5E416 /* CustomSoundAlarm.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CustomSoundAlarm.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -149,6 +151,7 @@
 		AF5897A9AC3BC0A9BE3F0981 /* AlarmCountdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmCountdownTests.swift; sourceTree = "<group>"; };
 		B12EC528B64B6A6F5D389E5B /* SnoozeDebugTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozeDebugTests.swift; sourceTree = "<group>"; };
 		B310D26A852FF2128CE87241 /* AudioConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioConverter.swift; sourceTree = "<group>"; };
+		B3C5F122CB36A012C496D3F1 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		BD1878E5099FBE066AAAE7F3 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		BE932E485F167BB33E9C66C0 /* ShareExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		C490E295A56C64361EFB9EA9 /* AlarmCountdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmCountdown.swift; sourceTree = "<group>"; };
@@ -353,6 +356,7 @@
 				DDEC29ADE0634B68AAFBD5CC /* CustomSoundAlarmWidget.entitlements */,
 				450DEB40FC22DF70FD2EEE04 /* CustomSoundAlarmWidgetBundle.swift */,
 				225524FA5A69D50318058FBA /* Info.plist */,
+				E286EE2BC8963A81867E5A14 /* Localizable.strings */,
 			);
 			path = CustomSoundAlarmWidget;
 			sourceTree = "<group>";
@@ -391,6 +395,7 @@
 			buildConfigurationList = 956B207EC4E80B32E323CE8D /* Build configuration list for PBXNativeTarget "CustomSoundAlarmWidget" */;
 			buildPhases = (
 				AC0242B7ED6DD4C026011C6F /* Sources */,
+				6FB97C77F1F76D0167CE9A38 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -503,6 +508,14 @@
 				A7DA5D96014B46FD3C91A138 /* Localizable.strings in Resources */,
 				648C64C81F89B294320DB7D7 /* PresetAlarm.caf in Resources */,
 				B870DC3743B1E92F43B5E614 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6FB97C77F1F76D0167CE9A38 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D9F9C8678905613AA468E74F /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -640,6 +653,15 @@
 				F88E972FEE942DB8F1BF0239 /* ja */,
 			);
 			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		E286EE2BC8963A81867E5A14 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B3C5F122CB36A012C496D3F1 /* en */,
+				680A6054B3E702FD00B5AFB1 /* ja */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
