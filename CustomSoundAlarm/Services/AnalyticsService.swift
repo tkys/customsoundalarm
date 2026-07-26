@@ -37,7 +37,8 @@ enum AnalyticsEvent: Sendable {
     case alarmPermission(status: AlarmPermissionStatus)
 
     /// 動画からの音声抽出・変換フローの開始
-    case videoImportStarted
+    /// - source: 取得元（photo_library / file）
+    case videoImportStarted(source: VideoImportSource)
 
     /// 動画からの音声抽出・変換フローの失敗
     /// - reason: 安定識別子。`error.localizedDescription` は絶対に含めない（PII/パス混入リスク）
@@ -110,8 +111,8 @@ enum AnalyticsEvent: Sendable {
             return [:]
         case let .alarmPermission(status):
             return ["status": status.rawValue]
-        case .videoImportStarted:
-            return [:]
+        case let .videoImportStarted(source):
+            return ["source": source.rawValue]
         case let .videoImportFailed(reason):
             return ["reason": reason.rawValue]
         case .alarmDuplicated:
@@ -140,6 +141,14 @@ enum SoundImportSource: String, Sendable {
     case audio
 }
 
+// MARK: - VideoImportSource
+
+/// 動画インポートの取得元（計測用）
+enum VideoImportSource: String, Sendable {
+    case photoLibrary = "photo_library"
+    case file
+}
+
 // MARK: - AlarmPermissionStatus
 
 /// AlarmKit 権限状態の安定識別子。
@@ -164,6 +173,9 @@ enum VideoImportFailureReason: String, Sendable {
     case exportFailed = "export_failed"
     case converterSetupFailed = "converter_setup_failed"
     case conversionFailed = "conversion_failed"
+    case fileAccessDenied = "file_access_denied"
+    case fileCopyFailed = "file_copy_failed"
+    case unsupportedFormat = "unsupported_format"
     case unknown
 
     /// 任意の Error を安定識別子にマップする。
@@ -176,6 +188,12 @@ enum VideoImportFailureReason: String, Sendable {
             return .exportSessionFailed
         case VideoExtractionError.exportFailed:
             return .exportFailed
+        case VideoImportError.fileAccessDenied:
+            return .fileAccessDenied
+        case VideoImportError.fileCopyFailed:
+            return .fileCopyFailed
+        case VideoImportError.unsupportedFormat:
+            return .unsupportedFormat
         case AudioConverterError.bufferCreationFailed,
              AudioConverterError.converterCreationFailed:
             return .converterSetupFailed
