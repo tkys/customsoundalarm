@@ -20,6 +20,11 @@ struct VideoTrimmerBar: View {
     /// ドラッグ中のハンドルを識別（ハンドルのスケール/Haptic 用）
     @State private var draggingHandle: Handle?
 
+    /// パン開始時の範囲。累積移動量（translation）をこの基準に適用する。
+    /// onChanged で currentRange を再計算して使うと、毎フレーム累積量が
+    /// 既に動いた位置に足され二次関数的に加速する（#36 review の累積バグ）。
+    @State private var panBaseRange: TrimRange?
+
     /// バーの描画幅（GeometryReader から取得）。座標→時間の変換に使う
     @State private var barWidth: CGFloat = 0
 
@@ -174,14 +179,19 @@ struct VideoTrimmerBar: View {
             .gesture(
                 DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpaceName))
                     .onChanged { value in
-                        // 一定距離移動したら範囲移動モードに入る
                         if abs(value.translation.width) >= tapThreshold {
                             if draggingHandle != .pan {
                                 draggingHandle = .pan
+                                // panBaseRange を1度だけ固定する。
+                                // onChanged は毎回呼ばれるが、基準は変化させない。
+                                panBaseRange = currentRange
                                 previewer.stop()
                             }
+                            // translation（ドラッグ開始からの累積移動量）を
+                            // 固定した基準に適用する（currentRange ではない）。
                             let delta = value.translation.width / max(barWidth, 1) * videoDuration
-                            let clamped = currentRange.movingRange(by: delta)
+                            let base = panBaseRange ?? currentRange
+                            let clamped = base.movingRange(by: delta)
                             startTime = clamped.start
                             endTime = clamped.end
                         }
@@ -190,6 +200,7 @@ struct VideoTrimmerBar: View {
                         if draggingHandle == .pan {
                             // 範囲移動だった → 終了
                             draggingHandle = nil
+                            panBaseRange = nil
                         } else {
                             // タップだった → スクラブ（再生位置指定）
                             let fraction = (value.location.x - offset) / max(width, 1)

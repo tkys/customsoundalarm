@@ -327,4 +327,42 @@ struct TrimRangeTests {
         #expect(r.start == 70)
         #expect(r.end == 90)
     }
+
+    // MARK: - パン累積バグの回帰テスト（#36 review）
+
+    /// パンは「固定した基準範囲に対して translation（累積移動量）を適用」する必要がある。
+    /// `onChanged` で毎回 `currentRange` に translation を足すと、
+    /// 既に動いた位置に累積量が足され二次関数的に加速する。
+    /// このテストは固定基準に異なる delta を順に適用し、線形に動くことを検証する。
+
+    @Test
+    func panAppliedToFixedBase_isLinear() {
+        let base = TrimRange(start: 0, end: 30, duration: 120)
+
+        // delta = 10, 20, 30 を固定基準に適用 → 常に (delta, delta+30)
+        let r10 = base.movingRange(by: 10)
+        #expect(r10.start == 10 && r10.end == 40)
+
+        let r20 = base.movingRange(by: 20)
+        #expect(r20.start == 20 && r20.end == 50)
+
+        let r30 = base.movingRange(by: 30)
+        #expect(r30.start == 30 && r30.end == 60)
+    }
+
+    @Test
+    func panFixedBase_doesNotCompound() {
+        // 修正後の正しい挙動: 固定 base に delta を順に適用
+        let base = TrimRange(start: 0, end: 30, duration: 120)
+
+        let r1 = base.movingRange(by: 10)
+        let r2 = base.movingRange(by: 20)
+        let r3 = base.movingRange(by: 30)
+
+        // 線形に動く: (10,40) → (20,50) → (30,60)
+        // 累積バグなら: (10,40) → (30,60) → (60,90) となる
+        #expect(r1.start == 10)
+        #expect(r2.start == 20)  // ← 30 ではない
+        #expect(r3.start == 30)  // ← 60 ではない
+    }
 }
