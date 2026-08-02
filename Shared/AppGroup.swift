@@ -34,6 +34,20 @@ enum AppGroup {
         }
     }
 
+    /// ユーザーが削除したプリセットの fileName（再登録防止用・#45 罠1）
+    static var dismissedPresetFileNames: Set<String> {
+        get {
+            guard let data = userDefaults.data(forKey: "dismissed_preset_file_names"),
+                  let ids = try? JSONDecoder().decode(Set<String>.self, from: data)
+            else { return [] }
+            return ids
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else { return }
+            userDefaults.set(data, forKey: "dismissed_preset_file_names")
+        }
+    }
+
     /// Share Extensionからの受け渡し用ステージングディレクトリ
     static var stagingDirectory: URL {
         let url = containerURL.appendingPathComponent("Staging", isDirectory: true)
