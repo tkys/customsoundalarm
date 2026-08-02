@@ -47,7 +47,7 @@
 /* SoundPickerView */
 "rename" = "名前を変更";
 "sound_name_placeholder" = "サウンド名";
-"presets" = "プリセット";
+"presets" = "すぐ使える音";
 "recent_sounds" = "最近使った";
 "imported_sounds" = "追加した音";
 "converting" = "変換中...";

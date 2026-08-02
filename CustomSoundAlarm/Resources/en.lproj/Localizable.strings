@@ -47,7 +47,7 @@
 /* SoundPickerView */
 "rename" = "Rename";
 "sound_name_placeholder" = "Sound Name";
-"presets" = "Presets";
+"presets" = "Ready to Use";
 "recent_sounds" = "Recent";
 "imported_sounds" = "My Sounds";
 "converting" = "Converting...";

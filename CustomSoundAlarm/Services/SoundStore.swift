@@ -34,6 +34,11 @@ final class SoundStore {
         sounds.removeAll { $0.id == sound.id }
         if !sound.isPreset {
             try? AudioConverter.shared.deleteSound(fileName: sound.fileName)
+        } else {
+            // プリセット削除を記録し、再起動時に復活しないようにする（罠1）
+            var dismissed = AppGroup.dismissedPresetFileNames
+            dismissed.insert(sound.fileName)
+            AppGroup.dismissedPresetFileNames = dismissed
         }
         save()
     }
@@ -126,10 +131,36 @@ final class SoundStore {
         AppGroup.userDefaults.set(data, forKey: key)
     }
 
-    /// プリセット音源を登録（未登録時のみ）
+    /// プリセット音源の定義リスト。
+    /// 音源追加手順:
+    /// 1. CAF ファイル（PCM 16-bit / 44.1kHz / mono / 30秒以内 / 商用利用可）を
+    ///    CustomSoundAlarm/Resources/Sounds/ に配置
+    /// 2. 以下のリストに (fileName, labelKey) を追加
+    /// 3. Localizable.strings（en/ja）に labelKey の翻訳を追加
+    /// 4. docs/adding-preset-sounds.md も参照
+    static let presetDefinitions: [PresetRegistration.Definition] = [
+        PresetRegistration.Definition(fileName: "PresetAlarm.caf", labelKey: "preset_jazz"),
+        // 音源が用意でき次第ここに追加する
+    ]
+
+    /// プリセット音源を登録（未登録かつ未削除のもののみ）
     private func registerPresets() {
-        if !sounds.contains(where: { $0.fileName == "PresetAlarm.caf" }) {
-            add(AlarmSound(name: String(localized: "preset_jazz"), fileName: "PresetAlarm.caf", isPreset: true))
+        let existing = Set(sounds.map(\.fileName))
+        let dismissed = AppGroup.dismissedPresetFileNames
+        let toRegister = PresetRegistration.presetsToRegister(
+            definitions: SoundStore.presetDefinitions,
+            existingFileNames: existing,
+            dismissedFileNames: dismissed
+        )
+        for def in toRegister {
+            add(AlarmSound(
+                name: String(localized: String.LocalizationValue(def.labelKey)),
+                fileName: def.fileName,
+                isPreset: true
+            ))
+        }
+        if !toRegister.isEmpty {
+            logger.info("Registered \(toRegister.count) preset sound(s)")
         }
     }
 
