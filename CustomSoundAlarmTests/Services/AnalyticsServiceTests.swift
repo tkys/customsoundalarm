@@ -620,3 +620,37 @@ private extension NSLock {
         return block()
     }
 }
+
+// MARK: - AnalyticsGateTests
+
+struct AnalyticsGateTests {
+
+    @Test
+    func resolve_release_sendsAndNotInternal() {
+        let gate = AnalyticsGate.resolve(isDebugBuild: false, debugOptIn: false)
+        #expect(gate.shouldSend == true)
+        #expect(gate.isInternal == false)
+    }
+
+    @Test
+    func resolve_release_sendsEvenIfOptInTrue() {
+        // opt-in フラグは Release では無視される
+        let gate = AnalyticsGate.resolve(isDebugBuild: false, debugOptIn: true)
+        #expect(gate.shouldSend == true)
+        #expect(gate.isInternal == false)
+    }
+
+    @Test
+    func resolve_debugNoOptIn_doesNotSend() {
+        let gate = AnalyticsGate.resolve(isDebugBuild: true, debugOptIn: false)
+        #expect(gate.shouldSend == false)
+        #expect(gate.isInternal == true)
+    }
+
+    @Test
+    func resolve_debugWithOptIn_sendsAsInternal() {
+        let gate = AnalyticsGate.resolve(isDebugBuild: true, debugOptIn: true)
+        #expect(gate.shouldSend == true)
+        #expect(gate.isInternal == true)
+    }
+}
