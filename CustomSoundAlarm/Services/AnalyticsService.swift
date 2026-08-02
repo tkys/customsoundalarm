@@ -241,6 +241,43 @@ struct AnalyticsConfig: Equatable, Sendable {
     }
 }
 
+// MARK: - AnalyticsGate（DEBUG 除外の純粋関数・#43）
+
+/// DEBUG ビルドでの本番 PostHog 送信を制御するゲート。
+///
+/// 3ケース:
+/// - Release（`isDebugBuild=false`）→ 送信する、内部ではない
+/// - DEBUG + opt-in なし → **送信しない**、内部
+/// - DEBUG + opt-in あり → 送信する、**内部**（PostHog 側でフィルタ可能）
+struct AnalyticsGate: Equatable, Sendable {
+    let shouldSend: Bool
+    let isInternal: Bool
+
+    /// - Parameters:
+    ///   - isDebugBuild: `#if DEBUG` で与える定数
+    ///   - debugOptIn: DEBUG で `-AnalyticsDebugEnabled YES` のとき true
+    static func resolve(isDebugBuild: Bool, debugOptIn: Bool) -> AnalyticsGate {
+        if !isDebugBuild {
+            return AnalyticsGate(shouldSend: true, isInternal: false)
+        }
+        // DEBUG ビルド
+        return AnalyticsGate(shouldSend: debugOptIn, isInternal: true)
+    }
+
+    #if DEBUG
+    /// DEBUG ビルド: UserDefaults の `AnalyticsDebugEnabled` で opt-in
+    static func current() -> AnalyticsGate {
+        let optIn = UserDefaults.standard.bool(forKey: "AnalyticsDebugEnabled")
+        return resolve(isDebugBuild: true, debugOptIn: optIn)
+    }
+    #else
+    /// Release ビルド: 常に送信・内部ではない
+    static func current() -> AnalyticsGate {
+        resolve(isDebugBuild: false, debugOptIn: false)
+    }
+    #endif
+}
+
 // MARK: - PostHogAnalyticsBackend
 
 /// PostHog SDK を実際に呼び出すバックエンド実装。
@@ -294,6 +331,16 @@ final class AnalyticsService: @unchecked Sendable {
             return
         }
 
+        // DEBUG 除外ゲート（#43）: config が有効でも DEBUG では既定で送信しない。
+        // Scheme に -AnalyticsDebugEnabled YES を追加したときだけ送信し、
+        // その場合は is_internal: true を付けて PostHog 側でフィルタ可能にする。
+        let gate = AnalyticsGate.current()
+        guard gate.shouldSend else {
+            logger.info("Analytics disabled in DEBUG build (set AnalyticsDebugEnabled YES to opt in)")
+            // バッファを破棄せず溜めたまま（上限100件・古いものから自動破棄）
+            return
+        }
+
         let posthogConfig = PostHogConfig(projectToken: config.apiKey, host: config.host)
         posthogConfig.debug = config.isDebug
         // Phase 2: ライフサイクル自動計測を有効化（Application Opened 等 → PostHog 標準 Insights で
@@ -313,6 +360,12 @@ final class AnalyticsService: @unchecked Sendable {
         backend = PostHogAnalyticsBackend()
         isEnabled = true
         logger.info("PostHog configured (host=\(config.host, privacy: .public), debug=\(config.isDebug))")
+
+        // DEBUG opt-in の場合は is_internal: true を付与（PostHog 側でフィルタ可能）
+        if gate.isInternal {
+            backend?.setUserProperties(["is_internal": true])
+            logger.info("Analytics running in internal/debug mode")
+        }
 
         // configure 後に保留中のアラームイベント（Intent 経由）をフラッシュ
         flushPendingAlarmEvents()
