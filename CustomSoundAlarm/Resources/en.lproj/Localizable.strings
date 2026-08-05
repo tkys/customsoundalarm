@@ -108,7 +108,13 @@
 "sound_missing" = "Sound not found";
 
 /* Preset sound names */
-"preset_jazz" = "Jazz";
+"preset_marimba" = "Marimba";
+"preset_bell" = "Soft Bell";
+"preset_crescendo" = "Crescendo";
+"preset_beep" = "Retro Beep";
+"preset_ascending" = "Ascending";
+"preset_dual_tone" = "Dual Tone";
+"preset_music_box" = "Music Box";
 
 /* Live Activity */
 "snoozing" = "Snoozing";

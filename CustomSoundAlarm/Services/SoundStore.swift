@@ -139,8 +139,13 @@ final class SoundStore {
     /// 3. Localizable.strings（en/ja）に labelKey の翻訳を追加
     /// 4. docs/adding-preset-sounds.md も参照
     static let presetDefinitions: [PresetRegistration.Definition] = [
-        PresetRegistration.Definition(fileName: "PresetAlarm.caf", labelKey: "preset_jazz"),
-        // 音源が用意でき次第ここに追加する
+        PresetRegistration.Definition(fileName: "PresetMarimba.caf", labelKey: "preset_marimba"),
+        PresetRegistration.Definition(fileName: "PresetBell.caf", labelKey: "preset_bell"),
+        PresetRegistration.Definition(fileName: "PresetCrescendo.caf", labelKey: "preset_crescendo"),
+        PresetRegistration.Definition(fileName: "PresetBeep.caf", labelKey: "preset_beep"),
+        PresetRegistration.Definition(fileName: "PresetAscending.caf", labelKey: "preset_ascending"),
+        PresetRegistration.Definition(fileName: "PresetDualTone.caf", labelKey: "preset_dual_tone"),
+        PresetRegistration.Definition(fileName: "PresetMusicBox.caf", labelKey: "preset_music_box"),
     ]
 
     /// プリセット音源を登録（未登録かつ未削除のもののみ）

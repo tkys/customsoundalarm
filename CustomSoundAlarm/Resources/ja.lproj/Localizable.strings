@@ -108,7 +108,13 @@
 "sound_missing" = "サウンドが見つかりません";
 
 /* Preset sound names */
-"preset_jazz" = "ジャズ";
+"preset_marimba" = "マリンバ";
+"preset_bell" = "やわらかベル";
+"preset_crescendo" = "クレッシェンド";
+"preset_beep" = "レトロビープ";
+"preset_ascending" = "上昇シーケンス";
+"preset_dual_tone" = "デュアルトーン";
+"preset_music_box" = "オルゴール";
 
 /* Live Activity */
 "snoozing" = "スヌーズ中";
