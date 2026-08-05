@@ -69,10 +69,10 @@ afconvert -f caff -d LEI16@44100 -c 1 input.mp3 output.caf
 - `-d LEI16@44100`: PCM 16-bit Little Endian / 44.1kHz
 - `-c 1`: モノラル
 
-### 30秒へのカット
+### 20〜40秒へのカット
 
 ```bash
-# 先頭から30秒だけ取り出す
+# 先頭から30秒だけ取り出す（実用例）
 afconvert -f caff -d LEI16@44100 -c 1 input.mp3 output.caf
 # カットが必要な場合は ffmpeg が便利:
 ffmpeg -i input.mp3 -t 30 -acodec pcm_s16le -ar 44100 -ac 1 output.wav
