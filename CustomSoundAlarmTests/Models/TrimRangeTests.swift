@@ -365,4 +365,42 @@ struct TrimRangeTests {
         #expect(r2.start == 20)  // ← 30 ではない
         #expect(r3.start == 30)  // ← 60 ではない
     }
+
+    // MARK: - 60秒上限（VideoTrimmerBar の実際の maxRange）
+
+    @Test
+    func fullRange_longVideo_capsAt60WithExplicitMaxRange() {
+        // VideoTrimmerBar は maxRange=60 を渡す
+        let r = TrimRange.fullRange(duration: 120, maxRange: 60)
+        #expect(r.start == 0)
+        #expect(r.end == 60)
+        #expect(r.width == 60)
+    }
+
+    @Test
+    func movingEnd_60sLimit() {
+        // start=0, maxRange=60 → end は 60 が上限
+        let r = TrimRange(start: 0, end: 30, duration: 300, maxRange: 60)
+        let moved = r.movingEnd(to: 100)
+        #expect(moved.end == 60)
+        #expect(moved.width == 60)
+    }
+
+    @Test
+    func movingStart_60sLimit() {
+        // end=120, maxRange=60 → start は 60 が下限
+        let r = TrimRange(start: 70, end: 120, duration: 300, maxRange: 60)
+        let moved = r.movingStart(to: 10)
+        #expect(moved.start == 60)
+        #expect(moved.width == 60)
+    }
+
+    @Test
+    func shortVideo_under60s_selectsAll() {
+        // 45秒動画 → 全範囲選べる
+        let r = TrimRange.fullRange(duration: 45, maxRange: 60)
+        #expect(r.start == 0)
+        #expect(r.end == 45)
+        #expect(r.width == 45)
+    }
 }

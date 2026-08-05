@@ -30,7 +30,7 @@ struct VideoTrimmerBar: View {
 
     private let barHeight: CGFloat = 48
     private let handleWidth: CGFloat = 6
-    private let maxRangeSeconds: Double = 30
+    private let maxRangeSeconds: Double = 60
     private let thumbnailCount = 12
     private let coordinateSpaceName = "trimBar"
 
