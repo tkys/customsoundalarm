@@ -14,17 +14,42 @@ struct SoundSelectionView: View {
     @State private var renamingSound: AlarmSound?
     @State private var renameText = ""
 
+    // プリセット開閉状態
+    @State private var presetExpanded: Bool = SoundPickerLogic.presetExpandedDefault(
+        importedCount: SoundStore.shared.sounds.filter { !$0.isPreset }.count,
+        userOverride: AppGroup.presetExpandedOverride
+    )
+
     var body: some View {
         List {
+            addSection
+            importedSection
             recentSection
             presetSection
-            importedSection
-            addSection
             errorSection
         }
         .warmListBackground()
         .navigationTitle(String(localized: "sound"))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    NavigationLink {
+                        VideoImportFlow(selectedSound: $selectedSound)
+                    } label: {
+                        Label("add_from_video", systemImage: "video.badge.waveform")
+                    }
+                    Button {
+                        isImporting = true
+                    } label: {
+                        Label("add_from_audio", systemImage: "doc.badge.plus")
+                    }
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title2)
+                }
+            }
+        }
         .onDisappear { audioPlayer.stop() }
         .fileImporter(
             isPresented: $isImporting,
@@ -51,117 +76,7 @@ struct SoundSelectionView: View {
         }
     }
 
-    // MARK: - Recent Sounds（最近使った音を上部に・混在OK）
-
-    /// 現存する音のうち最近使ったもの（新しい順、最大5件）。
-    /// 削除済み音は `recentFileNames` の existingFileNames フィルタで自然に除外される。
-    private var recentSounds: [AlarmSound] {
-        let existing = Set(soundStore.sounds.map(\.fileName))
-        return SoundUsageHistory.recentFileNames(limit: 5, existingFileNames: existing)
-            .compactMap { name in soundStore.sounds.first { $0.fileName == name } }
-    }
-
-    /// Recent に表示中の fileName（カテゴリセクションでの重複排除用）。
-    private var recentFileNamesSet: Set<String> {
-        Set(recentSounds.map(\.fileName))
-    }
-
-    @ViewBuilder
-    private var recentSection: some View {
-        let recents = recentSounds
-        if !recents.isEmpty {
-            Section {
-                ForEach(recents, id: \.id) { sound in
-                    soundRow(name: sound.name, sound: sound, isPreset: sound.isPreset, fromRecent: true)
-                        .contextMenu {
-                            if !sound.isPreset {
-                                Button {
-                                    renameText = sound.name
-                                    renamingSound = sound
-                                } label: {
-                                    Label("rename", systemImage: "pencil")
-                                }
-                                Button(role: .destructive) {
-                                    soundStore.remove(sound)
-                                } label: {
-                                    Label("delete", systemImage: "trash")
-                                }
-                            }
-                        }
-                }
-            } header: {
-                WarmSectionHeader(title: String(localized: "recent_sounds"))
-            }
-        }
-    }
-
-    // MARK: - Preset Sounds
-
-    @ViewBuilder
-    private var presetSection: some View {
-        let excluded = recentFileNamesSet
-        Section {
-            soundRow(name: String(localized: "default_sound"), sound: nil, isPreset: true)
-
-            ForEach(soundStore.sounds.filter { $0.isPreset && !excluded.contains($0.fileName) }, id: \.id) { sound in
-                soundRow(name: sound.name, sound: sound, isPreset: true)
-            }
-        } header: {
-            WarmSectionHeader(title: String(localized: "presets"))
-        }
-    }
-
-    // MARK: - Imported Sounds
-
-    @ViewBuilder
-    private var importedSection: some View {
-        let excluded = recentFileNamesSet
-        let imported = soundStore.sounds.filter { !$0.isPreset && !excluded.contains($0.fileName) }
-        Section {
-            if imported.isEmpty {
-                VStack(spacing: 8) {
-                    Image(systemName: "waveform.badge.plus")
-                        .font(.title2)
-                        .foregroundStyle(Brand.purpleLight)
-                    Text("my_sounds_empty_title")
-                        .font(.subheadline.weight(.medium))
-                    Text("my_sounds_empty_description")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-            } else {
-                ForEach(imported, id: \.id) { sound in
-                    soundRow(name: sound.name, sound: sound, isPreset: false)
-                        .contextMenu {
-                            Button {
-                                renameText = sound.name
-                                renamingSound = sound
-                            } label: {
-                                Label("rename", systemImage: "pencil")
-                            }
-                            Button(role: .destructive) {
-                                soundStore.remove(sound)
-                            } label: {
-                                Label("delete", systemImage: "trash")
-                            }
-                        }
-                }
-                .onDelete { indexSet in
-                    let targets = imported
-                    for index in indexSet {
-                        soundStore.remove(targets[index])
-                    }
-                }
-            }
-        } header: {
-            WarmSectionHeader(title: String(localized: "imported_sounds"))
-        }
-    }
-
-    // MARK: - Add Sound
+    // MARK: - Add Sound (最上位)
 
     private var addSection: some View {
         Section {
@@ -211,6 +126,139 @@ struct SoundSelectionView: View {
         }
     }
 
+    // MARK: - Imported Sounds (主役)
+
+    @ViewBuilder
+    private var importedSection: some View {
+        let excluded = recentFileNamesSet
+        let imported = soundStore.sounds.filter { !$0.isPreset && !excluded.contains($0.fileName) }
+        Section {
+            if imported.isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: "waveform.badge.plus")
+                        .font(.title2)
+                        .foregroundStyle(Brand.purpleLight)
+                    Text("my_sounds_empty_title")
+                        .font(.subheadline.weight(.medium))
+                    Text("my_sounds_empty_description")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+            } else {
+                ForEach(imported, id: \.id) { sound in
+                    soundRow(name: sound.name, sound: sound, isPreset: false)
+                        .contextMenu {
+                            Button {
+                                renameText = sound.name
+                                renamingSound = sound
+                            } label: {
+                                Label("rename", systemImage: "pencil")
+                            }
+                            Button(role: .destructive) {
+                                soundStore.remove(sound)
+                            } label: {
+                                Label("delete", systemImage: "trash")
+                            }
+                        }
+                }
+                .onDelete { indexSet in
+                    let targets = imported
+                    for index in indexSet {
+                        soundStore.remove(targets[index])
+                    }
+                }
+            }
+        } header: {
+            WarmSectionHeader(title: String(localized: "imported_sounds"))
+        }
+    }
+
+    // MARK: - Recent Sounds
+
+    /// 現存する音のうち最近使ったもの（新しい順、最大5件）。
+    private var recentSounds: [AlarmSound] {
+        let existing = Set(soundStore.sounds.map(\.fileName))
+        return SoundUsageHistory.recentFileNames(limit: 5, existingFileNames: existing)
+            .compactMap { name in soundStore.sounds.first { $0.fileName == name } }
+    }
+
+    private var recentFileNamesSet: Set<String> {
+        Set(recentSounds.map(\.fileName))
+    }
+
+    private var importedCount: Int {
+        soundStore.sounds.filter { !$0.isPreset }.count
+    }
+
+    @ViewBuilder
+    private var recentSection: some View {
+        let recents = recentSounds
+        let shouldShow = SoundPickerLogic.shouldShowRecent(
+            recentCount: recents.count,
+            importedCount: importedCount
+        )
+        if shouldShow {
+            Section {
+                ForEach(recents, id: \.id) { sound in
+                    soundRow(name: sound.name, sound: sound, isPreset: sound.isPreset, fromRecent: true)
+                        .contextMenu {
+                            if !sound.isPreset {
+                                Button {
+                                    renameText = sound.name
+                                    renamingSound = sound
+                                } label: {
+                                    Label("rename", systemImage: "pencil")
+                                }
+                                Button(role: .destructive) {
+                                    soundStore.remove(sound)
+                                } label: {
+                                    Label("delete", systemImage: "trash")
+                                }
+                            }
+                        }
+                }
+            } header: {
+                WarmSectionHeader(title: String(localized: "recent_sounds"))
+            }
+        }
+    }
+
+    // MARK: - Preset Sounds (折りたたみ)
+
+    @ViewBuilder
+    private var presetSection: some View {
+        let excluded = recentFileNamesSet
+        let presets = soundStore.sounds.filter { $0.isPreset && !excluded.contains($0.fileName) }
+        Section {
+            DisclosureGroup(
+                isExpanded: Binding(
+                    get: { presetExpanded },
+                    set: { newVal in
+                        presetExpanded = newVal
+                        AppGroup.presetExpandedOverride = newVal
+                    }
+                )
+            ) {
+                soundRow(name: String(localized: "default_sound"), sound: nil, isPreset: true)
+                ForEach(presets, id: \.id) { sound in
+                    soundRow(name: sound.name, sound: sound, isPreset: true)
+                }
+            } label: {
+                HStack {
+                    Text(String(localized: "presets"))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Brand.purpleLight)
+                    Text("(\(presets.count + 1))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
     // MARK: - Error
 
     @ViewBuilder
@@ -255,6 +303,8 @@ struct SoundSelectionView: View {
             }
             .frame(width: 32)
 
+            // 行全体をタップで選択（試聴は別ボタン）
+            // 判断: タップで試聴を併用しない（誤タップで音が鳴るのを避ける）
             Button {
                 selectedSound = sound
                 audioPlayer.stop()
