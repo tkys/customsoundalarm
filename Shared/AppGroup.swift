@@ -48,6 +48,12 @@ enum AppGroup {
         }
     }
 
+    /// ベッドサイド時計の配色テーマ（raw文字列・#56）
+    static var bedsideColorThemeRaw: String {
+        get { userDefaults.string(forKey: "bedside_color_theme") ?? "white" }
+        set { userDefaults.set(newValue, forKey: "bedside_color_theme") }
+    }
+
     /// Share Extensionからの受け渡し用ステージングディレクトリ
     static var stagingDirectory: URL {
         let url = containerURL.appendingPathComponent("Staging", isDirectory: true)

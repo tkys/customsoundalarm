@@ -119,6 +119,9 @@
 /* Bedside Clock */
 "bedside_today" = "Today";
 "bedside_tomorrow" = "Tomorrow";
+"bedside_no_alarm" = "No alarm set";
+"bedside_theme_white" = "White";
+"bedside_theme_amber" = "Amber";
 
 /* Live Activity */
 "snoozing" = "Snoozing";
