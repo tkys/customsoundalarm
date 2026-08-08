@@ -121,8 +121,118 @@ struct BedsideClockLogicTests {
     @Test
     func is24HourFormat_returnsBool() {
         let result = BedsideClockLogic.is24HourFormat(for: Date())
-        // 結果はロケール依存だが Bool が返ることのみ検証
-        // (テスト環境のロケールに合わせて true または false)
         #expect(result == true || result == false)
+    }
+
+    // MARK: - countdownText
+
+    @Test
+    func countdownText_noAlarms_returnsNil() {
+        let result = BedsideClockLogic.countdownText(alarms: [], currentDate: Date())
+        #expect(result == nil)
+    }
+
+    @Test
+    func countdownText_enabledAlarm_returnsNonNil() {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "UTC")!
+        var refComps = DateComponents()
+        refComps.year = 2026; refComps.month = 1; refComps.day = 15
+        refComps.hour = 6; refComps.minute = 0
+        let ref = cal.date(from: refComps)!
+
+        let alarm = AlarmEntry(hour: 7, minute: 30, isEnabled: true, repeatWeekdays: [])
+        let result = BedsideClockLogic.countdownText(alarms: [alarm], currentDate: ref, calendar: cal)
+        #expect(result != nil)
+    }
+
+    @Test
+    func countdownText_underOneHour() {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "UTC")!
+        var refComps = DateComponents()
+        refComps.year = 2026; refComps.month = 1; refComps.day = 15
+        refComps.hour = 6; refComps.minute = 50
+        let ref = cal.date(from: refComps)!
+
+        let alarm = AlarmEntry(hour: 7, minute: 0, isEnabled: true, repeatWeekdays: [])
+        let result = BedsideClockLogic.countdownText(alarms: [alarm], currentDate: ref, calendar: cal)
+        #expect(result != nil)
+    }
+
+    @Test
+    func countdownText_over24Hours() {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "UTC")!
+        var refComps = DateComponents()
+        refComps.year = 2026; refComps.month = 1; refComps.day = 15
+        refComps.hour = 6; refComps.minute = 0
+        let ref = cal.date(from: refComps)!
+
+        // 繰り返しアラームで週末のみ → 数日先になる可能性
+        let alarm = AlarmEntry(hour: 6, minute: 0, isEnabled: true, repeatWeekdays: [1])
+        let result = BedsideClockLogic.countdownText(alarms: [alarm], currentDate: ref, calendar: cal)
+        #expect(result != nil)
+    }
+
+    // MARK: - nextAlarmFireDate
+
+    @Test
+    func nextAlarmFireDate_disabledOnly_returnsNil() {
+        let alarm = AlarmEntry(hour: 7, minute: 0, isEnabled: false, repeatWeekdays: [])
+        let result = BedsideClockLogic.nextAlarmFireDate(alarms: [alarm], currentDate: Date())
+        #expect(result == nil)
+    }
+
+    // MARK: - ColorTheme
+
+    @Test
+    func colorTheme_allCases() {
+        #expect(BedsideClockLogic.ColorTheme.allCases.count == 2)
+        #expect(BedsideClockLogic.ColorTheme.allCases.contains(.white))
+        #expect(BedsideClockLogic.ColorTheme.allCases.contains(.amber))
+    }
+
+    @Test
+    func colorTheme_rawValueRoundTrip() {
+        for theme in BedsideClockLogic.ColorTheme.allCases {
+            let raw = theme.rawValue
+            let restored = BedsideClockLogic.ColorTheme(rawValue: raw)
+            #expect(restored == theme)
+        }
+    }
+
+    // MARK: - 輝度制御
+
+    @Test
+    func dimmedBrightness_halfsOriginal() {
+        let result = BedsideClockLogic.dimmedBrightness(originalBrightness: 0.8)
+        #expect(result == 0.4)
+    }
+
+    @Test
+    func dimmedBrightness_floorAt005() {
+        let result = BedsideClockLogic.dimmedBrightness(originalBrightness: 0.01)
+        #expect(result == 0.05)
+    }
+
+    @Test
+    func idleBrightness_fifteenPercent() {
+        let result = BedsideClockLogic.idleBrightness(originalBrightness: 1.0)
+        #expect(result == 0.15)
+    }
+
+    @Test
+    func idleBrightness_floorAt002() {
+        let result = BedsideClockLogic.idleBrightness(originalBrightness: 0.05)
+        #expect(result == 0.02)
+    }
+
+    @Test
+    func dimmedLessThanIdle_isFalse() {
+        // 通常時の減光はアイドル時より明るい
+        let dimmed = BedsideClockLogic.dimmedBrightness(originalBrightness: 0.8)
+        let idle = BedsideClockLogic.idleBrightness(originalBrightness: 0.8)
+        #expect(dimmed > idle)
     }
 }

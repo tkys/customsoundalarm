@@ -119,6 +119,9 @@
 /* Bedside Clock */
 "bedside_today" = "今日";
 "bedside_tomorrow" = "明日";
+"bedside_no_alarm" = "アラームが設定されていません";
+"bedside_theme_white" = "ホワイト";
+"bedside_theme_amber" = "アンバー";
 
 /* Live Activity */
 "snoozing" = "スヌーズ中";
