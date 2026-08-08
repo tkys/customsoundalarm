@@ -1,17 +1,19 @@
-■ Major snooze improvements
-• Fixed an issue where snooze did not work correctly
-• You can now choose your snooze interval (Off / 1, 5, 9, 10, 15, 20, 30 minutes)
-• The remaining snooze time now appears on the Lock Screen
+■ New: Night Mode
+A full-screen bedside clock for when your phone is charging next to you.
+• Large, easy-to-read clock plus a countdown to your next alarm
+• Adjust brightness, text size, and which details are shown
+• Switch to an eye-friendly amber palette
+• Choose from three clock designs
+• Warns you when no alarm is set, so you notice before falling asleep
 
-■ Easier audio capture from videos
-• A redesigned trimmer lets you pick a range while browsing video thumbnails
-• Drag the handles to set your clip intuitively
-• You can now pick videos from the Files app and iCloud Drive
+■ Many more alarm sounds to choose from
+• Built-in presets expanded from 1 to 8
+• "Add sound" now sits at the top of the list, so it's easy to find
+• Presets can be collapsed so your own sounds stay front and center
 
-■ Display and reliability
-• Sound names now display correctly on the Lock Screen
-• Alarm scheduling was reworked so alarms ring more reliably
-• You can now toggle an alarm on or off from the edit screen
+■ Improved audio capture from videos
+• Clip length extended to 60 seconds
+• Pick videos from the Files app and iCloud Drive
 
 Thanks for using My Sound Alarm!
 We'd love to hear your feedback — please reach out through support.
