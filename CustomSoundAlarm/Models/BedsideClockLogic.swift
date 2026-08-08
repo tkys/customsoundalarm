@@ -110,7 +110,7 @@ enum BedsideClockLogic {
         var clockColor: Color {
             switch self {
             case .white: .white.opacity(0.85)
-            case .amber: Color(red: 1.0, green: 0.5, blue: 0.1).opacity(0.85)
+            case .amber: Color(red: 1.0, green: 0.65, blue: 0.15).opacity(1.0)
             }
         }
 
@@ -118,7 +118,7 @@ enum BedsideClockLogic {
         var infoColor: Color {
             switch self {
             case .white: .white.opacity(0.5)
-            case .amber: Color(red: 1.0, green: 0.5, blue: 0.1).opacity(0.5)
+            case .amber: Color(red: 1.0, green: 0.65, blue: 0.15).opacity(0.75)
             }
         }
 
@@ -126,7 +126,7 @@ enum BedsideClockLogic {
         var warningColor: Color {
             switch self {
             case .white: .orange.opacity(0.8)
-            case .amber: Color(red: 1.0, green: 0.4, blue: 0.05).opacity(0.9)
+            case .amber: Color(red: 1.0, green: 0.55, blue: 0.1).opacity(0.95)
             }
         }
     }
@@ -134,26 +134,24 @@ enum BedsideClockLogic {
     // MARK: - 輝度制御（純粋関数）
 
     /// モード開始時の初期輝度を算出する。
-    /// 元の輝度にユーザー設定のオフセット倍率を適用する（最低 0.05）。
-    /// - Parameters:
-    ///   - originalBrightness: システムの元輝度（onAppear 時に保存）
-    ///   - userOffset: ユーザー設定の明るさ倍率（0.2〜1.0、既定 0.5）
-    static func dimmedBrightness(originalBrightness: CGFloat, userOffset: CGFloat = 0.5) -> CGFloat {
-        max(0.05, originalBrightness * userOffset)
+    /// 元の輝度にユーザー設定のオフセット倍率を適用する（最低 0.1）。
+    /// 既定は0.7（明るめ）：暗所で時刻が読めることを基準。暗くしたい人はスライダーで下げられる。
+    static func dimmedBrightness(originalBrightness: CGFloat, userOffset: CGFloat = 0.7) -> CGFloat {
+        max(0.1, originalBrightness * userOffset)
     }
 
     /// アイドル時（一定時間操作なし）の減光輝度。
-    /// ユーザー設定のオフセットからさらに 30% に下げる（最低 0.02）。
-    static func idleBrightness(originalBrightness: CGFloat, userOffset: CGFloat = 0.5) -> CGFloat {
-        max(0.02, originalBrightness * userOffset * 0.3)
+    /// ユーザー設定のオフセットからさらに 60% に下げる（最低 0.05）。
+    static func idleBrightness(originalBrightness: CGFloat, userOffset: CGFloat = 0.7) -> CGFloat {
+        max(0.05, originalBrightness * userOffset * 0.6)
     }
 
     // MARK: - 設定
 
     /// ベッドサイド時計のユーザー設定（永続化対象）。
     struct BedsideSettings: Codable, Equatable, Sendable {
-        /// 明るさ倍率（0.2〜1.0、既定 0.5）
-        var brightnessOffset: CGFloat = 0.5
+        /// 明るさ倍率（0.2〜1.0、既定 0.7）
+        var brightnessOffset: CGFloat = 0.7
         /// カウントダウン表示
         var showCountdown: Bool = true
         /// 音名表示
@@ -164,6 +162,8 @@ enum BedsideClockLogic {
         var showSeconds: Bool = false
         /// 配色テーマ
         var colorTheme: String = "white"
+        /// 文字サイズ倍率（0.7〜1.5、既定 1.0）
+        var fontScale: CGFloat = 1.0
 
         /// 表示要素の数（時計自体を除く）
         var visibleElementCount: Int {
@@ -177,13 +177,16 @@ enum BedsideClockLogic {
 
     /// 表示要素数に応じた時計のフォントサイズ。
     /// 要素が多いほど時計が小さくなり、少ないほど大きくなる。
-    static func clockFontSize(visibleElementCount: Int) -> CGFloat {
+    /// ユーザー指定の倍率を適用した最終サイズを返す。
+    static func clockFontSize(visibleElementCount: Int, fontScale: CGFloat = 1.0) -> CGFloat {
+        let base: CGFloat
         switch visibleElementCount {
-        case 0: 120       // 要素なし → 最大
-        case 1: 110
-        case 2: 96
-        default: 84       // 3要素 → 最小
+        case 0: base = 120
+        case 1: base = 110
+        case 2: base = 96
+        default: base = 84
         }
+        return base * fontScale
     }
 
     /// 時刻文字列を生成する。

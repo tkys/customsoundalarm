@@ -127,6 +127,7 @@
 "bedside_show_sound_name" = "音の名前";
 "bedside_show_date" = "日付";
 "bedside_show_seconds" = "秒表示";
+"bedside_font_size" = "文字サイズ";
 
 /* Live Activity */
 "snoozing" = "スヌーズ中";

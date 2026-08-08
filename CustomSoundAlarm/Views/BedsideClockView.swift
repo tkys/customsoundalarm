@@ -41,6 +41,12 @@ struct BedsideClockView: View {
             .offset(offset)
 
             if showOverlay {
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        closeOverlay()
+                    }
+
                 settingsOverlay
                     .transition(.opacity)
             }
@@ -74,7 +80,10 @@ struct BedsideClockView: View {
     private var clockDisplay: some View {
         let is24 = BedsideClockLogic.is24HourFormat(for: now)
         let timeStr = BedsideClockLogic.timeString(for: now, is24Hour: is24, showSeconds: settings.showSeconds)
-        let fontSize = BedsideClockLogic.clockFontSize(visibleElementCount: settings.visibleElementCount)
+        let fontSize = BedsideClockLogic.clockFontSize(
+            visibleElementCount: settings.visibleElementCount,
+            fontScale: settings.fontScale
+        )
 
         return Text(timeStr)
             .font(.system(size: fontSize, weight: .light, design: .default))
@@ -149,6 +158,18 @@ struct BedsideClockView: View {
 
     private var settingsOverlay: some View {
         VStack(spacing: 20) {
+            // 閉じるボタン（暗所で押せる大きさ）
+            HStack {
+                Spacer()
+                Button {
+                    closeOverlay()
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title)
+                        .foregroundStyle(theme.infoColor)
+                }
+            }
+
             // 明るさスライダー
             VStack(spacing: 8) {
                 Text("bedside_brightness")
@@ -170,6 +191,30 @@ struct BedsideClockView: View {
                     .frame(maxWidth: 240)
                     Image(systemName: "sun.max")
                         .font(.title3)
+                        .foregroundStyle(theme.infoColor)
+                }
+            }
+
+            // 文字サイズスライダー
+            VStack(spacing: 8) {
+                Text("bedside_font_size")
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(theme.infoColor)
+                HStack(spacing: 16) {
+                    Text("A")
+                        .font(.caption)
+                        .foregroundStyle(theme.infoColor)
+                    Slider(value: Binding(
+                        get: { settings.fontScale },
+                        set: { newVal in
+                            settings.fontScale = newVal
+                            saveSettings()
+                        }
+                    ), in: 0.7...1.5)
+                    .tint(theme.clockColor)
+                    .frame(maxWidth: 240)
+                    Text("A")
+                        .font(.title2)
                         .foregroundStyle(theme.infoColor)
                 }
             }
@@ -236,13 +281,28 @@ struct BedsideClockView: View {
     // MARK: - Tap Handling
 
     private func handleTap() {
+        if showOverlay {
+            // オーバーレイ表示中のタップはオーバーレイ外で処理（closeOverlay）
+            // ここには来ない（オーバーレイのdim layerがタップを吸収）
+            return
+        }
         if isIdle {
             isIdle = false
             applyBrightness()
         }
-        showOverlay = true
+        withAnimation(.easeInOut(duration: 0.25)) {
+            showOverlay = true
+        }
         resetIdleTimer()
         resetOverlayTimer()
+    }
+
+    private func closeOverlay() {
+        withAnimation(.easeInOut(duration: 0.25)) {
+            showOverlay = false
+        }
+        overlayTimer?.invalidate()
+        resetIdleTimer()
     }
 
     // MARK: - Mode Lifecycle
@@ -303,14 +363,14 @@ struct BedsideClockView: View {
         idleTimer?.invalidate()
         idleTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: false) { _ in
             isIdle = true
-            showOverlay = false
+            closeOverlay()
             applyBrightness()
         }
     }
 
     private func resetOverlayTimer() {
         overlayTimer?.invalidate()
-        overlayTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { _ in
+        overlayTimer = Timer.scheduledTimer(withTimeInterval: 8, repeats: false) { _ in
             withAnimation(.easeInOut(duration: 0.3)) {
                 showOverlay = false
             }

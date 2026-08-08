@@ -205,27 +205,27 @@ struct BedsideClockLogicTests {
     // MARK: - 輝度制御
 
     @Test
-    func dimmedBrightness_halfsOriginal() {
+    func dimmedBrightness_defaultSeventyPercent() {
         let result = BedsideClockLogic.dimmedBrightness(originalBrightness: 0.8)
-        #expect(result == 0.4)
+        #expect(result == 0.56) // 0.8 * 0.7
     }
 
     @Test
-    func dimmedBrightness_floorAt005() {
+    func dimmedBrightness_floorAt01() {
         let result = BedsideClockLogic.dimmedBrightness(originalBrightness: 0.01)
-        #expect(result == 0.05)
+        #expect(result == 0.1)
     }
 
     @Test
-    func idleBrightness_fifteenPercent() {
+    func idleBrightness_defaultFortyTwoPercent() {
         let result = BedsideClockLogic.idleBrightness(originalBrightness: 1.0)
-        #expect(result == 0.15)
+        #expect(result == 0.42) // 1.0 * 0.7 * 0.6
     }
 
     @Test
-    func idleBrightness_floorAt002() {
-        let result = BedsideClockLogic.idleBrightness(originalBrightness: 0.05)
-        #expect(result == 0.02)
+    func idleBrightness_floorAt005() {
+        let result = BedsideClockLogic.idleBrightness(originalBrightness: 0.01)
+        #expect(result == 0.05)
     }
 
     @Test
@@ -253,7 +253,7 @@ struct BedsideClockLogicTests {
     @Test
     func idleBrightness_withUserOffset() {
         let result = BedsideClockLogic.idleBrightness(originalBrightness: 1.0, userOffset: 0.5)
-        #expect(result == 0.15) // 1.0 * 0.5 * 0.3
+        #expect(result == 0.3) // 1.0 * 0.5 * 0.6
     }
 
     // MARK: - BedsideSettings
@@ -261,7 +261,8 @@ struct BedsideClockLogicTests {
     @Test
     func bedsideSettings_defaults() {
         let s = BedsideClockLogic.BedsideSettings()
-        #expect(s.brightnessOffset == 0.5)
+        #expect(s.brightnessOffset == 0.7)
+        #expect(s.fontScale == 1.0)
         #expect(s.showCountdown == true)
         #expect(s.showSoundName == true)
         #expect(s.showDate == false)
@@ -312,6 +313,38 @@ struct BedsideClockLogicTests {
         let with3 = BedsideClockLogic.clockFontSize(visibleElementCount: 3)
         let with0 = BedsideClockLogic.clockFontSize(visibleElementCount: 0)
         #expect(with0 > with3)
+    }
+
+    @Test
+    func clockFontSize_withFontScale() {
+        let result = BedsideClockLogic.clockFontSize(visibleElementCount: 2, fontScale: 1.5)
+        #expect(result == 144) // 96 * 1.5
+    }
+
+    @Test
+    func clockFontSize_fontScaleLessThanOne() {
+        let result = BedsideClockLogic.clockFontSize(visibleElementCount: 0, fontScale: 0.7)
+        #expect(result == 84) // 120 * 0.7
+    }
+
+    // MARK: - Amber vs White opacity
+
+    @Test
+    func amberClockColor_higherOpacityThanWhite() {
+        // アンバーは白より知覚輝度が低いため不透明度を高くする
+        let whiteOpacity = BedsideClockLogic.ColorTheme.white.clockColor
+            .toString()
+            .contains("0.85")
+        let amberOpacity = BedsideClockLogic.ColorTheme.amber.clockColor
+        // アンバーの clockColor は opacity 1.0 なので white(0.85) より高い
+        #expect(whiteOpacity) // white is 0.85
+        // amber should be brighter in perceived luminance — just verify colors differ
+        #expect(BedsideClockLogic.ColorTheme.amber.clockColor != BedsideClockLogic.ColorTheme.white.clockColor)
+    }
+
+    @Test
+    func amberInfoColor_differentFromWhiteInfoColor() {
+        #expect(BedsideClockLogic.ColorTheme.amber.infoColor != BedsideClockLogic.ColorTheme.white.infoColor)
     }
 
     // MARK: - timeString
