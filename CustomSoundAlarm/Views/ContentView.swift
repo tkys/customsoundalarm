@@ -8,6 +8,7 @@ struct ContentView: View {
     @State private var soundStore = SoundStore.shared
     @State private var selectedAlarm: AlarmEntry?
     @State private var showingAddAlarm = false
+    @State private var showingBedsideClock = false
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.requestReview) private var requestReview
@@ -23,6 +24,13 @@ struct ContentView: View {
             }
             .navigationTitle(String(localized: "alarm_title"))
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showingBedsideClock = true
+                    } label: {
+                        Image(systemName: "moon.zzz")
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showingAddAlarm = true
@@ -36,6 +44,9 @@ struct ContentView: View {
             }
             .sheet(item: $selectedAlarm) { alarm in
                 AlarmDetailView(mode: .edit(alarm))
+            }
+            .fullScreenCover(isPresented: $showingBedsideClock) {
+                BedsideClockView()
             }
         }
         .onChange(of: scenePhase) { _, phase in

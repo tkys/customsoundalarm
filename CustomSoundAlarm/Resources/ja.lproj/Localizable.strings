@@ -116,6 +116,10 @@
 "preset_dual_tone" = "デュアルトーン";
 "preset_music_box" = "オルゴール";
 
+/* Bedside Clock */
+"bedside_today" = "今日";
+"bedside_tomorrow" = "明日";
+
 /* Live Activity */
 "snoozing" = "スヌーズ中";
 
