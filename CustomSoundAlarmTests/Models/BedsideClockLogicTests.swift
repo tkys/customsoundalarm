@@ -235,4 +235,102 @@ struct BedsideClockLogicTests {
         let idle = BedsideClockLogic.idleBrightness(originalBrightness: 0.8)
         #expect(dimmed > idle)
     }
+
+    // MARK: - ユーザー設定可能な輝度
+
+    @Test
+    func dimmedBrightness_withUserOffset() {
+        let result = BedsideClockLogic.dimmedBrightness(originalBrightness: 1.0, userOffset: 0.3)
+        #expect(result == 0.3)
+    }
+
+    @Test
+    func dimmedBrightness_highUserOffset() {
+        let result = BedsideClockLogic.dimmedBrightness(originalBrightness: 0.6, userOffset: 1.0)
+        #expect(result == 0.6)
+    }
+
+    @Test
+    func idleBrightness_withUserOffset() {
+        let result = BedsideClockLogic.idleBrightness(originalBrightness: 1.0, userOffset: 0.5)
+        #expect(result == 0.15) // 1.0 * 0.5 * 0.3
+    }
+
+    // MARK: - BedsideSettings
+
+    @Test
+    func bedsideSettings_defaults() {
+        let s = BedsideClockLogic.BedsideSettings()
+        #expect(s.brightnessOffset == 0.5)
+        #expect(s.showCountdown == true)
+        #expect(s.showSoundName == true)
+        #expect(s.showDate == false)
+        #expect(s.showSeconds == false)
+        #expect(s.colorTheme == "white")
+    }
+
+    @Test
+    func bedsideSettings_visibleElementCount() {
+        var s = BedsideClockLogic.BedsideSettings()
+        #expect(s.visibleElementCount == 2) // countdown + soundName
+
+        s.showDate = true
+        #expect(s.visibleElementCount == 3)
+
+        s.showCountdown = false
+        s.showSoundName = false
+        #expect(s.visibleElementCount == 1) // date only
+
+        s.showDate = false
+        #expect(s.visibleElementCount == 0)
+    }
+
+    // MARK: - clockFontSize
+
+    @Test
+    func clockFontSize_noElements_isLargest() {
+        #expect(BedsideClockLogic.clockFontSize(visibleElementCount: 0) == 120)
+    }
+
+    @Test
+    func clockFontSize_oneElement() {
+        #expect(BedsideClockLogic.clockFontSize(visibleElementCount: 1) == 110)
+    }
+
+    @Test
+    func clockFontSize_twoElements() {
+        #expect(BedsideClockLogic.clockFontSize(visibleElementCount: 2) == 96)
+    }
+
+    @Test
+    func clockFontSize_threeElements_isSmallest() {
+        #expect(BedsideClockLogic.clockFontSize(visibleElementCount: 3) == 84)
+    }
+
+    @Test
+    func clockFontSize_fewerElements_isLarger() {
+        let with3 = BedsideClockLogic.clockFontSize(visibleElementCount: 3)
+        let with0 = BedsideClockLogic.clockFontSize(visibleElementCount: 0)
+        #expect(with0 > with3)
+    }
+
+    // MARK: - timeString
+
+    @Test
+    func timeString_withoutSeconds() {
+        let date = Date()
+        let result = BedsideClockLogic.timeString(for: date, is24Hour: true, showSeconds: false)
+        // HH:mm 形式であること（コロン1つ、秒なし）
+        #expect(result.count == 5)
+        #expect(result.filter { $0 == ":" }.count == 1)
+    }
+
+    @Test
+    func timeString_withSeconds() {
+        let date = Date()
+        let result = BedsideClockLogic.timeString(for: date, is24Hour: true, showSeconds: true)
+        // HH:mm:ss 形式であること（コロン2つ、秒あり）
+        #expect(result.count == 8)
+        #expect(result.filter { $0 == ":" }.count == 2)
+    }
 }
