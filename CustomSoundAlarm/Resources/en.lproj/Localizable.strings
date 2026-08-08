@@ -127,6 +127,7 @@
 "bedside_show_sound_name" = "Sound Name";
 "bedside_show_date" = "Date";
 "bedside_show_seconds" = "Seconds";
+"bedside_font_size" = "Text Size";
 
 /* Live Activity */
 "snoozing" = "Snoozing";
