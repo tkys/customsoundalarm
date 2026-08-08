@@ -106,20 +106,42 @@ enum BedsideClockLogic {
             }
         }
 
+        // MARK: テスト可能な値
+
+        /// 時計文字の不透明度（アンバーは白より高い）
+        var clockOpacity: Double {
+            switch self {
+            case .white: 0.85
+            case .amber: 1.0
+            }
+        }
+
+        /// 情報テキストの不透明度
+        var infoOpacity: Double {
+            switch self {
+            case .white: 0.5
+            case .amber: 0.75
+            }
+        }
+
+        /// 色相（nil = 白）
+        var tintRGB: (r: Double, g: Double, b: Double)? {
+            switch self {
+            case .white: nil
+            case .amber: (1.0, 0.65, 0.15)
+            }
+        }
+
+        // MARK: 値から組み立てる SwiftUI Color
+
         /// 時計文字の色
         var clockColor: Color {
-            switch self {
-            case .white: .white.opacity(0.85)
-            case .amber: Color(red: 1.0, green: 0.65, blue: 0.15).opacity(1.0)
-            }
+            baseColor.opacity(clockOpacity)
         }
 
         /// アラーム情報の色
         var infoColor: Color {
-            switch self {
-            case .white: .white.opacity(0.5)
-            case .amber: Color(red: 1.0, green: 0.65, blue: 0.15).opacity(0.75)
-            }
+            baseColor.opacity(infoOpacity)
         }
 
         /// 警告の色
@@ -127,6 +149,14 @@ enum BedsideClockLogic {
             switch self {
             case .white: .orange.opacity(0.8)
             case .amber: Color(red: 1.0, green: 0.55, blue: 0.1).opacity(0.95)
+            }
+        }
+
+        private var baseColor: Color {
+            if let rgb = tintRGB {
+                Color(red: rgb.r, green: rgb.g, blue: rgb.b)
+            } else {
+                .white
             }
         }
     }

@@ -330,21 +330,39 @@ struct BedsideClockLogicTests {
     // MARK: - Amber vs White opacity
 
     @Test
-    func amberClockColor_higherOpacityThanWhite() {
-        // アンバーは白より知覚輝度が低いため不透明度を高くする
-        let whiteOpacity = BedsideClockLogic.ColorTheme.white.clockColor
-            .toString()
-            .contains("0.85")
-        let amberOpacity = BedsideClockLogic.ColorTheme.amber.clockColor
-        // アンバーの clockColor は opacity 1.0 なので white(0.85) より高い
-        #expect(whiteOpacity) // white is 0.85
-        // amber should be brighter in perceived luminance — just verify colors differ
-        #expect(BedsideClockLogic.ColorTheme.amber.clockColor != BedsideClockLogic.ColorTheme.white.clockColor)
+    func amberClockOpacity_higherThanWhite() {
+        #expect(BedsideClockLogic.ColorTheme.amber.clockOpacity > BedsideClockLogic.ColorTheme.white.clockOpacity)
     }
 
     @Test
-    func amberInfoColor_differentFromWhiteInfoColor() {
-        #expect(BedsideClockLogic.ColorTheme.amber.infoColor != BedsideClockLogic.ColorTheme.white.infoColor)
+    func amberInfoOpacity_higherThanWhite() {
+        #expect(BedsideClockLogic.ColorTheme.amber.infoOpacity > BedsideClockLogic.ColorTheme.white.infoOpacity)
+    }
+
+    @Test
+    func whiteClockOpacity_is085() {
+        #expect(BedsideClockLogic.ColorTheme.white.clockOpacity == 0.85)
+    }
+
+    @Test
+    func amberClockOpacity_is1() {
+        #expect(BedsideClockLogic.ColorTheme.amber.clockOpacity == 1.0)
+    }
+
+    @Test
+    func amberTintRGB_isNotNil() {
+        #expect(BedsideClockLogic.ColorTheme.amber.tintRGB != nil)
+    }
+
+    @Test
+    func whiteTintRGB_isNil() {
+        #expect(BedsideClockLogic.ColorTheme.white.tintRGB == nil)
+    }
+
+    @Test
+    func amberTintGreen_is065() {
+        let rgb = BedsideClockLogic.ColorTheme.amber.tintRGB!
+        #expect(rgb.g == 0.65)
     }
 
     // MARK: - timeString
