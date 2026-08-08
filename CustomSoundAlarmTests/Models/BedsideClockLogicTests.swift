@@ -207,7 +207,7 @@ struct BedsideClockLogicTests {
     @Test
     func dimmedBrightness_defaultSeventyPercent() {
         let result = BedsideClockLogic.dimmedBrightness(originalBrightness: 0.8)
-        #expect(result == 0.56) // 0.8 * 0.7
+        #expect(abs(result - 0.56) < 0.0001) // 0.8 * 0.7
     }
 
     @Test
@@ -219,7 +219,7 @@ struct BedsideClockLogicTests {
     @Test
     func idleBrightness_defaultFortyTwoPercent() {
         let result = BedsideClockLogic.idleBrightness(originalBrightness: 1.0)
-        #expect(result == 0.42) // 1.0 * 0.7 * 0.6
+        #expect(abs(result - 0.42) < 0.0001) // 1.0 * 0.7 * 0.6
     }
 
     @Test
@@ -241,19 +241,19 @@ struct BedsideClockLogicTests {
     @Test
     func dimmedBrightness_withUserOffset() {
         let result = BedsideClockLogic.dimmedBrightness(originalBrightness: 1.0, userOffset: 0.3)
-        #expect(result == 0.3)
+        #expect(abs(result - 0.3) < 0.0001)
     }
 
     @Test
     func dimmedBrightness_highUserOffset() {
         let result = BedsideClockLogic.dimmedBrightness(originalBrightness: 0.6, userOffset: 1.0)
-        #expect(result == 0.6)
+        #expect(abs(result - 0.6) < 0.0001)
     }
 
     @Test
     func idleBrightness_withUserOffset() {
         let result = BedsideClockLogic.idleBrightness(originalBrightness: 1.0, userOffset: 0.5)
-        #expect(result == 0.3) // 1.0 * 0.5 * 0.6
+        #expect(abs(result - 0.3) < 0.0001) // 1.0 * 0.5 * 0.6
     }
 
     // MARK: - BedsideSettings
