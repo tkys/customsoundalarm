@@ -116,6 +116,10 @@
 "preset_dual_tone" = "Dual Tone";
 "preset_music_box" = "Music Box";
 
+/* Bedside Clock */
+"bedside_today" = "Today";
+"bedside_tomorrow" = "Tomorrow";
+
 /* Live Activity */
 "snoozing" = "Snoozing";
 

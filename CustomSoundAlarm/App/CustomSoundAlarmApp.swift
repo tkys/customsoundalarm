@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 struct CustomSoundAlarmApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @Environment(\.scenePhase) private var scenePhase
     @State private var hasLaunched = false
 
