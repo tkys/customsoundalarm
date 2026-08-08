@@ -72,6 +72,21 @@ enum AppGroup {
         set { userDefaults.set(newValue, forKey: "bedside_hint_shown") }
     }
 
+    /// サウンド選択画面のプリセット開閉状態（nil = 未操作・#65）
+    static var presetExpandedOverride: Bool? {
+        get {
+            guard userDefaults.object(forKey: "preset_expanded_override") != nil else { return nil }
+            return userDefaults.bool(forKey: "preset_expanded_override")
+        }
+        set {
+            if let newValue {
+                userDefaults.set(newValue, forKey: "preset_expanded_override")
+            } else {
+                userDefaults.removeObject(forKey: "preset_expanded_override")
+            }
+        }
+    }
+
     /// Share Extensionからの受け渡し用ステージングディレクトリ
     static var stagingDirectory: URL {
         let url = containerURL.appendingPathComponent("Staging", isDirectory: true)
