@@ -66,6 +66,12 @@ enum AppGroup {
         }
     }
 
+    /// ベッドサイドモードの初回ヒント表示済みフラグ（#62）
+    static var bedsideHintShown: Bool {
+        get { userDefaults.bool(forKey: "bedside_hint_shown") }
+        set { userDefaults.set(newValue, forKey: "bedside_hint_shown") }
+    }
+
     /// Share Extensionからの受け渡し用ステージングディレクトリ
     static var stagingDirectory: URL {
         let url = containerURL.appendingPathComponent("Staging", isDirectory: true)

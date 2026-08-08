@@ -128,6 +128,13 @@
 "bedside_show_date" = "Date";
 "bedside_show_seconds" = "Seconds";
 "bedside_font_size" = "Text Size";
+"bedside_layout" = "Clock Style";
+"bedside_layout_digital_large" = "Digital";
+"bedside_layout_minimal" = "Minimal";
+"bedside_layout_digital_bold" = "Bold";
+"bedside_layout_flip" = "Flip (Pro)";
+"bedside_exit" = "Exit Night Mode";
+"bedside_exit_hint" = "Press and hold to exit";
 
 /* Live Activity */
 "snoozing" = "Snoozing";

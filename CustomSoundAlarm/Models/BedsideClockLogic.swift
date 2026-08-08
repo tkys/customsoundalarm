@@ -92,11 +92,68 @@ enum BedsideClockLogic {
             && !formatted.contains("午前") && !formatted.contains("午後")
     }
 
+    // MARK: - 時計レイアウト
+
+    /// ベッドサイド時計のレイアウト（時計面のデザイン）。
+    enum ClockLayout: String, CaseIterable, Sendable {
+        // 無料
+        case digitalLarge    // 大きなデジタル時計（既存）
+        case minimal         // 時刻のみ・余白多め
+        case digitalBold     // 太字デジタル
+        // Pro
+        case flipClock       // フリップ時計風（Pro）
+
+        var displayName: String {
+            switch self {
+            case .digitalLarge: String(localized: "bedside_layout_digital_large")
+            case .minimal: String(localized: "bedside_layout_minimal")
+            case .digitalBold: String(localized: "bedside_layout_digital_bold")
+            case .flipClock: String(localized: "bedside_layout_flip")
+            }
+        }
+
+        var isPro: Bool {
+            self == .flipClock
+        }
+
+        /// フォントのウエイト
+        var fontWeight: Font.Weight {
+            switch self {
+            case .digitalLarge: .light
+            case .minimal: .ultraLight
+            case .digitalBold: .bold
+            case .flipClock: .medium
+            }
+        }
+
+        /// フォントデザイン
+        var fontDesign: Font.Design {
+            switch self {
+            case .digitalLarge, .minimal, .digitalBold: .default
+            case .flipClock: .rounded
+            }
+        }
+
+        /// 時計のフォントサイズ倍率（レイアウト固有）
+        var sizeMultiplier: CGFloat {
+            switch self {
+            case .digitalLarge: 1.0
+            case .minimal: 0.85
+            case .digitalBold: 1.0
+            case .flipClock: 0.9
+            }
+        }
+
+        /// 利用可能なレイアウト一覧を返す（Pro でない場合は Pro 面を除外）
+        static func available(isPro: Bool) -> [ClockLayout] {
+            allCases.filter { isPro || !$0.isPro }
+        }
+    }
+
     // MARK: - 配色テーマ
 
     /// ベッドサイド時計の配色テーマ。
-    enum ColorTheme: String, CaseIterable, Sendable {
-        case white
+    enum ColorTheme: String, CaseIterable, Sendable {        case white
         case amber
 
         var displayName: String {
@@ -194,6 +251,8 @@ enum BedsideClockLogic {
         var colorTheme: String = "white"
         /// 文字サイズ倍率（0.7〜1.5、既定 1.0）
         var fontScale: CGFloat = 1.0
+        /// 時計レイアウト
+        var clockLayout: String = ClockLayout.digitalLarge.rawValue
 
         /// 表示要素の数（時計自体を除く）
         var visibleElementCount: Int {

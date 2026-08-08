@@ -3,7 +3,8 @@ import SwiftUI
 /// 全画面ベッドサイド時計モード。
 ///
 /// 横向き全画面で時刻・カウントダウン・次回アラーム（音名付き）を表示し、
-/// 画面消灯を抑止する。焼き付き対策・輝度制御・夜間配色・調整オーバーレイを搭載。
+/// 画面消灯を抑止する。焼き付き対策・輝度制御・夜間配色・調整オーバーレイ・
+/// 複数レイアウトを搭載。
 struct BedsideClockView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
@@ -15,11 +16,13 @@ struct BedsideClockView: View {
     @State private var isPresented = false
     @State private var isIdle = false
     @State private var showOverlay = false
+    @State private var showHint = false
 
     // 輝度制御
     @State private var savedBrightness: CGFloat = 0.5
     @State private var idleTimer: Timer?
     @State private var overlayTimer: Timer?
+    @State private var hintTimer: Timer?
 
     // ユーザー設定
     @State private var settings: BedsideClockLogic.BedsideSettings = loadSettings()
@@ -39,6 +42,20 @@ struct BedsideClockView: View {
                 Spacer()
             }
             .offset(offset)
+
+            // 初回ヒント（長押しで終了）
+            if showHint {
+                VStack {
+                    Spacer()
+                    Text("bedside_exit_hint")
+                        .font(.callout)
+                        .foregroundStyle(theme.infoColor)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 12)
+                        .background(Capsule().fill(.ultraThinMaterial))
+                        .padding(.bottom, 60)
+                }
+            }
 
             if showOverlay {
                 Color.black.opacity(0.4)
@@ -80,13 +97,15 @@ struct BedsideClockView: View {
     private var clockDisplay: some View {
         let is24 = BedsideClockLogic.is24HourFormat(for: now)
         let timeStr = BedsideClockLogic.timeString(for: now, is24Hour: is24, showSeconds: settings.showSeconds)
-        let fontSize = BedsideClockLogic.clockFontSize(
+        let layout = clockLayout
+        let baseFontSize = BedsideClockLogic.clockFontSize(
             visibleElementCount: settings.visibleElementCount,
             fontScale: settings.fontScale
         )
+        let fontSize = baseFontSize * layout.sizeMultiplier
 
         return Text(timeStr)
-            .font(.system(size: fontSize, weight: .light, design: .default))
+            .font(.system(size: fontSize, weight: layout.fontWeight, design: layout.fontDesign))
             .foregroundStyle(theme.clockColor)
             .minimumScaleFactor(0.5)
     }
@@ -158,13 +177,13 @@ struct BedsideClockView: View {
 
     private var settingsOverlay: some View {
         VStack(spacing: 20) {
-            // 閉じるボタン（暗所で押せる大きさ）
+            // ヘッダー: chevron.down（オーバーレイを閉じる）
             HStack {
                 Spacer()
                 Button {
                     closeOverlay()
                 } label: {
-                    Image(systemName: "xmark.circle.fill")
+                    Image(systemName: "chevron.down.circle.fill")
                         .font(.title)
                         .foregroundStyle(theme.infoColor)
                 }
@@ -219,6 +238,33 @@ struct BedsideClockView: View {
                 }
             }
 
+            // レイアウト選択
+            VStack(spacing: 8) {
+                Text("bedside_layout")
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(theme.infoColor)
+                let layouts = BedsideClockLogic.ClockLayout.available(isPro: Entitlements.shared.isPro)
+                HStack(spacing: 8) {
+                    ForEach(layouts, id: \.self) { layout in
+                        Button {
+                            settings.clockLayout = layout.rawValue
+                            saveSettings()
+                        } label: {
+                            Text(layout.displayName)
+                                .font(.caption)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(
+                                    Capsule()
+                                        .fill(clockLayout == layout ?
+                                              Color.white.opacity(0.15) : Color.clear)
+                                )
+                                .foregroundStyle(theme.infoColor)
+                        }
+                    }
+                }
+            }
+
             // 配色
             HStack(spacing: 12) {
                 ForEach(BedsideClockLogic.ColorTheme.allCases, id: \.self) { t in
@@ -247,6 +293,22 @@ struct BedsideClockView: View {
                 toggleRow("bedside_show_date", isOn: $settings.showDate)
                 toggleRow("bedside_show_seconds", isOn: $settings.showSeconds)
             }
+
+            // ナイトモードを終了
+            Button {
+                dismiss()
+            } label: {
+                Text("bedside_exit")
+                    .font(.body.weight(.semibold))
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background(
+                        Capsule()
+                            .fill(theme.warningColor.opacity(0.2))
+                    )
+                    .foregroundStyle(theme.warningColor)
+            }
+            .padding(.top, 8)
         }
         .padding(24)
         .background(
@@ -278,14 +340,14 @@ struct BedsideClockView: View {
         BedsideClockLogic.ColorTheme(rawValue: settings.colorTheme) ?? .white
     }
 
+    private var clockLayout: BedsideClockLogic.ClockLayout {
+        BedsideClockLogic.ClockLayout(rawValue: settings.clockLayout) ?? .digitalLarge
+    }
+
     // MARK: - Tap Handling
 
     private func handleTap() {
-        if showOverlay {
-            // オーバーレイ表示中のタップはオーバーレイ外で処理（closeOverlay）
-            // ここには来ない（オーバーレイのdim layerがタップを吸収）
-            return
-        }
+        if showOverlay { return }
         if isIdle {
             isIdle = false
             applyBrightness()
@@ -322,6 +384,17 @@ struct BedsideClockView: View {
         savedBrightness = UIScreen.main.brightness
         applyBrightness()
         resetIdleTimer()
+
+        // 初回ヒント
+        if !AppGroup.bedsideHintShown {
+            showHint = true
+            AppGroup.bedsideHintShown = true
+            hintTimer = Timer.scheduledTimer(withTimeInterval: 4, repeats: false) { _ in
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    showHint = false
+                }
+            }
+        }
     }
 
     private func exitMode() {
@@ -335,6 +408,7 @@ struct BedsideClockView: View {
 
         idleTimer?.invalidate()
         overlayTimer?.invalidate()
+        hintTimer?.invalidate()
     }
 
     // MARK: - Brightness
