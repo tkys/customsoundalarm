@@ -128,6 +128,13 @@
 "bedside_show_date" = "日付";
 "bedside_show_seconds" = "秒表示";
 "bedside_font_size" = "文字サイズ";
+"bedside_layout" = "時計スタイル";
+"bedside_layout_digital_large" = "デジタル";
+"bedside_layout_minimal" = "ミニマル";
+"bedside_layout_digital_bold" = "太字";
+"bedside_layout_flip" = "フリップ (Pro)";
+"bedside_exit" = "ナイトモードを終了";
+"bedside_exit_hint" = "長押しで終了";
 
 /* Live Activity */
 "snoozing" = "スヌーズ中";

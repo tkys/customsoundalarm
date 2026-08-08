@@ -384,4 +384,68 @@ struct BedsideClockLogicTests {
         #expect(result.count == 8)
         #expect(result.filter { $0 == ":" }.count == 2)
     }
+
+    // MARK: - ClockLayout
+
+    @Test
+    func clockLayout_allCases() {
+        #expect(BedsideClockLogic.ClockLayout.allCases.count == 4)
+    }
+
+    @Test
+    func clockLayout_freeLayouts_areNotPro() {
+        let free = BedsideClockLogic.ClockLayout.allCases.filter { !$0.isPro }
+        #expect(free.count == 3)
+        #expect(free.contains(.digitalLarge))
+        #expect(free.contains(.minimal))
+        #expect(free.contains(.digitalBold))
+    }
+
+    @Test
+    func clockLayout_proLayout_isPro() {
+        #expect(BedsideClockLogic.ClockLayout.flipClock.isPro == true)
+    }
+
+    @Test
+    func clockLayout_available_notPro_excludesProLayouts() {
+        let available = BedsideClockLogic.ClockLayout.available(isPro: false)
+        #expect(available.count == 3)
+        #expect(!available.contains(.flipClock))
+    }
+
+    @Test
+    func clockLayout_available_pro_includesAll() {
+        let available = BedsideClockLogic.ClockLayout.available(isPro: true)
+        #expect(available.count == 4)
+        #expect(available.contains(.flipClock))
+    }
+
+    @Test
+    func clockLayout_rawValueRoundTrip() {
+        for layout in BedsideClockLogic.ClockLayout.allCases {
+            let raw = layout.rawValue
+            let restored = BedsideClockLogic.ClockLayout(rawValue: raw)
+            #expect(restored == layout)
+        }
+    }
+
+    @Test
+    func clockLayout_sizeMultiplier_positive() {
+        for layout in BedsideClockLogic.ClockLayout.allCases {
+            #expect(layout.sizeMultiplier > 0)
+        }
+    }
+
+    @Test
+    func clockLayout_minimal_smallerThanDigitalLarge() {
+        #expect(BedsideClockLogic.ClockLayout.minimal.sizeMultiplier < BedsideClockLogic.ClockLayout.digitalLarge.sizeMultiplier)
+    }
+
+    // MARK: - BedsideSettings clockLayout
+
+    @Test
+    func bedsideSettings_defaultLayout_isDigitalLarge() {
+        let s = BedsideClockLogic.BedsideSettings()
+        #expect(s.clockLayout == BedsideClockLogic.ClockLayout.digitalLarge.rawValue)
+    }
 }
