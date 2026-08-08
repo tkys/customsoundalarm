@@ -54,6 +54,18 @@ enum AppGroup {
         set { userDefaults.set(newValue, forKey: "bedside_color_theme") }
     }
 
+    /// ベッドサイド時計のユーザー設定（JSON・#59）
+    static var bedsideSettingsData: Data? {
+        get { userDefaults.data(forKey: "bedside_settings") }
+        set {
+            if let newValue {
+                userDefaults.set(newValue, forKey: "bedside_settings")
+            } else {
+                userDefaults.removeObject(forKey: "bedside_settings")
+            }
+        }
+    }
+
     /// Share Extensionからの受け渡し用ステージングディレクトリ
     static var stagingDirectory: URL {
         let url = containerURL.appendingPathComponent("Staging", isDirectory: true)

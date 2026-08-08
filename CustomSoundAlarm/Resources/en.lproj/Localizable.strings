@@ -122,6 +122,11 @@
 "bedside_no_alarm" = "No alarm set";
 "bedside_theme_white" = "White";
 "bedside_theme_amber" = "Amber";
+"bedside_brightness" = "Brightness";
+"bedside_show_countdown" = "Countdown";
+"bedside_show_sound_name" = "Sound Name";
+"bedside_show_date" = "Date";
+"bedside_show_seconds" = "Seconds";
 
 /* Live Activity */
 "snoozing" = "Snoozing";

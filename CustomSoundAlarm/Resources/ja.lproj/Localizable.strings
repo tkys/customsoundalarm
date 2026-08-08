@@ -122,6 +122,11 @@
 "bedside_no_alarm" = "アラームが設定されていません";
 "bedside_theme_white" = "ホワイト";
 "bedside_theme_amber" = "アンバー";
+"bedside_brightness" = "明るさ";
+"bedside_show_countdown" = "カウントダウン";
+"bedside_show_sound_name" = "音の名前";
+"bedside_show_date" = "日付";
+"bedside_show_seconds" = "秒表示";
 
 /* Live Activity */
 "snoozing" = "スヌーズ中";

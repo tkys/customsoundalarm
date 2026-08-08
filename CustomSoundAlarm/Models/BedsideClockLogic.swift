@@ -134,13 +134,70 @@ enum BedsideClockLogic {
     // MARK: - 輝度制御（純粋関数）
 
     /// モード開始時の初期輝度を算出する。
-    /// 元の輝度の半分（最低 0.05）に下げる。
-    static func dimmedBrightness(originalBrightness: CGFloat) -> CGFloat {
-        max(0.05, originalBrightness * 0.5)
+    /// 元の輝度にユーザー設定のオフセット倍率を適用する（最低 0.05）。
+    /// - Parameters:
+    ///   - originalBrightness: システムの元輝度（onAppear 時に保存）
+    ///   - userOffset: ユーザー設定の明るさ倍率（0.2〜1.0、既定 0.5）
+    static func dimmedBrightness(originalBrightness: CGFloat, userOffset: CGFloat = 0.5) -> CGFloat {
+        max(0.05, originalBrightness * userOffset)
     }
 
-    /// アイドル時（一定時間操作なし）のさらに減光した輝度。
-    static func idleBrightness(originalBrightness: CGFloat) -> CGFloat {
-        max(0.02, originalBrightness * 0.15)
+    /// アイドル時（一定時間操作なし）の減光輝度。
+    /// ユーザー設定のオフセットからさらに 30% に下げる（最低 0.02）。
+    static func idleBrightness(originalBrightness: CGFloat, userOffset: CGFloat = 0.5) -> CGFloat {
+        max(0.02, originalBrightness * userOffset * 0.3)
+    }
+
+    // MARK: - 設定
+
+    /// ベッドサイド時計のユーザー設定（永続化対象）。
+    struct BedsideSettings: Codable, Equatable, Sendable {
+        /// 明るさ倍率（0.2〜1.0、既定 0.5）
+        var brightnessOffset: CGFloat = 0.5
+        /// カウントダウン表示
+        var showCountdown: Bool = true
+        /// 音名表示
+        var showSoundName: Bool = true
+        /// 日付表示
+        var showDate: Bool = false
+        /// 秒表示
+        var showSeconds: Bool = false
+        /// 配色テーマ
+        var colorTheme: String = "white"
+
+        /// 表示要素の数（時計自体を除く）
+        var visibleElementCount: Int {
+            var count = 0
+            if showCountdown { count += 1 }
+            if showSoundName { count += 1 }
+            if showDate { count += 1 }
+            return count
+        }
+    }
+
+    /// 表示要素数に応じた時計のフォントサイズ。
+    /// 要素が多いほど時計が小さくなり、少ないほど大きくなる。
+    static func clockFontSize(visibleElementCount: Int) -> CGFloat {
+        switch visibleElementCount {
+        case 0: 120       // 要素なし → 最大
+        case 1: 110
+        case 2: 96
+        default: 84       // 3要素 → 最小
+        }
+    }
+
+    /// 時刻文字列を生成する。
+    /// - Parameters:
+    ///   - date: 現在時刻
+    ///   - is24Hour: 24時間表示か
+    ///   - showSeconds: 秒表示するか
+    static func timeString(for date: Date, is24Hour: Bool, showSeconds: Bool) -> String {
+        let formatter = DateFormatter()
+        if showSeconds {
+            formatter.dateFormat = is24Hour ? "HH:mm:ss" : "h:mm:ss"
+        } else {
+            formatter.dateFormat = is24Hour ? "HH:mm" : "h:mm"
+        }
+        return formatter.string(from: date)
     }
 }
