@@ -1,19 +1,10 @@
-■ New: Night Mode
-A full-screen bedside clock for when your phone is charging next to you.
-• Large, easy-to-read clock plus a countdown to your next alarm
-• Adjust brightness, text size, and which details are shown
-• Switch to an eye-friendly amber palette
-• Choose from three clock designs
-• Warns you when no alarm is set, so you notice before falling asleep
+■ Under-the-hood improvements
+Added internal analytics so we can understand how the app is used and improve it.
+No personally identifiable information is collected.
 
-■ Many more alarm sounds to choose from
-• Built-in presets expanded from 1 to 8
-• "Add sound" now sits at the top of the list, so it's easy to find
-• Presets can be collapsed so your own sounds stay front and center
-
-■ Improved audio capture from videos
-• Clip length extended to 60 seconds
-• Pick videos from the Files app and iCloud Drive
+■ Stability
+Minor fixes and general stability improvements.
 
 Thanks for using My Sound Alarm!
+If you haven't tried Night Mode or the new preset sounds from the last update, give them a look.
 We'd love to hear your feedback — please reach out through support.
