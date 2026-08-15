@@ -27,6 +27,10 @@ struct BedsideClockView: View {
     // ユーザー設定
     @State private var settings: BedsideClockLogic.BedsideSettings = loadSettings()
 
+    // 計測（#68）
+    @State private var enterDate = Date()
+    @State private var exitMethod: BedsideExitMethod = .exitButton
+
     private let clockTimer = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
     private let countdownTimer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
     private let offsetTimer = Timer.publish(every: 300, on: .main, in: .common).autoconnect()
@@ -88,6 +92,7 @@ struct BedsideClockView: View {
             handleTap()
         }
         .onLongPressGesture(minimumDuration: 0.6) {
+            exitMethod = .longPress
             dismiss()
         }
     }
@@ -204,6 +209,10 @@ struct BedsideClockView: View {
                             settings.brightnessOffset = newVal
                             saveSettings()
                             applyBrightness()
+                            AnalyticsService.shared.capture(.bedsideSettingChanged(
+                                setting: .brightness,
+                                value: .number(newVal)
+                            ))
                         }
                     ), in: 0.2...1.0)
                     .tint(theme.clockColor)
@@ -228,6 +237,10 @@ struct BedsideClockView: View {
                         set: { newVal in
                             settings.fontScale = newVal
                             saveSettings()
+                            AnalyticsService.shared.capture(.bedsideSettingChanged(
+                                setting: .fontScale,
+                                value: .number(newVal)
+                            ))
                         }
                     ), in: 0.7...1.5)
                     .tint(theme.clockColor)
@@ -249,6 +262,10 @@ struct BedsideClockView: View {
                         Button {
                             settings.clockLayout = layout.rawValue
                             saveSettings()
+                            AnalyticsService.shared.capture(.bedsideSettingChanged(
+                                setting: .layout,
+                                value: .string(layout.rawValue)
+                            ))
                         } label: {
                             Text(layout.displayName)
                                 .font(.caption)
@@ -271,6 +288,10 @@ struct BedsideClockView: View {
                     Button {
                         settings.colorTheme = t.rawValue
                         saveSettings()
+                        AnalyticsService.shared.capture(.bedsideSettingChanged(
+                            setting: .theme,
+                            value: .string(t.rawValue)
+                        ))
                     } label: {
                         Text(t.displayName)
                             .font(.body)
@@ -288,14 +309,15 @@ struct BedsideClockView: View {
 
             // 表示要素トグル
             VStack(spacing: 10) {
-                toggleRow("bedside_show_countdown", isOn: $settings.showCountdown)
-                toggleRow("bedside_show_sound_name", isOn: $settings.showSoundName)
-                toggleRow("bedside_show_date", isOn: $settings.showDate)
-                toggleRow("bedside_show_seconds", isOn: $settings.showSeconds)
+                toggleRow("bedside_show_countdown", isOn: $settings.showCountdown, analyticsElement: "countdown")
+                toggleRow("bedside_show_sound_name", isOn: $settings.showSoundName, analyticsElement: "sound_name")
+                toggleRow("bedside_show_date", isOn: $settings.showDate, analyticsElement: "date")
+                toggleRow("bedside_show_seconds", isOn: $settings.showSeconds, analyticsElement: "seconds")
             }
 
             // ナイトモードを終了
             Button {
+                exitMethod = .exitButton
                 dismiss()
             } label: {
                 Text("bedside_exit")
@@ -318,10 +340,22 @@ struct BedsideClockView: View {
         .padding(.horizontal, 40)
     }
 
-    private func toggleRow(_ key: String, isOn: Binding<Bool>) -> some View {
+    private func toggleRow(_ key: String, isOn: Binding<Bool>, analyticsElement: String) -> some View {
         Button {
             isOn.wrappedValue.toggle()
             saveSettings()
+            // 計測: 表示要素（秒表示は別設定として扱う）
+            if analyticsElement == "seconds" {
+                AnalyticsService.shared.capture(.bedsideSettingChanged(
+                    setting: .seconds,
+                    value: .bool(isOn.wrappedValue)
+                ))
+            } else {
+                AnalyticsService.shared.capture(.bedsideSettingChanged(
+                    setting: .elements,
+                    value: .string("\(analyticsElement)_\(isOn.wrappedValue ? "on" : "off")")
+                ))
+            }
         } label: {
             HStack {
                 Text(LocalizedStringResource(stringLiteral: key))
@@ -385,6 +419,14 @@ struct BedsideClockView: View {
         applyBrightness()
         resetIdleTimer()
 
+        // 計測: モードに入った
+        enterDate = Date()
+        AnalyticsService.shared.capture(.bedsideEntered(
+            layout: clockLayout.rawValue,
+            theme: settings.colorTheme,
+            hour: Calendar.current.component(.hour, from: now)
+        ))
+
         // 初回ヒント
         if !AppGroup.bedsideHintShown {
             showHint = true
@@ -399,6 +441,13 @@ struct BedsideClockView: View {
 
     private func exitMode() {
         isPresented = false
+
+        // 計測: モードを抜けた（滞在時間は区分で送る）
+        let duration = Date().timeIntervalSince(enterDate)
+        AnalyticsService.shared.capture(.bedsideExited(
+            durationBucket: AnalyticsBuckets.durationBucket(seconds: duration),
+            exitMethod: exitMethod.rawValue
+        ))
 
         AppDelegate.orientationLock = .portrait
         forceRotateIfNeeded()

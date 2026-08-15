@@ -20,8 +20,36 @@ final class SoundStore {
     }
 
     func add(_ sound: AlarmSound) {
+        var sound = sound
+        // 追加時に秒数を記録する（起動のたびに全ファイルを AVURLAsset で読まない・#68）
+        if !sound.isPreset && sound.durationSeconds == nil {
+            sound.durationSeconds = AudioConverter.shared.measureDurationSeconds(fileName: sound.fileName)
+        }
         sounds.append(sound)
         save()
+    }
+
+    /// 既存のカスタム音源のうち秒数が未記録のものを一度だけ補完して永続化する。
+    /// バージョンアップで `durationSeconds` が追加される前にインポートされた音源向け（#17 罠1対応）。
+    /// 計測済みの音源は対象外なので、起動のたびに全ファイルを読むことはない。
+    /// - Returns: 補完して保存したか（ユーザープロパティの再送判定用）
+    @discardableResult
+    func backfillMissingDurations() -> Bool {
+        var changed = false
+        for index in sounds.indices
+        where !sounds[index].isPreset && sounds[index].durationSeconds == nil {
+            if let seconds = AudioConverter.shared.measureDurationSeconds(fileName: sounds[index].fileName) {
+                sounds[index].durationSeconds = seconds
+                changed = true
+            }
+        }
+        if changed { save() }
+        return changed
+    }
+
+    /// カスタム音源のうち秒数が未記録のものがあるか（バックフィル要否判定）
+    func hasMissingDurations() -> Bool {
+        sounds.contains { !$0.isPreset && $0.durationSeconds == nil }
     }
 
     func rename(_ sound: AlarmSound, to newName: String) {

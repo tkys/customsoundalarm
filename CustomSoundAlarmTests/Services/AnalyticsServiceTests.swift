@@ -59,6 +59,10 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.alarmFired(wasAppForeground: true, hour: 8, isRepeating: false, detection: "observer").name == "alarm_fired")
         #expect(AnalyticsEvent.alarmStopped(hour: 8).name == "alarm_stopped")
         #expect(AnalyticsEvent.alarmSnoozed(from: "observer").name == "alarm_snoozed")
+        // Phase 4（ベッドサイドモード・#68）
+        #expect(AnalyticsEvent.bedsideEntered(layout: "digital_large", theme: "white", hour: 23).name == "bedside_entered")
+        #expect(AnalyticsEvent.bedsideExited(durationBucket: "over_2h", exitMethod: "long_press").name == "bedside_exited")
+        #expect(AnalyticsEvent.bedsideSettingChanged(setting: .layout, value: .string("minimal")).name == "bedside_setting_changed")
     }
 
     // MARK: alarm_created
@@ -134,6 +138,11 @@ struct AnalyticsEventTests {
             .alarmFired(wasAppForeground: true, hour: 8, isRepeating: false, detection: "observer"),
             .alarmStopped(hour: 8),
             .alarmSnoozed(from: "observer"),
+            .bedsideEntered(layout: "digital_large", theme: "white", hour: 23),
+            .bedsideExited(durationBucket: "1_5min", exitMethod: "exit_button"),
+            .bedsideSettingChanged(setting: .layout, value: .string("minimal")),
+            .bedsideSettingChanged(setting: .brightness, value: .number(0.8)),
+            .bedsideSettingChanged(setting: .seconds, value: .bool(true)),
         ]
 
         for event in events {
@@ -233,6 +242,89 @@ struct AnalyticsEventTests {
         #expect(VideoImportFailureReason.converterSetupFailed.rawValue == "converter_setup_failed")
         #expect(VideoImportFailureReason.conversionFailed.rawValue == "conversion_failed")
         #expect(VideoImportFailureReason.unknown.rawValue == "unknown")
+    }
+
+    // MARK: bedside_entered
+
+    @Test
+    func bedsideEnteredProperties_carryLayoutThemeHour() {
+        let props = AnalyticsEvent.bedsideEntered(layout: "digital_large", theme: "amber", hour: 23).properties
+
+        #expect(props.count == 3)
+        #expect(props["layout"] as? String == "digital_large")
+        #expect(props["theme"] as? String == "amber")
+        #expect(props["hour"] as? Int == 23)
+    }
+
+    @Test
+    func bedsideEnteredProperties_midnightHour() {
+        let props = AnalyticsEvent.bedsideEntered(layout: "minimal", theme: "white", hour: 0).properties
+        #expect(props["hour"] as? Int == 0)
+    }
+
+    // MARK: bedside_exited
+
+    @Test
+    func bedsideExitedProperties_carryBucketAndMethod() {
+        let props = AnalyticsEvent.bedsideExited(durationBucket: "under_1min", exitMethod: "exit_button").properties
+
+        #expect(props.count == 2)
+        #expect(props["duration_bucket"] as? String == "under_1min")
+        #expect(props["exit_method"] as? String == "exit_button")
+    }
+
+    @Test
+    func bedsideExitedProperties_longPressMethod() {
+        let props = AnalyticsEvent.bedsideExited(durationBucket: "over_2h", exitMethod: "long_press").properties
+        #expect(props["exit_method"] as? String == "long_press")
+    }
+
+    @Test
+    func bedsideExitMethodRawValuesAreStable() {
+        #expect(BedsideExitMethod.exitButton.rawValue == "exit_button")
+        #expect(BedsideExitMethod.longPress.rawValue == "long_press")
+    }
+
+    // MARK: bedside_setting_changed
+
+    @Test
+    func bedsideSettingChangedProperties_stringValue() {
+        let props = AnalyticsEvent.bedsideSettingChanged(setting: .layout, value: .string("flip_clock")).properties
+
+        #expect(props.count == 2)
+        #expect(props["setting"] as? String == "layout")
+        #expect(props["value"] as? String == "flip_clock")
+    }
+
+    @Test
+    func bedsideSettingChangedProperties_numberValue() {
+        let props = AnalyticsEvent.bedsideSettingChanged(setting: .brightness, value: .number(0.6)).properties
+
+        #expect(props["setting"] as? String == "brightness")
+        let value = props["value"] as? Double
+        #expect(value != nil)
+        // 浮動小数点は許容誤差で比較（#61）
+        if let value {
+            #expect(abs(value - 0.6) < 0.0001)
+        }
+    }
+
+    @Test
+    func bedsideSettingChangedProperties_boolValue() {
+        let props = AnalyticsEvent.bedsideSettingChanged(setting: .seconds, value: .bool(true)).properties
+        #expect(props["setting"] as? String == "seconds")
+        #expect(props["value"] as? Bool == true)
+    }
+
+    @Test
+    func bedsideSettingRawValuesAreStable() {
+        // PostHog ダッシュボード定義と一致すること
+        #expect(BedsideSetting.layout.rawValue == "layout")
+        #expect(BedsideSetting.theme.rawValue == "theme")
+        #expect(BedsideSetting.brightness.rawValue == "brightness")
+        #expect(BedsideSetting.fontScale.rawValue == "font_scale")
+        #expect(BedsideSetting.elements.rawValue == "elements")
+        #expect(BedsideSetting.seconds.rawValue == "seconds")
     }
 }
 
@@ -503,6 +595,51 @@ struct AnalyticsServiceCaptureTests {
         #expect(mock.captureCount == 1)
         #expect(mock.captures[0].event == "alarm_snoozed")
         #expect(mock.captures[0].properties?["from"] as? String == "observer")
+    }
+
+    // MARK: bedside events (Phase 4・#68)
+
+    @Test
+    func captureForwardsBedsideEntered() {
+        let mock = MockBackend()
+        let service = AnalyticsService(backend: mock)
+
+        service.capture(.bedsideEntered(layout: "minimal", theme: "amber", hour: 22))
+
+        #expect(mock.captureCount == 1)
+        let captured = mock.captures[0]
+        #expect(captured.event == "bedside_entered")
+        #expect(captured.properties?["layout"] as? String == "minimal")
+        #expect(captured.properties?["theme"] as? String == "amber")
+        #expect(captured.properties?["hour"] as? Int == 22)
+    }
+
+    @Test
+    func captureForwardsBedsideExited() {
+        let mock = MockBackend()
+        let service = AnalyticsService(backend: mock)
+
+        service.capture(.bedsideExited(durationBucket: "over_2h", exitMethod: "long_press"))
+
+        #expect(mock.captureCount == 1)
+        let captured = mock.captures[0]
+        #expect(captured.event == "bedside_exited")
+        #expect(captured.properties?["duration_bucket"] as? String == "over_2h")
+        #expect(captured.properties?["exit_method"] as? String == "long_press")
+    }
+
+    @Test
+    func captureForwardsBedsideSettingChanged() {
+        let mock = MockBackend()
+        let service = AnalyticsService(backend: mock)
+
+        service.capture(.bedsideSettingChanged(setting: .layout, value: .string("flip_clock")))
+
+        #expect(mock.captureCount == 1)
+        let captured = mock.captures[0]
+        #expect(captured.event == "bedside_setting_changed")
+        #expect(captured.properties?["setting"] as? String == "layout")
+        #expect(captured.properties?["value"] as? String == "flip_clock")
     }
 
     // MARK: setUserProperties
