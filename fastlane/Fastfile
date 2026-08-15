@@ -23,7 +23,7 @@ platform :ios do
       run_precheck_before_submit: false,
       submit_for_review: false,
       primary_category: "UTILITIES",
-      app_version: "1.3.0",
+      app_version: "1.4.0",
       languages: ["en-US", "ja"]
     )
   end
@@ -41,12 +41,12 @@ platform :ios do
       run_precheck_before_submit: false,
       submit_for_review: false,
       primary_category: "UTILITIES",
-      app_version: "1.3.0",
+      app_version: "1.4.0",
       languages: ["en-US", "ja"]
     )
   end
 
-  desc "リリースビルドを作成し App Store Connect にアップロード＆審査提出（v1.3.0）"
+  desc "リリースビルドを作成し App Store Connect にアップロード＆審査提出（v1.4.0）"
   lane :release do
     build_app(
       scheme: "CustomSoundAlarm",
@@ -85,7 +85,7 @@ platform :ios do
         export_compliance_uses_encryption: false,
         export_compliance_is_exempt: false
       },
-      app_version: "1.3.0",
+      app_version: "1.4.0",
       languages: ["en-US", "ja"]
     )
   end
@@ -109,8 +109,8 @@ platform :ios do
         export_compliance_uses_encryption: false,
         export_compliance_is_exempt: false
       },
-      app_version: "1.3.0",
-      build_number: "4",
+      app_version: "1.4.0",
+      build_number: "5",
       languages: ["en-US", "ja"]
     )
   end
