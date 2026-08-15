@@ -59,13 +59,40 @@ private func setUserProperties() {
         AppGroup.firstInstallVersion = version
     }
 
-    let customSoundCount = SoundStore.shared.sounds.filter { !$0.isPreset }.count
+    AnalyticsService.shared.setUserProperties(userPropertiesPayload())
+
+    // 既存のカスタム音源で秒数が未記録のものがある場合のみ、一度だけ遅延バックフィルして再送する。
+    // 起動直後のクリティカルパスを重くしないため 1 秒遅延させ、計測済み音源は対象外なので
+    // 起動のたびに全ファイルを読むことはない（#68・追加時記録との併用）。
+    if SoundStore.shared.hasMissingDurations() {
+        Task {
+            try? await Task.sleep(for: .seconds(1))
+            if SoundStore.shared.backfillMissingDurations() {
+                AnalyticsService.shared.setUserProperties(userPropertiesPayload())
+            }
+        }
+    }
+}
+
+/// ユーザープロパティのペイロードを組み立てる。
+/// サウンドの長さ・件数の分布は区分（バケット）で送る（生の秒数は不要・#68）。
+@MainActor
+private func userPropertiesPayload() -> [String: Any] {
+    let customSounds = SoundStore.shared.sounds.filter { !$0.isPreset }
+    let durations = customSounds.compactMap(\.durationSeconds)
+    let totalSeconds = durations.reduce(0, +)
+    let maxSeconds = durations.max()
+
+    let customSoundCount = customSounds.count
     let alarmCount = AlarmStore.shared.alarms.count
     let firstVersion = AppGroup.firstInstallVersion ?? "unknown"
 
-    AnalyticsService.shared.setUserProperties([
+    return [
         "custom_sound_count": customSoundCount,
         "alarm_count": alarmCount,
-        "first_install_version": firstVersion
-    ])
+        "first_install_version": firstVersion,
+        "sound_total_seconds_bucket": AnalyticsBuckets.secondsBucket(seconds: totalSeconds),
+        "sound_max_seconds_bucket": maxSeconds.map { AnalyticsBuckets.secondsBucket(seconds: $0) }
+            ?? AnalyticsBuckets.secondsBucket(seconds: 0)
+    ]
 }

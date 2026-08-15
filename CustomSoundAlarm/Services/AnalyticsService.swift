@@ -68,6 +68,24 @@ enum AnalyticsEvent: Sendable {
     /// - from: "observer" または "reconcile"
     case alarmSnoozed(from: String)
 
+    // MARK: Phase 4（ベッドサイドモード・#68）
+
+    /// ベッドサイドモードに入った
+    /// - layout: 選択中レイアウトの安定識別子（digital_large 等）
+    /// - theme: 配色テーマの安定識別子（white / amber）
+    /// - hour: 入った時刻の「時」（PII なし・時刻帯のみ）
+    case bedsideEntered(layout: String, theme: String, hour: Int)
+
+    /// ベッドサイドモードを抜けた
+    /// - durationBucket: 滞在時間の区分（under_1min 等・生の秒数は送らない）
+    /// - exitMethod: exit_button / long_press（#62 で両導線を用意したため区別する）
+    case bedsideExited(durationBucket: String, exitMethod: String)
+
+    /// ベッドサイドモードの設定変更
+    /// - setting: layout / theme / brightness / font_scale / elements / seconds
+    /// - value: 変更後の値（PII なし）
+    case bedsideSettingChanged(setting: BedsideSetting, value: BedsideSettingValue)
+
     /// PostHog に送信するイベント名
     var name: String {
         switch self {
@@ -84,6 +102,9 @@ enum AnalyticsEvent: Sendable {
         case .alarmFired: return "alarm_fired"
         case .alarmStopped: return "alarm_stopped"
         case .alarmSnoozed: return "alarm_snoozed"
+        case .bedsideEntered: return "bedside_entered"
+        case .bedsideExited: return "bedside_exited"
+        case .bedsideSettingChanged: return "bedside_setting_changed"
         }
     }
 
@@ -130,8 +151,63 @@ enum AnalyticsEvent: Sendable {
             return ["hour": hour]
         case let .alarmSnoozed(from):
             return ["from": from]
+        case let .bedsideEntered(layout, theme, hour):
+            return [
+                "layout": layout,
+                "theme": theme,
+                "hour": hour
+            ]
+        case let .bedsideExited(durationBucket, exitMethod):
+            return [
+                "duration_bucket": durationBucket,
+                "exit_method": exitMethod
+            ]
+        case let .bedsideSettingChanged(setting, value):
+            return [
+                "setting": setting.rawValue,
+                "value": value.asProperty
+            ]
         }
     }
+}
+
+// MARK: - BedsideSetting
+
+/// ベッドサイドモードの変更対象設定（安定識別子）。
+enum BedsideSetting: String, Sendable {
+    case layout
+    case theme
+    case brightness
+    case fontScale = "font_scale"
+    case elements
+    case seconds
+}
+
+// MARK: - BedsideSettingValue
+
+/// 設定変更イベントの「変更後の値」。
+/// PostHog プロパティは String / Double / Bool で渡す（PII は含めない）。
+enum BedsideSettingValue: Sendable {
+    case string(String)
+    case number(Double)
+    case bool(Bool)
+
+    /// PostHog プロパティとして渡す値
+    var asProperty: Any {
+        switch self {
+        case let .string(s): return s
+        case let .number(d): return d
+        case let .bool(b): return b
+        }
+    }
+}
+
+// MARK: - BedsideExitMethod
+
+/// ベッドサイドモードの退出導線（#62）。
+enum BedsideExitMethod: String, Sendable {
+    case exitButton = "exit_button"
+    case longPress = "long_press"
 }
 
 // MARK: - SoundImportSource

@@ -141,6 +141,18 @@ final class AudioConverter {
         try FileManager.default.removeItem(at: url)
         logger.info("Deleted sound: \(fileName)")
     }
+
+    /// CAF ファイルの秒数を取得する（追加時に記録する目的・#68）。
+    /// 計測失敗（ファイル欠損・無効なアセット等）は nil を返す。
+    /// 起動のたびに全ファイルを読まないよう、追加時計測と欠損分の一度きり補完のみで使う。
+    func measureDurationSeconds(fileName: String) -> Double? {
+        let url = soundsDirectory.appendingPathComponent(fileName)
+        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        let asset = AVURLAsset(url: url)
+        let seconds = CMTimeGetSeconds(asset.duration)
+        guard seconds.isFinite, seconds > 0 else { return nil }
+        return seconds
+    }
 }
 
 enum AudioConverterError: LocalizedError {
