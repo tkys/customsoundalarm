@@ -63,6 +63,8 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.bedsideEntered(layout: "digital_large", theme: "white", hour: 23).name == "bedside_entered")
         #expect(AnalyticsEvent.bedsideExited(durationBucket: "over_2h", exitMethod: "long_press").name == "bedside_exited")
         #expect(AnalyticsEvent.bedsideSettingChanged(setting: .layout, value: .string("minimal")).name == "bedside_setting_changed")
+        // #71: バックグラウンド退出も同じイベント名
+        #expect(AnalyticsEvent.bedsideExited(durationBucket: "under_1min", exitMethod: "backgrounded").name == "bedside_exited")
     }
 
     // MARK: alarm_created
@@ -280,9 +282,17 @@ struct AnalyticsEventTests {
     }
 
     @Test
+    func bedsideExitedProperties_backgroundedMethod() {
+        // #71: バックグラウンド化による退出（exit_button / long_press と区別）
+        let props = AnalyticsEvent.bedsideExited(durationBucket: "under_1min", exitMethod: "backgrounded").properties
+        #expect(props["exit_method"] as? String == "backgrounded")
+    }
+
+    @Test
     func bedsideExitMethodRawValuesAreStable() {
         #expect(BedsideExitMethod.exitButton.rawValue == "exit_button")
         #expect(BedsideExitMethod.longPress.rawValue == "long_press")
+        #expect(BedsideExitMethod.backgrounded.rawValue == "backgrounded")
     }
 
     // MARK: bedside_setting_changed
