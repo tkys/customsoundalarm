@@ -143,15 +143,17 @@ struct BedsideSessionLogicTests {
     }
 
     @Test
-    func exit_afterBackgrounded_usesResumedEnterDate() {
-        // バックグラウンド後に復帰せず明示終了した場合も、モード内なら発火する。
-        // 滞在時間は初回 enterDate（t0）からの経過（t0→t2 = 150秒）
+    func exit_afterBackgrounded_doesNotDoubleFire() {
+        // バックグラウンドで退出済み（exited(backgrounded) 発火済み）のため、
+        // 復帰せず明示終了しても退出イベントは発火せず、状態だけ閉じる（二重計上防止・#73）
         let entered = BedsideSessionLogic.enter(now: t0).state
         let backgrounded = BedsideSessionLogic.background(entered, now: t1).state
 
         let result = BedsideSessionLogic.exit(backgrounded, now: t2, method: .exitButton)
 
-        #expect(result.event == .exited(durationSeconds: 150, exitMethod: .exitButton))
+        #expect(result.event == .none)
+        #expect(result.state.isInMode == false)
+        #expect(result.state.isSessionActive == false)
     }
 
     // MARK: - BedsideExitMethod.backgrounded

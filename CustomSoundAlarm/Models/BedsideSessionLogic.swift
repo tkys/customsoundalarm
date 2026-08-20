@@ -70,14 +70,20 @@ enum BedsideSessionLogic {
     }
 
     /// 明示的終了（dismiss）。モード内なら退出イベント（exit_button / long_press）を発火する。
+    /// 既にバックグラウンド化で退出済み（isSessionActive == false）の場合は、
+    /// イベントを発火せず状態だけ閉じる（二重計上防止・#73 レビュー指摘）。
     static func exit(_ state: BedsideSessionState, now: Date, method: BedsideExitMethod) -> (state: BedsideSessionState, event: BedsideSessionEvent) {
         guard state.isInMode else {
             return (state, .none)
         }
-        let duration = now.timeIntervalSince(state.enterDate)
         var next = state
         next.isInMode = false
         next.isSessionActive = false
+        // 既に background で退出済みなら二重に発火しない
+        guard state.isSessionActive else {
+            return (next, .none)
+        }
+        let duration = now.timeIntervalSince(state.enterDate)
         return (next, .exited(durationSeconds: duration, exitMethod: method))
     }
 }

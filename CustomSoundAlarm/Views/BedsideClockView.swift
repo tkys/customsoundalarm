@@ -81,17 +81,24 @@ struct BedsideClockView: View {
         .onDisappear { exitMode() }
         .onChange(of: scenePhase) { _, phase in
             if phase != .active {
-                // 輝度復帰（既存・#56 の3経路の1つ）
+                // 輝度復帰（既存・#56 の3経路の1つ）: 一時的な中断でも早く戻すほうが安全なので
+                // .inactive 含む非アクティブすべてで実行（計測とは意図的に非対称）
                 restoreBrightness()
                 UIApplication.shared.isIdleTimerDisabled = false
+            }
 
-                // 計測: バックグラウンド化で退出（二重発火しない）
+            // 計測: 実バックグラウンド化（.background）でのみ退出イベントを発火する。
+            // .inactive はコントロールセンター等の一時的な中断で、ベッドサイドモードでは
+            // 夜中に開くだけで短時間滞在の誤発火になるため除外（#73 レビュー指摘）。
+            // iOS は実バックグラウンド化で .active → .inactive → .background と順に遷移するため
+            // .background だけを見ても取りこぼしはない。二重発火もしない。
+            if phase == .background {
                 let result = BedsideSessionLogic.background(sessionState, now: Date())
                 sessionState = result.state
                 if case let .exited(duration, method) = result.event {
                     captureExit(duration: duration, method: method)
                 }
-            } else if isPresented {
+            } else if phase == .active && isPresented {
                 UIApplication.shared.isIdleTimerDisabled = true
                 applyBrightness()
 
@@ -447,8 +454,8 @@ struct BedsideClockView: View {
         applyBrightness()
         resetIdleTimer()
 
-        // 計測: モードに入った
-        let result = BedsideSessionLogic.enter(now: now)
+        // 計測: モードに入った（background / exit と同じく Date() を基準に統一）
+        let result = BedsideSessionLogic.enter(now: Date())
         sessionState = result.state
         AnalyticsService.shared.capture(.bedsideEntered(
             layout: clockLayout.rawValue,
