@@ -27,8 +27,8 @@ struct BedsideClockView: View {
     // ユーザー設定
     @State private var settings: BedsideClockLogic.BedsideSettings = loadSettings()
 
-    // 計測（#68）
-    @State private var enterDate = Date()
+    // 計測（#68 / #71）
+    @State private var sessionState = BedsideSessionState.initial(now: Date())
     @State private var exitMethod: BedsideExitMethod = .exitButton
 
     private let clockTimer = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
@@ -81,11 +81,30 @@ struct BedsideClockView: View {
         .onDisappear { exitMode() }
         .onChange(of: scenePhase) { _, phase in
             if phase != .active {
+                // 輝度復帰（既存・#56 の3経路の1つ）: 一時的な中断でも早く戻すほうが安全なので
+                // .inactive 含む非アクティブすべてで実行（計測とは意図的に非対称）
                 restoreBrightness()
                 UIApplication.shared.isIdleTimerDisabled = false
-            } else if isPresented {
+            }
+
+            // 計測: 実バックグラウンド化（.background）でのみ退出イベントを発火する。
+            // .inactive はコントロールセンター等の一時的な中断で、ベッドサイドモードでは
+            // 夜中に開くだけで短時間滞在の誤発火になるため除外（#73 レビュー指摘）。
+            // iOS は実バックグラウンド化で .active → .inactive → .background と順に遷移するため
+            // .background だけを見ても取りこぼしはない。二重発火もしない。
+            if phase == .background {
+                let result = BedsideSessionLogic.background(sessionState, now: Date())
+                sessionState = result.state
+                if case let .exited(duration, method) = result.event {
+                    captureExit(duration: duration, method: method)
+                }
+            } else if phase == .active && isPresented {
                 UIApplication.shared.isIdleTimerDisabled = true
                 applyBrightness()
+
+                // 計測: 復帰でセッション再起点（二重計上防止・イベントは発火しない）
+                let result = BedsideSessionLogic.foreground(sessionState, now: Date())
+                sessionState = result.state
             }
         }
         .onTapGesture {
@@ -203,18 +222,26 @@ struct BedsideClockView: View {
                     Image(systemName: "sun.min")
                         .font(.title3)
                         .foregroundStyle(theme.infoColor)
-                    Slider(value: Binding(
-                        get: { settings.brightnessOffset },
-                        set: { newVal in
-                            settings.brightnessOffset = newVal
-                            saveSettings()
-                            applyBrightness()
-                            AnalyticsService.shared.capture(.bedsideSettingChanged(
-                                setting: .brightness,
-                                value: .number(newVal)
-                            ))
+                    Slider(
+                        value: Binding(
+                            get: { settings.brightnessOffset },
+                            set: { newVal in
+                                settings.brightnessOffset = newVal
+                                saveSettings()
+                                applyBrightness()
+                            }
+                        ),
+                        in: 0.2...1.0,
+                        // ドラッグ確定時（onEditingChanged=false）に1回だけ送信（#71・毎フレーム連打の防止）
+                        onEditingChanged: { editing in
+                            if !editing {
+                                AnalyticsService.shared.capture(.bedsideSettingChanged(
+                                    setting: .brightness,
+                                    value: .number(settings.brightnessOffset)
+                                ))
+                            }
                         }
-                    ), in: 0.2...1.0)
+                    )
                     .tint(theme.clockColor)
                     .frame(maxWidth: 240)
                     Image(systemName: "sun.max")
@@ -232,17 +259,25 @@ struct BedsideClockView: View {
                     Text("A")
                         .font(.caption)
                         .foregroundStyle(theme.infoColor)
-                    Slider(value: Binding(
-                        get: { settings.fontScale },
-                        set: { newVal in
-                            settings.fontScale = newVal
-                            saveSettings()
-                            AnalyticsService.shared.capture(.bedsideSettingChanged(
-                                setting: .fontScale,
-                                value: .number(newVal)
-                            ))
+                    Slider(
+                        value: Binding(
+                            get: { settings.fontScale },
+                            set: { newVal in
+                                settings.fontScale = newVal
+                                saveSettings()
+                            }
+                        ),
+                        in: 0.7...1.5,
+                        // ドラッグ確定時に1回だけ送信（#71・毎フレーム連打の防止）
+                        onEditingChanged: { editing in
+                            if !editing {
+                                AnalyticsService.shared.capture(.bedsideSettingChanged(
+                                    setting: .fontScale,
+                                    value: .number(settings.fontScale)
+                                ))
+                            }
                         }
-                    ), in: 0.7...1.5)
+                    )
                     .tint(theme.clockColor)
                     .frame(maxWidth: 240)
                     Text("A")
@@ -419,8 +454,9 @@ struct BedsideClockView: View {
         applyBrightness()
         resetIdleTimer()
 
-        // 計測: モードに入った
-        enterDate = Date()
+        // 計測: モードに入った（background / exit と同じく Date() を基準に統一）
+        let result = BedsideSessionLogic.enter(now: Date())
+        sessionState = result.state
         AnalyticsService.shared.capture(.bedsideEntered(
             layout: clockLayout.rawValue,
             theme: settings.colorTheme,
@@ -442,12 +478,12 @@ struct BedsideClockView: View {
     private func exitMode() {
         isPresented = false
 
-        // 計測: モードを抜けた（滞在時間は区分で送る）
-        let duration = Date().timeIntervalSince(enterDate)
-        AnalyticsService.shared.capture(.bedsideExited(
-            durationBucket: AnalyticsBuckets.durationBucket(seconds: duration),
-            exitMethod: exitMethod.rawValue
-        ))
+        // 計測: モードを抜けた（滞在時間は区分で送る・二重発火しない）
+        let result = BedsideSessionLogic.exit(sessionState, now: Date(), method: exitMethod)
+        sessionState = result.state
+        if case let .exited(duration, method) = result.event {
+            captureExit(duration: duration, method: method)
+        }
 
         AppDelegate.orientationLock = .portrait
         forceRotateIfNeeded()
@@ -458,6 +494,14 @@ struct BedsideClockView: View {
         idleTimer?.invalidate()
         overlayTimer?.invalidate()
         hintTimer?.invalidate()
+    }
+
+    /// bedside_exited の共通送信ヘルパー（滞在時間は区分で送る）
+    private func captureExit(duration: TimeInterval, method: BedsideExitMethod) {
+        AnalyticsService.shared.capture(.bedsideExited(
+            durationBucket: AnalyticsBuckets.durationBucket(seconds: duration),
+            exitMethod: method.rawValue
+        ))
     }
 
     // MARK: - Brightness

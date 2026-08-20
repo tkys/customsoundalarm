@@ -204,10 +204,12 @@ enum BedsideSettingValue: Sendable {
 
 // MARK: - BedsideExitMethod
 
-/// ベッドサイドモードの退出導線（#62）。
+/// ベッドサイドモードの退出導線（#62 / #71）。
 enum BedsideExitMethod: String, Sendable {
     case exitButton = "exit_button"
     case longPress = "long_press"
+    /// バックグラウンド化による退出（#71）。明示的な終了ではない
+    case backgrounded
 }
 
 // MARK: - SoundImportSource
@@ -432,6 +434,12 @@ final class AnalyticsService: @unchecked Sendable {
         }
 
         PostHogSDK.shared.setup(posthogConfig)
+
+        // デバッグ/開発ビルドを本番分析から恒久除外するための super-property（#71）。
+        // 以降の全イベントに自動付与される。Release（App Store）ビルドでは付与されない。
+        #if DEBUG
+        PostHogSDK.shared.register(["build_type": "debug"])
+        #endif
 
         backend = PostHogAnalyticsBackend()
         isEnabled = true
