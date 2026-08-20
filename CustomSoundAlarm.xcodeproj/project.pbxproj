@@ -73,6 +73,7 @@
 		BF9B0277F257A5780994AA1D /* PresetMusicBox.caf in Resources */ = {isa = PBXBuildFile; fileRef = AAA02B1AE43B835B2A27D6CF /* PresetMusicBox.caf */; };
 		C280DD997F519388BF6F63EA /* PresetCrescendo.caf in Resources */ = {isa = PBXBuildFile; fileRef = 8CDCD4DBBDF46DDC920E75C1 /* PresetCrescendo.caf */; };
 		C4CC98722FBE4B800784E5A6 /* SoundStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E385B754D493555537FB767D /* SoundStore.swift */; };
+		C6304B14B6E21E7CACF9B24E /* BedsideClockProFaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04F29961811D7F236A835C19 /* BedsideClockProFaces.swift */; };
 		C6B768B7246257C8EE0725FB /* PendingSoundImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CBACC275B5CC8C65DB386E6 /* PendingSoundImport.swift */; };
 		CA0EEECA616D5FD95C77EF8E /* AnalyticsServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9D35522AC999425CF7052E /* AnalyticsServiceTests.swift */; };
 		CC7A9B0476BC22807767F442 /* CustomSoundAlarmWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 450DEB40FC22DF70FD2EEE04 /* CustomSoundAlarmWidgetBundle.swift */; };
@@ -141,6 +142,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		04F29961811D7F236A835C19 /* BedsideClockProFaces.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BedsideClockProFaces.swift; sourceTree = "<group>"; };
 		05D997460327EF0788815A8A /* BedsideSessionLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BedsideSessionLogic.swift; sourceTree = "<group>"; };
 		06D75262D4EB4101D764EEED /* AlarmStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmStore.swift; sourceTree = "<group>"; };
 		070B386CACF0CF5F1B4FD824 /* AudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
@@ -382,6 +384,7 @@
 			children = (
 				AEEBEBF4DB690A293B406484 /* AddAlarmView.swift */,
 				887EC8A6AFEAF34381615011 /* BedsideClockFaces.swift */,
+				04F29961811D7F236A835C19 /* BedsideClockProFaces.swift */,
 				BA0DC1BEE7AD4F2604D84B47 /* BedsideClockView.swift */,
 				C5C2A02E12D039E82B55921A /* ContentView.swift */,
 				177D78CF60700582FA34F061 /* SoundPickerView.swift */,
@@ -656,6 +659,7 @@
 				28A5C3EDD2A11E6FFFCDD154 /* AudioPlayer.swift in Sources */,
 				477A46E380445D30CDA36584 /* BedsideClockFaces.swift in Sources */,
 				ED3E30974CF59BD1941A3FF2 /* BedsideClockLogic.swift in Sources */,
+				C6304B14B6E21E7CACF9B24E /* BedsideClockProFaces.swift in Sources */,
 				039DFCF8FECC7EDAE85815C2 /* BedsideClockView.swift in Sources */,
 				B42071593738C0BBE32C4664 /* BedsideSessionLogic.swift in Sources */,
 				907E1AC28A0FA1AEEC8F463A /* ContentView.swift in Sources */,

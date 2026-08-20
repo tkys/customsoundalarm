@@ -103,7 +103,9 @@ enum BedsideClockLogic {
         case analog          // アナログフェイス（#72 Phase1）
         case word            // ワードクロック（#72 Phase1）
         // Pro
-        case flipClock       // フリップ時計風（Pro）
+        case flipClock       // フリップ時計風（#72 Phase2）
+        case sevenSegment    // 7セグLED（#72 Phase2）
+        case dot             // ドットマトリクス（#72 Phase2）
 
         var displayName: String {
             switch self {
@@ -113,11 +115,17 @@ enum BedsideClockLogic {
             case .analog: String(localized: "bedside_layout_analog")
             case .word: String(localized: "bedside_layout_word")
             case .flipClock: String(localized: "bedside_layout_flip")
+            case .sevenSegment: String(localized: "bedside_layout_seven_segment")
+            case .dot: String(localized: "bedside_layout_dot")
             }
         }
 
+        /// Pro 限定か。分類は維持し、開放は Entitlements の一時フラグで行う（#72 Phase2）
         var isPro: Bool {
-            self == .flipClock
+            switch self {
+            case .digitalLarge, .minimal, .digitalBold, .analog, .word: false
+            case .flipClock, .sevenSegment, .dot: true
+            }
         }
 
         /// フォントのウエイト（デジタル系のみ使用。analog/word は値を持たせるだけ）
@@ -127,7 +135,7 @@ enum BedsideClockLogic {
             case .minimal: .ultraLight
             case .digitalBold: .bold
             case .analog, .word: .light
-            case .flipClock: .medium
+            case .flipClock, .sevenSegment, .dot: .medium
             }
         }
 
@@ -135,7 +143,7 @@ enum BedsideClockLogic {
         var fontDesign: Font.Design {
             switch self {
             case .digitalLarge, .minimal, .digitalBold, .analog, .word: .default
-            case .flipClock: .rounded
+            case .flipClock, .sevenSegment, .dot: .rounded
             }
         }
 
@@ -147,6 +155,8 @@ enum BedsideClockLogic {
             case .digitalBold: 1.0
             case .analog, .word: 1.0
             case .flipClock: 0.9
+            case .sevenSegment: 0.8
+            case .dot: 0.8
             }
         }
 

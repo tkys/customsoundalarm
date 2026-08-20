@@ -123,9 +123,9 @@
 "bedside_theme_white" = "ホワイト";
 "bedside_theme_amber" = "アンバー";
 "bedside_theme_red" = "レッド";
-"bedside_theme_green" = "グリーン (Pro)";
-"bedside_theme_ice_blue" = "アイスブルー (Pro)";
-"bedside_theme_rose" = "ローズ (Pro)";
+"bedside_theme_green" = "グリーン";
+"bedside_theme_ice_blue" = "アイスブルー";
+"bedside_theme_rose" = "ローズ";
 "bedside_brightness" = "明るさ";
 "bedside_show_countdown" = "カウントダウン";
 "bedside_show_sound_name" = "音の名前";
@@ -138,9 +138,16 @@
 "bedside_layout_digital_bold" = "太字";
 "bedside_layout_analog" = "アナログ";
 "bedside_layout_word" = "文字盤";
-"bedside_layout_flip" = "フリップ (Pro)";
+"bedside_layout_flip" = "フリップ";
+"bedside_layout_seven_segment" = "7セグ";
+"bedside_layout_dot" = "ドット";
 "bedside_exit" = "ナイトモードを終了";
 "bedside_exit_hint" = "長押しで終了";
+
+/* #72 Phase2: 一時無料開放 */
+"pro_badge" = "Pro";
+"promo_unlock_badge" = "無料開放中";
+"promo_unlock_note" = "Pro フェイス・カラーを一時的に無料開放中です。将来 Pro 限定に戻る場合があります。";
 
 /* WordClock (#72) */
 "word_clock_night" = "よる";
