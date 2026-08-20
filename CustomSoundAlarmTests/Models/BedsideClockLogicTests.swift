@@ -188,9 +188,44 @@ struct BedsideClockLogicTests {
 
     @Test
     func colorTheme_allCases() {
-        #expect(BedsideClockLogic.ColorTheme.allCases.count == 2)
+        #expect(BedsideClockLogic.ColorTheme.allCases.count == 6)
         #expect(BedsideClockLogic.ColorTheme.allCases.contains(.white))
         #expect(BedsideClockLogic.ColorTheme.allCases.contains(.amber))
+        #expect(BedsideClockLogic.ColorTheme.allCases.contains(.red))
+        #expect(BedsideClockLogic.ColorTheme.allCases.contains(.green))
+        #expect(BedsideClockLogic.ColorTheme.allCases.contains(.iceBlue))
+        #expect(BedsideClockLogic.ColorTheme.allCases.contains(.rose))
+    }
+
+    @Test
+    func colorTheme_freeThemes_areNotPro() {
+        let free = BedsideClockLogic.ColorTheme.allCases.filter { !$0.isPro }
+        #expect(free.count == 3)
+        #expect(free.contains(.white))
+        #expect(free.contains(.amber))
+        #expect(free.contains(.red))
+    }
+
+    @Test
+    func colorTheme_proThemes_arePro() {
+        #expect(BedsideClockLogic.ColorTheme.green.isPro == true)
+        #expect(BedsideClockLogic.ColorTheme.iceBlue.isPro == true)
+        #expect(BedsideClockLogic.ColorTheme.rose.isPro == true)
+    }
+
+    @Test
+    func colorTheme_available_notPro_excludesProThemes() {
+        let available = BedsideClockLogic.ColorTheme.available(isPro: false)
+        #expect(available.count == 3)
+        #expect(!available.contains(.green))
+        #expect(!available.contains(.iceBlue))
+        #expect(!available.contains(.rose))
+    }
+
+    @Test
+    func colorTheme_available_pro_includesAll() {
+        let available = BedsideClockLogic.ColorTheme.available(isPro: true)
+        #expect(available.count == 6)
     }
 
     @Test
@@ -199,6 +234,61 @@ struct BedsideClockLogicTests {
             let raw = theme.rawValue
             let restored = BedsideClockLogic.ColorTheme(rawValue: raw)
             #expect(restored == theme)
+        }
+    }
+
+    @Test
+    func colorTheme_iceBlueRawValue_isStable() {
+        #expect(BedsideClockLogic.ColorTheme.iceBlue.rawValue == "ice_blue")
+    }
+
+    // MARK: - 新テーマの値（#72・float は許容誤差で比較）
+
+    @Test
+    func redTheme_values() {
+        let red = BedsideClockLogic.ColorTheme.red
+        #expect(abs(red.clockOpacity - 0.9) < 0.0001)
+        let rgb = red.tintRGB!
+        #expect(abs(rgb.r - 1.0) < 0.0001)
+        #expect(abs(rgb.g - 0.28) < 0.0001)
+        #expect(abs(rgb.b - 0.22) < 0.0001)
+    }
+
+    @Test
+    func greenTheme_values() {
+        let green = BedsideClockLogic.ColorTheme.green
+        #expect(abs(green.clockOpacity - 0.9) < 0.0001)
+        let rgb = green.tintRGB!
+        #expect(abs(rgb.r - 0.22) < 0.0001)
+        #expect(abs(rgb.g - 1.0) < 0.0001)
+        #expect(abs(rgb.b - 0.38) < 0.0001)
+    }
+
+    @Test
+    func iceBlueTheme_values() {
+        let ice = BedsideClockLogic.ColorTheme.iceBlue
+        #expect(abs(ice.clockOpacity - 0.9) < 0.0001)
+        let rgb = ice.tintRGB!
+        #expect(abs(rgb.r - 0.55) < 0.0001)
+        #expect(abs(rgb.g - 0.82) < 0.0001)
+        #expect(abs(rgb.b - 1.0) < 0.0001)
+    }
+
+    @Test
+    func roseTheme_values() {
+        let rose = BedsideClockLogic.ColorTheme.rose
+        #expect(abs(rose.clockOpacity - 0.9) < 0.0001)
+        let rgb = rose.tintRGB!
+        #expect(abs(rgb.r - 1.0) < 0.0001)
+        #expect(abs(rgb.g - 0.62) < 0.0001)
+        #expect(abs(rgb.b - 0.75) < 0.0001)
+    }
+
+    @Test
+    func everyThemeHasPositiveOpacity() {
+        for theme in BedsideClockLogic.ColorTheme.allCases {
+            #expect(theme.clockOpacity > 0)
+            #expect(theme.infoOpacity > 0)
         }
     }
 
@@ -389,16 +479,19 @@ struct BedsideClockLogicTests {
 
     @Test
     func clockLayout_allCases() {
-        #expect(BedsideClockLogic.ClockLayout.allCases.count == 4)
+        #expect(BedsideClockLogic.ClockLayout.allCases.count == 6)
     }
 
     @Test
     func clockLayout_freeLayouts_areNotPro() {
         let free = BedsideClockLogic.ClockLayout.allCases.filter { !$0.isPro }
-        #expect(free.count == 3)
+        #expect(free.count == 5)
         #expect(free.contains(.digitalLarge))
         #expect(free.contains(.minimal))
         #expect(free.contains(.digitalBold))
+        // #72 Phase1: アナログ・ワードクロックは無料側
+        #expect(free.contains(.analog))
+        #expect(free.contains(.word))
     }
 
     @Test
@@ -409,14 +502,16 @@ struct BedsideClockLogicTests {
     @Test
     func clockLayout_available_notPro_excludesProLayouts() {
         let available = BedsideClockLogic.ClockLayout.available(isPro: false)
-        #expect(available.count == 3)
+        #expect(available.count == 5)
         #expect(!available.contains(.flipClock))
+        #expect(available.contains(.analog))
+        #expect(available.contains(.word))
     }
 
     @Test
     func clockLayout_available_pro_includesAll() {
         let available = BedsideClockLogic.ClockLayout.available(isPro: true)
-        #expect(available.count == 4)
+        #expect(available.count == 6)
         #expect(available.contains(.flipClock))
     }
 

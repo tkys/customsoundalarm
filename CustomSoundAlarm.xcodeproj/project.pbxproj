@@ -20,6 +20,7 @@
 		1D51CFD3A640B15B6272B13A /* AlarmMetadataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C8C1415F3825EA19A5F8714 /* AlarmMetadataModel.swift */; };
 		23DA87EF8C3F2F9F829BC18F /* AlarmEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A90C5CB204A2C060BFDFD18D /* AlarmEntry.swift */; };
 		24E3C49276F57794BD6921CC /* AlarmCountdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF5897A9AC3BC0A9BE3F0981 /* AlarmCountdownTests.swift */; };
+		253B1E99CE54D98C100211A4 /* WordClockLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7629DC240259F86DD44458A1 /* WordClockLogicTests.swift */; };
 		280022EDB1A50B264A0C6287 /* TrimRangeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2EDEE904CEA28891E63DDB4 /* TrimRangeTests.swift */; };
 		28A5C3EDD2A11E6FFFCDD154 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070B386CACF0CF5F1B4FD824 /* AudioPlayer.swift */; };
 		303D3E535C13A4B1EF295608 /* AlarmMetadataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C8C1415F3825EA19A5F8714 /* AlarmMetadataModel.swift */; };
@@ -32,6 +33,7 @@
 		41B44F296D997D7D38BA3DD8 /* SyncDiffTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39989820052720055A683E8A /* SyncDiffTests.swift */; };
 		442664997A989CFE11611D8B /* AlarmScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE105D13EE2FE60FAE50F6C7 /* AlarmScheduler.swift */; };
 		4442998D1B45AA91B6DAF454 /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = BE932E485F167BB33E9C66C0 /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		477A46E380445D30CDA36584 /* BedsideClockFaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 887EC8A6AFEAF34381615011 /* BedsideClockFaces.swift */; };
 		51108A698155ACD02B8EBC3A /* PendingAlarmEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13164272F44EAF943FDAB6E2 /* PendingAlarmEvent.swift */; };
 		5382328DBE970BF786EEC79F /* SnoozeDebugTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B12EC528B64B6A6F5D389E5B /* SnoozeDebugTests.swift */; };
 		550BB96979FE51FF49DA523E /* Entitlements.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB65D02618898ACF54202398 /* Entitlements.swift */; };
@@ -96,6 +98,7 @@
 		FB09AF3122E802F2E7227043 /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = 1F39A85D2D50B8401865D3FC /* PostHog */; };
 		FCE8653DBFC19A413125A2AA /* AddAlarmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEEBEBF4DB690A293B406484 /* AddAlarmView.swift */; };
 		FF6104B0D449CD52F0C14499 /* AlarmMetadataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C8C1415F3825EA19A5F8714 /* AlarmMetadataModel.swift */; };
+		FFFA5F9076B18132B7E83DF9 /* WordClockLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B96306320AAB8224237CB52 /* WordClockLogic.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -166,16 +169,19 @@
 		649ACDAAA65ED0A4EAB4A593 /* CustomSoundAlarmApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSoundAlarmApp.swift; sourceTree = "<group>"; };
 		67B419A7C166A0C68EA15ECC /* PostSaveFeedbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostSaveFeedbackTests.swift; sourceTree = "<group>"; };
 		680A6054B3E702FD00B5AFB1 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
+		6B96306320AAB8224237CB52 /* WordClockLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordClockLogic.swift; sourceTree = "<group>"; };
 		6C8C1415F3825EA19A5F8714 /* AlarmMetadataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmMetadataModel.swift; sourceTree = "<group>"; };
 		7023AEAF15F5D0D792D217E3 /* AlarmIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmIntents.swift; sourceTree = "<group>"; };
 		73006F217DAD8BFF87A77080 /* EntitlementsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementsTests.swift; sourceTree = "<group>"; };
 		756E44AB40EB57CD77F1BF39 /* AnalyticsBuckets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsBuckets.swift; sourceTree = "<group>"; };
+		7629DC240259F86DD44458A1 /* WordClockLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordClockLogicTests.swift; sourceTree = "<group>"; };
 		7B785B0AA836FD95FBE5E416 /* CustomSoundAlarm.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CustomSoundAlarm.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FDFF3E0BB74C0B6C048D867 /* TrimRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrimRange.swift; sourceTree = "<group>"; };
 		85907A9D7C84B496D404EFA0 /* VideoTrimmerBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTrimmerBar.swift; sourceTree = "<group>"; };
 		85A905CD44F94EC80ECDCA40 /* SoundStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundStoreTests.swift; sourceTree = "<group>"; };
 		8617DE7DDFD767CAB2A28B9E /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
 		862AA6520E0D0EB7FF580EAE /* AlarmSoundCodableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSoundCodableTests.swift; sourceTree = "<group>"; };
+		887EC8A6AFEAF34381615011 /* BedsideClockFaces.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BedsideClockFaces.swift; sourceTree = "<group>"; };
 		8B0D5FB2BAFE575463DA794F /* BedsideClockLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BedsideClockLogicTests.swift; sourceTree = "<group>"; };
 		8CDCD4DBBDF46DDC920E75C1 /* PresetCrescendo.caf */ = {isa = PBXFileReference; path = PresetCrescendo.caf; sourceTree = "<group>"; };
 		8EBEEA911580D9582E865DD7 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -256,6 +262,7 @@
 				EA4D6382156797331B6E9D10 /* SoundPickerLogicTests.swift */,
 				171400DBA98E9AB1A2F8A3EF /* SoundUsageHistoryTests.swift */,
 				D2EDEE904CEA28891E63DDB4 /* TrimRangeTests.swift */,
+				7629DC240259F86DD44458A1 /* WordClockLogicTests.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -374,6 +381,7 @@
 			isa = PBXGroup;
 			children = (
 				AEEBEBF4DB690A293B406484 /* AddAlarmView.swift */,
+				887EC8A6AFEAF34381615011 /* BedsideClockFaces.swift */,
 				BA0DC1BEE7AD4F2604D84B47 /* BedsideClockView.swift */,
 				C5C2A02E12D039E82B55921A /* ContentView.swift */,
 				177D78CF60700582FA34F061 /* SoundPickerView.swift */,
@@ -404,6 +412,7 @@
 				4F4EDA00108BCD1FA3612C5E /* SoundPickerLogic.swift */,
 				D620CC2A8B9C10399A403D9E /* SoundUsageHistory.swift */,
 				7FDFF3E0BB74C0B6C048D867 /* TrimRange.swift */,
+				6B96306320AAB8224237CB52 /* WordClockLogic.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -645,6 +654,7 @@
 				3A6E302E4D885A46C64EA98A /* AppGroup.swift in Sources */,
 				98E5E2041DFF10AA899AF19D /* AudioConverter.swift in Sources */,
 				28A5C3EDD2A11E6FFFCDD154 /* AudioPlayer.swift in Sources */,
+				477A46E380445D30CDA36584 /* BedsideClockFaces.swift in Sources */,
 				ED3E30974CF59BD1941A3FF2 /* BedsideClockLogic.swift in Sources */,
 				039DFCF8FECC7EDAE85815C2 /* BedsideClockView.swift in Sources */,
 				B42071593738C0BBE32C4664 /* BedsideSessionLogic.swift in Sources */,
@@ -667,6 +677,7 @@
 				9F6ABE7A493058668F5EC0B3 /* VideoFileImporter.swift in Sources */,
 				DFA060844B237AD0B731661E /* VideoTrimView.swift in Sources */,
 				E8588BF22C362F9B9C37B42C /* VideoTrimmerBar.swift in Sources */,
+				FFFA5F9076B18132B7E83DF9 /* WordClockLogic.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -724,6 +735,7 @@
 				41B44F296D997D7D38BA3DD8 /* SyncDiffTests.swift in Sources */,
 				280022EDB1A50B264A0C6287 /* TrimRangeTests.swift in Sources */,
 				5DBFA4F06D38315D3CF8C99A /* VideoFileImporterTests.swift in Sources */,
+				253B1E99CE54D98C100211A4 /* WordClockLogicTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

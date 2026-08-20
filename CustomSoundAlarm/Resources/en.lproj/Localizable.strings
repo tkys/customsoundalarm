@@ -122,6 +122,10 @@
 "bedside_no_alarm" = "No alarm set";
 "bedside_theme_white" = "White";
 "bedside_theme_amber" = "Amber";
+"bedside_theme_red" = "Red";
+"bedside_theme_green" = "Green (Pro)";
+"bedside_theme_ice_blue" = "Ice Blue (Pro)";
+"bedside_theme_rose" = "Rose (Pro)";
 "bedside_brightness" = "Brightness";
 "bedside_show_countdown" = "Countdown";
 "bedside_show_sound_name" = "Sound Name";
@@ -132,9 +136,38 @@
 "bedside_layout_digital_large" = "Digital";
 "bedside_layout_minimal" = "Minimal";
 "bedside_layout_digital_bold" = "Bold";
+"bedside_layout_analog" = "Analog";
+"bedside_layout_word" = "Word Clock";
 "bedside_layout_flip" = "Flip (Pro)";
 "bedside_exit" = "Exit Night Mode";
 "bedside_exit_hint" = "Press and hold to exit";
+
+/* WordClock (#72) */
+"word_clock_night" = "NIGHT";
+"word_clock_hour_1" = "ONE";
+"word_clock_hour_2" = "TWO";
+"word_clock_hour_3" = "THREE";
+"word_clock_hour_4" = "FOUR";
+"word_clock_hour_5" = "FIVE";
+"word_clock_hour_6" = "SIX";
+"word_clock_hour_7" = "SEVEN";
+"word_clock_hour_8" = "EIGHT";
+"word_clock_hour_9" = "NINE";
+"word_clock_hour_10" = "TEN";
+"word_clock_hour_11" = "ELEVEN";
+"word_clock_hour_12" = "TWELVE";
+"word_clock_minute_0" = "O'CLOCK";
+"word_clock_minute_1" = "FIVE";
+"word_clock_minute_2" = "TEN";
+"word_clock_minute_3" = "FIFTEEN";
+"word_clock_minute_4" = "TWENTY";
+"word_clock_minute_5" = "TWENTY-FIVE";
+"word_clock_minute_6" = "THIRTY";
+"word_clock_minute_7" = "THIRTY-FIVE";
+"word_clock_minute_8" = "FORTY";
+"word_clock_minute_9" = "FORTY-FIVE";
+"word_clock_minute_10" = "FIFTY";
+"word_clock_minute_11" = "FIFTY-FIVE";
 
 /* Live Activity */
 "snoozing" = "Snoozing";

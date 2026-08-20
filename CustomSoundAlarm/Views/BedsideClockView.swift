@@ -118,20 +118,40 @@ struct BedsideClockView: View {
 
     // MARK: - Clock Display
 
+    @ViewBuilder
     private var clockDisplay: some View {
-        let is24 = BedsideClockLogic.is24HourFormat(for: now)
-        let timeStr = BedsideClockLogic.timeString(for: now, is24Hour: is24, showSeconds: settings.showSeconds)
-        let layout = clockLayout
-        let baseFontSize = BedsideClockLogic.clockFontSize(
-            visibleElementCount: settings.visibleElementCount,
-            fontScale: settings.fontScale
-        )
-        let fontSize = baseFontSize * layout.sizeMultiplier
+        switch clockLayout {
+        case .analog:
+            // アナログフェイス（#72 Phase1・無料）
+            AnalogClockFaceView(
+                date: now,
+                theme: theme,
+                showSeconds: settings.showSeconds,
+                fontScale: settings.fontScale
+            )
+        case .word:
+            // ワードクロック（#72 Phase1・無料）
+            WordClockView(
+                date: now,
+                theme: theme,
+                fontScale: settings.fontScale,
+                visibleElementCount: settings.visibleElementCount
+            )
+        case .digitalLarge, .minimal, .digitalBold, .flipClock:
+            let is24 = BedsideClockLogic.is24HourFormat(for: now)
+            let timeStr = BedsideClockLogic.timeString(for: now, is24Hour: is24, showSeconds: settings.showSeconds)
+            let layout = clockLayout
+            let baseFontSize = BedsideClockLogic.clockFontSize(
+                visibleElementCount: settings.visibleElementCount,
+                fontScale: settings.fontScale
+            )
+            let fontSize = baseFontSize * layout.sizeMultiplier
 
-        return Text(timeStr)
-            .font(.system(size: fontSize, weight: layout.fontWeight, design: layout.fontDesign))
-            .foregroundStyle(theme.clockColor)
-            .minimumScaleFactor(0.5)
+            Text(timeStr)
+                .font(.system(size: fontSize, weight: layout.fontWeight, design: layout.fontDesign))
+                .foregroundStyle(theme.clockColor)
+                .minimumScaleFactor(0.5)
+        }
     }
 
     // MARK: - Alarm Info
@@ -317,9 +337,9 @@ struct BedsideClockView: View {
                 }
             }
 
-            // 配色
+            // 配色（無料3色・Pro6色）
             HStack(spacing: 12) {
-                ForEach(BedsideClockLogic.ColorTheme.allCases, id: \.self) { t in
+                ForEach(BedsideClockLogic.ColorTheme.available(isPro: Entitlements.shared.isPro), id: \.self) { t in
                     Button {
                         settings.colorTheme = t.rawValue
                         saveSettings()

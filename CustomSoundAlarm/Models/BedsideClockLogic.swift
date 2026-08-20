@@ -100,6 +100,8 @@ enum BedsideClockLogic {
         case digitalLarge    // 大きなデジタル時計（既存）
         case minimal         // 時刻のみ・余白多め
         case digitalBold     // 太字デジタル
+        case analog          // アナログフェイス（#72 Phase1）
+        case word            // ワードクロック（#72 Phase1）
         // Pro
         case flipClock       // フリップ時計風（Pro）
 
@@ -108,6 +110,8 @@ enum BedsideClockLogic {
             case .digitalLarge: String(localized: "bedside_layout_digital_large")
             case .minimal: String(localized: "bedside_layout_minimal")
             case .digitalBold: String(localized: "bedside_layout_digital_bold")
+            case .analog: String(localized: "bedside_layout_analog")
+            case .word: String(localized: "bedside_layout_word")
             case .flipClock: String(localized: "bedside_layout_flip")
             }
         }
@@ -116,20 +120,21 @@ enum BedsideClockLogic {
             self == .flipClock
         }
 
-        /// フォントのウエイト
+        /// フォントのウエイト（デジタル系のみ使用。analog/word は値を持たせるだけ）
         var fontWeight: Font.Weight {
             switch self {
             case .digitalLarge: .light
             case .minimal: .ultraLight
             case .digitalBold: .bold
+            case .analog, .word: .light
             case .flipClock: .medium
             }
         }
 
-        /// フォントデザイン
+        /// フォントデザイン（同上）
         var fontDesign: Font.Design {
             switch self {
-            case .digitalLarge, .minimal, .digitalBold: .default
+            case .digitalLarge, .minimal, .digitalBold, .analog, .word: .default
             case .flipClock: .rounded
             }
         }
@@ -140,6 +145,7 @@ enum BedsideClockLogic {
             case .digitalLarge: 1.0
             case .minimal: 0.85
             case .digitalBold: 1.0
+            case .analog, .word: 1.0
             case .flipClock: 0.9
             }
         }
@@ -153,14 +159,38 @@ enum BedsideClockLogic {
     // MARK: - 配色テーマ
 
     /// ベッドサイド時計の配色テーマ。
-    enum ColorTheme: String, CaseIterable, Sendable {        case white
+    /// 無料: white / amber / red（赤は暗順応を壊さない・物理ベッドサイド時計が赤LEDなのはこの理由）
+    /// Pro: green / iceBlue / rose
+    enum ColorTheme: String, CaseIterable, Sendable {
+        case white
         case amber
+        case red
+        case green
+        case iceBlue = "ice_blue"
+        case rose
 
         var displayName: String {
             switch self {
             case .white: String(localized: "bedside_theme_white")
             case .amber: String(localized: "bedside_theme_amber")
+            case .red: String(localized: "bedside_theme_red")
+            case .green: String(localized: "bedside_theme_green")
+            case .iceBlue: String(localized: "bedside_theme_ice_blue")
+            case .rose: String(localized: "bedside_theme_rose")
             }
+        }
+
+        /// Pro 限定か（ClockLayout.isPro と同じパターン）
+        var isPro: Bool {
+            switch self {
+            case .white, .amber, .red: false
+            case .green, .iceBlue, .rose: true
+            }
+        }
+
+        /// 利用可能なテーマ一覧を返す（Pro でない場合は Pro 色を除外）
+        static func available(isPro: Bool) -> [ColorTheme] {
+            allCases.filter { isPro || !$0.isPro }
         }
 
         // MARK: テスト可能な値
@@ -170,6 +200,10 @@ enum BedsideClockLogic {
             switch self {
             case .white: 0.85
             case .amber: 1.0
+            case .red: 0.9
+            case .green: 0.9
+            case .iceBlue: 0.9
+            case .rose: 0.9
             }
         }
 
@@ -178,6 +212,10 @@ enum BedsideClockLogic {
             switch self {
             case .white: 0.5
             case .amber: 0.75
+            case .red: 0.6
+            case .green: 0.6
+            case .iceBlue: 0.6
+            case .rose: 0.6
             }
         }
 
@@ -186,6 +224,10 @@ enum BedsideClockLogic {
             switch self {
             case .white: nil
             case .amber: (1.0, 0.65, 0.15)
+            case .red: (1.0, 0.28, 0.22)
+            case .green: (0.22, 1.0, 0.38)
+            case .iceBlue: (0.55, 0.82, 1.0)
+            case .rose: (1.0, 0.62, 0.75)
             }
         }
 
@@ -196,7 +238,7 @@ enum BedsideClockLogic {
             baseColor.opacity(clockOpacity)
         }
 
-        /// アラーム情報の色
+        /// 情報テキストの色
         var infoColor: Color {
             baseColor.opacity(infoOpacity)
         }
@@ -206,10 +248,19 @@ enum BedsideClockLogic {
             switch self {
             case .white: .orange.opacity(0.8)
             case .amber: Color(red: 1.0, green: 0.55, blue: 0.1).opacity(0.95)
+            case .red: Color(red: 1.0, green: 0.4, blue: 0.3).opacity(0.95)
+            case .green: Color(red: 0.6, green: 1.0, blue: 0.5).opacity(0.95)
+            case .iceBlue: Color(red: 0.7, green: 0.9, blue: 1.0).opacity(0.95)
+            case .rose: Color(red: 1.0, green: 0.7, blue: 0.8).opacity(0.95)
             }
         }
 
-        private var baseColor: Color {
+        /// アナログフェイスのアクセント針用（#72）。時計文字と同じ色相・不透明度を適用しない。
+        var accentColor: Color {
+            baseColor
+        }
+
+        var baseColor: Color {
             if let rgb = tintRGB {
                 Color(red: rgb.r, green: rgb.g, blue: rgb.b)
             } else {
