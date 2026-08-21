@@ -123,9 +123,9 @@
 "bedside_theme_white" = "White";
 "bedside_theme_amber" = "Amber";
 "bedside_theme_red" = "Red";
-"bedside_theme_green" = "Green (Pro)";
-"bedside_theme_ice_blue" = "Ice Blue (Pro)";
-"bedside_theme_rose" = "Rose (Pro)";
+"bedside_theme_green" = "Green";
+"bedside_theme_ice_blue" = "Ice Blue";
+"bedside_theme_rose" = "Rose";
 "bedside_brightness" = "Brightness";
 "bedside_show_countdown" = "Countdown";
 "bedside_show_sound_name" = "Sound Name";
@@ -138,9 +138,16 @@
 "bedside_layout_digital_bold" = "Bold";
 "bedside_layout_analog" = "Analog";
 "bedside_layout_word" = "Word Clock";
-"bedside_layout_flip" = "Flip (Pro)";
+"bedside_layout_flip" = "Flip";
+"bedside_layout_seven_segment" = "7-Seg";
+"bedside_layout_dot" = "Dot";
 "bedside_exit" = "Exit Night Mode";
 "bedside_exit_hint" = "Press and hold to exit";
+
+/* #72 Phase2: 一時無料開放 */
+"pro_badge" = "Pro";
+"promo_unlock_badge" = "Free Unlock";
+"promo_unlock_note" = "Pro faces & colors are temporarily unlocked for everyone. They may become Pro-only again in the future.";
 
 /* WordClock (#72) */
 "word_clock_night" = "NIGHT";

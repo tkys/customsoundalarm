@@ -137,7 +137,30 @@ struct BedsideClockView: View {
                 fontScale: settings.fontScale,
                 visibleElementCount: settings.visibleElementCount
             )
-        case .digitalLarge, .minimal, .digitalBold, .flipClock:
+        case .flipClock:
+            // フリップ時計（#72 Phase2・Pro）
+            FlipClockFaceView(
+                date: now,
+                theme: theme,
+                fontScale: settings.fontScale
+            )
+        case .sevenSegment:
+            // 7セグLED（#72 Phase2・Pro）
+            SevenSegmentFaceView(
+                date: now,
+                theme: theme,
+                showSeconds: settings.showSeconds,
+                fontScale: settings.fontScale
+            )
+        case .dot:
+            // ドットマトリクス（#72 Phase2・Pro）
+            DotMatrixFaceView(
+                date: now,
+                theme: theme,
+                showSeconds: settings.showSeconds,
+                fontScale: settings.fontScale
+            )
+        case .digitalLarge, .minimal, .digitalBold:
             let is24 = BedsideClockLogic.is24HourFormat(for: now)
             let timeStr = BedsideClockLogic.timeString(for: now, is24Hour: is24, showSeconds: settings.showSeconds)
             let layout = clockLayout
@@ -311,7 +334,7 @@ struct BedsideClockView: View {
                 Text("bedside_layout")
                     .font(.body.weight(.medium))
                     .foregroundStyle(theme.infoColor)
-                let layouts = BedsideClockLogic.ClockLayout.available(isPro: Entitlements.shared.isPro)
+                let layouts = BedsideClockLogic.ClockLayout.available(isPro: Entitlements.shared.effectiveIsPro)
                 HStack(spacing: 8) {
                     ForEach(layouts, id: \.self) { layout in
                         Button {
@@ -322,16 +345,7 @@ struct BedsideClockView: View {
                                 value: .string(layout.rawValue)
                             ))
                         } label: {
-                            Text(layout.displayName)
-                                .font(.caption)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(
-                                    Capsule()
-                                        .fill(clockLayout == layout ?
-                                              Color.white.opacity(0.15) : Color.clear)
-                                )
-                                .foregroundStyle(theme.infoColor)
+                            layoutPickerLabel(layout: layout)
                         }
                     }
                 }
@@ -339,7 +353,7 @@ struct BedsideClockView: View {
 
             // 配色（無料3色・Pro6色）
             HStack(spacing: 12) {
-                ForEach(BedsideClockLogic.ColorTheme.available(isPro: Entitlements.shared.isPro), id: \.self) { t in
+                ForEach(BedsideClockLogic.ColorTheme.available(isPro: Entitlements.shared.effectiveIsPro), id: \.self) { t in
                     Button {
                         settings.colorTheme = t.rawValue
                         saveSettings()
@@ -348,18 +362,17 @@ struct BedsideClockView: View {
                             value: .string(t.rawValue)
                         ))
                     } label: {
-                        Text(t.displayName)
-                            .font(.body)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(
-                                Capsule()
-                                    .fill(theme == t ?
-                                          Color.white.opacity(0.15) : Color.clear)
-                            )
-                            .foregroundStyle(theme.infoColor)
+                        themePickerLabel(theme: t)
                     }
                 }
+            }
+
+            // 一時無料開放の案内（#72 Phase2・単一フラグで開閉）
+            if Entitlements.isPromotionalUnlockActive {
+                Text("promo_unlock_note")
+                    .font(.caption2)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(theme.infoColor.opacity(0.75))
             }
 
             // 表示要素トグル
@@ -431,6 +444,69 @@ struct BedsideClockView: View {
 
     private var clockLayout: BedsideClockLogic.ClockLayout {
         BedsideClockLogic.ClockLayout(rawValue: settings.clockLayout) ?? .digitalLarge
+    }
+
+    // MARK: - Picker Labels（#72 Phase2・Proバッジ + 一時開放表示）
+
+    /// Pro フェイスは Pro バッジ + 一時開放中の旨を併記する
+    private func layoutPickerLabel(layout: BedsideClockLogic.ClockLayout) -> some View {
+        VStack(spacing: 2) {
+            HStack(spacing: 4) {
+                Text(layout.displayName)
+                    .font(.caption)
+                if layout.isPro {
+                    ProBadge()
+                }
+            }
+            if layout.isPro && Entitlements.isPromotionalUnlockActive {
+                Text("promo_unlock_badge")
+                    .font(.system(size: 8))
+                    .foregroundStyle(theme.clockColor.opacity(0.9))
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(
+            Capsule()
+                .fill(clockLayout == layout ? Color.white.opacity(0.15) : Color.clear)
+        )
+        .foregroundStyle(theme.infoColor)
+    }
+
+    /// Pro カラーも同様にバッジ + 一時開放中の旨を併記する
+    private func themePickerLabel(theme: BedsideClockLogic.ColorTheme) -> some View {
+        VStack(spacing: 2) {
+            HStack(spacing: 4) {
+                Text(theme.displayName)
+                    .font(.body)
+                if theme.isPro {
+                    ProBadge()
+                }
+            }
+            if theme.isPro && Entitlements.isPromotionalUnlockActive {
+                Text("promo_unlock_badge")
+                    .font(.system(size: 8))
+                    .foregroundStyle(self.theme.clockColor.opacity(0.9))
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(
+            Capsule()
+                .fill(self.theme == theme ? Color.white.opacity(0.15) : Color.clear)
+        )
+        .foregroundStyle(self.theme.infoColor)
+    }
+
+    /// 「Pro」バッジ
+    private struct ProBadge: View {
+        var body: some View {
+            Text("pro_badge")
+                .font(.system(size: 9, weight: .bold))
+                .padding(.horizontal, 4)
+                .padding(.vertical, 1)
+                .background(Capsule().fill(Color.white.opacity(0.2)))
+        }
     }
 
     // MARK: - Tap Handling

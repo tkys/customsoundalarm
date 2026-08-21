@@ -479,7 +479,7 @@ struct BedsideClockLogicTests {
 
     @Test
     func clockLayout_allCases() {
-        #expect(BedsideClockLogic.ClockLayout.allCases.count == 6)
+        #expect(BedsideClockLogic.ClockLayout.allCases.count == 8)
     }
 
     @Test
@@ -495,8 +495,11 @@ struct BedsideClockLogicTests {
     }
 
     @Test
-    func clockLayout_proLayout_isPro() {
+    func clockLayout_proLayouts_arePro() {
+        // #72 Phase2: フリップ・7セグ・ドットは Pro 側（分類は維持）
         #expect(BedsideClockLogic.ClockLayout.flipClock.isPro == true)
+        #expect(BedsideClockLogic.ClockLayout.sevenSegment.isPro == true)
+        #expect(BedsideClockLogic.ClockLayout.dot.isPro == true)
     }
 
     @Test
@@ -504,6 +507,8 @@ struct BedsideClockLogicTests {
         let available = BedsideClockLogic.ClockLayout.available(isPro: false)
         #expect(available.count == 5)
         #expect(!available.contains(.flipClock))
+        #expect(!available.contains(.sevenSegment))
+        #expect(!available.contains(.dot))
         #expect(available.contains(.analog))
         #expect(available.contains(.word))
     }
@@ -511,8 +516,10 @@ struct BedsideClockLogicTests {
     @Test
     func clockLayout_available_pro_includesAll() {
         let available = BedsideClockLogic.ClockLayout.available(isPro: true)
-        #expect(available.count == 6)
+        #expect(available.count == 8)
         #expect(available.contains(.flipClock))
+        #expect(available.contains(.sevenSegment))
+        #expect(available.contains(.dot))
     }
 
     @Test
@@ -534,6 +541,49 @@ struct BedsideClockLogicTests {
     @Test
     func clockLayout_minimal_smallerThanDigitalLarge() {
         #expect(BedsideClockLogic.ClockLayout.minimal.sizeMultiplier < BedsideClockLogic.ClockLayout.digitalLarge.sizeMultiplier)
+    }
+
+    // MARK: - 保存済み Pro 選択のフォールバック防止（#72 Phase2 最重要）
+
+    /// 保存値の読み出しは available() で検証しない（rawValue 解決のみ）。
+    /// ゲートが閉じても（isPro=false）、保存済みの Pro フェイスはそのまま復元されること。
+    @Test
+    func savedProLayout_doesNotFallBack_whenGateClosed() {
+        for layout in BedsideClockLogic.ClockLayout.allCases where layout.isPro {
+            // ゲートが閉じた状態では一覧に含まれない
+            let available = BedsideClockLogic.ClockLayout.available(isPro: false)
+            #expect(!available.contains(layout))
+            // しかし保存値の読み出しはフォールバックせずその値が返る
+            let restored = BedsideClockLogic.ClockLayout(rawValue: layout.rawValue) ?? .digitalLarge
+            #expect(restored == layout)
+        }
+    }
+
+    @Test
+    func savedProTheme_doesNotFallBack_whenGateClosed() {
+        for theme in BedsideClockLogic.ColorTheme.allCases where theme.isPro {
+            let available = BedsideClockLogic.ColorTheme.available(isPro: false)
+            #expect(!available.contains(theme))
+            // フォールバックせず保存値が返る
+            let restored = BedsideClockLogic.ColorTheme(rawValue: theme.rawValue) ?? .white
+            #expect(restored == theme)
+        }
+    }
+
+    @Test
+    func savedProSelection_roundTripsThroughSettings() {
+        // BedsideSettings に保存された Pro フェイス/テーマがそのまま復元されること
+        var settings = BedsideClockLogic.BedsideSettings()
+        settings.clockLayout = BedsideClockLogic.ClockLayout.sevenSegment.rawValue
+        settings.colorTheme = BedsideClockLogic.ColorTheme.green.rawValue
+
+        let restoredLayout = BedsideClockLogic.ClockLayout(rawValue: settings.clockLayout) ?? .digitalLarge
+        let restoredTheme = BedsideClockLogic.ColorTheme(rawValue: settings.colorTheme) ?? .white
+        #expect(restoredLayout == .sevenSegment)
+        #expect(restoredTheme == .green)
+        // ゲートが閉じていても一覧に無いだけで有効
+        #expect(!BedsideClockLogic.ClockLayout.available(isPro: false).contains(restoredLayout))
+        #expect(!BedsideClockLogic.ColorTheme.available(isPro: false).contains(restoredTheme))
     }
 
     // MARK: - BedsideSettings clockLayout
