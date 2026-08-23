@@ -1,10 +1,5 @@
-■ Under-the-hood improvements
-Added internal analytics so we can understand how the app is used and improve it.
-No personally identifiable information is collected.
-
-■ Stability
-Minor fixes and general stability improvements.
+■ Alarm sounds can now be up to 10 minutes
+The 60-second cap on trimming is gone. Import up to 10 minutes of audio and it plays all the way to the end before repeating — so intros and build-ups survive instead of getting cut off.
 
 Thanks for using My Sound Alarm!
-If you haven't tried Night Mode or the new preset sounds from the last update, give them a look.
 We'd love to hear your feedback — please reach out through support.

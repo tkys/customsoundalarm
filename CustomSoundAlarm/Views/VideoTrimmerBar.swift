@@ -30,7 +30,10 @@ struct VideoTrimmerBar: View {
 
     private let barHeight: CGFloat = 48
     private let handleWidth: CGFloat = 6
-    private let maxRangeSeconds: Double = 60
+    /// 切り出せる最大の長さ。
+    /// AlarmKit は音源を最後まで再生してからループするため、通知音の 30 秒制限は適用されない。
+    /// 実機で 300 秒・600 秒の完走を確認済み（上限は未確認）。v1.5.0 で 60 → 600 に緩和。
+    private let maxRangeSeconds: Double = 600
     private let thumbnailCount = 12
     private let coordinateSpaceName = "trimBar"
 
