@@ -14,6 +14,9 @@ packages:
   PostHog:
     url: https://github.com/PostHog/posthog-ios.git
     from: 3.56.0
+  DSWaveformImage:
+    url: https://github.com/dmrschmidt/DSWaveformImage
+    from: 14.5.0
 
 settings:
   base:
@@ -81,6 +84,10 @@ targets:
       - target: ShareExtension
         embed: true
       - package: PostHog
+      - package: DSWaveformImage
+        product: DSWaveformImage
+      - package: DSWaveformImage
+        product: DSWaveformImageViews
     entitlements:
       path: CustomSoundAlarm/CustomSoundAlarm.entitlements
       properties:

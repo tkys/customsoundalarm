@@ -9,10 +9,12 @@ struct SoundSelectionView: View {
     @State private var soundStore = SoundStore.shared
     @State private var audioPlayer = AudioPlayer.shared
     @State private var isImporting = false
-    @State private var isConverting = false
     @State private var errorMessage: String?
     @State private var renamingSound: AlarmSound?
     @State private var renameText = ""
+
+    /// 波形クロップ待ちの音声取り込み（#77）。非nilでシートを表示
+    @State private var pendingAudio: PendingAudioImport?
 
     // プリセット開閉状態
     @State private var presetExpanded: Bool = SoundPickerLogic.presetExpandedDefault(
@@ -58,6 +60,12 @@ struct SoundSelectionView: View {
         ) { result in
             handleImport(result)
         }
+        // 音声ファイルの波形クロップ（#77）
+        .sheet(item: $pendingAudio) { pending in
+            NavigationStack {
+                AudioCropView(source: pending, selectedSound: $selectedSound)
+            }
+        }
         .alert(String(localized: "rename"), isPresented: Binding(
             get: { renamingSound != nil },
             set: { if !$0 { renamingSound = nil } }
@@ -80,43 +88,35 @@ struct SoundSelectionView: View {
 
     private var addSection: some View {
         Section {
-            if isConverting {
-                HStack {
-                    ProgressView()
-                    Text("converting")
-                        .padding(.leading, 8)
+            NavigationLink {
+                VideoImportFlow(selectedSound: $selectedSound)
+            } label: {
+                Label {
+                    Text("add_from_video")
+                } icon: {
+                    Image(systemName: "video.badge.waveform")
+                        .foregroundStyle(Brand.purpleLight)
+                        .padding(4)
+                        .background(
+                            Circle()
+                                .fill(Brand.purpleLight.opacity(0.12))
+                        )
                 }
-            } else {
-                NavigationLink {
-                    VideoImportFlow(selectedSound: $selectedSound)
-                } label: {
-                    Label {
-                        Text("add_from_video")
-                    } icon: {
-                        Image(systemName: "video.badge.waveform")
-                            .foregroundStyle(Brand.purpleLight)
-                            .padding(4)
-                            .background(
-                                Circle()
-                                    .fill(Brand.purpleLight.opacity(0.12))
-                            )
-                    }
-                }
+            }
 
-                Button {
-                    isImporting = true
-                } label: {
-                    Label {
-                        Text("add_from_audio")
-                    } icon: {
-                        Image(systemName: "doc.badge.plus")
-                            .foregroundStyle(Color.accentColor)
-                            .padding(4)
-                            .background(
-                                Circle()
-                                    .fill(Color.accentColor.opacity(0.12))
-                            )
-                    }
+            Button {
+                isImporting = true
+            } label: {
+                Label {
+                    Text("add_from_audio")
+                } icon: {
+                    Image(systemName: "doc.badge.plus")
+                        .foregroundStyle(Color.accentColor)
+                        .padding(4)
+                        .background(
+                            Circle()
+                                .fill(Color.accentColor.opacity(0.12))
+                        )
                 }
             }
         } header: {
@@ -365,37 +365,29 @@ struct SoundSelectionView: View {
         }
     }
 
+    /// 選択された音声ファイルを波形クロップUIに渡す（#77）。
+    /// security-scoped resource の寿命を最小化するため、
+    /// 選択直後に temp へコピー → 即解放する（VideoImportFlow の罠1 対策と同じ）。
+    /// 変換・保存はクロップUI（AudioCropView）内で行う。
     private func importSound(from url: URL) {
         guard url.startAccessingSecurityScopedResource() else {
             errorMessage = String(localized: "file_access_denied")
             return
         }
+        defer { url.stopAccessingSecurityScopedResource() }
 
-        isConverting = true
-        errorMessage = nil
-
-        let name = url.deletingPathExtension().lastPathComponent
-
-        Task {
-            defer {
-                url.stopAccessingSecurityScopedResource()
-                isConverting = false
-            }
-
-            do {
-                let fileName = try await AudioConverter.shared.convertToCAF(
-                    from: url,
-                    outputName: UUID().uuidString
-                )
-
-                let sound = AlarmSound(name: name, fileName: fileName)
-                soundStore.add(sound)
-                selectedSound = sound
-
-                AnalyticsService.shared.capture(.customSoundImported(source: .audio))
-            } catch {
-                errorMessage = error.localizedDescription
-            }
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(UUID().uuidString).\(url.pathExtension)")
+        do {
+            try FileManager.default.copyItem(at: url, to: tempURL)
+        } catch {
+            errorMessage = error.localizedDescription
+            return
         }
+
+        pendingAudio = PendingAudioImport(
+            url: tempURL,
+            name: url.deletingPathExtension().lastPathComponent
+        )
     }
 }

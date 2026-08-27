@@ -55,6 +55,12 @@
 "add_from_audio" = "Add Audio File";
 "add_section" = "Add";
 "add_section_footer" = "Video: Select from Camera Roll and trim\nAudio File: Supports MP3, AAC, WAV, M4A";
+
+/* Waveform Crop (#77) */
+"waveform_loading" = "Generating waveform...";
+"crop_and_save" = "Crop & Save";
+"import_whole_audio" = "Import Whole File";
+"crop_hint_footer" = "Drag the upper waveform for rough positioning, the lower zoomed waveform for fine adjustment.";
 "my_sounds_empty_title" = "Make Any Sound Your Alarm";
 "my_sounds_empty_description" = "Import music from videos or your favorite\naudio files to use as alarm sounds";
 "file_access_denied" = "File access denied";

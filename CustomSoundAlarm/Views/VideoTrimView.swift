@@ -22,11 +22,18 @@ struct VideoImportFlow: View {
     @State private var showingPhotoPicker = false
     @State private var showingFilePicker = false
 
+    /// 波形描画・試聴・切り出しの元になる音声（動画から抽出済みの一時m4a）。
+    /// 抽出完了までクロップUIはプレースホルダを表示する（#77）
+    @State private var extractedAudioURL: URL?
+
     // インポートソース（計測用）
     @State private var importSource: VideoImportSource = .photoLibrary
 
     // プレビュー再生
     @State private var previewer = TrimPreviewer()
+
+    /// 切り出し上限（VideoTrimmerBar と同じ値）
+    private let maxRangeSeconds: Double = 600
 
     var body: some View {
         Group {
@@ -126,16 +133,34 @@ struct VideoImportFlow: View {
 
     private func trimView(url: URL) -> some View {
         Form {
-            // 1. トリムバー + 試聴
+            // 1. 波形クロップ + 補助サムネイル + 試聴
             Section {
                 VStack(spacing: 12) {
-                    VideoTrimmerBar(
-                        startTime: $startTime,
-                        endTime: $endTime,
-                        videoURL: url,
-                        videoDuration: videoDuration,
-                        previewer: previewer
-                    )
+                    if let audioURL = extractedAudioURL {
+                        // 波形を主・サムネイルを補助とする二段構えのクロップUI（#77）
+                        WaveformCropView(
+                            startTime: $startTime,
+                            endTime: $endTime,
+                            audioURL: audioURL,
+                            duration: videoDuration,
+                            maxRange: maxRangeSeconds,
+                            previewer: previewer,
+                            playURL: audioURL
+                        )
+                    } else {
+                        // 音声抽出中のプレースホルダ（UIはブロックしない）
+                        HStack(spacing: 8) {
+                            ProgressView()
+                            Text("waveform_loading")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 120)
+                    }
+
+                    // 補助: サムネイル（通常の動画では位置の手がかりになる）
+                    FilmstripView(videoURL: url)
 
                     // プレビューボタン
                     HStack {
@@ -143,7 +168,7 @@ struct VideoImportFlow: View {
                             if previewer.isPlaying {
                                 previewer.stop()
                             } else {
-                                previewer.play(url: url, from: startTime, to: endTime)
+                                previewer.play(url: extractedAudioURL ?? url, from: startTime, to: endTime)
                             }
                         } label: {
                             Label(
@@ -154,6 +179,7 @@ struct VideoImportFlow: View {
                         }
                         .buttonStyle(.bordered)
                         .tint(previewer.isPlaying ? .red : .accentColor)
+                        .disabled(extractedAudioURL == nil)
 
                         Spacer()
 
@@ -169,7 +195,10 @@ struct VideoImportFlow: View {
             } header: {
                 WarmSectionHeader(title: String(localized: "range"))
             } footer: {
-                Text(String(format: String(localized: "total_duration"), formatTime(videoDuration)))
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(String(format: String(localized: "total_duration"), formatTime(videoDuration)))
+                    Text("crop_hint_footer")
+                }
             }
 
             // 2. サウンド名
@@ -209,13 +238,13 @@ struct VideoImportFlow: View {
                 .listRowBackground(
                     RoundedRectangle(cornerRadius: 10)
                         .fill(
-                            (isProcessing || endTime <= startTime || soundName.isEmpty)
+                            (isProcessing || endTime <= startTime || soundName.isEmpty || extractedAudioURL == nil)
                                 ? AnyShapeStyle(Color.gray.opacity(0.4))
                                 : AnyShapeStyle(Brand.saveButtonGradient)
                         )
                         .padding(.horizontal, 4)
                 )
-                .disabled(isProcessing || endTime <= startTime || soundName.isEmpty)
+                .disabled(isProcessing || endTime <= startTime || soundName.isEmpty || extractedAudioURL == nil)
             }
 
             if let errorMessage {
@@ -227,9 +256,42 @@ struct VideoImportFlow: View {
             }
         }
         .warmListBackground()
+        // 動画が選び直されたら波形用音声を抽出し直す
+        .task(id: url) {
+            await extractAudioForWaveform(from: url)
+        }
     }
 
     // MARK: - Actions
+
+    /// duration に応じた初期選択範囲（全長 ≤ 上限なら全体、超えるなら先頭から上限分）
+    private func applyFullRange(duration: Double) {
+        let full = TrimRange.fullRange(duration: duration, maxRange: maxRangeSeconds)
+        startTime = full.start
+        endTime = full.end
+    }
+
+    /// 波形描画・試聴・切り出しの元として音声を一度だけ抽出する（#77）。
+    /// AVAudioFile ベースの波形解析は動画コンテナを読めないため、
+    /// 先に m4a へ抽出してから波形を出す方針。抽出中はプレースホルダを表示。
+    private func extractAudioForWaveform(from url: URL) async {
+        if let old = extractedAudioURL {
+            try? FileManager.default.removeItem(at: old)
+        }
+        extractedAudioURL = nil
+        do {
+            let audio = try await VideoAudioExtractor.shared.extractAudio(from: url)
+            if !Task.isCancelled {
+                extractedAudioURL = audio
+            } else {
+                try? FileManager.default.removeItem(at: audio)
+            }
+        } catch {
+            if !Task.isCancelled {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
 
     private func loadVideo(from item: PhotosPickerItem) {
         isProcessing = true
@@ -246,7 +308,7 @@ struct VideoImportFlow: View {
 
                 let duration = try await VideoAudioExtractor.shared.getDuration(from: movie.url)
                 videoDuration = duration
-                endTime = min(30, duration)
+                applyFullRange(duration: duration)
                 videoURL = movie.url
                 soundName = movie.displayName
             } catch {
@@ -291,7 +353,7 @@ struct VideoImportFlow: View {
                 let duration = try await VideoAudioExtractor.shared.getDuration(from: tempURL)
                 await MainActor.run {
                     videoDuration = duration
-                    endTime = min(30, duration)
+                    applyFullRange(duration: duration)
                     videoURL = tempURL
                     soundName = originalName
                     isProcessing = false
@@ -306,6 +368,7 @@ struct VideoImportFlow: View {
     }
 
     private func extractAndConvert(from url: URL) {
+        guard let audioURL = extractedAudioURL else { return }
         isProcessing = true
         errorMessage = nil
 
@@ -315,18 +378,16 @@ struct VideoImportFlow: View {
             defer { isProcessing = false }
 
             do {
-                let audioURL = try await VideoAudioExtractor.shared.extractAudio(
-                    from: url,
+                // 波形・試聴に使った抽出済み音声から、範囲指定で直接CAFへ変換（#77）
+                let cafName = try await AudioConverter.shared.convertToCAF(
+                    from: audioURL,
+                    outputName: UUID().uuidString,
                     startTime: startTime,
                     endTime: endTime
                 )
 
-                let cafName = try await AudioConverter.shared.convertToCAF(
-                    from: audioURL,
-                    outputName: UUID().uuidString
-                )
-
                 try? FileManager.default.removeItem(at: audioURL)
+                extractedAudioURL = nil
 
                 let sound = AlarmSound(
                     name: soundName.isEmpty ? url.deletingPathExtension().lastPathComponent : soundName,
