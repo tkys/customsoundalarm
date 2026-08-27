@@ -184,21 +184,21 @@ struct VideoImportFlow: View {
                         Spacer()
 
                         if previewer.isPlaying {
-                            Text(formatTime(previewer.currentTime - startTime) + " / " + formatTime(selectedDuration))
+                            Text(WaveformCropMath.formatTime(previewer.currentTime - startTime) + " / " + WaveformCropMath.formatTime(selectedDuration))
                                 .font(.caption)
                                 .monospacedDigit()
                                 .foregroundStyle(.secondary)
                         }
                     }
+
+                    // 変換後サイズの見積りと警告（#79-8）
+                    sizeEstimateRow
                 }
                 .padding(.vertical, 4)
             } header: {
                 WarmSectionHeader(title: String(localized: "range"))
             } footer: {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(String(format: String(localized: "total_duration"), formatTime(videoDuration)))
-                    Text("crop_hint_footer")
-                }
+                Text("crop_hint_footer")
             }
 
             // 2. サウンド名
@@ -406,11 +406,24 @@ struct VideoImportFlow: View {
         }
     }
 
-    private func formatTime(_ seconds: Double) -> String {
-        let total = max(0, Int(seconds))
-        let m = total / 60
-        let s = total % 60
-        return String(format: "%d:%02d", m, s)
+    /// 変換後のサイズ見積り。動画は600秒上限だが選択範囲に応じて表示する（#79-8）
+    private var sizeEstimateRow: some View {
+        let selectionSeconds = endTime - startTime
+        let size = AudioSizeEstimate.formattedSize(
+            bytes: AudioSizeEstimate.estimatedFileSize(seconds: selectionSeconds)
+        )
+        return VStack(spacing: 4) {
+            Text(String(format: String(localized: "estimated_size"), size))
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            if AudioSizeEstimate.requiresWarning(seconds: selectionSeconds) {
+                Text(String(format: String(localized: "large_file_warning"), size))
+                    .font(.caption2)
+                    .foregroundStyle(.orange)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .frame(maxWidth: .infinity)
     }
 }
 

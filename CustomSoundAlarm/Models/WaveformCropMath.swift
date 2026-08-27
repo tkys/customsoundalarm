@@ -46,6 +46,17 @@ enum WaveformCropMath {
 
     // MARK: - 下段（拡大波形）の座標変換
 
+    /// 下段の描画バケット数。
+    ///
+    /// DSWaveformImage の `LinearWaveformRenderer` はサンプルを**1サンプル=1pt で描き、
+    /// 引き伸ばさない**（余白があれば右寄せになる）。
+    /// したがってバケット数はバーの幅（pt）と一致させなければならない
+    /// （#79 バグ1: 幅の1/3のバケット数だったため波形が右1/3にだけ描画されていた）。
+    /// 併せて `Waveform.Configuration(scale: 1)` で実画面スケールを無効化して使うこと。
+    static func zoomBucketCount(viewWidth: Double) -> Int {
+        max(Int(viewWidth), 1)
+    }
+
     /// 下段の x 座標 → 時間。`[0, width]` を `window` に写像する
     static func zoomTime(atX x: Double, width: Double, window: CropWindow) -> Double {
         guard width > 0, window.width > 0 else { return window.start }
@@ -130,6 +141,35 @@ enum WaveformCropMath {
             start = max(0, duration - window.width)
         }
         return CropWindow(start: start, end: end)
+    }
+
+    /// 再生中のズーム窓追従（#79 バグ2）。
+    /// 再生ヘッドが窓の外に出たら、ヘッドが窓の先頭から `leadFraction`（既定0.25）の
+    /// 位置に来るよう窓を再配置する。窓内なら現状維持（再生中の不用意なスクロールを防ぐ）。
+    static func windowFollowingPlayback(
+        current: CropWindow,
+        playhead: Double,
+        duration: Double,
+        leadFraction: Double = 0.25
+    ) -> CropWindow {
+        guard current.width > 0, duration > 0 else { return current }
+        if current.contains(playhead) { return current }
+        var start = playhead - current.width * leadFraction
+        if start < 0 { start = 0 }
+        if start + current.width > duration {
+            start = max(0, duration - current.width)
+        }
+        return CropWindow(start: start, end: min(start + current.width, duration))
+    }
+
+    // MARK: - 時間表示フォーマット
+
+    /// 秒 → "m:ss" 形式。負数は 0 扱い。1時間超は m が60を超える（"60:00" 等）
+    static func formatTime(_ seconds: Double) -> String {
+        let total = max(0, Int(seconds))
+        let m = total / 60
+        let s = total % 60
+        return String(format: "%d:%02d", m, s)
     }
 
     // MARK: - サンプルのリサンプル（下段描画用）

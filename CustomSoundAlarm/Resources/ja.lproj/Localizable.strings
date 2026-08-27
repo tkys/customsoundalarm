@@ -56,11 +56,17 @@
 "add_section" = "追加";
 "add_section_footer" = "動画: カメラロールから選択してトリム\n音声ファイル: MP3, AAC, WAV, M4A 形式に対応";
 
-/* Waveform Crop (#77) */
+/* Waveform Crop (#77 / #79) */
 "waveform_loading" = "波形を生成中...";
-"crop_and_save" = "切り出して保存";
-"import_whole_audio" = "全体を取り込む";
+"crop_and_save" = "この範囲を追加";
+"import_whole_audio" = "全体を追加";
 "crop_hint_footer" = "上の波形で大まかに位置を決め、下の拡大波形で細かく調整できます。";
+"time_start" = "開始";
+"time_end" = "終了";
+"time_length" = "長さ";
+"time_total" = "元の長さ";
+"estimated_size" = "変換後のサイズ: 約 %@";
+"large_file_warning" = "大きいファイルになります（約 %@）。端末の容量にご注意ください。";
 "my_sounds_empty_title" = "好きな音をアラームにしよう";
 "my_sounds_empty_description" = "動画の音楽やお気に入りの音声ファイルを\n取り込んでアラーム音に設定できます";
 "file_access_denied" = "ファイルへのアクセスが拒否されました";
@@ -72,12 +78,11 @@
 "preview" = "試聴";
 "selected_duration" = "選択: %@";
 "stop" = "停止";
-"preview_selection" = "選択範囲を試聴";
+"preview_selection" = "再生";
 "start" = "開始";
 "end" = "終了";
 "range" = "範囲";
 "duration_warning" = "選択範囲が30秒を超えています。アラーム音は30秒以内を推奨します。";
-"total_duration" = "動画全体: %@";
 "name" = "名前";
 "enter_name_to_save" = "保存するには名前を入力してください";
 "extract_and_save" = "音声を抽出して保存";

@@ -56,11 +56,17 @@
 "add_section" = "Add";
 "add_section_footer" = "Video: Select from Camera Roll and trim\nAudio File: Supports MP3, AAC, WAV, M4A";
 
-/* Waveform Crop (#77) */
+/* Waveform Crop (#77 / #79) */
 "waveform_loading" = "Generating waveform...";
-"crop_and_save" = "Crop & Save";
-"import_whole_audio" = "Import Whole File";
+"crop_and_save" = "Add Selection";
+"import_whole_audio" = "Add Entire File";
 "crop_hint_footer" = "Drag the upper waveform for rough positioning, the lower zoomed waveform for fine adjustment.";
+"time_start" = "Start";
+"time_end" = "End";
+"time_length" = "Length";
+"time_total" = "Total";
+"estimated_size" = "Converted size: ~%@";
+"large_file_warning" = "This will create a large file (~%@). Make sure you have enough storage.";
 "my_sounds_empty_title" = "Make Any Sound Your Alarm";
 "my_sounds_empty_description" = "Import music from videos or your favorite\naudio files to use as alarm sounds";
 "file_access_denied" = "File access denied";
@@ -72,12 +78,11 @@
 "preview" = "Preview";
 "selected_duration" = "Selected: %@";
 "stop" = "Stop";
-"preview_selection" = "Preview Selection";
+"preview_selection" = "Play";
 "start" = "Start";
 "end" = "End";
 "range" = "Range";
 "duration_warning" = "Selection exceeds 30 seconds. Alarm sounds of 30 seconds or less are recommended.";
-"total_duration" = "Total: %@";
 "name" = "Name";
 "enter_name_to_save" = "Enter a name to save";
 "extract_and_save" = "Extract & Save Audio";

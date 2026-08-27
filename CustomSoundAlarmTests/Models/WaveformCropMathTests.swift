@@ -285,4 +285,121 @@ struct WaveformCropMathTests {
         #expect(!window.contains(9.9))
         #expect(!window.contains(20.1))
     }
+
+    // MARK: - 下段の描画バケット数（#79 バグ1 回帰防止）
+
+    /// DSWaveformImage の LinearWaveformRenderer は 1サンプル=1pt で描き引き伸ばさない。
+    /// バケット数がバー幅より少ないと波形は右側の一部にしか描画されない
+    /// （#79 バグ1の実際の症状）。バケット数は常にバー幅と一致すること。
+    @Test
+    func zoomBucketCount_equalsViewWidth() {
+        #expect(WaveformCropMath.zoomBucketCount(viewWidth: 390) == 390)
+        #expect(WaveformCropMath.zoomBucketCount(viewWidth: 120) == 120)
+    }
+
+    @Test
+    func zoomBucketCount_minimumIsOne() {
+        #expect(WaveformCropMath.zoomBucketCount(viewWidth: 0) == 1)
+        #expect(WaveformCropMath.zoomBucketCount(viewWidth: -10) == 1)
+        #expect(WaveformCropMath.zoomBucketCount(viewWidth: 0.4) == 1)
+    }
+
+    /// バグ1の再発防止: 選択範囲（＝窓）に対応するサンプルが正しい時間範囲から
+    /// 取れていること。サンプル値に時刻をエンコードし、出力バケットの値が
+    /// 窓内の正しい時刻を指すことを検証する
+    @Test
+    func resample_takesSamplesFromCorrectTimeRange_regression79() {
+        // 100秒の音源を1000サンプルで表す。samples[i] = i/1000（= 時刻/100 に等しい）
+        let sampleDuration = 100.0
+        let total = 1000
+        let samples = (0..<total).map { Float($0) / Float(total) * Float(sampleDuration) / 100.0 }
+        // → samples[i] ≈ 時刻(i/10) / 100。値自体が「時刻/100」をエンコードする
+
+        let window = CropWindow(start: 50, end: 60) // 50〜60秒のみ取り出す
+        let count = 100
+        let result = WaveformCropMath.resample(samples, in: window, sampleDuration: sampleDuration, count: count)
+
+        #expect(result.count == count)
+        // 各バケットのピーク（= バケット末尾の時刻）は窓内の時刻をエンコードしている。
+        // バケット j のカバー時刻は [50 + j*0.1, 50 + (j+1)*0.1)
+        for j in 0..<count {
+            let expectedTime = 50.0 + Double(j + 1) / Double(count) * 10.0
+            #expect(abs(Double(result[j]) * 100.0 - expectedTime) < 0.11) // バケット幅(0.1秒)の誤差内
+        }
+        // 先頭バケットは 50〜50.1秒の範囲から（窓の外の 0〜50秒を拾っていない）
+        #expect(Double(result[0]) * 100.0 >= 50.0)
+        #expect(Double(result[0]) * 100.0 <= 50.1 + 0.0001)
+    }
+
+    /// resample の出力が窓の時間方向に単調増加になること（インデックス逆転していないこと）
+    @Test
+    func resample_isMonotonicWithTimeEncodedSamples() {
+        let sampleDuration = 50.0
+        let samples = (0..<5000).map { Float($0) }
+        let window = CropWindow(start: 10, end: 40)
+        let result = WaveformCropMath.resample(samples, in: window, sampleDuration: sampleDuration, count: 50)
+        #expect(result.count == 50)
+        for j in 1..<result.count {
+            #expect(result[j] > result[j - 1])
+        }
+    }
+
+    // MARK: - 再生中の窓追従（#79 バグ2）
+
+    @Test
+    func followPlayback_insideWindow_keepsWindow() {
+        let window = CropWindow(start: 100, end: 130)
+        let followed = WaveformCropMath.windowFollowingPlayback(current: window, playhead: 115, duration: 600)
+        #expect(followed == window)
+    }
+
+    @Test
+    func followPlayback_outsideWindow_recentersAtLeadFraction() {
+        // ヘッドが窓の終端を超えた → ヘッドが窓の25%位置に来るよう再配置
+        let window = CropWindow(start: 100, end: 130)
+        let followed = WaveformCropMath.windowFollowingPlayback(current: window, playhead: 135, duration: 600)
+        #expect(approx(followed.start, 135 - 30 * 0.25))
+        #expect(approx(followed.start, 127.5))
+        #expect(approx(followed.width, 30))
+        #expect(followed.contains(135))
+    }
+
+    @Test
+    func followPlayback_clampsAtEnd() {
+        let window = CropWindow(start: 580, end: 600)
+        // ヘッドが末尾を超えた → 末尾にクランプ（start = 600 - 窓幅20）
+        let followed = WaveformCropMath.windowFollowingPlayback(current: window, playhead: 601, duration: 600)
+        #expect(approx(followed.start, 580))
+        #expect(approx(followed.end, 600))
+    }
+
+    @Test
+    func followPlayback_zeroWidth_returnsCurrent() {
+        let window = CropWindow(start: 0, end: 0)
+        let followed = WaveformCropMath.windowFollowingPlayback(current: window, playhead: 10, duration: 600)
+        #expect(followed == window)
+    }
+
+    // MARK: - 時間フォーマット（#79-6）
+
+    @Test
+    func formatTime_basics() {
+        #expect(WaveformCropMath.formatTime(0) == "0:00")
+        #expect(WaveformCropMath.formatTime(5) == "0:05")
+        #expect(WaveformCropMath.formatTime(65) == "1:05")
+        #expect(WaveformCropMath.formatTime(3599) == "59:59")
+        #expect(WaveformCropMath.formatTime(3600) == "60:00")
+        #expect(WaveformCropMath.formatTime(3661) == "61:01")
+    }
+
+    @Test
+    func formatTime_negativeClampsToZero() {
+        #expect(WaveformCropMath.formatTime(-3) == "0:00")
+    }
+
+    @Test
+    func formatTime_truncatesFraction() {
+        #expect(WaveformCropMath.formatTime(59.9) == "0:59")
+        #expect(WaveformCropMath.formatTime(60.5) == "1:00")
+    }
 }

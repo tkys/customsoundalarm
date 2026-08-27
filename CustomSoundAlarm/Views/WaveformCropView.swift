@@ -42,8 +42,8 @@ struct WaveformCropView: View {
     @State private var overviewWidth: CGFloat = 0
     @State private var zoomWidth: CGFloat = 0
 
-    private let overviewHeight: CGFloat = 56
-    private let zoomHeight: CGFloat = 72
+    private let overviewHeight: CGFloat = 64
+    private let zoomHeight: CGFloat = 140
     private let handleWidth: CGFloat = 6
     private let overviewSpace = "waveOverviewSpace"
     private let zoomSpace = "waveZoomSpace"
@@ -75,6 +75,15 @@ struct WaveformCropView: View {
         }
         .onChange(of: endTime) { _, _ in
             syncZoomWindow()
+        }
+        // 再生位置にズーム窓を追従させる（#79 バグ2: 再生ヘッドが窓外に出たら再配置）
+        .onChange(of: previewer?.currentTime) { _, playhead in
+            guard let playhead, previewer?.isPlaying == true else { return }
+            zoomWindow = WaveformCropMath.windowFollowingPlayback(
+                current: zoomWindow,
+                playhead: playhead,
+                duration: duration
+            )
         }
     }
 
@@ -184,8 +193,8 @@ struct WaveformCropView: View {
 
         return Color.clear
             .frame(width: width, height: overviewHeight)
-            .offset(x: offset)
             .contentShape(Rectangle())
+            .offset(x: offset)
             .gesture(
                 DragGesture(minimumDistance: 0, coordinateSpace: .named(overviewSpace))
                     .onChanged { value in
@@ -258,17 +267,21 @@ struct WaveformCropView: View {
 
             ZStack(alignment: .leading) {
                 // 1. 窓内の拡大波形（サンプルからリサンプル）
+                // ⚠️ LinearWaveformRenderer は 1サンプル=1pt で描き引き伸ばさないため、
+                // バケット数はバー幅と一致させる + scale を 1 に固定する（#79 バグ1）
                 Group {
                     if let samples {
-                        let bucketCount = max(Int(width / 3), 16)
                         let slice = WaveformCropMath.resample(
                             samples,
                             in: zoomWindow,
                             sampleDuration: duration,
-                            count: bucketCount
+                            count: WaveformCropMath.zoomBucketCount(viewWidth: width)
                         )
-                        WaveformShape(samples: slice)
-                            .fill(Color.accentColor.opacity(0.9))
+                        WaveformShape(
+                            samples: slice,
+                            configuration: Waveform.Configuration(scale: 1)
+                        )
+                        .fill(Color.accentColor.opacity(0.9))
                     } else {
                         RoundedRectangle(cornerRadius: 4)
                             .fill(Color.secondary.opacity(0.1))
@@ -300,9 +313,8 @@ struct WaveformCropView: View {
                 zoomHandle(kind: .startZoom, x: leading)
                 zoomHandle(kind: .endZoom, x: leading + selectedWidth)
 
-                // 6. 再生ヘッド（窓内のみ）
-                if previewer?.isPlaying == true, let previewer,
-                   zoomWindow.contains(previewer.currentTime) {
+                // 6. 再生ヘッド（窓の追従により常に窓内。x はクランプ済み）
+                if previewer?.isPlaying == true, let previewer {
                     let x = WaveformCropMath.zoomX(for: previewer.currentTime, width: width, window: zoomWindow)
                     Rectangle()
                         .fill(Color.red)
@@ -394,18 +406,28 @@ struct WaveformCropView: View {
 
     // MARK: - 共通パーツ
 
+    /// 4つの値をラベル付きで明示（#79-6: どれが何か分からない状態を解消する）
     private func timeLabels(range: TrimRange) -> some View {
-        HStack {
-            Text(formatTime(range.start))
-            Spacer()
-            Text(formatTime(range.width))
-                .foregroundStyle(.secondary)
-            Spacer()
-            Text(formatTime(range.end))
+        HStack(spacing: 8) {
+            labeledTime("time_start", value: range.start)
+            Spacer(minLength: 0)
+            labeledTime("time_end", value: range.end)
+            Spacer(minLength: 0)
+            labeledTime("time_length", value: range.width)
+            Spacer(minLength: 0)
+            labeledTime("time_total", value: duration)
         }
-        .font(.caption2)
-        .monospacedDigit()
-        .foregroundStyle(.secondary)
+    }
+
+    private func labeledTime(_ key: LocalizedStringKey, value: Double) -> some View {
+        VStack(spacing: 2) {
+            Text(key)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Text(WaveformCropMath.formatTime(value))
+                .font(.caption.weight(.medium))
+                .monospacedDigit()
+        }
     }
 
     private func handleShape(isActive: Bool) -> some View {
@@ -414,12 +436,5 @@ struct WaveformCropView: View {
             .frame(width: handleWidth, height: nil)
             .frame(maxHeight: .infinity)
             .shadow(color: .black.opacity(0.3), radius: isActive ? 4 : 2)
-    }
-
-    private func formatTime(_ seconds: Double) -> String {
-        let total = max(0, Int(seconds))
-        let m = total / 60
-        let s = total % 60
-        return String(format: "%d:%02d", m, s)
     }
 }
