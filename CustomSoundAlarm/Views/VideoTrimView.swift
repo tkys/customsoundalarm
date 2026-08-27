@@ -129,13 +129,16 @@ struct VideoImportFlow: View {
 
     // MARK: - Trim View
 
-    private var selectedDuration: Double { endTime - startTime }
+    /// 「この範囲を追加」が押せる条件
+    private var canSave: Bool {
+        extractedAudioURL != nil && endTime > startTime && !soundName.isEmpty
+    }
 
     private func trimView(url: URL) -> some View {
-        Form {
-            // 1. 波形クロップ + 補助サムネイル + 試聴
-            Section {
-                VStack(spacing: 12) {
+        VStack(spacing: 0) {
+            // 波形エリア（画面幅いっぱい・#80-1）。フォームの体裁を使わない
+            ScrollView {
+                VStack(spacing: 14) {
                     if let audioURL = extractedAudioURL {
                         // 波形を主・サムネイルを補助とする二段構えのクロップUI（#77）
                         WaveformCropView(
@@ -162,100 +165,98 @@ struct VideoImportFlow: View {
                     // 補助: サムネイル（通常の動画では位置の手がかりになる）
                     FilmstripView(videoURL: url)
 
-                    // プレビューボタン
-                    HStack {
-                        Button {
-                            if previewer.isPlaying {
-                                previewer.stop()
-                            } else {
-                                previewer.play(url: extractedAudioURL ?? url, from: startTime, to: endTime)
-                            }
-                        } label: {
-                            Label(
-                                previewer.isPlaying ? String(localized: "stop") : String(localized: "preview_selection"),
-                                systemImage: previewer.isPlaying ? "stop.fill" : "play.fill"
-                            )
-                            .font(.subheadline.weight(.medium))
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(previewer.isPlaying ? .red : .accentColor)
-                        .disabled(extractedAudioURL == nil)
-
-                        Spacer()
-
+                    // 再生 / 停止（スクラブと対の操作）
+                    Button {
                         if previewer.isPlaying {
-                            Text(WaveformCropMath.formatTime(previewer.currentTime - startTime) + " / " + WaveformCropMath.formatTime(selectedDuration))
-                                .font(.caption)
-                                .monospacedDigit()
-                                .foregroundStyle(.secondary)
+                            previewer.stop()
+                        } else {
+                            previewer.play(url: extractedAudioURL ?? url, from: startTime, to: endTime)
                         }
+                    } label: {
+                        Image(systemName: previewer.isPlaying ? "stop.fill" : "play.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .frame(width: 40, height: 40)
+                            .background(
+                                Circle().fill(Color.accentColor.opacity(0.14))
+                            )
+                            .foregroundStyle(previewer.isPlaying ? Color.red : Color.accentColor)
                     }
+                    .buttonStyle(.plain)
+                    .disabled(extractedAudioURL == nil)
+                    .accessibilityLabel(previewer.isPlaying ? String(localized: "stop") : String(localized: "preview_selection"))
 
                     // 変換後サイズの見積りと警告（#79-8）
                     sizeEstimateRow
-                }
-                .padding(.vertical, 4)
-            } header: {
-                WarmSectionHeader(title: String(localized: "range"))
-            } footer: {
-                Text("crop_hint_footer")
-            }
+                        .padding(.horizontal, 20)
 
-            // 2. サウンド名
-            Section {
-                HStack {
-                    Text("name")
-                    TextField("sound_name_placeholder", text: $soundName)
-                        .multilineTextAlignment(.trailing)
+                    Text("crop_hint_footer")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
                 }
-            } footer: {
-                if soundName.isEmpty {
-                    Text("enter_name_to_save")
-                }
+                .padding(.top, 8)
+                .padding(.bottom, 12)
             }
+            .scrollBounceBehavior(.basedOnSize)
 
-            // 3. 保存ボタン
-            Section {
-                Button {
-                    previewer.stop()
-                    extractAndConvert(from: url)
-                } label: {
-                    HStack {
-                        Spacer()
-                        if isProcessing {
-                            ProgressView()
-                                .padding(.trailing, 8)
-                            Text("converting")
-                        } else {
-                            Label("extract_and_save", systemImage: "waveform.badge.plus")
-                                .fontWeight(.semibold)
-                        }
-                        Spacer()
-                    }
-                    .padding(.vertical, 4)
-                }
-                .foregroundStyle(.white)
-                .listRowBackground(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(
-                            (isProcessing || endTime <= startTime || soundName.isEmpty || extractedAudioURL == nil)
-                                ? AnyShapeStyle(Color.gray.opacity(0.4))
-                                : AnyShapeStyle(Brand.saveButtonGradient)
-                        )
-                        .padding(.horizontal, 4)
-                )
-                .disabled(isProcessing || endTime <= startTime || soundName.isEmpty || extractedAudioURL == nil)
-            }
+            Spacer(minLength: 0)
 
-            if let errorMessage {
-                Section {
+            // 下部: 名前入力 + アクション
+            VStack(spacing: 10) {
+                if let errorMessage {
                     Text(errorMessage)
                         .foregroundStyle(.red)
                         .font(.caption)
                 }
+
+                HStack(spacing: 8) {
+                    Image(systemName: "waveform")
+                        .foregroundStyle(Color.accentColor)
+                    TextField("sound_name_placeholder", text: $soundName)
+                        .textFieldStyle(.plain)
+                        .submitLabel(.done)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.warmCardBackground)
+                )
+
+                // 主アクション: 目立つ pill ボタン（#80-7）
+                Button {
+                    previewer.stop()
+                    extractAndConvert(from: url)
+                } label: {
+                    HStack(spacing: 8) {
+                        if isProcessing {
+                            ProgressView()
+                                .tint(.white)
+                        } else {
+                            Image(systemName: "waveform.badge.plus")
+                        }
+                        Text("crop_and_save")
+                            .fontWeight(.semibold)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(
+                        Capsule().fill(
+                            (isProcessing || !canSave)
+                                ? AnyShapeStyle(Color.gray.opacity(0.4))
+                                : AnyShapeStyle(Brand.saveButtonGradient)
+                        )
+                    )
+                    .foregroundStyle(.white)
+                }
+                .disabled(isProcessing || !canSave)
             }
+            .padding(.horizontal, 20)
+            .padding(.top, 8)
+            .padding(.bottom, 12)
         }
-        .warmListBackground()
+        .background(Color.warmListBackground.ignoresSafeArea())
         // 動画が選び直されたら波形用音声を抽出し直す
         .task(id: url) {
             await extractAudioForWaveform(from: url)

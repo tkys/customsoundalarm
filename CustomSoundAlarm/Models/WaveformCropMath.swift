@@ -172,6 +172,47 @@ enum WaveformCropMath {
         return String(format: "%d:%02d", m, s)
     }
 
+    /// 秒 → "00:05.70" 形式（1/100秒まで・#80-3）。
+    /// 再生位置の主役表示に使う。負数は 0 扱い。
+    static func formatPreciseTime(_ seconds: Double) -> String {
+        let clamped = max(0, seconds)
+        let totalHundredths = Int((clamped * 100).rounded())
+        let m = totalHundredths / 6000
+        let s = (totalHundredths % 6000) / 100
+        let cs = totalHundredths % 100
+        return String(format: "%02d:%02d.%02d", m, s, cs)
+    }
+
+    // MARK: - 時間目盛り（#80-5）
+
+    /// 目盛りに使う刻み幅の候補（秒）
+    private static let rulerStepCandidates: [Double] = [
+        1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600
+    ]
+
+    /// 表示幅（秒）から目盛りの刻み幅を選ぶ。
+    /// ラベル数が `targetCount`（既定6）を超えない最小の「きりの良い」刻みを選ぶ。
+    /// どの候補でも収まらないときは最大候補（3600）を返す。
+    static func rulerStep(forSpan span: Double, targetCount: Int = 6) -> Double {
+        guard span > 0, targetCount > 0 else { return rulerStepCandidates.last! }
+        for step in rulerStepCandidates where span / step <= Double(targetCount) {
+            return step
+        }
+        return rulerStepCandidates.last!
+    }
+
+    /// 目盛りの時刻一覧（0 から step 刻み、span 以下）
+    static func rulerTimes(span: Double, step: Double) -> [Double] {
+        guard span > 0, step > 0 else { return [] }
+        var times: [Double] = []
+        var t = 0.0
+        while t <= span + 0.0001 {
+            times.append(t)
+            t += step
+        }
+        return times
+    }
+
     // MARK: - サンプルのリサンプル（下段描画用）
 
     /// 全体サンプル配列から窓の範囲のみをピークホールドでリサンプルする。

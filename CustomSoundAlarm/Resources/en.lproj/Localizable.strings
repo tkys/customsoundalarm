@@ -83,9 +83,6 @@
 "end" = "End";
 "range" = "Range";
 "duration_warning" = "Selection exceeds 30 seconds. Alarm sounds of 30 seconds or less are recommended.";
-"name" = "Name";
-"enter_name_to_save" = "Enter a name to save";
-"extract_and_save" = "Extract & Save Audio";
 
 /* ShareExtension */
 "saving" = "Saving...";

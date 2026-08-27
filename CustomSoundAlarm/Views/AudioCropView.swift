@@ -30,10 +30,10 @@ struct AudioCropView: View {
     @State private var previewer = TrimPreviewer()
 
     var body: some View {
-        Form {
-            // 1. 波形クロップ + 試聴
-            Section {
-                VStack(spacing: 12) {
+        VStack(spacing: 0) {
+            // 波形エリア（画面幅いっぱい・#80-1）。フォームの体裁を使わない
+            ScrollView {
+                VStack(spacing: 14) {
                     if duration > 0 {
                         WaveformCropView(
                             startTime: $startTime,
@@ -55,115 +55,108 @@ struct AudioCropView: View {
                         .frame(height: 120)
                     }
 
-                    // プレビューボタン
-                    HStack {
-                        Button {
-                            if previewer.isPlaying {
-                                previewer.stop()
-                            } else {
-                                previewer.play(url: source.url, from: startTime, to: endTime)
-                            }
-                        } label: {
-                            Label(
-                                previewer.isPlaying ? String(localized: "stop") : String(localized: "preview_selection"),
-                                systemImage: previewer.isPlaying ? "stop.fill" : "play.fill"
-                            )
-                            .font(.subheadline.weight(.medium))
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(previewer.isPlaying ? .red : .accentColor)
-                        .disabled(duration <= 0)
-
-                        Spacer()
-
+                    // 再生 / 停止（スクラブと対の操作）
+                    Button {
                         if previewer.isPlaying {
-                            Text(WaveformCropMath.formatTime(previewer.currentTime - startTime) + " / " + WaveformCropMath.formatTime(endTime - startTime))
-                                .font(.caption)
-                                .monospacedDigit()
-                                .foregroundStyle(.secondary)
+                            previewer.stop()
+                        } else {
+                            previewer.play(url: source.url, from: startTime, to: endTime)
                         }
+                    } label: {
+                        Image(systemName: previewer.isPlaying ? "stop.fill" : "play.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .frame(width: 40, height: 40)
+                            .background(
+                                Circle().fill(Color.accentColor.opacity(0.14))
+                            )
+                            .foregroundStyle(previewer.isPlaying ? Color.red : Color.accentColor)
                     }
+                    .buttonStyle(.plain)
+                    .disabled(duration <= 0)
+                    .accessibilityLabel(previewer.isPlaying ? String(localized: "stop") : String(localized: "preview_selection"))
 
                     // 変換後サイズの見積りと警告（#79-8）
                     sizeEstimateRow
+                        .padding(.horizontal, 20)
+
+                    Text("crop_hint_footer")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
                 }
-                .padding(.vertical, 4)
-            } header: {
-                WarmSectionHeader(title: String(localized: "range"))
-            } footer: {
-                Text("crop_hint_footer")
+                .padding(.top, 8)
+                .padding(.bottom, 12)
             }
+            .scrollBounceBehavior(.basedOnSize)
 
-            // 2. サウンド名
-            Section {
-                HStack {
-                    Text("name")
-                    TextField("sound_name_placeholder", text: $soundName)
-                        .multilineTextAlignment(.trailing)
-                }
-            } footer: {
-                if soundName.isEmpty {
-                    Text("enter_name_to_save")
-                }
-            }
+            Spacer(minLength: 0)
 
-            // 3. 保存ボタン（切り出し / 全体）
-            Section {
-                Button {
-                    save(start: startTime, end: endTime)
-                } label: {
-                    HStack {
-                        Spacer()
-                        if isProcessing {
-                            ProgressView()
-                                .padding(.trailing, 8)
-                            Text("converting")
-                        } else {
-                            Label("crop_and_save", systemImage: "waveform.badge.plus")
-                                .fontWeight(.semibold)
-                        }
-                        Spacer()
-                    }
-                    .padding(.vertical, 4)
-                }
-                .foregroundStyle(.white)
-                .listRowBackground(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(
-                            (isProcessing || !canSave)
-                                ? AnyShapeStyle(Color.gray.opacity(0.4))
-                                : AnyShapeStyle(Brand.saveButtonGradient)
-                        )
-                        .padding(.horizontal, 4)
-                )
-                .disabled(isProcessing || !canSave)
-
-                // クロップを強制しない: 全体取り込みの選択肢（#77）
-                Button {
-                    save(start: 0, end: duration)
-                } label: {
-                    HStack {
-                        Spacer()
-                        Label("import_whole_audio", systemImage: "tray.and.arrow.down")
-                            .fontWeight(.medium)
-                        Spacer()
-                    }
-                    .padding(.vertical, 4)
-                }
-                .buttonStyle(.bordered)
-                .tint(.accentColor)
-                .disabled(isProcessing || !canSave)
-            }
-
-            if let errorMessage {
-                Section {
+            // 下部: 名前入力 + アクション
+            VStack(spacing: 10) {
+                if let errorMessage {
                     Text(errorMessage)
                         .foregroundStyle(.red)
                         .font(.caption)
                 }
+
+                HStack(spacing: 8) {
+                    Image(systemName: "waveform")
+                        .foregroundStyle(Color.accentColor)
+                    TextField("sound_name_placeholder", text: $soundName)
+                        .textFieldStyle(.plain)
+                        .submitLabel(.done)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.warmCardBackground)
+                )
+
+                // 主アクション: 目立つ pill ボタン（#80-7）
+                Button {
+                    save(start: startTime, end: endTime)
+                } label: {
+                    HStack(spacing: 8) {
+                        if isProcessing {
+                            ProgressView()
+                                .tint(.white)
+                        } else {
+                            Image(systemName: "waveform.badge.plus")
+                        }
+                        Text("crop_and_save")
+                            .fontWeight(.semibold)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(
+                        Capsule().fill(
+                            (isProcessing || !canSave)
+                                ? AnyShapeStyle(Color.gray.opacity(0.4))
+                                : AnyShapeStyle(Brand.saveButtonGradient)
+                        )
+                    )
+                    .foregroundStyle(.white)
+                }
+                .disabled(isProcessing || !canSave)
+
+                // 副アクション: 格下のテキストボタン（クロップを強制しない・#77/#80-7）
+                Button {
+                    save(start: 0, end: duration)
+                } label: {
+                    Label("import_whole_audio", systemImage: "tray.and.arrow.down")
+                        .font(.footnote)
+                }
+                .buttonStyle(.borderless)
+                .tint(.secondary)
+                .disabled(isProcessing || !canSave)
             }
+            .padding(.horizontal, 20)
+            .padding(.top, 8)
+            .padding(.bottom, 12)
         }
-        .warmListBackground()
+        .background(Color.warmListBackground.ignoresSafeArea())
         .navigationTitle(String(localized: "add_from_audio"))
         .navigationBarTitleDisplayMode(.inline)
         .task {

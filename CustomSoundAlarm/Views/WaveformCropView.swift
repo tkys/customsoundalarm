@@ -44,11 +44,27 @@ struct WaveformCropView: View {
 
     private let overviewHeight: CGFloat = 64
     private let zoomHeight: CGFloat = 140
+    private let rulerHeight: CGFloat = 20
     private let handleWidth: CGFloat = 6
     private let overviewSpace = "waveOverviewSpace"
     private let zoomSpace = "waveZoomSpace"
     /// 下段のサンプル解像度（600秒ファイルで窓8秒時に約100バケット）
     private let sampleCount = 8000
+
+    /// 上段（WaveformView）用のストライプ設定（#80-2）。スケールはビュー側既定
+    private var stripedOverviewConfig: Waveform.Configuration {
+        Waveform.Configuration(
+            style: .striped(.init(color: UIColor(Color.accentColor), width: 2, spacing: 2, lineCap: .round))
+        )
+    }
+
+    /// 下段（WaveformShape）用。#79 バグ1対策でスケールは 1 固定
+    private var stripedZoomConfig: Waveform.Configuration {
+        Waveform.Configuration(
+            style: .striped(.init(color: UIColor(Color.accentColor), width: 2, spacing: 2, lineCap: .round)),
+            scale: 1
+        )
+    }
 
     enum Handle: Hashable {
         case startOverview, endOverview, panOverview
@@ -57,10 +73,11 @@ struct WaveformCropView: View {
 
     var body: some View {
         let range = currentRange
-        VStack(spacing: 8) {
+        VStack(spacing: 10) {
+            bigTimeLabel(range: range)
             overviewBar(range: range)
-            timeLabels(range: range)
             zoomBar(range: range)
+            timeLabels(range: range)
         }
         .task(id: audioURL) {
             await loadSamples()
@@ -85,6 +102,24 @@ struct WaveformCropView: View {
                 duration: duration
             )
         }
+    }
+
+    // MARK: - 主役の現在時刻（#80-3）
+
+    /// 再生位置を1/100秒まで大きな数字で表示する。
+    /// 非再生時は再生開始位置（選択の先頭）を示す
+    private func bigTimeLabel(range: TrimRange) -> some View {
+        let displayTime: Double
+        if let previewer, previewer.isPlaying {
+            displayTime = previewer.currentTime
+        } else {
+            displayTime = range.start
+        }
+        return Text(WaveformCropMath.formatPreciseTime(displayTime))
+            .font(.system(size: 34, weight: .semibold, design: .rounded))
+            .monospacedDigit()
+            .foregroundStyle(.primary)
+            .frame(maxWidth: .infinity)
     }
 
     // MARK: - Range / Window
@@ -132,12 +167,15 @@ struct WaveformCropView: View {
             let selectedWidth = width - leading - trailing
 
             ZStack(alignment: .leading) {
-                // 1. 全体波形（DSWaveformImage・生成中はプレースホルダ）
-                WaveformView(audioURL: audioURL) { shape in
-                    shape.fill(Color.accentColor.opacity(0.85))
-                } placeholder: {
-                    ProgressView()
-                        .scaleEffect(0.8)
+                // 1. 全体波形（ストライプ表現・#80-2。読み込み中は自前のプレースホルダ）
+                ZStack {
+                    WaveformView(audioURL: audioURL, configuration: stripedOverviewConfig)
+                    if samples == nil {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                            .frame(width: width, height: overviewHeight)
+                            .background(Color.warmListBackground)
+                    }
                 }
                 .frame(width: width, height: overviewHeight)
 
@@ -164,15 +202,11 @@ struct WaveformCropView: View {
                 overviewHandle(kind: .startOverview, x: leading)
                 overviewHandle(kind: .endOverview, x: leading + selectedWidth)
 
-                // 6. 再生ヘッド
+                // 6. 再生ヘッド（縦線＋上下ノブ・#80-4）
                 if previewer?.isPlaying == true, let previewer {
                     let x = WaveformCropMath.overviewX(for: previewer.currentTime, width: width, duration: duration)
-                    Rectangle()
-                        .fill(Color.red)
-                        .frame(width: 2.5, height: overviewHeight - 4)
-                        .offset(x: x)
-                        .shadow(color: .red.opacity(0.4), radius: 3)
-                        .allowsHitTesting(false)
+                    playhead()
+                        .offset(x: x - 5)
                 }
             }
             .coordinateSpace(name: overviewSpace)
@@ -265,7 +299,8 @@ struct WaveformCropView: View {
             let trailing = width - WaveformCropMath.zoomX(for: range.end, width: width, window: zoomWindow)
             let selectedWidth = width - leading - trailing
 
-            ZStack(alignment: .leading) {
+            VStack(spacing: 2) {
+                ZStack(alignment: .leading) {
                 // 1. 窓内の拡大波形（サンプルからリサンプル）
                 // ⚠️ LinearWaveformRenderer は 1サンプル=1pt で描き引き伸ばさないため、
                 // バケット数はバー幅と一致させる + scale を 1 に固定する（#79 バグ1）
@@ -279,7 +314,7 @@ struct WaveformCropView: View {
                         )
                         WaveformShape(
                             samples: slice,
-                            configuration: Waveform.Configuration(scale: 1)
+                            configuration: stripedZoomConfig
                         )
                         .fill(Color.accentColor.opacity(0.9))
                     } else {
@@ -313,25 +348,52 @@ struct WaveformCropView: View {
                 zoomHandle(kind: .startZoom, x: leading)
                 zoomHandle(kind: .endZoom, x: leading + selectedWidth)
 
-                // 6. 再生ヘッド（窓の追従により常に窓内。x はクランプ済み）
+                // 6. 再生ヘッド（縦線＋上下ノブ・窓の追従により常に窓内）
                 if previewer?.isPlaying == true, let previewer {
                     let x = WaveformCropMath.zoomX(for: previewer.currentTime, width: width, window: zoomWindow)
-                    Rectangle()
-                        .fill(Color.red)
-                        .frame(width: 2.5, height: zoomHeight - 4)
-                        .offset(x: x)
-                        .shadow(color: .red.opacity(0.4), radius: 3)
-                        .allowsHitTesting(false)
+                    playhead()
+                        .offset(x: x - 5)
                 }
+                }
+                .coordinateSpace(name: zoomSpace)
+                .background(
+                    Color.clear
+                        .onAppear { zoomWidth = width }
+                        .onChange(of: width) { _, newWidth in zoomWidth = newWidth }
+                )
+
+                // 7. 時間目盛り（ズーム窓の絶対時刻・#80-5）
+                ruler(width: width)
             }
-            .coordinateSpace(name: zoomSpace)
-            .background(
-                Color.clear
-                    .onAppear { zoomWidth = width }
-                    .onChange(of: width) { _, newWidth in zoomWidth = newWidth }
-            )
         }
-        .frame(height: zoomHeight)
+        .frame(height: zoomHeight + rulerHeight)
+    }
+
+    /// 下段の下の時間目盛り。等間隔ラベル + 小さなティック
+    private func ruler(width: CGFloat) -> some View {
+        let span = zoomWindow.width
+        let step = WaveformCropMath.rulerStep(forSpan: span)
+        let times = WaveformCropMath.rulerTimes(span: span, step: step)
+
+        return ZStack(alignment: .leading) {
+            ForEach(times, id: \.self) { t in
+                let x = WaveformCropMath.zoomX(for: t, width: width, window: zoomWindow)
+                VStack(spacing: 2) {
+                    Rectangle()
+                        .fill(Color.secondary.opacity(0.6))
+                        .frame(width: 1, height: 4)
+                    Text(WaveformCropMath.formatTime(t))
+                        .font(.caption2)
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                        .fixedSize()
+                }
+                .frame(width: 34, alignment: t == times.last ? .trailing : .leading)
+                .offset(x: min(x, width - 34))
+            }
+        }
+        .frame(width: width, height: rulerHeight, alignment: .topLeading)
+        .allowsHitTesting(false)
     }
 
     /// 下段のドラッグでズーム窓を移動（panBaseWindow 基準・#36 と同じ累積対策）。
@@ -405,6 +467,24 @@ struct WaveformCropView: View {
     }
 
     // MARK: - 共通パーツ
+
+    /// 再生ヘッド: 縦線＋上下の丸ノブ（#80-4）。アクセント色・掴める感のある形状。
+    /// 幅10ptで、中心が再生位置に来るよう呼び出し側で offset(x: x - 5) する
+    private func playhead() -> some View {
+        VStack(spacing: 0) {
+            Circle()
+                .frame(width: 9, height: 9)
+            Rectangle()
+                .fill(Color.accentColor)
+                .frame(width: 2)
+            Circle()
+                .frame(width: 9, height: 9)
+        }
+        .frame(width: 10)
+        .foregroundStyle(Color.accentColor)
+        .shadow(color: Color.accentColor.opacity(0.35), radius: 3)
+        .allowsHitTesting(false)
+    }
 
     /// 4つの値をラベル付きで明示（#79-6: どれが何か分からない状態を解消する）
     private func timeLabels(range: TrimRange) -> some View {

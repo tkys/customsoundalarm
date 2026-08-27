@@ -83,9 +83,6 @@
 "end" = "終了";
 "range" = "範囲";
 "duration_warning" = "選択範囲が30秒を超えています。アラーム音は30秒以内を推奨します。";
-"name" = "名前";
-"enter_name_to_save" = "保存するには名前を入力してください";
-"extract_and_save" = "音声を抽出して保存";
 
 /* ShareExtension */
 "saving" = "保存中...";

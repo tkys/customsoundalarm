@@ -402,4 +402,75 @@ struct WaveformCropMathTests {
         #expect(WaveformCropMath.formatTime(59.9) == "0:59")
         #expect(WaveformCropMath.formatTime(60.5) == "1:00")
     }
+
+    // MARK: - 高精度時間フォーマット（#80-3）
+
+    @Test
+    func formatPreciseTime_basics() {
+        #expect(WaveformCropMath.formatPreciseTime(0) == "00:00.00")
+        #expect(WaveformCropMath.formatPreciseTime(5.7) == "00:05.70")
+        #expect(WaveformCropMath.formatPreciseTime(65.5) == "01:05.50")
+        #expect(WaveformCropMath.formatPreciseTime(3661.23) == "61:01.23")
+    }
+
+    @Test
+    func formatPreciseTime_negativeClampsToZero() {
+        #expect(WaveformCropMath.formatPreciseTime(-0.5) == "00:00.00")
+    }
+
+    @Test
+    func formatPreciseTime_roundsToHundredth() {
+        // 5.706秒 → 570.6 → 571（1/100秒に四捨五入）
+        #expect(WaveformCropMath.formatPreciseTime(5.706) == "00:05.71")
+        // 5.704秒 → 570.4 → 570
+        #expect(WaveformCropMath.formatPreciseTime(5.704) == "00:05.70")
+    }
+
+    // MARK: - 時間目盛り（#80-5）
+
+    @Test
+    func rulerStep_picksNiceStep() {
+        // 30秒 → 5秒刻み（6ラベル）
+        #expect(WaveformCropMath.rulerStep(forSpan: 30) == 5)
+        // 600秒 → 120秒刻み（6ラベル）
+        #expect(WaveformCropMath.rulerStep(forSpan: 600) == 120)
+        // 8秒 → 2秒刻み（5ラベル）
+        #expect(WaveformCropMath.rulerStep(forSpan: 8) == 2)
+        // 100秒 → 15秒では6.67ラベルで超過 → 30秒刻み
+        #expect(WaveformCropMath.rulerStep(forSpan: 100) == 30)
+        // 60秒 → 10秒刻み（6ラベル）
+        #expect(WaveformCropMath.rulerStep(forSpan: 60) == 10)
+    }
+
+    @Test
+    func rulerStep_respectsTargetCount() {
+        // targetCount を大きくすれば細かい刻みが選ばれる
+        #expect(WaveformCropMath.rulerStep(forSpan: 100, targetCount: 10) == 10)
+        #expect(WaveformCropMath.rulerStep(forSpan: 30, targetCount: 3) == 10)
+    }
+
+    @Test
+    func rulerStep_invalidInput_returnsLargestCandidate() {
+        #expect(WaveformCropMath.rulerStep(forSpan: 0) == 3600)
+        #expect(WaveformCropMath.rulerStep(forSpan: -5) == 3600)
+    }
+
+    @Test
+    func rulerTimes_evenSteps() {
+        let times = WaveformCropMath.rulerTimes(span: 30, step: 5)
+        #expect(times == [0, 5, 10, 15, 20, 25, 30])
+    }
+
+    @Test
+    func rulerTimes_includesClippedEnd() {
+        // 割り切れない場合も span 以下の刻みまで列挙
+        let times = WaveformCropMath.rulerTimes(span: 30, step: 20)
+        #expect(times == [0, 20])
+    }
+
+    @Test
+    func rulerTimes_invalidInput_returnsEmpty() {
+        #expect(WaveformCropMath.rulerTimes(span: 0, step: 5).isEmpty)
+        #expect(WaveformCropMath.rulerTimes(span: 30, step: 0).isEmpty)
+    }
 }
