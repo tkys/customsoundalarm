@@ -23,4 +23,15 @@ enum SoundPickerLogic {
         guard recentCount > 0 else { return false }
         return importedCount >= threshold
     }
+
+    /// My Sounds セクションに表示する音源（#85）。
+    ///
+    /// **所有する非プリセット音源の完全な一覧**を返す。使用済み（Recent に載っている）か
+    /// どうかで除外しない。かつては Recent との重複を避けて除外していたが、
+    /// 「一度使った音源が消える」「保有1〜2本で Recent が非表示のとき完全に不可視になる」
+    /// 問題があった。Recent は「よく使うものへの近道」であり、両方に同じ音が出るのは
+    /// 自然（写真アプリの「最近の項目」とアルバムの関係と同じ）。
+    static func mySounds(in sounds: [AlarmSound]) -> [AlarmSound] {
+        sounds.filter { !$0.isPreset }
+    }
 }

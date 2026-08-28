@@ -143,8 +143,10 @@ struct SoundSelectionView: View {
 
     @ViewBuilder
     private var importedSection: some View {
-        let excluded = recentFileNamesSet
-        let imported = soundStore.sounds.filter { !$0.isPreset && !excluded.contains($0.fileName) }
+        // #85: My Sounds は所有する音源の完全な一覧。Recent に載っている音を
+        // 除外しない（かつての除外で「使用したら消える」「1〜2本のとき完全に
+        // 見えなくなる」問題があった。Recent との重複は許容する）
+        let imported = SoundPickerLogic.mySounds(in: soundStore.sounds)
         Section {
             if imported.isEmpty {
                 VStack(spacing: 8) {

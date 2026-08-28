@@ -88,4 +88,65 @@ struct SoundPickerLogicTests {
         let result = SoundPickerLogic.shouldShowRecent(recentCount: 3, importedCount: 0)
         #expect(result == false)
     }
+
+    // MARK: - mySounds（#85: 使用済みでも My Sounds から消さない）
+
+    /// #85 の再現シナリオ: 音源1本を使用（＝Recent 対象）しても My Sounds に出る。
+    /// 保有1本では Recent が非表示（閾値未満）なので、ここから消えると完全に不可視になる
+    @Test
+    func mySounds_singleUsedSound_stillListed() {
+        let only = AlarmSound(name: "My Clip", fileName: "clip.caf")
+        let mySounds = SoundPickerLogic.mySounds(in: [only])
+
+        // Recent は非表示（保有1本 < 閾値3）
+        #expect(SoundPickerLogic.shouldShowRecent(recentCount: 1, importedCount: 1) == false)
+        // それでも My Sounds には出る（旧実装は Recent 除外でここからも消えていた）
+        #expect(mySounds.count == 1)
+        #expect(mySounds.first?.fileName == "clip.caf")
+    }
+
+    /// 音源2本・うち1本使用のケースでも両方 My Sounds に出る
+    @Test
+    func mySounds_twoSoundsOneUsed_bothListed() {
+        let used = AlarmSound(name: "Used", fileName: "used.caf")
+        let unused = AlarmSound(name: "Unused", fileName: "unused.caf")
+        let mySounds = SoundPickerLogic.mySounds(in: [used, unused])
+
+        #expect(SoundPickerLogic.shouldShowRecent(recentCount: 1, importedCount: 2) == false)
+        #expect(mySounds.count == 2)
+        #expect(mySounds.map(\.fileName).contains("used.caf"))
+        #expect(mySounds.map(\.fileName).contains("unused.caf"))
+    }
+
+    /// Recent と My Sounds に同じ音源が出ることを許容する（重複は自然・#85）
+    @Test
+    func mySounds_overlapWithRecent_isAllowed() {
+        let a = AlarmSound(name: "A", fileName: "a.caf")
+        let b = AlarmSound(name: "B", fileName: "b.caf")
+        let c = AlarmSound(name: "C", fileName: "c.caf")
+        let mySounds = SoundPickerLogic.mySounds(in: [a, b, c])
+
+        // 保有3本・使用済み2本 → Recent は表示される
+        #expect(SoundPickerLogic.shouldShowRecent(recentCount: 2, importedCount: 3) == true)
+        // 使用済みの2本（a, b）も My Sounds に残る（= Recent と重複して表示される）
+        #expect(mySounds.count == 3)
+        #expect(mySounds.map(\.fileName) == ["a.caf", "b.caf", "c.caf"])
+    }
+
+    /// プリセットは My Sounds に含めない（従来どおり）
+    @Test
+    func mySounds_excludesPresets() {
+        let preset = AlarmSound(name: "Preset", fileName: "preset.caf", isPreset: true)
+        let mine = AlarmSound(name: "Mine", fileName: "mine.caf")
+        let mySounds = SoundPickerLogic.mySounds(in: [preset, mine])
+
+        #expect(mySounds.count == 1)
+        #expect(mySounds.first?.fileName == "mine.caf")
+    }
+
+    /// 空のときは空（空状態ビューの条件）
+    @Test
+    func mySounds_empty_returnsEmpty() {
+        #expect(SoundPickerLogic.mySounds(in: []).isEmpty)
+    }
 }
