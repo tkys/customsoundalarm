@@ -42,6 +42,9 @@ struct WaveformCropView: View {
     @State private var overviewWidth: CGFloat = 0
     @State private var zoomWidth: CGFloat = 0
 
+    /// アクセント色のアセット解決に使う（#81-2）
+    @Environment(\.colorScheme) private var colorScheme
+
     private let overviewHeight: CGFloat = 64
     private let zoomHeight: CGFloat = 140
     private let rulerHeight: CGFloat = 20
@@ -51,18 +54,17 @@ struct WaveformCropView: View {
     /// 下段のサンプル解像度（600秒ファイルで窓8秒時に約100バケット）
     private let sampleCount = 8000
 
-    /// 上段（WaveformView）用のストライプ設定（#80-2）。スケールはビュー側既定
+    /// 上段（WaveformView）用のストライプ設定（#80-2）。スケールはビュー側既定。
+    /// 色は AccentColor アセットを直接解決（#81-2: UIColor(Color.accentColor) は
+    /// 環境依存のためビュー階層の外で青にフォールバックする）
     private var stripedOverviewConfig: Waveform.Configuration {
         Waveform.Configuration(
-            style: .striped(.init(color: UIColor(Color.accentColor), width: 2, spacing: 2, lineCap: .round))
-        )
-    }
-
-    /// 下段（WaveformShape）用。#79 バグ1対策でスケールは 1 固定
-    private var stripedZoomConfig: Waveform.Configuration {
-        Waveform.Configuration(
-            style: .striped(.init(color: UIColor(Color.accentColor), width: 2, spacing: 2, lineCap: .round)),
-            scale: 1
+            style: .striped(.init(
+                color: Brand.accentUIColor(dark: colorScheme == .dark),
+                width: 2,
+                spacing: 2,
+                lineCap: .round
+            ))
         )
     }
 
@@ -74,10 +76,13 @@ struct WaveformCropView: View {
     var body: some View {
         let range = currentRange
         VStack(spacing: 10) {
+            // テキスト行は横パディングあり（#81-3）。全画面幅にするのは波形のみ
             bigTimeLabel(range: range)
+                .padding(.horizontal, 20)
             overviewBar(range: range)
             zoomBar(range: range)
             timeLabels(range: range)
+                .padding(.horizontal, 20)
         }
         .task(id: audioURL) {
             await loadSamples()
@@ -301,29 +306,27 @@ struct WaveformCropView: View {
 
             VStack(spacing: 2) {
                 ZStack(alignment: .leading) {
-                // 1. 窓内の拡大波形（サンプルからリサンプル）
-                // ⚠️ LinearWaveformRenderer は 1サンプル=1pt で描き引き伸ばさないため、
-                // バケット数はバー幅と一致させる + scale を 1 に固定する（#79 バグ1）
-                Group {
-                    if let samples {
-                        let slice = WaveformCropMath.resample(
-                            samples,
-                            in: zoomWindow,
-                            sampleDuration: duration,
-                            count: WaveformCropMath.zoomBucketCount(viewWidth: width)
-                        )
-                        WaveformShape(
-                            samples: slice,
-                            configuration: stripedZoomConfig
-                        )
-                        .fill(Color.accentColor.opacity(0.9))
-                    } else {
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.secondary.opacity(0.1))
-                            .overlay(ProgressView().scaleEffect(0.7))
+                    // 1. 窓内の拡大波形（自前 Canvas 描画・#81-1）
+                    // WaveformShape は .striped を表現できない（Shape は塗りつぶしのみで
+                    // 「線を引く」スタイルが Path 化されず空になる）。そのため
+                    // 1バケット=1本の角丸矩形を Canvas で中央揃えに描く。
+                    // #79 バグ1の契約は維持: バケット数＝バー幅（zoomBucketCount）
+                    Group {
+                        if let samples {
+                            let slice = WaveformCropMath.resample(
+                                samples,
+                                in: zoomWindow,
+                                sampleDuration: duration,
+                                count: WaveformCropMath.zoomBucketCount(viewWidth: width)
+                            )
+                            zoomWaveformCanvas(slice: slice, width: width)
+                        } else {
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color.secondary.opacity(0.1))
+                                .overlay(ProgressView().scaleEffect(0.7))
+                        }
                     }
-                }
-                .frame(width: width, height: zoomHeight)
+                    .frame(width: width, height: zoomHeight)
 
                 // 2. 選択範囲外のディム
                 HStack(spacing: 0) {
@@ -369,15 +372,53 @@ struct WaveformCropView: View {
         .frame(height: zoomHeight + rulerHeight)
     }
 
-    /// 下段の下の時間目盛り。等間隔ラベル + 小さなティック
+    /// 下段の波形を Canvas で描く（#81-1）。
+    /// 4ptピッチ（幅2+間隔2）の角丸縦バーを上下対称（中央揃え）に並べる。
+    /// 各バーは対応する4バケット分のピーク値を使う（トランジェントを潰さない）。
+    private func zoomWaveformCanvas(slice: [Float], width: CGFloat) -> some View {
+        Canvas { context, size in
+            let barWidth: CGFloat = 2
+            let pitch: CGFloat = 4  // barWidth + spacing
+            let barsPerPitch = Int(pitch / barWidth)
+            let midY = size.height / 2
+            let color = Color.accentColor
+
+            var barIndex = 0
+            var x: CGFloat = 0
+            while x + barWidth <= size.width {
+                let s0 = barIndex * barsPerPitch
+                guard s0 < slice.count else { break }
+                let s1 = min(s0 + barsPerPitch, slice.count)
+                let peak = slice[s0..<s1].max() ?? 0
+                let amplitude = max(2, CGFloat(peak) * size.height * 0.92)
+                let rect = CGRect(x: x, y: midY - amplitude / 2, width: barWidth, height: amplitude)
+                context.fill(
+                    Path(roundedRect: rect, cornerRadius: barWidth / 2),
+                    with: .color(color)
+                )
+                barIndex += 1
+                x += pitch
+            }
+        }
+        .frame(width: width, height: zoomHeight)
+    }
+
+    /// 下段の下の時間目盛り（#80-5 / #81-3）。
+    /// ラベルの実描画幅を考慮して刻みを間引き、両端で内側にクランプする
     private func ruler(width: CGFloat) -> some View {
         let span = zoomWindow.width
-        let step = WaveformCropMath.rulerStep(forSpan: span)
+        let labelWidth: Double = 34
+        let step = WaveformCropMath.rulerStep(
+            forSpan: span,
+            barWidth: width,
+            labelWidth: labelWidth
+        )
         let times = WaveformCropMath.rulerTimes(span: span, step: step)
 
         return ZStack(alignment: .leading) {
             ForEach(times, id: \.self) { t in
-                let x = WaveformCropMath.zoomX(for: t, width: width, window: zoomWindow)
+                let rawX = WaveformCropMath.zoomX(for: t, width: width, window: zoomWindow)
+                let x = WaveformCropMath.clampedRulerX(x: rawX, barWidth: width, labelWidth: labelWidth)
                 VStack(spacing: 2) {
                     Rectangle()
                         .fill(Color.secondary.opacity(0.6))
@@ -388,8 +429,8 @@ struct WaveformCropView: View {
                         .foregroundStyle(.secondary)
                         .fixedSize()
                 }
-                .frame(width: 34, alignment: t == times.last ? .trailing : .leading)
-                .offset(x: min(x, width - 34))
+                .frame(width: labelWidth, alignment: .center)
+                .offset(x: x)
             }
         }
         .frame(width: width, height: rulerHeight, alignment: .topLeading)

@@ -473,4 +473,54 @@ struct WaveformCropMathTests {
         #expect(WaveformCropMath.rulerTimes(span: 0, step: 5).isEmpty)
         #expect(WaveformCropMath.rulerTimes(span: 30, step: 0).isEmpty)
     }
+
+    // MARK: - 目盛りラベルのクランプと間引き（#81-3）
+
+    @Test
+    func clampedRulerX_leftEdgeClampsToZero() {
+        #expect(WaveformCropMath.clampedRulerX(x: -5, barWidth: 390, labelWidth: 34) == 0)
+        #expect(WaveformCropMath.clampedRulerX(x: 0, barWidth: 390, labelWidth: 34) == 0)
+    }
+
+    @Test
+    func clampedRulerX_rightEdgeClampsInside() {
+        // 右端: x = barWidth - labelWidth に収める（右端のラベルが切れない）
+        #expect(abs(WaveformCropMath.clampedRulerX(x: 390, barWidth: 390, labelWidth: 34) - 356) < 0.0001)
+        #expect(abs(WaveformCropMath.clampedRulerX(x: 400, barWidth: 390, labelWidth: 34) - 356) < 0.0001)
+    }
+
+    @Test
+    func clampedRulerX_middleUnchanged() {
+        #expect(abs(WaveformCropMath.clampedRulerX(x: 150, barWidth: 390, labelWidth: 34) - 150) < 0.0001)
+    }
+
+    @Test
+    func clampedRulerX_invalidInput_returnsX() {
+        #expect(WaveformCropMath.clampedRulerX(x: 150, barWidth: 0, labelWidth: 34) == 150)
+        #expect(WaveformCropMath.clampedRulerX(x: -5, barWidth: 390, labelWidth: 0) == -5)
+    }
+
+    @Test
+    func rulerStepWithLabelWidth_noOverlap() {
+        // 十分な幅なら従来どおり: 30秒/390pt/ラベル34pt → 5秒刻み（間隔65pt ≥ 34+8）
+        #expect(WaveformCropMath.rulerStep(forSpan: 30, barWidth: 390, labelWidth: 34) == 5)
+    }
+
+    @Test
+    func rulerStepWithLabelWidth_thinsOutWhenTight() {
+        // 60秒/200pt では 10秒刻み（間隔33.3pt）がラベル幅に満たない → 15秒刻みに間引き
+        #expect(WaveformCropMath.rulerStep(forSpan: 60, barWidth: 200, labelWidth: 34) == 15)
+    }
+
+    @Test
+    func rulerStepWithLabelWidth_fallsBackToLargest() {
+        // 2時間/100pt: どの候補も間隔条件を満たさず、最大候補で1〜2ラベルに
+        #expect(WaveformCropMath.rulerStep(forSpan: 7200, barWidth: 100, labelWidth: 34) == 3600)
+    }
+
+    @Test
+    func rulerStepWithLabelWidth_invalidInput() {
+        #expect(WaveformCropMath.rulerStep(forSpan: 0, barWidth: 390, labelWidth: 34) == 3600)
+        #expect(WaveformCropMath.rulerStep(forSpan: 30, barWidth: -1, labelWidth: 34) == 3600)
+    }
 }

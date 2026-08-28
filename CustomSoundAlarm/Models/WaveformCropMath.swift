@@ -201,6 +201,45 @@ enum WaveformCropMath {
         return rulerStepCandidates.last!
     }
 
+    /// ラベルの実描画幅を考慮した刻み幅の選択（#81-3）。
+    ///
+    /// 隣接ラベルの間隔（px）が `labelWidth + minGap` に満たない刻みは除外することで、
+    /// ラベル同士の重なりを防ぐ。ラベル数の上限（targetCount）との両方を満たす
+    /// 最小の候補を返し、無い場合は最大候補（3600）を返す。
+    ///
+    /// - Parameters:
+    ///   - span: 表示幅（秒）
+    ///   - barWidth: 目盛りを描くバーの幅（pt）
+    ///   - labelWidth: ラベル1つの実描画幅（pt）
+    ///   - minGap: ラベル間の最小間隔（pt）
+    ///   - targetCount: ラベル数の上限
+    static func rulerStep(
+        forSpan span: Double,
+        barWidth: Double,
+        labelWidth: Double,
+        minGap: Double = 8,
+        targetCount: Int = 6
+    ) -> Double {
+        guard span > 0, barWidth > 0, labelWidth >= 0, minGap >= 0 else {
+            return rulerStepCandidates.last!
+        }
+        let pxPerSecond = barWidth / span
+        for step in rulerStepCandidates {
+            let labelSpacing = step * pxPerSecond
+            if span / step <= Double(targetCount) && labelSpacing >= labelWidth + minGap {
+                return step
+            }
+        }
+        return rulerStepCandidates.last!
+    }
+
+    /// 目盛りラベルのX位置を両端で内側にクランプする（#81-3）。
+    /// 最初のラベルは左端で切れず（x >= 0）、最後のラベルは右端に収まる（x <= barWidth - labelWidth）。
+    static func clampedRulerX(x: Double, barWidth: Double, labelWidth: Double) -> Double {
+        guard barWidth > 0, labelWidth > 0 else { return x }
+        return min(max(x, 0), max(0, barWidth - labelWidth))
+    }
+
     /// 目盛りの時刻一覧（0 から step 刻み、span 以下）
     static func rulerTimes(span: Double, step: Double) -> [Double] {
         guard span > 0, step > 0 else { return [] }
