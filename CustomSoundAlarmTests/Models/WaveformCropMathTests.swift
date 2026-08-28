@@ -213,6 +213,8 @@ struct WaveformCropMathTests {
     }
 
     // MARK: - リサンプル（下段描画用）
+    // ⚠️ 入力サンプルは DSWaveformImage の反転正規化（1 = 無音, 0 = 最大音量）。
+    // resample は出力をレベル値（0 = 無音, 1 = 最大音量）に変換する（#83）。
 
     @Test
     func resample_emptySamples_returnsEmpty() {
@@ -222,32 +224,51 @@ struct WaveformCropMathTests {
 
     @Test
     func resample_uniformSamples() {
-        let samples = [Float](repeating: 1.0, count: 1000)
+        // 入力 0.3（反転正規化でそこそこ大きい音）→ レベル 0.7
+        let samples = [Float](repeating: 0.3, count: 1000)
         let result = WaveformCropMath.resample(samples, in: CropWindow(start: 0, end: 10), sampleDuration: 10, count: 50)
         #expect(result.count == 50)
-        #expect(result.allSatisfy { abs($0 - 1.0) < 0.0001 })
+        #expect(result.allSatisfy { abs(Double($0) - 0.7) < 0.0001 })
+    }
+
+    /// 振幅の向き（#83 の本件）: 無音のサンプル（値1）は最小の高さ（レベル0）になる
+    @Test
+    func resample_silence_mapsToZeroLevel() {
+        let samples = [Float](repeating: 1.0, count: 1000)  // 1 = 無音（-50dB）
+        let result = WaveformCropMath.resample(samples, in: CropWindow(start: 0, end: 10), sampleDuration: 10, count: 50)
+        #expect(result.allSatisfy { abs(Double($0) - 0.0) < 0.0001 })
+    }
+
+    /// 振幅の向き（#83 の本件）: 最大音量のサンプル（値0）は最大の高さ（レベル1）になる
+    @Test
+    func resample_loudest_mapsToMaxLevel() {
+        let samples = [Float](repeating: 0.0, count: 1000)  // 0 = 最大音量
+        let result = WaveformCropMath.resample(samples, in: CropWindow(start: 0, end: 10), sampleDuration: 10, count: 50)
+        #expect(result.allSatisfy { abs(Double($0) - 1.0) < 0.0001 })
     }
 
     @Test
     func resample_peakHoldPreservesTransients() {
-        // 500サンプル中1つだけ 1.0、他は 0.1 → ピークホールドで 1.0 が残る
-        var samples = [Float](repeating: 0.1, count: 500)
-        samples[250] = 1.0
+        // ほぼ無音（値1.0）の中に1つだけ最大音量（値0.0）→ ピークホールドで
+        // レベル1.0（大きな音）が残る。生値 max だと「最も静かな値」を拾う罠（#83）
+        var samples = [Float](repeating: 1.0, count: 500)
+        samples[250] = 0.0
         let result = WaveformCropMath.resample(samples, in: CropWindow(start: 0, end: 10), sampleDuration: 10, count: 1)
         #expect(result.count == 1)
-        #expect(abs(result[0] - 1.0) < 0.0001)
+        #expect(abs(Double(result[0]) - 1.0) < 0.0001)
     }
 
     @Test
     func resample_respectsWindow() {
-        // 前半0.0・後半1.0 のサンプル: 窓を後半にすると全て1.0
-        var samples = [Float](repeating: 0.0, count: 100)
-        for i in 50..<100 { samples[i] = 1.0 }
+        // 前半 無音(1.0)・後半 最大音量(0.0) のサンプル:
+        // 窓を後半にするとレベルは全て1.0、前半では全て0.0
+        var samples = [Float](repeating: 1.0, count: 100)
+        for i in 50..<100 { samples[i] = 0.0 }
         let secondHalf = WaveformCropMath.resample(samples, in: CropWindow(start: 5, end: 10), sampleDuration: 10, count: 10)
-        #expect(secondHalf.allSatisfy { abs($0 - 1.0) < 0.0001 })
+        #expect(secondHalf.allSatisfy { abs(Double($0) - 1.0) < 0.0001 })
 
         let firstHalf = WaveformCropMath.resample(samples, in: CropWindow(start: 0, end: 5), sampleDuration: 10, count: 10)
-        #expect(firstHalf.allSatisfy { abs($0 - 0.0) < 0.0001 })
+        #expect(firstHalf.allSatisfy { abs(Double($0) - 0.0) < 0.0001 })
     }
 
     @Test
@@ -327,7 +348,7 @@ struct WaveformCropMathTests {
     }
 
     /// 振幅が飽和しないこと（#82-1 回帰防止）: 一定の入力に対し出力が
-    /// 最大値（1.0）に張り付かない。0.5 の入力は 0.5 のまま出力される
+    /// 最大値（1.0）に張り付かない。0.5 の入力はレベル 0.5 のまま出力される
     @Test
     func resample_constantHalfAmplitude_doesNotSaturate() {
         let samples = [Float](repeating: 0.5, count: 8000)
@@ -343,12 +364,12 @@ struct WaveformCropMathTests {
         #expect((result.max() ?? 1.0) < 1.0)
     }
 
-    /// 静かな区間の窓では静かなまま出る（静音区間のピークが無視されない）
+    /// 静かな区間の窓では静かなまま出る（無音 = 値1 → レベル0。#82/#83）
     @Test
     func resample_quietWindow_staysQuiet() {
-        var samples = [Float](repeating: 0.1, count: 6000)
-        for i in 3000..<6000 { samples[i] = 1.0 }
-        // 窓は前半（静かな区間）のみ
+        var samples = [Float](repeating: 1.0, count: 6000)  // 前半: 無音
+        for i in 3000..<6000 { samples[i] = 0.0 }           // 後半: 最大音量
+        // 窓は前半（無音区間）のみ → レベルは 0 に張り付かず静かなまま
         let result = WaveformCropMath.resample(
             samples,
             in: CropWindow(start: 0, end: 30),
@@ -360,7 +381,8 @@ struct WaveformCropMathTests {
 
     /// バグ1の再発防止: 選択範囲（＝窓）に対応するサンプルが正しい時間範囲から
     /// 取れていること。サンプル値に時刻をエンコードし、出力バケットの値が
-    /// 窓内の正しい時刻を指すことを検証する（#79 の本質的契約は維持）
+    /// 窓内の正しい時刻を指すことを検証する（#79 の本質的契約は維持）。
+    /// 出力はレベル値（1 - 生値）なので、復元は 1 - result で行う（#83）
     @Test
     func resample_takesSamplesFromCorrectTimeRange_regression79() {
         // 100秒の音源を1000サンプルで表す。samples[i] = i/1000（= 時刻/100 に等しい）
@@ -378,23 +400,26 @@ struct WaveformCropMathTests {
         // バケット j のカバー時刻は [50 + j*0.1, 50 + (j+1)*0.1)
         for j in 0..<count {
             let expectedTime = 50.0 + Double(j + 1) / Double(count) * 10.0
-            #expect(abs(Double(result[j]) * 100.0 - expectedTime) < 0.11) // バケット幅(0.1秒)の誤差内
+            let encodedTime = (1.0 - Double(result[j])) * 100.0
+            #expect(abs(encodedTime - expectedTime) < 0.11) // バケット幅(0.1秒)の誤差内
         }
         // 先頭バケットは 50〜50.1秒の範囲から（窓の外の 0〜50秒を拾っていない）
-        #expect(Double(result[0]) * 100.0 >= 50.0)
-        #expect(Double(result[0]) * 100.0 <= 50.1 + 0.0001)
+        #expect((1.0 - Double(result[0])) * 100.0 >= 50.0)
+        #expect((1.0 - Double(result[0])) * 100.0 <= 50.1 + 0.0001)
     }
 
-    /// resample の出力が窓の時間方向に単調増加になること（インデックス逆転していないこと）
+    /// resample の出力が時間方向に単調（インデックス逆転していないこと）。
+    /// 生値が [0,1] で時間とともに増加する入力は、レベル値（1 - 生値）としては単調減少になる。
+    /// （正規化: 入力は 1 = 無音の反転正規化に従う [0,1] の値とする・#83）
     @Test
     func resample_isMonotonicWithTimeEncodedSamples() {
         let sampleDuration = 50.0
-        let samples = (0..<5000).map { Float($0) }
+        let samples = (0..<5000).map { Float($0) / 5000.0 }
         let window = CropWindow(start: 10, end: 40)
         let result = WaveformCropMath.resample(samples, in: window, sampleDuration: sampleDuration, count: 50)
         #expect(result.count == 50)
         for j in 1..<result.count {
-            #expect(result[j] > result[j - 1])
+            #expect(result[j] < result[j - 1])
         }
     }
 

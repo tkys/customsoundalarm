@@ -150,6 +150,8 @@ struct WaveformCropView: View {
     private func loadSamples() async {
         samples = nil
         // 波形サンプルの生成は重い（600秒≈2600万サンプル）ため非同期で。
+        // ⚠️ WaveformAnalyzer の戻り値は 1 = 無音(-50dB) の反転正規化（#83）。
+        // レベル値への変換は resample が担う（生値を直接 UI に使わないこと）。
         // 失敗してもクロップ自体は可能（ディムとハンドルのみの表示になる）
         let analyzer = WaveformAnalyzer()
         if let result = try? await analyzer.samples(fromAudioAt: audioURL, count: sampleCount, qos: .userInitiated) {
@@ -370,10 +372,13 @@ struct WaveformCropView: View {
         .frame(height: zoomHeight + rulerHeight)
     }
 
-    /// 下段の波形を Canvas で描く（#81-1 / #82-1）。
+    /// 下段の波形を Canvas で描く（#81-1 / #82-1 / #83）。
     /// 4ptピッチ（幅2+間隔2）の角丸縦バーを上下対称（中央揃え）に並べる。
     /// **1バケット＝1バー**（slice[i] をそのまま使用・再集約しない）。
-    /// ピッチは `WaveformCropMath.zoomBucketCount` の既定値（4）と一致させること。
+    ///
+    /// ⚠️ `slice` は `resample` が既に **0 = 無音・1 = 最大音量のレベル値**に変換済み
+    /// （DSWaveformImage の生サンプルは 1 = 無音の反転正規化。#83）。
+    /// ここで反転してはならない。ピッチは zoomBucketCount の既定値（4）と一致させること。
     private func zoomWaveformCanvas(slice: [Float], width: CGFloat) -> some View {
         Canvas { context, size in
             let barWidth: CGFloat = 2
@@ -381,10 +386,10 @@ struct WaveformCropView: View {
             let midY = size.height / 2
             let color = Color.accentColor
 
-            for (i, amplitude) in slice.enumerated() {
+            for (i, level) in slice.enumerated() {
                 let x = CGFloat(i) * pitch
                 guard x + barWidth <= size.width else { break }
-                let barHeight = max(2, CGFloat(amplitude) * size.height * 0.92)
+                let barHeight = max(2, CGFloat(level) * size.height * 0.92)
                 let rect = CGRect(x: x, y: midY - barHeight / 2, width: barWidth, height: barHeight)
                 context.fill(
                     Path(roundedRect: rect, cornerRadius: barWidth / 2),

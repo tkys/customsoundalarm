@@ -261,14 +261,23 @@ enum WaveformCropMath {
 
     /// 全体サンプル配列から窓の範囲のみをピークホールドでリサンプルする。
     ///
+    /// ⚠️ **入力の正規化は反転している（ライブラリ仕様・#83）**:
+    /// DSWaveformImage の `WaveformAnalyzer` が返すサンプルは
+    /// **1 = 無音（-50dB）、0 = 最大音量**（dB を線形正規化したもの）。
+    /// この関数は内部で `1 - x` を施し、**0 = 無音・1 = 最大音量の「レベル値」に変換してから**
+    /// ピークホールド（max）を取って返す。生値のままで max を集約すると
+    /// 「最も静かな値」が残ってしまい、描画時に正負が逆転する
+    /// （#79 空白 → #82 飽和 → #83 反転と3回踏んだ罠。値だけ見ても分からないため
+    /// ここに明記する）。
+    ///
     /// - Parameters:
-    ///   - samples: 全体波形の振幅配列（0...1）
+    ///   - samples: 全体波形の振幅配列（**反転正規化: 1 = 無音, 0 = 最大音量**）
     ///   - window: 取り出す時間窓
     ///   - sampleDuration: `samples` がカバーする全体の秒数
-    ///   - count: 出力バケット数（下段の描画幅に対応）
-    /// - Returns: 窓の範囲の振幅配列。入力が空の場合は空配列
+    ///   - count: 出力バケット数（下段のバー本数に一致させる・#82）
+    /// - Returns: 窓の範囲のレベル配列（**0 = 無音, 1 = 最大音量**）。入力が空の場合は空配列
     ///
-    /// ピークホールド（平均でなく最大値）なのは、
+    /// ピークホールド（平均でなく最大）なのは、変換後のレベル値において
     /// 短いトランジェント（ドラムのアタック等）が平均で潰れないようにするため。
     static func resample(
         _ samples: [Float],
@@ -285,11 +294,14 @@ enum WaveformCropMath {
             let index0 = max(0, min(Int(t0 * samplesPerSecond), samples.count))
             let index1 = max(0, min(Int(ceil(t1 * samplesPerSecond)), samples.count))
             guard index1 > index0 else { continue }
-            var peak: Float = 0
-            for j in index0..<index1 where samples[j] > peak {
-                peak = samples[j]
+            var peakLevel: Float = 0
+            for j in index0..<index1 {
+                let level = 1 - samples[j]  // 反転正規化 → レベル値（0=無音, 1=最大）
+                if level > peakLevel {
+                    peakLevel = level
+                }
             }
-            result[i] = peak
+            result[i] = peakLevel
         }
         return result
     }
