@@ -46,15 +46,20 @@ enum WaveformCropMath {
 
     // MARK: - 下段（拡大波形）の座標変換
 
-    /// 下段の描画バケット数。
+    /// 下段の描画バケット数 = 描画する**バーの本数**（#82-1）。
     ///
-    /// DSWaveformImage の `LinearWaveformRenderer` はサンプルを**1サンプル=1pt で描き、
-    /// 引き伸ばさない**（余白があれば右寄せになる）。
-    /// したがってバケット数はバーの幅（pt）と一致させなければならない
-    /// （#79 バグ1: 幅の1/3のバケット数だったため波形が右1/3にだけ描画されていた）。
-    /// 併せて `Waveform.Configuration(scale: 1)` で実画面スケールを無効化して使うこと。
-    static func zoomBucketCount(viewWidth: Double) -> Int {
-        max(Int(viewWidth), 1)
+    /// 下段は自前の Canvas 描画で 1バーを `barPitch`（既定4pt = 幅2+間隔2）の
+    /// ピッチで並べる。バケット数はバー本数と一致させ、**1バケット＝1バー** として
+    /// `slice[i]` をそのまま描く。バケット数 > バー本数だと resample が取った
+    /// ピークからさらにピークを取る二重集約になり、振幅が最大値付近に飽和する（#82-1）。
+    ///
+    /// ※ #79 バグ1当時の「バケット数＝バー幅（1サンプル=1pt）」は WaveformShape 前提の
+    /// 契約。#81-1 で自前 Canvas（4ptピッチ）に置き換えた時点で前提は変わり、
+    /// 正しい契約はこちら。「選択範囲に対応する正しい時間範囲からサンプルを取る」
+    /// という #79 の本質的な契約（resample の時間マッピング）は維持する。
+    static func zoomBucketCount(viewWidth: Double, barPitch: Double = 4) -> Int {
+        guard viewWidth > 0, barPitch > 0 else { return 1 }
+        return max(Int(viewWidth / barPitch), 1)
     }
 
     /// 下段の x 座標 → 時間。`[0, width]` を `window` に写像する

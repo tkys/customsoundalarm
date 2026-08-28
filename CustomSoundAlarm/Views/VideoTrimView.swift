@@ -22,6 +22,9 @@ struct VideoImportFlow: View {
     @State private var showingPhotoPicker = false
     @State private var showingFilePicker = false
 
+    /// 編集内容の破棄確認（#82-2: 閉じる操作で黙って消えないようにする）
+    @State private var showingDiscardConfirm = false
+
     /// 波形描画・試聴・切り出しの元になる音声（動画から抽出済みの一時m4a）。
     /// 抽出完了までクロップUIはプレースホルダを表示する（#77）
     @State private var extractedAudioURL: URL?
@@ -45,6 +48,35 @@ struct VideoImportFlow: View {
         }
         .navigationTitle(String(localized: "add_from_video_title"))
         .navigationBarTitleDisplayMode(.inline)
+        // 閉じるボタン（#82-2: シート化に伴う明示的な出口。編集中は破棄を確認する）
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    if videoURL != nil {
+                        showingDiscardConfirm = true
+                    } else {
+                        dismiss()
+                    }
+                } label: {
+                    Image(systemName: "xmark")
+                }
+                .accessibilityLabel(String(localized: "close"))
+            }
+        }
+        // 編集内容の破棄確認（#82-2）
+        .confirmationDialog(
+            String(localized: "discard_edits_title"),
+            isPresented: $showingDiscardConfirm,
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "discard"), role: .destructive) {
+                previewer.stop()
+                dismiss()
+            }
+            Button("cancel", role: .cancel) {}
+        } message: {
+            Text("discard_edits_message")
+        }
         .onAppear {
             if videoURL == nil { showingSourceDialog = true }
         }

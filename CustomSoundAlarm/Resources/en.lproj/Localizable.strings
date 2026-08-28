@@ -67,6 +67,12 @@
 "time_total" = "Total";
 "estimated_size" = "Converted size: ~%@";
 "large_file_warning" = "This will create a large file (~%@). Make sure you have enough storage.";
+
+/* Discard confirmation (#82) */
+"close" = "Close";
+"discard" = "Discard";
+"discard_edits_title" = "Discard your edits?";
+"discard_edits_message" = "Your selection will not be saved.";
 "my_sounds_empty_title" = "Make Any Sound Your Alarm";
 "my_sounds_empty_description" = "Import music from videos or your favorite\naudio files to use as alarm sounds";
 "file_access_denied" = "File access denied";

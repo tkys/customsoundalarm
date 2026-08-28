@@ -16,6 +16,10 @@ struct SoundSelectionView: View {
     /// 波形クロップ待ちの音声取り込み（#77）。非nilでシートを表示
     @State private var pendingAudio: PendingAudioImport?
 
+    /// 動画取り込みをシート表示する（#82-2: NavigationLink push は
+    /// 画面左端の戻るジェスチャが左ハンドルと衝突して編集内容を失うため）
+    @State private var showingVideoImport = false
+
     // プリセット開閉状態
     @State private var presetExpanded: Bool = SoundPickerLogic.presetExpandedDefault(
         importedCount: SoundStore.shared.sounds.filter { !$0.isPreset }.count,
@@ -36,8 +40,8 @@ struct SoundSelectionView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    NavigationLink {
-                        VideoImportFlow(selectedSound: $selectedSound)
+                    Button {
+                        showingVideoImport = true
                     } label: {
                         Label("add_from_video", systemImage: "video.badge.waveform")
                     }
@@ -60,11 +64,19 @@ struct SoundSelectionView: View {
         ) { result in
             handleImport(result)
         }
-        // 音声ファイルの波形クロップ（#77）
+        // 音声ファイルの波形クロップ（#77）。編集中の誤クローズを防ぐ（#82-2）
         .sheet(item: $pendingAudio) { pending in
             NavigationStack {
                 AudioCropView(source: pending, selectedSound: $selectedSound)
             }
+            .interactiveDismissDisabled()
+        }
+        // 動画の波形クロップ（#82-2: シート表示に統一）
+        .sheet(isPresented: $showingVideoImport) {
+            NavigationStack {
+                VideoImportFlow(selectedSound: $selectedSound)
+            }
+            .interactiveDismissDisabled()
         }
         .alert(String(localized: "rename"), isPresented: Binding(
             get: { renamingSound != nil },
@@ -88,8 +100,9 @@ struct SoundSelectionView: View {
 
     private var addSection: some View {
         Section {
-            NavigationLink {
-                VideoImportFlow(selectedSound: $selectedSound)
+            // #82-2: NavigationLink push は戻るジェスチャが波形の左ハンドルと衝突するためシート表示
+            Button {
+                showingVideoImport = true
             } label: {
                 Label {
                     Text("add_from_video")

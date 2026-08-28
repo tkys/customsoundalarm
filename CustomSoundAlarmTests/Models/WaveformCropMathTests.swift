@@ -286,15 +286,25 @@ struct WaveformCropMathTests {
         #expect(!window.contains(20.1))
     }
 
-    // MARK: - 下段の描画バケット数（#79 バグ1 回帰防止）
+    // MARK: - 下段の描画バケット数（#82-1: バケット数＝バー本数）
 
-    /// DSWaveformImage の LinearWaveformRenderer は 1サンプル=1pt で描き引き伸ばさない。
-    /// バケット数がバー幅より少ないと波形は右側の一部にしか描画されない
-    /// （#79 バグ1の実際の症状）。バケット数は常にバー幅と一致すること。
+    /// 下段は自前 Canvas が 1バー=4pt ピッチ（幅2+間隔2）で描くため、バケット数は
+    /// バー本数と一致させる。1バケット＝1バーで描くことで、resample が取ったピークから
+    /// さらにピークを取る二重集約（振幅飽和・#82-1）を防ぐ。
+    /// ※ #79 当時の「バケット数＝バー幅（1サンプル=1pt）」は WaveformShape 前提の
+    ///   古い契約。自前 Canvas 化（#81-1）以降はこちらが正しい契約。
     @Test
-    func zoomBucketCount_equalsViewWidth() {
-        #expect(WaveformCropMath.zoomBucketCount(viewWidth: 390) == 390)
-        #expect(WaveformCropMath.zoomBucketCount(viewWidth: 120) == 120)
+    func zoomBucketCount_equalsBarCount() {
+        // 390pt / 4ptピッチ → 97本
+        #expect(WaveformCropMath.zoomBucketCount(viewWidth: 390) == 97)
+        #expect(WaveformCropMath.zoomBucketCount(viewWidth: 120) == 30)
+        #expect(WaveformCropMath.zoomBucketCount(viewWidth: 4) == 1)
+    }
+
+    @Test
+    func zoomBucketCount_customPitch() {
+        #expect(WaveformCropMath.zoomBucketCount(viewWidth: 100, barPitch: 5) == 20)
+        #expect(WaveformCropMath.zoomBucketCount(viewWidth: 100, barPitch: 10) == 10)
     }
 
     @Test
@@ -302,11 +312,55 @@ struct WaveformCropMathTests {
         #expect(WaveformCropMath.zoomBucketCount(viewWidth: 0) == 1)
         #expect(WaveformCropMath.zoomBucketCount(viewWidth: -10) == 1)
         #expect(WaveformCropMath.zoomBucketCount(viewWidth: 0.4) == 1)
+        #expect(WaveformCropMath.zoomBucketCount(viewWidth: 100, barPitch: 0) == 1)
+        #expect(WaveformCropMath.zoomBucketCount(viewWidth: 100, barPitch: -4) == 1)
+    }
+
+    /// バケット数＝バー本数の契約: 全バーがバー幅内に収まる（描画時に切り捨てられない）
+    @Test
+    func zoomBucketCount_allBarsFitInWidth() {
+        for width in [390.0, 200.0, 97.0, 12.0] {
+            let count = WaveformCropMath.zoomBucketCount(viewWidth: width)
+            #expect(Double(count) * 4 <= width)
+            #expect(Double(count + 1) * 4 > width)
+        }
+    }
+
+    /// 振幅が飽和しないこと（#82-1 回帰防止）: 一定の入力に対し出力が
+    /// 最大値（1.0）に張り付かない。0.5 の入力は 0.5 のまま出力される
+    @Test
+    func resample_constantHalfAmplitude_doesNotSaturate() {
+        let samples = [Float](repeating: 0.5, count: 8000)
+        let barCount = WaveformCropMath.zoomBucketCount(viewWidth: 390)
+        let result = WaveformCropMath.resample(
+            samples,
+            in: CropWindow(start: 0, end: 60),
+            sampleDuration: 600,
+            count: barCount
+        )
+        #expect(result.count == barCount)
+        #expect(result.allSatisfy { abs($0 - 0.5) < 0.0001 })
+        #expect((result.max() ?? 1.0) < 1.0)
+    }
+
+    /// 静かな区間の窓では静かなまま出る（静音区間のピークが無視されない）
+    @Test
+    func resample_quietWindow_staysQuiet() {
+        var samples = [Float](repeating: 0.1, count: 6000)
+        for i in 3000..<6000 { samples[i] = 1.0 }
+        // 窓は前半（静かな区間）のみ
+        let result = WaveformCropMath.resample(
+            samples,
+            in: CropWindow(start: 0, end: 30),
+            sampleDuration: 60,
+            count: WaveformCropMath.zoomBucketCount(viewWidth: 390)
+        )
+        #expect((result.max() ?? 1.0) < 0.2)
     }
 
     /// バグ1の再発防止: 選択範囲（＝窓）に対応するサンプルが正しい時間範囲から
     /// 取れていること。サンプル値に時刻をエンコードし、出力バケットの値が
-    /// 窓内の正しい時刻を指すことを検証する
+    /// 窓内の正しい時刻を指すことを検証する（#79 の本質的契約は維持）
     @Test
     func resample_takesSamplesFromCorrectTimeRange_regression79() {
         // 100秒の音源を1000サンプルで表す。samples[i] = i/1000（= 時刻/100 に等しい）

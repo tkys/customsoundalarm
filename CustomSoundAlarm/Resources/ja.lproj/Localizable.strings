@@ -67,6 +67,12 @@
 "time_total" = "元の長さ";
 "estimated_size" = "変換後のサイズ: 約 %@";
 "large_file_warning" = "大きいファイルになります（約 %@）。端末の容量にご注意ください。";
+
+/* Discard confirmation (#82) */
+"close" = "閉じる";
+"discard" = "破棄";
+"discard_edits_title" = "編集内容を破棄しますか？";
+"discard_edits_message" = "選択した範囲は保存されません。";
 "my_sounds_empty_title" = "好きな音をアラームにしよう";
 "my_sounds_empty_description" = "動画の音楽やお気に入りの音声ファイルを\n取り込んでアラーム音に設定できます";
 "file_access_denied" = "ファイルへのアクセスが拒否されました";

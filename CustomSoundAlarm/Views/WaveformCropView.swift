@@ -306,11 +306,9 @@ struct WaveformCropView: View {
 
             VStack(spacing: 2) {
                 ZStack(alignment: .leading) {
-                    // 1. 窓内の拡大波形（自前 Canvas 描画・#81-1）
-                    // WaveformShape は .striped を表現できない（Shape は塗りつぶしのみで
-                    // 「線を引く」スタイルが Path 化されず空になる）。そのため
-                    // 1バケット=1本の角丸矩形を Canvas で中央揃えに描く。
-                    // #79 バグ1の契約は維持: バケット数＝バー幅（zoomBucketCount）
+                    // 1. 窓内の拡大波形（自前 Canvas 描画・#81-1 / #82-1）
+                    // バケット数＝バー本数（zoomBucketCount）で **1バケット＝1バー**。
+                    // slice[i] をそのまま描き、再集約しない（ピークのピーク取りは飽和の原因）
                     Group {
                         if let samples {
                             let slice = WaveformCropMath.resample(
@@ -372,32 +370,26 @@ struct WaveformCropView: View {
         .frame(height: zoomHeight + rulerHeight)
     }
 
-    /// 下段の波形を Canvas で描く（#81-1）。
+    /// 下段の波形を Canvas で描く（#81-1 / #82-1）。
     /// 4ptピッチ（幅2+間隔2）の角丸縦バーを上下対称（中央揃え）に並べる。
-    /// 各バーは対応する4バケット分のピーク値を使う（トランジェントを潰さない）。
+    /// **1バケット＝1バー**（slice[i] をそのまま使用・再集約しない）。
+    /// ピッチは `WaveformCropMath.zoomBucketCount` の既定値（4）と一致させること。
     private func zoomWaveformCanvas(slice: [Float], width: CGFloat) -> some View {
         Canvas { context, size in
             let barWidth: CGFloat = 2
-            let pitch: CGFloat = 4  // barWidth + spacing
-            let barsPerPitch = Int(pitch / barWidth)
+            let pitch: CGFloat = 4  // barWidth + spacing（zoomBucketCount の barPitch と同じ）
             let midY = size.height / 2
             let color = Color.accentColor
 
-            var barIndex = 0
-            var x: CGFloat = 0
-            while x + barWidth <= size.width {
-                let s0 = barIndex * barsPerPitch
-                guard s0 < slice.count else { break }
-                let s1 = min(s0 + barsPerPitch, slice.count)
-                let peak = slice[s0..<s1].max() ?? 0
-                let amplitude = max(2, CGFloat(peak) * size.height * 0.92)
-                let rect = CGRect(x: x, y: midY - amplitude / 2, width: barWidth, height: amplitude)
+            for (i, amplitude) in slice.enumerated() {
+                let x = CGFloat(i) * pitch
+                guard x + barWidth <= size.width else { break }
+                let barHeight = max(2, CGFloat(amplitude) * size.height * 0.92)
+                let rect = CGRect(x: x, y: midY - barHeight / 2, width: barWidth, height: barHeight)
                 context.fill(
                     Path(roundedRect: rect, cornerRadius: barWidth / 2),
                     with: .color(color)
                 )
-                barIndex += 1
-                x += pitch
             }
         }
         .frame(width: width, height: zoomHeight)

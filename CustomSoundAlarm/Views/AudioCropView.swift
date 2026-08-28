@@ -26,6 +26,9 @@ struct AudioCropView: View {
     @State private var isProcessing = false
     @State private var errorMessage: String?
 
+    /// 編集内容の破棄確認（#82-2: 閉じる操作で黙って消えないようにする）
+    @State private var showingDiscardConfirm = false
+
     // プレビュー再生
     @State private var previewer = TrimPreviewer()
 
@@ -159,6 +162,37 @@ struct AudioCropView: View {
         .background(Color.warmListBackground.ignoresSafeArea())
         .navigationTitle(String(localized: "add_from_audio"))
         .navigationBarTitleDisplayMode(.inline)
+        // 閉じるボタン（#82-2: 誤クローズ防止の代替出口。編集中は破棄を確認する）
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    if duration > 0 {
+                        showingDiscardConfirm = true
+                    } else {
+                        dismiss()
+                    }
+                } label: {
+                    Image(systemName: "xmark")
+                }
+                .accessibilityLabel(String(localized: "close"))
+            }
+        }
+        // 編集内容の破棄確認（#82-2）
+        .confirmationDialog(
+            String(localized: "discard_edits_title"),
+            isPresented: $showingDiscardConfirm,
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "discard"), role: .destructive) {
+                previewer.stop()
+                // 一時コピーを破棄して閉じる
+                try? FileManager.default.removeItem(at: source.url)
+                dismiss()
+            }
+            Button("cancel", role: .cancel) {}
+        } message: {
+            Text("discard_edits_message")
+        }
         .task {
             await loadDuration()
         }
