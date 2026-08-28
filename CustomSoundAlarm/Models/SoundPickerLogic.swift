@@ -34,4 +34,15 @@ enum SoundPickerLogic {
     static func mySounds(in sounds: [AlarmSound]) -> [AlarmSound] {
         sounds.filter { !$0.isPreset }
     }
+
+    /// Preset セクションに表示する音源（#85 レビュー）。
+    ///
+    /// **プリセット音源の完全な一覧**を返す。mySounds と同じ規則（所有する音源の
+    /// 完全な一覧・Recent による除外をしない）に従う。プリセット利用者は
+    /// インポート音源0本のことが多く、その場合 Recent は常に非表示
+    /// （shouldShowRecent の importedCount >= 3 を満たさない）のため、
+    /// 除外すると使ったプリセットがどこにも出なくなる。
+    static func presetSounds(in sounds: [AlarmSound]) -> [AlarmSound] {
+        sounds.filter { $0.isPreset }
+    }
 }

@@ -200,10 +200,6 @@ struct SoundSelectionView: View {
             .compactMap { name in soundStore.sounds.first { $0.fileName == name } }
     }
 
-    private var recentFileNamesSet: Set<String> {
-        Set(recentSounds.map(\.fileName))
-    }
-
     private var importedCount: Int {
         soundStore.sounds.filter { !$0.isPreset }.count
     }
@@ -245,8 +241,11 @@ struct SoundSelectionView: View {
 
     @ViewBuilder
     private var presetSection: some View {
-        let excluded = recentFileNamesSet
-        let presets = soundStore.sounds.filter { $0.isPreset && !excluded.contains($0.fileName) }
+        // #85 レビュー: プリセットも「所有する音源の完全な一覧」の規則に従う。
+        // Recent による除外はしない（プリセット利用者はインポート0本が多く
+        // Recent が常に非表示になるため、除外すると使ったプリセットが
+        // どこにも出なくなる）
+        let presets = SoundPickerLogic.presetSounds(in: soundStore.sounds)
         Section {
             DisclosureGroup(
                 isExpanded: Binding(
