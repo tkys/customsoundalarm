@@ -33,3 +33,4 @@ fastlane/test_output/
 
 # Signing artifacts (API-created App Store profiles; regenerable, machine-local)
 *.mobileprovision
+AppScreenshot/
