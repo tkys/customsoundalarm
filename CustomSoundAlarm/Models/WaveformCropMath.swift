@@ -257,6 +257,28 @@ enum WaveformCropMath {
         return times
     }
 
+    /// 窓内の目盛り時刻一覧（**絶対時刻**・step の倍数に揃える・#87）。
+    ///
+    /// ラベル値が常に「きりの良い」時刻（0, 5, 10…秒の倍数）になり、
+    /// 窓のどこを表示していても等間隔に並ぶ。`span` 版（0 基点の相対時刻）と違い、
+    /// この関数の戻り値はそのまま `zoomX(for:)`（絶対時刻→座標）に渡せる。
+    /// ⚠️ #87 の教訓: 相対時刻を絶対座標変換に渡すと窓が t=0 に無いとき
+    /// 全ラベルが左端にクランプされ重なる（単体テストでは捕まらない結合バグ）。
+    static func rulerTimes(in window: CropWindow, step: Double) -> [Double] {
+        guard window.width > 0, step > 0 else { return [] }
+        var times: [Double] = []
+        var t = (window.start / step).rounded(.up) * step
+        // 浮動小数の丸め誤差で窓の開始を下回らないよう補正
+        while t < window.start - 0.0001 {
+            t += step
+        }
+        while t <= window.end + 0.0001 {
+            times.append(t)
+            t += step
+        }
+        return times
+    }
+
     // MARK: - サンプルのリサンプル（下段描画用）
 
     /// 全体サンプル配列から窓の範囲のみをピークホールドでリサンプルする。

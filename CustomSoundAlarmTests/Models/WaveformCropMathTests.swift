@@ -553,6 +553,90 @@ struct WaveformCropMathTests {
         #expect(WaveformCropMath.rulerTimes(span: 30, step: 0).isEmpty)
     }
 
+    // MARK: - 窓内の目盛り（絶対時刻・#87）
+
+    /// #87 の本体: 窓が t=0 に無くても絶対時刻で目盛りが並ぶ。
+    /// 以前の View 実装は 0 基点の相対時刻を絶対座標変換に渡し、
+    /// 全ラベルが左端にクランプされて重なっていた
+    @Test
+    func rulerTimesInWindow_offsetWindow_returnsAbsoluteTimes() {
+        let window = CropWindow(start: 300, end: 330)
+        let times = WaveformCropMath.rulerTimes(in: window, step: 5)
+        #expect(times == [300, 305, 310, 315, 320, 325, 330])
+    }
+
+    @Test
+    func rulerTimesInWindow_windowAtZero_includesZero() {
+        let window = CropWindow(start: 0, end: 30)
+        let times = WaveformCropMath.rulerTimes(in: window, step: 5)
+        #expect(times.first == 0)
+        #expect(times.last == 30)
+        #expect(times.count == 7)
+    }
+
+    /// 窓の開始が刻みに揃っていない場合も、step の倍数に整列して並ぶ
+    @Test
+    func rulerTimesInWindow_unalignedWindow_alignsToStepMultiples() {
+        let window = CropWindow(start: 303, end: 333)
+        let times = WaveformCropMath.rulerTimes(in: window, step: 5)
+        #expect(times == [305, 310, 315, 320, 325, 330])
+    }
+
+    @Test
+    func rulerTimesInWindow_invalidInput_returnsEmpty() {
+        #expect(WaveformCropMath.rulerTimes(in: CropWindow(start: 0, end: 0), step: 5).isEmpty)
+        #expect(WaveformCropMath.rulerTimes(in: CropWindow(start: 0, end: 30), step: 0).isEmpty)
+    }
+
+    /// 結合の代表ケース（#87 テスト要件）: 窓30秒 / 幅390pt / ラベル幅34pt。
+    /// View と同じ手順（rulerStep → rulerTimes(in:) → zoomX）で
+    /// ラベルが2つ以上生成され、隣接ラベルの間隔がラベル幅+余白以上であることを検証する
+    @Test
+    func rulerIntegration_window30s_width390_multipleNonOverlappingLabels() {
+        let window = CropWindow(start: 300, end: 330)  // 窓が t=0 に無いケース（#87 の症状）
+        let width = 390.0
+        let labelWidth = 34.0
+        let minGap = 8.0
+
+        let step = WaveformCropMath.rulerStep(forSpan: window.width, barWidth: width, labelWidth: labelWidth, minGap: minGap)
+        let times = WaveformCropMath.rulerTimes(in: window, step: step)
+
+        // ラベルが2つ以上生成される
+        #expect(times.count >= 2)
+
+        // 各ラベルの絶対時刻が窓内に収まる
+        for t in times {
+            #expect(t >= window.start)
+            #expect(t <= window.end)
+        }
+
+        // 隣接ラベルの描画間隔が ラベル幅+余白 以上（重ならない）
+        let xs = times.map { WaveformCropMath.zoomX(for: $0, width: width, window: window) }
+        for i in 1..<xs.count {
+            #expect(xs[i] - xs[i - 1] >= labelWidth + minGap)
+        }
+    }
+
+    /// 結合ケースその2: 窓が t=0 にあるケースでも複数ラベルが等間隔に並ぶ
+    @Test
+    func rulerIntegration_windowAtZero_spreadsLabels() {
+        let window = CropWindow(start: 0, end: 30)
+        let width = 390.0
+        let labelWidth = 34.0
+
+        let step = WaveformCropMath.rulerStep(forSpan: window.width, barWidth: width, labelWidth: labelWidth)
+        let times = WaveformCropMath.rulerTimes(in: window, step: step)
+
+        #expect(times.count >= 2)
+        #expect(times.first == 0)
+
+        let xs = times.map { WaveformCropMath.zoomX(for: $0, width: width, window: window) }
+        #expect(approx(xs.first ?? 0, 0))  // 先頭ラベルは左端
+        for i in 1..<xs.count {
+            #expect(xs[i] - xs[i - 1] >= labelWidth + 8)
+        }
+    }
+
     // MARK: - 目盛りラベルのクランプと間引き（#81-3）
 
     @Test

@@ -400,8 +400,15 @@ struct WaveformCropView: View {
         .frame(width: width, height: zoomHeight)
     }
 
-    /// 下段の下の時間目盛り（#80-5 / #81-3）。
-    /// ラベルの実描画幅を考慮して刻みを間引き、両端で内側にクランプする
+    /// 下段の下の時間目盛り（#80-5 / #81-3 / #87）。
+    ///
+    /// #87 の結合バグ修正:
+    /// - 目盛り時刻は**絶対時刻**（`rulerTimes(in:step:)`・step の倍数に整列）。
+    ///   以前は 0 基点の相対時刻を絶対座標変換（zoomX）に渡していたため、
+    ///   窓が t=0 に無いとき全ラベルの x が負 → 左端にクランプされて重なっていた
+    /// - ティックは時刻位置（tickX）に正確に置き、ラベルはティックの下に中心合わせで
+    ///   置きつつ両端で内側にクランプする（clampedRulerX）。以前はティックも
+    ///   ラベル幅のフレーム中央に置かれ半分ずれていた
     private func ruler(width: CGFloat) -> some View {
         let span = zoomWindow.width
         let labelWidth: Double = 34
@@ -410,24 +417,33 @@ struct WaveformCropView: View {
             barWidth: width,
             labelWidth: labelWidth
         )
-        let times = WaveformCropMath.rulerTimes(span: span, step: step)
+        let times = WaveformCropMath.rulerTimes(in: zoomWindow, step: step)
 
-        return ZStack(alignment: .leading) {
+        return ZStack(alignment: .topLeading) {
             ForEach(times, id: \.self) { t in
-                let rawX = WaveformCropMath.zoomX(for: t, width: width, window: zoomWindow)
-                let x = WaveformCropMath.clampedRulerX(x: rawX, barWidth: width, labelWidth: labelWidth)
-                VStack(spacing: 2) {
+                let tickX = WaveformCropMath.zoomX(for: t, width: width, window: zoomWindow)
+                // ラベル中心 = ティック位置。両端ではみ出す分だけ内側にクランプ
+                let labelCenter = WaveformCropMath.clampedRulerX(
+                    x: tickX - labelWidth / 2,
+                    barWidth: width,
+                    labelWidth: labelWidth
+                ) + labelWidth / 2
+
+                ZStack(alignment: .top) {
+                    // ティック: 時刻位置に正確に
                     Rectangle()
                         .fill(Color.secondary.opacity(0.6))
                         .frame(width: 1, height: 4)
+                        .offset(x: tickX)
+                    // ラベル: ティックの下・中心合わせ（両端でクランプ済み）
                     Text(WaveformCropMath.formatTime(t))
                         .font(.caption2)
                         .monospacedDigit()
                         .foregroundStyle(.secondary)
                         .fixedSize()
+                        .frame(width: labelWidth, alignment: .center)
+                        .offset(x: labelCenter - labelWidth / 2, y: 6)
                 }
-                .frame(width: labelWidth, alignment: .center)
-                .offset(x: x)
             }
         }
         .frame(width: width, height: rulerHeight, alignment: .topLeading)
