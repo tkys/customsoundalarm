@@ -29,6 +29,23 @@ enum Brand {
     )
 }
 
+// MARK: - Accent UIColor (#81-2)
+
+extension Brand {
+    /// AccentColor アセットを直接解決した UIColor（#81-2）。
+    ///
+    /// `UIColor(Color.accentColor)` は環境依存の動的な色のため、ビュー階層の外で
+    /// 橋渡しするとアセットの値が解決されずシステム既定の青にフォールバックする。
+    /// DSWaveformImage の設定色にはこちらを使うこと。
+    /// ダークモードは `UITraitCollection` で明示的に解決する。
+    static func accentUIColor(dark: Bool) -> UIColor {
+        let base = UIColor(named: "AccentColor") ?? .systemOrange
+        return base.resolvedColor(
+            with: UITraitCollection(userInterfaceStyle: dark ? .dark : .light)
+        )
+    }
+}
+
 // MARK: - Adaptive Brand Colors (Light/Dark)
 
 extension Color {

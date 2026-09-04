@@ -9,10 +9,16 @@ struct SoundSelectionView: View {
     @State private var soundStore = SoundStore.shared
     @State private var audioPlayer = AudioPlayer.shared
     @State private var isImporting = false
-    @State private var isConverting = false
     @State private var errorMessage: String?
     @State private var renamingSound: AlarmSound?
     @State private var renameText = ""
+
+    /// 波形クロップ待ちの音声取り込み（#77）。非nilでシートを表示
+    @State private var pendingAudio: PendingAudioImport?
+
+    /// 動画取り込みをシート表示する（#82-2: NavigationLink push は
+    /// 画面左端の戻るジェスチャが左ハンドルと衝突して編集内容を失うため）
+    @State private var showingVideoImport = false
 
     // プリセット開閉状態
     @State private var presetExpanded: Bool = SoundPickerLogic.presetExpandedDefault(
@@ -34,8 +40,8 @@ struct SoundSelectionView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    NavigationLink {
-                        VideoImportFlow(selectedSound: $selectedSound)
+                    Button {
+                        showingVideoImport = true
                     } label: {
                         Label("add_from_video", systemImage: "video.badge.waveform")
                     }
@@ -57,6 +63,20 @@ struct SoundSelectionView: View {
             allowsMultipleSelection: false
         ) { result in
             handleImport(result)
+        }
+        // 音声ファイルの波形クロップ（#77）。編集中の誤クローズを防ぐ（#82-2）
+        .sheet(item: $pendingAudio) { pending in
+            NavigationStack {
+                AudioCropView(source: pending, selectedSound: $selectedSound)
+            }
+            .interactiveDismissDisabled()
+        }
+        // 動画の波形クロップ（#82-2: シート表示に統一）
+        .sheet(isPresented: $showingVideoImport) {
+            NavigationStack {
+                VideoImportFlow(selectedSound: $selectedSound)
+            }
+            .interactiveDismissDisabled()
         }
         .alert(String(localized: "rename"), isPresented: Binding(
             get: { renamingSound != nil },
@@ -80,43 +100,36 @@ struct SoundSelectionView: View {
 
     private var addSection: some View {
         Section {
-            if isConverting {
-                HStack {
-                    ProgressView()
-                    Text("converting")
-                        .padding(.leading, 8)
+            // #82-2: NavigationLink push は戻るジェスチャが波形の左ハンドルと衝突するためシート表示
+            Button {
+                showingVideoImport = true
+            } label: {
+                Label {
+                    Text("add_from_video")
+                } icon: {
+                    Image(systemName: "video.badge.waveform")
+                        .foregroundStyle(Brand.purpleLight)
+                        .padding(4)
+                        .background(
+                            Circle()
+                                .fill(Brand.purpleLight.opacity(0.12))
+                        )
                 }
-            } else {
-                NavigationLink {
-                    VideoImportFlow(selectedSound: $selectedSound)
-                } label: {
-                    Label {
-                        Text("add_from_video")
-                    } icon: {
-                        Image(systemName: "video.badge.waveform")
-                            .foregroundStyle(Brand.purpleLight)
-                            .padding(4)
-                            .background(
-                                Circle()
-                                    .fill(Brand.purpleLight.opacity(0.12))
-                            )
-                    }
-                }
+            }
 
-                Button {
-                    isImporting = true
-                } label: {
-                    Label {
-                        Text("add_from_audio")
-                    } icon: {
-                        Image(systemName: "doc.badge.plus")
-                            .foregroundStyle(Color.accentColor)
-                            .padding(4)
-                            .background(
-                                Circle()
-                                    .fill(Color.accentColor.opacity(0.12))
-                            )
-                    }
+            Button {
+                isImporting = true
+            } label: {
+                Label {
+                    Text("add_from_audio")
+                } icon: {
+                    Image(systemName: "doc.badge.plus")
+                        .foregroundStyle(Color.accentColor)
+                        .padding(4)
+                        .background(
+                            Circle()
+                                .fill(Color.accentColor.opacity(0.12))
+                        )
                 }
             }
         } header: {
@@ -130,8 +143,10 @@ struct SoundSelectionView: View {
 
     @ViewBuilder
     private var importedSection: some View {
-        let excluded = recentFileNamesSet
-        let imported = soundStore.sounds.filter { !$0.isPreset && !excluded.contains($0.fileName) }
+        // #85: My Sounds は所有する音源の完全な一覧。Recent に載っている音を
+        // 除外しない（かつての除外で「使用したら消える」「1〜2本のとき完全に
+        // 見えなくなる」問題があった。Recent との重複は許容する）
+        let imported = SoundPickerLogic.mySounds(in: soundStore.sounds)
         Section {
             if imported.isEmpty {
                 VStack(spacing: 8) {
@@ -185,10 +200,6 @@ struct SoundSelectionView: View {
             .compactMap { name in soundStore.sounds.first { $0.fileName == name } }
     }
 
-    private var recentFileNamesSet: Set<String> {
-        Set(recentSounds.map(\.fileName))
-    }
-
     private var importedCount: Int {
         soundStore.sounds.filter { !$0.isPreset }.count
     }
@@ -230,8 +241,11 @@ struct SoundSelectionView: View {
 
     @ViewBuilder
     private var presetSection: some View {
-        let excluded = recentFileNamesSet
-        let presets = soundStore.sounds.filter { $0.isPreset && !excluded.contains($0.fileName) }
+        // #85 レビュー: プリセットも「所有する音源の完全な一覧」の規則に従う。
+        // Recent による除外はしない（プリセット利用者はインポート0本が多く
+        // Recent が常に非表示になるため、除外すると使ったプリセットが
+        // どこにも出なくなる）
+        let presets = SoundPickerLogic.presetSounds(in: soundStore.sounds)
         Section {
             DisclosureGroup(
                 isExpanded: Binding(
@@ -365,37 +379,29 @@ struct SoundSelectionView: View {
         }
     }
 
+    /// 選択された音声ファイルを波形クロップUIに渡す（#77）。
+    /// security-scoped resource の寿命を最小化するため、
+    /// 選択直後に temp へコピー → 即解放する（VideoImportFlow の罠1 対策と同じ）。
+    /// 変換・保存はクロップUI（AudioCropView）内で行う。
     private func importSound(from url: URL) {
         guard url.startAccessingSecurityScopedResource() else {
             errorMessage = String(localized: "file_access_denied")
             return
         }
+        defer { url.stopAccessingSecurityScopedResource() }
 
-        isConverting = true
-        errorMessage = nil
-
-        let name = url.deletingPathExtension().lastPathComponent
-
-        Task {
-            defer {
-                url.stopAccessingSecurityScopedResource()
-                isConverting = false
-            }
-
-            do {
-                let fileName = try await AudioConverter.shared.convertToCAF(
-                    from: url,
-                    outputName: UUID().uuidString
-                )
-
-                let sound = AlarmSound(name: name, fileName: fileName)
-                soundStore.add(sound)
-                selectedSound = sound
-
-                AnalyticsService.shared.capture(.customSoundImported(source: .audio))
-            } catch {
-                errorMessage = error.localizedDescription
-            }
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(UUID().uuidString).\(url.pathExtension)")
+        do {
+            try FileManager.default.copyItem(at: url, to: tempURL)
+        } catch {
+            errorMessage = error.localizedDescription
+            return
         }
+
+        pendingAudio = PendingAudioImport(
+            url: tempURL,
+            name: url.deletingPathExtension().lastPathComponent
+        )
     }
 }
