@@ -23,7 +23,7 @@ platform :ios do
       run_precheck_before_submit: false,
       submit_for_review: false,
       primary_category: "UTILITIES",
-      app_version: "1.4.0",
+      app_version: "1.5.0",
       languages: ["en-US", "ja"]
     )
   end
@@ -41,7 +41,7 @@ platform :ios do
       run_precheck_before_submit: false,
       submit_for_review: false,
       primary_category: "UTILITIES",
-      app_version: "1.4.0",
+      app_version: "1.5.0",
       languages: ["en-US", "ja"]
     )
   end
@@ -71,7 +71,10 @@ platform :ios do
       api_key: api_key,
       app_identifier: "com.tkysdev.customsoundalarm",
       metadata_path: "./fastlane/metadata",
-      skip_screenshots: true,
+      screenshots_path: "./fastlane/screenshots",
+      # v1.5.0: スクリーンショットを差し替えるため release でも上げる。
+      # 差し替えが無い回でも既存と同一なら実害は無い（アップロード時間だけ増える）。
+      skip_screenshots: false,
       skip_metadata: false,
       force: true,
       run_precheck_before_submit: false,
@@ -85,7 +88,7 @@ platform :ios do
         export_compliance_uses_encryption: false,
         export_compliance_is_exempt: false
       },
-      app_version: "1.4.0",
+      app_version: "1.5.0",
       languages: ["en-US", "ja"]
     )
   end
@@ -109,8 +112,8 @@ platform :ios do
         export_compliance_uses_encryption: false,
         export_compliance_is_exempt: false
       },
-      app_version: "1.4.0",
-      build_number: "5",
+      app_version: "1.5.0",
+      build_number: "6",
       languages: ["en-US", "ja"]
     )
   end

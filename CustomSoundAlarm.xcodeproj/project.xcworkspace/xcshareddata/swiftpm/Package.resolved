@@ -1,6 +1,15 @@
 {
-  "originHash" : "47cbe4ef2adc7155b834c1fb5ae451e260f9ef6ba19f0658c4fcafd3565fad48",
+  "originHash" : "e07d3db1563361bfe936f11f8c3bb6930a9dfade30fa2b85c157b41da3499de0",
   "pins" : [
+    {
+      "identity" : "dswaveformimage",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/dmrschmidt/DSWaveformImage",
+      "state" : {
+        "revision" : "00afb7930863b9cc3bd011389d601735e548093c",
+        "version" : "14.5.0"
+      }
+    },
     {
       "identity" : "posthog-ios",
       "kind" : "remoteSourceControl",

@@ -86,6 +86,16 @@ enum AnalyticsEvent: Sendable {
     /// - value: 変更後の値（PII なし）
     case bedsideSettingChanged(setting: BedsideSetting, value: BedsideSettingValue)
 
+    // MARK: レビュー依頼（#84）
+
+    /// レビュー依頼を実際に実行した（OS の requestReview を呼んだ）。
+    /// OS 側がダイアログを表示したかはアプリから分からない点に注意
+    case reviewRequested
+
+    /// レビュー依頼がブロックされた
+    /// - reason: below_threshold / already_requested_version / post_fire
+    case reviewRequestBlocked(reason: ReviewRequestBlockedReason)
+
     /// PostHog に送信するイベント名
     var name: String {
         switch self {
@@ -105,6 +115,8 @@ enum AnalyticsEvent: Sendable {
         case .bedsideEntered: return "bedside_entered"
         case .bedsideExited: return "bedside_exited"
         case .bedsideSettingChanged: return "bedside_setting_changed"
+        case .reviewRequested: return "review_requested"
+        case .reviewRequestBlocked: return "review_request_blocked"
         }
     }
 
@@ -167,8 +179,24 @@ enum AnalyticsEvent: Sendable {
                 "setting": setting.rawValue,
                 "value": value.asProperty
             ]
+        case .reviewRequested:
+            return [:]
+        case let .reviewRequestBlocked(reason):
+            return ["reason": reason.rawValue]
         }
     }
+}
+
+// MARK: - ReviewRequestBlockedReason
+
+/// レビュー依頼がブロックされた理由の安定識別子（#84）。
+enum ReviewRequestBlockedReason: String, Sendable {
+    /// 発火日数が閾値に達していない
+    case belowThreshold = "below_threshold"
+    /// 同一アプリバージョンで既に依頼済み
+    case alreadyRequestedVersion = "already_requested_version"
+    /// アラーム発火直後（抑制期間内）
+    case postFire = "post_fire"
 }
 
 // MARK: - BedsideSetting

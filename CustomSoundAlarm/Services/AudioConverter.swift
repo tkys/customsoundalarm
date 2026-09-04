@@ -23,8 +23,18 @@ final class AudioConverter {
     /// - Parameters:
     ///   - sourceURL: 元の音声ファイル（MP3, AAC, WAV, M4A等）
     ///   - outputName: 出力ファイル名（拡張子なし）
+    ///   - startTime: 切り出し開始時間（秒）。nil で先頭から
+    ///   - endTime: 切り出し終了時間（秒）。nil で末尾まで
     /// - Returns: 変換後のCAFファイル名
-    func convertToCAF(from sourceURL: URL, outputName: String) async throws -> String {
+    ///
+    /// #77: 波形クロップUIからの範囲指定変換に対応。
+    /// ソースの `framePosition` を開始位置に_seek_し、目的フレーム数に達したら入力を打ち切る。
+    func convertToCAF(
+        from sourceURL: URL,
+        outputName: String,
+        startTime: Double? = nil,
+        endTime: Double? = nil
+    ) async throws -> String {
         let fileName = "\(outputName).caf"
         let outputURL = soundsDirectory.appendingPathComponent(fileName)
 
@@ -57,6 +67,26 @@ final class AudioConverter {
             throw AudioConverterError.converterCreationFailed
         }
 
+        // #77: 範囲指定があるときは読み取り位置と打ち切りフレームを決める
+        let sourceSampleRate = sourceFile.processingFormat.sampleRate
+        let totalFrames = sourceFile.length
+        let rangeStartFrame: AVAudioFramePosition
+        let rangeEndFrame: AVAudioFramePosition
+        if let startTime, startTime > 0 {
+            rangeStartFrame = min(max(Int64(startTime * sourceSampleRate), 0), totalFrames)
+        } else {
+            rangeStartFrame = 0
+        }
+        if let endTime, endTime > startTime ?? 0 {
+            rangeEndFrame = min(max(Int64(endTime * sourceSampleRate), rangeStartFrame), totalFrames)
+        } else {
+            rangeEndFrame = totalFrames
+        }
+        guard rangeEndFrame > rangeStartFrame else {
+            throw AudioConverterError.conversionFailed(String(localized: "error_empty_file"))
+        }
+        sourceFile.framePosition = rangeStartFrame
+
         let bufferSize: AVAudioFrameCount = 4096
         let inputBuffer = AVAudioPCMBuffer(
             pcmFormat: sourceFile.processingFormat,
@@ -64,9 +94,10 @@ final class AudioConverter {
         )!
 
         // inputブロック内でソースファイルから読み込む（コンバーターが必要時に呼ぶ）
-        var reachedEnd = false
+        // #77: 目的フレーム数に達したら endOfStream を返して打ち切る
+        var remainingFrames = rangeEndFrame - rangeStartFrame
 
-        while !reachedEnd {
+        while remainingFrames > 0 {
             let outputBuffer = AVAudioPCMBuffer(
                 pcmFormat: outputFile.processingFormat,
                 frameCapacity: bufferSize
@@ -80,6 +111,11 @@ final class AudioConverter {
                         outStatus.pointee = .endOfStream
                         return nil
                     }
+                    // 範囲末尾を超えて読んだ分は切り捨てる
+                    if AVAudioFramePosition(inputBuffer.frameLength) > remainingFrames {
+                        inputBuffer.frameLength = AVAudioFrameCount(remainingFrames)
+                    }
+                    remainingFrames -= AVAudioFramePosition(inputBuffer.frameLength)
                     outStatus.pointee = .haveData
                     return inputBuffer
                 } catch {
@@ -101,15 +137,18 @@ final class AudioConverter {
                 if outputBuffer.frameLength > 0 {
                     try outputFile.write(from: outputBuffer)
                 }
-                reachedEnd = true
+                remainingFrames = 0
             case .error:
                 throw AudioConverterError.conversionFailed(String(localized: "error_conversion_status"))
             case .inputRanDry:
                 if outputBuffer.frameLength > 0 {
                     try outputFile.write(from: outputBuffer)
                 }
+                if remainingFrames > 0, sourceFile.framePosition >= rangeEndFrame {
+                    remainingFrames = 0
+                }
             @unknown default:
-                reachedEnd = true
+                remainingFrames = 0
             }
         }
 

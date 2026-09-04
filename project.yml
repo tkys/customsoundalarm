@@ -14,13 +14,16 @@ packages:
   PostHog:
     url: https://github.com/PostHog/posthog-ios.git
     from: 3.56.0
+  DSWaveformImage:
+    url: https://github.com/dmrschmidt/DSWaveformImage
+    from: 14.5.0
 
 settings:
   base:
     SWIFT_VERSION: "6.2"
     TARGETED_DEVICE_FAMILY: "1"
-    MARKETING_VERSION: "1.4.0"
-    CURRENT_PROJECT_VERSION: "5"
+    MARKETING_VERSION: "1.5.0"
+    CURRENT_PROJECT_VERSION: "6"
     DEVELOPMENT_TEAM: "F8ZP855SM2"
     GENERATE_INFOPLIST_FILE: true
     SWIFT_EMIT_LOC_STRINGS: true
@@ -81,6 +84,10 @@ targets:
       - target: ShareExtension
         embed: true
       - package: PostHog
+      - package: DSWaveformImage
+        product: DSWaveformImage
+      - package: DSWaveformImage
+        product: DSWaveformImageViews
     entitlements:
       path: CustomSoundAlarm/CustomSoundAlarm.entitlements
       properties:
