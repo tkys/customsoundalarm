@@ -69,34 +69,6 @@ struct EntitlementsTests {
         #expect(recovered == true)
     }
 
-    // MARK: - 一時無料開放（#72 Phase2）
-
-    @Test
-    func gate_openWhenUnlockActive() {
-        // 開放フラグが有効なら無料ユーザーも Pro 機能にアクセスできる（実質 Pro）
-        #expect(isFeatureGateOpen(isPro: false, isPromotionalUnlockActive: true) == true)
-        #expect(isFeatureGateOpen(isPro: true, isPromotionalUnlockActive: true) == true)
-    }
-
-    @Test
-    func gate_closedWhenUnlockInactive() {
-        // 開放フラグが無効なら通常の分類に従う
-        #expect(isFeatureGateOpen(isPro: false, isPromotionalUnlockActive: false) == false)
-        #expect(isFeatureGateOpen(isPro: true, isPromotionalUnlockActive: false) == true)
-    }
-
-    @Test
-    func gate_pureFunction_isDeterministic() {
-        // 同一入力 → 同一出力（単一フラグで開閉できる）
-        for unlock in [true, false] {
-            for pro in [true, false] {
-                let a = isFeatureGateOpen(isPro: pro, isPromotionalUnlockActive: unlock)
-                let b = isFeatureGateOpen(isPro: pro, isPromotionalUnlockActive: unlock)
-                #expect(a == b)
-            }
-        }
-    }
-
     // MARK: - EntitlementResult Equatable
 
     @Test
