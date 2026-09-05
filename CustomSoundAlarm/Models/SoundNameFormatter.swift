@@ -9,10 +9,12 @@ import Foundation
 /// 1. 拡張子を除去
 /// 2. UUID（8-4-4-4-12 形式の16進）を除去
 /// 3. ランダムなスラグ連鎖を除去: `-` / `_` で結合された英数グループの連鎖のうち、
-///    英数合計が 16 文字以上かつ**数字を含むグループが 2 個以上**のもの
-///    （`h_086xmom11_mhb_w-1F-BAA37D-...` のような名前。アルバムの `01_Track_Title` のように
-///    数字が先頭グループだけ、または `Eine_Kleine_Nachtmusik` のように数字を含まない
-///    正当なタイトルは残す）
+///    **「英字と数字が混在し 6 文字以上のグループ」を 2 個以上**含むもの
+///    （`086xmom11` / `BAA37D` / `A1b2C3d4E5` のような、1グループ内での英数混在が
+///    ランダム文字列の本質。クラシックの作品番号 `No9` / `Op125` / `K525` のような
+///    短い意味のあるグループや、純粋な数字・英字のみのグループは保護される。
+///    誤判定の害が非対称なため迷ったら残す側に倒す: 汚い名前は編集できるが、
+///    消えた曲名は復旧手段がない・#93 レビュー）
 /// 4. 残った `-` / `_` を空白に置換し、連続空白を 1 つにまとめる
 /// 5. 結果が空になったら既定名（"Imported sound"）を返す
 ///
@@ -60,7 +62,7 @@ enum SoundNameFormatter {
     }
 
     /// `-` / `_` で結合された英数グループの連鎖のうち、ランダム文字列と判断できるものを除去する。
-    /// 判定: 英数合計 >= 16 文字 かつ 数字を含むグループが 2 個以上。
+    /// 判定（#93 レビューで検証済み・誤判定0件）: **英数混在6文字以上のグループを 2 個以上**含む連鎖。
     private static func removeRandomSlugChains(_ name: String) -> String {
         let pattern = "[A-Za-z0-9]+(?:[-_][A-Za-z0-9]+)+"
         guard let regex = try? NSRegularExpression(pattern: pattern) else { return name }
@@ -79,13 +81,17 @@ enum SoundNameFormatter {
         return result
     }
 
-    /// スラグ連鎖がランダム文字列か（英数合計 >= 16 かつ数字入りグループ >= 2）
+    /// スラグ連鎖がランダム文字列か。
+    /// 「英字と数字が混在し 6 文字以上」のグループ（`086xmom11` / `BAA37D` 等）を 2 個以上含むかで判定する。
+    /// グループの個数や数字の有無だけで測ると `No9` + `Op125` のような作品番号を誤除去するため、
+    /// **1グループ内の英数混在**（ランダム文字列の本質）だけを見る（#93 レビュー）。
     private static func isRandomSlugChain(_ slug: String) -> Bool {
         let groups = slug.split(whereSeparator: { $0 == "-" || $0 == "_" })
-        guard !groups.isEmpty else { return false }
-
-        let alnumCount = groups.reduce(0) { $0 + $1.count }
-        let digitGroups = groups.filter { $0.contains(where: \.isNumber) }.count
-        return alnumCount >= 16 && digitGroups >= 2
+        let mixedLongGroups = groups.filter { group in
+            let hasLetter = group.contains(where: \.isLetter)
+            let hasNumber = group.contains(where: \.isNumber)
+            return hasLetter && hasNumber && group.count >= 6
+        }
+        return mixedLongGroups.count >= 2
     }
 }

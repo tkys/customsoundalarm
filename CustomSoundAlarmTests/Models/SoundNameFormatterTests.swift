@@ -102,11 +102,58 @@ struct SoundNameFormatterTests {
     }
 
     @Test
-    func screenshotTimestamp_fallsBackToDefault() {
-        // スクリーンショットのタイムスタンプ名は識別にならない → 既定名
+    func screenshotTimestamp_isKept() {
+        // タイムスタンプ名は混在グループを持たないため残る（#93 レビューの安全側倒し:
+        // 誤判定の害が非対称で、汚い名前は編集できるが消えた曲名は復旧不能）
         #expect(
             SoundNameFormatter.sanitizedFileName("Screenshot_2026-01-15-104530.png", fallback: fallback)
-            == fallback
+            == "Screenshot 2026 01 15 104530"
+        )
+    }
+
+    // MARK: - レビュー検証表の8件（#93 レビュー・そのままテストケース化）
+
+    /// 新判定「英字と数字が混在し6文字以上のグループが2個以上」の検証セット。
+    /// クラシックの作品番号形式（No9 / Op125 / K525 / Op32 / No4 / Op67）は
+    /// 短く意味のある接頭辞を持つため除去されない（再発しやすいので必須ケース）
+    @Test
+    func reviewTable_removes() {
+        // 除去したいもの（英数混在6文字以上 × 2 を含む）
+        #expect(SoundNameFormatter.sanitizedFileName("h_086xmom11_mhb_w-1F-BAA37D.mp4", fallback: fallback) == fallback)
+        #expect(SoundNameFormatter.sanitizedFileName("yt5s_io_A1b2C3d4E5_f6G7h8I9j0.mp4", fallback: fallback) == fallback)
+    }
+
+    @Test
+    func reviewTable_classicalWorkNumbers_areKept() {
+        // クラシックの作品番号（実機テスト素材がモーツァルトとホルストだったため実害あり得た領域）
+        #expect(
+            SoundNameFormatter.sanitizedFileName("Beethoven_Symphony_No9_Op125.mp3", fallback: fallback)
+            == "Beethoven Symphony No9 Op125"
+        )
+        #expect(
+            SoundNameFormatter.sanitizedFileName("Mozart_K525_Movement_1.mp3", fallback: fallback)
+            == "Mozart K525 Movement 1"
+        )
+        #expect(
+            SoundNameFormatter.sanitizedFileName("Symphony_No5_in_C_minor_Op67.mp3", fallback: fallback)
+            == "Symphony No5 in C minor Op67"
+        )
+        #expect(
+            SoundNameFormatter.sanitizedFileName("The_Planets_Op32_No4_Jupiter.mp3", fallback: fallback)
+            == "The Planets Op32 No4 Jupiter"
+        )
+    }
+
+    @Test
+    func reviewTable_miscLegitimateNames_areKept() {
+        #expect(
+            SoundNameFormatter.sanitizedFileName("Bohemian_Rhapsody_1975_Remaster.mp3", fallback: fallback)
+            == "Bohemian Rhapsody 1975 Remaster"
+        )
+        // 混在グループが1個だけ（Final1234567890）→ 除去しない（安全側の外れは許容）
+        #expect(
+            SoundNameFormatter.sanitizedFileName("RPReplay_Final1234567890.mp4", fallback: fallback)
+            == "RPReplay Final1234567890"
         )
     }
 
