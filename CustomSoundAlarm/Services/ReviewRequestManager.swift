@@ -37,6 +37,9 @@ final class ReviewRequestManager {
     private let defaults: UserDefaults
     private let logger = Logger(subsystem: "com.tkysdev.customsoundalarm", category: "ReviewRequest")
 
+    /// このセッションで review_request_blocked を送信した回数（#91-2: 1セッション1回まで）
+    private var reviewBlockedEventSentCount = 0
+
     init(defaults: UserDefaults = AppGroup.userDefaults) {
         self.defaults = defaults
     }
@@ -93,6 +96,8 @@ final class ReviewRequestManager {
 
     /// 条件を満たすときだけ `perform` を呼び、依頼済みとして記録する。
     /// ブロックした理由と実行の両方を計測する（#84・OS がダイアログを表示したかは分からない）。
+    /// `review_request_blocked` は scenePhase == .active のたびに呼ばれるため
+    /// **1セッション1回まで**に抑制する（#91-2）。`review_requested` は抑制しない。
     /// - Parameters:
     ///   - appVersion: 現在のアプリバージョン（既定は Info.plist から）。
     ///   - now: 判定基準時刻（テスト用に注入可能）。
@@ -104,26 +109,33 @@ final class ReviewRequestManager {
         now: Date = Date(),
         perform: () -> Void
     ) -> Bool {
-        // 発火直後の抑制は「最終発火からの経過時間」で判定する（プロセス寿命非依存・#84）
+        // ブロック理由の判定（優先度: 発火直後 → 閾値未達 → 同一バージョン依頼済み）
         let lastFiredAt = defaults.object(forKey: Key.lastFiredAt) as? Date
-        guard Self.isPastPostFireInterval(lastFiredAt: lastFiredAt, now: now) else {
-            AnalyticsService.shared.capture(.reviewRequestBlocked(reason: .postFire))
-            return false
-        }
-        guard firedDayCount >= Self.firedDayThreshold else {
-            AnalyticsService.shared.capture(.reviewRequestBlocked(reason: .belowThreshold))
-            return false
-        }
-        guard defaults.string(forKey: Key.lastRequestedVersion) != appVersion else {
-            AnalyticsService.shared.capture(.reviewRequestBlocked(reason: .alreadyRequestedVersion))
-            return false
+        let blockedReason: ReviewRequestBlockedReason?
+        if !Self.isPastPostFireInterval(lastFiredAt: lastFiredAt, now: now) {
+            blockedReason = .postFire
+        } else if firedDayCount < Self.firedDayThreshold {
+            blockedReason = .belowThreshold
+        } else if defaults.string(forKey: Key.lastRequestedVersion) == appVersion {
+            blockedReason = .alreadyRequestedVersion
+        } else {
+            blockedReason = nil
         }
 
-        perform()
-        markRequested(appVersion: appVersion)
-        logger.info("Review requested (version=\(appVersion, privacy: .public))")
-        AnalyticsService.shared.capture(.reviewRequested)
-        return true
+        guard let blockedReason else {
+            perform()
+            markRequested(appVersion: appVersion)
+            logger.info("Review requested (version=\(appVersion, privacy: .public))")
+            AnalyticsService.shared.capture(.reviewRequested)
+            return true
+        }
+
+        // 1セッション1回まで（#91-2: scenePhase のたびに同じ理由が連続送信されていた）
+        if AnalyticsThrottle.shouldSendReviewBlocked(sessionSentCount: reviewBlockedEventSentCount) {
+            reviewBlockedEventSentCount += 1
+            AnalyticsService.shared.capture(.reviewRequestBlocked(reason: blockedReason))
+        }
+        return false
     }
 
     /// Info.plist の CFBundleShortVersionString。

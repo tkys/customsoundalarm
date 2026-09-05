@@ -158,13 +158,7 @@
 
 /* Snooze */
 "snooze_off" = "Off";
-"snooze_1min" = "1 minute";
-"snooze_5min" = "5 minutes";
-"snooze_9min" = "9 minutes";
-"snooze_10min" = "10 minutes";
-"snooze_15min" = "15 minutes";
-"snooze_20min" = "20 minutes";
-"snooze_30min" = "30 minutes";
+"snooze_minutes_fmt" = "%d min";
 
 /* Convenience Phase 1 (duplicate / countdown / save toast) */
 "duplicate_alarm" = "Duplicate";

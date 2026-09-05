@@ -199,6 +199,35 @@ enum ReviewRequestBlockedReason: String, Sendable {
     case postFire = "post_fire"
 }
 
+// MARK: - AnalyticsThrottle（診断イベントの送信抑制・#91-2・純粋関数）
+
+/// 診断イベントが計測対象より多くのイベントを消費しないようにする抑制ルール。
+///
+/// - `review_request_blocked` は scenePhase == .active のたびに呼ばれる経路にあるため、
+///   **1セッション1回まで**とする（ブロック理由の分布把握にはそれで十分）
+/// - `alarm_permission` は「状態変化時のみ」が設計意図。**前回送信時と状態が変わった
+///   ときだけ**送る（状態は永続化して比較し、セッションをまたいでも重複しない）
+/// - `review_requested`（実際に依頼した）は件数が少なく成果測定に必要なため**抑制しない**
+enum AnalyticsThrottle {
+
+    /// review_request_blocked を送信すべきか。1セッション1回のみ
+    /// - Parameter sessionSentCount: このセッションで既に送信した回数
+    static func shouldSendReviewBlocked(sessionSentCount: Int) -> Bool {
+        sessionSentCount == 0
+    }
+
+    /// alarm_permission を送信すべきか。前回送信時と状態が変わったときのみ
+    /// - Parameters:
+    ///   - current: 今回報告しようとしている状態
+    ///   - lastSent: 前回送信した状態（nil = 一度も送信していない）
+    static func shouldSendPermissionStatus(
+        current: AlarmPermissionStatus?,
+        lastSent: AlarmPermissionStatus?
+    ) -> Bool {
+        current != lastSent
+    }
+}
+
 // MARK: - BedsideSetting
 
 /// ベッドサイドモードの変更対象設定（安定識別子）。

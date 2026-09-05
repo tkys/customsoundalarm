@@ -23,39 +23,40 @@ struct snoozeIntervalTests {
     }
 }
 
-// MARK: - SnoozeOptionTests
+// MARK: - SnoozeDisplayTests（#91-1: チップ＋微調整の表示文言）
 
-struct SnoozeOptionTests {
+struct SnoozeDisplayTests {
 
     @Test
-    func allContainsOneMinuteOption() {
-        let minutes = SnoozeOption.all.map(\.minutes)
-        #expect(minutes.contains(1))
+    func zeroMinutes_showsOff() {
+        let text = SnoozeDisplay.text(for: 0)
+        #expect(!text.isEmpty)
+        #expect(text == String(localized: "snooze_off"))
     }
 
     @Test
-    func allContainsExpectedMinutes() {
-        let expected = [0, 1, 5, 9, 10, 15, 20, 30]
-        #expect(SnoozeOption.all.map(\.minutes) == expected)
-    }
-
-    @Test
-    func labelForOneMinute_returnsNonEmpty() {
-        let label = SnoozeOption.label(for: 1)
-        #expect(!label.isEmpty)
-    }
-
-    @Test
-    func labelForKnownValue_returnsNonEmpty() {
-        for option in SnoozeOption.all {
-            let label = SnoozeOption.label(for: option.minutes)
-            #expect(!label.isEmpty, "Label should not be empty for \(option.minutes) min")
+    func quickOptions_containTheirMinutes() {
+        // チップの値 1/2/5/10 はいずれも分値を含む文言になる
+        for minutes in [1, 2, 5, 10] {
+            let text = SnoozeDisplay.text(for: minutes)
+            #expect(!text.isEmpty)
+            #expect(text.contains("\(minutes)"), "Text for \(minutes) min should contain the number")
         }
     }
 
     @Test
-    func labelForUnknownValue_fallsBackToNine() {
-        let label = SnoozeOption.label(for: 99)
-        #expect(!label.isEmpty)
+    func arbitraryValues_areFormatted() {
+        // 微調整で選べる任意値（旧選択肢に無い値を含む）
+        for minutes in [3, 7, 12, 25, 30] {
+            let text = SnoozeDisplay.text(for: minutes)
+            #expect(!text.isEmpty)
+            #expect(text.contains("\(minutes)"))
+        }
+    }
+
+    @Test
+    func negativeMinutes_showsOffFallback() {
+        // 範囲外の値はフォーマットに流れるが空にはならない
+        #expect(!SnoozeDisplay.text(for: -1).isEmpty)
     }
 }

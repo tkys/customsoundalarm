@@ -161,23 +161,80 @@ struct AlarmDetailView: View {
 
     // MARK: - Snooze
 
+    /// クイック選択のチップ（#91-1: よく使う値をワンタップで）
+    private let snoozeQuickOptions: [Int] = [1, 2, 5, 10]
+    /// 微調整の範囲（0 = オフ。旧選択肢の上限に合わせる）
+    private let snoozeRange = 0...30
+
     private var snoozeSection: some View {
         Section {
-            NavigationLink {
-                SnoozeSelectionView(selectedMinutes: $snoozeMinutes)
-            } label: {
+            VStack(alignment: .leading, spacing: 12) {
+                // 見出し行 + −／＋ の微調整（任意の値は引き続き設定可能）
                 HStack {
                     Text("snooze")
                     Spacer()
-                    Text(snoozeSummaryText)
-                        .foregroundStyle(.secondary)
+                    HStack(spacing: 14) {
+                        Button {
+                            snoozeMinutes = max(snoozeRange.lowerBound, snoozeMinutes - 1)
+                        } label: {
+                            Image(systemName: "minus.circle.fill")
+                                .font(.title2)
+                                .foregroundStyle(snoozeMinutes > snoozeRange.lowerBound ? Color.accentColor : Color.gray.opacity(0.4))
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(snoozeMinutes <= snoozeRange.lowerBound)
+
+                        Text(snoozeSummaryText)
+                            .monospacedDigit()
+                            .frame(minWidth: 48)
+
+                        Button {
+                            snoozeMinutes = min(snoozeRange.upperBound, snoozeMinutes + 1)
+                        } label: {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title2)
+                                .foregroundStyle(snoozeMinutes < snoozeRange.upperBound ? Color.accentColor : Color.gray.opacity(0.4))
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(snoozeMinutes >= snoozeRange.upperBound)
+                    }
+                }
+
+                // クイック選択チップ
+                HStack(spacing: 8) {
+                    ForEach(snoozeQuickOptions, id: \.self) { minutes in
+                        Button {
+                            snoozeMinutes = minutes
+                        } label: {
+                            Text(snoozeText(for: minutes))
+                                .font(.subheadline.weight(.medium))
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 7)
+                                .background(
+                                    Capsule().fill(
+                                        snoozeMinutes == minutes
+                                            ? AnyShapeStyle(Brand.saveButtonGradient)
+                                            : AnyShapeStyle(Color.accentColor.opacity(0.12))
+                                    )
+                                )
+                                .foregroundStyle(snoozeMinutes == minutes ? .white : Color.accentColor)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    Spacer()
                 }
             }
+            .padding(.vertical, 2)
         }
     }
 
+    /// チップ・サマリ表示の文言（#91-1）。「N分」形式で任意値にも対応
+    private func snoozeText(for minutes: Int) -> String {
+        SnoozeDisplay.text(for: minutes)
+    }
+
     private var snoozeSummaryText: String {
-        SnoozeOption.label(for: snoozeMinutes)
+        SnoozeDisplay.text(for: snoozeMinutes)
     }
 
     // MARK: - Toggle
@@ -360,58 +417,15 @@ struct RepeatSelectionView: View {
     }
 }
 
-// MARK: - SnoozeOption
+// MARK: - SnoozeDisplay
 
-/// スヌーズ時間選択肢の単一情報源。
-/// AlarmDetailView のサマリ表示と SnoozeSelectionView の双方がこれを参照する。
-struct SnoozeOption {
-    let minutes: Int
-    let labelKey: String
-
-    static let all: [SnoozeOption] = [
-        SnoozeOption(minutes: 0, labelKey: "snooze_off"),
-        SnoozeOption(minutes: 1, labelKey: "snooze_1min"),
-        SnoozeOption(minutes: 5, labelKey: "snooze_5min"),
-        SnoozeOption(minutes: 9, labelKey: "snooze_9min"),
-        SnoozeOption(minutes: 10, labelKey: "snooze_10min"),
-        SnoozeOption(minutes: 15, labelKey: "snooze_15min"),
-        SnoozeOption(minutes: 20, labelKey: "snooze_20min"),
-        SnoozeOption(minutes: 30, labelKey: "snooze_30min")
-    ]
-
-    static func label(for minutes: Int) -> String {
-        let key = all.first { $0.minutes == minutes }?.labelKey ?? "snooze_9min"
-        return String(localized: String.LocalizationValue(key))
-    }
-}
-
-// MARK: - SnoozeSelectionView
-
-/// スヌーズ時間選択（Apple Clock 準拠のチェックリスト形式）
-struct SnoozeSelectionView: View {
-    @Binding var selectedMinutes: Int
-
-    var body: some View {
-        List {
-            ForEach(SnoozeOption.all, id: \.minutes) { option in
-                Button {
-                    selectedMinutes = option.minutes
-                } label: {
-                    HStack {
-                        Text(String(localized: String.LocalizationValue(option.labelKey)))
-                        Spacer()
-                        if selectedMinutes == option.minutes {
-                            Image(systemName: "checkmark")
-                                .foregroundStyle(Color.accentColor)
-                        }
-                    }
-                }
-                .foregroundStyle(.primary)
-            }
-        }
-        .warmListBackground()
-        .navigationTitle(String(localized: "snooze"))
-        .navigationBarTitleDisplayMode(.inline)
+/// スヌーズ時間の表示文言（#91-1・単体テスト対象）。
+/// チップ（1/2/5/10）と −／＋ 微調整の任意値（例: 3分）のどちらにも対応するため
+/// 「N分」フォーマットで組み立てる。0 はオフ表記。
+enum SnoozeDisplay {
+    static func text(for minutes: Int) -> String {
+        if minutes == 0 { return String(localized: "snooze_off") }
+        return String(format: String(localized: "snooze_minutes_fmt"), minutes)
     }
 }
 
