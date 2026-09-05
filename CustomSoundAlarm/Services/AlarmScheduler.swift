@@ -27,11 +27,6 @@ final class AlarmScheduler {
     /// ID マッピングの永続化キー
     private let idMapKey = "alarm_id_map"
 
-    /// 計測用: 直近で報告した権限状態（同一セッション内の重複送信防止。
-    /// `performSync` が毎回 `requestAuthorization` を呼ぶため、状態変化時のみ送る）
-    @ObservationIgnored
-    private var lastReportedPermissionStatus: AlarmPermissionStatus?
-
     /// 同一 AlarmEntry.ID に対して alarm_fired を1回だけ送るための記録（observer 系）
     @ObservationIgnored
     private var firedReportedThisSession: Set<Alarm.ID> = []
@@ -71,11 +66,15 @@ final class AlarmScheduler {
         }
     }
 
-    /// 権限状態を計測する。同一セッション内で状態が変化した場合のみ送信し、
-    /// 頻発する sync ごとの重複イベントを避ける。
+    /// 権限状態を計測する（#91-2）。
+    /// **前回送信時と状態が変わったときだけ**送る（状態を永続化して比較）。
+    /// 従来はセッション内メモリ比較だったため実質起動ごとに送信され、
+    /// 6.8回/人を消費していた。判定は `AnalyticsThrottle`（純粋関数）。
     private func recordPermissionStatus(_ status: AlarmPermissionStatus) {
-        guard lastReportedPermissionStatus != status else { return }
-        lastReportedPermissionStatus = status
+        let lastSent = AppGroup.lastReportedPermissionStatus
+            .flatMap { AlarmPermissionStatus(rawValue: $0) }
+        guard AnalyticsThrottle.shouldSendPermissionStatus(current: status, lastSent: lastSent) else { return }
+        AppGroup.lastReportedPermissionStatus = status.rawValue
         AnalyticsService.shared.capture(.alarmPermission(status: status))
     }
 

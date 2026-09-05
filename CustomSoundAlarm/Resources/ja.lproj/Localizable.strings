@@ -158,13 +158,7 @@
 
 /* Snooze */
 "snooze_off" = "オフ";
-"snooze_1min" = "1分";
-"snooze_5min" = "5分";
-"snooze_9min" = "9分";
-"snooze_10min" = "10分";
-"snooze_15min" = "15分";
-"snooze_20min" = "20分";
-"snooze_30min" = "30分";
+"snooze_minutes_fmt" = "%d分";
 
 /* Convenience Phase 1 (duplicate / countdown / save toast) */
 "duplicate_alarm" = "複製";

@@ -48,6 +48,18 @@ enum AppGroup {
         }
     }
 
+    /// 前回送信した alarm_permission の状態（#91-2: 状態が変わったときだけ送るための比較用）
+    static var lastReportedPermissionStatus: String? {
+        get { userDefaults.string(forKey: "last_reported_permission_status") }
+        set {
+            if let newValue {
+                userDefaults.set(newValue, forKey: "last_reported_permission_status")
+            } else {
+                userDefaults.removeObject(forKey: "last_reported_permission_status")
+            }
+        }
+    }
+
     /// ベッドサイド時計の配色テーマ（raw文字列・#56）
     static var bedsideColorThemeRaw: String {
         get { userDefaults.string(forKey: "bedside_color_theme") ?? "white" }

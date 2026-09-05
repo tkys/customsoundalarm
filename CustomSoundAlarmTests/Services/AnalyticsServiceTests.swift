@@ -801,3 +801,45 @@ struct AnalyticsGateTests {
         #expect(gate.isInternal == true)
     }
 }
+
+// MARK: - AnalyticsThrottleTests（#91-2: 診断イベントの送信抑制）
+
+struct AnalyticsThrottleTests {
+
+    // MARK: - review_request_blocked（1セッション1回まで）
+
+    @Test
+    func reviewBlocked_firstInSession_sends() {
+        #expect(AnalyticsThrottle.shouldSendReviewBlocked(sessionSentCount: 0) == true)
+    }
+
+    @Test
+    func reviewBlocked_alreadySentInSession_suppressed() {
+        // 同一セッションの2回目以降は送らない（scenePhase active のたびの連続送信を抑制）
+        #expect(AnalyticsThrottle.shouldSendReviewBlocked(sessionSentCount: 1) == false)
+        #expect(AnalyticsThrottle.shouldSendReviewBlocked(sessionSentCount: 5) == false)
+    }
+
+    // MARK: - alarm_permission（状態変化時のみ）
+
+    @Test
+    func permissionStatus_firstEver_sends() {
+        #expect(AnalyticsThrottle.shouldSendPermissionStatus(current: .authorized, lastSent: nil) == true)
+        #expect(AnalyticsThrottle.shouldSendPermissionStatus(current: .notDetermined, lastSent: nil) == true)
+    }
+
+    @Test
+    func permissionStatus_sameAsLastSent_suppressed() {
+        // 前回送信時と状態が同じなら送らない（セッションをまたいだ永続比較）
+        #expect(AnalyticsThrottle.shouldSendPermissionStatus(current: .authorized, lastSent: .authorized) == false)
+        #expect(AnalyticsThrottle.shouldSendPermissionStatus(current: .denied, lastSent: .denied) == false)
+        #expect(AnalyticsThrottle.shouldSendPermissionStatus(current: nil, lastSent: nil) == false)
+    }
+
+    @Test
+    func permissionStatus_changed_sends() {
+        #expect(AnalyticsThrottle.shouldSendPermissionStatus(current: .denied, lastSent: .authorized) == true)
+        #expect(AnalyticsThrottle.shouldSendPermissionStatus(current: .authorized, lastSent: .notDetermined) == true)
+        #expect(AnalyticsThrottle.shouldSendPermissionStatus(current: nil, lastSent: .authorized) == true)
+    }
+}
