@@ -265,7 +265,13 @@ struct AudioCropView: View {
                     endTime: end < duration ? end : nil
                 )
 
-                let sound = AlarmSound(name: soundName, fileName: fileName)
+                // サムネイル: 埋め込みアートワーク（ID3 / MP4 メタデータ・#86）。
+                // 無い素の音声は nil（波形の代替表示にフォールバック）
+                let thumbnailFileName = await SoundThumbnailStore.shared
+                    .artwork(from: source.url)
+                    .flatMap { SoundThumbnailStore.shared.save($0) }
+
+                let sound = AlarmSound(name: soundName, fileName: fileName, thumbnailFileName: thumbnailFileName)
                 soundStore.add(sound)
                 selectedSound = sound
 

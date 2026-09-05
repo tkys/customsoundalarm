@@ -100,6 +100,7 @@ struct ContentView: View {
                 AlarmRow(
                     alarm: alarm,
                     soundName: soundStore.displayName(for: alarm.soundFileName),
+                    sound: soundStore.sounds.first { $0.fileName == alarm.soundFileName },
                     onToggle: {
                         alarmStore.toggleEnabled(alarm)
                         AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
@@ -135,12 +136,16 @@ struct ContentView: View {
 struct AlarmRow: View {
     let alarm: AlarmEntry
     let soundName: String
+    let sound: AlarmSound?
     let onToggle: () -> Void
     let onTap: () -> Void
 
     var body: some View {
         Button(action: onTap) {
-            HStack {
+            HStack(spacing: 12) {
+                // 音源サムネイル（#86）
+                SoundThumbnail(sound: sound, size: 40)
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text(alarm.timeString)
                         .font(.system(size: 44, weight: .light, design: .rounded))
