@@ -83,17 +83,6 @@ extension AppGroup {
     }
 }
 
-// MARK: - PromotionalUnlock（一時無料開放・#72 Phase2）
-
-/// 一時無料開放の判定（純粋関数・単体テスト対象）。
-/// 課金導線が未実装の間、Pro フェイス・Pro カラーを全ユーザーへ開放する。
-/// `isPromotionalUnlockActive` が true の間は実質 Pro 扱い。
-/// 閉じるときは `Entitlements.isPromotionalUnlockActive` を false に戻すだけで良い
-/// （ClockLayout.isPro / ColorTheme.isPro の分類と available(isPro:) は残す）。
-func isFeatureGateOpen(isPro: Bool, isPromotionalUnlockActive: Bool) -> Bool {
-    isPromotionalUnlockActive || isPro
-}
-
 // MARK: - Entitlements
 
 /// 課金権利の単一の情報源。
@@ -110,21 +99,10 @@ private let proProductID = "com.tkysdev.customsoundalarm.pro"
 final class Entitlements {
     static let shared = Entitlements()
 
-    /// 一時無料開放フラグ（#72 Phase2）。
-    /// 課金導線実装までの間 true。閉じるときはここを false に戻すだけ。
-    /// 分類・ゲートのコード（isPro / available(isPro:)）は削除しないこと。
-    static let isPromotionalUnlockActive = true
-
     private let logger = Logger(subsystem: "com.tkysdev.customsoundalarm", category: "Entitlements")
 
     /// 機能側が参照する唯一のプロパティ
     private(set) var isPro: Bool
-
-    /// 機能ゲートの最終判定。available(isPro:) に渡す値。
-    /// 一時開放中は実質 true（単一フラグで開閉できる）。
-    var effectiveIsPro: Bool {
-        isFeatureGateOpen(isPro: isPro, isPromotionalUnlockActive: Self.isPromotionalUnlockActive)
-    }
 
     /// 権利取得のバックエンド（本番: StoreKit / テスト: フェイク）
     private let store: EntitlementStore
