@@ -22,11 +22,21 @@ struct VideoImportFlow: View {
     @State private var showingPhotoPicker = false
     @State private var showingFilePicker = false
 
+    /// 編集内容の破棄確認（#82-2: 閉じる操作で黙って消えないようにする）
+    @State private var showingDiscardConfirm = false
+
+    /// 波形描画・試聴・切り出しの元になる音声（動画から抽出済みの一時m4a）。
+    /// 抽出完了までクロップUIはプレースホルダを表示する（#77）
+    @State private var extractedAudioURL: URL?
+
     // インポートソース（計測用）
     @State private var importSource: VideoImportSource = .photoLibrary
 
     // プレビュー再生
     @State private var previewer = TrimPreviewer()
+
+    /// 切り出し上限（VideoTrimmerBar と同じ値）
+    private let maxRangeSeconds: Double = 600
 
     var body: some View {
         Group {
@@ -38,6 +48,35 @@ struct VideoImportFlow: View {
         }
         .navigationTitle(String(localized: "add_from_video_title"))
         .navigationBarTitleDisplayMode(.inline)
+        // 閉じるボタン（#82-2: シート化に伴う明示的な出口。編集中は破棄を確認する）
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    if videoURL != nil {
+                        showingDiscardConfirm = true
+                    } else {
+                        dismiss()
+                    }
+                } label: {
+                    Image(systemName: "xmark")
+                }
+                .accessibilityLabel(String(localized: "close"))
+            }
+        }
+        // 編集内容の破棄確認（#82-2）
+        .confirmationDialog(
+            String(localized: "discard_edits_title"),
+            isPresented: $showingDiscardConfirm,
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "discard"), role: .destructive) {
+                previewer.stop()
+                dismiss()
+            }
+            Button("cancel", role: .cancel) {}
+        } message: {
+            Text("discard_edits_message")
+        }
         .onAppear {
             if videoURL == nil { showingSourceDialog = true }
         }
@@ -122,114 +161,170 @@ struct VideoImportFlow: View {
 
     // MARK: - Trim View
 
-    private var selectedDuration: Double { endTime - startTime }
+    /// 「この範囲を追加」が押せる条件
+    private var canSave: Bool {
+        extractedAudioURL != nil && endTime > startTime && !soundName.isEmpty
+    }
 
     private func trimView(url: URL) -> some View {
-        Form {
-            // 1. トリムバー + 試聴
-            Section {
-                VStack(spacing: 12) {
-                    VideoTrimmerBar(
-                        startTime: $startTime,
-                        endTime: $endTime,
-                        videoURL: url,
-                        videoDuration: videoDuration,
-                        previewer: previewer
-                    )
-
-                    // プレビューボタン
-                    HStack {
-                        Button {
-                            if previewer.isPlaying {
-                                previewer.stop()
-                            } else {
-                                previewer.play(url: url, from: startTime, to: endTime)
-                            }
-                        } label: {
-                            Label(
-                                previewer.isPlaying ? String(localized: "stop") : String(localized: "preview_selection"),
-                                systemImage: previewer.isPlaying ? "stop.fill" : "play.fill"
-                            )
-                            .font(.subheadline.weight(.medium))
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(previewer.isPlaying ? .red : .accentColor)
-
-                        Spacer()
-
-                        if previewer.isPlaying {
-                            Text(formatTime(previewer.currentTime - startTime) + " / " + formatTime(selectedDuration))
+        VStack(spacing: 0) {
+            // 波形エリア（画面幅いっぱい・#80-1）。フォームの体裁を使わない
+            ScrollView {
+                VStack(spacing: 14) {
+                    if let audioURL = extractedAudioURL {
+                        // 波形を主・サムネイルを補助とする二段構えのクロップUI（#77）
+                        WaveformCropView(
+                            startTime: $startTime,
+                            endTime: $endTime,
+                            audioURL: audioURL,
+                            duration: videoDuration,
+                            maxRange: maxRangeSeconds,
+                            previewer: previewer,
+                            playURL: audioURL
+                        )
+                    } else {
+                        // 音声抽出中のプレースホルダ（UIはブロックしない）
+                        HStack(spacing: 8) {
+                            ProgressView()
+                            Text("waveform_loading")
                                 .font(.caption)
-                                .monospacedDigit()
                                 .foregroundStyle(.secondary)
                         }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 120)
                     }
-                }
-                .padding(.vertical, 4)
-            } header: {
-                WarmSectionHeader(title: String(localized: "range"))
-            } footer: {
-                Text(String(format: String(localized: "total_duration"), formatTime(videoDuration)))
-            }
 
-            // 2. サウンド名
-            Section {
-                HStack {
-                    Text("name")
-                    TextField("sound_name_placeholder", text: $soundName)
-                        .multilineTextAlignment(.trailing)
-                }
-            } footer: {
-                if soundName.isEmpty {
-                    Text("enter_name_to_save")
-                }
-            }
+                    // 補助: サムネイル（通常の動画では位置の手がかりになる）
+                    FilmstripView(videoURL: url)
 
-            // 3. 保存ボタン
-            Section {
-                Button {
-                    previewer.stop()
-                    extractAndConvert(from: url)
-                } label: {
-                    HStack {
-                        Spacer()
-                        if isProcessing {
-                            ProgressView()
-                                .padding(.trailing, 8)
-                            Text("converting")
+                    // 再生 / 停止（スクラブと対の操作）
+                    Button {
+                        if previewer.isPlaying {
+                            previewer.stop()
                         } else {
-                            Label("extract_and_save", systemImage: "waveform.badge.plus")
-                                .fontWeight(.semibold)
+                            previewer.play(url: extractedAudioURL ?? url, from: startTime, to: endTime)
                         }
-                        Spacer()
+                    } label: {
+                        Image(systemName: previewer.isPlaying ? "stop.fill" : "play.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .frame(width: 40, height: 40)
+                            .background(
+                                Circle().fill(Color.accentColor.opacity(0.14))
+                            )
+                            .foregroundStyle(previewer.isPlaying ? Color.red : Color.accentColor)
                     }
-                    .padding(.vertical, 4)
-                }
-                .foregroundStyle(.white)
-                .listRowBackground(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(
-                            (isProcessing || endTime <= startTime || soundName.isEmpty)
-                                ? AnyShapeStyle(Color.gray.opacity(0.4))
-                                : AnyShapeStyle(Brand.saveButtonGradient)
-                        )
-                        .padding(.horizontal, 4)
-                )
-                .disabled(isProcessing || endTime <= startTime || soundName.isEmpty)
-            }
+                    .buttonStyle(.plain)
+                    .disabled(extractedAudioURL == nil)
+                    .accessibilityLabel(previewer.isPlaying ? String(localized: "stop") : String(localized: "preview_selection"))
 
-            if let errorMessage {
-                Section {
+                    // 変換後サイズの見積りと警告（#79-8）
+                    sizeEstimateRow
+                        .padding(.horizontal, 20)
+
+                    Text("crop_hint_footer")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                }
+                .padding(.top, 8)
+                .padding(.bottom, 12)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+
+            Spacer(minLength: 0)
+
+            // 下部: 名前入力 + アクション
+            VStack(spacing: 10) {
+                if let errorMessage {
                     Text(errorMessage)
                         .foregroundStyle(.red)
                         .font(.caption)
                 }
+
+                HStack(spacing: 8) {
+                    Image(systemName: "waveform")
+                        .foregroundStyle(Color.accentColor)
+                    TextField("sound_name_placeholder", text: $soundName)
+                        .textFieldStyle(.plain)
+                        .submitLabel(.done)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.warmCardBackground)
+                )
+
+                // 主アクション: 目立つ pill ボタン（#80-7）
+                Button {
+                    previewer.stop()
+                    extractAndConvert(from: url)
+                } label: {
+                    HStack(spacing: 8) {
+                        if isProcessing {
+                            ProgressView()
+                                .tint(.white)
+                        } else {
+                            Image(systemName: "waveform.badge.plus")
+                        }
+                        Text("crop_and_save")
+                            .fontWeight(.semibold)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(
+                        Capsule().fill(
+                            (isProcessing || !canSave)
+                                ? AnyShapeStyle(Color.gray.opacity(0.4))
+                                : AnyShapeStyle(Brand.saveButtonGradient)
+                        )
+                    )
+                    .foregroundStyle(.white)
+                }
+                .disabled(isProcessing || !canSave)
             }
+            .padding(.horizontal, 20)
+            .padding(.top, 8)
+            .padding(.bottom, 12)
         }
-        .warmListBackground()
+        .background(Color.warmListBackground.ignoresSafeArea())
+        // 動画が選び直されたら波形用音声を抽出し直す
+        .task(id: url) {
+            await extractAudioForWaveform(from: url)
+        }
     }
 
     // MARK: - Actions
+
+    /// duration に応じた初期選択範囲（全長 ≤ 上限なら全体、超えるなら先頭から上限分）
+    private func applyFullRange(duration: Double) {
+        let full = TrimRange.fullRange(duration: duration, maxRange: maxRangeSeconds)
+        startTime = full.start
+        endTime = full.end
+    }
+
+    /// 波形描画・試聴・切り出しの元として音声を一度だけ抽出する（#77）。
+    /// AVAudioFile ベースの波形解析は動画コンテナを読めないため、
+    /// 先に m4a へ抽出してから波形を出す方針。抽出中はプレースホルダを表示。
+    private func extractAudioForWaveform(from url: URL) async {
+        if let old = extractedAudioURL {
+            try? FileManager.default.removeItem(at: old)
+        }
+        extractedAudioURL = nil
+        do {
+            let audio = try await VideoAudioExtractor.shared.extractAudio(from: url)
+            if !Task.isCancelled {
+                extractedAudioURL = audio
+            } else {
+                try? FileManager.default.removeItem(at: audio)
+            }
+        } catch {
+            if !Task.isCancelled {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
 
     private func loadVideo(from item: PhotosPickerItem) {
         isProcessing = true
@@ -246,7 +341,7 @@ struct VideoImportFlow: View {
 
                 let duration = try await VideoAudioExtractor.shared.getDuration(from: movie.url)
                 videoDuration = duration
-                endTime = min(30, duration)
+                applyFullRange(duration: duration)
                 videoURL = movie.url
                 soundName = movie.displayName
             } catch {
@@ -291,7 +386,7 @@ struct VideoImportFlow: View {
                 let duration = try await VideoAudioExtractor.shared.getDuration(from: tempURL)
                 await MainActor.run {
                     videoDuration = duration
-                    endTime = min(30, duration)
+                    applyFullRange(duration: duration)
                     videoURL = tempURL
                     soundName = originalName
                     isProcessing = false
@@ -306,6 +401,7 @@ struct VideoImportFlow: View {
     }
 
     private func extractAndConvert(from url: URL) {
+        guard let audioURL = extractedAudioURL else { return }
         isProcessing = true
         errorMessage = nil
 
@@ -315,18 +411,16 @@ struct VideoImportFlow: View {
             defer { isProcessing = false }
 
             do {
-                let audioURL = try await VideoAudioExtractor.shared.extractAudio(
-                    from: url,
+                // 波形・試聴に使った抽出済み音声から、範囲指定で直接CAFへ変換（#77）
+                let cafName = try await AudioConverter.shared.convertToCAF(
+                    from: audioURL,
+                    outputName: UUID().uuidString,
                     startTime: startTime,
                     endTime: endTime
                 )
 
-                let cafName = try await AudioConverter.shared.convertToCAF(
-                    from: audioURL,
-                    outputName: UUID().uuidString
-                )
-
                 try? FileManager.default.removeItem(at: audioURL)
+                extractedAudioURL = nil
 
                 let sound = AlarmSound(
                     name: soundName.isEmpty ? url.deletingPathExtension().lastPathComponent : soundName,
@@ -345,11 +439,24 @@ struct VideoImportFlow: View {
         }
     }
 
-    private func formatTime(_ seconds: Double) -> String {
-        let total = max(0, Int(seconds))
-        let m = total / 60
-        let s = total % 60
-        return String(format: "%d:%02d", m, s)
+    /// 変換後のサイズ見積り。動画は600秒上限だが選択範囲に応じて表示する（#79-8）
+    private var sizeEstimateRow: some View {
+        let selectionSeconds = endTime - startTime
+        let size = AudioSizeEstimate.formattedSize(
+            bytes: AudioSizeEstimate.estimatedFileSize(seconds: selectionSeconds)
+        )
+        return VStack(spacing: 4) {
+            Text(String(format: String(localized: "estimated_size"), size))
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            if AudioSizeEstimate.requiresWarning(seconds: selectionSeconds) {
+                Text(String(format: String(localized: "large_file_warning"), size))
+                    .font(.caption2)
+                    .foregroundStyle(.orange)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .frame(maxWidth: .infinity)
     }
 }
 
