@@ -1,5 +1,13 @@
-■ Alarm sounds can now be up to 10 minutes
-The 60-second cap on trimming is gone. Import up to 10 minutes of audio and it plays all the way to the end before repeating — so intros and build-ups survive instead of getting cut off.
+■ See your sounds at a glance
+Each alarm now shows a picture of its sound. A frame from the video you used, or the album art from your file. It is much easier to tell your alarms apart.
+
+■ Clearer alarm list
+Alarm details no longer get cut off. The label, the sound, the days and the countdown are all readable now.
+
+■ Better names for imported sounds
+Long file names full of random letters and numbers are cleaned up when you import.
+
+■ Faster snooze setup
+Pick 1, 2, 5 or 10 minutes with one tap, or fine-tune any value you like.
 
 Thanks for using My Sound Alarm!
-We'd love to hear your feedback — please reach out through support.
