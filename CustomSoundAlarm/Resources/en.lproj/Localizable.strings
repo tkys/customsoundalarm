@@ -73,6 +73,9 @@
 "discard" = "Discard";
 "discard_edits_title" = "Discard your edits?";
 "discard_edits_message" = "Your selection will not be saved.";
+
+/* Sound name formatting (#93) */
+"imported_sound_default" = "Imported sound";
 "my_sounds_empty_title" = "Make Any Sound Your Alarm";
 "my_sounds_empty_description" = "Import music from videos or your favorite\naudio files to use as alarm sounds";
 "file_access_denied" = "File access denied";

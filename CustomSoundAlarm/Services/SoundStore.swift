@@ -62,6 +62,10 @@ final class SoundStore {
         sounds.removeAll { $0.id == sound.id }
         if !sound.isPreset {
             try? AudioConverter.shared.deleteSound(fileName: sound.fileName)
+            // サムネイルも一緒に消す（#86）
+            if let thumbnailFileName = sound.thumbnailFileName {
+                SoundThumbnailStore.shared.delete(fileName: thumbnailFileName)
+            }
         } else {
             // プリセット削除を記録し、再起動時に復活しないようにする（罠1）
             var dismissed = AppGroup.dismissedPresetFileNames
@@ -122,7 +126,24 @@ final class SoundStore {
                         from: sourceForCAF,
                         outputName: UUID().uuidString
                     )
-                    let sound = AlarmSound(name: pending.displayName, fileName: cafName)
+
+                    // サムネイル生成（#86）: 動画はフレーム、音声はアートワーク
+                    let thumbnailFileName: String?
+                    if isVideo, let frame = await SoundThumbnailStore.shared.bestVideoFrame(from: audioFile) {
+                        thumbnailFileName = SoundThumbnailStore.shared.save(frame)
+                    } else if let artwork = await SoundThumbnailStore.shared.artwork(from: audioFile) {
+                        thumbnailFileName = SoundThumbnailStore.shared.save(artwork)
+                    } else {
+                        thumbnailFileName = nil
+                    }
+
+                    // #93-2a: ShareExtension 由来のファイル名も取り込み時に整形する。
+                    // （ShareExtension ターゲットに依存を追加せず、取り込み側で整える）
+                    let sound = AlarmSound(
+                        name: SoundNameFormatter.sanitizedFileName(pending.displayName),
+                        fileName: cafName,
+                        thumbnailFileName: thumbnailFileName
+                    )
                     add(sound)
                     try? fm.removeItem(at: file)
                     try? fm.removeItem(at: audioFile)

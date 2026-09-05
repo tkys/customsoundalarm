@@ -400,6 +400,15 @@ struct VideoImportFlow: View {
         }
     }
 
+    /// 元動画からサムネイルを生成して保存し、ファイル名を返す（#86）。
+    /// 失敗（映像なし等）は nil（プリセット/波形の代替表示にフォールバック）
+    private static func generateThumbnail(videoURL: URL) async -> String? {
+        guard let frame = await SoundThumbnailStore.shared.bestVideoFrame(from: videoURL) else {
+            return nil
+        }
+        return SoundThumbnailStore.shared.save(frame)
+    }
+
     private func extractAndConvert(from url: URL) {
         guard let audioURL = extractedAudioURL else { return }
         isProcessing = true
@@ -422,9 +431,13 @@ struct VideoImportFlow: View {
                 try? FileManager.default.removeItem(at: audioURL)
                 extractedAudioURL = nil
 
+                // サムネイル: 元動画の12フレーム候補から輝度分散最大の1枚（#86）
+                let thumbnailFileName = await Self.generateThumbnail(videoURL: url)
+
                 let sound = AlarmSound(
                     name: soundName.isEmpty ? url.deletingPathExtension().lastPathComponent : soundName,
-                    fileName: cafName
+                    fileName: cafName,
+                    thumbnailFileName: thumbnailFileName
                 )
                 soundStore.add(sound)
                 selectedSound = sound

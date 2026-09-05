@@ -292,30 +292,24 @@ struct SoundSelectionView: View {
         let isPlaying = sound != nil && audioPlayer.playingFileName == sound?.fileName
 
         return HStack {
-            // Leading icon with glow when playing
+            // Leading thumbnail with glow when playing（#86: サムネイル優先表示）
             ZStack {
                 if isPlaying {
                     Circle()
                         .fill(Color.accentColor.opacity(0.25))
-                        .frame(width: 32, height: 32)
+                        .frame(width: 38, height: 38)
                         .blur(radius: 4)
                 }
 
-                Circle()
-                    .fill(
-                        isPlaying
-                            ? Color.accentColor.opacity(0.18)
-                            : (isPreset ? Brand.purpleLight.opacity(0.12) : Color.accentColor.opacity(0.12))
-                    )
-                    .frame(width: 28, height: 28)
+                SoundThumbnail(sound: sound, size: 34)
 
                 if isPlaying {
-                    MiniWaveformBars(color: .accentColor, barWidth: 2, height: 12)
-                } else {
-                    SoundIndicator(isCustom: !isPreset, size: 13)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .strokeBorder(Color.accentColor, lineWidth: 1.5)
+                        .frame(width: 34, height: 34)
                 }
             }
-            .frame(width: 32)
+            .frame(width: 38)
 
             // 行全体をタップで選択（試聴は別ボタン）
             // 判断: タップで試聴を併用しない（誤タップで音が鳴るのを避ける）
@@ -401,7 +395,8 @@ struct SoundSelectionView: View {
 
         pendingAudio = PendingAudioImport(
             url: tempURL,
-            name: url.deletingPathExtension().lastPathComponent
+            // #93-2a: 取り込み時に名前を整える（UUID・ランダムスラグ除去・記号の空白化）
+            name: SoundNameFormatter.sanitizedFileName(url.lastPathComponent)
         )
     }
 }

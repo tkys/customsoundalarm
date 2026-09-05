@@ -100,6 +100,7 @@ struct ContentView: View {
                 AlarmRow(
                     alarm: alarm,
                     soundName: soundStore.displayName(for: alarm.soundFileName),
+                    sound: soundStore.sounds.first { $0.fileName == alarm.soundFileName },
                     onToggle: {
                         alarmStore.toggleEnabled(alarm)
                         AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
@@ -135,12 +136,16 @@ struct ContentView: View {
 struct AlarmRow: View {
     let alarm: AlarmEntry
     let soundName: String
+    let sound: AlarmSound?
     let onToggle: () -> Void
     let onTap: () -> Void
 
     var body: some View {
         Button(action: onTap) {
-            HStack {
+            HStack(spacing: 12) {
+                // 音源サムネイル（#86）
+                SoundThumbnail(sound: sound, size: 40)
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text(alarm.timeString)
                         .font(.system(size: 44, weight: .light, design: .rounded))
@@ -152,28 +157,41 @@ struct AlarmRow: View {
                         // 長い音名のキャプションが幅を奪っても時刻は必ず自然サイズで描画されるよう優先
                         .layoutPriority(1)
 
+                    // 1行目: ラベル ・ 音源名（識別に必要な情報を優先・#93-1）
                     HStack(spacing: 6) {
-                        Text(alarm.label)
-                        Text("・")
+                        if !alarm.label.isEmpty {
+                            Text(alarm.label)
+                            Text("・")
+                        }
                         SoundIndicator(isCustom: !alarm.soundFileName.isEmpty, size: 10)
                         Text(soundName.isEmpty ? String(localized: "default_sound") : soundName)
                             // 音名が最も長くなりがちなので、まず音名自体を1行・末尾省略にしておく
                             .lineLimit(1)
                             .truncationMode(.tail)
-                        if !alarm.repeatWeekdays.isEmpty {
-                            Text("・")
-                            Text(repeatSummary)
-                        }
-                        if let countdown = nextAlarmCountdown {
-                            Text("・")
-                            Text(countdown)
-                        }
                     }
                     .font(.caption)
                     .foregroundStyle(alarm.isEnabled ? .secondary : .tertiary)
-                    // キャプション全体を1行に制限（「・」区切りの要素がまとめて1行、あふれは末尾「…」）
                     .lineLimit(1)
                     .truncationMode(.tail)
+
+                    // 2行目: 繰り返し ・ カウントダウン（どちらも無い場合は行ごと省略・#93-1）
+                    if !alarm.repeatWeekdays.isEmpty || nextAlarmCountdown != nil {
+                        HStack(spacing: 6) {
+                            if !alarm.repeatWeekdays.isEmpty {
+                                Text(repeatSummary)
+                            }
+                            if let countdown = nextAlarmCountdown {
+                                if !alarm.repeatWeekdays.isEmpty {
+                                    Text("・")
+                                }
+                                Text(countdown)
+                            }
+                        }
+                        .font(.caption)
+                        .foregroundStyle(alarm.isEnabled ? .secondary : .tertiary)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    }
                 }
 
                 Spacer()

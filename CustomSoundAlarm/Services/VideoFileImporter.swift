@@ -47,10 +47,9 @@ enum VideoFileImporter {
     ///   `VideoFileImporter.copyToTemp` が生成した temp 名なので空文字を返す
     ///   （呼び出し元でフォールバックさせる）
     static func defaultSoundName(from url: URL) -> String {
-        let name = url.deletingPathExtension().lastPathComponent
-        // UUID 形式チェック（temp コピーで生成された名前を弾く）
-        if UUID(uuidString: name) != nil { return "" }
-        return name
+        // #93-2a: 取り込み時に名前を整える（UUID・ランダムスラグ除去、記号の空白化）。
+        // 整形結果が空になったら既定名を返す（呼び出し側の空文字フォールバックも兼ねる）
+        SoundNameFormatter.sanitizedFileName(url.lastPathComponent)
     }
 
     // MARK: - File Copy（I/O）
