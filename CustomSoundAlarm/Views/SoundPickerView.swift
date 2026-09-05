@@ -395,7 +395,8 @@ struct SoundSelectionView: View {
 
         pendingAudio = PendingAudioImport(
             url: tempURL,
-            name: url.deletingPathExtension().lastPathComponent
+            // #93-2a: 取り込み時に名前を整える（UUID・ランダムスラグ除去・記号の空白化）
+            name: SoundNameFormatter.sanitizedFileName(url.lastPathComponent)
         )
     }
 }

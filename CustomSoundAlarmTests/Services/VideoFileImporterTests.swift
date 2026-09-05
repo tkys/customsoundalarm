@@ -147,11 +147,13 @@ struct VideoFileImporterTests {
     }
 
     @Test
-    func defaultSoundName_uuid_returnsEmpty() {
+    func defaultSoundName_uuid_returnsDefaultName() {
+        // #93-2a: UUID だけの名前は既定名にフォールバック（空を返さない）
         let uuid = UUID().uuidString
         let url = URL(fileURLWithPath: "/tmp/\(uuid).mov")
         let name = VideoFileImporter.defaultSoundName(from: url)
-        #expect(name.isEmpty)
+        #expect(!name.isEmpty)
+        #expect(name == SoundNameFormatter.defaultName)
     }
 
     @Test
@@ -166,10 +168,11 @@ struct VideoFileImporterTests {
 
     @Test
     func defaultSoundName_photoLibraryFormat() {
-        // 写真ライブラリの標準的な命名（IMG_1234）
+        // 写真ライブラリの標準的な命名（IMG_1234）。
+        // #93-2a: アンダースコアは空白に置換される
         let url = URL(fileURLWithPath: "/Photo/IMG_1234.MOV")
         let name = VideoFileImporter.defaultSoundName(from: url)
-        #expect(name == "IMG_1234")
+        #expect(name == "IMG 1234")
     }
 
     @Test
@@ -187,10 +190,12 @@ struct VideoFileImporterTests {
     }
 
     @Test
-    func defaultSoundName_lowercaseUuid_returnsEmpty() {
-        // UUID() は大文字小文字両方を受理する
+    func defaultSoundName_lowercaseUuid_returnsDefaultName() {
+        // UUID() は大文字小文字両方を受理する。
+        // #93-2a: 既定名にフォールバック（空を返さない）
         let url = URL(fileURLWithPath: "/tmp/550e8400-e29b-41d4-a716-446655440000.mov")
         let name = VideoFileImporter.defaultSoundName(from: url)
-        #expect(name.isEmpty)
+        #expect(!name.isEmpty)
+        #expect(name == SoundNameFormatter.defaultName)
     }
 }

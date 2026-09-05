@@ -133,6 +133,9 @@ struct AlarmDetailView: View {
                         )
                         Text(selectedSound?.name ?? String(localized: "none"))
                             .foregroundStyle(.secondary)
+                            // 1行・末尾省略（#93-2b: 生のファイル名が3行に伸びないようにする）
+                            .lineLimit(1)
+                            .truncationMode(.tail)
                     }
                 }
             }

@@ -137,7 +137,13 @@ final class SoundStore {
                         thumbnailFileName = nil
                     }
 
-                    let sound = AlarmSound(name: pending.displayName, fileName: cafName, thumbnailFileName: thumbnailFileName)
+                    // #93-2a: ShareExtension 由来のファイル名も取り込み時に整形する。
+                    // （ShareExtension ターゲットに依存を追加せず、取り込み側で整える）
+                    let sound = AlarmSound(
+                        name: SoundNameFormatter.sanitizedFileName(pending.displayName),
+                        fileName: cafName,
+                        thumbnailFileName: thumbnailFileName
+                    )
                     add(sound)
                     try? fm.removeItem(at: file)
                     try? fm.removeItem(at: audioFile)

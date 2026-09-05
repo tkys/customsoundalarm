@@ -73,6 +73,9 @@
 "discard" = "破棄";
 "discard_edits_title" = "編集内容を破棄しますか？";
 "discard_edits_message" = "選択した範囲は保存されません。";
+
+/* Sound name formatting (#93) */
+"imported_sound_default" = "取り込んだ音源";
 "my_sounds_empty_title" = "好きな音をアラームにしよう";
 "my_sounds_empty_description" = "動画の音楽やお気に入りの音声ファイルを\n取り込んでアラーム音に設定できます";
 "file_access_denied" = "ファイルへのアクセスが拒否されました";
