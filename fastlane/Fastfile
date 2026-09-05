@@ -24,7 +24,7 @@ platform :ios do
       submit_for_review: false,
       primary_category: "UTILITIES",
       app_version: "1.5.0",
-      languages: ["en-US", "ja"]
+      languages: ["en-US", "en-GB", "ja"]
     )
   end
 
@@ -42,7 +42,7 @@ platform :ios do
       submit_for_review: false,
       primary_category: "UTILITIES",
       app_version: "1.5.0",
-      languages: ["en-US", "ja"]
+      languages: ["en-US", "en-GB", "ja"]
     )
   end
 
@@ -89,7 +89,7 @@ platform :ios do
         export_compliance_is_exempt: false
       },
       app_version: "1.5.0",
-      languages: ["en-US", "ja"]
+      languages: ["en-US", "en-GB", "ja"]
     )
   end
 
@@ -114,7 +114,7 @@ platform :ios do
       },
       app_version: "1.5.0",
       build_number: "6",
-      languages: ["en-US", "ja"]
+      languages: ["en-US", "en-GB", "ja"]
     )
   end
 

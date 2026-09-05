@@ -1,0 +1,5 @@
+■ Alarm sounds can now be up to 10 minutes
+The 60-second cap on trimming is gone. Import up to 10 minutes of audio and it plays all the way to the end before repeating — so intros and build-ups survive instead of getting cut off.
+
+Thanks for using My Sound Alarm!
+We'd love to hear your feedback — please reach out through support.

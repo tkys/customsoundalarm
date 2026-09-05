@@ -1,0 +1,37 @@
+Use your own music as your alarm. The whole song plays. It does not stop after a few seconds.
+
+KEY FEATURES
+
+Up to 10 Minutes
+An iPhone ringtone can only be about 40 seconds long. Your own audio always stops too early. This app is different. You can take up to 10 minutes from a video. Audio files have no time limit at all. Your alarm plays the sound to the end, and then plays it again.
+
+Your Own Files
+This app uses the audio you already have. A song file. A voice recording. Sound from a video you saved. You do not need a subscription. There is no music catalog to search.
+
+Take the Audio From a Video
+Choose a video from your Camera Roll. Move the start point and the end point to pick the part you want. You can listen while you change it. The waveform shows you where the sound is loud and where it is quiet.
+
+Import Audio Files
+MP3, AAC, WAV, and M4A files all work. You can open them from the Files app.
+
+Built on Apple's Alarm System
+This app uses AlarmKit, the alarm system from Apple. Your alarm rings the same way the built-in Clock app rings. It is not a background trick that can fail when you need it.
+
+Share Sheet
+Send audio or video to this app from other apps.
+
+Repeat Days
+Choose the days for each alarm. Weekdays, weekends, or any days you want.
+
+Snooze
+Choose your own snooze time. You are not limited to nine minutes.
+
+Night Mode
+Your iPhone becomes a bedside clock. The numbers are large and soft, so you can read them in a dark room.
+
+SUPPORTED FORMATS
+MP3 / AAC / WAV / M4A / Audio from video (MOV, MP4)
+
+NOTES
+- Needs iOS 26 or later (AlarmKit)
+- A longer sound uses more storage. A 10-minute alarm sound is about 50 MB.
