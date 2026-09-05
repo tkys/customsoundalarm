@@ -1,21 +1,29 @@
-Use your own music as your alarm. The whole song plays. It does not stop after a few seconds.
+Wake up to the music you love. Keep only the part you want — the chorus, the hook, the line you sing along to.
 
 KEY FEATURES
 
-Up to 10 Minutes
-An iPhone ringtone can only be about 40 seconds long. Your own audio always stops too early. This app is different. You can take up to 10 minutes from a video. Audio files have no time limit at all. Your alarm plays the sound to the end, and then plays it again.
+Wake Up to the Part You Love
+Most people do not want a whole song. They want one part of it. Open a video or an audio file, look at the waveform, and drag to select the section you like. You can listen while you adjust it. The waveform shows you where the sound is loud and where it is quiet.
+
+A short section works well. Your alarm plays it to the end, then plays it again, until you get up. Twenty or thirty seconds of the chorus is often all you need.
 
 Your Own Files
 This app uses the audio you already have. A song file. A voice recording. Sound from a video you saved. You do not need a subscription. There is no music catalog to search.
 
 Take the Audio From a Video
-Choose a video from your Camera Roll. Move the start point and the end point to pick the part you want. You can listen while you change it. The waveform shows you where the sound is loud and where it is quiet.
+Choose a video from your Camera Roll and keep only the sound. This works well for videos you saved or recorded yourself.
 
 Import Audio Files
 MP3, AAC, WAV, and M4A files all work. You can open them from the Files app.
 
 Built on Apple's Alarm System
 This app uses AlarmKit, the alarm system from Apple. Your alarm rings the same way the built-in Clock app rings. It is not a background trick that can fail when you need it.
+
+See Your Sounds
+Each alarm shows a picture of its sound: a frame from your video, or the album art from your file. It is easy to tell your alarms apart.
+
+No 40-Second Limit
+An iPhone ringtone can only be about 40 seconds long. This app is different. You can take up to 10 minutes from a video, and audio files have no time limit at all.
 
 Share Sheet
 Send audio or video to this app from other apps.
@@ -24,7 +32,7 @@ Repeat Days
 Choose the days for each alarm. Weekdays, weekends, or any days you want.
 
 Snooze
-Choose your own snooze time. You are not limited to nine minutes.
+Pick 1, 2, 5 or 10 minutes with one tap, or set any value you like.
 
 Night Mode
 Your iPhone becomes a bedside clock. The numbers are large and soft, so you can read them in a dark room.
