@@ -20,56 +20,63 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if alarmStore.alarms.isEmpty {
-                    emptyState
-                } else {
-                    alarmList
-                }
-            }
-            .navigationTitle(String(localized: "alarm_title"))
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        showingBedsideClock = true
-                    } label: {
-                        Image(systemName: "moon.zzz")
+            ZStack {
+                Group {
+                    if alarmStore.alarms.isEmpty {
+                        emptyState
+                    } else {
+                        alarmList
                     }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingAddAlarm = true
-                    } label: {
-                        Image(systemName: "plus")
+                .navigationTitle(String(localized: "alarm_title"))
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            showingBedsideClock = true
+                        } label: {
+                            Image(systemName: "moon.zzz")
+                        }
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            showingAddAlarm = true
+                        } label: {
+                            Image(systemName: "plus")
+                        }
                     }
                 }
+                .sheet(isPresented: $showingAddAlarm, onDismiss: { onboardingImport = nil }) {
+                    AlarmDetailView(mode: .add, initialImport: onboardingImport)
+                }
+                .sheet(item: $selectedAlarm) { alarm in
+                    AlarmDetailView(mode: .edit(alarm))
+                }
+                .fullScreenCover(isPresented: $showingBedsideClock) {
+                    BedsideClockView()
+                }
+                .task {
+                    evaluateOnboarding()
+                }
+
+                if showingOnboarding {
+                    OnboardingView { source in
+                        AppGroup.hasCompletedOnboarding = true
+                        pendingOnboardingSource = source
+                        withAnimation { showingOnboarding = false }
+                    }
+                    .environment(\.colorScheme, .light)
+                    .transition(.opacity)
+                    .zIndex(1)
+                }
             }
-            .sheet(isPresented: $showingAddAlarm, onDismiss: { onboardingImport = nil }) {
-                AlarmDetailView(mode: .add, initialImport: onboardingImport)
-            }
-            .fullScreenCover(isPresented: $showingOnboarding, onDismiss: {
-                // fullScreenCover を閉じるアニメーション中に sheet を出すと無言で出ない
-                // ため、onDismiss で追加シートを出す（レビュー指摘1）
-                if let pending = pendingOnboardingSource, pending.opensAddScreen {
+        }
+        .onChange(of: showingOnboarding) { _, isShowing in
+            if !isShowing, let pending = pendingOnboardingSource {
+                if pending.opensAddScreen {
                     onboardingImport = pending
                     showingAddAlarm = true
                 }
                 pendingOnboardingSource = nil
-            }) {
-                OnboardingView { source in
-                    AppGroup.hasCompletedOnboarding = true
-                    pendingOnboardingSource = source
-                    showingOnboarding = false
-                }
-            }
-            .sheet(item: $selectedAlarm) { alarm in
-                AlarmDetailView(mode: .edit(alarm))
-            }
-            .fullScreenCover(isPresented: $showingBedsideClock) {
-                BedsideClockView()
-            }
-            .task {
-                evaluateOnboarding()
             }
         }
         .onChange(of: scenePhase) { _, phase in
@@ -86,8 +93,18 @@ struct ContentView: View {
     /// オンボの表示判定（#98 Phase 1/2）。
     /// 既存ユーザー（条件を満たさない）はここで完了扱いにして以後出さない
     private func evaluateOnboarding() {
+#if DEBUG
+        let effectiveHasCompleted: Bool
+        if AppGroup.isUITestFreshOnboarding {
+            effectiveHasCompleted = false
+        } else {
+            effectiveHasCompleted = AppGroup.hasCompletedOnboarding
+        }
+#else
+        let effectiveHasCompleted = AppGroup.hasCompletedOnboarding
+#endif
         let shows = OnboardingLogic.shouldShow(
-            hasCompleted: AppGroup.hasCompletedOnboarding,
+            hasCompleted: effectiveHasCompleted,
             alarmCount: alarmStore.alarms.count,
             importedSoundCount: soundStore.sounds.filter { !$0.isPreset }.count
         )

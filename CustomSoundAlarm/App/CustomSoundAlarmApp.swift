@@ -21,8 +21,18 @@ struct CustomSoundAlarmApp: App {
                     // 同期的に決める（ContentView も即座に同じ入力で判定する。await の後で
                     // App が評価するとレースし、ユーザーがオンボ完了後に二重で
                     // reconcile/sync/startObserving が走る恐れがある — レビュー指摘2）
+#if DEBUG
+                    let effectiveHasCompletedForLaunch: Bool
+                    if AppGroup.isUITestFreshOnboarding {
+                        effectiveHasCompletedForLaunch = false
+                    } else {
+                        effectiveHasCompletedForLaunch = AppGroup.hasCompletedOnboarding
+                    }
+#else
+                    let effectiveHasCompletedForLaunch = AppGroup.hasCompletedOnboarding
+#endif
                     let showsOnboardingAtLaunch = OnboardingLogic.shouldShow(
-                        hasCompleted: AppGroup.hasCompletedOnboarding,
+                        hasCompleted: effectiveHasCompletedForLaunch,
                         alarmCount: AlarmStore.shared.alarms.count,
                         importedSoundCount: SoundStore.shared.sounds.filter { !$0.isPreset }.count
                     )

@@ -20,6 +20,15 @@ enum AppGroup {
         set { userDefaults.set(newValue, forKey: "first_install_version") }
     }
 
+    /// UIテスト用: DEBUG時のみ有効なfresh onboarding強制フラグ
+    static var isUITestFreshOnboarding: Bool {
+#if DEBUG
+        return CommandLine.arguments.contains("-uitest-fresh-onboarding")
+#else
+        return false
+#endif
+    }
+
     /// オンボーディングを完了したか（#98）。
     /// 未完了かつアラーム0件・取り込み音源0件の新規インストールにだけオンボを出す。
     /// 既存ユーザーは初回起動時に条件を満たさなければ立てて以後出さない
