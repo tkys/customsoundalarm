@@ -49,6 +49,23 @@ struct OnboardingView: View {
             .padding(.bottom, 32)
         }
         .preferredColorScheme(.light)
+        // 計測: 各場面の表示（#98 Phase 5）
+        .onAppear { trackStepViewed() }
+        .onChange(of: step) { _, _ in trackStepViewed() }
+    }
+
+    /// onboarding_step_viewed を送る
+    private func trackStepViewed() {
+        AnalyticsService.shared.capture(.onboardingStepViewed(step: step))
+    }
+
+    /// 完了時の計測と完了コールバック（source_selected + completed）
+    private func complete(with source: OnboardingSource) {
+        AnalyticsService.shared.capture(.onboardingSourceSelected(source: source))
+        AnalyticsService.shared.capture(
+            .onboardingCompleted(source: source, permissionGranted: permissionGranted ?? false)
+        )
+        onComplete(source)
     }
 
     // MARK: - 場面ごとの部品
@@ -91,7 +108,7 @@ struct OnboardingView: View {
 
     private func sourceRow(_ source: OnboardingSource, icon: String, label: LocalizedStringKey) -> some View {
         Button {
-            onComplete(source)
+            complete(with: source)
         } label: {
             HStack(spacing: 14) {
                 Image(systemName: icon)
@@ -118,7 +135,7 @@ struct OnboardingView: View {
     /// 控えめなテキストボタン → 一覧へ
     private var laterButton: some View {
         Button {
-            onComplete(.later)
+            complete(with: .later)
         } label: {
             Text("onb.later")
                 .font(.subheadline)
@@ -192,8 +209,7 @@ struct OnboardingView: View {
         case .permission:
             requestPermissionThenAdvance()
         case .source:
-            // Phase 4 で行選択を実装（ここには来ない）
-            onComplete(.later)
+            complete(with: .later)
         }
     }
 
