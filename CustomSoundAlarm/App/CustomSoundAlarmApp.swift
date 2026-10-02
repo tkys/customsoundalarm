@@ -17,6 +17,23 @@ struct CustomSoundAlarmApp: App {
                     AnalyticsService.shared.configure()
                     setUserProperties()
 
+                    // #98: オンボの要否は Entitlements のネットワーク待ちより前に
+                    // 同期的に決める（ContentView も即座に同じ入力で判定する。await の後で
+                    // App が評価するとレースし、ユーザーがオンボ完了後に二重で
+                    // reconcile/sync/startObserving が走る恐れがある — レビュー指摘2）
+                    let showsOnboardingAtLaunch = OnboardingLogic.shouldShow(
+                        hasCompleted: AppGroup.hasCompletedOnboarding,
+                        alarmCount: AlarmStore.shared.alarms.count,
+                        importedSoundCount: SoundStore.shared.sounds.filter { !$0.isPreset }.count
+                    )
+                    if OnboardingLogic.shouldMarkCompleted(
+                        hasCompleted: AppGroup.hasCompletedOnboarding,
+                        shouldShowOnboarding: showsOnboardingAtLaunch
+                    ) {
+                        // 既存ユーザー（アップデートで来た人）は初回起動時に完了扱いにして以後出さない
+                        AppGroup.hasCompletedOnboarding = true
+                    }
+
                     // 課金権利の監視開始（Transaction.updates）と最新化
                     // StoreKit の作法: 起動のできるだけ早い段階で監視を開始し、
                     // アプリ外で完了したトランザクション（Ask to Buy 等）を受け取る
@@ -24,20 +41,7 @@ struct CustomSoundAlarmApp: App {
                     await Entitlements.shared.refresh()
 
                     // #98 Phase 1: オンボを出す人は許可要求を場面3へ移す（価値を見せてから聞く）
-                    let showsOnboarding = OnboardingLogic.shouldShow(
-                        hasCompleted: AppGroup.hasCompletedOnboarding,
-                        alarmCount: AlarmStore.shared.alarms.count,
-                        importedSoundCount: SoundStore.shared.sounds.filter { !$0.isPreset }.count
-                    )
-                    if OnboardingLogic.shouldMarkCompleted(
-                        hasCompleted: AppGroup.hasCompletedOnboarding,
-                        shouldShowOnboarding: showsOnboarding
-                    ) {
-                        // 既存ユーザー（アップデートで来た人）は初回起動時に完了扱いにして以後出さない
-                        AppGroup.hasCompletedOnboarding = true
-                    }
-
-                    if OnboardingLogic.shouldRequestAuthorizationAtLaunch(shouldShowOnboarding: showsOnboarding) {
+                    if OnboardingLogic.shouldRequestAuthorizationAtLaunch(shouldShowOnboarding: showsOnboardingAtLaunch) {
                         let authorized = await AlarmScheduler.shared.requestAuthorization()
                         if authorized {
                             // 起動時: AlarmKit と AlarmStore の整合性チェック

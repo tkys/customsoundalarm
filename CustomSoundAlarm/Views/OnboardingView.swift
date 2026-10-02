@@ -12,14 +12,10 @@ struct OnboardingView: View {
     let onComplete: (OnboardingSource) -> Void
 
     @State private var step: OnboardingStep = .intro
-    /// 場面2の左→右へ一度だけの塗りアニメーション済みフラグ
-    @State private var loopSweepApplied = false
     /// 場面3の許可要求の結果（場面4完了時の計測に使う・未実施は nil）
     @State private var permissionGranted: Bool?
     /// 許可要求のシステムダイアログ表示中（二重タップ防止）
     @State private var isRequestingPermission = false
-
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ZStack {
@@ -78,14 +74,8 @@ struct OnboardingView: View {
             OnboardingIllustration(assetName: "onboarding_hero", aspectRatio: 3.0 / 4.0)
                 .frame(maxHeight: UIScreen.main.bounds.height * 0.55)
         case .loop:
-            // 場面2: サビのくり返し（色付き部分を左→右へ一度だけ塗る・reduceMotion 時なし）
+            // 場面2: サビのくり返し（イラスト側で色付き済みのため追加アニメーションなし — レビュー指摘3）
             OnboardingIllustration(assetName: "onboarding_loop", aspectRatio: 4.0 / 3.0)
-                .overlay(alignment: .bottomLeading) {
-                    if !reduceMotion {
-                        sweepOverlay
-                    }
-                }
-                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         case .permission:
             // 場面3: 消音でも鳴る
             OnboardingIllustration(assetName: "onboarding_silent", aspectRatio: 1.0)
@@ -142,24 +132,6 @@ struct OnboardingView: View {
                 .foregroundStyle(Color(white: 0.55))
         }
         .buttonStyle(.plain)
-    }
-
-    /// 波形の色付き部分を左→右へ一度だけ塗る軽いアニメーション（画像の下部40%）
-    private var sweepOverlay: some View {
-        GeometryReader { geo in
-            Rectangle()
-                .fill(Color.accentColor.opacity(0.14))
-                .frame(width: loopSweepApplied ? geo.size.width : 0,
-                       height: geo.size.height * 0.4)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-        }
-        .allowsHitTesting(false)
-        .onAppear {
-            guard !loopSweepApplied else { return }
-            withAnimation(.easeInOut(duration: 1.2)) {
-                loopSweepApplied = true
-            }
-        }
     }
 
     private var headline: some View {

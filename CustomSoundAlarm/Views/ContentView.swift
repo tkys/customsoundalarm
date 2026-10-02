@@ -13,6 +13,7 @@ struct ContentView: View {
     @State private var showingOnboarding = false
     /// オンボ場面4で選ばれた取り込み入口（追加画面に伝える・#98 Phase 4）
     @State private var onboardingImport: OnboardingSource?
+    @State private var pendingOnboardingSource: OnboardingSource?
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.requestReview) private var requestReview
@@ -46,24 +47,26 @@ struct ContentView: View {
             .sheet(isPresented: $showingAddAlarm, onDismiss: { onboardingImport = nil }) {
                 AlarmDetailView(mode: .add, initialImport: onboardingImport)
             }
+            .fullScreenCover(isPresented: $showingOnboarding, onDismiss: {
+                // fullScreenCover を閉じるアニメーション中に sheet を出すと無言で出ない
+                // ため、onDismiss で追加シートを出す（レビュー指摘1）
+                if let pending = pendingOnboardingSource, pending.opensAddScreen {
+                    onboardingImport = pending
+                    showingAddAlarm = true
+                }
+                pendingOnboardingSource = nil
+            }) {
+                OnboardingView { source in
+                    AppGroup.hasCompletedOnboarding = true
+                    pendingOnboardingSource = source
+                    showingOnboarding = false
+                }
+            }
             .sheet(item: $selectedAlarm) { alarm in
                 AlarmDetailView(mode: .edit(alarm))
             }
             .fullScreenCover(isPresented: $showingBedsideClock) {
                 BedsideClockView()
-            }
-            // オンボ（#98）: 新規インストール（未完了×アラーム0×取込0）にだけ出す
-            .fullScreenCover(isPresented: $showingOnboarding) {
-                OnboardingView { source in
-                    // どの選択でも完了フラグを立てる（「あとで」でも以後出さない）
-                    AppGroup.hasCompletedOnboarding = true
-                    showingOnboarding = false
-                    // 場面4の選択: 追加画面を開き、該当の入口を直接開く（あとで→一覧へ）
-                    if source.opensAddScreen {
-                        onboardingImport = source
-                        showingAddAlarm = true
-                    }
-                }
             }
             .task {
                 evaluateOnboarding()
