@@ -187,3 +187,5 @@
 "onb.hero.title" = "好きな曲の、好きな瞬間で起きる";
 "onb.loop.title" = "サビだけ切って、起きるまでくり返し";
 "onb.next" = "次へ";
+"onb.silent.title" = "消音モードでも鳴るように";
+"onb.continue" = "続ける";

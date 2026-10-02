@@ -6,13 +6,18 @@ import SwiftUI
 /// - 本文テキストを置かない（イラスト＋見出し1行で伝える）
 /// - ライト表示に固定（イラストが白背景のため・ダークモードでも白）
 /// - reduceMotion が true ならアニメーションを省く
+/// - 場面3で初めて AlarmKit の許可を聞く（許可でも拒否でも次へ進む・止めない・再要求しない）
 struct OnboardingView: View {
-    /// 完了時。source は場面4の選択（Phase 2 の暫定では .later）
+    /// 完了時。source は場面4の選択
     let onComplete: (OnboardingSource) -> Void
 
     @State private var step: OnboardingStep = .intro
     /// 場面2の左→右へ一度だけの塗りアニメーション済みフラグ
     @State private var loopSweepApplied = false
+    /// 場面3の許可要求の結果（場面4完了時の計測に使う・未実施は nil）
+    @State private var permissionGranted: Bool?
+    /// 許可要求のシステムダイアログ表示中（二重タップ防止）
+    @State private var isRequestingPermission = false
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -98,15 +103,22 @@ struct OnboardingView: View {
         Button {
             advance()
         } label: {
-            Text("onb.next")
-                .font(.headline)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(
-                    Capsule().fill(Brand.saveButtonGradient)
-                )
+            HStack(spacing: 8) {
+                if isRequestingPermission {
+                    ProgressView()
+                        .tint(.white)
+                }
+                Text(step == .permission ? "onb.continue" : "onb.next")
+                    .font(.headline)
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(
+                Capsule().fill(Brand.saveButtonGradient)
+            )
         }
+        .disabled(isRequestingPermission)
     }
 
     private func advance() {
@@ -114,11 +126,33 @@ struct OnboardingView: View {
         case .intro:
             step = .loop
         case .loop:
-            // Phase 3 で場面3（許可）へ進める。暫定ではここで完了扱い
+            step = .permission
+        case .permission:
+            requestPermissionThenAdvance()
+        case .source:
+            // Phase 4 で行選択を実装（ここには来ない）
             onComplete(.later)
-        case .permission, .source:
-            // Phase 3/4 で実装
-            onComplete(.later)
+        }
+    }
+
+    /// 場面3「続ける」で初めて許可を聞く（#98）。
+    /// 許可でも拒否でも場面4へ進む（止めない・再要求しない）。
+    /// 結果は既存の alarm_permission として計測される（AlarmScheduler 内）。
+    /// 許可された場合、起動時と同じ順で初期化処理を実行する
+    /// （reconcileOnLaunch → syncAlarms → startObservingAlarmStates）。
+    private func requestPermissionThenAdvance() {
+        guard !isRequestingPermission else { return }
+        isRequestingPermission = true
+        Task { @MainActor in
+            let authorized = await AlarmScheduler.shared.requestAuthorization()
+            permissionGranted = authorized
+            if authorized {
+                AlarmScheduler.shared.reconcileOnLaunch()
+                AlarmScheduler.shared.syncAlarms(AlarmStore.shared.alarms)
+                AlarmScheduler.shared.startObservingAlarmStates()
+            }
+            isRequestingPermission = false
+            step = .source
         }
     }
 }

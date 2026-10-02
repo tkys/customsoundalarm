@@ -187,3 +187,5 @@
 "onb.hero.title" = "Wake up to the part you love";
 "onb.loop.title" = "Pick the chorus. It plays until you're up.";
 "onb.next" = "Next";
+"onb.silent.title" = "So it rings, even on silent";
+"onb.continue" = "Continue";
