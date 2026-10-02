@@ -23,16 +23,35 @@ struct CustomSoundAlarmApp: App {
                     Entitlements.shared.startObservingUpdates()
                     await Entitlements.shared.refresh()
 
-                    let authorized = await AlarmScheduler.shared.requestAuthorization()
-                    if authorized {
-                        // 起動時: AlarmKit と AlarmStore の整合性チェック
-                        // （キル中に発火した一回限りアラームを自動 OFF）
-                        AlarmScheduler.shared.reconcileOnLaunch()
-                        // AlarmKit に現在の設定を反映
-                        AlarmScheduler.shared.syncAlarms(AlarmStore.shared.alarms)
-                        // 一回限りアラーム発火後の自動 OFF を監視
-                        AlarmScheduler.shared.startObservingAlarmStates()
+                    // #98 Phase 1: オンボを出す人は許可要求を場面3へ移す（価値を見せてから聞く）
+                    let showsOnboarding = OnboardingLogic.shouldShow(
+                        hasCompleted: AppGroup.hasCompletedOnboarding,
+                        alarmCount: AlarmStore.shared.alarms.count,
+                        importedSoundCount: SoundStore.shared.sounds.filter { !$0.isPreset }.count
+                    )
+                    if OnboardingLogic.shouldMarkCompleted(
+                        hasCompleted: AppGroup.hasCompletedOnboarding,
+                        shouldShowOnboarding: showsOnboarding
+                    ) {
+                        // 既存ユーザー（アップデートで来た人）は初回起動時に完了扱いにして以後出さない
+                        AppGroup.hasCompletedOnboarding = true
                     }
+
+                    if OnboardingLogic.shouldRequestAuthorizationAtLaunch(shouldShowOnboarding: showsOnboarding) {
+                        let authorized = await AlarmScheduler.shared.requestAuthorization()
+                        if authorized {
+                            // 起動時: AlarmKit と AlarmStore の整合性チェック
+                            // （キル中に発火した一回限りアラームを自動 OFF）
+                            AlarmScheduler.shared.reconcileOnLaunch()
+                            // AlarmKit に現在の設定を反映
+                            AlarmScheduler.shared.syncAlarms(AlarmStore.shared.alarms)
+                            // 一回限りアラーム発火後の自動 OFF を監視
+                            AlarmScheduler.shared.startObservingAlarmStates()
+                        }
+                    }
+                    // オンボを出す人は場面3で「続ける」を押した時点で
+                    // requestAuthorization → reconcileOnLaunch / syncAlarms / startObservingAlarmStates
+                    // を同じ順に実行する（OnboardingView 側）
                 }
                 .onChange(of: scenePhase) { _, newPhase in
                     if newPhase == .active {

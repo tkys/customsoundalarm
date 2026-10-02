@@ -20,6 +20,14 @@ enum AppGroup {
         set { userDefaults.set(newValue, forKey: "first_install_version") }
     }
 
+    /// オンボーディングを完了したか（#98）。
+    /// 未完了かつアラーム0件・取り込み音源0件の新規インストールにだけオンボを出す。
+    /// 既存ユーザーは初回起動時に条件を満たさなければ立てて以後出さない
+    static var hasCompletedOnboarding: Bool {
+        get { userDefaults.bool(forKey: "has_completed_onboarding") }
+        set { userDefaults.set(newValue, forKey: "has_completed_onboarding") }
+    }
+
     /// スヌーズ記録済みの AlarmEntry.ID（App Group 永続化。スヌーズ検知の二重計上防止）
     static var snoozedAlarmEntryIDs: Set<UUID> {
         get {
