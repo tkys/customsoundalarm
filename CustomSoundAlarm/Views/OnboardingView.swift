@@ -121,6 +121,7 @@ struct OnboardingView: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("onboarding.source.\(source.rawValue)")
     }
 
     /// 控えめなテキストボタン → 一覧へ
@@ -133,6 +134,7 @@ struct OnboardingView: View {
                 .foregroundStyle(Color(white: 0.55))
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("onboarding.later")
     }
 
     private var headline: some View {
@@ -171,6 +173,7 @@ struct OnboardingView: View {
             )
         }
         .disabled(isRequestingPermission)
+        .accessibilityIdentifier(step == .permission ? "onboarding.continue" : "onboarding.next")
     }
 
     private func advance() {

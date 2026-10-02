@@ -13,6 +13,15 @@ struct CustomSoundAlarmApp: App {
                     guard !hasLaunched else { return }
                     hasLaunched = true
 
+#if DEBUG
+                    // UIテスト用: fresh onboarding で起動されたら永続化をクリアして空状態にする
+                    if AppGroup.isUITestFreshOnboarding {
+                        AppGroup.hasCompletedOnboarding = false
+                        AlarmStore.shared.resetForUITest()
+                        SoundStore.shared.resetForUITest()
+                    }
+#endif
+
                     // PostHog 計測の初期化（Info.plist にキーが無い場合は安全に無効化）
                     AnalyticsService.shared.configure()
                     setUserProperties()

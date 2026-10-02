@@ -164,6 +164,14 @@ final class SoundStore {
         importFromStaging()
     }
 
+#if DEBUG
+    /// UIテスト用: カスタム音をクリアして空状態にする（プリセットは残す）
+    func resetForUITest() {
+        sounds = sounds.filter(\.isPreset)
+        save()
+    }
+#endif
+
     // MARK: - Persistence
 
     private func load() {

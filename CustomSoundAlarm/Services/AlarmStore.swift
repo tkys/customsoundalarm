@@ -78,4 +78,13 @@ final class AlarmStore {
         AppGroup.userDefaults.set(data, forKey: key)
         contentHash = data.hashValue
     }
+
+#if DEBUG
+    /// UIテスト用: 保存済みアラームをクリア
+    func resetForUITest() {
+        alarms = []
+        AppGroup.userDefaults.removeObject(forKey: key)
+        contentHash = 0
+    }
+#endif
 }

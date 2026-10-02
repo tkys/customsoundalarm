@@ -13,7 +13,6 @@ struct ContentView: View {
     @State private var showingOnboarding = false
     /// オンボ場面4で選ばれた取り込み入口（追加画面に伝える・#98 Phase 4）
     @State private var onboardingImport: OnboardingSource?
-    @State private var pendingOnboardingSource: OnboardingSource?
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.requestReview) private var requestReview
@@ -45,15 +44,6 @@ struct ContentView: View {
                         }
                     }
                 }
-                .sheet(isPresented: $showingAddAlarm, onDismiss: { onboardingImport = nil }) {
-                    AlarmDetailView(mode: .add, initialImport: onboardingImport)
-                }
-                .sheet(item: $selectedAlarm) { alarm in
-                    AlarmDetailView(mode: .edit(alarm))
-                }
-                .fullScreenCover(isPresented: $showingBedsideClock) {
-                    BedsideClockView()
-                }
                 .task {
                     evaluateOnboarding()
                 }
@@ -61,22 +51,29 @@ struct ContentView: View {
                 if showingOnboarding {
                     OnboardingView { source in
                         AppGroup.hasCompletedOnboarding = true
-                        pendingOnboardingSource = source
+                        let shouldPresent = source.opensAddScreen
+                        let importSource = source
                         withAnimation { showingOnboarding = false }
+                        if shouldPresent {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                onboardingImport = importSource
+                                showingAddAlarm = true
+                            }
+                        }
                     }
                     .environment(\.colorScheme, .light)
                     .transition(.opacity)
                     .zIndex(1)
                 }
             }
-        }
-        .onChange(of: showingOnboarding) { _, isShowing in
-            if !isShowing, let pending = pendingOnboardingSource {
-                if pending.opensAddScreen {
-                    onboardingImport = pending
-                    showingAddAlarm = true
-                }
-                pendingOnboardingSource = nil
+            .sheet(isPresented: $showingAddAlarm, onDismiss: { onboardingImport = nil }) {
+                AlarmDetailView(mode: .add, initialImport: onboardingImport)
+            }
+            .sheet(item: $selectedAlarm) { alarm in
+                AlarmDetailView(mode: .edit(alarm))
+            }
+            .fullScreenCover(isPresented: $showingBedsideClock) {
+                BedsideClockView()
             }
         }
         .onChange(of: scenePhase) { _, phase in
@@ -148,6 +145,7 @@ struct ContentView: View {
             }
             .buttonStyle(.borderedProminent)
         }
+        .accessibilityIdentifier("empty.title")
     }
 
     // MARK: - Alarm List

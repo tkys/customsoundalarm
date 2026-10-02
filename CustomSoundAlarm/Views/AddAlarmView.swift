@@ -77,6 +77,15 @@ struct AlarmDetailView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Text(initialImport?.rawValue ?? "nil")
+                    .opacity(0)
+                    .frame(height: 1)
+                    .accessibilityIdentifier("addAlarm.initialImport")
+                Text(selectedSound?.name ?? String(localized: "none"))
+                    .opacity(0)
+                    .frame(height: 1)
+                    .accessibilityIdentifier("addAlarm.soundName")
+                    .accessibilityHidden(false)
                 timeSection
                 soundSection
                 repeatSection
@@ -87,6 +96,7 @@ struct AlarmDetailView: View {
                     deleteSection
                 }
             }
+            .accessibilityIdentifier("addAlarm.root")
             .warmListBackground()
             .navigationTitle(isEditing ? String(localized: "edit_alarm") : String(localized: "add_alarm"))
             .navigationBarTitleDisplayMode(.inline)
@@ -115,10 +125,11 @@ struct AlarmDetailView: View {
                 errorMessage: $importErrorMessage
             )
             .task {
-                // 追加画面のシート提示完了後に取り込みを開く（300〜400ms）
-                try? await Task.sleep(for: .milliseconds(350))
+                // 追加画面のシート提示完了後に取り込みを開く
+                try? await Task.sleep(for: .milliseconds(1500))
                 applyInitialImportOnce()
             }
+            .accessibilityIdentifier("addAlarm.root")
         }
     }
 
@@ -176,7 +187,6 @@ struct AlarmDetailView: View {
                         )
                         Text(selectedSound?.name ?? String(localized: "none"))
                             .foregroundStyle(.secondary)
-                            // 1行・末尾省略（#93-2b: 生のファイル名が3行に伸びないようにする）
                             .lineLimit(1)
                             .truncationMode(.tail)
                     }
