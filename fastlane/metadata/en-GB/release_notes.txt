@@ -1,13 +1,7 @@
-■ See your sounds at a glance
-Each alarm now shows a picture of its sound. A frame from the video you used, or the album art from your file. It is much easier to tell your alarms apart.
+■ A short welcome for new users
+The first time you open the app, a few screens show how to turn part of a song into an alarm. Then you can start right away: from a video, from an audio file, or with a built-in sound.
 
-■ Clearer alarm list
-Alarm details no longer get cut off. The label, the sound, the days and the countdown are all readable now.
+■ Alarm permission at a better time
+The app now asks for alarm permission after the welcome screens, not the moment it opens.
 
-■ Better names for imported sounds
-Long file names full of random letters and numbers are cleaned up when you import.
-
-■ Faster snooze setup
-Pick 1, 2, 5 or 10 minutes with one tap, or fine-tune any value you like.
-
-Thanks for using My Sound Alarm!
+If you already use the app, nothing changes for you. Thanks for using My Sound Alarm!
