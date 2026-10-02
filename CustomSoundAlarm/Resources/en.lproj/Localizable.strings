@@ -189,3 +189,8 @@
 "onb.next" = "Next";
 "onb.silent.title" = "So it rings, even on silent";
 "onb.continue" = "Continue";
+"onb.source.title" = "Where's the sound you love?";
+"onb.source.video" = "From a video";
+"onb.source.audio" = "From an audio file";
+"onb.source.preset" = "Try a built-in sound";
+"onb.later" = "Later";

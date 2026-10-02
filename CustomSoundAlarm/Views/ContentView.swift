@@ -11,6 +11,8 @@ struct ContentView: View {
     @State private var showingBedsideClock = false
     /// オンボの表示（#98）。初回評価は .task で1回だけ
     @State private var showingOnboarding = false
+    /// オンボ場面4で選ばれた取り込み入口（追加画面に伝える・#98 Phase 4）
+    @State private var onboardingImport: OnboardingSource?
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.requestReview) private var requestReview
@@ -41,8 +43,8 @@ struct ContentView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showingAddAlarm) {
-                AlarmDetailView(mode: .add)
+            .sheet(isPresented: $showingAddAlarm, onDismiss: { onboardingImport = nil }) {
+                AlarmDetailView(mode: .add, initialImport: onboardingImport)
             }
             .sheet(item: $selectedAlarm) { alarm in
                 AlarmDetailView(mode: .edit(alarm))
@@ -56,8 +58,11 @@ struct ContentView: View {
                     // どの選択でも完了フラグを立てる（「あとで」でも以後出さない）
                     AppGroup.hasCompletedOnboarding = true
                     showingOnboarding = false
-                    // Phase 4: source に応じた追加画面の直接オープン
-                    _ = source
+                    // 場面4の選択: 追加画面を開き、該当の入口を直接開く（あとで→一覧へ）
+                    if source.opensAddScreen {
+                        onboardingImport = source
+                        showingAddAlarm = true
+                    }
                 }
             }
             .task {

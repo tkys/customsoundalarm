@@ -28,6 +28,17 @@ enum OnboardingLogic {
     static func shouldMarkCompleted(hasCompleted: Bool, shouldShowOnboarding: Bool) -> Bool {
         !hasCompleted && !shouldShowOnboarding
     }
+
+    /// 場面4の選択 → 追加画面での初期動作（testSourceMapsToInitialImport・#98 Phase 4）。
+    /// 追加画面（AlarmDetailView）とサウンド選択（SoundSelectionView）はこの写像に従う
+    static func initialImportAction(for source: OnboardingSource?) -> InitialImportAction {
+        switch source {
+        case .video: .openVideoImport
+        case .audio: .openFileImporter
+        case .preset: .preselectPreset
+        case .later, nil: .none
+        }
+    }
 }
 
 /// オンボの場面4「どこから音を持ってくる？」の選択（計測の source 値と一致させる）
@@ -49,4 +60,16 @@ enum OnboardingStep: String, Equatable, Sendable {
     case loop
     case permission
     case source
+}
+
+/// 場面4の選択を受けた追加画面の初期動作
+enum InitialImportAction: Equatable, Sendable {
+    /// 動画の取り込みシートを直接開く
+    case openVideoImport
+    /// ファイル選択（fileImporter）を直接開く
+    case openFileImporter
+    /// プリセット先頭をサウンドとして選択済みにする
+    case preselectPreset
+    /// 何もしない（あとで / 指定なし）
+    case none
 }

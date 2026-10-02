@@ -189,3 +189,8 @@
 "onb.next" = "次へ";
 "onb.silent.title" = "消音モードでも鳴るように";
 "onb.continue" = "続ける";
+"onb.source.title" = "どこから音を持ってくる？";
+"onb.source.video" = "動画から";
+"onb.source.audio" = "音声ファイルから";
+"onb.source.preset" = "入っている音で試す";
+"onb.later" = "あとで";

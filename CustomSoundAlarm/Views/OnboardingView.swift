@@ -28,12 +28,22 @@ struct OnboardingView: View {
 
             VStack(spacing: 0) {
                 Spacer(minLength: 0)
-                illustration
-                Spacer(minLength: 0)
+                if step != .source {
+                    illustration
+                    Spacer(minLength: 0)
+                }
                 headline
-                    .padding(.bottom, 32)
+                    .padding(.bottom, step == .source ? 24 : 32)
                 Spacer(minLength: 0)
-                primaryButton
+                if step == .source {
+                    // 場面4: 大きな行3つ + あとで
+                    sourceList
+                    Spacer(minLength: 0)
+                    laterButton
+                } else {
+                    Spacer(minLength: 0)
+                    primaryButton
+                }
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 32)
@@ -59,10 +69,62 @@ struct OnboardingView: View {
                     }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        case .permission, .source:
-            // 場面3・4は Phase 3/4 で実装
+        case .permission:
+            // 場面3: 消音でも鳴る
             OnboardingIllustration(assetName: "onboarding_silent", aspectRatio: 1.0)
+        case .source:
+            // 場面4は行3つのみ（イラストなし）
+            EmptyView()
         }
+    }
+
+    // MARK: - 場面4（どこから音を持ってくる？）
+
+    /// 行全体がタップ対象の大きな行3つ（SF Symbol＋短語）
+    private var sourceList: some View {
+        VStack(spacing: 12) {
+            sourceRow(.video, icon: "video.badge.waveform", label: "onb.source.video")
+            sourceRow(.audio, icon: "doc.badge.plus", label: "onb.source.audio")
+            sourceRow(.preset, icon: "bell", label: "onb.source.preset")
+        }
+    }
+
+    private func sourceRow(_ source: OnboardingSource, icon: String, label: LocalizedStringKey) -> some View {
+        Button {
+            onComplete(source)
+        } label: {
+            HStack(spacing: 14) {
+                Image(systemName: icon)
+                    .font(.title2)
+                    .foregroundStyle(Color.accentColor)
+                    .frame(width: 34)
+                Text(label)
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(Color.primary)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.footnote)
+                    .foregroundStyle(Color(white: 0.75))
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color(white: 0.96))
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    /// 控えめなテキストボタン → 一覧へ
+    private var laterButton: some View {
+        Button {
+            onComplete(.later)
+        } label: {
+            Text("onb.later")
+                .font(.subheadline)
+                .foregroundStyle(Color(white: 0.55))
+        }
+        .buttonStyle(.plain)
     }
 
     /// 波形の色付き部分を左→右へ一度だけ塗る軽いアニメーション（画像の下部40%）

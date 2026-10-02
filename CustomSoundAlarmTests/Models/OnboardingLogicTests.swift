@@ -89,4 +89,19 @@ struct OnboardingLogicTests {
         // 「あとで」は一覧へ戻るだけ
         #expect(OnboardingSource.later.opensAddScreen == false)
     }
+
+    // MARK: - 選択 → 初期動作の写像（testSourceMapsToInitialImport）
+
+    @Test
+    func initialImportAction_mapsEachSource() {
+        #expect(OnboardingLogic.initialImportAction(for: .video) == .openVideoImport)
+        #expect(OnboardingLogic.initialImportAction(for: .audio) == .openFileImporter)
+        #expect(OnboardingLogic.initialImportAction(for: .preset) == .preselectPreset)
+    }
+
+    @Test
+    func initialImportAction_laterAndNil_doNothing() {
+        #expect(OnboardingLogic.initialImportAction(for: .later) == .none)
+        #expect(OnboardingLogic.initialImportAction(for: nil) == .none)
+    }
 }
