@@ -86,6 +86,21 @@ enum AnalyticsEvent: Sendable {
     /// - value: 変更後の値（PII なし）
     case bedsideSettingChanged(setting: BedsideSetting, value: BedsideSettingValue)
 
+    // MARK: オンボーディング（#98）
+
+    /// オンボの場面が表示された
+    /// - step: intro / loop / permission / source
+    case onboardingStepViewed(step: OnboardingStep)
+
+    /// オンボ場面4で音の取得元を選択した
+    /// - source: video / audio / preset / later
+    case onboardingSourceSelected(source: OnboardingSource)
+
+    /// オンボを完了した（どの選択でも完了時に送る）
+    /// - source: 選択した取得元
+    /// - permissionGranted: 場面3の許可要求の結果
+    case onboardingCompleted(source: OnboardingSource, permissionGranted: Bool)
+
     // MARK: レビュー依頼（#84）
 
     /// レビュー依頼を実際に実行した（OS の requestReview を呼んだ）。
@@ -115,6 +130,9 @@ enum AnalyticsEvent: Sendable {
         case .bedsideEntered: return "bedside_entered"
         case .bedsideExited: return "bedside_exited"
         case .bedsideSettingChanged: return "bedside_setting_changed"
+        case .onboardingStepViewed: return "onboarding_step_viewed"
+        case .onboardingSourceSelected: return "onboarding_source_selected"
+        case .onboardingCompleted: return "onboarding_completed"
         case .reviewRequested: return "review_requested"
         case .reviewRequestBlocked: return "review_request_blocked"
         }
@@ -178,6 +196,15 @@ enum AnalyticsEvent: Sendable {
             return [
                 "setting": setting.rawValue,
                 "value": value.asProperty
+            ]
+        case let .onboardingStepViewed(step):
+            return ["step": step.rawValue]
+        case let .onboardingSourceSelected(source):
+            return ["source": source.rawValue]
+        case let .onboardingCompleted(source, permissionGranted):
+            return [
+                "source": source.rawValue,
+                "permission_granted": permissionGranted
             ]
         case .reviewRequested:
             return [:]

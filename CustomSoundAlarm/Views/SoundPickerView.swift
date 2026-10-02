@@ -13,6 +13,12 @@ struct SoundSelectionView: View {
     @State private var renamingSound: AlarmSound?
     @State private var renameText = ""
 
+    /// オンボ場面4からの指定（#98 Phase 4）。表示直後に該当の取り込みを1回だけ開く
+    var initialImport: OnboardingSource?
+
+    /// 初期動作を1回だけ適用したか
+    @State private var didApplyInitialImport = false
+
     /// 波形クロップ待ちの音声取り込み（#77）。非nilでシートを表示
     @State private var pendingAudio: PendingAudioImport?
 
@@ -57,6 +63,12 @@ struct SoundSelectionView: View {
             }
         }
         .onDisappear { audioPlayer.stop() }
+        // オンボ場面4からの直接取り込み（#98 Phase 4）: push アニメーション完了後に開く
+        // （push 中に sheet/fileImporter を出すと無言で出ない — レビュー指摘1）
+        .task {
+            try? await Task.sleep(for: .milliseconds(400))
+            applyInitialImportOnce()
+        }
         .fileImporter(
             isPresented: $isImporting,
             allowedContentTypes: Self.supportedTypes,
@@ -377,6 +389,24 @@ struct SoundSelectionView: View {
     /// security-scoped resource の寿命を最小化するため、
     /// 選択直後に temp へコピー → 即解放する（VideoImportFlow の罠1 対策と同じ）。
     /// 変換・保存はクロップUI（AudioCropView）内で行う。
+    /// オンボ指定の初期動作を1回だけ適用する（写像は OnboardingLogic.initialImportAction）
+    private func applyInitialImportOnce() {
+        guard !didApplyInitialImport else { return }
+        didApplyInitialImport = true
+        switch OnboardingLogic.initialImportAction(for: initialImport) {
+        case .openVideoImport:
+            showingVideoImport = true
+        case .openFileImporter:
+            isImporting = true
+        case .preselectPreset:
+            if selectedSound == nil {
+                selectedSound = soundStore.sounds.first(where: \.isPreset)
+            }
+        case .none:
+            break
+        }
+    }
+
     private func importSound(from url: URL) {
         guard url.startAccessingSecurityScopedResource() else {
             errorMessage = String(localized: "file_access_denied")

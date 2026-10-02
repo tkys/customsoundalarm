@@ -9,6 +9,11 @@ struct ContentView: View {
     @State private var selectedAlarm: AlarmEntry?
     @State private var showingAddAlarm = false
     @State private var showingBedsideClock = false
+    /// オンボの表示（#98）。初回評価は .task で1回だけ
+    @State private var showingOnboarding = false
+    /// オンボ場面4で選ばれた取り込み入口（追加画面に伝える・#98 Phase 4）
+    @State private var onboardingImport: OnboardingSource?
+    @State private var pendingOnboardingSource: OnboardingSource?
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.requestReview) private var requestReview
@@ -39,14 +44,32 @@ struct ContentView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showingAddAlarm) {
-                AlarmDetailView(mode: .add)
+            .sheet(isPresented: $showingAddAlarm, onDismiss: { onboardingImport = nil }) {
+                AlarmDetailView(mode: .add, initialImport: onboardingImport)
+            }
+            .fullScreenCover(isPresented: $showingOnboarding, onDismiss: {
+                // fullScreenCover を閉じるアニメーション中に sheet を出すと無言で出ない
+                // ため、onDismiss で追加シートを出す（レビュー指摘1）
+                if let pending = pendingOnboardingSource, pending.opensAddScreen {
+                    onboardingImport = pending
+                    showingAddAlarm = true
+                }
+                pendingOnboardingSource = nil
+            }) {
+                OnboardingView { source in
+                    AppGroup.hasCompletedOnboarding = true
+                    pendingOnboardingSource = source
+                    showingOnboarding = false
+                }
             }
             .sheet(item: $selectedAlarm) { alarm in
                 AlarmDetailView(mode: .edit(alarm))
             }
             .fullScreenCover(isPresented: $showingBedsideClock) {
                 BedsideClockView()
+            }
+            .task {
+                evaluateOnboarding()
             }
         }
         .onChange(of: scenePhase) { _, phase in
@@ -57,6 +80,24 @@ struct ContentView: View {
             ReviewRequestManager.shared.requestReviewIfAppropriate {
                 requestReview()
             }
+        }
+    }
+
+    /// オンボの表示判定（#98 Phase 1/2）。
+    /// 既存ユーザー（条件を満たさない）はここで完了扱いにして以後出さない
+    private func evaluateOnboarding() {
+        let shows = OnboardingLogic.shouldShow(
+            hasCompleted: AppGroup.hasCompletedOnboarding,
+            alarmCount: alarmStore.alarms.count,
+            importedSoundCount: soundStore.sounds.filter { !$0.isPreset }.count
+        )
+        if shows {
+            showingOnboarding = true
+        } else if OnboardingLogic.shouldMarkCompleted(
+            hasCompleted: AppGroup.hasCompletedOnboarding,
+            shouldShowOnboarding: shows
+        ) {
+            AppGroup.hasCompletedOnboarding = true
         }
     }
 

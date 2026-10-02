@@ -24,6 +24,10 @@ struct AlarmDetailView: View {
     @State private var soundStore = SoundStore.shared
 
     let mode: AlarmDetailMode
+    /// オンボ場面4からの指定（#98 Phase 4）。
+    /// video/audio → 表示直後にサウンド選択を開き該当の取り込みを直接開く。
+    /// preset → プリセット先頭を選択済みにする。nil なら従来どおり
+    var initialImport: OnboardingSource?
 
     @State private var selectedTime: Date
     @State private var label: String
@@ -32,8 +36,14 @@ struct AlarmDetailView: View {
     @State private var snoozeMinutes: Int
     @State private var isEnabled: Bool
 
-    init(mode: AlarmDetailMode) {
+    /// オンボ指定の初期動作を1回だけ適用したか
+    @State private var didApplyInitialImport = false
+    /// サウンド選択を自動で開くか（オンボの video/audio 指定・1回だけ）
+    @State private var shouldAutoOpenSoundPicker = false
+
+    init(mode: AlarmDetailMode, initialImport: OnboardingSource? = nil) {
         self.mode = mode
+        self.initialImport = initialImport
 
         if case .edit(let entry) = mode {
             var components = DateComponents()
@@ -94,6 +104,32 @@ struct AlarmDetailView: View {
                 }
             }
             .animation(.easeInOut(duration: 0.25), value: saveConfirmation)
+            // オンボ場面4からの直接取り込み（#98 Phase 4）。
+            // 既存の手動 NavigationLink とは別に、プログラム的に1回だけ開く
+            .navigationDestination(isPresented: $shouldAutoOpenSoundPicker) {
+                SoundSelectionView(selectedSound: $selectedSound, initialImport: initialImport)
+            }
+            .task {
+                applyInitialImportOnce()
+            }
+        }
+    }
+
+    /// オンボ指定の初期動作を1回だけ適用する（写像は OnboardingLogic.initialImportAction）
+    private func applyInitialImportOnce() {
+        guard !didApplyInitialImport else { return }
+        didApplyInitialImport = true
+        switch OnboardingLogic.initialImportAction(for: initialImport) {
+        case .openVideoImport, .openFileImporter:
+            // 追加画面を開き、サウンド選択 → 該当の取り込みを直接開く
+            shouldAutoOpenSoundPicker = true
+        case .preselectPreset:
+            // サウンドはプリセット先頭を選択済みにする
+            if selectedSound == nil {
+                selectedSound = soundStore.sounds.first(where: \.isPreset)
+            }
+        case .none:
+            break
         }
     }
 
