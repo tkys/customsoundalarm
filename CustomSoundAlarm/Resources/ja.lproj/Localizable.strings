@@ -182,3 +182,8 @@
 "error_file_access_denied" = "ファイルへのアクセスが拒否されました。";
 "error_file_copy_failed" = "ファイルのコピーに失敗しました。";
 "error_unsupported_video_format" = "サポートされていない動画形式です。";
+
+/* Onboarding (#98) */
+"onb.hero.title" = "好きな曲の、好きな瞬間で起きる";
+"onb.loop.title" = "サビだけ切って、起きるまでくり返し";
+"onb.next" = "次へ";

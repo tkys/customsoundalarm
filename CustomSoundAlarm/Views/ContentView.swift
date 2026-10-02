@@ -9,6 +9,8 @@ struct ContentView: View {
     @State private var selectedAlarm: AlarmEntry?
     @State private var showingAddAlarm = false
     @State private var showingBedsideClock = false
+    /// オンボの表示（#98）。初回評価は .task で1回だけ
+    @State private var showingOnboarding = false
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.requestReview) private var requestReview
@@ -48,6 +50,19 @@ struct ContentView: View {
             .fullScreenCover(isPresented: $showingBedsideClock) {
                 BedsideClockView()
             }
+            // オンボ（#98）: 新規インストール（未完了×アラーム0×取込0）にだけ出す
+            .fullScreenCover(isPresented: $showingOnboarding) {
+                OnboardingView { source in
+                    // どの選択でも完了フラグを立てる（「あとで」でも以後出さない）
+                    AppGroup.hasCompletedOnboarding = true
+                    showingOnboarding = false
+                    // Phase 4: source に応じた追加画面の直接オープン
+                    _ = source
+                }
+            }
+            .task {
+                evaluateOnboarding()
+            }
         }
         .onChange(of: scenePhase) { _, phase in
             // ユーザーが自ら落ち着いてアプリを前面に出したタイミングで、
@@ -57,6 +72,24 @@ struct ContentView: View {
             ReviewRequestManager.shared.requestReviewIfAppropriate {
                 requestReview()
             }
+        }
+    }
+
+    /// オンボの表示判定（#98 Phase 1/2）。
+    /// 既存ユーザー（条件を満たさない）はここで完了扱いにして以後出さない
+    private func evaluateOnboarding() {
+        let shows = OnboardingLogic.shouldShow(
+            hasCompleted: AppGroup.hasCompletedOnboarding,
+            alarmCount: alarmStore.alarms.count,
+            importedSoundCount: soundStore.sounds.filter { !$0.isPreset }.count
+        )
+        if shows {
+            showingOnboarding = true
+        } else if OnboardingLogic.shouldMarkCompleted(
+            hasCompleted: AppGroup.hasCompletedOnboarding,
+            shouldShowOnboarding: shows
+        ) {
+            AppGroup.hasCompletedOnboarding = true
         }
     }
 

@@ -182,3 +182,8 @@
 "error_file_access_denied" = "Access to the file was denied.";
 "error_file_copy_failed" = "Failed to copy the file.";
 "error_unsupported_video_format" = "Unsupported video format.";
+
+/* Onboarding (#98) */
+"onb.hero.title" = "Wake up to the part you love";
+"onb.loop.title" = "Pick the chorus. It plays until you're up.";
+"onb.next" = "Next";

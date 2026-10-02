@@ -56,6 +56,7 @@
 		830680F612096B92BA4F656C /* SoundThumbnailLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B79F944B04148C7CBF5A918 /* SoundThumbnailLogic.swift */; };
 		843DF8A93E4FB88919995FCC /* PendingSoundImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CBACC275B5CC8C65DB386E6 /* PendingSoundImport.swift */; };
 		84E3E333E64E1002BB13067E /* PostSaveFeedbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67B419A7C166A0C68EA15ECC /* PostSaveFeedbackTests.swift */; };
+		863A5EC67944CE4FAFA8D195 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E338088DF544D7FBE2B2E3 /* OnboardingView.swift */; };
 		8732DB3B7B9E5AB7B3E337AC /* FilmstripLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51401720522F62D539F7E2EF /* FilmstripLogic.swift */; };
 		891ED003471E04F591082F81 /* ReviewRequestManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15FECDD6D248960DF6FAE7B /* ReviewRequestManagerTests.swift */; };
 		8A585E588C19181D73579247 /* ReviewRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A71D3FC6920B80C0C3ECD04E /* ReviewRequestManager.swift */; };
@@ -249,6 +250,7 @@
 		DDEC29ADE0634B68AAFBD5CC /* CustomSoundAlarmWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CustomSoundAlarmWidget.entitlements; sourceTree = "<group>"; };
 		E15FECDD6D248960DF6FAE7B /* ReviewRequestManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewRequestManagerTests.swift; sourceTree = "<group>"; };
 		E385B754D493555537FB767D /* SoundStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundStore.swift; sourceTree = "<group>"; };
+		E5E338088DF544D7FBE2B2E3 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		EA4D6382156797331B6E9D10 /* SoundPickerLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundPickerLogicTests.swift; sourceTree = "<group>"; };
 		EB945E440D779CA36034EF9D /* AudioSizeEstimate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSizeEstimate.swift; sourceTree = "<group>"; };
 		ECFB5D72956BEF5074D1BB4B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -421,6 +423,7 @@
 				BA0DC1BEE7AD4F2604D84B47 /* BedsideClockView.swift */,
 				C5C2A02E12D039E82B55921A /* ContentView.swift */,
 				7070484DAE7EA0EEC071F6AF /* FilmstripView.swift */,
+				E5E338088DF544D7FBE2B2E3 /* OnboardingView.swift */,
 				177D78CF60700582FA34F061 /* SoundPickerView.swift */,
 				4506353486F1AE80B4A03D35 /* SoundThumbnail.swift */,
 				30144856E697293FF8124FFB /* Theme.swift */,
@@ -711,6 +714,7 @@
 				8732DB3B7B9E5AB7B3E337AC /* FilmstripLogic.swift in Sources */,
 				2B59BF3CF209333B9D1F4568 /* FilmstripView.swift in Sources */,
 				4A6FF243E32041C112C3C022 /* OnboardingLogic.swift in Sources */,
+				863A5EC67944CE4FAFA8D195 /* OnboardingView.swift in Sources */,
 				5F6C4264DD4D8B3FD6A493B8 /* PendingAlarmEvent.swift in Sources */,
 				8F21CEB2AF87F7747B941689 /* PendingSoundImport.swift in Sources */,
 				09591C8F94E7D65C2407B130 /* PostSaveFeedback.swift in Sources */,
