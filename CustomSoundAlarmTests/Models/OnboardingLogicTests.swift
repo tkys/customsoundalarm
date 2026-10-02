@@ -104,4 +104,69 @@ struct OnboardingLogicTests {
         #expect(OnboardingLogic.initialImportAction(for: .later) == .none)
         #expect(OnboardingLogic.initialImportAction(for: nil) == .none)
     }
+
+    // MARK: - 文言の存在と行数同数（testOnboardingKeysExistJaEn）
+
+    @Test
+    func onboardingKeys_existInBothLocalesAndLineCountsMatch() throws {
+        let onboardingKeys = [
+            "onb.hero.title", "onb.loop.title", "onb.silent.title",
+            "onb.next", "onb.continue",
+            "onb.source.title", "onb.source.video", "onb.source.audio", "onb.source.preset",
+            "onb.later"
+        ]
+
+        guard let jaPath = Bundle.main.path(forResource: "Localizable", ofType: "strings", inDirectory: nil, forLocalization: "ja"),
+              let enPath = Bundle.main.path(forResource: "Localizable", ofType: "strings", inDirectory: nil, forLocalization: "en") else {
+            Issue.record("Localizable.strings not found in bundle")
+            return
+        }
+
+        let jaDict = NSDictionary(contentsOfFile: jaPath) as? [String: String]
+        let enDict = NSDictionary(contentsOfFile: enPath) as? [String: String]
+        #expect(jaDict != nil, "ja Localizable.strings should parse")
+        #expect(enDict != nil, "en Localizable.strings should parse")
+
+        for key in onboardingKeys {
+            #expect(jaDict?[key] != nil, "ja missing key: \(key)")
+            #expect(enDict?[key] != nil, "en missing key: \(key)")
+            #expect(jaDict?[key]?.isEmpty == false, "ja empty value for: \(key)")
+            #expect(enDict?[key]?.isEmpty == false, "en empty value for: \(key)")
+        }
+
+        // 行数同数: ソースファイル（テキスト）を直接読む。
+        // Bundle 内のコンパイル済み .strings はバイナリ plist のため String(encoding:.utf8) では読めない
+        let projectRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        let jaSourcePath = projectRoot.appendingPathComponent("CustomSoundAlarm/Resources/ja.lproj/Localizable.strings").path
+        let enSourcePath = projectRoot.appendingPathComponent("CustomSoundAlarm/Resources/en.lproj/Localizable.strings").path
+        let jaContent = try String(contentsOfFile: jaSourcePath, encoding: .utf8)
+        let enContent = try String(contentsOfFile: enSourcePath, encoding: .utf8)
+        // ベタ書き禁止・行数同数維持: 非空行の行数は ja/en で一致すること
+        let jaLines = jaContent.components(separatedBy: "\n").filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }.count
+        let enLines = enContent.components(separatedBy: "\n").filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }.count
+        #expect(jaLines == enLines, "ja (\(jaLines) lines) and en (\(enLines) lines) should have equal non-empty line counts")
+    }
+
+    // MARK: - 計測（Phase 5）
+
+    @Test
+    func analytics_onboardingEvents_haveExpectedNames() {
+        #expect(AnalyticsEvent.onboardingStepViewed(step: .intro).name == "onboarding_step_viewed")
+        #expect(AnalyticsEvent.onboardingSourceSelected(source: .video).name == "onboarding_source_selected")
+        #expect(AnalyticsEvent.onboardingCompleted(source: .preset, permissionGranted: true).name == "onboarding_completed")
+    }
+
+    @Test
+    func analytics_onboardingEvents_haveExpectedProperties() {
+        let stepProps = AnalyticsEvent.onboardingStepViewed(step: .permission).properties
+        #expect(stepProps["step"] as? String == "permission")
+
+        let sourceProps = AnalyticsEvent.onboardingSourceSelected(source: .later).properties
+        #expect(sourceProps["source"] as? String == "later")
+
+        let completedProps = AnalyticsEvent.onboardingCompleted(source: .audio, permissionGranted: true).properties
+        #expect(completedProps["source"] as? String == "audio")
+        #expect(completedProps["permission_granted"] as? Bool == true)
+    }
 }
