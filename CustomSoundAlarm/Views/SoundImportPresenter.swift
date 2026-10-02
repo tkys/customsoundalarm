@@ -51,6 +51,11 @@ struct SoundImportModifier: ViewModifier {
         }
     }
 
+    /// 選択された音声ファイルを波形クロップUIに渡す（#77）。
+    /// security-scoped resource の寿命を最小化するため、
+    /// 選択直後に temp へコピー → 即解放する（VideoImportFlow の罠1 対策と同じ）。
+    /// 変換・保存はクロップUI（AudioCropView）内で行う。
+    /// 取り込み時の名前整形は SoundNameFormatter.sanitizedFileName で行う（#93-2a）。
     private func importSound(from url: URL) {
         guard url.startAccessingSecurityScopedResource() else {
             errorMessage = String(localized: "file_access_denied")

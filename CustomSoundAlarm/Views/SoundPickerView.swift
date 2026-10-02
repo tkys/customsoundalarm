@@ -355,11 +355,6 @@ struct SoundSelectionView: View {
 
     // MARK: - Import
 
-    /// 選択された音声ファイルを波形クロップUIに渡す（#77）。
-    /// security-scoped resource の寿命を最小化するため、
-    /// 選択直後に temp へコピー → 即解放する（VideoImportFlow の罠1 対策と同じ）。
-    /// 変換・保存はクロップUI（AudioCropView）内で行う。
-    /// オンボ指定の初期動作を1回だけ適用する（写像は OnboardingLogic.initialImportAction）
     private func applyInitialImportOnce() {
         guard !didApplyInitialImport else { return }
         didApplyInitialImport = true

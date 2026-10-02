@@ -51,14 +51,10 @@ struct ContentView: View {
                 if showingOnboarding {
                     OnboardingView { source in
                         AppGroup.hasCompletedOnboarding = true
-                        let shouldPresent = source.opensAddScreen
-                        let importSource = source
                         withAnimation { showingOnboarding = false }
-                        if shouldPresent {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                                onboardingImport = importSource
-                                showingAddAlarm = true
-                            }
+                        if source.opensAddScreen {
+                            onboardingImport = source
+                            showingAddAlarm = true
                         }
                     }
                     .environment(\.colorScheme, .light)

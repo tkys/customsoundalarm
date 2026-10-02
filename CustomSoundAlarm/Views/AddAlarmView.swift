@@ -77,15 +77,6 @@ struct AlarmDetailView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Text(initialImport?.rawValue ?? "nil")
-                    .opacity(0)
-                    .frame(height: 1)
-                    .accessibilityIdentifier("addAlarm.initialImport")
-                Text(selectedSound?.name ?? String(localized: "none"))
-                    .opacity(0)
-                    .frame(height: 1)
-                    .accessibilityIdentifier("addAlarm.soundName")
-                    .accessibilityHidden(false)
                 timeSection
                 soundSection
                 repeatSection
@@ -125,11 +116,20 @@ struct AlarmDetailView: View {
                 errorMessage: $importErrorMessage
             )
             .task {
-                // 追加画面のシート提示完了後に取り込みを開く
-                try? await Task.sleep(for: .milliseconds(1500))
+                // 追加画面のシート提示完了後に取り込みを開く（約0.35秒待つ）
+                try? await Task.sleep(for: .milliseconds(500))
                 applyInitialImportOnce()
             }
-            .accessibilityIdentifier("addAlarm.root")
+            .alert("error", isPresented: Binding(
+                get: { importErrorMessage != nil },
+                set: { if !$0 { importErrorMessage = nil } }
+            )) {
+                Button("ok", role: .cancel) { importErrorMessage = nil }
+            } message: {
+                if let importErrorMessage {
+                    Text(importErrorMessage)
+                }
+            }
         }
     }
 
@@ -187,6 +187,8 @@ struct AlarmDetailView: View {
                         )
                         Text(selectedSound?.name ?? String(localized: "none"))
                             .foregroundStyle(.secondary)
+                            .accessibilityIdentifier("addAlarm.soundName")
+                            // 1行・末尾省略（#93-2b: 生のファイル名が3行に伸びないようにする）
                             .lineLimit(1)
                             .truncationMode(.tail)
                     }
