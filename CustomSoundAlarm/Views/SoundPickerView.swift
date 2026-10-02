@@ -69,27 +69,13 @@ struct SoundSelectionView: View {
             try? await Task.sleep(for: .milliseconds(400))
             applyInitialImportOnce()
         }
-        .fileImporter(
-            isPresented: $isImporting,
-            allowedContentTypes: Self.supportedTypes,
-            allowsMultipleSelection: false
-        ) { result in
-            handleImport(result)
-        }
-        // 音声ファイルの波形クロップ（#77）。編集中の誤クローズを防ぐ（#82-2）
-        .sheet(item: $pendingAudio) { pending in
-            NavigationStack {
-                AudioCropView(source: pending, selectedSound: $selectedSound)
-            }
-            .interactiveDismissDisabled()
-        }
-        // 動画の波形クロップ（#82-2: シート表示に統一）
-        .sheet(isPresented: $showingVideoImport) {
-            NavigationStack {
-                VideoImportFlow(selectedSound: $selectedSound)
-            }
-            .interactiveDismissDisabled()
-        }
+        .soundImport(
+            selectedSound: $selectedSound,
+            isImporting: $isImporting,
+            pendingAudio: $pendingAudio,
+            showingVideoImport: $showingVideoImport,
+            errorMessage: $errorMessage
+        )
         .alert(String(localized: "rename"), isPresented: Binding(
             get: { renamingSound != nil },
             set: { if !$0 { renamingSound = nil } }
@@ -369,22 +355,6 @@ struct SoundSelectionView: View {
 
     // MARK: - Import
 
-    private static let supportedTypes: [UTType] = [
-        .mp3, .aiff, .wav, .mpeg4Audio,
-        UTType("com.apple.coreaudio-format") ?? .audio,
-        .audio
-    ]
-
-    private func handleImport(_ result: Result<[URL], Error>) {
-        switch result {
-        case .success(let urls):
-            guard let url = urls.first else { return }
-            importSound(from: url)
-        case .failure(let error):
-            errorMessage = error.localizedDescription
-        }
-    }
-
     /// 選択された音声ファイルを波形クロップUIに渡す（#77）。
     /// security-scoped resource の寿命を最小化するため、
     /// 選択直後に temp へコピー → 即解放する（VideoImportFlow の罠1 対策と同じ）。
@@ -405,28 +375,5 @@ struct SoundSelectionView: View {
         case .none:
             break
         }
-    }
-
-    private func importSound(from url: URL) {
-        guard url.startAccessingSecurityScopedResource() else {
-            errorMessage = String(localized: "file_access_denied")
-            return
-        }
-        defer { url.stopAccessingSecurityScopedResource() }
-
-        let tempURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("\(UUID().uuidString).\(url.pathExtension)")
-        do {
-            try FileManager.default.copyItem(at: url, to: tempURL)
-        } catch {
-            errorMessage = error.localizedDescription
-            return
-        }
-
-        pendingAudio = PendingAudioImport(
-            url: tempURL,
-            // #93-2a: 取り込み時に名前を整える（UUID・ランダムスラグ除去・記号の空白化）
-            name: SoundNameFormatter.sanitizedFileName(url.lastPathComponent)
-        )
     }
 }

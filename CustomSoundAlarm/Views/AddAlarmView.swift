@@ -38,8 +38,11 @@ struct AlarmDetailView: View {
 
     /// オンボ指定の初期動作を1回だけ適用したか
     @State private var didApplyInitialImport = false
-    /// サウンド選択を自動で開くか（オンボの video/audio 指定・1回だけ）
-    @State private var shouldAutoOpenSoundPicker = false
+    /// 取り込み提示（#101 B: 追加画面に直接出す）
+    @State private var isImporting = false
+    @State private var pendingAudio: PendingAudioImport?
+    @State private var showingVideoImport = false
+    @State private var importErrorMessage: String?
 
     init(mode: AlarmDetailMode, initialImport: OnboardingSource? = nil) {
         self.mode = mode
@@ -104,27 +107,31 @@ struct AlarmDetailView: View {
                 }
             }
             .animation(.easeInOut(duration: 0.25), value: saveConfirmation)
-            // オンボ場面4からの直接取り込み（#98 Phase 4）。
-            // 既存の手動 NavigationLink とは別に、プログラム的に1回だけ開く
-            .navigationDestination(isPresented: $shouldAutoOpenSoundPicker) {
-                SoundSelectionView(selectedSound: $selectedSound, initialImport: initialImport)
-            }
+            .soundImport(
+                selectedSound: $selectedSound,
+                isImporting: $isImporting,
+                pendingAudio: $pendingAudio,
+                showingVideoImport: $showingVideoImport,
+                errorMessage: $importErrorMessage
+            )
             .task {
+                // 追加画面のシート提示完了後に取り込みを開く（300〜400ms）
+                try? await Task.sleep(for: .milliseconds(350))
                 applyInitialImportOnce()
             }
         }
     }
 
-    /// オンボ指定の初期動作を1回だけ適用する（写像は OnboardingLogic.initialImportAction）
+    /// オンボ指定の初期動作を1回だけ適用する（#101 B: 追加画面に直接出す）
     private func applyInitialImportOnce() {
         guard !didApplyInitialImport else { return }
         didApplyInitialImport = true
         switch OnboardingLogic.initialImportAction(for: initialImport) {
-        case .openVideoImport, .openFileImporter:
-            // 追加画面を開き、サウンド選択 → 該当の取り込みを直接開く
-            shouldAutoOpenSoundPicker = true
+        case .openVideoImport:
+            showingVideoImport = true
+        case .openFileImporter:
+            isImporting = true
         case .preselectPreset:
-            // サウンドはプリセット先頭を選択済みにする
             if selectedSound == nil {
                 selectedSound = soundStore.sounds.first(where: \.isPreset)
             }

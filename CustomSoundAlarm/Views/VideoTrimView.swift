@@ -46,6 +46,7 @@ struct VideoImportFlow: View {
                 loadingView
             }
         }
+        .accessibilityIdentifier("videoImport.root")
         .navigationTitle(String(localized: "add_from_video_title"))
         .navigationBarTitleDisplayMode(.inline)
         // 閉じるボタン（#82-2: シート化に伴う明示的な出口。編集中は破棄を確認する）
