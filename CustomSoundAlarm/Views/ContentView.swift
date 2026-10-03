@@ -1,75 +1,79 @@
 import SwiftUI
 import StoreKit
 
+/// 追加画面への要求（sheet(item:) 用・#101）
+struct AddAlarmRequest: Identifiable {
+    let id = UUID()
+    let source: OnboardingSource?
+}
+
 /// メイン画面：アラーム一覧
 /// OOUIの原則に従い、主オブジェクト（アラーム）のみを表示
 struct ContentView: View {
     @State private var alarmStore = AlarmStore.shared
     @State private var soundStore = SoundStore.shared
     @State private var selectedAlarm: AlarmEntry?
-    @State private var showingAddAlarm = false
     @State private var showingBedsideClock = false
     /// オンボの表示（#98）。初回評価は .task で1回だけ
     @State private var showingOnboarding = false
     /// オンボ場面4で選ばれた取り込み入口（追加画面に伝える・#98 Phase 4）
-    @State private var onboardingImport: OnboardingSource?
-    @State private var pendingOnboardingSource: OnboardingSource?
+    @State private var addAlarmRequest: AddAlarmRequest?
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.requestReview) private var requestReview
 
     var body: some View {
         NavigationStack {
-            Group {
-                if alarmStore.alarms.isEmpty {
-                    emptyState
-                } else {
-                    alarmList
-                }
-            }
-            .navigationTitle(String(localized: "alarm_title"))
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        showingBedsideClock = true
-                    } label: {
-                        Image(systemName: "moon.zzz")
+            ZStack {
+                Group {
+                    if alarmStore.alarms.isEmpty {
+                        emptyState
+                    } else {
+                        alarmList
                     }
                 }
+                .navigationTitle(String(localized: "alarm_title"))
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            showingBedsideClock = true
+                        } label: {
+                            Image(systemName: "moon.zzz")
+                        }
+                    }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        showingAddAlarm = true
+                        addAlarmRequest = AddAlarmRequest(source: nil)
                     } label: {
                         Image(systemName: "plus")
                     }
                 }
-            }
-            .sheet(isPresented: $showingAddAlarm, onDismiss: { onboardingImport = nil }) {
-                AlarmDetailView(mode: .add, initialImport: onboardingImport)
-            }
-            .fullScreenCover(isPresented: $showingOnboarding, onDismiss: {
-                // fullScreenCover を閉じるアニメーション中に sheet を出すと無言で出ない
-                // ため、onDismiss で追加シートを出す（レビュー指摘1）
-                if let pending = pendingOnboardingSource, pending.opensAddScreen {
-                    onboardingImport = pending
-                    showingAddAlarm = true
                 }
-                pendingOnboardingSource = nil
-            }) {
-                OnboardingView { source in
-                    AppGroup.hasCompletedOnboarding = true
-                    pendingOnboardingSource = source
-                    showingOnboarding = false
+                .task {
+                    evaluateOnboarding()
                 }
+
+                if showingOnboarding {
+                    OnboardingView { source in
+                        AppGroup.hasCompletedOnboarding = true
+                        withAnimation { showingOnboarding = false }
+                        if source.opensAddScreen {
+                            addAlarmRequest = AddAlarmRequest(source: source)
+                        }
+                    }
+                    .environment(\.colorScheme, .light)
+                    .transition(.opacity)
+                    .zIndex(1)
+                }
+            }
+            .sheet(item: $addAlarmRequest) { request in
+                AlarmDetailView(mode: .add, initialImport: request.source)
             }
             .sheet(item: $selectedAlarm) { alarm in
                 AlarmDetailView(mode: .edit(alarm))
             }
             .fullScreenCover(isPresented: $showingBedsideClock) {
                 BedsideClockView()
-            }
-            .task {
-                evaluateOnboarding()
             }
         }
         .onChange(of: scenePhase) { _, phase in
@@ -86,8 +90,18 @@ struct ContentView: View {
     /// オンボの表示判定（#98 Phase 1/2）。
     /// 既存ユーザー（条件を満たさない）はここで完了扱いにして以後出さない
     private func evaluateOnboarding() {
+#if DEBUG
+        let effectiveHasCompleted: Bool
+        if AppGroup.isUITestFreshOnboarding {
+            effectiveHasCompleted = false
+        } else {
+            effectiveHasCompleted = AppGroup.hasCompletedOnboarding
+        }
+#else
+        let effectiveHasCompleted = AppGroup.hasCompletedOnboarding
+#endif
         let shows = OnboardingLogic.shouldShow(
-            hasCompleted: AppGroup.hasCompletedOnboarding,
+            hasCompleted: effectiveHasCompleted,
             alarmCount: alarmStore.alarms.count,
             importedSoundCount: soundStore.sounds.filter { !$0.isPreset }.count
         )
@@ -125,12 +139,13 @@ struct ContentView: View {
             }
         } actions: {
             Button {
-                showingAddAlarm = true
+                addAlarmRequest = AddAlarmRequest(source: nil)
             } label: {
                 Text("add_alarm")
             }
             .buttonStyle(.borderedProminent)
         }
+        .accessibilityIdentifier("empty.title")
     }
 
     // MARK: - Alarm List

@@ -51,6 +51,17 @@
                ReferencedContainer = "container:CustomSoundAlarm.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "4905A51E452C39425A231FB4"
+               BuildableName = "CustomSoundAlarmUITests.xctest"
+               BlueprintName = "CustomSoundAlarmUITests"
+               ReferencedContainer = "container:CustomSoundAlarm.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

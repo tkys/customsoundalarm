@@ -39,11 +39,16 @@ struct VideoImportFlow: View {
     private let maxRangeSeconds: Double = 600
 
     var body: some View {
-        Group {
-            if let videoURL {
-                trimView(url: videoURL)
-            } else {
-                loadingView
+        ZStack(alignment: .top) {
+            Color.clear
+                .frame(height: 1)
+                .accessibilityIdentifier("videoImport.root")
+            Group {
+                if let videoURL {
+                    trimView(url: videoURL)
+                } else {
+                    loadingView
+                }
             }
         }
         .navigationTitle(String(localized: "add_from_video_title"))

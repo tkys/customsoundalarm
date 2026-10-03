@@ -44,7 +44,8 @@ struct OnboardingView: View {
             .padding(.horizontal, 24)
             .padding(.bottom, 32)
         }
-        .preferredColorScheme(.light)
+        // ライト固定は ContentView 側の .environment(\.colorScheme, .light) で行う
+        // （.preferredColorScheme はウィンドウ全体に波及するため使わない）
         // 計測: 各場面の表示（#98 Phase 5）
         .onAppear { trackStepViewed() }
         .onChange(of: step) { _, _ in trackStepViewed() }
@@ -120,6 +121,7 @@ struct OnboardingView: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("onboarding.source.\(source.rawValue)")
     }
 
     /// 控えめなテキストボタン → 一覧へ
@@ -132,6 +134,7 @@ struct OnboardingView: View {
                 .foregroundStyle(Color(white: 0.55))
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("onboarding.later")
     }
 
     private var headline: some View {
@@ -170,6 +173,7 @@ struct OnboardingView: View {
             )
         }
         .disabled(isRequestingPermission)
+        .accessibilityIdentifier(step == .permission ? "onboarding.continue" : "onboarding.next")
     }
 
     private func advance() {
