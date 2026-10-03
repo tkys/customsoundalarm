@@ -1,18 +1,23 @@
 import SwiftUI
 import StoreKit
 
+/// 追加画面への要求（sheet(item:) 用・#101）
+struct AddAlarmRequest: Identifiable {
+    let id = UUID()
+    let source: OnboardingSource?
+}
+
 /// メイン画面：アラーム一覧
 /// OOUIの原則に従い、主オブジェクト（アラーム）のみを表示
 struct ContentView: View {
     @State private var alarmStore = AlarmStore.shared
     @State private var soundStore = SoundStore.shared
     @State private var selectedAlarm: AlarmEntry?
-    @State private var showingAddAlarm = false
     @State private var showingBedsideClock = false
     /// オンボの表示（#98）。初回評価は .task で1回だけ
     @State private var showingOnboarding = false
     /// オンボ場面4で選ばれた取り込み入口（追加画面に伝える・#98 Phase 4）
-    @State private var onboardingImport: OnboardingSource?
+    @State private var addAlarmRequest: AddAlarmRequest?
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.requestReview) private var requestReview
@@ -36,13 +41,13 @@ struct ContentView: View {
                             Image(systemName: "moon.zzz")
                         }
                     }
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            showingAddAlarm = true
-                        } label: {
-                            Image(systemName: "plus")
-                        }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        addAlarmRequest = AddAlarmRequest(source: nil)
+                    } label: {
+                        Image(systemName: "plus")
                     }
+                }
                 }
                 .task {
                     evaluateOnboarding()
@@ -53,8 +58,7 @@ struct ContentView: View {
                         AppGroup.hasCompletedOnboarding = true
                         withAnimation { showingOnboarding = false }
                         if source.opensAddScreen {
-                            onboardingImport = source
-                            showingAddAlarm = true
+                            addAlarmRequest = AddAlarmRequest(source: source)
                         }
                     }
                     .environment(\.colorScheme, .light)
@@ -62,8 +66,8 @@ struct ContentView: View {
                     .zIndex(1)
                 }
             }
-            .sheet(isPresented: $showingAddAlarm, onDismiss: { onboardingImport = nil }) {
-                AlarmDetailView(mode: .add, initialImport: onboardingImport)
+            .sheet(item: $addAlarmRequest) { request in
+                AlarmDetailView(mode: .add, initialImport: request.source)
             }
             .sheet(item: $selectedAlarm) { alarm in
                 AlarmDetailView(mode: .edit(alarm))
@@ -135,7 +139,7 @@ struct ContentView: View {
             }
         } actions: {
             Button {
-                showingAddAlarm = true
+                addAlarmRequest = AddAlarmRequest(source: nil)
             } label: {
                 Text("add_alarm")
             }
