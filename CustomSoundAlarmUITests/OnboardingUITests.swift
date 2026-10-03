@@ -67,18 +67,12 @@ final class OnboardingUITests: XCTestCase {
         let addRoot = app.collectionViews["addAlarm.root"]
         XCTAssertTrue(addRoot.waitForExistence(timeout: 8), "add screen should appear: \(app.debugDescription)")
 
-        // Allow a moment for the nested sheet to present after the add screen (now 500ms in app)
-        sleep(1)
-
-        let videoRoot = findElement(identifier: "videoImport.root")
-        let videoTitleEn = app.navigationBars["Add Audio from Video"].firstMatch
-        let videoTitleJa = app.navigationBars["動画から音声を追加"].firstMatch
+        // 取り込み画面は開いた直後にソース選択ダイアログ（写真ライブラリ / ファイル）を出す。
+        // このボタンは動画の取り込みにしか無いので、出ていれば直接開けている。
+        // "Cancel" は追加画面のツールバーにもあるため判定に使わない（#101 偽陽性の原因）
         let photoButton = app.buttons["写真ライブラリ"]
         let photoButtonEn = app.buttons["Photo Library"]
-        let cancelButton = app.buttons["Cancel"]
-        let cancelJa = app.buttons["キャンセル"]
-        // videoImport sheet, its title, or the source dialog, or even the add screen's video import button state — any indicates the flow worked
-        let videoExists = videoRoot.waitForExistence(timeout: 5) || videoTitleEn.waitForExistence(timeout: 2) || videoTitleJa.waitForExistence(timeout: 2) || photoButton.waitForExistence(timeout: 3) || photoButtonEn.waitForExistence(timeout: 2) || cancelButton.waitForExistence(timeout: 2) || cancelJa.waitForExistence(timeout: 2)
+        let videoExists = photoButtonEn.waitForExistence(timeout: 6) || photoButton.waitForExistence(timeout: 1)
         if !videoExists {
             print("DEBUG videoImport not found, hierarchy:\n\(app.debugDescription)")
         }
@@ -105,11 +99,9 @@ final class OnboardingUITests: XCTestCase {
         let addRoot = findElement(identifier: "addAlarm.root")
         XCTAssertTrue(addRoot.waitForExistence(timeout: 8))
 
-        let cancelEn = app.buttons["Cancel"]
-        let cancelJa = app.buttons["キャンセル"]
-        let exists = cancelEn.waitForExistence(timeout: 8) || cancelJa.waitForExistence(timeout: 2)
-        XCTAssertTrue(exists, "file importer should be presented")
-        if cancelEn.exists { cancelEn.tap() } else if cancelJa.exists { cancelJa.tap() }
+        // ファイル選択（UIDocumentPicker）固有のナビゲーションバー。追加画面の "Cancel" では判定しない
+        let picker = app.navigationBars["FullDocumentManagerViewControllerNavigationBar"]
+        XCTAssertTrue(picker.waitForExistence(timeout: 6), "file importer should be presented: \(app.debugDescription)")
     }
 
     func testOnboardingPresetPreselects() {
@@ -127,17 +119,12 @@ final class OnboardingUITests: XCTestCase {
 
         let addRoot = findElement(identifier: "addAlarm.root")
         XCTAssertTrue(addRoot.waitForExistence(timeout: 8))
-        // Sound row shows the selected preset name (visible Text), not the hidden identifier
-        // Check for any preset name or that the row is not showing the placeholder "none"
-        let noneText = app.staticTexts["none"]
-        let noneJa = app.staticTexts["なし"]
-        // The hidden identifier element exists but may have empty label; instead check visible sound name
-        // Look for any staticText that is a preset name (Marimba, Bell, etc.) or check that "none" is not showing as the selected sound
-        let hasPreset = app.staticTexts["Marimba"].waitForExistence(timeout: 3) || app.staticTexts["マリンバ"].waitForExistence(timeout: 1) || app.staticTexts["Bell"].waitForExistence(timeout: 1) || app.staticTexts["ベル"].waitForExistence(timeout: 1)
-        // Fallback: ensure the add screen's sound row does not show "none" as the selected value
-        let soundNameElement = app.staticTexts["addAlarm.soundName"]
-        let label = soundNameElement.exists ? soundNameElement.label : ""
-        XCTAssertTrue(hasPreset || (!label.isEmpty && label != "none" && label != "なし"), "preset should be preselected, found label: \(label)")
+        // サウンド行に「なし」以外（＝プリセット先頭）が入っていること。
+        // 大文字小文字の違い（実表示は "None"）で常に真にならないよう、表示文字列と完全一致で比べる
+        let soundName = app.staticTexts["addAlarm.soundName"]
+        XCTAssertTrue(soundName.waitForExistence(timeout: 3))
+        let label = soundName.label
+        XCTAssertFalse(label.isEmpty || label == "None" || label == "なし", "preset should be preselected, found label: \(label)")
     }
 
     func testOnboardingLaterGoesToList() {
