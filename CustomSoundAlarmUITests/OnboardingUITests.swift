@@ -65,13 +65,10 @@ final class OnboardingUITests: XCTestCase {
         videoButton.tap()
 
         let addRoot = app.collectionViews["addAlarm.root"]
-        XCTAssertTrue(addRoot.waitForExistence(timeout: 10), "add screen should appear: \(app.debugDescription)")
+        XCTAssertTrue(addRoot.waitForExistence(timeout: 8), "add screen should appear: \(app.debugDescription)")
 
-        // Video import sheet appears on the add screen; the hidden initialImport label confirms the add screen received the correct source
-        let initialImportLabel = app.staticTexts["addAlarm.initialImport"].label
-        print("DEBUG initialImport label: \(initialImportLabel)")
-        // Allow a moment for the nested sheet to present after the add screen
-        sleep(2)
+        // Allow a moment for the nested sheet to present after the add screen (now 500ms in app)
+        sleep(1)
 
         let videoRoot = findElement(identifier: "videoImport.root")
         let videoTitleEn = app.navigationBars["Add Audio from Video"].firstMatch
