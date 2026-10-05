@@ -23,7 +23,7 @@ platform :ios do
       run_precheck_before_submit: false,
       submit_for_review: false,
       primary_category: "UTILITIES",
-      app_version: "1.6.0",
+      app_version: "1.7.0",
       languages: ["en-US", "en-GB", "ja"]
     )
   end
@@ -41,7 +41,7 @@ platform :ios do
       run_precheck_before_submit: false,
       submit_for_review: false,
       primary_category: "UTILITIES",
-      app_version: "1.6.0",
+      app_version: "1.7.0",
       languages: ["en-US", "en-GB", "ja"]
     )
   end
@@ -72,9 +72,9 @@ platform :ios do
       app_identifier: "com.tkysdev.customsoundalarm",
       metadata_path: "./fastlane/metadata",
       screenshots_path: "./fastlane/screenshots",
-      # v1.5.0: スクリーンショットを差し替えるため release でも上げる。
-      # 差し替えが無い回でも既存と同一なら実害は無い（アップロード時間だけ増える）。
-      skip_screenshots: false,
+      # v1.7.0: スクショ #2 の PPO（A/B テスト）実行中のため、スクショは上げない。
+      # テスト対象の素材を新バージョンで触ると結果が崩れる。差し替える回は false に戻す。
+      skip_screenshots: true,
       skip_metadata: false,
       force: true,
       run_precheck_before_submit: false,
@@ -88,7 +88,7 @@ platform :ios do
         export_compliance_uses_encryption: false,
         export_compliance_is_exempt: false
       },
-      app_version: "1.6.0",
+      app_version: "1.7.0",
       languages: ["en-US", "en-GB", "ja"]
     )
   end
@@ -112,8 +112,8 @@ platform :ios do
         export_compliance_uses_encryption: false,
         export_compliance_is_exempt: false
       },
-      app_version: "1.6.0",
-      build_number: "7",
+      app_version: "1.7.0",
+      build_number: "8",
       languages: ["en-US", "en-GB", "ja"]
     )
   end
