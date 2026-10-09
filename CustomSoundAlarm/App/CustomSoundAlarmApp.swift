@@ -26,7 +26,9 @@ struct CustomSoundAlarmApp: App {
                         AlarmStore.shared.resetForUITest()
                         let seeds: [(Int, Int)] = [(23, 44), (6, 24), (18, 0)]
                         for (h, m) in seeds {
-                            let alarm = AlarmEntry(hour: h, minute: m)
+                            // OFF で入れる: ON だと起動時の syncAlarms で AlarmKit に登録され、
+                            // シミュレータで実際に鳴って SpringBoard が落ちる（2026-10 に発生）
+                            let alarm = AlarmEntry(hour: h, minute: m, isEnabled: false)
                             AlarmStore.shared.add(alarm)
                         }
                     }
