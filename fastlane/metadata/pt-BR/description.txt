@@ -1,0 +1,45 @@
+Acorde com a música que você ama. Fique só com a parte que você quer: o refrão, o gancho, o verso que você canta junto.
+
+RECURSOS PRINCIPAIS
+
+Acorde com sua parte favorita
+Quase ninguém quer a música inteira, só um trecho. Abra um vídeo ou um arquivo de áudio, veja a forma de onda e arraste para escolher o trecho. Você pode ouvir enquanto ajusta. A forma de onda mostra onde o som é alto e onde é baixo.
+
+Um trecho curto funciona bem. O alarme toca até o fim e começa de novo, até você levantar. Vinte ou trinta segundos do refrão costumam bastar.
+
+Seus próprios arquivos
+O app usa o áudio que você já tem: um arquivo de música, uma gravação de voz, o som de um vídeo salvo. Sem assinatura. Sem catálogo para procurar.
+
+O som de um vídeo
+Escolha um vídeo do rolo da câmera e fique só com o som. Ótimo para vídeos salvos ou gravados por você.
+
+Importar arquivos de áudio
+Compatível com MP3, AAC, WAV e M4A. Abra pelo app Arquivos.
+
+O sistema de alarmes da Apple
+O app usa o AlarmKit, o sistema de alarmes da Apple. Seu alarme toca do mesmo jeito que o do app Relógio. Não é um truque em segundo plano que pode falhar na hora errada.
+
+Reconheça seus sons
+Cada alarme mostra uma imagem do seu som: um quadro do vídeo ou a capa do arquivo. Fica fácil diferenciar seus alarmes.
+
+Sem limite de 40 segundos
+Um toque de iPhone só pode ter cerca de 40 segundos. Aqui você pode usar até 10 minutos de um vídeo, e arquivos de áudio não têm limite de duração.
+
+Compartilhar
+Envie áudio ou vídeo de outros apps para este app.
+
+Dias de repetição
+Escolha os dias de cada alarme: dias úteis, fins de semana ou os dias que quiser.
+
+Soneca
+Escolha 1, 2, 5 ou 10 minutos com um toque, ou qualquer outro valor.
+
+Modo noturno
+Seu iPhone vira um relógio de cabeceira. Números grandes e suaves, fáceis de ler no escuro.
+
+FORMATOS COMPATÍVEIS
+MP3 / AAC / WAV / M4A / Áudio de vídeo (MOV, MP4)
+
+OBSERVAÇÕES
+- Requer iOS 26 ou posterior (AlarmKit)
+- Sons mais longos ocupam mais espaço. Um som de alarme de 10 minutos ocupa cerca de 50 MB.

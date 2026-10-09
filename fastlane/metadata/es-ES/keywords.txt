@@ -1,0 +1,1 @@
+despertador,alarma,tono,música,canción,vídeo,audio,mp3,recortar,mañana,reloj,sonido,repetir

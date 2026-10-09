@@ -1,0 +1,45 @@
+Wach auf mit der Musik, die du liebst. Behalte nur den Teil, den du willst: den Refrain, die Hook, die Zeile, die du mitsingst.
+
+FUNKTIONEN
+
+Wach auf mit deinem Lieblingsteil
+Die meisten wollen nicht den ganzen Song, sondern nur einen Teil davon. Öffne ein Video oder eine Audiodatei, sieh dir die Wellenform an und ziehe, um den Abschnitt auszuwählen. Du kannst ihn beim Anpassen anhören. Die Wellenform zeigt, wo es laut und wo es leise ist.
+
+Ein kurzer Abschnitt funktioniert gut. Der Wecker spielt ihn bis zum Ende und dann wieder von vorn, bis du aufstehst. Zwanzig oder dreißig Sekunden Refrain reichen oft.
+
+Deine eigenen Dateien
+Die App nutzt Audio, das du schon hast: eine Musikdatei, eine Sprachaufnahme, den Ton aus einem gespeicherten Video. Kein Abo. Kein Musikkatalog zum Durchsuchen.
+
+Ton aus einem Video
+Wähle ein Video aus deiner Mediathek und behalte nur den Ton. Ideal für gespeicherte oder selbst gefilmte Videos.
+
+Audiodateien importieren
+MP3, AAC, WAV und M4A werden unterstützt. Öffne sie aus der Dateien-App.
+
+Apples Wecker-System
+Die App nutzt AlarmKit, das Wecker-System von Apple. Dein Wecker klingelt wie der in der Uhr-App. Kein Hintergrund-Trick, der im falschen Moment versagt.
+
+Deine Töne auf einen Blick
+Jeder Wecker zeigt ein Bild seines Tons: ein Bild aus deinem Video oder das Cover deiner Datei. So unterscheidest du deine Wecker leicht.
+
+Keine 40-Sekunden-Grenze
+Ein iPhone-Klingelton darf nur etwa 40 Sekunden lang sein. Hier kannst du bis zu 10 Minuten aus einem Video nehmen, und Audiodateien haben gar keine Längenbegrenzung.
+
+Teilen-Menü
+Sende Audio oder Video aus anderen Apps an diese App.
+
+Wiederholung
+Wähle die Tage für jeden Wecker: werktags, am Wochenende oder an beliebigen Tagen.
+
+Schlummern
+Wähle 1, 2, 5 oder 10 Minuten mit einem Tippen oder jeden anderen Wert.
+
+Nachtmodus
+Dein iPhone wird zur Uhr am Bett. Große, sanfte Ziffern, gut lesbar im dunklen Zimmer.
+
+FORMATE
+MP3 / AAC / WAV / M4A / Ton aus Video (MOV, MP4)
+
+HINWEISE
+- Benötigt iOS 26 oder neuer (AlarmKit)
+- Längere Töne brauchen mehr Speicher. Ein 10-Minuten-Weckton belegt etwa 50 MB.

@@ -1,0 +1,45 @@
+Réveille-toi avec la musique que tu aimes. Garde seulement le passage que tu veux : le refrain, l'accroche, la phrase que tu chantes.
+
+FONCTIONS PRINCIPALES
+
+Réveille-toi sur ton passage préféré
+On ne veut pas toute la chanson, juste un moment. Ouvre une vidéo ou un fichier audio, regarde la forme d'onde et fais glisser pour choisir le passage. Tu peux l'écouter pendant que tu ajustes. La forme d'onde montre où le son est fort et où il est calme.
+
+Un passage court fonctionne bien. L'alarme le joue jusqu'au bout, puis recommence, jusqu'à ce que tu te lèves. Vingt ou trente secondes de refrain suffisent souvent.
+
+Tes propres fichiers
+L'app utilise l'audio que tu as déjà : un fichier de musique, un enregistrement de voix, le son d'une vidéo enregistrée. Aucun abonnement. Aucun catalogue à parcourir.
+
+Le son d'une vidéo
+Choisis une vidéo dans ta pellicule et garde uniquement le son. Idéal pour les vidéos enregistrées ou que tu as filmées toi-même.
+
+Importer des fichiers audio
+MP3, AAC, WAV et M4A sont pris en charge. Ouvre-les depuis l'app Fichiers.
+
+Le système d'alarme d'Apple
+L'app utilise AlarmKit, le système d'alarme d'Apple. Ton alarme sonne comme celle de l'app Horloge. Ce n'est pas une astuce en arrière-plan qui peut échouer au mauvais moment.
+
+Repère tes sons
+Chaque alarme affiche une image de son son : une image de ta vidéo ou la pochette de ton fichier. Tu distingues facilement tes alarmes.
+
+Pas de limite de 40 secondes
+Une sonnerie d'iPhone dure environ 40 secondes au maximum. Ici, tu peux prendre jusqu'à 10 minutes d'une vidéo, et les fichiers audio n'ont aucune limite de durée.
+
+Feuille de partage
+Envoie de l'audio ou de la vidéo vers l'app depuis d'autres apps.
+
+Jours de répétition
+Choisis les jours de chaque alarme : en semaine, le week-end ou les jours que tu veux.
+
+Rappel d'alarme
+Choisis 1, 2, 5 ou 10 minutes d'un geste, ou n'importe quelle autre durée.
+
+Mode nuit
+Ton iPhone devient un réveil de chevet. Les chiffres sont grands et doux, lisibles dans une pièce sombre.
+
+FORMATS PRIS EN CHARGE
+MP3 / AAC / WAV / M4A / Audio de vidéo (MOV, MP4)
+
+REMARQUES
+- Nécessite iOS 26 ou version ultérieure (AlarmKit)
+- Un son long occupe plus d'espace. Un son d'alarme de 10 minutes fait environ 50 Mo.
