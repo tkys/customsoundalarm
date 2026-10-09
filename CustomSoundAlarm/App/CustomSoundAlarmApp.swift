@@ -20,6 +20,16 @@ struct CustomSoundAlarmApp: App {
                         AlarmStore.shared.resetForUITest()
                         SoundStore.shared.resetForUITest()
                     }
+                    // UIテスト用: アラーム一覧を時刻順で検証するためのシード
+                    if AppGroup.isUITestSeedAlarms {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        let seeds: [(Int, Int)] = [(23, 44), (6, 24), (18, 0)]
+                        for (h, m) in seeds {
+                            let alarm = AlarmEntry(hour: h, minute: m)
+                            AlarmStore.shared.add(alarm)
+                        }
+                    }
 #endif
 
                     // PostHog 計測の初期化（Info.plist にキーが無い場合は安全に無効化）
