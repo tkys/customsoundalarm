@@ -1,0 +1,45 @@
+Svegliati con la musica che ami. Tieni solo la parte che vuoi: il ritornello, il passaggio, la frase che canti.
+
+FUNZIONI PRINCIPALI
+
+Svegliati con la tua parte preferita
+Quasi nessuno vuole la canzone intera, solo una parte. Apri un video o un file audio, guarda la forma d'onda e trascina per scegliere il passaggio. Puoi ascoltarlo mentre lo regoli. La forma d'onda mostra dove il suono è forte e dove è piano.
+
+Un passaggio breve funziona bene. La sveglia lo suona fino alla fine e poi ricomincia, finché non ti alzi. Venti o trenta secondi di ritornello spesso bastano.
+
+I tuoi file
+L'app usa l'audio che hai già: un file musicale, una registrazione vocale, il suono di un video salvato. Nessun abbonamento. Nessun catalogo da sfogliare.
+
+Il suono di un video
+Scegli un video dal Rullino e tieni solo il suono. Perfetto per video salvati o girati da te.
+
+Importa file audio
+Supporta MP3, AAC, WAV e M4A. Aprili dall'app File.
+
+Il sistema di sveglie di Apple
+L'app usa AlarmKit, il sistema di sveglie di Apple. La tua sveglia suona come quella dell'app Orologio. Non è un trucco in background che può fallire nel momento sbagliato.
+
+Riconosci i tuoi suoni
+Ogni sveglia mostra un'immagine del suo suono: un fotogramma del video o la copertina del file. Così distingui facilmente le sveglie.
+
+Nessun limite di 40 secondi
+Una suoneria dell'iPhone dura al massimo circa 40 secondi. Qui puoi prendere fino a 10 minuti da un video, e i file audio non hanno limiti di durata.
+
+Condivisione
+Invia audio o video a questa app da altre app.
+
+Giorni di ripetizione
+Scegli i giorni per ogni sveglia: feriali, weekend o quelli che vuoi.
+
+Posticipa
+Scegli 1, 2, 5 o 10 minuti con un tocco, o qualsiasi altro valore.
+
+Modalità notte
+Il tuo iPhone diventa un orologio da comodino. Cifre grandi e morbide, leggibili al buio.
+
+FORMATI SUPPORTATI
+MP3 / AAC / WAV / M4A / Audio da video (MOV, MP4)
+
+NOTE
+- Richiede iOS 26 o successivo (AlarmKit)
+- Un suono più lungo occupa più spazio. Un suono di sveglia di 10 minuti occupa circa 50 MB.

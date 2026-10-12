@@ -1,0 +1,45 @@
+Word wakker met muziek waar je van houdt. Bewaar alleen het stuk dat je wilt: het refrein, de hook, de zin die je meezingt.
+
+FUNCTIES
+
+Word wakker met je favoriete stuk
+Bijna niemand wil het hele nummer, alleen een stukje. Open een video of audiobestand, bekijk de golfvorm en sleep om het stuk te kiezen. Je kunt meeluisteren terwijl je het aanpast. De golfvorm laat zien waar het geluid hard en waar het zacht is.
+
+Een kort stuk werkt goed. De wekker speelt het tot het einde en begint dan opnieuw, tot je opstaat. Twintig of dertig seconden refrein is vaak genoeg.
+
+Je eigen bestanden
+De app gebruikt audio die je al hebt: een muziekbestand, een spraakopname, het geluid van een opgeslagen video. Geen abonnement. Geen catalogus om door te zoeken.
+
+Geluid uit een video
+Kies een video uit je fotobibliotheek en houd alleen het geluid. Handig voor opgeslagen of zelf gefilmde video's.
+
+Audiobestanden importeren
+MP3, AAC, WAV en M4A werken allemaal. Open ze vanuit de Bestanden-app.
+
+Het wekkersysteem van Apple
+De app gebruikt AlarmKit, het wekkersysteem van Apple. Je wekker gaat af zoals die in de Klok-app. Geen achtergrondtruc die op het verkeerde moment faalt.
+
+Herken je geluiden
+Elke wekker toont een afbeelding van zijn geluid: een beeld uit je video of de hoes van je bestand. Zo houd je je wekkers makkelijk uit elkaar.
+
+Geen limiet van 40 seconden
+Een iPhone-beltoon mag maar ongeveer 40 seconden duren. Hier kun je tot 10 minuten uit een video halen, en audiobestanden hebben geen lengtelimiet.
+
+Deelmenu
+Stuur audio of video vanuit andere apps naar deze app.
+
+Herhaaldagen
+Kies de dagen voor elke wekker: doordeweeks, in het weekend of welke dagen je maar wilt.
+
+Sluimeren
+Kies met één tik 1, 2, 5 of 10 minuten, of elke andere waarde.
+
+Nachtmodus
+Je iPhone wordt een klok naast je bed. Grote, zachte cijfers, goed leesbaar in een donkere kamer.
+
+ONDERSTEUNDE FORMATEN
+MP3 / AAC / WAV / M4A / Geluid uit video (MOV, MP4)
+
+OPMERKINGEN
+- Vereist iOS 26 of nieuwer (AlarmKit)
+- Een langer geluid neemt meer ruimte in. Een wekkergeluid van 10 minuten is ongeveer 50 MB.

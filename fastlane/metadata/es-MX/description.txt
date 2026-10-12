@@ -1,0 +1,45 @@
+Despierta con la música que te gusta. Quédate solo con la parte que quieres: el coro, el gancho, la frase que cantas.
+
+FUNCIONES PRINCIPALES
+
+Despierta con tu parte favorita
+Casi nadie quiere la canción entera, solo una parte. Abre un video o un archivo de audio, mira la forma de onda y arrastra para elegir el fragmento. Puedes escucharlo mientras lo ajustas. La forma de onda te muestra dónde suena fuerte y dónde suave.
+
+Un fragmento corto funciona bien. La alarma lo reproduce hasta el final y vuelve a empezar, hasta que te levantas. Veinte o treinta segundos del coro suelen bastar.
+
+Tus propios archivos
+La app usa el audio que ya tienes: un archivo de música, una grabación de voz, el sonido de un video guardado. Sin suscripción. Sin catálogo que buscar.
+
+El sonido de un video
+Elige un video de tu galería y quédate solo con el sonido. Ideal para videos guardados o grabados por ti.
+
+Importar archivos de audio
+Compatible con MP3, AAC, WAV y M4A. Ábrelos desde la app Archivos.
+
+El sistema de alarmas de Apple
+La app usa AlarmKit, el sistema de alarmas de Apple. Tu alarma suena igual que la de la app Reloj. No es un truco en segundo plano que puede fallar justo cuando lo necesitas.
+
+Reconoce tus sonidos
+Cada alarma muestra una imagen de su sonido: un fotograma de tu video o la portada de tu archivo. Así distingues tus alarmas fácilmente.
+
+Sin límite de 40 segundos
+Un tono de iPhone solo puede durar unos 40 segundos. Aquí puedes tomar hasta 10 minutos de un video, y los archivos de audio no tienen límite de duración.
+
+Hoja para compartir
+Envía audio o video a esta app desde otras apps.
+
+Días de repetición
+Elige los días de cada alarma: entre semana, el fin de semana o los días que quieras.
+
+Posponer
+Elige 1, 2, 5 o 10 minutos con un toque, o el valor que prefieras.
+
+Modo noche
+Tu iPhone se convierte en un reloj de buró. Números grandes y suaves, fáciles de leer a oscuras.
+
+FORMATOS COMPATIBLES
+MP3 / AAC / WAV / M4A / Audio de video (MOV, MP4)
+
+NOTAS
+- Requiere iOS 26 o posterior (AlarmKit)
+- Un sonido más largo ocupa más espacio. Un sonido de alarma de 10 minutos ocupa unos 50 MB.
