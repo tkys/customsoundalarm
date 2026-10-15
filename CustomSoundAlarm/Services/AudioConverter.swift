@@ -42,7 +42,6 @@ final class AudioConverter {
         startTime: Double? = nil,
         endTime: Double? = nil
     ) async throws -> ConversionResult {
-        do {
         let fileName = "\(outputName).caf"
         let outputURL = soundsDirectory.appendingPathComponent(fileName)
 
@@ -184,11 +183,6 @@ final class AudioConverter {
 
         logger.info("Converted audio to CAF: \(fileName) (\(fileSize) bytes) peak=\(peakDb.map { String(format: "%.1f", $0) } ?? "silent") gain=\(gainDb)")
         return ConversionResult(fileName: fileName, peakDb: peakDb, gainDb: gainDb)
-        } catch {
-            let ns = error as NSError
-            print("DEBUG convertToCAF failed: \(error) domain=\(ns.domain) code=\(ns.code)")
-            throw error
-        }
     }
 
     /// Library/Soundsにあるサウンドファイル一覧
@@ -211,75 +205,71 @@ final class AudioConverter {
 
     // MARK: - Peak Normalization Helpers (#106, nonisolated for background execution)
 
-    nonisolated static func measurePeakDbSync(fileURL: URL) throws -> Double? {
-        let file = try AVAudioFile(forReading: fileURL)
-        let format = file.processingFormat
-        let bufferSize: AVAudioFrameCount = 4096
-        guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: bufferSize) else { return nil }
-        var maxAbs: Int32 = 0
-        while true {
-            try file.read(into: buffer)
-            if buffer.frameLength == 0 { break }
-            if let channelData = buffer.int16ChannelData {
-                let channelCount = Int(format.channelCount)
-                for ch in 0..<channelCount {
-                    let ptr = channelData[ch]
-                    for i in 0..<Int(buffer.frameLength) {
-                        let sample = ptr[i]
-                        let absVal: Int32 = sample == Int16.min ? 32768 : Int32(abs(sample))
-                        if absVal > maxAbs { maxAbs = absVal }
-                    }
-                }
-            } else if let floatData = buffer.floatChannelData {
-                let channelCount = Int(format.channelCount)
-                for ch in 0..<channelCount {
-                    let ptr = floatData[ch]
-                    for i in 0..<Int(buffer.frameLength) {
-                        let v = abs(ptr[i])
-                        let asInt = Int32((v * 32767).rounded())
-                        if asInt > maxAbs { maxAbs = asInt }
-                    }
-                }
-            }
-        }
-        if maxAbs == 0 { return nil }
-        let peakLinear = Double(maxAbs) / 32768.0
-        return 20 * log10(peakLinear)
+    /// 変換後 CAF（PCM16 / mono）と同じ形式。読み書きの形式をそろえるため両方で使う
+    nonisolated private static var pcm16Settings: [String: Any] {
+        [
+        AVFormatIDKey: kAudioFormatLinearPCM,
+        AVSampleRateKey: 44100.0,
+        AVNumberOfChannelsKey: 1,
+        AVLinearPCMBitDepthKey: 16,
+        AVLinearPCMIsFloatKey: false,
+        AVLinearPCMIsBigEndianKey: false
+        ]
     }
 
-    nonisolated static func applyGainSync(fileURL: URL, gainDb: Double) throws {
-        let linearGain = pow(10.0, gainDb / 20.0)
-        let tempURL = fileURL.deletingLastPathComponent().appendingPathComponent(UUID().uuidString + ".tmp.caf")
-        defer { try? FileManager.default.removeItem(at: tempURL) }
-        do {
-            let sourceFile = try AVAudioFile(forReading: fileURL)
-            let format = sourceFile.processingFormat
-            let outputSettings: [String: Any] = [AVFormatIDKey: kAudioFormatLinearPCM, AVSampleRateKey: 44100.0, AVNumberOfChannelsKey: 1, AVLinearPCMBitDepthKey: 16, AVLinearPCMIsFloatKey: false, AVLinearPCMIsBigEndianKey: false]
-            let tempFile = try AVAudioFile(forWriting: tempURL, settings: outputSettings, commonFormat: .pcmFormatInt16, interleaved: true)
-            let bufferSize: AVAudioFrameCount = 4096
-            guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: bufferSize) else { throw AudioConverterError.bufferCreationFailed }
-            sourceFile.framePosition = 0
-            while true {
-                try sourceFile.read(into: buffer)
-                if buffer.frameLength == 0 { break }
-                if let channelData = buffer.int16ChannelData {
-                    let channelCount = Int(format.channelCount)
-                    for ch in 0..<channelCount {
-                        let ptr = channelData[ch]
-                        for i in 0..<Int(buffer.frameLength) { let sample = Double(ptr[i]); var amplified = sample * linearGain; if amplified > 32767 { amplified = 32767 }; if amplified < -32768 { amplified = -32768 }; ptr[i] = Int16(amplified.rounded()) }
-                    }
-                } else if let floatData = buffer.floatChannelData {
-                    let channelCount = Int(format.channelCount)
-                    for ch in 0..<channelCount {
-                        let ptr = floatData[ch]
-                        for i in 0..<Int(buffer.frameLength) { ptr[i] = ptr[i] * Float(linearGain) }
-                    }
-                }
-                try tempFile.write(from: buffer)
+    /// ピーク dBFS を測る。無音なら nil。
+    /// Int16 のまま読む（既定の Float32 で読むと、書き戻し側の Int16 と形式が合わない）。
+    /// 末尾を越えて read するとエラーになるため framePosition で終端を判定する
+    nonisolated static func measurePeakDbSync(fileURL: URL) throws -> Double? {
+        let file = try AVAudioFile(forReading: fileURL, commonFormat: .pcmFormatInt16, interleaved: true)
+        guard let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: 4096),
+              let data = buffer.int16ChannelData else { return nil }
+        let channels = Int(file.processingFormat.channelCount)
+        var maxAbs: Int32 = 0
+        while file.framePosition < file.length {
+            try file.read(into: buffer)
+            let count = Int(buffer.frameLength) * channels  // interleaved
+            if count == 0 { break }
+            for i in 0..<count {
+                let v = Int32(data[0][i]).magnitude
+                if v > maxAbs { maxAbs = Int32(v) }
             }
         }
-        try FileManager.default.removeItem(at: fileURL)
-        try FileManager.default.moveItem(at: tempURL, to: fileURL)
+        guard maxAbs > 0 else { return nil }
+        return 20 * log10(Double(maxAbs) / 32768.0)
+    }
+
+    /// ゲインをかけて同じ形式で書き直す。クリップしないよう ±32767 に丸める
+    nonisolated static func applyGainSync(fileURL: URL, gainDb: Double) throws {
+        let linearGain = pow(10.0, gainDb / 20.0)
+        let tempURL = fileURL.deletingLastPathComponent()
+            .appendingPathComponent(UUID().uuidString + ".tmp.caf")
+        defer { try? FileManager.default.removeItem(at: tempURL) }
+        do {
+            let source = try AVAudioFile(forReading: fileURL, commonFormat: .pcmFormatInt16, interleaved: true)
+            let dest = try AVAudioFile(
+                forWriting: tempURL,
+                settings: pcm16Settings,
+                commonFormat: .pcmFormatInt16,
+                interleaved: true
+            )
+            guard let buffer = AVAudioPCMBuffer(pcmFormat: source.processingFormat, frameCapacity: 4096),
+                  let data = buffer.int16ChannelData else {
+                throw AudioConverterError.bufferCreationFailed
+            }
+            let channels = Int(source.processingFormat.channelCount)
+            while source.framePosition < source.length {
+                try source.read(into: buffer)
+                let count = Int(buffer.frameLength) * channels
+                if count == 0 { break }
+                for i in 0..<count {
+                    let amplified = (Double(data[0][i]) * linearGain).rounded()
+                    data[0][i] = Int16(max(-32767, min(32767, amplified)))
+                }
+                try dest.write(from: buffer)
+            }
+        }  // dest をここで閉じてから置き換える
+        _ = try FileManager.default.replaceItemAt(fileURL, withItemAt: tempURL)
     }
 
     /// CAF ファイルの秒数を取得する（追加時に記録する目的・#68）。
