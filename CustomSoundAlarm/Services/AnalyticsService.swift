@@ -18,7 +18,8 @@ enum AnalyticsEvent: Sendable {
 
     /// カスタムサウンドのインポート成功
     /// - source: "video" または "audio"
-    case customSoundImported(source: SoundImportSource)
+    /// - peakDbBucket / gainDbBucket: #106 ピークノーマライズ計測（生値は送らない）
+    case customSoundImported(source: SoundImportSource, peakDbBucket: String? = nil, gainDbBucket: String? = nil)
 
     /// サウンドプレビュー再生
     case soundPreviewPlayed
@@ -148,8 +149,11 @@ enum AnalyticsEvent: Sendable {
                 "is_repeating": isRepeating,
                 "snooze_minutes": snoozeMinutes
             ]
-        case let .customSoundImported(source):
-            return ["source": source.rawValue]
+        case let .customSoundImported(source, peakDbBucket, gainDbBucket):
+            var d: [String: Any] = ["source": source.rawValue]
+            if let peakDbBucket { d["peak_db_bucket"] = peakDbBucket }
+            if let gainDbBucket { d["gain_db_bucket"] = gainDbBucket }
+            return d
         case .soundPreviewPlayed:
             return [:]
         case let .alarmEdited(hasCustomSound, isRepeating, snoozeMinutes):

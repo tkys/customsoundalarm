@@ -122,10 +122,11 @@ final class SoundStore {
                         tempAudioURL = extracted
                     }
 
-                    let cafName = try await AudioConverter.shared.convertToCAF(
+                    let result = try await AudioConverter.shared.convertToCAF(
                         from: sourceForCAF,
                         outputName: UUID().uuidString
                     )
+                    let cafName = result.fileName
 
                     // サムネイル生成（#86）: 動画はフレーム、音声はアートワーク
                     let thumbnailFileName: String?
@@ -145,6 +146,11 @@ final class SoundStore {
                         thumbnailFileName: thumbnailFileName
                     )
                     add(sound)
+                    AnalyticsService.shared.capture(.customSoundImported(
+                        source: isVideo ? .video : .audio,
+                        peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
+                        gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb)
+                    ))
                     try? fm.removeItem(at: file)
                     try? fm.removeItem(at: audioFile)
                     if let tempAudioURL {
