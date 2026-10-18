@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Generate App Store metadata for 9 additional locales (fastlane/metadata/<locale>/).
+"""Generate App Store metadata for 12 additional locales (fastlane/metadata/<locale>/).
 
 Source of truth: fastlane/metadata/en-US. Re-run to regenerate; it overwrites
 name / subtitle / keywords / promotional_text / description / URLs only.
@@ -441,8 +441,164 @@ MP3 / AAC / WAV / M4A / 视频中的音频（MOV、MP4）
 """,
 )
 
+L["ar-SA"] = dict(
+    subtitle="استيقظ على مقطعك المفضل",
+    keywords="منبه,نغمة,موسيقى,أغنية,فيديو,صوت,mp3,قص,صباح,ساعة,تكرار,استيقاظ,رنين,مقطع",
+    promo="استيقظ على الموسيقى التي تحبها. اقتطع اللازمة فقط من فيديو أو ملف صوتي، وستتكرر حتى تنهض.",
+    description="""استيقظ على الموسيقى التي تحبها. احتفظ فقط بالجزء الذي تريده: اللازمة، أو اللحن المميز، أو السطر الذي تردده.
+
+الميزات الرئيسية
+
+استيقظ على مقطعك المفضل
+معظم الناس لا يريدون الأغنية كاملة، بل جزءًا منها. افتح فيديو أو ملفًا صوتيًا، وانظر إلى شكل الموجة، واسحب لاختيار المقطع. يمكنك الاستماع أثناء الضبط. يوضح لك شكل الموجة أين يكون الصوت عاليًا وأين يكون هادئًا.
+
+المقطع القصير مناسب. يشغّل المنبه المقطع حتى نهايته ثم يعيده من البداية، حتى تنهض. غالبًا ما تكفي عشرون أو ثلاثون ثانية من اللازمة.
+
+ملفاتك الخاصة
+يستخدم التطبيق الصوت الموجود لديك بالفعل: ملف موسيقى، أو تسجيل صوتي، أو صوت من فيديو محفوظ. بلا اشتراك، وبلا مكتبة موسيقى للبحث فيها.
+
+الصوت من الفيديو
+اختر فيديو من مكتبة الصور واحتفظ بالصوت فقط. مناسب للفيديوهات المحفوظة أو التي صورتها بنفسك.
+
+استيراد الملفات الصوتية
+يدعم MP3 وAAC وWAV وM4A. افتحها من تطبيق الملفات.
+
+نظام المنبه من Apple
+يستخدم التطبيق AlarmKit، نظام المنبه من Apple. يرن منبهك بالطريقة نفسها التي يرن بها تطبيق الساعة. ليس حيلة تعمل في الخلفية وقد تفشل في الوقت الخطأ.
+
+تعرّف على أصواتك
+يعرض كل منبه صورة لصوته: لقطة من الفيديو أو غلاف الملف. هكذا تميّز منبهاتك بسهولة.
+
+بلا حد الأربعين ثانية
+نغمة iPhone لا تتجاوز نحو 40 ثانية. هنا يمكنك أخذ ما يصل إلى 10 دقائق من الفيديو، أما الملفات الصوتية فلا حد لطولها.
+
+ورقة المشاركة
+أرسل الصوت أو الفيديو إلى هذا التطبيق من تطبيقات أخرى.
+
+أيام التكرار
+اختر أيام كل منبه: أيام العمل، أو عطلة نهاية الأسبوع، أو أي أيام تريدها.
+
+الغفوة
+اختر 1 أو 2 أو 5 أو 10 دقائق بلمسة واحدة، أو أي قيمة أخرى.
+
+الوضع الليلي
+يتحول iPhone إلى ساعة بجانب السرير. أرقام كبيرة وهادئة يسهل قراءتها في غرفة مظلمة.
+
+الصيغ المدعومة
+MP3 / AAC / WAV / M4A / الصوت من الفيديو (MOV، MP4)
+
+ملاحظات
+- يتطلب iOS 26 أو أحدث (AlarmKit)
+- الصوت الأطول يشغل مساحة أكبر. صوت منبه مدته 10 دقائق يشغل نحو 50 ميغابايت.
+""",
+)
+
+L["pl"] = dict(
+    subtitle="Budź się przy swoim refrenie",
+    keywords="budzik,dzwonek,muzyka,piosenka,wideo,audio,mp3,przyciąć,poranek,zegar,dźwięk,powtarzanie",
+    promo="Budź się przy muzyce, którą kochasz. Wytnij tylko refren z wideo lub pliku audio, a będzie grał w kółko, aż wstaniesz.",
+    description="""Budź się przy muzyce, którą kochasz. Zostaw tylko ten fragment, który chcesz: refren, chwytliwy motyw, wers, który nucisz.
+
+GŁÓWNE FUNKCJE
+
+Budź się przy ulubionym fragmencie
+Mało kto chce całą piosenkę, tylko jej fragment. Otwórz wideo lub plik audio, spójrz na wykres fali i przeciągnij, aby wybrać fragment. Możesz go słuchać podczas ustawiania. Wykres fali pokazuje, gdzie dźwięk jest głośny, a gdzie cichy.
+
+Krótki fragment sprawdza się dobrze. Budzik odtwarza go do końca i zaczyna od nowa, aż wstaniesz. Często wystarczy dwadzieścia lub trzydzieści sekund refrenu.
+
+Twoje własne pliki
+Aplikacja korzysta z dźwięków, które już masz: pliku z muzyką, nagrania głosu, dźwięku z zapisanego wideo. Bez subskrypcji. Bez katalogu do przeszukiwania.
+
+Dźwięk z wideo
+Wybierz wideo z biblioteki zdjęć i zostaw tylko dźwięk. Idealne do zapisanych lub nagranych przez ciebie filmów.
+
+Import plików audio
+Obsługiwane są MP3, AAC, WAV i M4A. Otwórz je z aplikacji Pliki.
+
+System budzika Apple
+Aplikacja korzysta z AlarmKit, systemu budzika Apple. Twój budzik dzwoni tak samo jak w aplikacji Zegar. To nie sztuczka działająca w tle, która może zawieść w złym momencie.
+
+Rozpoznawaj swoje dźwięki
+Każdy budzik pokazuje obrazek swojego dźwięku: klatkę z wideo lub okładkę pliku. Łatwo odróżnisz swoje budziki.
+
+Bez limitu 40 sekund
+Dzwonek iPhone'a może trwać tylko około 40 sekund. Tutaj możesz wziąć do 10 minut z wideo, a pliki audio nie mają limitu długości.
+
+Arkusz udostępniania
+Wysyłaj dźwięk lub wideo do tej aplikacji z innych aplikacji.
+
+Dni powtarzania
+Wybierz dni dla każdego budzika: dni robocze, weekend lub dowolne dni.
+
+Drzemka
+Wybierz 1, 2, 5 lub 10 minut jednym dotknięciem albo dowolną inną wartość.
+
+Tryb nocny
+Twój iPhone staje się zegarem przy łóżku. Duże, łagodne cyfry, czytelne w ciemnym pokoju.
+
+OBSŁUGIWANE FORMATY
+MP3 / AAC / WAV / M4A / Dźwięk z wideo (MOV, MP4)
+
+UWAGI
+- Wymaga iOS 26 lub nowszego (AlarmKit)
+- Dłuższy dźwięk zajmuje więcej miejsca. 10-minutowy dźwięk budzika zajmuje około 50 MB.
+""",
+)
+
+L["cs"] = dict(
+    subtitle="Probuď se u svého refrénu",
+    keywords="budík,vyzvánění,hudba,písnička,video,audio,mp3,stříhat,ráno,hodiny,zvuk,opakování,tón",
+    promo="Probuď se u hudby, kterou máš rád. Vystřihni jen refrén z videa nebo zvukového souboru a bude hrát dokola, dokud nevstaneš.",
+    description="""Probuď se u hudby, kterou máš rád. Nech si jen tu část, kterou chceš: refrén, chytlavý motiv, verš, který si zpíváš.
+
+HLAVNÍ FUNKCE
+
+Probuď se u své oblíbené části
+Málokdo chce celou písničku, jen její část. Otevři video nebo zvukový soubor, podívej se na průběh vlny a tažením vyber úsek. Při úpravách si ho můžeš pustit. Průběh vlny ukazuje, kde je zvuk hlasitý a kde tichý.
+
+Krátký úsek funguje dobře. Budík ho přehraje do konce a pak začne znovu, dokud nevstaneš. Často stačí dvacet nebo třicet sekund refrénu.
+
+Tvoje vlastní soubory
+Aplikace používá zvuk, který už máš: hudební soubor, nahrávku hlasu, zvuk z uloženého videa. Bez předplatného. Bez katalogu, ve kterém bys musel hledat.
+
+Zvuk z videa
+Vyber video z knihovny fotek a nech si jen zvuk. Hodí se pro uložená videa i ta, která sis natočil sám.
+
+Import zvukových souborů
+Podporuje MP3, AAC, WAV a M4A. Otevři je z aplikace Soubory.
+
+Budíkový systém od Applu
+Aplikace používá AlarmKit, budíkový systém od Applu. Tvůj budík zvoní stejně jako v aplikaci Hodiny. Není to trik na pozadí, který může selhat ve špatnou chvíli.
+
+Poznej své zvuky
+Každý budík ukazuje obrázek svého zvuku: snímek z videa nebo obal souboru. Budíky tak snadno rozlišíš.
+
+Žádný limit 40 sekund
+Vyzvánění iPhonu může trvat jen asi 40 sekund. Tady můžeš z videa vzít až 10 minut a zvukové soubory nemají žádný limit délky.
+
+Sdílení
+Posílej zvuk nebo video do této aplikace z jiných aplikací.
+
+Dny opakování
+Vyber dny pro každý budík: všední dny, víkend nebo jakékoli dny.
+
+Odložení
+Vyber 1, 2, 5 nebo 10 minut jedním klepnutím, nebo jakoukoli jinou hodnotu.
+
+Noční režim
+Z iPhonu se stanou hodiny u postele. Velké, jemné číslice, dobře čitelné v tmavé místnosti.
+
+PODPOROVANÉ FORMÁTY
+MP3 / AAC / WAV / M4A / Zvuk z videa (MOV, MP4)
+
+POZNÁMKY
+- Vyžaduje iOS 26 nebo novější (AlarmKit)
+- Delší zvuk zabírá více místa. 10minutový zvuk budíku zabírá asi 50 MB.
+""",
+)
+
 LIMITS = {"subtitle": 30, "keywords": 100, "promo": 170, "description": 4000}
-BANNED = ["free", "gratuit", "kostenlos", "gratis", "grátis", "gratuito", "무료", "免费"]
+BANNED = ["free", "gratuit", "kostenlos", "gratis", "grátis", "gratuito", "무료", "免费", "darmow", "zdarma", "مجان"]
 
 
 def main():
