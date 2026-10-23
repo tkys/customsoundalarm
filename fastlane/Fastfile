@@ -23,7 +23,7 @@ platform :ios do
       run_precheck_before_submit: false,
       submit_for_review: false,
       primary_category: "UTILITIES",
-      app_version: "1.7.0",
+      app_version: "1.7.1",
       languages: ["en-US", "en-GB", "ja", "fr-FR", "de-DE", "es-ES", "es-MX", "pt-BR", "it", "nl-NL", "ko", "zh-Hans", "ar-SA", "pl", "cs"]
     )
   end
@@ -41,7 +41,7 @@ platform :ios do
       run_precheck_before_submit: false,
       submit_for_review: false,
       primary_category: "UTILITIES",
-      app_version: "1.7.0",
+      app_version: "1.7.1",
       languages: ["en-US", "en-GB", "ja", "fr-FR", "de-DE", "es-ES", "es-MX", "pt-BR", "it", "nl-NL", "ko", "zh-Hans", "ar-SA", "pl", "cs"]
     )
   end
@@ -88,7 +88,7 @@ platform :ios do
         export_compliance_uses_encryption: false,
         export_compliance_is_exempt: false
       },
-      app_version: "1.7.0",
+      app_version: "1.7.1",
       languages: ["en-US", "en-GB", "ja", "fr-FR", "de-DE", "es-ES", "es-MX", "pt-BR", "it", "nl-NL", "ko", "zh-Hans", "ar-SA", "pl", "cs"]
     )
   end
@@ -112,8 +112,8 @@ platform :ios do
         export_compliance_uses_encryption: false,
         export_compliance_is_exempt: false
       },
-      app_version: "1.7.0",
-      build_number: "8",
+      app_version: "1.7.1",
+      build_number: "9",
       languages: ["en-US", "en-GB", "ja", "fr-FR", "de-DE", "es-ES", "es-MX", "pt-BR", "it", "nl-NL", "ko", "zh-Hans", "ar-SA", "pl", "cs"]
     )
   end

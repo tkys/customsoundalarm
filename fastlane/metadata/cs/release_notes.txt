@@ -1,0 +1,7 @@
+■ Budíky seřazené podle času
+Stejně jako v aplikaci Hodiny jsou teď tvoje budíky seřazené od nejdřívějšího po nejpozdější.
+
+■ Hlasitější importované zvuky
+Když je video nebo zvukový soubor příliš tichý, aplikace mu při importu zvýší hlasitost, bez zkreslení. Dříve importované zvuky zůstávají beze změny.
+
+Děkujeme, že používáš My Sound Alarm!

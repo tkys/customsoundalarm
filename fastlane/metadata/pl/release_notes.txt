@@ -1,0 +1,7 @@
+■ Budziki według godziny
+Tak jak w aplikacji Zegar, twoje budziki są teraz ułożone od najwcześniejszego do najpóźniejszego.
+
+■ Głośniejsze zaimportowane dźwięki
+Gdy wideo lub plik audio jest za cichy, aplikacja podgłaśnia go podczas importu, bez zniekształceń. Dźwięki zaimportowane wcześniej się nie zmieniają.
+
+Dziękujemy, że korzystasz z My Sound Alarm!

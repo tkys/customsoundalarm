@@ -1,7 +1,7 @@
-■ A short welcome for new users
-The first time you open the app, a few screens show how to turn part of a song into an alarm. Then you can start right away: from a video, from an audio file, or with a built-in sound.
+■ Alarms in time order
+Like the Clock app, your alarms are now sorted from earliest to latest.
 
-■ Alarm permission at a better time
-The app now asks for alarm permission after the welcome screens, not the moment it opens.
+■ Louder imported sounds
+When a video or audio file is quiet, the app now raises its volume when you import it, without distortion. Sounds you already imported stay the same.
 
-If you already use the app, nothing changes for you. Thanks for using My Sound Alarm!
+Thanks for using My Sound Alarm!

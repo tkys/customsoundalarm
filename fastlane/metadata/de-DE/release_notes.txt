@@ -1,0 +1,7 @@
+■ Wecker nach Uhrzeit sortiert
+Wie in der Uhr-App sind deine Wecker jetzt von früh nach spät sortiert.
+
+■ Lautere importierte Töne
+Ist ein Video oder eine Audiodatei zu leise, macht die App den Ton beim Import lauter – ohne Verzerrung. Bereits importierte Töne bleiben unverändert.
+
+Danke, dass du My Sound Alarm nutzt!
