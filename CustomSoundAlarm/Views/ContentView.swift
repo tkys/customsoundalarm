@@ -151,8 +151,9 @@ struct ContentView: View {
     // MARK: - Alarm List
 
     private var alarmList: some View {
-        List {
-            ForEach(alarmStore.alarms, id: \.id) { alarm in
+        let displayed = AlarmListOrdering.sortedForDisplay(alarmStore.alarms)
+        return List {
+            ForEach(displayed, id: \.id) { alarm in
                 AlarmRow(
                     alarm: alarm,
                     soundName: soundStore.displayName(for: alarm.soundFileName),
@@ -176,12 +177,16 @@ struct ContentView: View {
                 }
             }
             .onDelete { indexSet in
-                for index in indexSet {
-                    alarmStore.remove(alarmStore.alarms[index])
+                let idsToDelete = indexSet.map { displayed[$0].id }
+                for id in idsToDelete {
+                    if let alarm = alarmStore.alarms.first(where: { $0.id == id }) {
+                        alarmStore.remove(alarm)
+                    }
                 }
                 AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
             }
         }
+        .animation(.default, value: alarmStore.alarms)
         .warmListBackground()
     }
 

@@ -426,12 +426,13 @@ struct VideoImportFlow: View {
 
             do {
                 // 波形・試聴に使った抽出済み音声から、範囲指定で直接CAFへ変換（#77）
-                let cafName = try await AudioConverter.shared.convertToCAF(
+                let result = try await AudioConverter.shared.convertToCAF(
                     from: audioURL,
                     outputName: UUID().uuidString,
                     startTime: startTime,
                     endTime: endTime
                 )
+                let cafName = result.fileName
 
                 try? FileManager.default.removeItem(at: audioURL)
                 extractedAudioURL = nil
@@ -447,7 +448,11 @@ struct VideoImportFlow: View {
                 soundStore.add(sound)
                 selectedSound = sound
 
-                AnalyticsService.shared.capture(.customSoundImported(source: .video))
+                AnalyticsService.shared.capture(.customSoundImported(
+                    source: .video,
+                    peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
+                    gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb)
+                ))
                 dismiss()
             } catch {
                 errorMessage = error.localizedDescription

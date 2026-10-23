@@ -258,12 +258,13 @@ struct AudioCropView: View {
             defer { isProcessing = false }
 
             do {
-                let fileName = try await AudioConverter.shared.convertToCAF(
+                let result = try await AudioConverter.shared.convertToCAF(
                     from: source.url,
                     outputName: UUID().uuidString,
                     startTime: start > 0 ? start : nil,
                     endTime: end < duration ? end : nil
                 )
+                let fileName = result.fileName
 
                 // サムネイル: 埋め込みアートワーク（ID3 / MP4 メタデータ・#86）。
                 // 無い素の音声は nil（波形の代替表示にフォールバック）
@@ -275,7 +276,11 @@ struct AudioCropView: View {
                 soundStore.add(sound)
                 selectedSound = sound
 
-                AnalyticsService.shared.capture(.customSoundImported(source: .audio))
+                AnalyticsService.shared.capture(.customSoundImported(
+                    source: .audio,
+                    peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
+                    gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb)
+                ))
 
                 // 一時コピーを破棄して閉じる
                 try? FileManager.default.removeItem(at: source.url)
