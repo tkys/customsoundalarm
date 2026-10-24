@@ -86,6 +86,13 @@ enum AppGroup {
         set { userDefaults.set(newValue, forKey: "test_ring_volume_note_shown") }
     }
 
+    /// 先行公開中に最終アラームを使い始めた権利（#110）。
+    /// 正式に有料化した後も無料で使い続けられる。
+    static var backupEarlyAccessGranted: Bool {
+        get { userDefaults.bool(forKey: "backup_early_access_granted") }
+        set { userDefaults.set(newValue, forKey: "backup_early_access_granted") }
+    }
+
     /// 停止によって取り消した最終アラームの記録（entryID → 停止時刻・#110）。
     /// 次回同期で同じ締め切りを復活させないための抑制に使う。
     static var backupCanceledAt: [UUID: Date] {

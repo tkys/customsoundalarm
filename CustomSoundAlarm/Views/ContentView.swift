@@ -235,8 +235,8 @@ struct AlarmRow: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
 
-                    // 2行目: 繰り返し ・ カウントダウン（どちらも無い場合は行ごと省略・#93-1）
-                    if !alarm.repeatWeekdays.isEmpty || nextAlarmCountdown != nil {
+                    // 2行目: 繰り返し ・ カウントダウン ・ 最終アラーム（#110）
+                    if !alarm.repeatWeekdays.isEmpty || nextAlarmCountdown != nil || alarm.backupMinutes != nil {
                         HStack(spacing: 6) {
                             if !alarm.repeatWeekdays.isEmpty {
                                 Text(repeatSummary)
@@ -246,6 +246,13 @@ struct AlarmRow: View {
                                     Text("・")
                                 }
                                 Text(countdown)
+                            }
+                            if alarm.backupMinutes != nil {
+                                if !alarm.repeatWeekdays.isEmpty || nextAlarmCountdown != nil {
+                                    Text("・")
+                                }
+                                Image(systemName: "bell.badge.fill")
+                                    .accessibilityLabel(Text("backup_alarm_row_badge"))
                             }
                         }
                         .font(.caption)
