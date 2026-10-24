@@ -214,3 +214,15 @@
 "loudness_normal" = "Normal";
 "loudness_loud" = "Louder";
 "loudness_max" = "Maximum";
+
+/* Backup alarm (#110) */
+"backup_alarm_title" = "Final Alarm";
+"backup_alarm_section" = "Final Alarm";
+"backup_alarm_toggle" = "Final Alarm";
+"backup_alarm_early_access_badge" = "Early access";
+"backup_alarm_minutes" = "Deadline";
+"backup_alarm_minutes_fmt" = "%d min after";
+"backup_alarm_description" = "If you don't stop it for %d min, it rings again with a louder sound.";
+"backup_alarm_before_snooze" = "The final alarm rings before snooze ends.";
+"backup_alarm_early_access_note" = "If you start using this during early access, it stays available after launch.";
+"backup_alarm_row_badge" = "Final alarm on";

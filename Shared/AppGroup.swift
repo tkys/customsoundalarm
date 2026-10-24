@@ -86,6 +86,51 @@ enum AppGroup {
         set { userDefaults.set(newValue, forKey: "test_ring_volume_note_shown") }
     }
 
+    /// 本体アラームのスヌーズ回数（entryID → 回数・#110）。
+    /// 最終アラーム発火時の `snoozes_before` に使う。
+    static var snoozeCounts: [UUID: Int] {
+        get {
+            guard let data = userDefaults.data(forKey: "snooze_counts"),
+                  let map = try? JSONDecoder().decode([UUID: Int].self, from: data)
+            else { return [:] }
+            return map
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else { return }
+            userDefaults.set(data, forKey: "snooze_counts")
+        }
+    }
+
+    /// 先行公開中に最終アラームを使い始めた権利（#110）。
+    /// 正式に有料化した後も無料で使い続けられる。
+    static var backupEarlyAccessGranted: Bool {
+        get { userDefaults.bool(forKey: "backup_early_access_granted") }
+        set { userDefaults.set(newValue, forKey: "backup_early_access_granted") }
+    }
+
+    /// 停止によって取り消した最終アラームの記録（entryID → 停止時刻・#110）。
+    /// 次回同期で同じ締め切りを復活させないための抑制に使う。
+    static var backupCanceledAt: [UUID: Date] {
+        get {
+            guard let data = userDefaults.data(forKey: "backup_canceled_at"),
+                  let map = try? JSONDecoder().decode([UUID: Date].self, from: data)
+            else { return [:] }
+            return map
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else { return }
+            userDefaults.set(data, forKey: "backup_canceled_at")
+        }
+    }
+
+    /// 保存済みアラーム（停止 Intent が最終アラームの設定を読むため・#110）
+    static var savedAlarmEntries: [AlarmEntry] {
+        guard let data = userDefaults.data(forKey: "saved_alarms"),
+              let entries = try? JSONDecoder().decode([AlarmEntry].self, from: data)
+        else { return [] }
+        return entries
+    }
+
     /// ユーザーが削除したプリセットの fileName（再登録防止用・#45 罠1）
     static var dismissedPresetFileNames: Set<String> {
         get {

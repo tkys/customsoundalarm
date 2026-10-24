@@ -36,6 +36,7 @@ struct AlarmDetailView: View {
     @State private var repeatWeekdays: Set<Int>
     @State private var snoozeMinutes: Int
     @State private var isEnabled: Bool
+    @State private var backupMinutes: Int?
 
     /// オンボ指定の初期動作を1回だけ適用したか
     @State private var didApplyInitialImport = false
@@ -48,6 +49,7 @@ struct AlarmDetailView: View {
     /// 試しに鳴らす（#109）
     @State private var isSchedulingTestRing = false
     @State private var testRingMessage: String?
+    @State private var backupTestRingMessage: String?
     @State private var showTestRingVolumeNote = AppGroup.testRingVolumeNoteShown
 
     /// 音の大きさの目安（#109 C）
@@ -70,6 +72,7 @@ struct AlarmDetailView: View {
             )
             _snoozeMinutes = State(initialValue: entry.snoozeMinutes)
             _isEnabled = State(initialValue: entry.isEnabled)
+            _backupMinutes = State(initialValue: entry.backupMinutes)
         } else {
             _selectedTime = State(initialValue: Date())
             _label = State(initialValue: String(localized: "alarm_placeholder"))
@@ -81,6 +84,7 @@ struct AlarmDetailView: View {
             _repeatWeekdays = State(initialValue: [])
             _snoozeMinutes = State(initialValue: 9)
             _isEnabled = State(initialValue: true)
+            _backupMinutes = State(initialValue: nil)
         }
     }
 
@@ -89,8 +93,8 @@ struct AlarmDetailView: View {
             Form {
                 timeSection
                 soundSection
+                backupAlarmSection
                 trialRingSection
-                loudnessSection
                 repeatSection
                 snoozeSection
                 labelSection
@@ -216,6 +220,125 @@ struct AlarmDetailView: View {
         }
     }
 
+    // MARK: - Final Alarm (#110)
+
+    private var isBackupAvailable: Bool {
+        BackupAlarmAccess.isAvailable(
+            isPro: Entitlements.shared.isPro,
+            earlyAccessGranted: AppGroup.backupEarlyAccessGranted
+        )
+    }
+
+    private var backupToggle: Binding<Bool> {
+        Binding(
+            get: { backupMinutes != nil },
+            set: { isOn in
+                if isOn {
+                    backupMinutes = backupMinutes ?? BackupAlarmLogic.defaultMinutes
+                    if BackupAlarmAccess.shouldGrantEarlyAccess(isEnabled: true) {
+                        AppGroup.backupEarlyAccessGranted = true
+                    }
+                } else {
+                    backupMinutes = nil
+                }
+            }
+        )
+    }
+
+    private var backupAlarmSection: some View {
+        Section {
+            Toggle(isOn: backupToggle) {
+                HStack(spacing: 6) {
+                    Text("backup_alarm_toggle")
+                    badge("PRO")
+                    badge(String(localized: "backup_alarm_early_access_badge"))
+                }
+            }
+            // 使えない環境でも、既にオンならオフにはできる
+            .disabled(!isBackupAvailable && backupMinutes == nil)
+
+            if let minutes = backupMinutes {
+                Picker("backup_alarm_minutes", selection: Binding(
+                    get: { backupMinutes ?? BackupAlarmLogic.defaultMinutes },
+                    set: { backupMinutes = $0 }
+                )) {
+                    ForEach(BackupAlarmLogic.minuteOptions, id: \.self) { option in
+                        Text(String(format: String(localized: "backup_alarm_minutes_fmt"), option))
+                            .tag(option)
+                    }
+                }
+
+                Text(String(format: String(localized: "backup_alarm_description"), minutes))
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+
+                if minutes <= snoozeMinutes {
+                    Text("backup_alarm_before_snooze")
+                        .font(.footnote)
+                        .foregroundStyle(.orange)
+                }
+            }
+
+            Button {
+                scheduleTestRing(kind: .backup)
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "speaker.wave.3.fill")
+                    Text("test_ring_backup_title")
+                    Spacer()
+                    if isSchedulingTestRing {
+                        ProgressView()
+                    }
+                }
+            }
+            .disabled(!scheduler.canScheduleTestRing || isSchedulingTestRing)
+
+            if !scheduler.canScheduleTestRing {
+                Text("test_ring_permission_required")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
+            if let backupTestRingMessage {
+                Text(backupTestRingMessage)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
+            HStack {
+                Text("loudness_own")
+                Spacer()
+                Text(loudnessLabel(selectedLoudness))
+                    .foregroundStyle(.secondary)
+            }
+            HStack {
+                Text("loudness_backup")
+                Spacer()
+                Text(backupLoudness == nil ? "—" : String(localized: "loudness_max"))
+                    .foregroundStyle(.secondary)
+            }
+
+            if showTestRingVolumeNote {
+                Text("test_ring_volume_note")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+        } header: {
+            Text("backup_alarm_section")
+        } footer: {
+            Text("backup_alarm_early_access_note")
+        }
+    }
+
+    private func badge(_ text: String) -> some View {
+        Text(text)
+            .font(.caption2.weight(.bold))
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(Capsule().fill(Color.accentColor.opacity(0.15)))
+            .foregroundStyle(Color.accentColor)
+    }
+
     // MARK: - Trial Ring (#109)
 
     /// 本物の AlarmKit で 5 秒後に鳴らす。アプリ内の試し聴きとは音量の系統が違うため、
@@ -228,20 +351,6 @@ struct AlarmDetailView: View {
                 HStack(spacing: 10) {
                     Image(systemName: "bell.badge.waveform.fill")
                     Text("test_ring_title")
-                    Spacer()
-                    if isSchedulingTestRing {
-                        ProgressView()
-                    }
-                }
-            }
-            .disabled(!scheduler.canScheduleTestRing || isSchedulingTestRing)
-
-            Button {
-                scheduleTestRing(kind: .backup)
-            } label: {
-                HStack(spacing: 10) {
-                    Image(systemName: "speaker.wave.3.fill")
-                    Text("test_ring_backup_title")
                     Spacer()
                     if isSchedulingTestRing {
                         ProgressView()
@@ -272,27 +381,6 @@ struct AlarmDetailView: View {
         }
     }
 
-    // MARK: - Loudness display (#109 C)
-
-    private var loudnessSection: some View {
-        Section {
-            HStack {
-                Text("loudness_own")
-                Spacer()
-                Text(loudnessLabel(selectedLoudness))
-                    .foregroundStyle(.secondary)
-            }
-            HStack {
-                Text("loudness_backup")
-                Spacer()
-                Text(backupLoudness == nil ? "—" : String(localized: "loudness_max"))
-                    .foregroundStyle(.secondary)
-            }
-        } header: {
-            Text("loudness_section")
-        }
-    }
-
     private func loudnessLabel(_ level: SoundLoudness.Level?) -> String {
         switch level {
         case .quiet: String(localized: "loudness_quiet")
@@ -316,7 +404,11 @@ struct AlarmDetailView: View {
     private func scheduleTestRing(kind: TestRingKind) {
         guard !isSchedulingTestRing else { return }
         isSchedulingTestRing = true
-        testRingMessage = nil
+        if kind == .backup {
+            backupTestRingMessage = nil
+        } else {
+            testRingMessage = nil
+        }
 
         // 最終アラーム用の音は一覧に出さないバンドル音源（#109 B）
         let fileName = kind == .backup
@@ -330,16 +422,22 @@ struct AlarmDetailView: View {
             )
             isSchedulingTestRing = false
 
-            guard scheduled else {
+            let message: String
+            if scheduled {
+                message = String(localized: "test_ring_scheduled_message")
+            } else {
                 #if targetEnvironment(simulator)
-                testRingMessage = String(localized: "test_ring_simulator_unavailable")
+                message = String(localized: "test_ring_simulator_unavailable")
                 #else
-                testRingMessage = String(localized: "test_ring_failed")
+                message = String(localized: "test_ring_failed")
                 #endif
-                return
             }
-
-            testRingMessage = String(localized: "test_ring_scheduled_message")
+            if kind == .backup {
+                backupTestRingMessage = message
+            } else {
+                testRingMessage = message
+            }
+            guard scheduled else { return }
 
             // 鳴った後に一度だけ、音量の系統が違うことを控えめに伝える
             guard !AppGroup.testRingVolumeNoteShown else { return }
@@ -519,13 +617,17 @@ struct AlarmDetailView: View {
                 label: label,
                 repeatWeekdays: Array(repeatWeekdays).sorted(),
                 soundFileName: soundFileName,
-                snoozeMinutes: snoozeMinutes
+                snoozeMinutes: snoozeMinutes,
+                backupMinutes: backupMinutes
             )
             alarmStore.add(entry)
             AnalyticsService.shared.capture(
                 .alarmCreated(hasCustomSound: hasCustomSound, isRepeating: isRepeating, snoozeMinutes: snoozeMinutes),
                 properties: hoursUntilProperties(for: entry)
             )
+            if let backupMinutes {
+                AnalyticsService.shared.capture(.backupAlarmEnabled(minutes: backupMinutes))
+            }
             savedEntry = entry
         case .edit(let existing):
             var updated = existing
@@ -536,12 +638,24 @@ struct AlarmDetailView: View {
             updated.soundFileName = soundFileName
             updated.snoozeMinutes = snoozeMinutes
             updated.isEnabled = isEnabled
+            updated.backupMinutes = backupMinutes
             alarmStore.update(updated)
             AnalyticsService.shared.capture(
                 .alarmEdited(hasCustomSound: hasCustomSound, isRepeating: isRepeating, snoozeMinutes: snoozeMinutes),
                 properties: hoursUntilProperties(for: updated)
             )
+            if existing.backupMinutes != updated.backupMinutes {
+                if let newMinutes = updated.backupMinutes {
+                    AnalyticsService.shared.capture(.backupAlarmEnabled(minutes: newMinutes))
+                } else if let oldMinutes = existing.backupMinutes {
+                    AnalyticsService.shared.capture(.backupAlarmDisabled(minutes: oldMinutes))
+                }
+            }
             savedEntry = updated
+        }
+
+        if BackupAlarmAccess.shouldGrantEarlyAccess(isEnabled: backupMinutes != nil) {
+            AppGroup.backupEarlyAccessGranted = true
         }
 
         AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
