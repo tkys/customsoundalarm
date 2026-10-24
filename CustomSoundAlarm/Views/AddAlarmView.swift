@@ -50,6 +50,10 @@ struct AlarmDetailView: View {
     @State private var testRingMessage: String?
     @State private var showTestRingVolumeNote = AppGroup.testRingVolumeNoteShown
 
+    /// 音の大きさの目安（#109 C）
+    @State private var selectedLoudness: SoundLoudness.Level?
+    @State private var backupLoudness: SoundLoudness.Level?
+
     init(mode: AlarmDetailMode, initialImport: OnboardingSource? = nil) {
         self.mode = mode
         self.initialImport = initialImport
@@ -86,6 +90,7 @@ struct AlarmDetailView: View {
                 timeSection
                 soundSection
                 trialRingSection
+                loudnessSection
                 repeatSection
                 snoozeSection
                 labelSection
@@ -122,6 +127,9 @@ struct AlarmDetailView: View {
                 showingVideoImport: $showingVideoImport,
                 errorMessage: $importErrorMessage
             )
+            .task(id: selectedSound?.fileName) {
+                await refreshLoudness()
+            }
             .task {
                 scheduler.refreshTestRingPermission()
                 // 追加画面のシート提示完了後に取り込みを開く（約0.35秒待つ）
@@ -262,6 +270,47 @@ struct AlarmDetailView: View {
         } header: {
             Text("test_ring_section")
         }
+    }
+
+    // MARK: - Loudness display (#109 C)
+
+    private var loudnessSection: some View {
+        Section {
+            HStack {
+                Text("loudness_own")
+                Spacer()
+                Text(loudnessLabel(selectedLoudness))
+                    .foregroundStyle(.secondary)
+            }
+            HStack {
+                Text("loudness_backup")
+                Spacer()
+                Text(backupLoudness == nil ? "—" : String(localized: "loudness_max"))
+                    .foregroundStyle(.secondary)
+            }
+        } header: {
+            Text("loudness_section")
+        }
+    }
+
+    private func loudnessLabel(_ level: SoundLoudness.Level?) -> String {
+        switch level {
+        case .quiet: String(localized: "loudness_quiet")
+        case .normal: String(localized: "loudness_normal")
+        case .loud: String(localized: "loudness_loud")
+        case nil: "—"
+        }
+    }
+
+    /// 選択中の音と最終アラーム音の大きさを測る（SoundLoudnessStore がキャッシュする）
+    private func refreshLoudness() async {
+        let store = SoundLoudnessStore.shared
+        if let sound = selectedSound {
+            selectedLoudness = await store.level(for: sound.fileName)
+        } else {
+            selectedLoudness = nil
+        }
+        backupLoudness = await store.level(for: BackupAlarmSound.fileName)
     }
 
     private func scheduleTestRing(kind: TestRingKind) {

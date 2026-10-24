@@ -113,4 +113,36 @@ struct SoundLoudnessTests {
 
         #expect(SoundLoudness.measure(fileURL: url) == nil)
     }
+
+    // MARK: - Level classification (#109 C)
+
+    @Test
+    func level_thresholds() {
+        #expect(SoundLoudness.level(forRmsDb: -20) == .quiet)
+        #expect(SoundLoudness.level(forRmsDb: -15.1) == .quiet)
+        #expect(SoundLoudness.level(forRmsDb: -15) == .normal)
+        #expect(SoundLoudness.level(forRmsDb: -10) == .normal)
+        #expect(SoundLoudness.level(forRmsDb: -9.9) == .loud)
+        #expect(SoundLoudness.level(forRmsDb: 0) == .loud)
+    }
+
+    @Test
+    @MainActor
+    func level_backupIsLoud() throws {
+        let fileURL = try #require(backupURL())
+        let measurement = try #require(SoundLoudness.measure(fileURL: fileURL))
+        #expect(SoundLoudness.level(forRmsDb: measurement.rmsDb) == .loud)
+    }
+
+    @Test
+    @MainActor
+    func level_presetsAreMeasurable() throws {
+        for preset in SoundStore.presetDefinitions {
+            let name = preset.fileName.replacingOccurrences(of: ".caf", with: "")
+            let url = try #require(Bundle.main.url(forResource: name, withExtension: "caf"))
+            let measurement = try #require(SoundLoudness.measure(fileURL: url))
+            #expect(measurement.rmsDb < 0)
+            #expect(measurement.peakDb <= 0.001)
+        }
+    }
 }

@@ -205,3 +205,12 @@
 "test_ring_simulator_unavailable" = "試しに鳴らすは実機でのみ使えます。";
 "test_ring_alarm_title" = "試しのアラーム";
 "test_ring_backup_title" = "最終アラームの音で試す";
+
+/* Loudness (#109 C) */
+"loudness_section" = "音の大きさ";
+"loudness_own" = "あなたの音";
+"loudness_backup" = "最終アラームの音";
+"loudness_quiet" = "小さめ";
+"loudness_normal" = "ふつう";
+"loudness_loud" = "大きめ";
+"loudness_max" = "最大";
