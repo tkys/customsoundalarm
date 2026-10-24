@@ -13,6 +13,9 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
     var soundFileName: String
     /// スヌーズ時間（分）。0 = スヌーズ無効。既定 9分（iOS標準）
     var snoozeMinutes: Int
+    /// 最終アラーム（締め切り）までの分数（#110）。nil = オフ。
+    /// 旧データには存在しないため `decodeIfPresent` で移行する。
+    var backupMinutes: Int?
 
     init(
         id: UUID = UUID(),
@@ -22,7 +25,8 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
         label: String = "アラーム",
         repeatWeekdays: [Int] = [],
         soundFileName: String = "",
-        snoozeMinutes: Int = 9
+        snoozeMinutes: Int = 9,
+        backupMinutes: Int? = nil
     ) {
         self.id = id
         self.hour = hour
@@ -32,10 +36,11 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
         self.repeatWeekdays = repeatWeekdays
         self.soundFileName = soundFileName
         self.snoozeMinutes = snoozeMinutes
+        self.backupMinutes = backupMinutes
     }
 
     enum CodingKeys: String, CodingKey {
-        case id, hour, minute, isEnabled, label, repeatWeekdays, soundFileName, snoozeMinutes
+        case id, hour, minute, isEnabled, label, repeatWeekdays, soundFileName, snoozeMinutes, backupMinutes
     }
 
     init(from decoder: any Decoder) throws {
@@ -48,6 +53,7 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
         repeatWeekdays = try container.decode([Int].self, forKey: .repeatWeekdays)
         soundFileName = try container.decode(String.self, forKey: .soundFileName)
         snoozeMinutes = try container.decodeIfPresent(Int.self, forKey: .snoozeMinutes) ?? 9
+        backupMinutes = try container.decodeIfPresent(Int.self, forKey: .backupMinutes)
     }
 
     var timeString: String {
@@ -117,7 +123,8 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
             label: label,
             repeatWeekdays: repeatWeekdays,
             soundFileName: soundFileName,
-            snoozeMinutes: snoozeMinutes
+            snoozeMinutes: snoozeMinutes,
+            backupMinutes: backupMinutes
         )
     }
 }

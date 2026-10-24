@@ -263,7 +263,6 @@
 		B12EC528B64B6A6F5D389E5B /* SnoozeDebugTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnoozeDebugTests.swift; sourceTree = "<group>"; };
 		B310D26A852FF2128CE87241 /* AudioConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioConverter.swift; sourceTree = "<group>"; };
 		B3C5F122CB36A012C496D3F1 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
-		B3E67A5B8952BC89CEB1C4C4 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		B61E2495643F1EB1F7D5B676 /* AudioSizeEstimateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSizeEstimateTests.swift; sourceTree = "<group>"; };
 		B68A6B0E32814AD7A4F13201 /* PresetAscending.caf */ = {isa = PBXFileReference; path = PresetAscending.caf; sourceTree = "<group>"; };
 		B9351BFC7ADF3E53A9B56CD1 /* SoundNameFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundNameFormatterTests.swift; sourceTree = "<group>"; };
@@ -272,6 +271,7 @@
 		BC359E963EA8352F684AE02E /* PresetBundleRetentionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetBundleRetentionTests.swift; sourceTree = "<group>"; };
 		BC78F383C2207D567147D7C4 /* OnboardingLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLogic.swift; sourceTree = "<group>"; };
 		BD1878E5099FBE066AAAE7F3 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
+		BD2F2721F7D93D9AA7048FB2 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		BDF3BC4964F024CADE907CD6 /* LoudnessNormalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoudnessNormalizer.swift; sourceTree = "<group>"; };
 		BE932E485F167BB33E9C66C0 /* ShareExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEF5EC40C9684D9E09E745BF /* OnboardingUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingUITests.swift; sourceTree = "<group>"; };
@@ -387,15 +387,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		47E28FA20714E044B067FB1C /* csa-test-ring */ = {
-			isa = PBXGroup;
-			children = (
-				B3E67A5B8952BC89CEB1C4C4 /* Secrets.xcconfig */,
-			);
-			name = "csa-test-ring";
-			path = .;
-			sourceTree = "<group>";
-		};
 		48BD05F70D893BD47B7DEA10 /* CustomSoundAlarmUITests */ = {
 			isa = PBXGroup;
 			children = (
@@ -408,7 +399,7 @@
 		4EA1E92D7338F6EDA96ED5FB = {
 			isa = PBXGroup;
 			children = (
-				47E28FA20714E044B067FB1C /* csa-test-ring */,
+				5D7D9EF659F00DF65D5329F4 /* csa-backup */,
 				A3C533A61126660D3EEFBD5E /* CustomSoundAlarm */,
 				0D084D462AC55950BA713396 /* CustomSoundAlarmTests */,
 				48BD05F70D893BD47B7DEA10 /* CustomSoundAlarmUITests */,
@@ -448,6 +439,15 @@
 				EE9B082F9E27521B1C0E40A7 /* VideoFileImporter.swift */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		5D7D9EF659F00DF65D5329F4 /* csa-backup */ = {
+			isa = PBXGroup;
+			children = (
+				BD2F2721F7D93D9AA7048FB2 /* Secrets.xcconfig */,
+			);
+			name = "csa-backup";
+			path = .;
 			sourceTree = "<group>";
 		};
 		651DC06E83B312B2E4FF4A0E /* App */ = {
@@ -1069,7 +1069,7 @@
 		};
 		77ECEE071B9B56F3B1690269 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B3E67A5B8952BC89CEB1C4C4 /* Secrets.xcconfig */;
+			baseConfigurationReference = BD2F2721F7D93D9AA7048FB2 /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
@@ -1193,7 +1193,7 @@
 		};
 		D89907F4FAAA42AE6A67D447 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B3E67A5B8952BC89CEB1C4C4 /* Secrets.xcconfig */;
+			baseConfigurationReference = BD2F2721F7D93D9AA7048FB2 /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
