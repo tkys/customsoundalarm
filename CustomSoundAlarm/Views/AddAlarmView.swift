@@ -228,6 +228,20 @@ struct AlarmDetailView: View {
             }
             .disabled(!scheduler.canScheduleTestRing || isSchedulingTestRing)
 
+            Button {
+                scheduleTestRing(kind: .backup)
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "speaker.wave.3.fill")
+                    Text("test_ring_backup_title")
+                    Spacer()
+                    if isSchedulingTestRing {
+                        ProgressView()
+                    }
+                }
+            }
+            .disabled(!scheduler.canScheduleTestRing || isSchedulingTestRing)
+
             if !scheduler.canScheduleTestRing {
                 Text("test_ring_permission_required")
                     .font(.footnote)
@@ -255,7 +269,10 @@ struct AlarmDetailView: View {
         isSchedulingTestRing = true
         testRingMessage = nil
 
-        let fileName = selectedSound?.fileName ?? ""
+        // 最終アラーム用の音は一覧に出さないバンドル音源（#109 B）
+        let fileName = kind == .backup
+            ? BackupAlarmSound.fileName
+            : (selectedSound?.fileName ?? "")
 
         Task {
             let scheduled = await scheduler.scheduleTestRing(

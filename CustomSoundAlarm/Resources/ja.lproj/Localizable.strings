@@ -204,3 +204,4 @@
 "test_ring_failed" = "試しに鳴らせませんでした。";
 "test_ring_simulator_unavailable" = "試しに鳴らすは実機でのみ使えます。";
 "test_ring_alarm_title" = "試しのアラーム";
+"test_ring_backup_title" = "最終アラームの音で試す";

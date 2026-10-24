@@ -204,3 +204,4 @@
 "test_ring_failed" = "Couldn't schedule the test alarm.";
 "test_ring_simulator_unavailable" = "Trial ring is available on a real device only.";
 "test_ring_alarm_title" = "Test Alarm";
+"test_ring_backup_title" = "Try the final alarm sound";
