@@ -3,8 +3,8 @@ import AlarmKit
 
 /// アラーム停止Intent
 ///
-/// 対象の AlarmKit ID をパラメータで受け取り、停止された側に対応する
-/// もう片方（本体 ⇄ 最終アラーム）を取り消す（#110）。
+/// 対象の AlarmKit ID をパラメータで受け取り、停止された側に応じて
+/// 「今回分の取り消し」と「次回分の登録」を行う（#110）。
 /// 試しに鳴らすアラーム（#109）も同じ Intent で停止する。
 struct DismissAlarmIntent: LiveActivityIntent {
     static let title: LocalizedStringResource = "dismiss_alarm_intent"
@@ -55,42 +55,95 @@ struct DismissAlarmIntent: LiveActivityIntent {
         }
 
         // 2) 本体 / 最終アラーム
-        var primary = AlarmIDMaps.loadPrimary()
-        var backup = AlarmIDMaps.loadBackup()
+        let primary = AlarmIDMaps.loadPrimary()
+        let backup = AlarmIDMaps.loadBackup()
 
         if let stoppedID {
-            switch AlarmIDMaps.role(of: stoppedID, primary: primary, backup: backup) {
+            let entries = AppGroup.savedAlarmEntries
+            let action = AlarmIDMaps.stopAction(
+                of: stoppedID,
+                primary: primary,
+                backup: backup
+            )
+            let entryID = action.entryID
+            let entry = entryID.flatMap { id in entries.first { $0.id == id } }
+            let primaryID = entryID.flatMap { primary[$0] }
+            let primaryState = alarms.first(where: { $0.id == primaryID })?.state
+
+            // 一回限りの本体は「次回」が無い
+            let nextDate = entry.flatMap {
+                BackupAlarmLogic.nextBackupDate(
+                    for: $0,
+                    after: now,
+                    skippingCurrentOccurrence: true
+                )
+            }
+
+            let actions = StopActionPlanner.plan(
+                stoppedAlarmID: stoppedID,
+                primary: primary,
+                backup: backup,
+                primaryState: primaryState,
+                hasNextBackup: nextDate != nil
+            )
+
+            var scheduledNext = false
+            for stopAction in actions {
+                switch stopAction {
+                case .cancel(let id):
+                    try? AlarmManager.shared.cancel(id: id)
+                case .stop(let id):
+                    // 繰り返しの本体は消さず、スヌーズのカウントダウンだけ止める
+                    try? AlarmManager.shared.stop(id: id)
+                case .scheduleNextBackup(let entryID):
+                    guard let entry, let nextDate else { continue }
+                    let newID = UUID()
+                    let config = BackupAlarmFactory.configuration(
+                        for: entry,
+                        fireDate: nextDate,
+                        alarmID: newID,
+                        displayName: ""
+                    )
+                    if (try? await AlarmManager.shared.schedule(id: newID, configuration: config)) != nil {
+                        var map = AlarmIDMaps.loadBackup()
+                        map[entryID] = newID
+                        AlarmIDMaps.saveBackup(map)
+                        scheduledNext = true
+                    }
+                }
+            }
+
+            if !scheduledNext, let entryID {
+                var map = AlarmIDMaps.loadBackup()
+                map.removeValue(forKey: entryID)
+                AlarmIDMaps.saveBackup(map)
+            }
+
+            if let entryID {
+                var counts = AppGroup.snoozeCounts
+                counts.removeValue(forKey: entryID)
+                AppGroup.snoozeCounts = counts
+            }
+
+            switch action.role {
             case .primary(let entryID):
-                // 本体を止めたら、同じアラームの最終アラームを取り消す
-                if let backupID = backup[entryID] {
-                    try? AlarmManager.shared.cancel(id: backupID)
-                    backup.removeValue(forKey: entryID)
-                    AlarmIDMaps.saveBackup(backup)
+                // 直後の同期で「今回の締め切り」を復活させない
+                var canceled = AppGroup.backupCanceledAt
+                canceled[entryID] = now
+                AppGroup.backupCanceledAt = canceled
 
-                    // 次の同期で同じ締め切りを復活させない（#110）
-                    var canceled = AppGroup.backupCanceledAt
-                    canceled[entryID] = now
-                    AppGroup.backupCanceledAt = canceled
-
+                // 実際に今回分を取り消したときだけ計測する
+                if action.counterpartAlarmID != nil {
                     AlarmEventBuffer.enqueue(PendingAlarmEvent(
                         name: AnalyticsEvent.backupAlarmCancelledByStop.name,
                         properties: [:],
                         timestamp: now
                     ))
                 }
-                var counts = AppGroup.snoozeCounts
-                counts.removeValue(forKey: entryID)
-                AppGroup.snoozeCounts = counts
             case .backup(let entryID):
-                // 最終アラームを止めたら、本体のスヌーズも取り消す
-                if let primaryID = primary[entryID] {
-                    try? AlarmManager.shared.cancel(id: primaryID)
-                }
-                backup.removeValue(forKey: entryID)
-                AlarmIDMaps.saveBackup(backup)
-                var counts = AppGroup.snoozeCounts
-                counts.removeValue(forKey: entryID)
-                AppGroup.snoozeCounts = counts
+                var canceled = AppGroup.backupCanceledAt
+                canceled.removeValue(forKey: entryID)
+                AppGroup.backupCanceledAt = canceled
             case .unknown:
                 break
             }

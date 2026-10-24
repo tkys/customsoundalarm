@@ -3,8 +3,8 @@ import AlarmKit
 
 /// 最終アラーム（締め切り）の純ロジック（#110）。
 ///
-/// 本体アラームの時刻 + N 分に、同じ曜日で停止のみのアラームを登録する。
-/// 日付をまたぐ場合は曜日を +1 日ずらす。
+/// 最終アラームは「次の1回だけ」を `.fixed(date)` で登録する。
+/// 停止時はその場で次回分を登録するため、アプリを開かなくても毎回の締め切りが用意される。
 enum BackupAlarmLogic {
 
     /// 既定の分数
@@ -16,65 +16,63 @@ enum BackupAlarmLogic {
     /// 最終アラームに使う音（#109 で追加した専用音）
     static var soundFileName: String { BackupAlarmSound.fileName }
 
-    /// 本体の時刻から最終アラームの時刻・曜日を計算した結果。
-    struct Schedule: Equatable, Sendable {
-        let hour: Int
-        let minute: Int
-        /// 空 = 一回限り
-        let repeatWeekdays: [Int]
-    }
-
-    /// 曜日（1=日…7=土）を days 日ずらす。
-    static func shiftWeekday(_ weekday: Int, by days: Int) -> Int {
-        (((weekday - 1 + days) % 7) + 7) % 7 + 1
-    }
-
-    /// 本体の設定から最終アラームの時刻・曜日を求める。
-    static func schedule(
-        hour: Int,
-        minute: Int,
-        backupMinutes: Int,
-        repeatWeekdays: [Int]
-    ) -> Schedule {
-        let total = hour * 60 + minute + backupMinutes
-        let dayShift = total >= 24 * 60 ? 1 : 0
-        let wrapped = ((total % (24 * 60)) + (24 * 60)) % (24 * 60)
-        let weekdays = repeatWeekdays.isEmpty
-            ? []
-            : repeatWeekdays.map { shiftWeekday($0, by: dayShift) }
-        return Schedule(
-            hour: wrapped / 60,
-            minute: wrapped % 60,
-            repeatWeekdays: weekdays
-        )
-    }
-
-    /// 本体の設定から最終アラームの次回発火日時を求める（テスト・抑制判定用）。
-    /// `AlarmEntry.nextFireDate` と同じ規則（繰り返しは曜日、一回限りは次の時刻）。
-    static func nextFireDate(
+    /// 次の最終アラーム時刻。
+    ///
+    /// - `skippingCurrentOccurrence == false`: いまの本体サイクルの締め切りがまだ未来ならそれを返す
+    ///   （本体が鳴動/スヌーズ中でも、今日の締め切りを維持する）
+    /// - `skippingCurrentOccurrence == true`: いまのサイクルを飛ばして、次の本体発火 + N 分を返す
+    ///   （停止時に次回分を登録する用）。一回限りは次回が無いので nil。
+    static func nextBackupDate(
         for entry: AlarmEntry,
-        from referenceDate: Date,
+        after referenceDate: Date,
+        skippingCurrentOccurrence: Bool,
         calendar: Calendar = .current
     ) -> Date? {
-        guard entry.isEnabled, let backupMinutes = entry.backupMinutes else { return nil }
-        let plan = schedule(
-            hour: entry.hour,
+        guard entry.isEnabled, let minutes = entry.backupMinutes else { return nil }
+
+        if !skippingCurrentOccurrence,
+           let current = currentOccurrenceBackupDate(
+               for: entry,
+               after: referenceDate,
+               minutes: minutes,
+               calendar: calendar
+           ),
+           current > referenceDate {
+            return current
+        }
+
+        // 一回限りの「次回」は作らない
+        if skippingCurrentOccurrence && entry.repeatWeekdays.isEmpty {
+            return nil
+        }
+
+        guard let nextPrimary = entry.nextFireDate(from: referenceDate, calendar: calendar) else {
+            return nil
+        }
+        return nextPrimary.addingTimeInterval(TimeInterval(minutes * 60))
+    }
+
+    /// いまのサイクル（今日の本体発火）に対する締め切り。
+    /// 今日が繰り返し曜日に含まれない場合は nil。
+    private static func currentOccurrenceBackupDate(
+        for entry: AlarmEntry,
+        after referenceDate: Date,
+        minutes: Int,
+        calendar: Calendar
+    ) -> Date? {
+        guard let primaryToday = calendar.date(
+            bySettingHour: entry.hour,
             minute: entry.minute,
-            backupMinutes: backupMinutes,
-            repeatWeekdays: entry.repeatWeekdays
-        )
-        let probe = AlarmEntry(
-            id: entry.id,
-            hour: plan.hour,
-            minute: plan.minute,
-            isEnabled: true,
-            label: entry.label,
-            repeatWeekdays: plan.repeatWeekdays,
-            soundFileName: entry.soundFileName,
-            snoozeMinutes: entry.snoozeMinutes,
-            backupMinutes: nil
-        )
-        return probe.nextFireDate(from: referenceDate, calendar: calendar)
+            second: 0,
+            of: referenceDate
+        ) else { return nil }
+
+        if !entry.repeatWeekdays.isEmpty {
+            let weekday = calendar.component(.weekday, from: primaryToday)
+            guard entry.repeatWeekdays.contains(weekday) else { return nil }
+        }
+
+        return primaryToday.addingTimeInterval(TimeInterval(minutes * 60))
     }
 
     /// 停止で取り消した締め切りを復活させないための抑制時間（秒）。
@@ -98,11 +96,15 @@ enum BackupAlarmLogic {
     }
 
     /// `backupAlarmIDMap` の遷移を計算する純粋関数。
-    /// 本体の `computeSyncDiff` と同じ規則（鳴動/スヌーズ中だけ維持、それ以外は再登録）。
+    ///
+    /// - 鳴動/スヌーズ中は維持
+    /// - 停止直後の抑制中（`suppressedEntryIDs`）は何もしない（次回分を消さない）
+    /// - それ以外は次の締め切りで登録し直す
     static func computeBackupSyncDiff(
         oldMap: [UUID: UUID],
         entries: [AlarmEntry],
-        activeStates: [UUID: Alarm.State]
+        activeStates: [UUID: Alarm.State],
+        suppressedEntryIDs: Set<UUID> = []
     ) -> BackupSyncDiff {
         let wanted = entries.filter { $0.isEnabled && $0.backupMinutes != nil }
         let wantedIDs = Set(wanted.map(\.id))
@@ -117,6 +119,14 @@ enum BackupAlarmLogic {
         }
 
         for entry in wanted {
+            if suppressedEntryIDs.contains(entry.id) {
+                // 停止直後: いま登録されている次回分をそのまま残す
+                if let alarmID = oldMap[entry.id] {
+                    keptMap[entry.id] = alarmID
+                }
+                continue
+            }
+
             if let alarmID = oldMap[entry.id],
                let state = activeStates[alarmID],
                state == .countdown || state == .alerting || state == .paused {

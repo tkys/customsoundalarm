@@ -258,11 +258,27 @@ final class AlarmScheduler {
 
         guard !Task.isCancelled else { return }
 
-        // 最終アラーム（#110）: 本体と必ず一緒に同期する
+        // 最終アラーム（#110）: 本体と必ず一緒に同期する。
+        // 停止 Intent が次回分を登録している場合があるので、永続化された最新マップを読む。
+        backupAlarmIDMap = AlarmIDMaps.loadBackup()
+        let now = Date()
+        let suppressedEntryIDs = Set(entries.compactMap { entry -> UUID? in
+            guard let canceledAt = AppGroup.backupCanceledAt[entry.id],
+                  let nextDate = BackupAlarmLogic.nextBackupDate(
+                      for: entry,
+                      after: now,
+                      skippingCurrentOccurrence: false
+                  ),
+                  BackupAlarmLogic.isSuppressed(nextFireDate: nextDate, canceledAt: canceledAt)
+            else { return nil }
+            return entry.id
+        })
+
         let backupDiff = BackupAlarmLogic.computeBackupSyncDiff(
             oldMap: backupAlarmIDMap,
             entries: entries,
-            activeStates: activeStates
+            activeStates: activeStates,
+            suppressedEntryIDs: suppressedEntryIDs
         )
 
         for entryID in backupDiff.cancelEntryIDs {
@@ -429,82 +445,37 @@ final class AlarmScheduler {
         }
     }
 
-    /// 最終アラームを登録（停止のみ・スヌーズなし）（#110）
+    /// 最終アラームを登録（停止のみ・スヌーズなし・次の1回だけ）（#110）
     private func scheduleBackupAlarm(for entry: AlarmEntry) async -> Alarm.ID? {
-        guard let backupMinutes = entry.backupMinutes else { return nil }
+        guard entry.backupMinutes != nil else { return nil }
+
+        let now = Date()
+        let nextDate = BackupAlarmLogic.nextBackupDate(
+            for: entry,
+            after: now,
+            skippingCurrentOccurrence: false
+        )
+        guard let nextDate else { return nil }
 
         // 停止で取り消した締め切りを、次回同期で復活させない（#110）
-        let now = Date()
         if let canceledAt = AppGroup.backupCanceledAt[entry.id],
-           BackupAlarmLogic.isSuppressed(
-               nextFireDate: BackupAlarmLogic.nextFireDate(for: entry, from: now),
-               canceledAt: canceledAt
-           ) {
+           BackupAlarmLogic.isSuppressed(nextFireDate: nextDate, canceledAt: canceledAt) {
             logger.info("Backup suppressed after stop: \(entry.label)")
             return nil
         }
 
-        let plan = BackupAlarmLogic.schedule(
-            hour: entry.hour,
-            minute: entry.minute,
-            backupMinutes: backupMinutes,
-            repeatWeekdays: entry.repeatWeekdays
-        )
-
-        let title = LocalizedStringResource("backup_alarm_title")
-        let alert: AlarmPresentation.Alert
-        if #available(iOS 26.1, *) {
-            alert = AlarmPresentation.Alert(title: title)
-        } else {
-            alert = AlarmPresentation.Alert(
-                title: title,
-                stopButton: AlarmButton(
-                    text: "stop_alarm",
-                    textColor: .red,
-                    systemImageName: "stop.fill"
-                )
-            )
-        }
-
-        let displayName = SoundStore.shared.displayName(for: entry.soundFileName)
-        let attributes = AlarmAttributes<CustomAlarmMetadata>(
-            presentation: AlarmPresentation(alert: alert, countdown: nil, paused: nil),
-            metadata: CustomAlarmMetadata(entry: entry, soundDisplayName: displayName),
-            tintColor: .red
-        )
-
-        let time = Alarm.Schedule.Relative.Time(hour: plan.hour, minute: plan.minute)
-        let schedule: Alarm.Schedule
-        if plan.repeatWeekdays.isEmpty {
-            schedule = .relative(.init(time: time, repeats: .never))
-        } else {
-            let weekdays = plan.repeatWeekdays.compactMap { dayInt -> Locale.Weekday? in
-                switch dayInt {
-                case 1: .sunday
-                case 2: .monday
-                case 3: .tuesday
-                case 4: .wednesday
-                case 5: .thursday
-                case 6: .friday
-                case 7: .saturday
-                default: nil
-                }
-            }
-            schedule = .relative(.init(time: time, repeats: .weekly(weekdays)))
-        }
-
         let alarmID = Alarm.ID()
-        let config = AlarmManager.AlarmConfiguration<CustomAlarmMetadata>(
-            countdownDuration: nil,
-            schedule: schedule,
-            attributes: attributes,
-            stopIntent: DismissAlarmIntent(alarmID: alarmID.uuidString),
-            sound: .named(BackupAlarmLogic.soundFileName)
+        let displayName = SoundStore.shared.displayName(for: entry.soundFileName)
+        let config = BackupAlarmFactory.configuration(
+            for: entry,
+            fireDate: nextDate,
+            alarmID: alarmID,
+            displayName: displayName
         )
 
         do {
             _ = try await manager.schedule(id: alarmID, configuration: config)
-            logger.info("Scheduled backup alarm: \(plan.hour):\(plan.minute) (+ \(backupMinutes)m) for \(entry.label)")
+            logger.info("Scheduled one-shot backup alarm at \(nextDate) for \(entry.label)")
             return alarmID
         } catch {
             logger.error("Failed to schedule backup alarm \(entry.label): \(error.localizedDescription)")

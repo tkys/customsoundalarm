@@ -18,104 +18,148 @@ struct BackupAlarmLogicTests {
         return Self.cal.date(from: c)!
     }
 
-    // MARK: - Schedule
-
-    @Test
-    func schedule_sameDay() {
-        let plan = BackupAlarmLogic.schedule(
-            hour: 7, minute: 0, backupMinutes: 15, repeatWeekdays: [2, 4]
+    private func next(_ entry: AlarmEntry, after ref: Date, skipping: Bool) -> Date? {
+        BackupAlarmLogic.nextBackupDate(
+            for: entry,
+            after: ref,
+            skippingCurrentOccurrence: skipping,
+            calendar: Self.cal
         )
-        #expect(plan == .init(hour: 7, minute: 15, repeatWeekdays: [2, 4]))
+    }
+
+    // MARK: - nextBackupDate: 繰り返し
+
+    @Test
+    func nextBackupDate_beforePrimary_usesToday() {
+        // 毎日 7:00 + 15分
+        let entry = AlarmEntry(hour: 7, minute: 0, repeatWeekdays: [1, 2, 3, 4, 5, 6, 7], backupMinutes: 15)
+        let ref = date(2024, 1, 15, 6, 0) // 月曜
+
+        #expect(next(entry, after: ref, skipping: false) == date(2024, 1, 15, 7, 15))
     }
 
     @Test
-    func schedule_crossesMidnight_shiftsWeekday() {
-        let plan = BackupAlarmLogic.schedule(
-            hour: 23, minute: 50, backupMinutes: 20, repeatWeekdays: [7]
-        )
-        #expect(plan.hour == 0)
-        #expect(plan.minute == 10)
-        #expect(plan.repeatWeekdays == [1], "土曜+1日 = 日曜")
-    }
-
-    @Test
-    func schedule_exactMidnight_shiftsWeekday() {
-        let plan = BackupAlarmLogic.schedule(
-            hour: 23, minute: 30, backupMinutes: 30, repeatWeekdays: [2]
-        )
-        #expect(plan.hour == 0)
-        #expect(plan.minute == 0)
-        #expect(plan.repeatWeekdays == [3])
-    }
-
-    @Test
-    func schedule_oneTime_staysOneTime() {
-        let plan = BackupAlarmLogic.schedule(
-            hour: 23, minute: 50, backupMinutes: 20, repeatWeekdays: []
-        )
-        #expect(plan.hour == 0)
-        #expect(plan.minute == 10)
-        #expect(plan.repeatWeekdays.isEmpty)
-    }
-
-    @Test
-    func shiftWeekday_wraps() {
-        #expect(BackupAlarmLogic.shiftWeekday(1, by: 0) == 1)
-        #expect(BackupAlarmLogic.shiftWeekday(7, by: 1) == 1)
-        #expect(BackupAlarmLogic.shiftWeekday(1, by: -1) == 7)
-    }
-
-    // MARK: - nextFireDate
-
-    @Test
-    func nextFireDate_sameDay() {
-        // 2024-01-15 は月曜。土曜の設定を月曜に読む形ではなく、月曜繰り返しで検証
+    func nextBackupDate_duringPrimary_keepsTodayDeadline() {
+        // 7:05（本体の鳴動/スヌーズ中）でも今日の 7:15 を維持する
         let entry = AlarmEntry(hour: 7, minute: 0, repeatWeekdays: [2], backupMinutes: 15)
-        let ref = date(2024, 1, 14, 12, 0) // 日曜
+        let ref = date(2024, 1, 15, 7, 5)
 
-        let fire = BackupAlarmLogic.nextFireDate(for: entry, from: ref, calendar: Self.cal)
-        #expect(fire == date(2024, 1, 15, 7, 15))
+        #expect(next(entry, after: ref, skipping: false) == date(2024, 1, 15, 7, 15))
     }
 
     @Test
-    func nextFireDate_crossesMidnightToNextWeekday() {
-        // 月曜 23:50 + 20分 = 火曜 00:10
+    func nextBackupDate_afterDeadline_usesNextOccurrence() {
+        let entry = AlarmEntry(hour: 7, minute: 0, repeatWeekdays: [2], backupMinutes: 15)
+        let ref = date(2024, 1, 15, 7, 16)
+
+        #expect(next(entry, after: ref, skipping: false) == date(2024, 1, 22, 7, 15))
+    }
+
+    @Test
+    func nextBackupDate_skippingCurrent_usesNextWeek() {
+        let entry = AlarmEntry(hour: 7, minute: 0, repeatWeekdays: [2], backupMinutes: 15)
+        let ref = date(2024, 1, 15, 7, 0)
+
+        #expect(next(entry, after: ref, skipping: true) == date(2024, 1, 22, 7, 15))
+    }
+
+    @Test
+    func nextBackupDate_weeklyOnOtherDay() {
+        // 月曜(2) 7:00、日曜に読む
+        let entry = AlarmEntry(hour: 7, minute: 0, repeatWeekdays: [2], backupMinutes: 15)
+        let ref = date(2024, 1, 14, 12, 0)
+
+        #expect(next(entry, after: ref, skipping: false) == date(2024, 1, 15, 7, 15))
+    }
+
+    // MARK: - nextBackupDate: 日付またぎ
+
+    @Test
+    func nextBackupDate_crossesMidnight() {
+        // 23:50 + 20分 = 翌日 00:10
         let entry = AlarmEntry(hour: 23, minute: 50, repeatWeekdays: [2], backupMinutes: 20)
-        let ref = date(2024, 1, 15, 23, 55) // 月曜
+        let ref = date(2024, 1, 15, 23, 55)
 
-        let fire = BackupAlarmLogic.nextFireDate(for: entry, from: ref, calendar: Self.cal)
-        #expect(fire == date(2024, 1, 16, 0, 10))
+        #expect(next(entry, after: ref, skipping: false) == date(2024, 1, 16, 0, 10))
     }
 
     @Test
-    func nextFireDate_oneTime_futureToday() {
+    func nextBackupDate_crossesMidnight_skippingCurrent() {
+        let entry = AlarmEntry(hour: 23, minute: 50, repeatWeekdays: [2], backupMinutes: 20)
+        let ref = date(2024, 1, 15, 23, 50)
+
+        // 次回の本体は翌週月曜 23:50 → 火曜 00:10
+        #expect(next(entry, after: ref, skipping: true) == date(2024, 1, 23, 0, 10))
+    }
+
+    @Test
+    func nextBackupDate_afterCrossMidnightDeadline() {
+        let entry = AlarmEntry(hour: 23, minute: 50, repeatWeekdays: [2], backupMinutes: 20)
+        let ref = date(2024, 1, 16, 0, 15)
+
+        // 今回分は過ぎた → 次の月曜 23:50 + 20分
+        #expect(next(entry, after: ref, skipping: false) == date(2024, 1, 23, 0, 10))
+    }
+
+    // MARK: - nextBackupDate: 一回限り
+
+    @Test
+    func nextBackupDate_oneTime_today() {
         let entry = AlarmEntry(hour: 7, minute: 0, repeatWeekdays: [], backupMinutes: 15)
         let ref = date(2024, 1, 15, 6, 0)
 
-        let fire = BackupAlarmLogic.nextFireDate(for: entry, from: ref, calendar: Self.cal)
-        #expect(fire == date(2024, 1, 15, 7, 15))
+        #expect(next(entry, after: ref, skipping: false) == date(2024, 1, 15, 7, 15))
     }
 
     @Test
-    func nextFireDate_oneTime_pastToday_usesTomorrow() {
+    func nextBackupDate_oneTime_skippingReturnsNil() {
+        let entry = AlarmEntry(hour: 7, minute: 0, repeatWeekdays: [], backupMinutes: 15)
+        let ref = date(2024, 1, 15, 7, 0)
+
+        #expect(next(entry, after: ref, skipping: true) == nil, "一回限りは次回分を作らない")
+    }
+
+    @Test
+    func nextBackupDate_oneTime_createdAfterTodaysTime() {
         let entry = AlarmEntry(hour: 7, minute: 0, repeatWeekdays: [], backupMinutes: 15)
         let ref = date(2024, 1, 15, 8, 0)
 
-        let fire = BackupAlarmLogic.nextFireDate(for: entry, from: ref, calendar: Self.cal)
-        #expect(fire == date(2024, 1, 16, 7, 15))
+        #expect(next(entry, after: ref, skipping: false) == date(2024, 1, 16, 7, 15))
     }
 
     @Test
-    func nextFireDate_nilWhenDisabledOrOff() {
+    func nextBackupDate_nilWhenDisabledOrOff() {
         let ref = date(2024, 1, 15, 6, 0)
-        #expect(BackupAlarmLogic.nextFireDate(
-            for: AlarmEntry(hour: 7, isEnabled: false, repeatWeekdays: [], backupMinutes: 15),
-            from: ref, calendar: Self.cal
-        ) == nil)
-        #expect(BackupAlarmLogic.nextFireDate(
-            for: AlarmEntry(hour: 7, repeatWeekdays: [], backupMinutes: nil),
-            from: ref, calendar: Self.cal
-        ) == nil)
+        #expect(next(AlarmEntry(hour: 7, isEnabled: false, repeatWeekdays: [], backupMinutes: 15), after: ref, skipping: false) == nil)
+        #expect(next(AlarmEntry(hour: 7, repeatWeekdays: [], backupMinutes: nil), after: ref, skipping: false) == nil)
+    }
+
+    // MARK: - Stop suppression
+
+    @Test
+    func suppression_blocksTheDeadlineThatWasCanceled() {
+        let canceledAt = date(2024, 1, 15, 7, 0)
+        #expect(BackupAlarmLogic.isSuppressed(
+            nextFireDate: date(2024, 1, 15, 7, 15),
+            canceledAt: canceledAt
+        ))
+    }
+
+    @Test
+    func suppression_allowsNextOccurrence() {
+        let canceledAt = date(2024, 1, 15, 7, 0)
+        #expect(!BackupAlarmLogic.isSuppressed(
+            nextFireDate: date(2024, 1, 22, 7, 15),
+            canceledAt: canceledAt
+        ))
+    }
+
+    @Test
+    func suppression_nilDateIsNotSuppressed() {
+        #expect(!BackupAlarmLogic.isSuppressed(
+            nextFireDate: nil,
+            canceledAt: date(2024, 1, 15, 7, 0)
+        ))
     }
 
     // MARK: - BackupSyncDiff
@@ -197,7 +241,6 @@ struct BackupAlarmLogicTests {
 
     @Test
     func diff_scheduled_isRescheduled() {
-        // 時刻変更や通常同期では、既存の .scheduled を登録し直す（本体と同じ規則）
         let entry = AlarmEntry(id: uuid(1), backupMinutes: 20)
         let oldID = uuid(99)
         let diff = BackupAlarmLogic.computeBackupSyncDiff(
@@ -210,15 +253,32 @@ struct BackupAlarmLogicTests {
     }
 
     @Test
-    func diff_missingActiveState_isRescheduled() {
-        let entry = AlarmEntry(id: uuid(1), backupMinutes: 20)
-        let oldID = uuid(99)
+    func diff_suppressed_keepsTheNextBackup() {
+        // 停止直後は、Intent が登録した次回分をそのまま残す（消して再登録しない）
+        let entry = AlarmEntry(id: uuid(1), backupMinutes: 15)
+        let nextID = uuid(99)
         let diff = BackupAlarmLogic.computeBackupSyncDiff(
-            oldMap: [entry.id: oldID],
+            oldMap: [entry.id: nextID],
             entries: [entry],
-            activeStates: [:]
+            activeStates: [nextID: .scheduled],
+            suppressedEntryIDs: [entry.id]
         )
-        #expect(diff.rescheduleAlarmIDs[entry.id] == oldID)
+        #expect(diff.keptMap[entry.id] == nextID)
+        #expect(diff.scheduleEntries.isEmpty)
+        #expect(diff.rescheduleAlarmIDs.isEmpty)
+        #expect(diff.cancelEntryIDs.isEmpty)
+    }
+
+    @Test
+    func diff_suppressedWithoutMap_doesNotSchedule() {
+        let entry = AlarmEntry(id: uuid(1), backupMinutes: 15)
+        let diff = BackupAlarmLogic.computeBackupSyncDiff(
+            oldMap: [:],
+            entries: [entry],
+            activeStates: [:],
+            suppressedEntryIDs: [entry.id]
+        )
+        #expect(diff.scheduleEntries.isEmpty)
     }
 
     @Test
@@ -229,33 +289,5 @@ struct BackupAlarmLogicTests {
         )
         #expect(diff.scheduleEntries.isEmpty)
         #expect(diff.cancelEntryIDs.isEmpty)
-    }
-
-    // MARK: - Stop suppression
-
-    @Test
-    func suppression_blocksTheDeadlineThatWasCanceled() {
-        let canceledAt = date(2024, 1, 15, 7, 0)
-        let fire = date(2024, 1, 15, 7, 15)
-        #expect(BackupAlarmLogic.isSuppressed(nextFireDate: fire, canceledAt: canceledAt))
-    }
-
-    @Test
-    func suppression_allowsNextOccurrence() {
-        let canceledAt = date(2024, 1, 15, 7, 0)
-        let tomorrow = date(2024, 1, 16, 7, 15)
-        #expect(!BackupAlarmLogic.isSuppressed(nextFireDate: tomorrow, canceledAt: canceledAt))
-    }
-
-    @Test
-    func suppression_allowsEditedLaterDeadline() {
-        let canceledAt = date(2024, 1, 15, 7, 0)
-        let later = date(2024, 1, 15, 8, 15)
-        #expect(!BackupAlarmLogic.isSuppressed(nextFireDate: later, canceledAt: canceledAt))
-    }
-
-    @Test
-    func suppression_nilDateIsNotSuppressed() {
-        #expect(!BackupAlarmLogic.isSuppressed(nextFireDate: nil, canceledAt: date(2024, 1, 15, 7, 0)))
     }
 }

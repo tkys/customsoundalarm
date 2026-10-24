@@ -92,11 +92,10 @@ struct CustomSoundAlarmApp: App {
                     if newPhase == .active {
                         // Share Extension 等の外部変更を反映
                         SoundStore.shared.reload()
-                        // データが変わった場合のみ AlarmKit と再同期
-                        let changed = AlarmStore.shared.reload()
-                        if changed {
-                            AlarmScheduler.shared.syncAlarms(AlarmStore.shared.alarms)
-                        }
+                        // 前面に戻るたびに再同期する（#110）。
+                        // 差分同期は軽く、停止 Intent で取りこぼした最終アラームの保険にもなる。
+                        AlarmStore.shared.reload()
+                        AlarmScheduler.shared.syncAlarms(AlarmStore.shared.alarms)
                     }
                 }
         }
