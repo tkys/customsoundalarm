@@ -1,0 +1,7 @@
+■ Alarmes triées par heure
+Comme dans l'app Horloge, tes alarmes sont maintenant triées de la plus tôt à la plus tard.
+
+■ Sons importés plus forts
+Quand une vidéo ou un fichier audio est trop faible, l'app augmente son volume à l'import, sans distorsion. Les sons déjà importés ne changent pas.
+
+Merci d'utiliser My Sound Alarm !

@@ -1,0 +1,7 @@
+■ Alarmas ordenadas por hora
+Como en la app Reloj, tus alarmas ahora se ordenan de la más temprana a la más tardía.
+
+■ Sonidos importados más fuertes
+Si un vídeo o archivo de audio suena bajo, la app sube su volumen al importarlo, sin distorsión. Los sonidos que ya importaste no cambian.
+
+¡Gracias por usar My Sound Alarm!

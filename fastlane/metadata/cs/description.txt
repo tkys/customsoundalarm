@@ -1,0 +1,45 @@
+Probuď se u hudby, kterou máš rád. Nech si jen tu část, kterou chceš: refrén, chytlavý motiv, verš, který si zpíváš.
+
+HLAVNÍ FUNKCE
+
+Probuď se u své oblíbené části
+Málokdo chce celou písničku, jen její část. Otevři video nebo zvukový soubor, podívej se na průběh vlny a tažením vyber úsek. Při úpravách si ho můžeš pustit. Průběh vlny ukazuje, kde je zvuk hlasitý a kde tichý.
+
+Krátký úsek funguje dobře. Budík ho přehraje do konce a pak začne znovu, dokud nevstaneš. Často stačí dvacet nebo třicet sekund refrénu.
+
+Tvoje vlastní soubory
+Aplikace používá zvuk, který už máš: hudební soubor, nahrávku hlasu, zvuk z uloženého videa. Bez předplatného. Bez katalogu, ve kterém bys musel hledat.
+
+Zvuk z videa
+Vyber video z knihovny fotek a nech si jen zvuk. Hodí se pro uložená videa i ta, která sis natočil sám.
+
+Import zvukových souborů
+Podporuje MP3, AAC, WAV a M4A. Otevři je z aplikace Soubory.
+
+Budíkový systém od Applu
+Aplikace používá AlarmKit, budíkový systém od Applu. Tvůj budík zvoní stejně jako v aplikaci Hodiny. Není to trik na pozadí, který může selhat ve špatnou chvíli.
+
+Poznej své zvuky
+Každý budík ukazuje obrázek svého zvuku: snímek z videa nebo obal souboru. Budíky tak snadno rozlišíš.
+
+Žádný limit 40 sekund
+Vyzvánění iPhonu může trvat jen asi 40 sekund. Tady můžeš z videa vzít až 10 minut a zvukové soubory nemají žádný limit délky.
+
+Sdílení
+Posílej zvuk nebo video do této aplikace z jiných aplikací.
+
+Dny opakování
+Vyber dny pro každý budík: všední dny, víkend nebo jakékoli dny.
+
+Odložení
+Vyber 1, 2, 5 nebo 10 minut jedním klepnutím, nebo jakoukoli jinou hodnotu.
+
+Noční režim
+Z iPhonu se stanou hodiny u postele. Velké, jemné číslice, dobře čitelné v tmavé místnosti.
+
+PODPOROVANÉ FORMÁTY
+MP3 / AAC / WAV / M4A / Zvuk z videa (MOV, MP4)
+
+POZNÁMKY
+- Vyžaduje iOS 26 nebo novější (AlarmKit)
+- Delší zvuk zabírá více místa. 10minutový zvuk budíku zabírá asi 50 MB.

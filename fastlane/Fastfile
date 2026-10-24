@@ -23,8 +23,8 @@ platform :ios do
       run_precheck_before_submit: false,
       submit_for_review: false,
       primary_category: "UTILITIES",
-      app_version: "1.7.0",
-      languages: ["en-US", "en-GB", "ja"]
+      app_version: "1.7.1",
+      languages: ["en-US", "en-GB", "ja", "fr-FR", "de-DE", "es-ES", "es-MX", "pt-BR", "it", "nl-NL", "ko", "zh-Hans", "ar-SA", "pl", "cs"]
     )
   end
 
@@ -41,8 +41,8 @@ platform :ios do
       run_precheck_before_submit: false,
       submit_for_review: false,
       primary_category: "UTILITIES",
-      app_version: "1.7.0",
-      languages: ["en-US", "en-GB", "ja"]
+      app_version: "1.7.1",
+      languages: ["en-US", "en-GB", "ja", "fr-FR", "de-DE", "es-ES", "es-MX", "pt-BR", "it", "nl-NL", "ko", "zh-Hans", "ar-SA", "pl", "cs"]
     )
   end
 
@@ -72,9 +72,10 @@ platform :ios do
       app_identifier: "com.tkysdev.customsoundalarm",
       metadata_path: "./fastlane/metadata",
       screenshots_path: "./fastlane/screenshots",
-      # v1.7.0: スクショ #2 の PPO（A/B テスト）実行中のため、スクショは上げない。
-      # テスト対象の素材を新バージョンで触ると結果が崩れる。差し替える回は false に戻す。
-      skip_screenshots: true,
+      # v1.7.1: PPO（#2）終了。テスト版の #2 を採用したので上げる。
+      # PPO 実行中は true にすること（テスト対象の素材を新バージョンで触ると結果が崩れる）
+      skip_screenshots: false,
+      overwrite_screenshots: true,
       skip_metadata: false,
       force: true,
       run_precheck_before_submit: false,
@@ -88,8 +89,8 @@ platform :ios do
         export_compliance_uses_encryption: false,
         export_compliance_is_exempt: false
       },
-      app_version: "1.7.0",
-      languages: ["en-US", "en-GB", "ja"]
+      app_version: "1.7.1",
+      languages: ["en-US", "en-GB", "ja", "fr-FR", "de-DE", "es-ES", "es-MX", "pt-BR", "it", "nl-NL", "ko", "zh-Hans", "ar-SA", "pl", "cs"]
     )
   end
 
@@ -112,9 +113,9 @@ platform :ios do
         export_compliance_uses_encryption: false,
         export_compliance_is_exempt: false
       },
-      app_version: "1.7.0",
-      build_number: "8",
-      languages: ["en-US", "en-GB", "ja"]
+      app_version: "1.7.1",
+      build_number: "9",
+      languages: ["en-US", "en-GB", "ja", "fr-FR", "de-DE", "es-ES", "es-MX", "pt-BR", "it", "nl-NL", "ko", "zh-Hans", "ar-SA", "pl", "cs"]
     )
   end
 

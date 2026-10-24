@@ -1,0 +1,7 @@
+■ Wekkers op tijd gesorteerd
+Net als in de Klok-app staan je wekkers nu van vroeg naar laat.
+
+■ Luidere geïmporteerde geluiden
+Is een video of audiobestand te zacht, dan maakt de app het geluid bij het importeren luider, zonder vervorming. Geluiden die je al hebt geïmporteerd blijven hetzelfde.
+
+Bedankt voor het gebruiken van My Sound Alarm!

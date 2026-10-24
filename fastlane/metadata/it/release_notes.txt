@@ -1,0 +1,7 @@
+■ Sveglie in ordine di orario
+Come nell'app Orologio, le tue sveglie ora sono ordinate dalla più presto alla più tardi.
+
+■ Suoni importati più forti
+Se un video o un file audio è troppo basso, l'app ne alza il volume durante l'importazione, senza distorsioni. I suoni già importati non cambiano.
+
+Grazie per usare My Sound Alarm!
