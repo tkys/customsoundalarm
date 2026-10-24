@@ -44,10 +44,10 @@ final class AlarmScheduler {
     private var observationTask: Task<Void, Never>?
 
     /// ID マッピングの永続化キー
-    private let idMapKey = "alarm_id_map"
+    private var idMapKey: String { AlarmIDMaps.primaryKey }
 
     /// 最終アラームの ID マッピングの永続化キー（#110）
-    private let backupIDMapKey = "backup_alarm_id_map"
+    private var backupIDMapKey: String { AlarmIDMaps.backupKey }
 
     /// 同一 AlarmEntry.ID に対して alarm_fired を1回だけ送るための記録（observer 系）
     @ObservationIgnored
@@ -395,16 +395,16 @@ final class AlarmScheduler {
             countdownDuration = nil
         }
 
+        let alarmID = Alarm.ID()
         let config = AlarmManager.AlarmConfiguration<CustomAlarmMetadata>(
             countdownDuration: countdownDuration,
             schedule: schedule,
             attributes: attributes,
-            stopIntent: DismissAlarmIntent(),
+            stopIntent: DismissAlarmIntent(alarmID: alarmID.uuidString),
             sound: entry.soundFileName.isEmpty ? .default : .named(entry.soundFileName)
         )
 
         do {
-            let alarmID = Alarm.ID()
             _ = try await manager.schedule(id: alarmID, configuration: config)
             logger.info("Scheduled alarm: \(entry.timeString) - \(entry.label)")
             return alarmID
@@ -417,6 +417,17 @@ final class AlarmScheduler {
     /// 最終アラームを登録（停止のみ・スヌーズなし）（#110）
     private func scheduleBackupAlarm(for entry: AlarmEntry) async -> Alarm.ID? {
         guard let backupMinutes = entry.backupMinutes else { return nil }
+
+        // 停止で取り消した締め切りを、次回同期で復活させない（#110）
+        let now = Date()
+        if let canceledAt = AppGroup.backupCanceledAt[entry.id],
+           BackupAlarmLogic.isSuppressed(
+               nextFireDate: BackupAlarmLogic.nextFireDate(for: entry, from: now),
+               canceledAt: canceledAt
+           ) {
+            logger.info("Backup suppressed after stop: \(entry.label)")
+            return nil
+        }
 
         let plan = BackupAlarmLogic.schedule(
             hour: entry.hour,
@@ -467,16 +478,16 @@ final class AlarmScheduler {
             schedule = .relative(.init(time: time, repeats: .weekly(weekdays)))
         }
 
+        let alarmID = Alarm.ID()
         let config = AlarmManager.AlarmConfiguration<CustomAlarmMetadata>(
             countdownDuration: nil,
             schedule: schedule,
             attributes: attributes,
-            stopIntent: DismissAlarmIntent(),
+            stopIntent: DismissAlarmIntent(alarmID: alarmID.uuidString),
             sound: .named(BackupAlarmLogic.soundFileName)
         )
 
         do {
-            let alarmID = Alarm.ID()
             _ = try await manager.schedule(id: alarmID, configuration: config)
             logger.info("Scheduled backup alarm: \(plan.hour):\(plan.minute) (+ \(backupMinutes)m) for \(entry.label)")
             return alarmID
@@ -527,8 +538,8 @@ final class AlarmScheduler {
         return false
         #else
         let plan = TestRingLogic.makePlan(now: now, soundFileName: soundFileName, kind: kind)
-        let config = makeTestRingConfiguration(for: plan)
         let alarmID = UUID()
+        let config = makeTestRingConfiguration(for: plan, alarmID: alarmID)
 
         do {
             _ = try await manager.schedule(id: alarmID, configuration: config)
@@ -548,7 +559,8 @@ final class AlarmScheduler {
 
     /// 試しアラーム用の AlarmKit 設定（一回限り・スヌーズなし・停止のみ）。
     private func makeTestRingConfiguration(
-        for plan: TestRingLogic.Plan
+        for plan: TestRingLogic.Plan,
+        alarmID: UUID
     ) -> AlarmManager.AlarmConfiguration<CustomAlarmMetadata> {
         let title = LocalizedStringResource("test_ring_alarm_title")
         let alert: AlarmPresentation.Alert
@@ -573,7 +585,7 @@ final class AlarmScheduler {
             countdownDuration: nil,
             schedule: .fixed(plan.fireDate),
             attributes: attributes,
-            stopIntent: DismissAlarmIntent(),
+            stopIntent: DismissAlarmIntent(alarmID: alarmID.uuidString),
             sound: plan.soundFileName.isEmpty ? .default : .named(plan.soundFileName)
         )
     }

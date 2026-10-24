@@ -77,6 +77,16 @@ enum BackupAlarmLogic {
         return probe.nextFireDate(from: referenceDate, calendar: calendar)
     }
 
+    /// 停止で取り消した締め切りを復活させないための抑制時間（秒）。
+    static let suppressionWindow: TimeInterval = 60 * 60
+
+    /// 停止直後の同期で、同じ締め切りを再登録しないための判定。
+    /// 次の発生が停止時刻 + 1時間以内なら「いま取り消した締め切り」とみなす。
+    static func isSuppressed(nextFireDate: Date?, canceledAt: Date) -> Bool {
+        guard let nextFireDate else { return false }
+        return nextFireDate <= canceledAt.addingTimeInterval(suppressionWindow)
+    }
+
     // MARK: - Sync diff
 
     /// 最終アラームの差分同期。

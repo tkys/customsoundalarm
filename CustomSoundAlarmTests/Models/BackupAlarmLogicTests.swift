@@ -230,4 +230,32 @@ struct BackupAlarmLogicTests {
         #expect(diff.scheduleEntries.isEmpty)
         #expect(diff.cancelEntryIDs.isEmpty)
     }
+
+    // MARK: - Stop suppression
+
+    @Test
+    func suppression_blocksTheDeadlineThatWasCanceled() {
+        let canceledAt = date(2024, 1, 15, 7, 0)
+        let fire = date(2024, 1, 15, 7, 15)
+        #expect(BackupAlarmLogic.isSuppressed(nextFireDate: fire, canceledAt: canceledAt))
+    }
+
+    @Test
+    func suppression_allowsNextOccurrence() {
+        let canceledAt = date(2024, 1, 15, 7, 0)
+        let tomorrow = date(2024, 1, 16, 7, 15)
+        #expect(!BackupAlarmLogic.isSuppressed(nextFireDate: tomorrow, canceledAt: canceledAt))
+    }
+
+    @Test
+    func suppression_allowsEditedLaterDeadline() {
+        let canceledAt = date(2024, 1, 15, 7, 0)
+        let later = date(2024, 1, 15, 8, 15)
+        #expect(!BackupAlarmLogic.isSuppressed(nextFireDate: later, canceledAt: canceledAt))
+    }
+
+    @Test
+    func suppression_nilDateIsNotSuppressed() {
+        #expect(!BackupAlarmLogic.isSuppressed(nextFireDate: nil, canceledAt: date(2024, 1, 15, 7, 0)))
+    }
 }
