@@ -214,3 +214,6 @@
 "loudness_normal" = "Normal";
 "loudness_loud" = "Louder";
 "loudness_max" = "Maximum";
+
+/* Backup alarm (#110) */
+"backup_alarm_title" = "Final Alarm";

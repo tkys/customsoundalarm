@@ -214,3 +214,6 @@
 "loudness_normal" = "ふつう";
 "loudness_loud" = "大きめ";
 "loudness_max" = "最大";
+
+/* Backup alarm (#110) */
+"backup_alarm_title" = "最終アラーム";

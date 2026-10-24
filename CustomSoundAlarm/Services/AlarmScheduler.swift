@@ -34,6 +34,9 @@ final class AlarmScheduler {
     /// AlarmEntry.id → AlarmKit Alarm.ID のマッピング
     private var alarmIDMap: [UUID: Alarm.ID] = [:]
 
+    /// AlarmEntry.id → 最終アラームの AlarmKit Alarm.ID のマッピング（#110）
+    private var backupAlarmIDMap: [UUID: Alarm.ID] = [:]
+
     /// sync の直列化用（連続操作時に前回をキャンセルして最新のみ実行）
     private var syncTask: Task<Void, Never>?
 
@@ -43,12 +46,16 @@ final class AlarmScheduler {
     /// ID マッピングの永続化キー
     private let idMapKey = "alarm_id_map"
 
+    /// 最終アラームの ID マッピングの永続化キー（#110）
+    private let backupIDMapKey = "backup_alarm_id_map"
+
     /// 同一 AlarmEntry.ID に対して alarm_fired を1回だけ送るための記録（observer 系）
     @ObservationIgnored
     private var firedReportedThisSession: Set<Alarm.ID> = []
 
     private init() {
         loadIDMap()
+        loadBackupIDMap()
         refreshTestRingPermission()
     }
 
@@ -140,6 +147,10 @@ final class AlarmScheduler {
                 ))
                 store.toggleEnabled(alarm)
                 alarmIDMap.removeValue(forKey: alarm.id)
+                if let backupID = backupAlarmIDMap.removeValue(forKey: alarm.id) {
+                    try? manager.cancel(id: backupID)
+                    logger.info("Reconcile: cancelled backup for one-time alarm: \(alarm.label)")
+                }
                 didChange = true
                 logger.info("Reconcile: one-time alarm auto-disabled: \(alarm.label)")
             }
@@ -147,7 +158,11 @@ final class AlarmScheduler {
 
         if didChange {
             saveIDMap()
+            saveBackupIDMap()
         }
+
+        // 最終アラームの整合性（無効/削除されたアラームの取り残しを消す）
+        cancelOrphanBackupAlarms(entries: store.alarms)
 
         // スヌーズ待機中（.countdown）のアラームを遡及記録（App Group 永続化で二重計上防止）
         var snoozedIDs = AppGroup.snoozedAlarmEntryIDs
@@ -233,11 +248,39 @@ final class AlarmScheduler {
 
         guard !Task.isCancelled else { return }
 
+        // 最終アラーム（#110）: 本体と必ず一緒に同期する
+        let backupDiff = BackupAlarmLogic.computeBackupSyncDiff(
+            oldMap: backupAlarmIDMap,
+            entries: entries,
+            activeStates: activeStates
+        )
+
+        for entryID in backupDiff.cancelEntryIDs {
+            guard let backupID = backupAlarmIDMap[entryID] else { continue }
+            try? manager.cancel(id: backupID)
+            logger.info("Cancelled backup alarm for removed entry: \(entryID)")
+        }
+        for (_, oldBackupID) in backupDiff.rescheduleAlarmIDs {
+            try? manager.cancel(id: oldBackupID)
+        }
+
+        var newBackupMap = backupDiff.keptMap
+        for entry in backupDiff.scheduleEntries {
+            guard !Task.isCancelled else { return }
+            if let backupID = await scheduleBackupAlarm(for: entry) {
+                newBackupMap[entry.id] = backupID
+            }
+        }
+
+        guard !Task.isCancelled else { return }
+
         alarmIDMap = newMap
+        backupAlarmIDMap = newBackupMap
         scheduledAlarmCount = newMap.count
         saveIDMap()
+        saveBackupIDMap()
 
-        logger.info("Synced \(self.scheduledAlarmCount) alarms (\(diff.keptMap.count) kept, \(diff.scheduleEntries.count) scheduled, \(diff.cancelEntryIDs.count) cancelled, \(diff.rescheduleAlarmIDs.count) rescheduled)")
+        logger.info("Synced \(self.scheduledAlarmCount) alarms (\(diff.keptMap.count) kept, \(diff.scheduleEntries.count) scheduled, \(diff.cancelEntryIDs.count) cancelled, \(diff.rescheduleAlarmIDs.count) rescheduled), backups: \(newBackupMap.count)")
     }
 
     /// 単一アラームをスケジュール（成功時に Alarm.ID を返す）
@@ -369,6 +412,98 @@ final class AlarmScheduler {
             logger.error("Failed to schedule alarm \(entry.label): \(error.localizedDescription)")
             return nil
         }
+    }
+
+    /// 最終アラームを登録（停止のみ・スヌーズなし）（#110）
+    private func scheduleBackupAlarm(for entry: AlarmEntry) async -> Alarm.ID? {
+        guard let backupMinutes = entry.backupMinutes else { return nil }
+
+        let plan = BackupAlarmLogic.schedule(
+            hour: entry.hour,
+            minute: entry.minute,
+            backupMinutes: backupMinutes,
+            repeatWeekdays: entry.repeatWeekdays
+        )
+
+        let title = LocalizedStringResource("backup_alarm_title")
+        let alert: AlarmPresentation.Alert
+        if #available(iOS 26.1, *) {
+            alert = AlarmPresentation.Alert(title: title)
+        } else {
+            alert = AlarmPresentation.Alert(
+                title: title,
+                stopButton: AlarmButton(
+                    text: "stop_alarm",
+                    textColor: .red,
+                    systemImageName: "stop.fill"
+                )
+            )
+        }
+
+        let displayName = SoundStore.shared.displayName(for: entry.soundFileName)
+        let attributes = AlarmAttributes<CustomAlarmMetadata>(
+            presentation: AlarmPresentation(alert: alert, countdown: nil, paused: nil),
+            metadata: CustomAlarmMetadata(entry: entry, soundDisplayName: displayName),
+            tintColor: .red
+        )
+
+        let time = Alarm.Schedule.Relative.Time(hour: plan.hour, minute: plan.minute)
+        let schedule: Alarm.Schedule
+        if plan.repeatWeekdays.isEmpty {
+            schedule = .relative(.init(time: time, repeats: .never))
+        } else {
+            let weekdays = plan.repeatWeekdays.compactMap { dayInt -> Locale.Weekday? in
+                switch dayInt {
+                case 1: .sunday
+                case 2: .monday
+                case 3: .tuesday
+                case 4: .wednesday
+                case 5: .thursday
+                case 6: .friday
+                case 7: .saturday
+                default: nil
+                }
+            }
+            schedule = .relative(.init(time: time, repeats: .weekly(weekdays)))
+        }
+
+        let config = AlarmManager.AlarmConfiguration<CustomAlarmMetadata>(
+            countdownDuration: nil,
+            schedule: schedule,
+            attributes: attributes,
+            stopIntent: DismissAlarmIntent(),
+            sound: .named(BackupAlarmLogic.soundFileName)
+        )
+
+        do {
+            let alarmID = Alarm.ID()
+            _ = try await manager.schedule(id: alarmID, configuration: config)
+            logger.info("Scheduled backup alarm: \(plan.hour):\(plan.minute) (+ \(backupMinutes)m) for \(entry.label)")
+            return alarmID
+        } catch {
+            logger.error("Failed to schedule backup alarm \(entry.label): \(error.localizedDescription)")
+            return nil
+        }
+    }
+
+    /// 無効/削除されたアラームの最終アラームを取り残さない（起動時の整合性）。
+    private func cancelOrphanBackupAlarms(entries: [AlarmEntry]) {
+        let byID = Dictionary(uniqueKeysWithValues: entries.map { ($0.id, $0) })
+        var orphanIDs: [UUID] = []
+        for (entryID, _) in backupAlarmIDMap {
+            guard let entry = byID[entryID], entry.isEnabled, entry.backupMinutes != nil else {
+                orphanIDs.append(entryID)
+                continue
+            }
+        }
+        guard !orphanIDs.isEmpty else { return }
+        for entryID in orphanIDs {
+            if let backupID = backupAlarmIDMap.removeValue(forKey: entryID) {
+                try? manager.cancel(id: backupID)
+            }
+        }
+        saveBackupIDMap()
+        logger.info("Cancelled \(orphanIDs.count) orphan backup alarm(s)")
     }
 
     // MARK: - Test Ring (#109)
@@ -568,6 +703,26 @@ final class AlarmScheduler {
         } catch {
             logger.warning("Failed to decode alarm ID map, starting fresh")
             alarmIDMap = [:]
+        }
+    }
+
+    private func saveBackupIDMap() {
+        do {
+            let data = try JSONEncoder().encode(backupAlarmIDMap)
+            AppGroup.userDefaults.set(data, forKey: backupIDMapKey)
+        } catch {
+            logger.error("Failed to save backup alarm ID map: \(error.localizedDescription)")
+        }
+    }
+
+    private func loadBackupIDMap() {
+        guard let data = AppGroup.userDefaults.data(forKey: backupIDMapKey) else { return }
+        do {
+            backupAlarmIDMap = try JSONDecoder().decode([UUID: Alarm.ID].self, from: data)
+            logger.info("Loaded backup alarm ID map with \(self.backupAlarmIDMap.count) entries")
+        } catch {
+            logger.warning("Failed to decode backup alarm ID map, starting fresh")
+            backupAlarmIDMap = [:]
         }
     }
 }
