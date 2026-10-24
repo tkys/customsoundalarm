@@ -69,6 +69,14 @@ enum AnalyticsEvent: Sendable {
     /// - from: "observer" または "reconcile"
     case alarmSnoozed(from: String)
 
+    /// 試しに鳴らすアラームを登録した（#109）
+    /// - kind: own（選択中の音）/ backup（最終アラーム用の音）
+    case testRingScheduled(kind: TestRingKind)
+
+    /// 試しに鳴らしたアラームを停止した（#109）
+    /// 本番の alarm_stopped と区別するため、Intent 側で testAlarmIDs を照合して送る
+    case testRingStopped(hour: Int)
+
     // MARK: Phase 4（ベッドサイドモード・#68）
 
     /// ベッドサイドモードに入った
@@ -128,6 +136,8 @@ enum AnalyticsEvent: Sendable {
         case .alarmFired: return "alarm_fired"
         case .alarmStopped: return "alarm_stopped"
         case .alarmSnoozed: return "alarm_snoozed"
+        case .testRingScheduled: return "test_ring_scheduled"
+        case .testRingStopped: return "test_ring_stopped"
         case .bedsideEntered: return "bedside_entered"
         case .bedsideExited: return "bedside_exited"
         case .bedsideSettingChanged: return "bedside_setting_changed"
@@ -185,6 +195,10 @@ enum AnalyticsEvent: Sendable {
             return ["hour": hour]
         case let .alarmSnoozed(from):
             return ["from": from]
+        case let .testRingScheduled(kind):
+            return ["kind": kind.rawValue]
+        case let .testRingStopped(hour):
+            return ["hour": hour]
         case let .bedsideEntered(layout, theme, hour):
             return [
                 "layout": layout,

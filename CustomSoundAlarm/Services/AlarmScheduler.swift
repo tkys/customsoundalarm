@@ -3,6 +3,15 @@ import AlarmKit
 import SwiftUI
 import os
 
+// MARK: - TestRingPermission
+
+/// 試しに鳴らすボタンの有効/無効を決めるための権限状態（#109）。
+enum TestRingPermission: Equatable, Sendable {
+    case unknown
+    case allowed
+    case denied
+}
+
 // MARK: - AlarmScheduler
 
 @Observable
@@ -14,6 +23,13 @@ final class AlarmScheduler {
     private nonisolated(unsafe) let manager = AlarmManager.shared
 
     private(set) var scheduledAlarmCount: Int = 0
+
+    /// 試しに鳴らすボタンの権限状態（#109）
+    private(set) var testRingPermission: TestRingPermission = .unknown
+
+    /// 試しアラームの記録ごとの掃除タスク（60秒後にキャンセルする）
+    @ObservationIgnored
+    private var testRingCleanupTasks: [UUID: Task<Void, Never>] = [:]
 
     /// AlarmEntry.id → AlarmKit Alarm.ID のマッピング
     private var alarmIDMap: [UUID: Alarm.ID] = [:]
@@ -33,6 +49,22 @@ final class AlarmScheduler {
 
     private init() {
         loadIDMap()
+        refreshTestRingPermission()
+    }
+
+    /// 試しに鳴らすボタンの権限状態を更新する（#109）
+    func refreshTestRingPermission() {
+        switch manager.authorizationState {
+        case .authorized: testRingPermission = .allowed
+        case .denied: testRingPermission = .denied
+        case .notDetermined: testRingPermission = .unknown
+        @unknown default: testRingPermission = .unknown
+        }
+    }
+
+    /// 試しに鳴らせる状態か（ボタンの有効条件）
+    var canScheduleTestRing: Bool {
+        testRingPermission == .allowed
     }
 
     // MARK: - Authorization
@@ -83,6 +115,9 @@ final class AlarmScheduler {
     /// アプリ起動時に AlarmKit の状態と AlarmStore を突合し、
     /// 発火済みの一回限りアラームを自動 OFF にする
     func reconcileOnLaunch() {
+        // 試しのアラームは永続化しない。前回起動時に残っていれば確実にキャンセルする（#109）
+        cancelAllTestAlarms()
+
         let activeAlarmIDs: Set<Alarm.ID>
         do {
             activeAlarmIDs = Set(try manager.alarms.map(\.id))
@@ -333,6 +368,115 @@ final class AlarmScheduler {
         } catch {
             logger.error("Failed to schedule alarm \(entry.label): \(error.localizedDescription)")
             return nil
+        }
+    }
+
+    // MARK: - Test Ring (#109)
+
+    /// 選択中のサウンド（または最終アラーム用の音）で 5 秒後に一度だけ鳴らす。
+    /// AlarmStore には保存しない。成功したら ID を AppGroup に記録し、
+    /// 停止・60 秒経過・次回起動時でキャンセルする。
+    /// - Returns: 登録できたら true
+    @discardableResult
+    func scheduleTestRing(soundFileName: String, kind: TestRingKind, now: Date = Date()) async -> Bool {
+        refreshTestRingPermission()
+        guard canScheduleTestRing else {
+            logger.warning("Test ring skipped: AlarmKit not authorized")
+            return false
+        }
+
+        #if targetEnvironment(simulator)
+        // シミュレータで AlarmKit を鳴らすと SpringBoard が落ちるため登録しない。
+        // 鳴動確認は実機で行う（#109）。
+        logger.warning("Test ring is disabled on the simulator")
+        return false
+        #else
+        let plan = TestRingLogic.makePlan(now: now, soundFileName: soundFileName, kind: kind)
+        let config = makeTestRingConfiguration(for: plan)
+        let alarmID = UUID()
+
+        do {
+            _ = try await manager.schedule(id: alarmID, configuration: config)
+            var records = AppGroup.testAlarmRecords
+            records.append(TestAlarmRecord(id: alarmID, scheduledAt: now, kind: kind))
+            AppGroup.testAlarmRecords = records
+            AnalyticsService.shared.capture(.testRingScheduled(kind: kind))
+            scheduleTestRingCleanup(for: alarmID)
+            logger.info("Scheduled test ring in \(TestRingLogic.delay)s (kind=\(kind.rawValue))")
+            return true
+        } catch {
+            logger.error("Failed to schedule test ring: \(error.localizedDescription)")
+            return false
+        }
+        #endif
+    }
+
+    /// 試しアラーム用の AlarmKit 設定（一回限り・スヌーズなし・停止のみ）。
+    private func makeTestRingConfiguration(
+        for plan: TestRingLogic.Plan
+    ) -> AlarmManager.AlarmConfiguration<CustomAlarmMetadata> {
+        let title = LocalizedStringResource("test_ring_alarm_title")
+        let alert: AlarmPresentation.Alert
+        if #available(iOS 26.1, *) {
+            alert = AlarmPresentation.Alert(title: title)
+        } else {
+            alert = AlarmPresentation.Alert(
+                title: title,
+                stopButton: AlarmButton(
+                    text: "stop_alarm",
+                    textColor: .red,
+                    systemImageName: "stop.fill"
+                )
+            )
+        }
+        let attributes = AlarmAttributes<CustomAlarmMetadata>(
+            presentation: AlarmPresentation(alert: alert, countdown: nil, paused: nil),
+            metadata: CustomAlarmMetadata(),
+            tintColor: .orange
+        )
+        return AlarmManager.AlarmConfiguration(
+            countdownDuration: nil,
+            schedule: .fixed(plan.fireDate),
+            attributes: attributes,
+            stopIntent: DismissAlarmIntent(),
+            sound: plan.soundFileName.isEmpty ? .default : .named(plan.soundFileName)
+        )
+    }
+
+    /// 60 秒経過した試しアラームをキャンセルして記録から消す。
+    func cleanupTestAlarms(now: Date = Date()) {
+        let records = AppGroup.testAlarmRecords
+        guard !records.isEmpty else { return }
+
+        let result = TestRingLogic.cleanup(records: records, now: now)
+        for id in result.expiredIDs {
+            try? manager.cancel(id: id)
+        }
+        if !result.expiredIDs.isEmpty {
+            AppGroup.testAlarmRecords = result.remaining
+            logger.info("Cleaned up \(result.expiredIDs.count) test ring alarm(s)")
+        }
+    }
+
+    /// 起動時に残っている試しアラームをすべてキャンセルする。
+    private func cancelAllTestAlarms() {
+        let records = AppGroup.testAlarmRecords
+        guard !records.isEmpty else { return }
+        for record in records {
+            try? manager.cancel(id: record.id)
+        }
+        AppGroup.testAlarmRecords = []
+        logger.info("Cancelled \(records.count) leftover test ring alarm(s)")
+    }
+
+    /// 鳴らした試しアラームを 60 秒後に掃除する（放置対策）。
+    private func scheduleTestRingCleanup(for alarmID: UUID) {
+        testRingCleanupTasks[alarmID]?.cancel()
+        testRingCleanupTasks[alarmID] = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(TestRingLogic.cleanupAfter + 1))
+            guard !Task.isCancelled else { return }
+            self?.cleanupTestAlarms()
+            self?.testRingCleanupTasks[alarmID] = nil
         }
     }
 
