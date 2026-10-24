@@ -65,6 +65,10 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.bedsideSettingChanged(setting: .layout, value: .string("minimal")).name == "bedside_setting_changed")
         // #71: バックグラウンド退出も同じイベント名
         #expect(AnalyticsEvent.bedsideExited(durationBucket: "under_1min", exitMethod: "backgrounded").name == "bedside_exited")
+        // #109: 試しに鳴らす
+        #expect(AnalyticsEvent.testRingScheduled(kind: .own).name == "test_ring_scheduled")
+        #expect(AnalyticsEvent.testRingScheduled(kind: .backup).name == "test_ring_scheduled")
+        #expect(AnalyticsEvent.testRingStopped(hour: 8).name == "test_ring_stopped")
     }
 
     // MARK: alarm_created
@@ -111,6 +115,31 @@ struct AnalyticsEventTests {
         // PostHog 側のダッシュボード定義と一致することが前提
         #expect(SoundImportSource.video.rawValue == "video")
         #expect(SoundImportSource.audio.rawValue == "audio")
+    }
+
+    // MARK: test_ring_scheduled / test_ring_stopped (#109)
+
+    @Test
+    func testRingScheduledProperties_kindOwn() {
+        let props = AnalyticsEvent.testRingScheduled(kind: .own).properties
+
+        #expect(props.count == 1)
+        #expect(props["kind"] as? String == "own")
+    }
+
+    @Test
+    func testRingScheduledProperties_kindBackup() {
+        let props = AnalyticsEvent.testRingScheduled(kind: .backup).properties
+
+        #expect(props["kind"] as? String == "backup")
+    }
+
+    @Test
+    func testRingStoppedProperties_hour() {
+        let props = AnalyticsEvent.testRingStopped(hour: 6).properties
+
+        #expect(props.count == 1)
+        #expect(props["hour"] as? Int == 6)
     }
 
     // MARK: sound_preview_played

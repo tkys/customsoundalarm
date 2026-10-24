@@ -22,6 +22,7 @@ struct AlarmDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var alarmStore = AlarmStore.shared
     @State private var soundStore = SoundStore.shared
+    @State private var scheduler = AlarmScheduler.shared
 
     let mode: AlarmDetailMode
     /// オンボ場面4からの指定（#98 Phase 4）。
@@ -43,6 +44,11 @@ struct AlarmDetailView: View {
     @State private var pendingAudio: PendingAudioImport?
     @State private var showingVideoImport = false
     @State private var importErrorMessage: String?
+
+    /// 試しに鳴らす（#109）
+    @State private var isSchedulingTestRing = false
+    @State private var testRingMessage: String?
+    @State private var showTestRingVolumeNote = AppGroup.testRingVolumeNoteShown
 
     init(mode: AlarmDetailMode, initialImport: OnboardingSource? = nil) {
         self.mode = mode
@@ -79,6 +85,7 @@ struct AlarmDetailView: View {
             Form {
                 timeSection
                 soundSection
+                trialRingSection
                 repeatSection
                 snoozeSection
                 labelSection
@@ -116,9 +123,13 @@ struct AlarmDetailView: View {
                 errorMessage: $importErrorMessage
             )
             .task {
+                scheduler.refreshTestRingPermission()
                 // 追加画面のシート提示完了後に取り込みを開く（約0.35秒待つ）
                 try? await Task.sleep(for: .milliseconds(500))
                 applyInitialImportOnce()
+            }
+            .onAppear {
+                scheduler.refreshTestRingPermission()
             }
             .alert("error", isPresented: Binding(
                 get: { importErrorMessage != nil },
@@ -194,6 +205,81 @@ struct AlarmDetailView: View {
                     }
                 }
             }
+        }
+    }
+
+    // MARK: - Trial Ring (#109)
+
+    /// 本物の AlarmKit で 5 秒後に鳴らす。アプリ内の試し聴きとは音量の系統が違うため、
+    /// 「実際に鳴るか」を確認する導線として置く。
+    private var trialRingSection: some View {
+        Section {
+            Button {
+                scheduleTestRing(kind: .own)
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "bell.badge.waveform.fill")
+                    Text("test_ring_title")
+                    Spacer()
+                    if isSchedulingTestRing {
+                        ProgressView()
+                    }
+                }
+            }
+            .disabled(!scheduler.canScheduleTestRing || isSchedulingTestRing)
+
+            if !scheduler.canScheduleTestRing {
+                Text("test_ring_permission_required")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
+            if let testRingMessage {
+                Text(testRingMessage)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
+            if showTestRingVolumeNote {
+                Text("test_ring_volume_note")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+        } header: {
+            Text("test_ring_section")
+        }
+    }
+
+    private func scheduleTestRing(kind: TestRingKind) {
+        guard !isSchedulingTestRing else { return }
+        isSchedulingTestRing = true
+        testRingMessage = nil
+
+        let fileName = selectedSound?.fileName ?? ""
+
+        Task {
+            let scheduled = await scheduler.scheduleTestRing(
+                soundFileName: fileName,
+                kind: kind
+            )
+            isSchedulingTestRing = false
+
+            guard scheduled else {
+                #if targetEnvironment(simulator)
+                testRingMessage = String(localized: "test_ring_simulator_unavailable")
+                #else
+                testRingMessage = String(localized: "test_ring_failed")
+                #endif
+                return
+            }
+
+            testRingMessage = String(localized: "test_ring_scheduled_message")
+
+            // 鳴った後に一度だけ、音量の系統が違うことを控えめに伝える
+            guard !AppGroup.testRingVolumeNoteShown else { return }
+            try? await Task.sleep(for: .seconds(TestRingLogic.delay + 1))
+            showTestRingVolumeNote = true
+            AppGroup.testRingVolumeNoteShown = true
         }
     }
 

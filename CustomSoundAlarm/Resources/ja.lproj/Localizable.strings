@@ -194,3 +194,13 @@
 "onb.source.audio" = "音声ファイルから";
 "onb.source.preset" = "入っている音で試す";
 "onb.later" = "あとで";
+
+/* Trial ring (#109) */
+"test_ring_section" = "試しに鳴らす";
+"test_ring_title" = "5秒後に鳴らす";
+"test_ring_scheduled_message" = "5秒後に鳴ります。止めると終わります。";
+"test_ring_permission_required" = "アラームの許可が必要です。";
+"test_ring_volume_note" = "アラームの音量は「設定 → サウンドと触覚 → 着信音と通知音」で決まります。";
+"test_ring_failed" = "試しに鳴らせませんでした。";
+"test_ring_simulator_unavailable" = "試しに鳴らすは実機でのみ使えます。";
+"test_ring_alarm_title" = "試しのアラーム";

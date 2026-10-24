@@ -60,6 +60,32 @@ enum AppGroup {
         }
     }
 
+    /// 試しに鳴らしたアラームの記録（#109）。
+    /// AlarmStore の外に置き、停止・60秒経過・次回起動時で確実に掃除する。
+    static var testAlarmRecords: [TestAlarmRecord] {
+        get {
+            guard let data = userDefaults.data(forKey: "test_alarm_records"),
+                  let records = try? JSONDecoder().decode([TestAlarmRecord].self, from: data)
+            else { return [] }
+            return records
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else { return }
+            userDefaults.set(data, forKey: "test_alarm_records")
+        }
+    }
+
+    /// 記録中の試しアラーム ID（テスト・DismissAlarmIntent の照合用）
+    static var testAlarmIDs: Set<UUID> {
+        Set(testAlarmRecords.map(\.id))
+    }
+
+    /// 「アラームの音量」注記を表示済みか（#109・一度だけ）
+    static var testRingVolumeNoteShown: Bool {
+        get { userDefaults.bool(forKey: "test_ring_volume_note_shown") }
+        set { userDefaults.set(newValue, forKey: "test_ring_volume_note_shown") }
+    }
+
     /// ユーザーが削除したプリセットの fileName（再登録防止用・#45 罠1）
     static var dismissedPresetFileNames: Set<String> {
         get {
