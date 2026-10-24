@@ -625,6 +625,9 @@ struct AlarmDetailView: View {
                 .alarmCreated(hasCustomSound: hasCustomSound, isRepeating: isRepeating, snoozeMinutes: snoozeMinutes),
                 properties: hoursUntilProperties(for: entry)
             )
+            if let backupMinutes {
+                AnalyticsService.shared.capture(.backupAlarmEnabled(minutes: backupMinutes))
+            }
             savedEntry = entry
         case .edit(let existing):
             var updated = existing
@@ -641,6 +644,13 @@ struct AlarmDetailView: View {
                 .alarmEdited(hasCustomSound: hasCustomSound, isRepeating: isRepeating, snoozeMinutes: snoozeMinutes),
                 properties: hoursUntilProperties(for: updated)
             )
+            if existing.backupMinutes != updated.backupMinutes {
+                if let newMinutes = updated.backupMinutes {
+                    AnalyticsService.shared.capture(.backupAlarmEnabled(minutes: newMinutes))
+                } else if let oldMinutes = existing.backupMinutes {
+                    AnalyticsService.shared.capture(.backupAlarmDisabled(minutes: oldMinutes))
+                }
+            }
             savedEntry = updated
         }
 

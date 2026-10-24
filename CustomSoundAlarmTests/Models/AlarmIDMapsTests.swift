@@ -103,4 +103,21 @@ struct AlarmIDMapsTests {
         #expect(AlarmIDMaps.loadPrimary() == [entryID: primaryID])
         #expect(AlarmIDMaps.loadBackup() == [entryID: backupID])
     }
+
+    // MARK: - Snooze counts (#110)
+
+    @Test
+    func snoozeCounts_roundTripThroughAppGroup() {
+        let original = AppGroup.snoozeCounts
+        defer { AppGroup.snoozeCounts = original }
+
+        let entryID = uuid(1)
+        AppGroup.snoozeCounts = [entryID: 2]
+        #expect(AppGroup.snoozeCounts[entryID] == 2)
+
+        var counts = AppGroup.snoozeCounts
+        counts.removeValue(forKey: entryID)
+        AppGroup.snoozeCounts = counts
+        #expect(AppGroup.snoozeCounts[entryID] == nil)
+    }
 }

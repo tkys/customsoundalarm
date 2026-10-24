@@ -53,6 +53,10 @@ final class AlarmScheduler {
     @ObservationIgnored
     private var firedReportedThisSession: Set<Alarm.ID> = []
 
+    /// 最終アラームの backup_alarm_fired を1回だけ送るための記録（#110）
+    @ObservationIgnored
+    private var backupFiredReportedThisSession: Set<Alarm.ID> = []
+
     private init() {
         loadIDMap()
         loadBackupIDMap()
@@ -151,6 +155,9 @@ final class AlarmScheduler {
                     try? manager.cancel(id: backupID)
                     logger.info("Reconcile: cancelled backup for one-time alarm: \(alarm.label)")
                 }
+                var counts = AppGroup.snoozeCounts
+                counts.removeValue(forKey: alarm.id)
+                AppGroup.snoozeCounts = counts
                 didChange = true
                 logger.info("Reconcile: one-time alarm auto-disabled: \(alarm.label)")
             }
@@ -171,6 +178,9 @@ final class AlarmScheduler {
                   !snoozedIDs.contains(entryID)
             else { continue }
             snoozedIDs.insert(entryID)
+            var counts = AppGroup.snoozeCounts
+            counts[entryID, default: 0] += 1
+            AppGroup.snoozeCounts = counts
             AnalyticsService.shared.capture(.alarmSnoozed(from: "reconcile"))
             logger.info("Reconcile: detected snoozing alarm: \(alarm.id)")
         }
@@ -406,6 +416,11 @@ final class AlarmScheduler {
 
         do {
             _ = try await manager.schedule(id: alarmID, configuration: config)
+            // 新しい発火サイクルなのでスヌーズ回数をリセット（#110）
+            var counts = AppGroup.snoozeCounts
+            if counts.removeValue(forKey: entry.id) != nil {
+                AppGroup.snoozeCounts = counts
+            }
             logger.info("Scheduled alarm: \(entry.timeString) - \(entry.label)")
             return alarmID
         } catch {
@@ -647,6 +662,9 @@ final class AlarmScheduler {
                         guard !snoozedIDs.contains(entryID) else { continue }
                         snoozedIDs.insert(entryID)
                         AppGroup.snoozedAlarmEntryIDs = snoozedIDs
+                        var counts = AppGroup.snoozeCounts
+                        counts[entryID, default: 0] += 1
+                        AppGroup.snoozeCounts = counts
                         logger.info("Alarm snoozed: \(alarm.id)")
                         AnalyticsService.shared.capture(.alarmSnoozed(from: "observer"))
                     default:
@@ -667,6 +685,18 @@ final class AlarmScheduler {
         // 定着ユーザー判定用に発火実績を記録（同一日は1回、鳴動中は毎tick呼ばれるが日単位で冪等）
         // マッピング欠落時（オーファン）でも呼び出す
         ReviewRequestManager.shared.recordAlarmFired()
+
+        // 最終アラームの発火（#110）。本体の store には触らない
+        if let backupEntryID = backupAlarmIDMap.first(where: { $0.value == alarmKitID })?.key {
+            if !backupFiredReportedThisSession.contains(alarmKitID) {
+                backupFiredReportedThisSession.insert(alarmKitID)
+                AnalyticsService.shared.capture(.backupAlarmFired(
+                    snoozesBefore: AppGroup.snoozeCounts[backupEntryID]
+                ))
+                logger.info("Final alarm fired: \(alarmKitID)")
+            }
+            return
+        }
 
         guard let entryID = alarmIDMap.first(where: { $0.value == alarmKitID })?.key else {
             return

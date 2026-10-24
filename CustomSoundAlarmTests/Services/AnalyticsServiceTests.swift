@@ -69,6 +69,11 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.testRingScheduled(kind: .own).name == "test_ring_scheduled")
         #expect(AnalyticsEvent.testRingScheduled(kind: .backup).name == "test_ring_scheduled")
         #expect(AnalyticsEvent.testRingStopped(hour: 8).name == "test_ring_stopped")
+        // #110: 最終アラーム
+        #expect(AnalyticsEvent.backupAlarmEnabled(minutes: 15).name == "backup_alarm_enabled")
+        #expect(AnalyticsEvent.backupAlarmDisabled(minutes: 20).name == "backup_alarm_disabled")
+        #expect(AnalyticsEvent.backupAlarmFired(snoozesBefore: 2).name == "backup_alarm_fired")
+        #expect(AnalyticsEvent.backupAlarmCancelledByStop.name == "backup_alarm_cancelled_by_stop")
     }
 
     // MARK: alarm_created
@@ -140,6 +145,39 @@ struct AnalyticsEventTests {
 
         #expect(props.count == 1)
         #expect(props["hour"] as? Int == 6)
+    }
+
+    // MARK: 最終アラーム (#110)
+
+    @Test
+    func backupAlarmEnabledProperties_minutes() {
+        let props = AnalyticsEvent.backupAlarmEnabled(minutes: 15).properties
+        #expect(props.count == 1)
+        #expect(props["minutes"] as? Int == 15)
+    }
+
+    @Test
+    func backupAlarmDisabledProperties_minutes() {
+        let props = AnalyticsEvent.backupAlarmDisabled(minutes: 30).properties
+        #expect(props["minutes"] as? Int == 30)
+    }
+
+    @Test
+    func backupAlarmFiredProperties_snoozesBefore() {
+        let props = AnalyticsEvent.backupAlarmFired(snoozesBefore: 2).properties
+        #expect(props.count == 1)
+        #expect(props["snoozes_before"] as? Int == 2)
+    }
+
+    @Test
+    func backupAlarmFiredProperties_nilSnoozesIsOmitted() {
+        let props = AnalyticsEvent.backupAlarmFired(snoozesBefore: nil).properties
+        #expect(props.isEmpty)
+    }
+
+    @Test
+    func backupAlarmCancelledProperties_areEmpty() {
+        #expect(AnalyticsEvent.backupAlarmCancelledByStop.properties.isEmpty)
     }
 
     // MARK: sound_preview_played

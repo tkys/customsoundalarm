@@ -86,6 +86,21 @@ enum AppGroup {
         set { userDefaults.set(newValue, forKey: "test_ring_volume_note_shown") }
     }
 
+    /// 本体アラームのスヌーズ回数（entryID → 回数・#110）。
+    /// 最終アラーム発火時の `snoozes_before` に使う。
+    static var snoozeCounts: [UUID: Int] {
+        get {
+            guard let data = userDefaults.data(forKey: "snooze_counts"),
+                  let map = try? JSONDecoder().decode([UUID: Int].self, from: data)
+            else { return [:] }
+            return map
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else { return }
+            userDefaults.set(data, forKey: "snooze_counts")
+        }
+    }
+
     /// 先行公開中に最終アラームを使い始めた権利（#110）。
     /// 正式に有料化した後も無料で使い続けられる。
     static var backupEarlyAccessGranted: Bool {

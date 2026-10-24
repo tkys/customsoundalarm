@@ -71,7 +71,16 @@ struct DismissAlarmIntent: LiveActivityIntent {
                     var canceled = AppGroup.backupCanceledAt
                     canceled[entryID] = now
                     AppGroup.backupCanceledAt = canceled
+
+                    AlarmEventBuffer.enqueue(PendingAlarmEvent(
+                        name: AnalyticsEvent.backupAlarmCancelledByStop.name,
+                        properties: [:],
+                        timestamp: now
+                    ))
                 }
+                var counts = AppGroup.snoozeCounts
+                counts.removeValue(forKey: entryID)
+                AppGroup.snoozeCounts = counts
             case .backup(let entryID):
                 // 最終アラームを止めたら、本体のスヌーズも取り消す
                 if let primaryID = primary[entryID] {
@@ -79,6 +88,9 @@ struct DismissAlarmIntent: LiveActivityIntent {
                 }
                 backup.removeValue(forKey: entryID)
                 AlarmIDMaps.saveBackup(backup)
+                var counts = AppGroup.snoozeCounts
+                counts.removeValue(forKey: entryID)
+                AppGroup.snoozeCounts = counts
             case .unknown:
                 break
             }

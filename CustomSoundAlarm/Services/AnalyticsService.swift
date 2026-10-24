@@ -77,6 +77,21 @@ enum AnalyticsEvent: Sendable {
     /// 本番の alarm_stopped と区別するため、Intent 側で testAlarmIDs を照合して送る
     case testRingStopped(hour: Int)
 
+    // MARK: 最終アラーム・#110
+
+    /// 最終アラームをオンにした
+    case backupAlarmEnabled(minutes: Int)
+
+    /// 最終アラームをオフにした
+    case backupAlarmDisabled(minutes: Int)
+
+    /// 最終アラームが実際に鳴った
+    /// - snoozesBefore: 最終アラームまでに本体をスヌーズした回数（不明なら nil）
+    case backupAlarmFired(snoozesBefore: Int?)
+
+    /// 本体を停止したため最終アラームが取り消された
+    case backupAlarmCancelledByStop
+
     // MARK: Phase 4（ベッドサイドモード・#68）
 
     /// ベッドサイドモードに入った
@@ -138,6 +153,10 @@ enum AnalyticsEvent: Sendable {
         case .alarmSnoozed: return "alarm_snoozed"
         case .testRingScheduled: return "test_ring_scheduled"
         case .testRingStopped: return "test_ring_stopped"
+        case .backupAlarmEnabled: return "backup_alarm_enabled"
+        case .backupAlarmDisabled: return "backup_alarm_disabled"
+        case .backupAlarmFired: return "backup_alarm_fired"
+        case .backupAlarmCancelledByStop: return "backup_alarm_cancelled_by_stop"
         case .bedsideEntered: return "bedside_entered"
         case .bedsideExited: return "bedside_exited"
         case .bedsideSettingChanged: return "bedside_setting_changed"
@@ -199,6 +218,17 @@ enum AnalyticsEvent: Sendable {
             return ["kind": kind.rawValue]
         case let .testRingStopped(hour):
             return ["hour": hour]
+        case let .backupAlarmEnabled(minutes):
+            return ["minutes": minutes]
+        case let .backupAlarmDisabled(minutes):
+            return ["minutes": minutes]
+        case let .backupAlarmFired(snoozesBefore):
+            if let snoozesBefore {
+                return ["snoozes_before": snoozesBefore]
+            }
+            return [:]
+        case .backupAlarmCancelledByStop:
+            return [:]
         case let .bedsideEntered(layout, theme, hour):
             return [
                 "layout": layout,
