@@ -75,6 +75,18 @@ enum BackupAlarmLogic {
         return primaryToday.addingTimeInterval(TimeInterval(minutes * 60))
     }
 
+    /// 説明文に出す「元の時刻」と「寝過ごし防止の時刻」（#119）。
+    /// 日付をまたぐ場合は 0:10 のように時計の時刻へ丸める。
+    static func displayTimes(
+        hour: Int,
+        minute: Int,
+        backupMinutes: Int
+    ) -> (originalHour: Int, originalMinute: Int, backupHour: Int, backupMinute: Int) {
+        let total = hour * 60 + minute + backupMinutes
+        let wrapped = ((total % (24 * 60)) + (24 * 60)) % (24 * 60)
+        return (hour, minute, wrapped / 60, wrapped % 60)
+    }
+
     /// 停止で取り消した締め切りを復活させないための抑制時間（秒）。
     static let suppressionWindow: TimeInterval = 60 * 60
 

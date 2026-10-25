@@ -179,6 +179,21 @@ enum AppGroup {
         }
     }
 
+    /// 最終アラームで使う音のファイル名（entryID → fileName・#119）。
+    /// 停止 Intent が次回分を登録するときに参照する。
+    static var backupSoundNames: [UUID: String] {
+        get {
+            guard let data = userDefaults.data(forKey: "backup_sound_names"),
+                  let map = try? JSONDecoder().decode([UUID: String].self, from: data)
+            else { return [:] }
+            return map
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else { return }
+            userDefaults.set(data, forKey: "backup_sound_names")
+        }
+    }
+
     /// 先行公開中に最終アラームを使い始めた権利（#110）。
     /// 正式に有料化した後も無料で使い続けられる。
     static var backupEarlyAccessGranted: Bool {

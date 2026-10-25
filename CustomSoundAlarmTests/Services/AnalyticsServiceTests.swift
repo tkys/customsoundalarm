@@ -74,6 +74,11 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.backupAlarmDisabled(minutes: 20).name == "backup_alarm_disabled")
         #expect(AnalyticsEvent.backupAlarmFired(snoozesBefore: 2).name == "backup_alarm_fired")
         #expect(AnalyticsEvent.backupAlarmCancelledByStop.name == "backup_alarm_cancelled_by_stop")
+        // #119: 大きくした版
+        #expect(AnalyticsEvent.backupLoudVariantGenerated(
+            gainDbBucket: "12~20", durationBucket: "60s", source: .imported
+        ).name == "backup_loud_variant_generated")
+        #expect(AnalyticsEvent.backupLoudVariantFailed(reason: .silentSource).name == "backup_loud_variant_failed")
         // #116: アップデート案内
         #expect(AnalyticsEvent.updatePromptShown(
             kind: .required, currentBuild: 9, targetBuild: 10
@@ -214,6 +219,29 @@ struct AnalyticsEventTests {
         let props = AnalyticsEvent.updatePromptDismissed(kind: .recommended).properties
         #expect(props.count == 1)
         #expect(props["kind"] as? String == "recommended")
+    }
+
+    // MARK: backup_loud_variant (#119)
+
+    @Test
+    func backupLoudVariantGeneratedProperties() {
+        let props = AnalyticsEvent.backupLoudVariantGenerated(
+            gainDbBucket: "12~20",
+            durationBucket: "60s",
+            source: .imported
+        ).properties
+
+        #expect(props.count == 3)
+        #expect(props["gain_db_bucket"] as? String == "12~20")
+        #expect(props["duration_bucket"] as? String == "60s")
+        #expect(props["source"] as? String == "imported")
+    }
+
+    @Test
+    func backupLoudVariantFailedProperties() {
+        let props = AnalyticsEvent.backupLoudVariantFailed(reason: .silentSource).properties
+        #expect(props.count == 1)
+        #expect(props["reason"] as? String == "silent_source")
     }
 
     // MARK: sound_preview_played

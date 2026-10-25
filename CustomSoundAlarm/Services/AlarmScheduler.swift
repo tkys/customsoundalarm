@@ -163,6 +163,9 @@ final class AlarmScheduler {
                 alarmIDMap.removeValue(forKey: alarm.id)
                 if let backupID = backupAlarmIDMap.removeValue(forKey: alarm.id) {
                     try? manager.cancel(id: backupID)
+                    var soundNames = AppGroup.backupSoundNames
+                    soundNames.removeValue(forKey: alarm.id)
+                    AppGroup.backupSoundNames = soundNames
                     logger.info("Reconcile: cancelled backup for one-time alarm: \(alarm.label)")
                 }
                 var counts = AppGroup.snoozeCounts
@@ -294,6 +297,9 @@ final class AlarmScheduler {
         for entryID in backupDiff.cancelEntryIDs {
             guard let backupID = backupAlarmIDMap[entryID] else { continue }
             try? manager.cancel(id: backupID)
+            var soundNames = AppGroup.backupSoundNames
+            soundNames.removeValue(forKey: entryID)
+            AppGroup.backupSoundNames = soundNames
             logger.info("Cancelled backup alarm for removed entry: \(entryID)")
         }
         for (_, oldBackupID) in backupDiff.rescheduleAlarmIDs {
@@ -476,11 +482,16 @@ final class AlarmScheduler {
 
         let alarmID = Alarm.ID()
         let displayName = SoundStore.shared.displayName(for: entry.soundFileName)
+        let soundFileName = BackupLoudVariantService.resolvedSoundFileName(for: entry)
+        var soundNames = AppGroup.backupSoundNames
+        soundNames[entry.id] = soundFileName
+        AppGroup.backupSoundNames = soundNames
         let config = BackupAlarmFactory.configuration(
             for: entry,
             fireDate: nextDate,
             alarmID: alarmID,
-            displayName: displayName
+            displayName: displayName,
+            soundFileName: soundFileName
         )
 
         do {
@@ -509,6 +520,11 @@ final class AlarmScheduler {
                 try? manager.cancel(id: backupID)
             }
         }
+        var soundNames = AppGroup.backupSoundNames
+        for entryID in orphanIDs {
+            soundNames.removeValue(forKey: entryID)
+        }
+        AppGroup.backupSoundNames = soundNames
         saveBackupIDMap()
         logger.info("Cancelled \(orphanIDs.count) orphan backup alarm(s)")
     }
