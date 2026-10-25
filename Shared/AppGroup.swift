@@ -20,6 +20,75 @@ enum AppGroup {
         set { userDefaults.set(newValue, forKey: "first_install_version") }
     }
 
+    /// アップデート設定のキャッシュ（#116）
+    static var cachedAppConfigData: Data? {
+        get { userDefaults.data(forKey: "cached_app_config_data") }
+        set {
+            if let newValue {
+                userDefaults.set(newValue, forKey: "cached_app_config_data")
+            } else {
+                userDefaults.removeObject(forKey: "cached_app_config_data")
+            }
+        }
+    }
+
+    /// アップデート設定を最後に取得した日時（キャッシュの鮮度判定・#116）
+    static var cachedAppConfigFetchedAt: Date? {
+        get { userDefaults.object(forKey: "cached_app_config_fetched_at") as? Date }
+        set {
+            if let newValue {
+                userDefaults.set(newValue, forKey: "cached_app_config_fetched_at")
+            } else {
+                userDefaults.removeObject(forKey: "cached_app_config_fetched_at")
+            }
+        }
+    }
+
+    /// アップデート設定を最後に確認した日時（1時間に1回の制限・#116）
+    static var lastUpdateCheckAt: Date? {
+        get { userDefaults.object(forKey: "last_update_check_at") as? Date }
+        set {
+            if let newValue {
+                userDefaults.set(newValue, forKey: "last_update_check_at")
+            } else {
+                userDefaults.removeObject(forKey: "last_update_check_at")
+            }
+        }
+    }
+
+    /// 「あとで」で閉じたおすすめの latest_build（#116）
+    static var dismissedRecommendedBuild: Int? {
+        get {
+            guard userDefaults.object(forKey: "dismissed_recommended_build") != nil else { return nil }
+            return userDefaults.integer(forKey: "dismissed_recommended_build")
+        }
+        set {
+            if let newValue {
+                userDefaults.set(newValue, forKey: "dismissed_recommended_build")
+            } else {
+                userDefaults.removeObject(forKey: "dismissed_recommended_build")
+            }
+        }
+    }
+
+    /// UIテスト用: 必須アップデートを強制（DEBUGのみ・#116）
+    static var isUITestUpdateRequired: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-update-required")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: おすすめアップデートを強制（DEBUGのみ・#116）
+    static var isUITestUpdateRecommended: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-update-recommended")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: DEBUG時のみ有効なfresh onboarding強制フラグ
     static var isUITestFreshOnboarding: Bool {
 #if DEBUG
