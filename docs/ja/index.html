@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>My Sound Alarm｜好きな曲・動画の音を iPhone のアラームに</title>
+<meta name="description" content="好きな曲の好きな部分や動画の音を、iPhone のアラームに。波形で選んだ部分が、止めるまでくり返し鳴ります。iOS 26 の AlarmKit でアラームを登録するので、マナーモードや集中モードでも鳴ります。">
+<link rel="canonical" href="https://tkys.github.io/customsoundalarm/ja/">
+<link rel="alternate" hreflang="en" href="https://tkys.github.io/customsoundalarm/">
+<link rel="alternate" hreflang="ja" href="https://tkys.github.io/customsoundalarm/ja/">
+<link rel="alternate" hreflang="x-default" href="https://tkys.github.io/customsoundalarm/">
+<meta property="og:title" content="My Sound Alarm｜好きな曲・動画の音を iPhone のアラームに">
+<meta property="og:description" content="好きな曲の好きな部分や動画の音を、iPhone のアラームに。波形で選んだ部分が、止めるまでくり返し鳴ります。iOS 26 の AlarmKit でアラームを登録するので、マナーモードや集中モードでも鳴ります。">
+<meta property="og:image" content="https://tkys.github.io/customsoundalarm/assets/img/hero.jpg">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tkys.github.io/customsoundalarm/ja/">
+<meta property="og:site_name" content="My Sound Alarm">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="apple-touch-icon" href="../assets/img/icon.png">
+<meta name="apple-itunes-app" content="app-id=6760616800">
+<link rel="icon" href="../assets/img/icon.png">
+<style>
+:root{color-scheme:light;--text:#1C1714;--muted:#5E5650;--line:#E7E2DD;--accent:#C4501A;--wave:#D6D1CC}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#fff;color:var(--text);font:18px/1.7 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif}
+a{color:var(--accent);text-underline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 0 8px;font-size:16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;text-decoration:none;color:var(--text)}
+.brand img{width:32px;height:32px;border-radius:8px}
+h1,h2,h3{word-break:auto-phrase;text-wrap:balance}
+.ph{display:inline-block}
+p,li{word-break:auto-phrase}
+h1{font-size:clamp(32px,6.4vw,48px);line-height:1.2;letter-spacing:-.015em;margin:36px 0 14px}
+.lead{font-size:20px;color:var(--muted);margin:0 0 24px;max-width:34em}
+.badge img{height:52px;width:auto;display:block}
+.req{font-size:15px;color:var(--muted);margin:10px 0 0}
+figure{margin:44px 0 8px}
+.wavebox{position:relative;padding-bottom:26px}
+.wave{display:block;width:100%;height:auto}
+.wavelabel{position:absolute;bottom:0;transform:translateX(-50%);white-space:nowrap;font-size:14px;font-weight:600;color:var(--accent)}
+figcaption{font-size:16px;color:var(--muted);margin-top:8px}
+h2{font-size:26px;line-height:1.35;margin:56px 0 10px}
+.shot{display:block;width:100%;max-width:340px;height:auto;border:1px solid var(--line);border-radius:22px;margin:18px 0 0}
+.side{float:right;width:132px;height:auto;margin:0 0 12px 20px}
+.clear{clear:both}
+h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
+.faq p{margin:0;color:var(--muted)}
+.end{margin:64px 0 0;padding-top:32px;border-top:1px solid var(--line);display:flex;gap:28px;align-items:center}
+.end h2{margin:0 0 18px}
+.end-art{width:180px;height:auto;flex:none}
+@media (max-width:560px){.end{flex-direction:column;align-items:flex-start}.end-art{width:220px}}
+footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wrap}
+.made{color:var(--muted);flex-basis:100%}
+</style>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "My Sound Alarm", "alternateName": "CustomSoundAlarm", "operatingSystem": "iOS 26.0 or later", "applicationCategory": "UtilitiesApplication", "description": "好きな曲の好きな部分や動画の音を、iPhone のアラームに。波形で選んだ部分が、止めるまでくり返し鳴ります。iOS 26 の AlarmKit でアラームを登録するので、マナーモードや集中モードでも鳴ります。", "url": "https://tkys.github.io/customsoundalarm/ja/", "downloadUrl": "https://apps.apple.com/app/id6760616800", "sameAs": "https://apps.apple.com/app/id6760616800", "image": "https://tkys.github.io/customsoundalarm/assets/img/icon.png", "screenshot": "https://tkys.github.io/customsoundalarm/assets/img/crop-ja.jpg", "author": {"@type": "Person", "name": "tkys", "url": "https://github.com/tkys"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "inLanguage": "ja", "mainEntity": [{"@type": "Question", "name": "iPhone で好きな曲をアラームにするには？", "acceptedAnswer": {"@type": "Answer", "text": "時計アプリでもライブラリの曲を選べますが、鳴るのは曲の頭からです。My Sound Alarm なら、音声ファイル（MP3・AAC・WAV・M4A）や動画を開いて、波形で好きな部分を選び、アラームの音として保存できます。"}}, {"@type": "Question", "name": "Apple Music や Spotify の曲は使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "使えません。配信サービスの曲は保護されているため取り込めません。ファイルアプリに保存した音声ファイル、自分で録音した声、写真ライブラリの動画が使えます。"}}, {"@type": "Question", "name": "動画の音もアラームにできますか？", "acceptedAnswer": {"@type": "Answer", "text": "できます。写真ライブラリやファイルアプリから動画を選ぶと、音声を取り出します。どの部分を鳴らすかも選べます。"}}, {"@type": "Question", "name": "自作の着信音のような40秒の制限はありますか？", "acceptedAnswer": {"@type": "Answer", "text": "ありません。自作の着信音は約40秒までですが、My Sound Alarm では動画から最長10分、長い音声ファイルもそのまま取り込めます。くり返し鳴るので、短い部分がおすすめです。"}}, {"@type": "Question", "name": "マナーモードや集中モード、アプリを閉じているときも鳴りますか？", "acceptedAnswer": {"@type": "Answer", "text": "最初に表示される「アラーム」の許可をオンにしていれば鳴ります。Apple の AlarmKit でアラームを登録するので、アプリが起動していなくても鳴ります。"}}, {"@type": "Question", "name": "アラームの音を大きくするには？", "acceptedAnswer": {"@type": "Answer", "text": "アラームの音量は「設定 → サウンドと触覚 →『着信音と通知音』」で決まります。「ボタンで変更」をオンにすると、本体の音量ボタンでも変えられます。コントロールセンターの音量は音楽や動画の音量で、アラームには効きません。"}}]}</script>
+</head>
+<body>
+<div class="wrap">
+<header><a class="brand" href="https://tkys.github.io/customsoundalarm/ja/"><img src="../assets/img/icon.png" alt="">My Sound Alarm</a>
+<a href="https://tkys.github.io/customsoundalarm/" hreflang="en">English</a></header>
+<main>
+<h1><span class="ph">好きな曲の、</span><span class="ph">好きなところで起きる</span></h1>
+<p class="lead">曲のいちばん好きな部分や動画の音を、iPhone のアラームに。止めるまで、くり返し鳴ります。</p>
+<a class="badge" href="https://apps.apple.com/app/id6760616800" data-pos="hero" rel="noopener"><img src="../assets/img/app-store-badge.svg" alt="App Store からダウンロード" width="156" height="52"></a>
+<p class="req">マナーモードや集中モードでも鳴ります。iOS 26 以降の iPhone 向け。</p>
+<figure><div class="wavebox"><svg class="wave" viewBox="0 0 720 102" role="img" aria-label="止めるまで、この部分だけがくり返し鳴ります。"><rect x="1.3" y="29.7" width="4.8" height="30.7" rx="2.4" fill="var(--wave)"/><rect x="8.8" y="26.6" width="4.8" height="36.9" rx="2.4" fill="var(--wave)"/><rect x="16.4" y="23.7" width="4.8" height="42.5" rx="2.4" fill="var(--wave)"/><rect x="23.9" y="21.6" width="4.8" height="46.9" rx="2.4" fill="var(--wave)"/><rect x="31.4" y="20.3" width="4.8" height="49.4" rx="2.4" fill="var(--wave)"/><rect x="38.9" y="20.0" width="4.8" height="50.0" rx="2.4" fill="var(--wave)"/><rect x="46.4" y="20.7" width="4.8" height="48.6" rx="2.4" fill="var(--wave)"/><rect x="53.9" y="22.2" width="4.8" height="45.7" rx="2.4" fill="var(--wave)"/><rect x="61.4" y="24.0" width="4.8" height="41.9" rx="2.4" fill="var(--wave)"/><rect x="68.8" y="20.7" width="4.8" height="48.6" rx="2.4" fill="var(--wave)"/><rect x="76.3" y="17.3" width="4.8" height="55.5" rx="2.4" fill="var(--wave)"/><rect x="83.8" y="14.7" width="4.8" height="60.7" rx="2.4" fill="var(--wave)"/><rect x="91.3" y="13.2" width="4.8" height="63.6" rx="2.4" fill="var(--wave)"/><rect x="98.8" y="12.9" width="4.8" height="64.1" rx="2.4" fill="var(--wave)"/><rect x="106.3" y="13.9" width="4.8" height="62.2" rx="2.4" fill="var(--wave)"/><rect x="113.8" y="15.9" width="4.8" height="58.3" rx="2.4" fill="var(--wave)"/><rect x="121.3" y="18.5" width="4.8" height="53.0" rx="2.4" fill="var(--wave)"/><rect x="128.8" y="16.6" width="4.8" height="56.8" rx="2.4" fill="var(--wave)"/><rect x="136.3" y="14.2" width="4.8" height="61.6" rx="2.4" fill="var(--wave)"/><rect x="143.8" y="12.7" width="4.8" height="64.5" rx="2.4" fill="var(--wave)"/><rect x="151.3" y="12.4" width="4.8" height="65.2" rx="2.4" fill="var(--wave)"/><rect x="158.8" y="13.4" width="4.8" height="63.3" rx="2.4" fill="var(--wave)"/><rect x="166.3" y="15.5" width="4.8" height="59.0" rx="2.4" fill="var(--wave)"/><rect x="173.8" y="18.6" width="4.8" height="52.7" rx="2.4" fill="var(--wave)"/><rect x="181.3" y="22.3" width="4.8" height="45.3" rx="2.4" fill="var(--wave)"/><rect x="188.8" y="21.9" width="4.8" height="46.2" rx="2.4" fill="var(--wave)"/><rect x="196.3" y="20.3" width="4.8" height="49.5" rx="2.4" fill="var(--wave)"/><rect x="203.8" y="19.3" width="4.8" height="51.4" rx="2.4" fill="var(--wave)"/><rect x="211.3" y="19.3" width="4.8" height="51.4" rx="2.4" fill="var(--wave)"/><rect x="218.8" y="20.3" width="4.8" height="49.4" rx="2.4" fill="var(--wave)"/><rect x="226.3" y="22.3" width="4.8" height="45.4" rx="2.4" fill="var(--wave)"/><rect x="233.8" y="25.1" width="4.8" height="39.9" rx="2.4" fill="var(--wave)"/><rect x="241.3" y="28.2" width="4.8" height="33.5" rx="2.4" fill="var(--wave)"/><rect x="248.8" y="27.6" width="4.8" height="34.9" rx="2.4" fill="var(--wave)"/><rect x="256.4" y="25.0" width="4.8" height="39.9" rx="2.4" fill="var(--wave)"/><rect x="263.9" y="23.0" width="4.8" height="44.0" rx="2.4" fill="var(--wave)"/><rect x="271.4" y="21.8" width="4.8" height="46.4" rx="2.4" fill="var(--wave)"/><rect x="278.9" y="21.6" width="4.8" height="46.8" rx="2.4" fill="var(--wave)"/><rect x="286.4" y="22.3" width="4.8" height="45.3" rx="2.4" fill="var(--wave)"/><rect x="293.9" y="23.9" width="4.8" height="42.2" rx="2.4" fill="var(--wave)"/><rect x="301.4" y="26.0" width="4.8" height="38.1" rx="2.4" fill="var(--wave)"/><rect x="308.9" y="24.9" width="4.8" height="40.3" rx="2.4" fill="var(--wave)"/><rect x="316.4" y="21.5" width="4.8" height="47.0" rx="2.4" fill="var(--wave)"/><rect x="323.9" y="18.8" width="4.8" height="52.5" rx="2.4" fill="var(--wave)"/><rect x="331.4" y="17.1" width="4.8" height="55.9" rx="2.4" fill="var(--wave)"/><rect x="338.9" y="16.5" width="4.8" height="57.0" rx="2.4" fill="var(--wave)"/><rect x="346.4" y="17.2" width="4.8" height="55.6" rx="2.4" fill="var(--wave)"/><rect x="353.9" y="18.9" width="4.8" height="52.2" rx="2.4" fill="var(--wave)"/><rect x="361.4" y="21.4" width="4.8" height="47.2" rx="2.4" fill="var(--wave)"/><rect x="368.9" y="21.4" width="4.8" height="47.1" rx="2.4" fill="var(--wave)"/><rect x="376.4" y="18.8" width="4.8" height="52.3" rx="2.4" fill="var(--wave)"/><rect x="383.9" y="17.0" width="4.8" height="56.0" rx="2.4" fill="var(--wave)"/><rect x="391.4" y="5.7" width="4.8" height="78.5" rx="2.4" fill="var(--accent)"/><rect x="398.9" y="6.2" width="4.8" height="77.5" rx="2.4" fill="var(--accent)"/><rect x="406.4" y="8.0" width="4.8" height="74.0" rx="2.4" fill="var(--accent)"/><rect x="413.9" y="10.8" width="4.8" height="68.5" rx="2.4" fill="var(--accent)"/><rect x="421.4" y="14.3" width="4.8" height="61.4" rx="2.4" fill="var(--accent)"/><rect x="428.9" y="15.8" width="4.8" height="58.4" rx="2.4" fill="var(--accent)"/><rect x="436.4" y="14.0" width="4.8" height="62.0" rx="2.4" fill="var(--accent)"/><rect x="443.9" y="12.8" width="4.8" height="64.5" rx="2.4" fill="var(--accent)"/><rect x="451.4" y="12.4" width="4.8" height="65.2" rx="2.4" fill="var(--accent)"/><rect x="458.9" y="13.1" width="4.8" height="63.9" rx="2.4" fill="var(--accent)"/><rect x="466.4" y="14.7" width="4.8" height="60.5" rx="2.4" fill="var(--accent)"/><rect x="473.9" y="17.3" width="4.8" height="55.5" rx="2.4" fill="var(--accent)"/><rect x="481.4" y="20.3" width="4.8" height="49.3" rx="2.4" fill="var(--accent)"/><rect x="488.9" y="21.7" width="4.8" height="46.6" rx="2.4" fill="var(--accent)"/><rect x="496.4" y="19.0" width="4.8" height="52.0" rx="2.4" fill="var(--accent)"/><rect x="503.9" y="16.7" width="4.8" height="56.5" rx="2.4" fill="var(--accent)"/><rect x="511.4" y="15.2" width="4.8" height="59.7" rx="2.4" fill="var(--accent)"/><rect x="518.9" y="14.5" width="4.8" height="61.0" rx="2.4" fill="var(--accent)"/><rect x="526.4" y="25.3" width="4.8" height="39.4" rx="2.4" fill="var(--wave)"/><rect x="533.9" y="26.5" width="4.8" height="37.1" rx="2.4" fill="var(--wave)"/><rect x="541.4" y="28.2" width="4.8" height="33.6" rx="2.4" fill="var(--wave)"/><rect x="548.9" y="28.9" width="4.8" height="32.2" rx="2.4" fill="var(--wave)"/><rect x="556.4" y="25.1" width="4.8" height="39.7" rx="2.4" fill="var(--wave)"/><rect x="563.9" y="21.9" width="4.8" height="46.3" rx="2.4" fill="var(--wave)"/><rect x="571.4" y="19.5" width="4.8" height="51.1" rx="2.4" fill="var(--wave)"/><rect x="578.9" y="18.2" width="4.8" height="53.7" rx="2.4" fill="var(--wave)"/><rect x="586.4" y="18.1" width="4.8" height="53.9" rx="2.4" fill="var(--wave)"/><rect x="593.9" y="19.1" width="4.8" height="51.9" rx="2.4" fill="var(--wave)"/><rect x="601.4" y="20.9" width="4.8" height="48.1" rx="2.4" fill="var(--wave)"/><rect x="608.9" y="22.4" width="4.8" height="45.1" rx="2.4" fill="var(--wave)"/><rect x="616.4" y="19.2" width="4.8" height="51.5" rx="2.4" fill="var(--wave)"/><rect x="623.9" y="16.7" width="4.8" height="56.6" rx="2.4" fill="var(--wave)"/><rect x="631.4" y="15.1" width="4.8" height="59.8" rx="2.4" fill="var(--wave)"/><rect x="638.9" y="14.8" width="4.8" height="60.5" rx="2.4" fill="var(--wave)"/><rect x="646.4" y="15.7" width="4.8" height="58.6" rx="2.4" fill="var(--wave)"/><rect x="653.9" y="17.8" width="4.8" height="54.4" rx="2.4" fill="var(--wave)"/><rect x="661.4" y="20.8" width="4.8" height="48.5" rx="2.4" fill="var(--wave)"/><rect x="668.9" y="23.9" width="4.8" height="42.2" rx="2.4" fill="var(--wave)"/><rect x="676.4" y="21.7" width="4.8" height="46.6" rx="2.4" fill="var(--wave)"/><rect x="683.9" y="20.0" width="4.8" height="50.0" rx="2.4" fill="var(--wave)"/><rect x="691.4" y="19.1" width="4.8" height="51.7" rx="2.4" fill="var(--wave)"/><rect x="698.9" y="19.3" width="4.8" height="51.4" rx="2.4" fill="var(--wave)"/><rect x="706.4" y="20.5" width="4.8" height="49.0" rx="2.4" fill="var(--wave)"/><rect x="713.9" y="22.7" width="4.8" height="44.7" rx="2.4" fill="var(--wave)"/><line x1="390.0" y1="98" x2="525.0" y2="98" stroke="var(--accent)" stroke-width="2"/></svg><span class="wavelabel" style="left:63.5%">サビ 0:42–1:12</span></div><figcaption>止めるまで、この部分だけがくり返し鳴ります。</figcaption></figure>
+<h2>鳴らす部分を選ぶ</h2>
+<p>動画や音声ファイルを開いて、波形の上で範囲を選ぶだけ。サビの20〜30秒がちょうどいい長さです。最後まで鳴ったら、また最初から鳴ります。</p>
+<img class="shot" src="../assets/img/crop-ja.jpg" alt="切り出し画面：波形の中で33秒ぶんを選んだところ" width="340" height="383">
+<h2>マナーモードでも鳴る</h2>
+<img class="side" src="../assets/img/silent.jpg" alt="" width="132" height="132" loading="lazy">
+<p>アラームは、iOS 26 で Apple が用意した AlarmKit で登録します。時計アプリのアラームと同じようにロック画面に表示され、マナーモードや集中モードでも、アプリを閉じていても鳴ります。</p>
+<div class="clear"></div>
+<h2>手元にある音で</h2>
+<p>音声ファイル、自分で録音した声、保存した動画が使えます。カタログから探す手間も、サブスク登録もいりません。</p>
+<section class="faq"><h2>よくある質問</h2><h3>iPhone で好きな曲をアラームにするには？</h3><p>時計アプリでもライブラリの曲を選べますが、鳴るのは曲の頭からです。My Sound Alarm なら、音声ファイル（MP3・AAC・WAV・M4A）や動画を開いて、波形で好きな部分を選び、アラームの音として保存できます。</p><h3>Apple Music や Spotify の曲は使えますか？</h3><p>使えません。配信サービスの曲は保護されているため取り込めません。ファイルアプリに保存した音声ファイル、自分で録音した声、写真ライブラリの動画が使えます。</p><h3>動画の音もアラームにできますか？</h3><p>できます。写真ライブラリやファイルアプリから動画を選ぶと、音声を取り出します。どの部分を鳴らすかも選べます。</p><h3>自作の着信音のような40秒の制限はありますか？</h3><p>ありません。自作の着信音は約40秒までですが、My Sound Alarm では動画から最長10分、長い音声ファイルもそのまま取り込めます。くり返し鳴るので、短い部分がおすすめです。</p><h3>マナーモードや集中モード、アプリを閉じているときも鳴りますか？</h3><p>最初に表示される「アラーム」の許可をオンにしていれば鳴ります。Apple の AlarmKit でアラームを登録するので、アプリが起動していなくても鳴ります。</p><h3>アラームの音を大きくするには？</h3><p>アラームの音量は「設定 → サウンドと触覚 →『着信音と通知音』」で決まります。「ボタンで変更」をオンにすると、本体の音量ボタンでも変えられます。コントロールセンターの音量は音楽や動画の音量で、アラームには効きません。</p></section>
+<section class="end"><img class="end-art" src="../assets/img/hero.jpg" alt="" width="420" height="560" loading="lazy">
+<div><h2><span class="ph">明日の朝は、</span><span class="ph">好きなサビで起きる。</span></h2><a class="badge" href="https://apps.apple.com/app/id6760616800" data-pos="bottom" rel="noopener"><img src="../assets/img/app-store-badge.svg" alt="App Store からダウンロード" width="156" height="52"></a></div></section>
+</main>
+<footer><span class="made">日本の個人開発者 tkys がつくっています。</span><a href="../support.html">サポート</a><a href="../privacy.html">プライバシーポリシー</a></footer>
+</div>
+
+</body>
+</html>
