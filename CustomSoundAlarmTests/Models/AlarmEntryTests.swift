@@ -259,4 +259,106 @@ struct AlarmEntryTests {
         let copy = original.duplicated()
         #expect(copy.snoozeMinutes == 20)
     }
+
+    // MARK: - backupMinutes (#110 データ移行)
+
+    @Test
+    func backupMinutes_defaultIsNil() {
+        #expect(AlarmEntry().backupMinutes == nil)
+    }
+
+    @Test
+    func backupMinutes_oldFormatJSON_decodesAsNil() throws {
+        let json = """
+        {
+            "id": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
+            "hour": 7,
+            "minute": 0,
+            "isEnabled": true,
+            "label": "Old",
+            "repeatWeekdays": [2, 4],
+            "soundFileName": "abc.caf",
+            "snoozeMinutes": 9
+        }
+        """
+        let data = try #require(json.data(using: .utf8))
+        let alarm = try JSONDecoder().decode(AlarmEntry.self, from: data)
+
+        #expect(alarm.backupMinutes == nil, "backupMinutes が無い旧JSONは nil として読めるべき")
+        #expect(alarm.hour == 7)
+        #expect(alarm.label == "Old")
+        #expect(alarm.repeatWeekdays == [2, 4])
+        #expect(alarm.soundFileName == "abc.caf")
+    }
+
+    /// 旧データ（項目なし）の配列を丸ごと読んでも、アラームが1件も消えないことを固定する。
+    /// `try?` decode で失敗すると全消滅する前例があるため、配列経路で検証する。
+    @Test
+    func backupMinutes_oldFormatArray_decodesWithoutLosingEntries() throws {
+        let json = """
+        [
+            {
+                "id": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
+                "hour": 7,
+                "minute": 0,
+                "isEnabled": true,
+                "label": "Old 1",
+                "repeatWeekdays": [],
+                "soundFileName": ""
+            },
+            {
+                "id": "B621E1F8-C36C-495A-93FC-0C247A3E6E5F",
+                "hour": 8,
+                "minute": 30,
+                "isEnabled": false,
+                "label": "Old 2",
+                "repeatWeekdays": [1, 7],
+                "soundFileName": "x.caf"
+            }
+        ]
+        """
+        let data = try #require(json.data(using: .utf8))
+        let alarms = try JSONDecoder().decode([AlarmEntry].self, from: data)
+
+        #expect(alarms.count == 2, "旧データのアラームが消えてはいけない")
+        #expect(alarms.allSatisfy { $0.backupMinutes == nil })
+        #expect(alarms[0].label == "Old 1")
+        #expect(alarms[1].label == "Old 2")
+        #expect(alarms[1].repeatWeekdays == [1, 7])
+    }
+
+    @Test
+    func backupMinutes_roundTripPreservesValue() throws {
+        let original = AlarmEntry(
+            hour: 7, minute: 0,
+            label: "Backup",
+            backupMinutes: 20
+        )
+        let data = try JSONEncoder().encode(original)
+        let decoded = try JSONDecoder().decode(AlarmEntry.self, from: data)
+
+        #expect(decoded.backupMinutes == 20)
+        #expect(decoded.hour == 7)
+        #expect(decoded.id == original.id)
+    }
+
+    @Test
+    func backupMinutes_nilRoundTripStaysNil() throws {
+        let original = AlarmEntry(backupMinutes: nil)
+        let data = try JSONEncoder().encode(original)
+        let decoded = try JSONDecoder().decode(AlarmEntry.self, from: data)
+
+        #expect(decoded.backupMinutes == nil)
+    }
+
+    @Test
+    func backupMinutes_duplicatedCopiesValue() {
+        let copy = AlarmEntry(backupMinutes: 30).duplicated()
+        #expect(copy.backupMinutes == 30)
+    }
+
+    @Test
+    func backupMinutes_duplicatedKeepsNil() {
+        #expect(AlarmEntry(backupMinutes: nil).duplicated().backupMinutes == nil)
+    }
 }
