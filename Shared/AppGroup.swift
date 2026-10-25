@@ -98,6 +98,15 @@ enum AppGroup {
 #endif
     }
 
+    /// UI テストとして起動されたか（いずれかの -uitest- 引数がある）。DEBUG のみ
+    static var isUITestRun: Bool {
+#if DEBUG
+        CommandLine.arguments.contains { $0.hasPrefix("-uitest-") }
+#else
+        false
+#endif
+    }
+
     /// UIテスト用: DEBUG時のみ有効なアラーム一覧シード
     static var isUITestSeedAlarms: Bool {
 #if DEBUG
