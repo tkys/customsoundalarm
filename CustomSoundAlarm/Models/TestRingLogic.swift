@@ -8,7 +8,7 @@ import Foundation
 enum TestRingLogic {
 
     /// 登録から鳴るまでの秒数
-    static let delay: TimeInterval = 5
+    static let delay: TimeInterval = 1
 
     /// 停止されなかった試しアラームを掃除するまでの秒数
     static let cleanupAfter: TimeInterval = 60

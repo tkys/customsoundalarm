@@ -98,6 +98,15 @@ enum AppGroup {
 #endif
     }
 
+    /// UI テストとして起動されたか（いずれかの -uitest- 引数がある）。DEBUG のみ
+    static var isUITestRun: Bool {
+#if DEBUG
+        CommandLine.arguments.contains { $0.hasPrefix("-uitest-") }
+#else
+        false
+#endif
+    }
+
     /// UIテスト用: DEBUG時のみ有効なアラーム一覧シード
     static var isUITestSeedAlarms: Bool {
 #if DEBUG
@@ -167,6 +176,21 @@ enum AppGroup {
         set {
             guard let data = try? JSONEncoder().encode(newValue) else { return }
             userDefaults.set(data, forKey: "snooze_counts")
+        }
+    }
+
+    /// 最終アラームで使う音のファイル名（entryID → fileName・#119）。
+    /// 停止 Intent が次回分を登録するときに参照する。
+    static var backupSoundNames: [UUID: String] {
+        get {
+            guard let data = userDefaults.data(forKey: "backup_sound_names"),
+                  let map = try? JSONDecoder().decode([UUID: String].self, from: data)
+            else { return [:] }
+            return map
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else { return }
+            userDefaults.set(data, forKey: "backup_sound_names")
         }
     }
 

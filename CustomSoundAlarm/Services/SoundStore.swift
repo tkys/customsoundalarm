@@ -60,6 +60,8 @@ final class SoundStore {
 
     func remove(_ sound: AlarmSound) {
         sounds.removeAll { $0.id == sound.id }
+        // 最終アラーム用の大きくした版も一緒に消す（#119）
+        BackupLoudVariantService.deleteVariant(for: sound.fileName)
         if !sound.isPreset {
             try? AudioConverter.shared.deleteSound(fileName: sound.fileName)
             // サムネイルも一緒に消す（#86）

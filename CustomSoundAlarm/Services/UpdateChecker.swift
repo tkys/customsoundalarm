@@ -69,6 +69,15 @@ final class UpdateChecker {
 
     /// 起動時・前面復帰時に呼ぶ。
     func check(isOnboardingVisible: Bool) async {
+#if DEBUG
+        // UI テスト中は、アップデート案内のテスト以外で案内を出さない。
+        // 公開中の app-config.json（latest_build）より古い開発ビルドだと、
+        // 「新しいバージョンがあります」のシートが一覧を覆い、他の UI テストが失敗する。
+        if AppGroup.isUITestRun && !AppGroup.isUITestUpdateRequired && !AppGroup.isUITestUpdateRecommended {
+            prompt = nil
+            return
+        }
+#endif
         await refreshConfigIfNeeded()
 
         let input = UpdateGateInput(

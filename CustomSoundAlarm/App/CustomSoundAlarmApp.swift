@@ -45,6 +45,12 @@ struct CustomSoundAlarmApp: App {
                     }
                     #endif
 
+                    // 使われていない「大きくした版」を掃除（#119）
+                    BackupLoudVariantService.cleanupUnusedVariants(
+                        entries: AlarmStore.shared.alarms,
+                        availableSourceFileNames: Set(SoundStore.shared.sounds.map(\.fileName))
+                    )
+
                     // PostHog 計測の初期化（Info.plist にキーが無い場合は安全に無効化）
                     AnalyticsService.shared.configure()
                     setUserProperties()

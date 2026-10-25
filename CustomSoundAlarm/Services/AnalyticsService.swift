@@ -92,6 +92,22 @@ enum AnalyticsEvent: Sendable {
     /// 本体を停止したため最終アラームが取り消された
     case backupAlarmCancelledByStop
 
+    /// 大きくした版を生成した（#119）
+    case backupLoudVariantGenerated(
+        gainDbBucket: String,
+        durationBucket: String,
+        source: LoudVariantGenerator.Source
+    )
+
+    /// 大きくした版の生成に失敗した（予備音を使う・#119）
+    case backupLoudVariantFailed(reason: LoudVariantGenerator.GenerateError)
+
+    // MARK: 音量案内・#121
+
+    /// アラームの音量案内を開いた
+    /// - from: test_ring / loudness
+    case volumeGuideOpened(from: VolumeGuideSource)
+
     // MARK: アップデート案内・#116
 
     /// アップデート案内を表示した
@@ -168,6 +184,9 @@ enum AnalyticsEvent: Sendable {
         case .backupAlarmDisabled: return "backup_alarm_disabled"
         case .backupAlarmFired: return "backup_alarm_fired"
         case .backupAlarmCancelledByStop: return "backup_alarm_cancelled_by_stop"
+        case .backupLoudVariantGenerated: return "backup_loud_variant_generated"
+        case .backupLoudVariantFailed: return "backup_loud_variant_failed"
+        case .volumeGuideOpened: return "volume_guide_opened"
         case .updatePromptShown: return "update_prompt_shown"
         case .updatePromptTapped: return "update_prompt_tapped"
         case .updatePromptDismissed: return "update_prompt_dismissed"
@@ -243,6 +262,16 @@ enum AnalyticsEvent: Sendable {
             return [:]
         case .backupAlarmCancelledByStop:
             return [:]
+        case let .backupLoudVariantGenerated(gainDbBucket, durationBucket, source):
+            return [
+                "gain_db_bucket": gainDbBucket,
+                "duration_bucket": durationBucket,
+                "source": source.rawValue
+            ]
+        case let .backupLoudVariantFailed(reason):
+            return ["reason": reason.rawValue]
+        case let .volumeGuideOpened(source):
+            return ["from": source.rawValue]
         case let .updatePromptShown(kind, currentBuild, targetBuild):
             return [
                 "kind": kind.rawValue,
