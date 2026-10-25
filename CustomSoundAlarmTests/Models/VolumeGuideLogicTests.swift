@@ -26,6 +26,7 @@ struct VolumeGuideLogicTests {
             "volume_guide_title",
             "volume_guide_step1",
             "volume_guide_step2",
+            "volume_guide_image_label",
             "volume_guide_warning"
         ]
         for language in ["en", "ja"] {

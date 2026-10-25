@@ -239,4 +239,5 @@
 "volume_guide_title" = "How to make alarms louder";
 "volume_guide_step1" = "Settings → Sounds & Haptics → move the Ringtone and Alerts slider right";
 "volume_guide_step2" = "Turn on Change with Buttons to use the volume buttons too (when nothing else is playing)";
+"volume_guide_image_label" = "Settings, Sounds & Haptics, with the Ringtone and Alerts slider and the Change with Buttons switch marked";
 "volume_guide_warning" = "The volume in Control Center is for music and videos. It doesn't change alarm volume.";

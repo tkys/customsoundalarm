@@ -17,6 +17,8 @@ struct AlarmVolumeGuideView: View {
                         .scaledToFit()
                         .frame(maxWidth: .infinity)
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        // 画像名を読み上げさせない
+                        .accessibilityLabel(Text("volume_guide_image_label"))
                         .accessibilityIdentifier("volumeGuide.image")
 
                     stepRow(number: 1, text: "volume_guide_step1")
@@ -48,7 +50,8 @@ struct AlarmVolumeGuideView: View {
         HStack(alignment: .top, spacing: 12) {
             Text("\(number)")
                 .font(.subheadline.weight(.bold))
-                .foregroundStyle(.white)
+                // 白はアクセント色の上で 2.4:1 と読みにくいため黒（8.6:1）
+                .foregroundStyle(.black)
                 .frame(width: 26, height: 26)
                 .background(Circle().fill(Color.accentColor))
                 .accessibilityHidden(true)
