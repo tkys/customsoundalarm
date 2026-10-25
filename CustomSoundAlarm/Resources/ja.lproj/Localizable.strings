@@ -226,3 +226,10 @@
 "backup_alarm_before_snooze" = "スヌーズより前に最終アラームが鳴ります";
 "backup_alarm_early_access_note" = "先行公開中に使い始めた方は、正式版以降もそのまま使えます。";
 "backup_alarm_row_badge" = "最終アラームあり";
+
+/* Update gate (#116) */
+"update_required_title" = "アップデートが必要です";
+"update_required_message" = "このバージョンには問題が見つかりました。App Store で最新版に更新してください。設定済みのアラームはそのまま鳴ります。";
+"update_recommended_title" = "新しいバージョンがあります";
+"update_button" = "App Store で更新";
+"update_later" = "あとで";

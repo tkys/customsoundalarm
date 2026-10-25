@@ -226,3 +226,10 @@
 "backup_alarm_before_snooze" = "The final alarm rings before snooze ends.";
 "backup_alarm_early_access_note" = "If you start using this during early access, it stays available after launch.";
 "backup_alarm_row_badge" = "Final alarm on";
+
+/* Update gate (#116) */
+"update_required_title" = "Update Required";
+"update_required_message" = "A problem was found in this version. Please update to the latest version on the App Store. Your existing alarms will still ring.";
+"update_recommended_title" = "A New Version Is Available";
+"update_button" = "Update on the App Store";
+"update_later" = "Later";

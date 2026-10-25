@@ -47,6 +47,9 @@ struct UpdatePrompt: Equatable, Sendable, Identifiable {
     let targetBuild: Int
 
     var id: String { kind.rawValue }
+
+    /// App Store のアプリページ（#116）
+    static let appStoreURL = URL(string: "itms-apps://apps.apple.com/app/id6760616800")!
 }
 
 /// `UpdateGate` の入力。

@@ -105,8 +105,8 @@ final class UpdateChecker {
         return current
     }
 
-    /// 更新ボタンで案内を閉じる（おすすめのみ。必須は閉じない）。
-    func closeAfterUpdateTap() {
+    /// 更新ボタン後の後処理（おすすめのみ閉じる。必須は閉じない）。
+    func handleUpdateTap() {
         guard let current = prompt, current.kind == .recommended else { return }
         AppGroup.dismissedRecommendedBuild = current.targetBuild
         prompt = nil
