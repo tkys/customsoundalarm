@@ -79,6 +79,8 @@ struct AnalyticsEventTests {
             gainDbBucket: "12~20", durationBucket: "60s", source: .imported
         ).name == "backup_loud_variant_generated")
         #expect(AnalyticsEvent.backupLoudVariantFailed(reason: .silentSource).name == "backup_loud_variant_failed")
+        // #121: 音量案内
+        #expect(AnalyticsEvent.volumeGuideOpened(from: .testRing).name == "volume_guide_opened")
         // #116: アップデート案内
         #expect(AnalyticsEvent.updatePromptShown(
             kind: .required, currentBuild: 9, targetBuild: 10
@@ -242,6 +244,15 @@ struct AnalyticsEventTests {
         let props = AnalyticsEvent.backupLoudVariantFailed(reason: .silentSource).properties
         #expect(props.count == 1)
         #expect(props["reason"] as? String == "silent_source")
+    }
+
+    // MARK: volume_guide_opened (#121)
+
+    @Test
+    func volumeGuideOpenedProperties() {
+        let props = AnalyticsEvent.volumeGuideOpened(from: .loudness).properties
+        #expect(props.count == 1)
+        #expect(props["from"] as? String == "loudness")
     }
 
     // MARK: sound_preview_played

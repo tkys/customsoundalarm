@@ -234,3 +234,9 @@
 "update_recommended_title" = "A New Version Is Available";
 "update_button" = "Update on the App Store";
 "update_later" = "Later";
+
+/* Volume guide (#121) */
+"volume_guide_title" = "How to make alarms louder";
+"volume_guide_step1" = "Settings → Sounds & Haptics → move the Ringtone and Alerts slider right";
+"volume_guide_step2" = "Turn on Change with Buttons to use the volume buttons too (when nothing else is playing)";
+"volume_guide_warning" = "The volume in Control Center is for music and videos. It doesn't change alarm volume.";
