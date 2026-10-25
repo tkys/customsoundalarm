@@ -98,11 +98,13 @@ struct DismissAlarmIntent: LiveActivityIntent {
                 case .scheduleNextBackup(let entryID):
                     guard let entry, let nextDate else { continue }
                     let newID = UUID()
+                    let soundFileName = AppGroup.backupSoundNames[entryID] ?? BackupAlarmSound.fileName
                     let config = BackupAlarmFactory.configuration(
                         for: entry,
                         fireDate: nextDate,
                         alarmID: newID,
-                        displayName: ""
+                        displayName: "",
+                        soundFileName: soundFileName
                     )
                     if (try? await AlarmManager.shared.schedule(id: newID, configuration: config)) != nil {
                         var map = AlarmIDMaps.loadBackup()

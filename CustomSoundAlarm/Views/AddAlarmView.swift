@@ -250,8 +250,7 @@ struct AlarmDetailView: View {
             Toggle(isOn: backupToggle) {
                 HStack(spacing: 6) {
                     Text("backup_alarm_toggle")
-                    badge("PRO")
-                    badge(String(localized: "backup_alarm_early_access_badge"))
+                    badge(String(localized: "backup_alarm_badge"))
                 }
             }
             // 使えない環境でも、既にオンならオフにはできる
@@ -268,7 +267,7 @@ struct AlarmDetailView: View {
                     }
                 }
 
-                Text(String(format: String(localized: "backup_alarm_description"), minutes))
+                Text(backupDescriptionText)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
 
@@ -312,7 +311,7 @@ struct AlarmDetailView: View {
                     .foregroundStyle(.secondary)
             }
             HStack {
-                Text("loudness_backup")
+                Text(selectedSound == nil ? "loudness_backup_default" : "loudness_backup_own")
                 Spacer()
                 Text(backupLoudness == nil ? "—" : String(localized: "loudness_max"))
                     .foregroundStyle(.secondary)
@@ -328,6 +327,37 @@ struct AlarmDetailView: View {
         } footer: {
             Text("backup_alarm_early_access_note")
         }
+    }
+
+    /// 「7:00 のアラームを 7:15 までに止めなかったら…」を端末の時刻書式で組み立てる（#119）
+    private var backupDescriptionText: String {
+        guard let minutes = backupMinutes else { return "" }
+        let components = Calendar.current.dateComponents([.hour, .minute], from: selectedTime)
+        let times = BackupAlarmLogic.displayTimes(
+            hour: components.hour ?? 7,
+            minute: components.minute ?? 0,
+            backupMinutes: minutes
+        )
+        let calendar = Calendar.current
+        let now = Date()
+        let originalDate = calendar.date(
+            bySettingHour: times.originalHour,
+            minute: times.originalMinute,
+            second: 0,
+            of: now
+        ) ?? now
+        let backupDate = calendar.date(
+            bySettingHour: times.backupHour,
+            minute: times.backupMinute,
+            second: 0,
+            of: now
+        ) ?? now
+        let style = Date.FormatStyle(date: .omitted, time: .shortened)
+        return String(
+            format: String(localized: "backup_alarm_description_fmt"),
+            originalDate.formatted(style),
+            backupDate.formatted(style)
+        )
     }
 
     private func badge(_ text: String) -> some View {
@@ -410,12 +440,17 @@ struct AlarmDetailView: View {
             testRingMessage = nil
         }
 
-        // 最終アラーム用の音は一覧に出さないバンドル音源（#109 B）
-        let fileName = kind == .backup
-            ? BackupAlarmSound.fileName
-            : (selectedSound?.fileName ?? "")
-
         Task {
+            let fileName: String
+            if kind == .backup {
+                // 選択中の音を大きくした版で試す。無ければその場で生成（#119）
+                fileName = await BackupLoudVariantService.ensureVariant(
+                    for: selectedSound?.fileName ?? ""
+                ) ?? BackupAlarmSound.fileName
+            } else {
+                fileName = selectedSound?.fileName ?? ""
+            }
+
             let scheduled = await scheduler.scheduleTestRing(
                 soundFileName: fileName,
                 kind: kind
@@ -658,7 +693,15 @@ struct AlarmDetailView: View {
             AppGroup.backupEarlyAccessGranted = true
         }
 
-        AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
+        if backupMinutes != nil, let sourceFileName = selectedSound?.fileName, !sourceFileName.isEmpty {
+            // 大きくした版の生成が終わってから最終アラームを登録する（#119）
+            Task {
+                _ = await BackupLoudVariantService.ensureVariant(for: sourceFileName)
+                AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
+            }
+        } else {
+            AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
+        }
 
         // 保存後のフィードバック（ON: 発火までの時間 / OFF: このアラームはオフです）
         let feedback = PostSaveFeedback.resolve(for: savedEntry, currentDate: Date())

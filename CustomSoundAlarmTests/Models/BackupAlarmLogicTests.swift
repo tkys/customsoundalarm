@@ -290,4 +290,31 @@ struct BackupAlarmLogicTests {
         #expect(diff.scheduleEntries.isEmpty)
         #expect(diff.cancelEntryIDs.isEmpty)
     }
+
+    // MARK: - 説明用の時刻（#119）
+
+    @Test
+    func displayTimes_sameDay() {
+        let times = BackupAlarmLogic.displayTimes(hour: 7, minute: 0, backupMinutes: 15)
+        #expect(times.originalHour == 7)
+        #expect(times.originalMinute == 0)
+        #expect(times.backupHour == 7)
+        #expect(times.backupMinute == 15)
+    }
+
+    @Test
+    func displayTimes_crossesMidnight() {
+        let times = BackupAlarmLogic.displayTimes(hour: 23, minute: 50, backupMinutes: 20)
+        #expect(times.originalHour == 23)
+        #expect(times.originalMinute == 50)
+        #expect(times.backupHour == 0)
+        #expect(times.backupMinute == 10)
+    }
+
+    @Test
+    func displayTimes_exactMidnight() {
+        let times = BackupAlarmLogic.displayTimes(hour: 23, minute: 55, backupMinutes: 5)
+        #expect(times.backupHour == 0)
+        #expect(times.backupMinute == 0)
+    }
 }

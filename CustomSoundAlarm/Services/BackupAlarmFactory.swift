@@ -9,9 +9,11 @@ enum BackupAlarmFactory {
         for entry: AlarmEntry,
         fireDate: Date,
         alarmID: UUID,
-        displayName: String
+        displayName: String,
+        soundFileName: String = BackupAlarmSound.fileName
     ) -> AlarmManager.AlarmConfiguration<CustomAlarmMetadata> {
-        let title = LocalizedStringResource("backup_alarm_title")
+        let titleText = String(format: String(localized: "backup_alarm_title_fmt"), entry.label)
+        let title = LocalizedStringResource(stringLiteral: titleText)
         let alert: AlarmPresentation.Alert
         if #available(iOS 26.1, *) {
             alert = AlarmPresentation.Alert(title: title)
@@ -37,7 +39,7 @@ enum BackupAlarmFactory {
             schedule: .fixed(fireDate),
             attributes: attributes,
             stopIntent: DismissAlarmIntent(alarmID: alarmID.uuidString),
-            sound: .named(BackupAlarmLogic.soundFileName)
+            sound: .named(soundFileName)
         )
     }
 }
