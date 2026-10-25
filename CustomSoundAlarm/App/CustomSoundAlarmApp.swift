@@ -34,6 +34,11 @@ struct CustomSoundAlarmApp: App {
                     }
 #endif
 
+                    // 広告の7日間猶予用に初回起動日を記録（#111）
+                    if AppGroup.firstLaunchDate == nil {
+                        AppGroup.firstLaunchDate = Date()
+                    }
+
                     // PostHog 計測の初期化（Info.plist にキーが無い場合は安全に無効化）
                     AnalyticsService.shared.configure()
                     setUserProperties()

@@ -20,6 +20,24 @@ enum AppGroup {
         set { userDefaults.set(newValue, forKey: "first_install_version") }
     }
 
+    /// 初回起動日（広告の7日間猶予・#111）
+    static var firstLaunchDate: Date? {
+        get { userDefaults.object(forKey: "first_launch_date") as? Date }
+        set { userDefaults.set(newValue, forKey: "first_launch_date") }
+    }
+
+    /// 最後に全画面広告を出した日時（週1回の制御・#111）
+    static var lastInterstitialShownAt: Date? {
+        get { userDefaults.object(forKey: "last_interstitial_shown_at") as? Date }
+        set {
+            if let newValue {
+                userDefaults.set(newValue, forKey: "last_interstitial_shown_at")
+            } else {
+                userDefaults.removeObject(forKey: "last_interstitial_shown_at")
+            }
+        }
+    }
+
     /// UIテスト用: DEBUG時のみ有効なfresh onboarding強制フラグ
     static var isUITestFreshOnboarding: Bool {
 #if DEBUG
