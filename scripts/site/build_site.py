@@ -41,6 +41,10 @@ PAGES = {
         "s2_body": "Alarms are scheduled with AlarmKit, the alarm framework Apple added in iOS 26. They appear on the Lock Screen like Clock alarms and ring in Silent mode and in a Focus, even with the app closed.",
         "s3_title": "Sounds you already have",
         "s3_body": "Use an audio file, a recording of your own voice, or a video you saved. There's no catalog to search and no subscription.",
+        "voices_title": "From the App Store",
+        "rating_summary": "Rated {avg} out of 5 on the App Store, from {count} ratings in {regions} countries and regions.",
+        "stars_label": "{n} out of 5 stars",
+        "voices_note": "Every written review so far, in the reviewer's own words (one shortened to its title). Translations are ours.",
         "faq_title": "Questions",
         "faq": [
             ("How do I set a song as my alarm on iPhone?",
@@ -80,6 +84,10 @@ PAGES = {
         "s2_body": "アラームは、iOS 26 で Apple が用意した AlarmKit で登録します。時計アプリのアラームと同じようにロック画面に表示され、マナーモードや集中モードでも、アプリを閉じていても鳴ります。",
         "s3_title": "手元にある音で",
         "s3_body": "音声ファイル、自分で録音した声、保存した動画が使えます。カタログから探す手間も、サブスク登録もいりません。",
+        "voices_title": "App Store の声",
+        "rating_summary": "App Store の評価は 5 点中 {avg}（{regions} の国と地域から {count} 件）。",
+        "stars_label": "5 点中 {n} 点",
+        "voices_note": "これまでに書かれたレビューを原文のまま載せています（1件はタイトルのみ）。訳は当サイトによるものです。",
         "faq_title": "よくある質問",
         "faq": [
             ("iPhone で好きな曲をアラームにするには？",
@@ -101,6 +109,75 @@ PAGES = {
         "footer_privacy": "プライバシーポリシー",
     },
 }
+
+# Written App Store reviews, quoted as written (reviewer names left out).
+# "tr" = our translation into the page language; omitted when the review is already in it.
+# Only the title of the Spanish review is quoted: its body uses a word we keep off the site.
+REVIEWS = [
+    {"stars": 5, "cc": "KR", "date": "2026-09", "lang": "en",
+     "title": "This app is the goat.",
+     "body": "It contains what i really wanted, thank you for creating this app.",
+     "tr": {"ja": "最高のアプリ。本当にほしかったものが入っていました。作ってくれてありがとう。"}},
+    {"stars": 3, "cc": "FR", "date": "2026-09", "lang": "fr",
+     "title": "Enlever les vibrations",
+     "body": "Super application qui fonctionne très bien, même en mode avion, ne pas déranger etc Seul bémol il est impossible depuis l’application d’enlever les vibrations ou de les modifier",
+     "tr": {"ja": "とてもよく動くアプリ。機内モードやおやすみモードでも鳴ります。唯一の難点は、アプリからバイブレーションを切ったり変えたりできないこと。",
+            "en": "A great app that works very well, even in Airplane mode, Do Not Disturb and so on. The one drawback: you can't turn off or change the vibration from the app."}},
+    {"stars": 5, "cc": "ES", "date": "2026-08", "lang": "en",
+     "title": "Simply what I want for an alarm clock",
+     "body": "",
+     "tr": {"ja": "目覚ましに求めていたものそのもの"}},
+]
+COUNTRY = {
+    "ja": {"KR": "韓国", "FR": "フランス", "ES": "スペイン"},
+    "en": {"KR": "South Korea", "FR": "France", "ES": "Spain"},
+}
+STOREFRONTS = ("us jp gb ca au de fr es it nl se no dk fi pl cz pt br mx ar cl co kr tw hk cn sg th vn id my ph in "
+               "sa ae eg tr ru ua il za nz at ch be ie gr hu ro sk").split()
+# Used when the App Store can't be reached at build time (2026-10-25).
+RATINGS_FALLBACK = {"count": 59, "avg": 4.8, "regions": 20}
+
+
+def fetch_ratings():
+    """Sum star ratings across storefronts so the number on the page is current at build time."""
+    import ssl
+    import urllib.request
+    total = weighted = regions = 0
+    try:
+        ctx = ssl.create_default_context()
+        for cc in STOREFRONTS:
+            url = f"https://itunes.apple.com/lookup?id={APP_ID}&country={cc}"
+            res = json.load(urllib.request.urlopen(url, timeout=10, context=ctx)).get("results") or []
+            n = res[0].get("userRatingCount", 0) if res else 0
+            if n:
+                total += n
+                weighted += n * res[0]["averageUserRating"]
+                regions += 1
+    except Exception as e:  # offline, TLS, rate limit
+        print("ratings: using fallback,", e)
+        return RATINGS_FALLBACK
+    return {"count": total, "avg": round(weighted / total, 1), "regions": regions} if total else RATINGS_FALLBACK
+
+
+def stars(n):
+    return "★" * n + "☆" * (5 - n)
+
+
+def reviews_html(lang, c, r):
+    items = []
+    for v in REVIEWS:
+        tr = v["tr"].get(lang)
+        original = f'<b>{esc(v["title"])}</b>' + (f'<br>{esc(v["body"])}' if v["body"] else "")
+        quote = f'<p class="orig" lang="{v["lang"]}">{original}</p>'
+        if tr:
+            quote += f'<p class="tr">{esc(tr)}</p>'
+        meta = f'{COUNTRY[lang][v["cc"]]} · {v["date"]}'
+        items.append(f'<li><span class="stars" aria-label="{c["stars_label"].format(n=v["stars"])}">{stars(v["stars"])}</span>'
+                     f'<span class="rmeta">{esc(meta)}</span>{quote}</li>')
+    summary = c["rating_summary"].format(avg=f'{r["avg"]:.1f}', count=r["count"], regions=r["regions"])
+    return (f'<section class="voices"><h2>{esc(c["voices_title"])}</h2><p class="rsum">{esc(summary)}</p>'
+            f'<ul>{"".join(items)}</ul><p class="note">{esc(c["voices_note"])}</p></section>')
+
 
 CSS = """
 :root{color-scheme:light;--text:#1C1714;--muted:#5E5650;--line:#E7E2DD;--accent:#C4501A;--wave:#D6D1CC}
@@ -133,6 +210,14 @@ h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
 .end h2{margin:0 0 18px}
 .end-art{width:180px;height:auto;flex:none}
 @media (max-width:560px){.end{flex-direction:column;align-items:flex-start}.end-art{width:220px}}
+.voices ul{list-style:none;margin:18px 0 0;padding:0}
+.voices li{padding:16px 0;border-top:1px solid var(--line)}
+.stars{color:var(--accent);letter-spacing:.08em;margin-right:10px}
+.rmeta{font-size:15px;color:var(--muted)}
+.voices p{margin:6px 0 0}
+.voices .tr{color:var(--muted);font-size:16px}
+.rsum{margin:0;color:var(--muted)}
+.note{font-size:14px;color:var(--muted);margin-top:12px}
 footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wrap}
 .made{color:var(--muted);flex-basis:100%}
 """
@@ -224,7 +309,7 @@ document.addEventListener("click",function(e){{var a=e.target.closest("a.badge")
 </script>"""
 
 
-def page(lang, c):
+def page(lang, c, ratings):
     other = "ja" if lang == "en" else "en"
     oc = PAGES[other]
     prefix = "../" if c["path"] else ""
@@ -279,6 +364,7 @@ def page(lang, c):
 <div class="clear"></div>
 <h2>{esc(c["s3_title"])}</h2>
 <p>{esc(c["s3_body"])}</p>
+{reviews_html(lang, c, ratings)}
 <section class="faq"><h2>{esc(c["faq_title"])}</h2>{"".join(faqs)}</section>
 <section class="end"><img class="end-art" src="{img}hero.jpg" alt="" width="420" height="560" loading="lazy">
 <div><h2>{phrases(c["end_title"])}</h2>{badge(c, img, "bottom")}</div></section>
@@ -308,6 +394,10 @@ BANNED = ["free", "無料", "必ず", "絶対", "guarantee"]
 
 
 def main():
+    ratings = fetch_ratings()
+    print("ratings:", ratings)
+    quoted = json.dumps([[v["title"], v["body"], v["tr"]] for v in REVIEWS], ensure_ascii=False).lower()
+    assert not [w for w in BANNED if w in quoted], "banned word in quoted reviews"
     for lang, c in PAGES.items():
         text = json.dumps(c, ensure_ascii=False).lower()
         bad = [w for w in BANNED if w in text]
@@ -315,7 +405,7 @@ def main():
         out = os.path.join(ROOT, c["path"], "index.html")
         os.makedirs(os.path.dirname(out), exist_ok=True)
         with open(out, "w", encoding="utf-8") as f:
-            f.write(page(lang, c))
+            f.write(page(lang, c, ratings))
         print("wrote", os.path.relpath(out, ROOT))
     with open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write(sitemap())
