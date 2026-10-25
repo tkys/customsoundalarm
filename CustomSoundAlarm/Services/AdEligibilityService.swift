@@ -64,7 +64,7 @@ final class AdEligibilityService {
             timeZone: .current,
             firstLaunchDate: AppGroup.firstLaunchDate,
             originalAppVersion: originalAppVersion,
-            introductionVersion: AdsConfig.introductionVersion,
+            introductionBuild: AdsConfig.introductionBuild,
             isPro: Entitlements.shared.isPro,
             lastInterstitialShownAt: AppGroup.lastInterstitialShownAt,
             region: region

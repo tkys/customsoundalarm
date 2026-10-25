@@ -8,8 +8,13 @@ enum AdsConfig {
     /// 全体スイッチ。false の間は何も表示せず、判定と計測だけ動く。
     static let isEnabled: Bool = false
 
-    /// 広告導入バージョン（これより前にインストールしたユーザーには出さない）
-    static let introductionVersion: String = "1.9.0"
+    /// 広告導入ビルド（これより前にインストールしたユーザーには出さない）。
+    ///
+    /// `AppTransaction.originalAppVersion` は **CFBundleVersion（ビルド番号）** を返すため、
+    /// マーケティングバージョンではなくビルド番号で比較する。
+    /// 1.9.0 のビルド番号が確定したら、リリース前にこの値を合わせること。
+    /// （暫定: 1.8.0=10 の次を想定した 11）
+    static let introductionBuild: Int = 11
 
     /// 初回起動からの猶予（日）
     static let firstLaunchGraceDays: Int = 7

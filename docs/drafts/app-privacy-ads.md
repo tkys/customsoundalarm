@@ -4,6 +4,13 @@
 > #111 では広告 SDK を追加しないため、Info.plist と PrivacyInfo.xcprivacy は変更していません。
 > SDK 導入時に Google の現行ドキュメントと App Store Connect の表示に合わせて確定してください。
 
+## 0. リリース手順メモ（ビルド番号）
+
+- iOS の `AppTransaction.originalAppVersion` は **マーケティングバージョンではなく `CFBundleVersion`（ビルド番号）** を返す。
+- `AdsConfig.introductionBuild` は 1.9.0 の **ビルド番号** と一致させる。暫定値は 11（1.8.0=10 の次）。
+- 1.9.0 のビルド番号を確定したら、リリース前に `AdsConfig.introductionBuild` を更新し、
+  `AdPolicy` のテスト（既存ユーザー判定）も実値に合わせて更新する。
+
 ## 1. App Store Connect「App のプライバシー」
 
 広告導入時に見直す項目:

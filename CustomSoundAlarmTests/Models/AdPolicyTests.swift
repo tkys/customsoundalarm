@@ -23,7 +23,7 @@ struct AdPolicyTests {
         now: Date,
         timeZone: TimeZone = AdPolicyTests.utc,
         firstLaunchDate: Date? = nil,
-        originalAppVersion: String? = "1.9.0",
+        originalAppVersion: String? = "11",
         isPro: Bool = false,
         lastInterstitialShownAt: Date? = nil,
         region: AdRegion = .standard
@@ -33,7 +33,7 @@ struct AdPolicyTests {
             timeZone: timeZone,
             firstLaunchDate: firstLaunchDate ?? now.addingTimeInterval(-30 * 24 * 60 * 60),
             originalAppVersion: originalAppVersion,
-            introductionVersion: AdsConfig.introductionVersion,
+            introductionBuild: AdsConfig.introductionBuild,
             isPro: isPro,
             lastInterstitialShownAt: lastInterstitialShownAt,
             region: region
@@ -76,40 +76,47 @@ struct AdPolicyTests {
     // MARK: - 既存ユーザー / バージョン
 
     @Test
-    func existingUser_isDenied() {
+    func existingBuilds_areDenied() {
         let now = Self.utcDate(2024, 1, 15, 12, 0)
-        let p = AdPolicy(input: input(now: now, originalAppVersion: "1.8.9"))
-        let decision = p.canShowBanner(context: .soundsList)
-        #expect(!decision.allowed)
-        #expect(decision.reason == .existingUser)
+        // 実値: v1.5.0=6 / v1.7.1=9 / v1.8.0=10（広告導入は 1.9.0=11 予定）
+        for build in ["6", "9", "10"] {
+            let p = AdPolicy(input: input(now: now, originalAppVersion: build))
+            let decision = p.canShowBanner(context: .soundsList)
+            #expect(!decision.allowed, "build \(build) must not see ads")
+            #expect(decision.reason == .existingUser, "build \(build)")
+        }
     }
 
     @Test
-    func sameIntroductionVersion_isAllowed() {
+    func introductionBuildAndLater_areAllowed() {
         let now = Self.utcDate(2024, 1, 15, 12, 0)
-        let p = AdPolicy(input: input(now: now, originalAppVersion: "1.9.0"))
-        #expect(p.canShowBanner(context: .soundsList).allowed)
+        for build in ["11", "12"] {
+            let p = AdPolicy(input: input(now: now, originalAppVersion: build))
+            #expect(p.canShowBanner(context: .soundsList).allowed, "build \(build)")
+        }
     }
 
     @Test
     func versionUnavailable_isDenied() {
         let now = Self.utcDate(2024, 1, 15, 12, 0)
-        let nilVersion = AdPolicy(input: input(now: now, originalAppVersion: nil))
-        #expect(nilVersion.canShowBanner(context: .soundsList).reason == .versionUnavailable)
-
-        let invalid = AdPolicy(input: input(now: now, originalAppVersion: "abc"))
-        #expect(invalid.canShowBanner(context: .soundsList).reason == .versionUnavailable)
+        // nil / 空 / マーケティングバージョン形式（"1.0"）は Int に解釈できない
+        for value in [nil, "", "1.0", "abc"] as [String?] {
+            let p = AdPolicy(input: input(now: now, originalAppVersion: value))
+            let decision = p.canShowBanner(context: .soundsList)
+            #expect(!decision.allowed)
+            #expect(decision.reason == .versionUnavailable, "value \(value ?? "nil")")
+        }
     }
 
     @Test
-    func compareVersions() {
-        #expect(AdPolicy.compareVersions("1.9.0", "1.9.0") == 0)
-        #expect(AdPolicy.compareVersions("1.8.9", "1.9.0") == -1)
-        #expect(AdPolicy.compareVersions("1.10.0", "1.9.0") == 1)
-        #expect(AdPolicy.compareVersions("1.9", "1.9.0") == 0)
-        #expect(AdPolicy.compareVersions("2", "1.9.0") == 1)
-        #expect(AdPolicy.compareVersions("abc", "1.9.0") == nil)
-        #expect(AdPolicy.compareVersions("1..0", "1.9.0") == nil)
+    func parseBuild_acceptsOnlyIntegerBuildNumbers() {
+        #expect(AdPolicy.parseBuild("6") == 6)
+        #expect(AdPolicy.parseBuild("11") == 11)
+        #expect(AdPolicy.parseBuild(" 12 ") == 12)
+        #expect(AdPolicy.parseBuild(nil) == nil)
+        #expect(AdPolicy.parseBuild("") == nil)
+        #expect(AdPolicy.parseBuild("1.0") == nil)
+        #expect(AdPolicy.parseBuild("abc") == nil)
     }
 
     // MARK: - PRO
@@ -146,19 +153,16 @@ struct AdPolicyTests {
     @Test
     func missingFirstLaunch_isDenied() {
         let now = Self.utcDate(2024, 1, 15, 12, 0)
-        let p = AdPolicy(input: input(now: now, firstLaunchDate: nil))
-        // input() substitutes nil; build directly
         let direct = AdPolicy(input: AdPolicyInput(
             now: now,
             timeZone: Self.utc,
             firstLaunchDate: nil,
-            originalAppVersion: "1.9.0",
-            introductionVersion: AdsConfig.introductionVersion,
+            originalAppVersion: "11",
+            introductionBuild: AdsConfig.introductionBuild,
             isPro: false,
             lastInterstitialShownAt: nil,
             region: .standard
         ))
-        _ = p
         #expect(!direct.canShowBanner(context: .soundsList).allowed)
         #expect(direct.canShowBanner(context: .soundsList).reason == .firstWeek)
     }

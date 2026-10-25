@@ -65,7 +65,7 @@ struct AdPolicyInput: Equatable, Sendable {
     let timeZone: TimeZone
     let firstLaunchDate: Date?
     let originalAppVersion: String?
-    let introductionVersion: String
+    let introductionBuild: Int
     let isPro: Bool
     let lastInterstitialShownAt: Date?
     let region: AdRegion
@@ -122,12 +122,10 @@ struct AdPolicy {
             break
         }
 
-        guard let original = input.originalAppVersion,
-              let comparison = Self.compareVersions(original, input.introductionVersion)
-        else {
+        guard let originalBuild = Self.parseBuild(input.originalAppVersion) else {
             return deny(.versionUnavailable)
         }
-        if comparison < 0 {
+        if originalBuild < input.introductionBuild {
             return deny(.existingUser)
         }
 
@@ -175,31 +173,15 @@ struct AdPolicy {
         return calendar
     }
 
-    /// "1.9.0" のようなバージョンを数値で比較する。
-    /// 不正な形式は nil（＝安全側で出さない）。
-    static func compareVersions(_ lhs: String, _ rhs: String) -> Int? {
-        guard let left = parseVersion(lhs), let right = parseVersion(rhs) else {
+
+    /// `originalAppVersion`（CFBundleVersion）を Int として読む。
+    /// "6" のようなビルド番号のみ有効。"1.0" や空は nil（安全側で出さない）。
+    static func parseBuild(_ value: String?) -> Int? {
+        guard let value else { return nil }
+        let trimmed = value.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty, let number = Int(trimmed), number >= 0 else {
             return nil
         }
-        let count = max(left.count, right.count)
-        for index in 0..<count {
-            let l = index < left.count ? left[index] : 0
-            let r = index < right.count ? right[index] : 0
-            if l != r { return l < r ? -1 : 1 }
-        }
-        return 0
-    }
-
-    private static func parseVersion(_ value: String) -> [Int]? {
-        let trimmed = value.trimmingCharacters(in: .whitespaces)
-        guard !trimmed.isEmpty else { return nil }
-        let parts = trimmed.split(separator: ".", omittingEmptySubsequences: false)
-        guard !parts.isEmpty else { return nil }
-        var numbers: [Int] = []
-        for part in parts {
-            guard let number = Int(part), number >= 0 else { return nil }
-            numbers.append(number)
-        }
-        return numbers
+        return number
     }
 }
