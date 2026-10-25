@@ -37,6 +37,7 @@ enum BackupLoudVariantService {
             return variant
         }
         guard let source = sourceInfo(for: sourceFileName) else {
+            AnalyticsService.shared.capture(.backupLoudVariantFailed(reason: .sourceMissing))
             return nil
         }
 
@@ -50,8 +51,17 @@ enum BackupLoudVariantService {
                     source: source.source
                 )
             }.value
+            AnalyticsService.shared.capture(.backupLoudVariantGenerated(
+                gainDbBucket: LoudVariantGenerator.gainDbBucket(result.gainDb),
+                durationBucket: LoudVariantGenerator.durationBucket(result.durationSeconds),
+                source: result.source
+            ))
             return result.fileName
+        } catch let error as LoudVariantGenerator.GenerateError {
+            AnalyticsService.shared.capture(.backupLoudVariantFailed(reason: error))
+            return nil
         } catch {
+            AnalyticsService.shared.capture(.backupLoudVariantFailed(reason: .renderFailed))
             return nil
         }
     }
