@@ -32,6 +32,7 @@ struct UpdatePromptView: View {
             }
 
             Button {
+                AnalyticsService.shared.capture(.updatePromptTapped(kind: prompt.kind))
                 openURL(UpdatePrompt.appStoreURL)
                 onUpdate()
             } label: {
@@ -55,5 +56,12 @@ struct UpdatePromptView: View {
         }
         .padding(28)
         .interactiveDismissDisabled(isRequired)
+        .onAppear {
+            AnalyticsService.shared.capture(.updatePromptShown(
+                kind: prompt.kind,
+                currentBuild: prompt.currentBuild,
+                targetBuild: prompt.targetBuild
+            ))
+        }
     }
 }

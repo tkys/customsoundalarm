@@ -102,6 +102,7 @@ final class UpdateChecker {
         guard let current = prompt, current.kind == .recommended else { return nil }
         AppGroup.dismissedRecommendedBuild = current.targetBuild
         prompt = nil
+        AnalyticsService.shared.capture(.updatePromptDismissed(kind: .recommended))
         return current
     }
 

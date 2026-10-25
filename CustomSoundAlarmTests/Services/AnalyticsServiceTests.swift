@@ -74,6 +74,12 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.backupAlarmDisabled(minutes: 20).name == "backup_alarm_disabled")
         #expect(AnalyticsEvent.backupAlarmFired(snoozesBefore: 2).name == "backup_alarm_fired")
         #expect(AnalyticsEvent.backupAlarmCancelledByStop.name == "backup_alarm_cancelled_by_stop")
+        // #116: アップデート案内
+        #expect(AnalyticsEvent.updatePromptShown(
+            kind: .required, currentBuild: 9, targetBuild: 10
+        ).name == "update_prompt_shown")
+        #expect(AnalyticsEvent.updatePromptTapped(kind: .recommended).name == "update_prompt_tapped")
+        #expect(AnalyticsEvent.updatePromptDismissed(kind: .recommended).name == "update_prompt_dismissed")
     }
 
     // MARK: alarm_created
@@ -178,6 +184,36 @@ struct AnalyticsEventTests {
     @Test
     func backupAlarmCancelledProperties_areEmpty() {
         #expect(AnalyticsEvent.backupAlarmCancelledByStop.properties.isEmpty)
+    }
+
+    // MARK: update_prompt (#116)
+
+    @Test
+    func updatePromptShownProperties() {
+        let props = AnalyticsEvent.updatePromptShown(
+            kind: .required,
+            currentBuild: 9,
+            targetBuild: 10
+        ).properties
+
+        #expect(props.count == 3)
+        #expect(props["kind"] as? String == "required")
+        #expect(props["current_build"] as? Int == 9)
+        #expect(props["target_build"] as? Int == 10)
+    }
+
+    @Test
+    func updatePromptTappedProperties() {
+        let props = AnalyticsEvent.updatePromptTapped(kind: .recommended).properties
+        #expect(props.count == 1)
+        #expect(props["kind"] as? String == "recommended")
+    }
+
+    @Test
+    func updatePromptDismissedProperties() {
+        let props = AnalyticsEvent.updatePromptDismissed(kind: .recommended).properties
+        #expect(props.count == 1)
+        #expect(props["kind"] as? String == "recommended")
     }
 
     // MARK: sound_preview_played

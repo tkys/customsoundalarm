@@ -41,6 +41,7 @@ struct CustomSoundAlarmApp: App {
                         AppGroup.lastUpdateCheckAt = nil
                         AppGroup.cachedAppConfigData = nil
                         AppGroup.cachedAppConfigFetchedAt = nil
+                        AppGroup.dismissedRecommendedBuild = nil
                     }
                     #endif
 
