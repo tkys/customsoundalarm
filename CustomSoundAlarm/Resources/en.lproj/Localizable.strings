@@ -197,8 +197,8 @@
 
 /* Trial ring (#109) */
 "test_ring_section" = "Try It";
-"test_ring_title" = "Ring in 5 seconds";
-"test_ring_scheduled_message" = "It will ring in 5 seconds. Stop it to finish.";
+"test_ring_title" = "Ring now";
+"test_ring_scheduled_message" = "Ringing now. Stop it to finish.";
 "test_ring_permission_required" = "Alarm permission is required.";
 "test_ring_volume_note" = "Alarm volume is controlled in Settings > Sounds & Haptics > Ringtone and Alert Volume.";
 "test_ring_failed" = "Couldn't schedule the test alarm.";

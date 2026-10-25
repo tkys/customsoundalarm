@@ -9,12 +9,17 @@ struct TestRingLogicTests {
     // MARK: - Plan
 
     @Test
-    func makePlan_firesInFiveSeconds() {
+    func makePlan_firesInOneSecond() {
         let plan = TestRingLogic.makePlan(now: base, soundFileName: "PresetBeep.caf", kind: .own)
 
-        #expect(plan.fireDate == base.addingTimeInterval(5))
+        #expect(plan.fireDate == base.addingTimeInterval(1))
         #expect(plan.soundFileName == "PresetBeep.caf")
         #expect(plan.kind == .own)
+    }
+
+    @Test
+    func delayIsOneSecond() {
+        #expect(TestRingLogic.delay == 1)
     }
 
     @Test
