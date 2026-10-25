@@ -554,7 +554,7 @@ final class AlarmScheduler {
     }
 
     /// 試しアラーム用の AlarmKit 設定（一回限り・スヌーズなし・停止のみ）。
-    private func makeTestRingConfiguration(
+    private nonisolated func makeTestRingConfiguration(
         for plan: TestRingLogic.Plan,
         alarmID: UUID
     ) -> AlarmManager.AlarmConfiguration<CustomAlarmMetadata> {
