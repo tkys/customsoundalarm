@@ -92,6 +92,16 @@ enum AnalyticsEvent: Sendable {
     /// 本体を停止したため最終アラームが取り消された
     case backupAlarmCancelledByStop
 
+    // MARK: 広告・#111
+
+    /// 広告枠の表示機会（SDK 導入前に機会を測る）
+    /// - slot: banner_sounds / banner_import / interstitial_import_saved
+    /// - allowed: 表示条件を満たすか（AdsConfig.isEnabled は含まない）
+    /// - reason: eligible / existing_user / version_unavailable / pro /
+    ///   first_week / quiet_hours / frequency_cap / forbidden_context / wrong_context
+    /// - region: standard / limited
+    case adSlotEligible(slot: AdSlotKind, allowed: Bool, reason: AdDecisionReason, region: AdRegion)
+
     // MARK: Phase 4（ベッドサイドモード・#68）
 
     /// ベッドサイドモードに入った
@@ -157,6 +167,7 @@ enum AnalyticsEvent: Sendable {
         case .backupAlarmDisabled: return "backup_alarm_disabled"
         case .backupAlarmFired: return "backup_alarm_fired"
         case .backupAlarmCancelledByStop: return "backup_alarm_cancelled_by_stop"
+        case .adSlotEligible: return "ad_slot_eligible"
         case .bedsideEntered: return "bedside_entered"
         case .bedsideExited: return "bedside_exited"
         case .bedsideSettingChanged: return "bedside_setting_changed"
@@ -229,6 +240,13 @@ enum AnalyticsEvent: Sendable {
             return [:]
         case .backupAlarmCancelledByStop:
             return [:]
+        case let .adSlotEligible(slot, allowed, reason, region):
+            return [
+                "slot": slot.rawValue,
+                "allowed": allowed,
+                "reason": reason.rawValue,
+                "region": region.rawValue
+            ]
         case let .bedsideEntered(layout, theme, hour):
             return [
                 "layout": layout,

@@ -62,6 +62,9 @@ struct SoundSelectionView: View {
                 }
             }
         }
+        .safeAreaInset(edge: .bottom) {
+            AdSlot(slot: .bannerSounds)
+        }
         .onDisappear { audioPlayer.stop() }
         // オンボ場面4からの直接取り込み（#98 Phase 4）: push アニメーション完了後に開く
         // （push 中に sheet/fileImporter を出すと無言で出ない — レビュー指摘1）

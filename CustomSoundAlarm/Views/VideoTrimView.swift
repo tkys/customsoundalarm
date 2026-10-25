@@ -51,6 +51,9 @@ struct VideoImportFlow: View {
                 }
             }
         }
+        .safeAreaInset(edge: .bottom) {
+            AdSlot(slot: .bannerImport)
+        }
         .navigationTitle(String(localized: "add_from_video_title"))
         .navigationBarTitleDisplayMode(.inline)
         // 閉じるボタン（#82-2: シート化に伴う明示的な出口。編集中は破棄を確認する）
@@ -453,6 +456,7 @@ struct VideoImportFlow: View {
                     peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
                     gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb)
                 ))
+                await AdPresenter.presentInterstitialIfAllowed(after: .importSaved)
                 dismiss()
             } catch {
                 errorMessage = error.localizedDescription
