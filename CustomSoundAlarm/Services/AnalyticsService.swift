@@ -102,6 +102,12 @@ enum AnalyticsEvent: Sendable {
     /// 大きくした版の生成に失敗した（予備音を使う・#119）
     case backupLoudVariantFailed(reason: LoudVariantGenerator.GenerateError)
 
+    // MARK: 音量案内・#121
+
+    /// アラームの音量案内を開いた
+    /// - from: test_ring / loudness
+    case volumeGuideOpened(from: VolumeGuideSource)
+
     // MARK: アップデート案内・#116
 
     /// アップデート案内を表示した
@@ -180,6 +186,7 @@ enum AnalyticsEvent: Sendable {
         case .backupAlarmCancelledByStop: return "backup_alarm_cancelled_by_stop"
         case .backupLoudVariantGenerated: return "backup_loud_variant_generated"
         case .backupLoudVariantFailed: return "backup_loud_variant_failed"
+        case .volumeGuideOpened: return "volume_guide_opened"
         case .updatePromptShown: return "update_prompt_shown"
         case .updatePromptTapped: return "update_prompt_tapped"
         case .updatePromptDismissed: return "update_prompt_dismissed"
@@ -263,6 +270,8 @@ enum AnalyticsEvent: Sendable {
             ]
         case let .backupLoudVariantFailed(reason):
             return ["reason": reason.rawValue]
+        case let .volumeGuideOpened(source):
+            return ["from": source.rawValue]
         case let .updatePromptShown(kind, currentBuild, targetBuild):
             return [
                 "kind": kind.rawValue,

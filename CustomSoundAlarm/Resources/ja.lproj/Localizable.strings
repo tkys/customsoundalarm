@@ -234,3 +234,10 @@
 "update_recommended_title" = "新しいバージョンがあります";
 "update_button" = "App Store で更新";
 "update_later" = "あとで";
+
+/* Volume guide (#121) */
+"volume_guide_title" = "アラームの音量を上げるには";
+"volume_guide_step1" = "設定 → サウンドと触覚 →「着信音と通知音」のスライダーを右へ";
+"volume_guide_step2" = "「ボタンで変更」をオンにすると、本体の音量ボタンでも変えられます（音楽などを再生していないとき）";
+"volume_guide_image_label" = "設定の「サウンドと触覚」の画面。「着信音と通知音」のスライダーと「ボタンで変更」に印";
+"volume_guide_warning" = "コントロールセンターの音量は、音楽や動画の音量です。アラームには効きません。";
