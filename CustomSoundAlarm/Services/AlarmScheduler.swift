@@ -27,6 +27,14 @@ final class AlarmScheduler {
     /// 試しに鳴らすボタンの権限状態（#109）
     private(set) var testRingPermission: TestRingPermission = .unknown
 
+    /// いずれかのアラームが鳴動中か（アップデート案内の抑制・#116）
+    private(set) var isAlarmRinging: Bool = false
+
+    /// 試しに鳴らすアラームが登録中/鳴動中か（アップデート案内の抑制・#116）
+    var isTestRingActive: Bool {
+        !AppGroup.testAlarmRecords.isEmpty
+    }
+
     /// 試しアラームの記録ごとの掃除タスク（60秒後にキャンセルする）
     @ObservationIgnored
     private var testRingCleanupTasks: [UUID: Task<Void, Never>] = [:]
@@ -131,7 +139,9 @@ final class AlarmScheduler {
 
         let activeAlarmIDs: Set<Alarm.ID>
         do {
-            activeAlarmIDs = Set(try manager.alarms.map(\.id))
+            let alarms = try manager.alarms
+            activeAlarmIDs = Set(alarms.map(\.id))
+            isAlarmRinging = alarms.contains { $0.state == .alerting }
         } catch {
             logger.error("Failed to fetch alarms for reconciliation: \(error.localizedDescription)")
             return
@@ -621,6 +631,7 @@ final class AlarmScheduler {
         observationTask = Task {
             for await alarms in manager.alarmUpdates {
                 guard !Task.isCancelled else { break }
+                isAlarmRinging = alarms.contains { $0.state == .alerting }
                 for alarm in alarms {
                     switch alarm.state {
                     case .alerting:

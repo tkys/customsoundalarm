@@ -34,6 +34,17 @@ struct CustomSoundAlarmApp: App {
                     }
 #endif
 
+                    #if DEBUG
+                    // UIテスト用: アップデート案内を強制（#116）
+                    if AppGroup.isUITestUpdateRequired || AppGroup.isUITestUpdateRecommended {
+                        AppGroup.hasCompletedOnboarding = true
+                        AppGroup.lastUpdateCheckAt = nil
+                        AppGroup.cachedAppConfigData = nil
+                        AppGroup.cachedAppConfigFetchedAt = nil
+                        AppGroup.dismissedRecommendedBuild = nil
+                    }
+                    #endif
+
                     // PostHog 計測の初期化（Info.plist にキーが無い場合は安全に無効化）
                     AnalyticsService.shared.configure()
                     setUserProperties()

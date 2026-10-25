@@ -92,6 +92,17 @@ enum AnalyticsEvent: Sendable {
     /// 本体を停止したため最終アラームが取り消された
     case backupAlarmCancelledByStop
 
+    // MARK: アップデート案内・#116
+
+    /// アップデート案内を表示した
+    case updatePromptShown(kind: UpdatePromptKind, currentBuild: Int, targetBuild: Int)
+
+    /// 「App Store で更新」をタップした
+    case updatePromptTapped(kind: UpdatePromptKind)
+
+    /// おすすめを「あとで」で閉じた
+    case updatePromptDismissed(kind: UpdatePromptKind)
+
     // MARK: Phase 4（ベッドサイドモード・#68）
 
     /// ベッドサイドモードに入った
@@ -157,6 +168,9 @@ enum AnalyticsEvent: Sendable {
         case .backupAlarmDisabled: return "backup_alarm_disabled"
         case .backupAlarmFired: return "backup_alarm_fired"
         case .backupAlarmCancelledByStop: return "backup_alarm_cancelled_by_stop"
+        case .updatePromptShown: return "update_prompt_shown"
+        case .updatePromptTapped: return "update_prompt_tapped"
+        case .updatePromptDismissed: return "update_prompt_dismissed"
         case .bedsideEntered: return "bedside_entered"
         case .bedsideExited: return "bedside_exited"
         case .bedsideSettingChanged: return "bedside_setting_changed"
@@ -229,6 +243,16 @@ enum AnalyticsEvent: Sendable {
             return [:]
         case .backupAlarmCancelledByStop:
             return [:]
+        case let .updatePromptShown(kind, currentBuild, targetBuild):
+            return [
+                "kind": kind.rawValue,
+                "current_build": currentBuild,
+                "target_build": targetBuild
+            ]
+        case let .updatePromptTapped(kind):
+            return ["kind": kind.rawValue]
+        case let .updatePromptDismissed(kind):
+            return ["kind": kind.rawValue]
         case let .bedsideEntered(layout, theme, hour):
             return [
                 "layout": layout,
