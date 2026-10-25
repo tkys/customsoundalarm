@@ -176,10 +176,11 @@ def reviews_html(lang, c, r):
 
 
 CSS = """
-:root{color-scheme:light;--text:#1C1714;--muted:#5E5650;--line:#E7E2DD;--accent:#C4501A;--wave:#D6D1CC}
+:root{color-scheme:light;--text:#1C1714;--muted:#5E5650;--line:#E7E2DD;--accent:#FF843B;--ink:#4A1A6B;--wave:#D6D1CC}
+/* App colors: orange (AccentColor) is for graphics only — 2.4:1 on white is too low for text; text accents use the icon's purple. */
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
 body{margin:0;background:#fff;color:var(--text);font:18px/1.7 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif}
-a{color:var(--accent);text-underline-offset:3px}
+a{color:var(--ink);text-underline-offset:3px}
 .wrap{max-width:720px;margin:0 auto;padding:0 20px}
 header{display:flex;justify-content:space-between;align-items:center;padding:18px 0 8px;font-size:16px}
 .brand{display:flex;align-items:center;gap:10px;font-weight:600;text-decoration:none;color:var(--text)}
@@ -194,7 +195,7 @@ h1{font-size:clamp(32px,6.4vw,48px);line-height:1.2;letter-spacing:-.015em;margi
 figure{margin:44px 0 8px}
 .wavebox{position:relative;padding-bottom:26px}
 .wave{display:block;width:100%;height:auto}
-.wavelabel{position:absolute;bottom:0;transform:translateX(-50%);white-space:nowrap;font-size:14px;font-weight:600;color:var(--accent)}
+.wavelabel{position:absolute;bottom:0;transform:translateX(-50%);white-space:nowrap;font-size:14px;font-weight:600;color:var(--ink)}
 figcaption{font-size:16px;color:var(--muted);margin-top:8px}
 h2{font-size:26px;line-height:1.35;margin:56px 0 10px}
 .shot{display:block;width:100%;max-width:340px;height:auto;border:1px solid var(--line);border-radius:22px;margin:18px 0 0}
@@ -252,7 +253,7 @@ def waveform_svg(c):
         color = "var(--accent)" if lo <= i < hi else "var(--wave)"
         bars.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{gap * 0.64:.1f}" height="{bh:.1f}" rx="{gap * 0.32:.1f}" fill="{color}"/>')
     x0, x1 = lo * gap, hi * gap
-    line = f'<line x1="{x0:.1f}" y1="{h - 22}" x2="{x1:.1f}" y2="{h - 22}" stroke="var(--accent)" stroke-width="2"/>'
+    line = f'<line x1="{x0:.1f}" y1="{h - 22}" x2="{x1:.1f}" y2="{h - 22}" stroke="var(--ink)" stroke-width="2"/>'
     svg = (f'<svg class="wave" viewBox="0 0 {w} {h - 18}" role="img" aria-label="{esc(c["wave_caption"])}">'
            + "".join(bars) + line + "</svg>")
     # The label is HTML, not SVG text, so it doesn't shrink with the waveform on phones.
