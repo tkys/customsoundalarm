@@ -169,7 +169,6 @@
 "alarm_will_ring_in" = "%@後に鳴ります";
 
 /* Alarm Edit */
-"alarm_enabled" = "アラームをオン";
 "alarm_is_off" = "このアラームはオフです";
 
 /* Video Trimmer */
@@ -196,30 +195,16 @@
 "onb.later" = "あとで";
 
 /* Trial ring (#109) */
-"test_ring_section" = "試しに鳴らす";
 "test_ring_title" = "今すぐ鳴らす";
-"test_ring_scheduled_message" = "鳴らしています。止めると終わります。";
-"test_ring_permission_required" = "アラームの許可が必要です。";
-"test_ring_volume_note" = "アラームの音量は「設定 → サウンドと触覚 → 着信音と通知音」で決まります。";
 "test_ring_failed" = "試しに鳴らせませんでした。";
 "test_ring_simulator_unavailable" = "試しに鳴らすは実機でのみ使えます。";
 "test_ring_alarm_title" = "試しのアラーム";
 "test_ring_backup_title" = "寝過ごし防止の音を試す";
 
 /* Loudness (#109 C) */
-"loudness_section" = "音の大きさ";
-"loudness_own" = "あなたの音";
-"loudness_backup_own" = "寝過ごし防止の音：あなたの音を大きくしたもの";
-"loudness_backup_default" = "寝過ごし防止の音：標準の大きい音";
-"loudness_quiet" = "小さめ";
-"loudness_normal" = "ふつう";
-"loudness_loud" = "大きめ";
-"loudness_max" = "最大";
 
 /* Backup alarm (#110) */
-"backup_alarm_section" = "寝過ごし防止";
 "backup_alarm_toggle" = "寝過ごし防止";
-"backup_alarm_badge" = "PRO・先行公開中";
 "backup_alarm_title_fmt" = "寝過ごし防止：%@";
 "backup_alarm_description_fmt" = "%@ のアラームを %@ までに止めなかったら、同じ音を大きくしてもう一度鳴らします。";
 "backup_alarm_minutes" = "何分後に鳴らす";
@@ -241,3 +226,10 @@
 "volume_guide_step2" = "「ボタンで変更」をオンにすると、本体の音量ボタンでも変えられます（音楽などを再生していないとき）";
 "volume_guide_image_label" = "設定の「サウンドと触覚」の画面。「着信音と通知音」のスライダーと「ボタンで変更」に印";
 "volume_guide_warning" = "コントロールセンターの音量は、音楽や動画の音量です。アラームには効きません。";
+"alarm_permission_required" = "アラームの許可が必要です";
+"open_settings" = "設定を開く";
+"volume_guide_link" = "音が小さいときは";
+"test_ring_ringing_now" = "鳴らしています";
+"backup_alarm_info_title" = "寝過ごし防止";
+"backup_alarm_info_mechanism" = "止めずに設定した分数がたつと、同じ音を大きくしてもう一度鳴らします。";
+"backup_alarm_info_accessibility" = "寝過ごし防止の説明";

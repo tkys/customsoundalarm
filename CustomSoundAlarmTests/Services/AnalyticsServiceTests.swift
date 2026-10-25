@@ -250,9 +250,9 @@ struct AnalyticsEventTests {
 
     @Test
     func volumeGuideOpenedProperties() {
-        let props = AnalyticsEvent.volumeGuideOpened(from: .loudness).properties
+        let props = AnalyticsEvent.volumeGuideOpened(from: .testRing).properties
         #expect(props.count == 1)
-        #expect(props["from"] as? String == "loudness")
+        #expect(props["from"] as? String == "test_ring")
     }
 
     // MARK: sound_preview_played

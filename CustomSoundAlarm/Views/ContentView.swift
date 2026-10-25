@@ -53,6 +53,14 @@ struct ContentView: View {
                 }
                 .task {
                     evaluateOnboarding()
+                    #if DEBUG
+                    if AppGroup.isUITestOpenAddAlarm {
+                        addAlarmRequest = AddAlarmRequest(source: nil)
+                    } else if AppGroup.isUITestOpenEditAlarm,
+                              let alarm = alarmStore.alarms.first {
+                        selectedAlarm = alarm
+                    }
+                    #endif
                     await updateChecker.check(isOnboardingVisible: showingOnboarding)
                 }
 

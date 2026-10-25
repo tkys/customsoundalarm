@@ -48,6 +48,5 @@ struct VolumeGuideLogicTests {
     @Test
     func sourceRawValues() {
         #expect(VolumeGuideSource.testRing.rawValue == "test_ring")
-        #expect(VolumeGuideSource.loudness.rawValue == "loudness")
     }
 }
