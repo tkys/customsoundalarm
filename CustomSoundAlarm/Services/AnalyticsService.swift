@@ -14,7 +14,12 @@ enum AnalyticsEvent: Sendable {
     /// - has_custom_sound: カスタムサウンドを割り当てたか（プリセット/空は false）
     /// - is_repeating: 繰り返し曜日が設定されたか
     /// - snooze_minutes: スヌーズ時間（分）
-    case alarmCreated(hasCustomSound: Bool, isRepeating: Bool, snoozeMinutes: Int)
+    case alarmCreated(
+        hasCustomSound: Bool,
+        isRepeating: Bool,
+        snoozeMinutes: Int,
+        backupMinutes: Int = 0
+    )
 
     /// カスタムサウンドのインポート成功
     /// - source: "video" または "audio"
@@ -28,7 +33,13 @@ enum AnalyticsEvent: Sendable {
 
     /// アラーム編集（既存アラームの更新）
     /// - props は alarm_created と揃える
-    case alarmEdited(hasCustomSound: Bool, isRepeating: Bool, snoozeMinutes: Int)
+    case alarmEdited(
+        hasCustomSound: Bool,
+        isRepeating: Bool,
+        snoozeMinutes: Int,
+        backupMinutes: Int = 0,
+        wasEnabled: Bool = true
+    )
 
     /// アラーム削除
     case alarmDeleted
@@ -71,7 +82,7 @@ enum AnalyticsEvent: Sendable {
 
     /// 試しに鳴らすアラームを登録した（#109）
     /// - kind: own（選択中の音）/ backup（最終アラーム用の音）
-    case testRingScheduled(kind: TestRingKind)
+    case testRingScheduled(kind: TestRingKind, hasBackup: Bool = false)
 
     /// 試しに鳴らしたアラームを停止した（#109）
     /// 本番の alarm_stopped と区別するため、Intent 側で testAlarmIDs を照合して送る
@@ -91,6 +102,12 @@ enum AnalyticsEvent: Sendable {
 
     /// 本体を停止したため最終アラームが取り消された
     case backupAlarmCancelledByStop
+
+    /// 寝過ごし防止が鳴って止められた（主指標・Intent から記録・#124）
+    case backupAlarmStopped(minutes: Int, snoozesBefore: Int?, hour: Int)
+
+    /// サウンド選択で音を選んだ（#124）
+    case soundSelected(kind: SoundSelectionKind, rankBucket: String)
 
     /// 大きくした版を生成した（#119）
     case backupLoudVariantGenerated(
@@ -184,6 +201,8 @@ enum AnalyticsEvent: Sendable {
         case .backupAlarmDisabled: return "backup_alarm_disabled"
         case .backupAlarmFired: return "backup_alarm_fired"
         case .backupAlarmCancelledByStop: return "backup_alarm_cancelled_by_stop"
+        case .backupAlarmStopped: return "backup_alarm_stopped"
+        case .soundSelected: return "sound_selected"
         case .backupLoudVariantGenerated: return "backup_loud_variant_generated"
         case .backupLoudVariantFailed: return "backup_loud_variant_failed"
         case .volumeGuideOpened: return "volume_guide_opened"
@@ -205,11 +224,12 @@ enum AnalyticsEvent: Sendable {
     /// ここを単一情報源とすることで、送信内容のテストが SDK 非依存で可能。
     var properties: [String: Any] {
         switch self {
-        case let .alarmCreated(hasCustomSound, isRepeating, snoozeMinutes):
+        case let .alarmCreated(hasCustomSound, isRepeating, snoozeMinutes, backupMinutes):
             return [
                 "has_custom_sound": hasCustomSound,
                 "is_repeating": isRepeating,
-                "snooze_minutes": snoozeMinutes
+                "snooze_minutes": snoozeMinutes,
+                "backup_minutes": backupMinutes
             ]
         case let .customSoundImported(source, peakDbBucket, gainDbBucket):
             var d: [String: Any] = ["source": source.rawValue]
@@ -218,11 +238,13 @@ enum AnalyticsEvent: Sendable {
             return d
         case .soundPreviewPlayed:
             return [:]
-        case let .alarmEdited(hasCustomSound, isRepeating, snoozeMinutes):
+        case let .alarmEdited(hasCustomSound, isRepeating, snoozeMinutes, backupMinutes, wasEnabled):
             return [
                 "has_custom_sound": hasCustomSound,
                 "is_repeating": isRepeating,
-                "snooze_minutes": snoozeMinutes
+                "snooze_minutes": snoozeMinutes,
+                "backup_minutes": backupMinutes,
+                "was_enabled": wasEnabled
             ]
         case .alarmDeleted:
             return [:]
@@ -247,8 +269,11 @@ enum AnalyticsEvent: Sendable {
             return ["hour": hour]
         case let .alarmSnoozed(from):
             return ["from": from]
-        case let .testRingScheduled(kind):
-            return ["kind": kind.rawValue]
+        case let .testRingScheduled(kind, hasBackup):
+            return [
+                "kind": kind.rawValue,
+                "has_backup": hasBackup
+            ]
         case let .testRingStopped(hour):
             return ["hour": hour]
         case let .backupAlarmEnabled(minutes):
@@ -262,6 +287,20 @@ enum AnalyticsEvent: Sendable {
             return [:]
         case .backupAlarmCancelledByStop:
             return [:]
+        case let .backupAlarmStopped(minutes, snoozesBefore, hour):
+            var props: [String: Any] = [
+                "minutes": minutes,
+                "hour": hour
+            ]
+            if let snoozesBefore {
+                props["snoozes_before"] = snoozesBefore
+            }
+            return props
+        case let .soundSelected(kind, rankBucket):
+            return [
+                "kind": kind.rawValue,
+                "rank_bucket": rankBucket
+            ]
         case let .backupLoudVariantGenerated(gainDbBucket, durationBucket, source):
             return [
                 "gain_db_bucket": gainDbBucket,
@@ -685,14 +724,7 @@ final class AnalyticsService: @unchecked Sendable {
         let events = AlarmEventBuffer.dequeueAll()
         guard !events.isEmpty else { return }
         for event in events {
-            var props: [String: Any] = ["timestamp": event.timestamp.timeIntervalSince1970]
-            if let hour = event.hour {
-                props["hour"] = hour
-            }
-            for (k, v) in event.properties {
-                props[k] = v
-            }
-            backend?.capture(event.name, properties: props)
+            backend?.capture(event.name, properties: event.postHogProperties)
         }
         logger.info("Flushed \(events.count) pending alarm events")
     }

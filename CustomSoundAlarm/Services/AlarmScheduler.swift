@@ -536,7 +536,12 @@ final class AlarmScheduler {
     /// 停止・60 秒経過・次回起動時でキャンセルする。
     /// - Returns: 登録できたら true
     @discardableResult
-    func scheduleTestRing(soundFileName: String, kind: TestRingKind, now: Date = Date()) async -> Bool {
+    func scheduleTestRing(
+        soundFileName: String,
+        kind: TestRingKind,
+        hasBackup: Bool = false,
+        now: Date = Date()
+    ) async -> Bool {
         refreshTestRingPermission()
         guard canScheduleTestRing else {
             logger.warning("Test ring skipped: AlarmKit not authorized")
@@ -558,7 +563,7 @@ final class AlarmScheduler {
             var records = AppGroup.testAlarmRecords
             records.append(TestAlarmRecord(id: alarmID, scheduledAt: now, kind: kind))
             AppGroup.testAlarmRecords = records
-            AnalyticsService.shared.capture(.testRingScheduled(kind: kind))
+            AnalyticsService.shared.capture(.testRingScheduled(kind: kind, hasBackup: hasBackup))
             scheduleTestRingCleanup(for: alarmID)
             logger.info("Scheduled test ring in \(TestRingLogic.delay)s (kind=\(kind.rawValue))")
             return true

@@ -151,8 +151,8 @@ struct SoundSelectionView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
             } else {
-                ForEach(imported, id: \.id) { sound in
-                    soundRow(name: sound.name, sound: sound, isPreset: false)
+                ForEach(Array(imported.enumerated()), id: \.element.id) { index, sound in
+                    soundRow(name: sound.name, sound: sound, isPreset: false, position: index + 1)
                         .contextMenu {
                             Button {
                                 renameText = sound.name
@@ -198,9 +198,19 @@ struct SoundSelectionView: View {
                     }
                 )
             ) {
-                soundRow(name: String(localized: "default_sound"), sound: nil, isPreset: true)
-                ForEach(presets, id: \.id) { sound in
-                    soundRow(name: sound.name, sound: sound, isPreset: true)
+                soundRow(
+                    name: String(localized: "default_sound"),
+                    sound: nil,
+                    isPreset: true,
+                    position: 1
+                )
+                ForEach(Array(presets.enumerated()), id: \.element.id) { index, sound in
+                    soundRow(
+                        name: sound.name,
+                        sound: sound,
+                        isPreset: true,
+                        position: index + 2
+                    )
                 }
             } label: {
                 HStack {
@@ -230,7 +240,12 @@ struct SoundSelectionView: View {
 
     // MARK: - Sound Row
 
-    private func soundRow(name: String, sound: AlarmSound?, isPreset: Bool) -> some View {
+    private func soundRow(
+        name: String,
+        sound: AlarmSound?,
+        isPreset: Bool,
+        position: Int
+    ) -> some View {
         let isPlaying = sound != nil && audioPlayer.playingFileName == sound?.fileName
 
         return HStack {
@@ -258,6 +273,13 @@ struct SoundSelectionView: View {
             Button {
                 selectedSound = sound
                 audioPlayer.stop()
+                let kind: SoundSelectionKind = sound == nil
+                    ? .default
+                    : (isPreset ? .preset : .imported)
+                AnalyticsService.shared.capture(.soundSelected(
+                    kind: kind,
+                    rankBucket: SoundSelectionAnalytics.rankBucket(position: position)
+                ))
             } label: {
                 HStack {
                     Text(name)

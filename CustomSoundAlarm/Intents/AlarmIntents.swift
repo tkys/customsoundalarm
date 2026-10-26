@@ -121,6 +121,8 @@ struct DismissAlarmIntent: LiveActivityIntent {
                 AlarmIDMaps.saveBackup(map)
             }
 
+            let snoozesBefore = entryID.flatMap { AppGroup.snoozeCounts[$0] }
+
             if let entryID {
                 var counts = AppGroup.snoozeCounts
                 counts.removeValue(forKey: entryID)
@@ -146,6 +148,18 @@ struct DismissAlarmIntent: LiveActivityIntent {
                 var canceled = AppGroup.backupCanceledAt
                 canceled.removeValue(forKey: entryID)
                 AppGroup.backupCanceledAt = canceled
+
+                // 寝過ごし防止が鳴って止められた（主指標・#124）。
+                // アプリが閉じていても AlarmEventBuffer 経由で届く。
+                if let pending = BackupStopAnalytics.pendingEvent(
+                    role: .backup(entryID: entryID),
+                    entry: entry,
+                    snoozesBefore: snoozesBefore,
+                    hour: hour,
+                    timestamp: now
+                ) {
+                    AlarmEventBuffer.enqueue(pending)
+                }
             case .unknown:
                 break
             }

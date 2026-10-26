@@ -10,10 +10,27 @@ struct PendingAlarmEvent: Codable, Sendable {
     var name: String
     /// String / Int / Bool のみ（JSON で安全にシリアライズできる値）
     var properties: [String: String]
+    /// 数値プロパティ（Int）。PostHog で数値として集計するため（#124）
+    var intProperties: [String: Int]? = nil
     /// 停止時刻の「時」（alarm_fired と型を揃えるため Int）。nil 使用時は hour を持たないイベント
     var hour: Int? = nil
     /// PII 安全な時刻情報（アラーム発火想定時刻等）。デバッグ/分析以外の用途には使わない
     var timestamp: Date
+
+    /// PostHog に渡すプロパティ（timestamp / hour / String / Int）
+    var postHogProperties: [String: Any] {
+        var props: [String: Any] = ["timestamp": timestamp.timeIntervalSince1970]
+        if let hour {
+            props["hour"] = hour
+        }
+        for (key, value) in properties {
+            props[key] = value
+        }
+        for (key, value) in intProperties ?? [:] {
+            props[key] = value
+        }
+        return props
+    }
 }
 
 /// App Group UserDefaults をバッファにしたアラームイベントキュー。

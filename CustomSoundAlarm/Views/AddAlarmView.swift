@@ -449,7 +449,8 @@ struct AlarmDetailView: View {
 
             let scheduled = await scheduler.scheduleTestRing(
                 soundFileName: fileName,
-                kind: kind
+                kind: kind,
+                hasBackup: backupMinutes != nil
             )
             isSchedulingTestRing = false
 
@@ -609,7 +610,12 @@ struct AlarmDetailView: View {
             )
             alarmStore.add(entry)
             AnalyticsService.shared.capture(
-                .alarmCreated(hasCustomSound: hasCustomSound, isRepeating: isRepeating, snoozeMinutes: snoozeMinutes),
+                .alarmCreated(
+                    hasCustomSound: hasCustomSound,
+                    isRepeating: isRepeating,
+                    snoozeMinutes: snoozeMinutes,
+                    backupMinutes: backupMinutes ?? 0
+                ),
                 properties: hoursUntilProperties(for: entry)
             )
             if let backupMinutes {
@@ -629,7 +635,13 @@ struct AlarmDetailView: View {
             )
             alarmStore.update(updated)
             AnalyticsService.shared.capture(
-                .alarmEdited(hasCustomSound: hasCustomSound, isRepeating: isRepeating, snoozeMinutes: snoozeMinutes),
+                .alarmEdited(
+                    hasCustomSound: hasCustomSound,
+                    isRepeating: isRepeating,
+                    snoozeMinutes: snoozeMinutes,
+                    backupMinutes: backupMinutes ?? 0,
+                    wasEnabled: existing.isEnabled
+                ),
                 properties: hoursUntilProperties(for: updated)
             )
             if existing.backupMinutes != updated.backupMinutes {
