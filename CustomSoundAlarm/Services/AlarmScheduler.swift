@@ -287,6 +287,12 @@ final class AlarmScheduler {
             return entry.id
         })
 
+        // 生成方式の版が古い .loud.caf は次の同期で作り直す（#134）
+        for entry in entries
+        where entry.isEnabled && entry.backupMinutes != nil && !entry.soundFileName.isEmpty {
+            _ = await BackupLoudVariantService.ensureVariant(for: entry.soundFileName)
+        }
+
         let backupDiff = BackupAlarmLogic.computeBackupSyncDiff(
             oldMap: backupAlarmIDMap,
             entries: entries,

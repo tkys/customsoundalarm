@@ -258,6 +258,29 @@ struct AnalyticsEventTests {
     }
 
     @Test
+    func backupLoudVariantGeneratedProperties_outputLufsBucket() {
+        let props = AnalyticsEvent.backupLoudVariantGenerated(
+            gainDbBucket: "12~20",
+            durationBucket: "60s",
+            source: .imported,
+            outputLufsBucket: ">=-9"
+        ).properties
+
+        #expect(props.count == 4)
+        #expect(props["output_lufs_bucket"] as? String == ">=-9")
+    }
+
+    @Test
+    func customSoundImportedProperties_lufsBucket() {
+        let props = AnalyticsEvent.customSoundImported(
+            source: .audio,
+            lufsBucket: "-14~-20"
+        ).properties
+
+        #expect(props["lufs_bucket"] as? String == "-14~-20")
+    }
+
+    @Test
     func backupLoudVariantFailedProperties() {
         let props = AnalyticsEvent.backupLoudVariantFailed(reason: .silentSource).properties
         #expect(props.count == 1)

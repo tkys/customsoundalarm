@@ -8,13 +8,16 @@ enum BackupLoudVariantService {
         AudioConverter.shared.soundsDirectory
     }
 
-    /// 既に存在する大きくした版のファイル名（無ければ nil）
+    /// 既に存在する大きくした版のファイル名（現行の生成方式のものだけ）
     static func existingVariantFileName(for sourceFileName: String) -> String? {
         guard let variant = BackupSoundResolver.variantFileName(for: sourceFileName) else {
             return nil
         }
         let url = soundsDirectory.appendingPathComponent(variant)
         guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        guard !LoudVariantMetadata.shouldRegenerate(metadata(for: variant)) else {
+            return nil
+        }
         return variant
     }
 
@@ -51,10 +54,12 @@ enum BackupLoudVariantService {
                     source: source.source
                 )
             }.value
+            writeMetadata(for: variant)
             AnalyticsService.shared.capture(.backupLoudVariantGenerated(
                 gainDbBucket: LoudVariantGenerator.gainDbBucket(result.gainDb),
                 durationBucket: LoudVariantGenerator.durationBucket(result.durationSeconds),
-                source: result.source
+                source: result.source,
+                outputLufsBucket: LoudnessMeter.bucket(forLufs: result.outputLufs)
             ))
             return result.fileName
         } catch let error as LoudVariantGenerator.GenerateError {
@@ -72,6 +77,9 @@ enum BackupLoudVariantService {
             return
         }
         try? FileManager.default.removeItem(at: soundsDirectory.appendingPathComponent(variant))
+        try? FileManager.default.removeItem(
+            at: soundsDirectory.appendingPathComponent(metadataFileName(for: variant))
+        )
     }
 
     /// どのアラームにも使われていない（または元音源が消えた）大きくした版を削除する。
@@ -90,15 +98,37 @@ enum BackupLoudVariantService {
             includingPropertiesForKeys: nil
         )) ?? []
 
-        for file in files where file.lastPathComponent.hasSuffix(".loud.caf") {
-            let base = file.lastPathComponent
+        for file in files {
+            let name = file.lastPathComponent
+            guard name.hasSuffix(".loud.caf") || name.hasSuffix(".loud.json") else { continue }
+            let base = name
                 .replacingOccurrences(of: ".loud.caf", with: "")
+                .replacingOccurrences(of: ".loud.json", with: "")
                 + ".caf"
             let isUsed = used.contains(base) && availableSourceFileNames.contains(base)
             if !isUsed {
                 try? FileManager.default.removeItem(at: file)
             }
         }
+    }
+
+    // MARK: - Metadata
+
+    static func metadataFileName(for variantFileName: String) -> String {
+        variantFileName.replacingOccurrences(of: ".caf", with: ".json")
+    }
+
+    static func metadata(for variantFileName: String) -> LoudVariantMetadata? {
+        let url = soundsDirectory.appendingPathComponent(metadataFileName(for: variantFileName))
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        return try? JSONDecoder().decode(LoudVariantMetadata.self, from: data)
+    }
+
+    private static func writeMetadata(for variantFileName: String) {
+        let metadata = LoudVariantMetadata(version: LoudVariantGenerator.version)
+        guard let data = try? JSONEncoder().encode(metadata) else { return }
+        let url = soundsDirectory.appendingPathComponent(metadataFileName(for: variantFileName))
+        try? data.write(to: url)
     }
 
     // MARK: - Source resolution
