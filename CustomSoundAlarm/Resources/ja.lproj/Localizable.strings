@@ -231,5 +231,5 @@
 "volume_guide_link" = "音が小さいときは";
 "test_ring_ringing_now" = "鳴らしています";
 "backup_alarm_info_title" = "寝過ごし防止";
-"backup_alarm_info_mechanism" = "止めずに設定した分数がたつと、同じ音を大きくしてもう一度鳴らします。";
+"backup_alarm_info_mechanism" = "アラームを止めないまま設定した時間がたつと、同じ音を大きくしてもう一度鳴らします。";
 "backup_alarm_info_accessibility" = "寝過ごし防止の説明";

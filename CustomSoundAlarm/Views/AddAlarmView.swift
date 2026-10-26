@@ -93,11 +93,14 @@ struct AlarmDetailView: View {
                     permissionSection
                 }
                 timeSection
-                repeatSection
-                labelSection
-                soundSection
-                testRingSection
-                snoozeSection
+                // 繰り返し〜スヌーズは1つのまとまり（時計アプリと同じく行の並び・#122）
+                Section {
+                    repeatSection
+                    labelSection
+                    soundSection
+                    testRingSection
+                    snoozeSection
+                }
                 backupAlarmSection
                 if case .edit = mode {
                     deleteSection
@@ -200,7 +203,7 @@ struct AlarmDetailView: View {
     // MARK: - Sound (OOUI: アラームのプロパティとしてアクセス)
 
     private var soundSection: some View {
-        Section {
+        Group {
             NavigationLink {
                 SoundSelectionView(selectedSound: $selectedSound)
             } label: {
@@ -384,7 +387,7 @@ struct AlarmDetailView: View {
 
     /// 本物の AlarmKit で1秒後に鳴らす。結果は行の中で短く表示する。
     private var testRingSection: some View {
-        Section {
+        Group {
             HStack(spacing: 12) {
                 Button {
                     scheduleTestRing(kind: .own)
@@ -479,7 +482,7 @@ struct AlarmDetailView: View {
     // MARK: - Repeat
 
     private var repeatSection: some View {
-        Section {
+        Group {
             NavigationLink {
                 RepeatSelectionView(selectedDays: $repeatWeekdays)
             } label: {
@@ -506,7 +509,7 @@ struct AlarmDetailView: View {
     }
 
     private var snoozeSection: some View {
-        Section {
+        Group {
             HStack {
                 Text("snooze")
                 Spacer()
@@ -538,7 +541,7 @@ struct AlarmDetailView: View {
     // MARK: - Label
 
     private var labelSection: some View {
-        Section {
+        Group {
             HStack {
                 Text("label")
                 TextField("alarm_placeholder", text: $label)

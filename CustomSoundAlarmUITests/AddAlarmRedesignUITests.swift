@@ -53,10 +53,19 @@ final class AddAlarmRedesignUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10))
 
-        XCTAssertFalse(app.staticTexts["アラームを有効"].exists)
+        // 旧画面の切り替えの文言（ja/en とも完全一致）
+        XCTAssertFalse(app.staticTexts["アラームをオン"].exists)
         XCTAssertFalse(app.staticTexts["Alarm Enabled"].exists)
-        XCTAssertFalse(findElement("addAlarm.enabledToggle").exists)
-        XCTAssertTrue(findElement("addAlarm.testRing").exists)
+        // フォーム内でラベルを持つ切り替えは寝過ごし防止だけ
+        // （SwiftUI は同じ切り替えをラベル無しの要素でも出すので、ラベル無しは数えない）
+        let form = app.collectionViews["addAlarm.root"]
+        for _ in 0..<4 {
+            let labeled = form.switches.allElementsBoundByIndex.filter {
+                !$0.label.isEmpty && $0.identifier != "addAlarm.backupToggle"
+            }
+            XCTAssertTrue(labeled.isEmpty, "edit screen has another switch: \(labeled.map(\.label))")
+            form.swipeUp()
+        }
     }
 
     func testSectionOrder() {
