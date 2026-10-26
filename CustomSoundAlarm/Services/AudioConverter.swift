@@ -2,11 +2,13 @@ import Foundation
 @preconcurrency import AVFoundation
 import os
 
-/// 変換結果（#106）。ピークノーマライズの計測に使う
+/// 変換結果（#106 / #134）。ラウドネス正規化の計測に使う
 struct ConversionResult: Sendable {
     let fileName: String
     let peakDb: Double?
     let gainDb: Double
+    /// 取り込み前の積分ラウドネス（LUFS）。無音なら nil
+    let lufsBefore: Double?
 }
 
 /// 音声ファイルをAlarmKit互換のCAF形式に変換し、Library/Soundsに配置する
@@ -169,20 +171,25 @@ final class AudioConverter {
             throw AudioConverterError.conversionFailed(String(localized: "error_empty_file"))
         }
 
-        // #106: ピークを測り、-1 dBFS にそろえる（上げるだけ）
-        let peakDb: Double? = try await Task.detached(priority: .userInitiated) {
-            try Self.measurePeakDbSync(fileURL: outputURL)
+        // #134: BS.1770-4 の積分ラウドネスを測り、-14 LUFS にそろえる。
+        // 上げる場合はピーク -1 dBFS を超えない範囲まで（リミッタは使わない）。
+        let measurement = await Task.detached(priority: .userInitiated) {
+            LoudnessMeter.measure(fileURL: outputURL)
         }.value
-        let gainDb = LoudnessNormalizer.gainDb(forPeakDb: peakDb)
-        if gainDb > 0 {
+        let gainDb = Self.normalizationGain(measurement: measurement)
+        if abs(gainDb) > 0.01 {
             try await Task.detached(priority: .userInitiated) {
                 try Self.applyGainSync(fileURL: outputURL, gainDb: gainDb)
             }.value
-            logger.info("Peak normalized: peak=\(peakDb ?? -999) dBFS, gain=\(gainDb) dB -> \(fileName)")
         }
 
-        logger.info("Converted audio to CAF: \(fileName) (\(fileSize) bytes) peak=\(peakDb.map { String(format: "%.1f", $0) } ?? "silent") gain=\(gainDb)")
-        return ConversionResult(fileName: fileName, peakDb: peakDb, gainDb: gainDb)
+        logger.info("Converted audio to CAF: \(fileName) (\(fileSize) bytes) lufs=\(measurement?.lufs ?? -999) gain=\(gainDb)")
+        return ConversionResult(
+            fileName: fileName,
+            peakDb: measurement?.peakDb,
+            gainDb: gainDb,
+            lufsBefore: measurement?.lufs
+        )
     }
 
     /// Library/Soundsにあるサウンドファイル一覧
@@ -201,6 +208,31 @@ final class AudioConverter {
         let url = soundsDirectory.appendingPathComponent(fileName)
         try FileManager.default.removeItem(at: url)
         logger.info("Deleted sound: \(fileName)")
+    }
+
+    // MARK: - Loudness Normalization (#134)
+
+    /// 取り込み後の目標ラウドネス
+    nonisolated static let targetLufs: Double = -14
+    /// ピークの上限
+    nonisolated static let peakCeilingDb: Double = -1
+    /// 上げる場合の上限
+    nonisolated static let maxGainDb: Double = 20
+
+    /// LUFS とピークから適用するゲインを決める（純ロジック・#134）。
+    /// - 下げる場合はそのまま下げる
+    /// - 上げる場合はピーク -1 dBFS を超えない範囲まで
+    nonisolated static func normalizationGain(
+        measurement: LoudnessMeter.Measurement?
+    ) -> Double {
+        guard let measurement else { return 0 }
+        let desired = targetLufs - measurement.lufs
+        if desired < 0 {
+            return desired
+        }
+        let peakHeadroom = peakCeilingDb - measurement.peakDb
+        guard peakHeadroom > 0 else { return 0 }
+        return min(desired, peakHeadroom, maxGainDb)
     }
 
     // MARK: - Peak Normalization Helpers (#106, nonisolated for background execution)

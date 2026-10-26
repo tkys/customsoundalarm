@@ -275,7 +275,8 @@ struct AudioCropView: View {
                 AnalyticsService.shared.capture(.customSoundImported(
                     source: .audio,
                     peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
-                    gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb)
+                    gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
+                    lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore)
                 ))
 
                 // 一時コピーを破棄して閉じる

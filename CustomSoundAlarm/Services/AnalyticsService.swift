@@ -24,7 +24,12 @@ enum AnalyticsEvent: Sendable {
     /// カスタムサウンドのインポート成功
     /// - source: "video" または "audio"
     /// - peakDbBucket / gainDbBucket: #106 ピークノーマライズ計測（生値は送らない）
-    case customSoundImported(source: SoundImportSource, peakDbBucket: String? = nil, gainDbBucket: String? = nil)
+    case customSoundImported(
+        source: SoundImportSource,
+        peakDbBucket: String? = nil,
+        gainDbBucket: String? = nil,
+        lufsBucket: String? = nil
+    )
 
     /// サウンドプレビュー再生
     case soundPreviewPlayed
@@ -113,7 +118,8 @@ enum AnalyticsEvent: Sendable {
     case backupLoudVariantGenerated(
         gainDbBucket: String,
         durationBucket: String,
-        source: LoudVariantGenerator.Source
+        source: LoudVariantGenerator.Source,
+        outputLufsBucket: String? = nil
     )
 
     /// 大きくした版の生成に失敗した（予備音を使う・#119）
@@ -231,10 +237,11 @@ enum AnalyticsEvent: Sendable {
                 "snooze_minutes": snoozeMinutes,
                 "backup_minutes": backupMinutes
             ]
-        case let .customSoundImported(source, peakDbBucket, gainDbBucket):
+        case let .customSoundImported(source, peakDbBucket, gainDbBucket, lufsBucket):
             var d: [String: Any] = ["source": source.rawValue]
             if let peakDbBucket { d["peak_db_bucket"] = peakDbBucket }
             if let gainDbBucket { d["gain_db_bucket"] = gainDbBucket }
+            if let lufsBucket { d["lufs_bucket"] = lufsBucket }
             return d
         case .soundPreviewPlayed:
             return [:]
@@ -301,12 +308,16 @@ enum AnalyticsEvent: Sendable {
                 "kind": kind.rawValue,
                 "rank_bucket": rankBucket
             ]
-        case let .backupLoudVariantGenerated(gainDbBucket, durationBucket, source):
-            return [
+        case let .backupLoudVariantGenerated(gainDbBucket, durationBucket, source, outputLufsBucket):
+            var props: [String: Any] = [
                 "gain_db_bucket": gainDbBucket,
                 "duration_bucket": durationBucket,
                 "source": source.rawValue
             ]
+            if let outputLufsBucket {
+                props["output_lufs_bucket"] = outputLufsBucket
+            }
+            return props
         case let .backupLoudVariantFailed(reason):
             return ["reason": reason.rawValue]
         case let .volumeGuideOpened(source):

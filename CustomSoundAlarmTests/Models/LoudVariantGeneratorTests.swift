@@ -5,15 +5,12 @@ import AVFoundation
 
 struct LoudVariantGeneratorTests {
 
-    private func makeCAF(
-        samples: [Float],
-        sampleRate: Double = 44100
-    ) throws -> URL {
+    private func makeCAF(samples: [Float]) throws -> URL {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString + ".caf")
         let settings: [String: Any] = [
             AVFormatIDKey: kAudioFormatLinearPCM,
-            AVSampleRateKey: sampleRate,
+            AVSampleRateKey: 44_100.0,
             AVNumberOfChannelsKey: 1,
             AVLinearPCMBitDepthKey: 16,
             AVLinearPCMIsFloatKey: false,
@@ -43,11 +40,55 @@ struct LoudVariantGeneratorTests {
             .appendingPathComponent(UUID().uuidString + ".loud.caf")
     }
 
-    private func sine(amplitude: Float, seconds: Double, frequency: Double = 440) -> [Float] {
-        let count = Int(44100 * seconds)
+    private func sine(amplitude: Float, seconds: Double, frequency: Double = 1000) -> [Float] {
+        let count = Int(44_100 * seconds)
         return (0..<count).map { index in
-            Float(Double(amplitude) * sin(2 * Double.pi * frequency * Double(index) / 44100))
+            Float(Double(amplitude) * sin(2 * Double.pi * frequency * Double(index) / 44_100))
         }
+    }
+
+    private func crestDb(_ samples: [Float]) -> Double {
+        let peak = samples.reduce(Float(0)) { max($0, abs($1)) }
+        let meanSquare = samples.reduce(0.0) { $0 + Double($1 * $1) } / Double(samples.count)
+        let rms = sqrt(meanSquare)
+        guard rms > 0 else { return 0 }
+        return 20 * log10(Double(peak) / rms)
+    }
+
+    /// 打楽器風: 周期的（1.0秒ごと）な減衰 60ms のインパルス（0.3〜0.95）＋持続音
+    private func percussive(seconds: Double = 30) -> [Float] {
+        let count = Int(44_100 * seconds)
+        var samples = [Float](repeating: 0, count: count)
+        for index in 0..<count {
+            let time = Double(index) / 44_100
+            var value = 0.145 * sin(2 * Double.pi * 220 * time)
+            let beat = Int(floor(time / 1.0))
+            let sinceBeat = time - Double(beat) * 1.0
+            if sinceBeat < 0.06 {
+                var seed = UInt64(beat) &* 6364136223846793005 &+ 1442695040888963407
+                seed ^= seed >> 33
+                let amplitude = 0.3 + 0.65 * (Double(seed % 1000) / 1000)
+                value += amplitude * exp(-sinceBeat / 0.06)
+                    * sin(2 * Double.pi * 1000 * sinceBeat)
+            }
+            samples[index] = Float(value)
+        }
+        return samples
+    }
+
+    /// とがった音: まれな全振幅スパイク＋小さい持続音
+    private func spiky(seconds: Double = 30) -> [Float] {
+        let count = Int(44_100 * seconds)
+        var samples = [Float](repeating: 0, count: count)
+        for index in 0..<count {
+            let time = Double(index) / 44_100
+            var value = 0.02 * sin(2 * Double.pi * 220 * time)
+            if index % 22_050 < 4 {
+                value = 1.0
+            }
+            samples[index] = Float(value)
+        }
+        return samples
     }
 
     @Test
@@ -57,8 +98,14 @@ struct LoudVariantGeneratorTests {
     }
 
     @Test
-    func generate_lowRmsSine_raisesRmsAndCapsPeak() throws {
-        let source = try makeCAF(samples: sine(amplitude: 0.089, seconds: 3)) // RMS -24 dBFS
+    func signalsHaveRealisticCrestFactors() {
+        #expect(crestDb(percussive()) >= 18, "percussive crest was \(crestDb(percussive()))")
+        #expect(crestDb(spiky()) >= 28, "spiky crest was \(crestDb(spiky()))")
+    }
+
+    @Test
+    func generate_sine_reachesMinus8Lufs() throws {
+        let source = try makeCAF(samples: sine(amplitude: 0.28, seconds: 30))
         let output = outputURL()
         defer {
             try? FileManager.default.removeItem(at: source)
@@ -68,26 +115,20 @@ struct LoudVariantGeneratorTests {
         let result = try LoudVariantGenerator.generate(
             sourceURL: source,
             outputURL: output,
-            sourceFileName: "source.caf",
+            sourceFileName: "sine.caf",
             source: .imported
         )
 
-        #expect(result.gainDb > 10)
+        #expect(abs(result.outputLufs - (-8)) <= 1, "output lufs was \(result.outputLufs)")
+        #expect(result.outputLufs >= result.sourceLufs + 6)
+        #expect(result.outputLufs <= -7.5)
         let measurement = try #require(SoundLoudness.measure(fileURL: output))
-        #expect(measurement.rmsDb > -12, "rms was \(measurement.rmsDb)")
-        #expect(measurement.peakDb <= -0.9, "peak was \(measurement.peakDb)")
-        #expect(abs(result.durationSeconds - 3) < 0.2)
+        #expect(measurement.peakDb <= -0.95, "peak was \(measurement.peakDb)")
     }
 
-    /// 陰性確認の対象: Limiter を外すとピークが -1 dBFS を超える
     @Test
-    func generate_highCrestInput_keepsPeakBelowMinus1() throws {
-        var samples = sine(amplitude: 0.02, seconds: 5) // 低い RMS
-        for index in stride(from: 0, to: samples.count, by: 22050) {
-            for offset in 0..<4 where index + offset < samples.count {
-                samples[index + offset] = 1.0 // フルスケールのスパイク
-            }
-        }
+    func generate_percussive_meetsGapAndReductionLimit() throws {
+        let samples = percussive()
         let source = try makeCAF(samples: samples)
         let output = outputURL()
         defer {
@@ -95,40 +136,49 @@ struct LoudVariantGeneratorTests {
             try? FileManager.default.removeItem(at: output)
         }
 
-        _ = try LoudVariantGenerator.generate(
+        let result = try LoudVariantGenerator.generate(
             sourceURL: source,
             outputURL: output,
-            sourceFileName: "spiky.caf",
+            sourceFileName: "percussive.caf",
             source: .imported
         )
 
+        #expect(result.outputLufs >= result.sourceLufs + 6,
+                "source=\(result.sourceLufs) output=\(result.outputLufs)")
+        #expect(result.outputLufs <= -7.5, "output lufs was \(result.outputLufs)")
+        #expect(result.averageReductionDb <= 1.5,
+                "average reduction was \(result.averageReductionDb) source=\(result.sourceLufs) output=\(result.outputLufs) gain=\(result.gainDb)")
         let measurement = try #require(SoundLoudness.measure(fileURL: output))
-        #expect(measurement.peakDb <= -0.9, "peak was \(measurement.peakDb)")
+        #expect(measurement.peakDb <= -0.95, "peak was \(measurement.peakDb)")
     }
 
     @Test
-    func generate_alreadyLoudInput_keepsPeakBelowMinus1() throws {
-        let source = try makeCAF(samples: sine(amplitude: 0.9, seconds: 2))
+    func generate_spiky_meetsGap() throws {
+        let samples = spiky()
+        let source = try makeCAF(samples: samples)
         let output = outputURL()
         defer {
             try? FileManager.default.removeItem(at: source)
             try? FileManager.default.removeItem(at: output)
         }
 
-        _ = try LoudVariantGenerator.generate(
+        let result = try LoudVariantGenerator.generate(
             sourceURL: source,
             outputURL: output,
-            sourceFileName: "loud.caf",
-            source: .preset
+            sourceFileName: "spiky.caf",
+            source: .imported
         )
 
+        #expect(result.outputLufs >= result.sourceLufs + 6,
+                "source=\(result.sourceLufs) output=\(result.outputLufs)")
+        #expect(result.outputLufs <= -7.5, "output lufs was \(result.outputLufs)")
         let measurement = try #require(SoundLoudness.measure(fileURL: output))
-        #expect(measurement.peakDb <= -0.9, "peak was \(measurement.peakDb)")
+        #expect(measurement.peakDb <= -0.95, "peak was \(measurement.peakDb)")
     }
 
     @Test
     func generate_90Seconds_isCappedTo60() throws {
-        let source = try makeCAF(samples: sine(amplitude: 0.089, seconds: 90))
+        let source = try makeCAF(samples: sine(amplitude: 0.28, seconds: 90))
         let output = outputURL()
         defer {
             try? FileManager.default.removeItem(at: source)
@@ -148,7 +198,7 @@ struct LoudVariantGeneratorTests {
 
     @Test
     func generate_silentInput_fails() throws {
-        let source = try makeCAF(samples: [Float](repeating: 0, count: 44100))
+        let source = try makeCAF(samples: [Float](repeating: 0, count: 44_100))
         let output = outputURL()
         defer {
             try? FileManager.default.removeItem(at: source)
@@ -167,7 +217,7 @@ struct LoudVariantGeneratorTests {
 
     @Test
     func generate_doesNotModifySource() throws {
-        let source = try makeCAF(samples: sine(amplitude: 0.089, seconds: 1))
+        let source = try makeCAF(samples: sine(amplitude: 0.28, seconds: 3))
         let output = outputURL()
         defer {
             try? FileManager.default.removeItem(at: source)
@@ -183,6 +233,47 @@ struct LoudVariantGeneratorTests {
         )
 
         #expect(try Data(contentsOf: source) == before)
+    }
+
+    // MARK: - Candidate selection (#134)
+
+    @Test
+    func selectCandidate_keepsPlus6FloorForSpiky() {
+        // 低減上限で止まるが、その手前は +6 に届かない → +6 に届く段を採る
+        let candidates = [
+            LoudVariantGenerator.GainCandidate(gain: 0, lufs: -18, averageReductionDb: 0),
+            LoudVariantGenerator.GainCandidate(gain: 1.5, lufs: -16.5, averageReductionDb: 0.5),
+            LoudVariantGenerator.GainCandidate(gain: 3, lufs: -15, averageReductionDb: 1.0),
+            LoudVariantGenerator.GainCandidate(gain: 4.5, lufs: -13.5, averageReductionDb: 2.0),
+            LoudVariantGenerator.GainCandidate(gain: 6, lufs: -12, averageReductionDb: 3.0)
+        ]
+
+        let selected = LoudVariantGenerator.selectCandidate(candidates, sourceLufs: -20)
+        #expect(selected?.gain == 4.5)
+        #expect((selected?.lufs ?? -999) >= -14)
+    }
+
+    @Test
+    func selectCandidate_prefersBestWithinReductionWhenGapIsMet() {
+        let candidates = [
+            LoudVariantGenerator.GainCandidate(gain: 0, lufs: -18, averageReductionDb: 0),
+            LoudVariantGenerator.GainCandidate(gain: 1.5, lufs: -14, averageReductionDb: 0.5),
+            LoudVariantGenerator.GainCandidate(gain: 3, lufs: -12, averageReductionDb: 2.0)
+        ]
+        let selected = LoudVariantGenerator.selectCandidate(candidates, sourceLufs: -20)
+        #expect(selected?.gain == 1.5)
+    }
+
+    @Test
+    func selectCandidate_upperBoundWinsWhenGapIsAboveMinus8() {
+        let candidates = [
+            LoudVariantGenerator.GainCandidate(gain: 0, lufs: -12, averageReductionDb: 0),
+            LoudVariantGenerator.GainCandidate(gain: 1.5, lufs: -10.5, averageReductionDb: 0),
+            LoudVariantGenerator.GainCandidate(gain: 3, lufs: -9, averageReductionDb: 0),
+            LoudVariantGenerator.GainCandidate(gain: 4.5, lufs: -7.5, averageReductionDb: 0)
+        ]
+        let selected = LoudVariantGenerator.selectCandidate(candidates, sourceLufs: -10)
+        #expect(selected?.gain == 3)
     }
 
     @Test

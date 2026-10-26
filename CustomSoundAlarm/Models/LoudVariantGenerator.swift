@@ -1,31 +1,35 @@
 import Foundation
 @preconcurrency import AVFoundation
 
-/// ユーザーの音を「大きくした版」に変換する（#119）。
+/// ユーザーの音を「大きくした版」に変換する（#119 / #134）。
 ///
 /// - 入力は先頭60秒まで
-/// - ゲイン → Apple の Peak Limiter（`kAudioUnitSubType_PeakLimiter`）→ -1 dBFS にトリム
-/// - 出力は既存と同じ PCM16 / 44.1kHz / mono CAF
+/// - 自前の先読みリミッタ（上限 −1 dBFS・先読み 5ms・リリース 80ms）を使う
+/// - 目標は「元の音 +6 LU 以上・音をつぶさない範囲でできるだけ大きく・上限 −8 LUFS」
+/// - 出力は PCM16 / 44.1kHz / mono CAF
 /// - 元の音源は一切書き換えない
 enum LoudVariantGenerator {
 
-    /// 目標 RMS（LUFS の近似）
-    static let targetRMSDb: Double = -9
+    /// 生成方式の版。古い版の `.loud.caf` は作り直す（#134）
+    static let version: Int = 3
+
+    /// ラウドネスの上限
+    static let targetLufs: Double = -8
+
+    /// 元の音からの最低改善量
+    static let minimumGainLu: Double = 6
 
     /// ゲイン上限
     static let maxGainDb: Double = 30
 
-    /// オフライン描画の実測補正（モノラル→ミキサーで約3dB下がるため）
-    static let engineCompensationDb: Double = 3
-
     /// 出力の最大長
     static let maxDuration: TimeInterval = 60
 
-    /// 出力フォーマット
-    static let sampleRate: Double = 44100
+    /// 平均ゲイン低減の上限（これを超えたら音質優先で止める）
+    static let maxAverageReductionDb: Double = 1.5
 
-    /// リミッタ後の最終トリム（-1 dBFS）
-    static let outputTrimLinear: Float = 0.891
+    /// ゲインの探索刻み
+    static let gainStepDb: Double = 1.5
 
     enum Source: String, Sendable, Equatable {
         case imported
@@ -40,11 +44,50 @@ enum LoudVariantGenerator {
         case sourceMissing = "source_missing"
     }
 
+    /// ゲイン探索の1段（純ロジックのテスト用・#134）
+    struct GainCandidate: Equatable, Sendable {
+        let gain: Double
+        let lufs: Double
+        let averageReductionDb: Double
+    }
+
+    /// 探索した段から最終ゲインを選ぶ（純ロジック・#134）。
+    /// - 平均低減 ≤ 1.5 dB かつ −8 LUFS 未満の最後の段を基本とする
+    /// - それが「元の音 +6 LU」に届いていなければ、+6 に届く最初の段を採る（低減上限を超えてよい）
+    /// - 元の音 +6 が −8 より上になる場合は、−8 未満の最後の段（上限優先）
+    static func selectCandidate(
+        _ candidates: [GainCandidate],
+        sourceLufs: Double
+    ) -> GainCandidate? {
+        guard !candidates.isEmpty else { return nil }
+        let floorLufs = sourceLufs + minimumGainLu
+        let withinReduction = candidates.filter {
+            $0.averageReductionDb <= maxAverageReductionDb && $0.lufs < targetLufs
+        }
+
+        if let best = withinReduction.last,
+           best.lufs >= floorLufs || floorLufs > targetLufs {
+            return best
+        }
+        if let floorCandidate = candidates.first(where: { $0.lufs >= floorLufs }) {
+            return floorCandidate
+        }
+        return withinReduction.last ?? candidates[0]
+    }
+
     struct Result: Equatable, Sendable {
         let fileName: String
         let gainDb: Double
         let durationSeconds: Double
         let source: Source
+        /// 元の音（先頭60秒）の LUFS
+        let sourceLufs: Double
+        /// 出力の LUFS
+        let outputLufs: Double
+        /// リミッタのゲイン係数の時間平均（dB）
+        let averageReductionDb: Double
+        /// 探索した段数
+        let attempts: Int
     }
 
     /// `<元の名前>.loud.caf`
@@ -59,26 +102,97 @@ enum LoudVariantGenerator {
         sourceFileName: String,
         source: Source
     ) throws -> Result {
-        guard let sourceFile = try? AVAudioFile(forReading: sourceURL) else {
+        guard let buffer = AudioSampleLoader.loadMono44k(
+            fileURL: sourceURL,
+            maxSeconds: maxDuration
+        ), let channel = buffer.floatChannelData?[0] else {
             throw GenerateError.unreadableSource
         }
 
-        // 無音は失敗扱い（予備音にフォールバック）
-        guard let measurement = SoundLoudness.measure(file: sourceFile) else {
+        let samples = Array(UnsafeBufferPointer(start: channel, count: Int(buffer.frameLength)))
+        guard let sourceMeasurement = LoudnessMeter.measure(samples: samples) else {
             throw GenerateError.silentSource
         }
 
-        let requestedGain = min(max(targetRMSDb - measurement.rmsDb, 0), maxGainDb)
-        let gainDb = requestedGain + engineCompensationDb
+        let sourcePeak = samples.reduce(Float(0)) { max($0, abs($1)) }
+        guard sourcePeak > 0 else { throw GenerateError.silentSource }
+        let sourcePeakDb = 20 * log10(Double(sourcePeak))
 
-        guard let buffer = loadMonoBuffer(file: sourceFile, maxSeconds: maxDuration) else {
-            throw GenerateError.unreadableSource
+        // ピークを −1 dBFS にそろえるゲインと、LUFS 上限にそろえるゲインの小さい方から始める。
+        // 実音源（クレストが大きい）ではピーク基準が大幅に低く、そこから +1.5 dB ずつ上げる。
+        let peakNormalizationGain = -1 - sourcePeakDb
+        let lufsGain = targetLufs - sourceMeasurement.lufs
+        let startGain = min(maxGainDb, min(peakNormalizationGain, lufsGain))
+
+        struct Candidate {
+            let gain: Double
+            let limiter: LookaheadLimiter.Result
+            let lufs: Double
         }
 
+        func evaluate(_ gain: Double) -> Candidate? {
+            let limiter = LookaheadLimiter.process(samples: samples, gainDb: gain)
+            guard let measurement = LoudnessMeter.measure(samples: limiter.samples) else {
+                return nil
+            }
+            return Candidate(gain: gain, limiter: limiter, lufs: measurement.lufs)
+        }
+
+        var candidates: [Candidate] = []
+        var gain = startGain
+        while true {
+            guard let candidate = evaluate(gain) else {
+                throw GenerateError.renderFailed
+            }
+            candidates.append(candidate)
+
+            if gain >= maxGainDb { break }
+            if candidate.lufs >= targetLufs { break }
+            if candidate.limiter.averageReductionDb > maxAverageReductionDb,
+               candidate.lufs >= sourceMeasurement.lufs + minimumGainLu {
+                break
+            }
+            // 低減上限を超えても、+6 LU に届くまでは上げ続ける
+            let next = min(maxGainDb, gain + gainStepDb)
+            if next <= gain { break }
+            gain = next
+        }
+
+        guard !candidates.isEmpty else { throw GenerateError.renderFailed }
+
+        let gainCandidates = candidates.map {
+            GainCandidate(
+                gain: $0.gain,
+                lufs: $0.lufs,
+                averageReductionDb: $0.limiter.averageReductionDb
+            )
+        }
+        guard let selectedGain = Self.selectCandidate(
+            gainCandidates,
+            sourceLufs: sourceMeasurement.lufs
+        ), let selected = candidates.first(where: { $0.gain == selectedGain.gain }) else {
+            throw GenerateError.renderFailed
+        }
+
+        try write(samples: selected.limiter.samples, to: outputURL)
+
+        return Result(
+            fileName: outputURL.lastPathComponent,
+            gainDb: selected.gain,
+            durationSeconds: Double(selected.limiter.samples.count) / AudioSampleLoader.sampleRate,
+            source: source,
+            sourceLufs: sourceMeasurement.lufs,
+            outputLufs: selected.lufs,
+            averageReductionDb: selected.limiter.averageReductionDb,
+            attempts: candidates.count
+        )
+    }
+
+    private static func write(samples: [Float], to outputURL: URL) throws {
         try? FileManager.default.removeItem(at: outputURL)
         let settings: [String: Any] = [
             AVFormatIDKey: kAudioFormatLinearPCM,
-            AVSampleRateKey: sampleRate,
+            AVSampleRateKey: AudioSampleLoader.sampleRate,
             AVNumberOfChannelsKey: 1,
             AVLinearPCMBitDepthKey: 16,
             AVLinearPCMIsFloatKey: false,
@@ -92,212 +206,21 @@ enum LoudVariantGenerator {
         ) else {
             throw GenerateError.writeFailed
         }
-
-        let framesWritten = try renderWithPeakLimiter(
-            buffer: buffer,
-            gainDb: gainDb,
-            outputFile: outputFile
-        )
-
-        let duration = Double(framesWritten) / sampleRate
-        return Result(
-            fileName: outputURL.lastPathComponent,
-            gainDb: gainDb,
-            durationSeconds: duration,
-            source: source
-        )
-    }
-
-    // MARK: - Load
-
-    /// 先頭 maxSeconds までを 44.1kHz / mono / float32 で読む。
-    static func loadMonoBuffer(file: AVAudioFile, maxSeconds: TimeInterval) -> AVAudioPCMBuffer? {
-        let inputFormat = file.processingFormat
-        let maxFrames = AVAudioFrameCount(
-            min(Double(file.length), inputFormat.sampleRate * maxSeconds)
-        )
-        guard maxFrames > 0,
-              let input = AVAudioPCMBuffer(pcmFormat: inputFormat, frameCapacity: maxFrames)
-        else { return nil }
-
-        file.framePosition = 0
-        do {
-            try file.read(into: input, frameCount: maxFrames)
-        } catch {
-            return nil
-        }
-        guard input.frameLength > 0 else { return nil }
-
-        let outputFormat = AVAudioFormat(
-            commonFormat: .pcmFormatFloat32,
-            sampleRate: sampleRate,
-            channels: 1,
-            interleaved: false
-        )!
-
-        // 44.1kHz mono ならそのまま
-        if inputFormat.sampleRate == sampleRate,
-           inputFormat.channelCount == 1,
-           inputFormat.commonFormat == .pcmFormatFloat32 {
-            return input
-        }
-
-        // まず mono に落とす（サンプルレートは維持）
-        let monoSampleRate = inputFormat.sampleRate
-        let monoFormat = AVAudioFormat(
-            commonFormat: .pcmFormatFloat32,
-            sampleRate: monoSampleRate,
-            channels: 1,
-            interleaved: false
-        )!
-        guard let mono = AVAudioPCMBuffer(pcmFormat: monoFormat, frameCapacity: input.frameLength) else {
-            return nil
-        }
-        mono.frameLength = input.frameLength
-        let frames = Int(input.frameLength)
-        let channels = Int(inputFormat.channelCount)
-        if let source = input.floatChannelData {
-            for index in 0..<frames {
-                var sum: Float = 0
-                for channel in 0..<channels {
-                    sum += source[channel][index]
-                }
-                mono.floatChannelData![0][index] = sum / Float(channels)
-            }
-        } else if let source = input.int16ChannelData {
-            for index in 0..<frames {
-                var sum: Int32 = 0
-                for channel in 0..<channels {
-                    sum += Int32(source[channel][index])
-                }
-                mono.floatChannelData![0][index] = Float(sum) / Float(channels) / 32768.0
-            }
-        } else {
-            return nil
-        }
-
-        if monoSampleRate == sampleRate {
-            return mono
-        }
-
-        guard let converter = AVAudioConverter(from: monoFormat, to: outputFormat) else {
-            return nil
-        }
-        let ratio = sampleRate / monoSampleRate
-        let capacity = AVAudioFrameCount(Double(mono.frameLength) * ratio) + 1024
-        guard let output = AVAudioPCMBuffer(pcmFormat: outputFormat, frameCapacity: capacity) else {
-            return nil
-        }
-        var error: NSError?
-        var supplied = false
-        converter.convert(to: output, error: &error) { _, status in
-            if supplied {
-                status.pointee = .endOfStream
-                return nil
-            }
-            supplied = true
-            status.pointee = .haveData
-            return mono
-        }
-        guard error == nil, output.frameLength > 0 else { return nil }
-        return output
-    }
-
-    // MARK: - Render
-
-    /// ゲイン → Peak Limiter → -1 dBFS トリムでオフライン描画し、CAF に書き出す。
-    /// - Returns: 書き出したフレーム数
-    static func renderWithPeakLimiter(
-        buffer: AVAudioPCMBuffer,
-        gainDb: Double,
-        outputFile: AVAudioFile,
-        useLimiter: Bool = true
-    ) throws -> AVAudioFrameCount {
-        let engine = AVAudioEngine()
-        let player = AVAudioPlayerNode()
-        let eq = AVAudioUnitEQ(numberOfBands: 0)
-        eq.globalGain = Float(gainDb)
-        let limiter = AVAudioUnitEffect(audioComponentDescription: Self.peakLimiterDescription)
-
-        engine.attach(player)
-        engine.attach(eq)
-        if useLimiter {
-            engine.attach(limiter)
-        }
-
-        let format = buffer.format
-        engine.connect(player, to: eq, format: format)
-        if useLimiter {
-            engine.connect(eq, to: limiter, format: format)
-            engine.connect(limiter, to: engine.mainMixerNode, format: format)
-        } else {
-            engine.connect(eq, to: engine.mainMixerNode, format: format)
-        }
-        engine.mainMixerNode.outputVolume = Self.outputTrimLinear
-
-        do {
-            try engine.enableManualRenderingMode(
-                .offline,
-                format: format,
-                maximumFrameCount: 4096
-            )
-            try engine.start()
-        } catch {
-            throw GenerateError.renderFailed
-        }
-        defer { engine.stop() }
-
-        guard let renderBuffer = AVAudioPCMBuffer(
-            pcmFormat: engine.manualRenderingFormat,
-            frameCapacity: 4096
+        let format = outputFile.processingFormat
+        guard let buffer = AVAudioPCMBuffer(
+            pcmFormat: format,
+            frameCapacity: AVAudioFrameCount(samples.count)
         ) else {
-            throw GenerateError.renderFailed
+            throw GenerateError.writeFailed
         }
-
-        player.scheduleBuffer(buffer, at: nil, options: [], completionHandler: nil)
-        player.play()
-
-        var remaining = buffer.frameLength
-        var written: AVAudioFrameCount = 0
-        var guardCount = 0
-        while remaining > 0 {
-            guardCount += 1
-            if guardCount > 100_000 { throw GenerateError.renderFailed }
-            let frames = min(4096, remaining)
-            let status: AVAudioEngineManualRenderingStatus
-            do {
-                status = try engine.renderOffline(frames, to: renderBuffer)
-            } catch {
-                throw GenerateError.renderFailed
-            }
-            switch status {
-            case .success:
-                guard renderBuffer.frameLength > 0 else { throw GenerateError.renderFailed }
-                do {
-                    try outputFile.write(from: renderBuffer)
-                } catch {
-                    throw GenerateError.writeFailed
-                }
-                written += renderBuffer.frameLength
-                remaining -= min(remaining, renderBuffer.frameLength)
-            case .cannotDoInCurrentContext:
-                continue
-            case .insufficientDataFromInputNode, .error:
-                throw GenerateError.renderFailed
-            @unknown default:
-                throw GenerateError.renderFailed
-            }
+        buffer.frameLength = AVAudioFrameCount(samples.count)
+        for index in samples.indices {
+            buffer.floatChannelData![0][index] = samples[index]
         }
-        return written
-    }
-
-    private static var peakLimiterDescription: AudioComponentDescription {
-        AudioComponentDescription(
-            componentType: kAudioUnitType_Effect,
-            componentSubType: kAudioUnitSubType_PeakLimiter,
-            componentManufacturer: kAudioUnitManufacturer_Apple,
-            componentFlags: 0,
-            componentFlagsMask: 0
-        )
+        do {
+            try outputFile.write(from: buffer)
+        } catch {
+            throw GenerateError.writeFailed
+        }
     }
 }
