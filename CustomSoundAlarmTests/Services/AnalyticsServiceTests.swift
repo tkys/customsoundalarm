@@ -44,6 +44,8 @@ struct AnalyticsEventTests {
     @Test
     func eventNameMapping() {
         #expect(AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: false, snoozeMinutes: 0).name == "alarm_created")
+        #expect(AnalyticsEvent.backupAlarmStopped(minutes: 15, snoozesBefore: 2, hour: 7).name == "backup_alarm_stopped")
+        #expect(AnalyticsEvent.soundSelected(kind: .imported, rankBucket: "2-3").name == "sound_selected")
         #expect(AnalyticsEvent.customSoundImported(source: .video).name == "custom_sound_imported")
         #expect(AnalyticsEvent.customSoundImported(source: .audio).name == "custom_sound_imported")
         #expect(AnalyticsEvent.soundPreviewPlayed.name == "sound_preview_played")
@@ -95,10 +97,23 @@ struct AnalyticsEventTests {
     func alarmCreatedProperties_whenCustomAndRepeating() {
         let props = AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: true, snoozeMinutes: 9).properties
 
-        #expect(props.count == 3)
+        #expect(props.count == 4)
         #expect(props["has_custom_sound"] as? Bool == true)
         #expect(props["is_repeating"] as? Bool == true)
         #expect(props["snooze_minutes"] as? Int == 9)
+        #expect(props["backup_minutes"] as? Int == 0)
+    }
+
+    @Test
+    func alarmCreatedProperties_withBackupMinutes() {
+        let props = AnalyticsEvent.alarmCreated(
+            hasCustomSound: true,
+            isRepeating: false,
+            snoozeMinutes: 9,
+            backupMinutes: 20
+        ).properties
+
+        #expect(props["backup_minutes"] as? Int == 20)
     }
 
     @Test
@@ -108,6 +123,7 @@ struct AnalyticsEventTests {
         #expect(props["has_custom_sound"] as? Bool == false)
         #expect(props["is_repeating"] as? Bool == false)
         #expect(props["snooze_minutes"] as? Int == 0)
+        #expect(props["backup_minutes"] as? Int == 0)
     }
 
     // MARK: custom_sound_imported
@@ -141,15 +157,17 @@ struct AnalyticsEventTests {
     func testRingScheduledProperties_kindOwn() {
         let props = AnalyticsEvent.testRingScheduled(kind: .own).properties
 
-        #expect(props.count == 1)
+        #expect(props.count == 2)
         #expect(props["kind"] as? String == "own")
+        #expect(props["has_backup"] as? Bool == false)
     }
 
     @Test
     func testRingScheduledProperties_kindBackup() {
-        let props = AnalyticsEvent.testRingScheduled(kind: .backup).properties
+        let props = AnalyticsEvent.testRingScheduled(kind: .backup, hasBackup: true).properties
 
         #expect(props["kind"] as? String == "backup")
+        #expect(props["has_backup"] as? Bool == true)
     }
 
     @Test
@@ -255,6 +273,43 @@ struct AnalyticsEventTests {
         #expect(props["from"] as? String == "test_ring")
     }
 
+    // MARK: backup_alarm_stopped / sound_selected (#124)
+
+    @Test
+    func backupAlarmStoppedProperties() {
+        let props = AnalyticsEvent.backupAlarmStopped(
+            minutes: 15,
+            snoozesBefore: 2,
+            hour: 7
+        ).properties
+
+        #expect(props.count == 3)
+        #expect(props["minutes"] as? Int == 15)
+        #expect(props["snoozes_before"] as? Int == 2)
+        #expect(props["hour"] as? Int == 7)
+    }
+
+    @Test
+    func backupAlarmStoppedProperties_nilSnoozesIsOmitted() {
+        let props = AnalyticsEvent.backupAlarmStopped(
+            minutes: 30,
+            snoozesBefore: nil,
+            hour: 6
+        ).properties
+
+        #expect(props["minutes"] as? Int == 30)
+        #expect(props["hour"] as? Int == 6)
+        #expect(props["snoozes_before"] == nil)
+    }
+
+    @Test
+    func soundSelectedProperties() {
+        let props = AnalyticsEvent.soundSelected(kind: .preset, rankBucket: "4-10").properties
+        #expect(props.count == 2)
+        #expect(props["kind"] as? String == "preset")
+        #expect(props["rank_bucket"] as? String == "4-10")
+    }
+
     // MARK: sound_preview_played
 
     @Test
@@ -298,15 +353,31 @@ struct AnalyticsEventTests {
 
     @Test
     func alarmEditedProperties_matchAlarmCreatedShape() {
-        // 仕様: alarm_created と props を揃える（has_custom_sound / is_repeating / snooze_minutes）
+        // alarm_created と共通の props + was_enabled（#124）
         let edited = AnalyticsEvent.alarmEdited(hasCustomSound: true, isRepeating: false, snoozeMinutes: 9).properties
         let created = AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: false, snoozeMinutes: 9).properties
 
-        #expect(edited.count == 3)
-        #expect(Set(edited.keys) == Set(created.keys))
+        #expect(edited.count == 5)
+        #expect(Set(edited.keys).subtracting(["was_enabled"]) == Set(created.keys))
         #expect(edited["has_custom_sound"] as? Bool == true)
         #expect(edited["is_repeating"] as? Bool == false)
         #expect(edited["snooze_minutes"] as? Int == 9)
+        #expect(edited["backup_minutes"] as? Int == 0)
+        #expect(edited["was_enabled"] as? Bool == true)
+    }
+
+    @Test
+    func alarmEditedProperties_wasDisabledBeforeEdit() {
+        let props = AnalyticsEvent.alarmEdited(
+            hasCustomSound: false,
+            isRepeating: false,
+            snoozeMinutes: 9,
+            backupMinutes: 15,
+            wasEnabled: false
+        ).properties
+
+        #expect(props["was_enabled"] as? Bool == false)
+        #expect(props["backup_minutes"] as? Int == 15)
     }
 
     @Test

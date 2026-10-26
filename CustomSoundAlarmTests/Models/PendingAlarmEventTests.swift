@@ -174,4 +174,32 @@ private final class MockBackend: AnalyticsBackend, @unchecked Sendable {
     }
 
     func setUserProperties(_ properties: [String: Any]) {}
+
+    @Test
+    func postHogProperties_mergesIntProperties() {
+        let event = PendingAlarmEvent(
+            name: "backup_alarm_stopped",
+            properties: [:],
+            intProperties: ["minutes": 15, "snoozes_before": 2],
+            hour: 7,
+            timestamp: Date(timeIntervalSince1970: 1_700_000_000)
+        )
+
+        let props = event.postHogProperties
+        #expect(props["hour"] as? Int == 7)
+        #expect(props["minutes"] as? Int == 15)
+        #expect(props["snoozes_before"] as? Int == 2)
+        #expect(props["timestamp"] as? TimeInterval == 1_700_000_000)
+    }
+
+    @Test
+    func pendingEvent_oldJSONWithoutIntProperties_decodes() throws {
+        let json = """
+        {"name":"alarm_stopped","properties":{},"hour":7,"timestamp":0}
+        """
+        let data = try #require(json.data(using: .utf8))
+        let event = try JSONDecoder().decode(PendingAlarmEvent.self, from: data)
+        #expect(event.name == "alarm_stopped")
+        #expect(event.intProperties == nil)
+    }
 }
