@@ -192,6 +192,19 @@ struct SoundPickerLogicTests {
     }
 
     @Test
+    func mySoundsByRecentUse_duplicateNamesDoNotCrash() {
+        let a = AlarmSound(name: "A", fileName: "a.caf")
+        let b = AlarmSound(name: "B", fileName: "b.caf")
+
+        let sorted = SoundPickerLogic.mySoundsByRecentUse(
+            in: [a, b],
+            recentFileNames: ["b.caf", "a.caf", "b.caf"]
+        )
+
+        #expect(sorted.map(\.fileName) == ["b.caf", "a.caf"])
+    }
+
+    @Test
     func mySoundsByRecentUse_excludesPresets() {
         let preset = AlarmSound(name: "Preset", fileName: "p.caf", isPreset: true)
         let mine = AlarmSound(name: "Mine", fileName: "m.caf")

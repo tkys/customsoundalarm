@@ -20,8 +20,10 @@ enum SoundPickerLogic {
         recentFileNames: [String]
     ) -> [AlarmSound] {
         let imported = sounds.filter { !$0.isPreset }
+        // 同じ名前が2回あっても落ちないよう、先に出た（新しい）方を採る
         let rank = Dictionary(
-            uniqueKeysWithValues: recentFileNames.enumerated().map { ($0.element, $0.offset) }
+            recentFileNames.enumerated().map { ($0.element, $0.offset) },
+            uniquingKeysWith: { first, _ in first }
         )
         return imported.enumerated()
             .sorted { lhs, rhs in
