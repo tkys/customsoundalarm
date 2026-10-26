@@ -26,7 +26,7 @@
 | `backup_alarm_fired` | `snoozes_before` int（不明なら省略） | 寝過ごし防止の鳴動を監視で検知 | **補助指標**（アプリが開いていた場合のみ） | アプリ動作中のみ | 1.8.0 |
 | `backup_alarm_stopped` | `minutes` int, `snoozes_before` int（不明なら省略）, `hour` int | 寝過ごし防止が鳴って停止された（Intent） | **主指標**: 実際に人を起こした回数・人数、スヌーズ回数 | **届く** | 1.8.0 |
 | `backup_alarm_cancelled_by_stop` | — | 本体停止で寝過ごし防止が取り消された（Intent） | 締め切り前に止められた割合 | **届く** | 1.8.0 |
-| `backup_loud_variant_generated` | `gain_db_bucket` string, `duration_bucket` string, `source` string（imported/preset） | 大きくした版の生成成功 | 生成品質・音源種別 | アプリ動作中のみ | 1.8.0 |
+| `backup_loud_variant_generated` | `gain_db_bucket` string, `duration_bucket` string, `source` string（imported/preset）, `output_lufs_bucket` string | 大きくした版の生成成功 | 生成品質・音源種別・出力音量 | アプリ動作中のみ | 1.8.0（`output_lufs_bucket` は1.8.0） |
 | `backup_loud_variant_failed` | `reason` string（unreadable_source/silent_source/render_failed/write_failed/source_missing） | 生成失敗（予備音を使用） | 生成失敗率 | アプリ動作中のみ | 1.8.0 |
 | `volume_guide_opened` | `from` string（test_ring） | 音量案内を開いた | 案内の利用率 | アプリ動作中のみ | 1.8.0 |
 | `update_prompt_shown` | `kind` string（required/recommended）, `current_build` int, `target_build` int | アップデート案内の表示 | 案内の到達 | アプリ動作中のみ | 1.8.0 |
@@ -34,7 +34,7 @@
 | `update_prompt_dismissed` | `kind` string（recommended） | おすすめを「あとで」/スワイプで閉じた | おすすめの受容 | アプリ動作中のみ | 1.8.0 |
 | `sound_selected` | `kind` string（imported/preset/default）, `rank_bucket` string（1/2-3/4-10/11+） | サウンド選択で音を選んだ | 音の種類・並び順の影響 | アプリ動作中のみ | 1.8.0 |
 | `sound_preview_played` | — | サウンドの試聴 | 試聴行動 | アプリ動作中のみ | 既存 |
-| `custom_sound_imported` | `source` string（video/audio）, `peak_db_bucket` string, `gain_db_bucket` string | カスタムサウンド取り込み成功 | 取り込み経路・音量 | アプリ動作中のみ | 既存（音量は1.7.1） |
+| `custom_sound_imported` | `source` string（video/audio）, `peak_db_bucket` string, `gain_db_bucket` string, `lufs_bucket` string（取り込み前のLUFS区分） | カスタムサウンド取り込み成功 | 取り込み経路・音量 | アプリ動作中のみ | 既存（`lufs_bucket` は1.8.0） |
 | `video_import_started` | `source` string（photo_library/file） | 動画取り込み開始 | 動画経路 | アプリ動作中のみ | 既存 |
 | `video_import_failed` | `reason` string（安定識別子） | 動画取り込み失敗 | 失敗原因 | アプリ動作中のみ | 既存 |
 | `sound_picker_recent_used` | — | **送られなくなった**（#123 で「最近使った」を削除） | （過去データのみ） | — | 既存・1.8.0で停止 |
@@ -46,6 +46,12 @@
 | `onboarding_completed` | `source` string, `permission_granted` bool | オンボ完了 | 完了率 | アプリ動作中のみ | 既存 |
 | `review_requested` | — | OS のレビュー依頼を実行 | レビュー依頼の効果 | アプリ動作中のみ | 既存 |
 | `review_request_blocked` | `reason` string（below_threshold/already_requested_version/post_fire） | 依頼が抑制された | 抑制理由 | アプリ動作中のみ | 既存 |
+
+## 音量の基準（#134）
+
+- 取り込み時（普段の音）: **−14 LUFS** にそろえる。上げる場合はピーク −1 dBFS を超えない範囲まで（リミッタは使わない）。下げる場合はそのまま下げる。
+- 寝過ごし防止の音: **−8 LUFS** まで上げる。描画後に測り直し、1 LU 以上低ければゲインを足して最大2回描画する。生成方式の版（`LoudVariantGenerator.version`）が古い `.loud.caf` は次の同期で作り直す。
+- 元の取り込み音源は書き換えない。すでに取り込んだ音には適用しない。
 
 ## ユーザープロパティ
 

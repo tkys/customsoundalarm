@@ -151,7 +151,8 @@ final class SoundStore {
                     AnalyticsService.shared.capture(.customSoundImported(
                         source: isVideo ? .video : .audio,
                         peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
-                        gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb)
+                        gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
+                        lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore)
                     ))
                     try? fm.removeItem(at: file)
                     try? fm.removeItem(at: audioFile)

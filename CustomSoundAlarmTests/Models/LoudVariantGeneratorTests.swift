@@ -5,10 +5,7 @@ import AVFoundation
 
 struct LoudVariantGeneratorTests {
 
-    private func makeCAF(
-        samples: [Float],
-        sampleRate: Double = 44100
-    ) throws -> URL {
+    private func makeCAF(samples: [Float], sampleRate: Double = 44_100) throws -> URL {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString + ".caf")
         let settings: [String: Any] = [
@@ -43,10 +40,10 @@ struct LoudVariantGeneratorTests {
             .appendingPathComponent(UUID().uuidString + ".loud.caf")
     }
 
-    private func sine(amplitude: Float, seconds: Double, frequency: Double = 440) -> [Float] {
-        let count = Int(44100 * seconds)
+    private func sine(amplitude: Float, seconds: Double, frequency: Double = 1000) -> [Float] {
+        let count = Int(44_100 * seconds)
         return (0..<count).map { index in
-            Float(Double(amplitude) * sin(2 * Double.pi * frequency * Double(index) / 44100))
+            Float(Double(amplitude) * sin(2 * Double.pi * frequency * Double(index) / 44_100))
         }
     }
 
@@ -57,8 +54,9 @@ struct LoudVariantGeneratorTests {
     }
 
     @Test
-    func generate_lowRmsSine_raisesRmsAndCapsPeak() throws {
-        let source = try makeCAF(samples: sine(amplitude: 0.089, seconds: 3)) // RMS -24 dBFS
+    func generate_reachesMinus8LufsAndPlus6OverSource() throws {
+        // 元の音: 約 -15 LUFS（取り込み後 -14 に近い想定）
+        let source = try makeCAF(samples: sine(amplitude: 0.28, seconds: 30))
         let output = outputURL()
         defer {
             try? FileManager.default.removeItem(at: source)
@@ -72,20 +70,24 @@ struct LoudVariantGeneratorTests {
             source: .imported
         )
 
-        #expect(result.gainDb > 10)
-        let measurement = try #require(SoundLoudness.measure(fileURL: output))
-        #expect(measurement.rmsDb > -12, "rms was \(measurement.rmsDb)")
-        #expect(measurement.peakDb <= -0.9, "peak was \(measurement.peakDb)")
-        #expect(abs(result.durationSeconds - 3) < 0.2)
+        #expect(abs(result.outputLufs - (-8)) <= 1, "output lufs was \(result.outputLufs)")
+        #expect(
+            result.outputLufs >= result.sourceLufs + 6,
+            "expected +6 over source: source=\(result.sourceLufs) output=\(result.outputLufs)"
+        )
+        #expect(result.attempts >= 1)
+        #expect(result.attempts <= 2)
+
+        let measured = try #require(LoudnessMeter.measure(fileURL: output))
+        #expect(abs(measured.lufs - result.outputLufs) < 0.2)
     }
 
-    /// 陰性確認の対象: Limiter を外すとピークが -1 dBFS を超える
     @Test
     func generate_highCrestInput_keepsPeakBelowMinus1() throws {
-        var samples = sine(amplitude: 0.02, seconds: 5) // 低い RMS
-        for index in stride(from: 0, to: samples.count, by: 22050) {
+        var samples = sine(amplitude: 0.02, seconds: 5)
+        for index in stride(from: 0, to: samples.count, by: 22_050) {
             for offset in 0..<4 where index + offset < samples.count {
-                samples[index + offset] = 1.0 // フルスケールのスパイク
+                samples[index + offset] = 1.0
             }
         }
         let source = try makeCAF(samples: samples)
@@ -108,7 +110,7 @@ struct LoudVariantGeneratorTests {
 
     @Test
     func generate_alreadyLoudInput_keepsPeakBelowMinus1() throws {
-        let source = try makeCAF(samples: sine(amplitude: 0.9, seconds: 2))
+        let source = try makeCAF(samples: sine(amplitude: 0.9, seconds: 5))
         let output = outputURL()
         defer {
             try? FileManager.default.removeItem(at: source)
@@ -128,7 +130,7 @@ struct LoudVariantGeneratorTests {
 
     @Test
     func generate_90Seconds_isCappedTo60() throws {
-        let source = try makeCAF(samples: sine(amplitude: 0.089, seconds: 90))
+        let source = try makeCAF(samples: sine(amplitude: 0.4, seconds: 90))
         let output = outputURL()
         defer {
             try? FileManager.default.removeItem(at: source)
@@ -148,7 +150,7 @@ struct LoudVariantGeneratorTests {
 
     @Test
     func generate_silentInput_fails() throws {
-        let source = try makeCAF(samples: [Float](repeating: 0, count: 44100))
+        let source = try makeCAF(samples: [Float](repeating: 0, count: 44_100))
         let output = outputURL()
         defer {
             try? FileManager.default.removeItem(at: source)
@@ -167,7 +169,7 @@ struct LoudVariantGeneratorTests {
 
     @Test
     func generate_doesNotModifySource() throws {
-        let source = try makeCAF(samples: sine(amplitude: 0.089, seconds: 1))
+        let source = try makeCAF(samples: sine(amplitude: 0.4, seconds: 3))
         let output = outputURL()
         defer {
             try? FileManager.default.removeItem(at: source)
@@ -195,5 +197,31 @@ struct LoudVariantGeneratorTests {
         #expect(LoudVariantGenerator.durationBucket(10) == "under_30s")
         #expect(LoudVariantGenerator.durationBucket(45) == "30_60s")
         #expect(LoudVariantGenerator.durationBucket(60) == "60s")
+    }
+
+    /// 2パス目の検証: 1パス目が意図的に低い場合でも、測り直して目標に届く（#134）
+    @Test
+    func generate_secondPassCorrectsLowFirstPass() throws {
+        let source = try makeCAF(samples: sine(amplitude: 0.28, seconds: 30))
+        let output = outputURL()
+        defer {
+            try? FileManager.default.removeItem(at: source)
+            try? FileManager.default.removeItem(at: output)
+        }
+
+        let sourceLufs = try #require(LoudnessMeter.measure(fileURL: source)).lufs
+        let fullGain = min(max(LoudVariantGenerator.targetLufs - sourceLufs, 0), LoudVariantGenerator.maxGainDb)
+
+        let result = try LoudVariantGenerator.generate(
+            sourceURL: source,
+            outputURL: output,
+            sourceFileName: "retry.caf",
+            source: .imported,
+            firstPassGainOverride: fullGain - 4
+        )
+
+        #expect(result.attempts == 2)
+        #expect(abs(result.outputLufs - (-8)) <= 1, "output lufs was \(result.outputLufs)")
+        #expect(result.outputLufs >= result.sourceLufs + 6, "source=\(result.sourceLufs) output=\(result.outputLufs)")
     }
 }

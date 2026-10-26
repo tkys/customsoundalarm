@@ -99,4 +99,38 @@ struct BackupLoudVariantServiceTests {
         #expect(BackupLoudVariantService.sourceInfo(for: "") == nil)
         #expect(BackupLoudVariantService.sourceInfo(for: "UITestNope.caf") == nil)
     }
+
+    // MARK: - Version (#134)
+
+    @Test
+    func metadataVersion_detectsOldGeneration() throws {
+        let variant = "UITestVersion.loud.caf"
+        let names = ["UITestVersion.caf", variant, "UITestVersion.loud.json"]
+        removeIfExists(names)
+        defer { removeIfExists(names) }
+
+        try touch("UITestVersion.caf")
+        try touch(variant)
+        let metadataURL = directory.appendingPathComponent("UITestVersion.loud.json")
+        try JSONEncoder().encode(LoudVariantMetadata(version: 1)).write(to: metadataURL)
+
+        #expect(LoudVariantMetadata.shouldRegenerate(
+            BackupLoudVariantService.metadata(for: variant)
+        ))
+        #expect(BackupLoudVariantService.existingVariantFileName(for: "UITestVersion.caf") == nil)
+
+        try JSONEncoder().encode(
+            LoudVariantMetadata(version: LoudVariantGenerator.version)
+        ).write(to: metadataURL)
+
+        #expect(!LoudVariantMetadata.shouldRegenerate(
+            BackupLoudVariantService.metadata(for: variant)
+        ))
+        #expect(BackupLoudVariantService.existingVariantFileName(for: "UITestVersion.caf") == variant)
+    }
+
+    @Test
+    func metadataVersion_missingMeansRegenerate() {
+        #expect(LoudVariantMetadata.shouldRegenerate(nil))
+    }
 }
