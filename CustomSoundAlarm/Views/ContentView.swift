@@ -186,17 +186,7 @@ struct ContentView: View {
                     .padding(.bottom, 4)
             }
         } description: {
-            VStack(spacing: 8) {
-                Text("empty_description")
-                HStack(spacing: 4) {
-                    Image(systemName: "video.badge.waveform")
-                    Text("・")
-                    Image(systemName: "doc.badge.plus")
-                    Text("empty_tip")
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
+            Text("empty_description")
         } actions: {
             Button {
                 addAlarmRequest = AddAlarmRequest(source: nil)

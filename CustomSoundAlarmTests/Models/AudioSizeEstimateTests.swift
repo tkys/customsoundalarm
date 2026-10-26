@@ -61,18 +61,24 @@ struct AudioSizeEstimateTests {
         #expect(AudioSizeEstimate.formattedSize(bytes: -5) == "0.0 MB")
     }
 
-    // MARK: - 警告しきい値（10分）
+    // MARK: - 容量注意のしきい値（20MB・#123）
 
     @Test
-    func warning_atTenMinutes() {
-        #expect(AudioSizeEstimate.requiresWarning(seconds: 600) == true)
-        #expect(AudioSizeEstimate.requiresWarning(seconds: 1800) == true)
+    func warning_atTwentyMegabytes() {
+        #expect(AudioSizeEstimate.shouldShowWarning(bytes: 20_000_000))
+        #expect(AudioSizeEstimate.shouldShowWarning(bytes: 20_000_001))
+        #expect(AudioSizeEstimate.shouldShowWarning(seconds: 600))
     }
 
     @Test
-    func noWarning_belowTenMinutes() {
-        #expect(AudioSizeEstimate.requiresWarning(seconds: 599) == false)
-        #expect(AudioSizeEstimate.requiresWarning(seconds: 60) == false)
-        #expect(AudioSizeEstimate.requiresWarning(seconds: 0) == false)
+    func noWarning_belowTwentyMegabytes() {
+        #expect(!AudioSizeEstimate.shouldShowWarning(bytes: 19_999_999))
+        #expect(!AudioSizeEstimate.shouldShowWarning(bytes: 0))
+        #expect(!AudioSizeEstimate.shouldShowWarning(seconds: 226)) // 19,933,200 bytes
+    }
+
+    @Test
+    func warning_justOverThreshold() {
+        #expect(AudioSizeEstimate.shouldShowWarning(seconds: 227)) // 20,021,400 bytes
     }
 }

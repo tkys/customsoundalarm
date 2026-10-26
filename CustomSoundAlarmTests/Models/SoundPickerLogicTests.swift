@@ -41,54 +41,6 @@ struct SoundPickerLogicTests {
         #expect(result == false)
     }
 
-    // MARK: - shouldShowRecent
-
-    @Test
-    func shouldShowRecent_noRecent_returnsFalse() {
-        let result = SoundPickerLogic.shouldShowRecent(recentCount: 0, importedCount: 5)
-        #expect(result == false)
-    }
-
-    @Test
-    func shouldShowRecent_hasRecentFewImported_returnsFalse() {
-        // 自分の音が少ないときは最近使ったを表示しない（重複して冗長になるため）
-        let result = SoundPickerLogic.shouldShowRecent(recentCount: 3, importedCount: 2)
-        #expect(result == false)
-    }
-
-    @Test
-    func shouldShowRecent_hasRecentManyImported_returnsTrue() {
-        // 自分の音が多いときは最近使ったを表示する
-        let result = SoundPickerLogic.shouldShowRecent(recentCount: 3, importedCount: 5)
-        #expect(result == true)
-    }
-
-    @Test
-    func shouldShowRecent_exactlyAtThreshold_returnsTrue() {
-        // threshold ちょうど（既定3）で表示
-        let result = SoundPickerLogic.shouldShowRecent(recentCount: 2, importedCount: 3)
-        #expect(result == true)
-    }
-
-    @Test
-    func shouldShowRecent_belowThreshold_returnsFalse() {
-        let result = SoundPickerLogic.shouldShowRecent(recentCount: 2, importedCount: 2)
-        #expect(result == false)
-    }
-
-    @Test
-    func shouldShowRecent_customThreshold() {
-        let result = SoundPickerLogic.shouldShowRecent(recentCount: 1, importedCount: 2, threshold: 2)
-        #expect(result == true)
-    }
-
-    @Test
-    func shouldShowRecent_hasRecentNoImported_returnsFalse() {
-        // 自分の音が0件でも最近使ったに何かあれば... いや、自分の音0件なら表示しない
-        let result = SoundPickerLogic.shouldShowRecent(recentCount: 3, importedCount: 0)
-        #expect(result == false)
-    }
-
     // MARK: - mySounds（#85: 使用済みでも My Sounds から消さない）
 
     /// #85 の再現シナリオ: 音源1本を使用（＝Recent 対象）しても My Sounds に出る。
@@ -99,7 +51,6 @@ struct SoundPickerLogicTests {
         let mySounds = SoundPickerLogic.mySounds(in: [only])
 
         // Recent は非表示（保有1本 < 閾値3）
-        #expect(SoundPickerLogic.shouldShowRecent(recentCount: 1, importedCount: 1) == false)
         // それでも My Sounds には出る（旧実装は Recent 除外でここからも消えていた）
         #expect(mySounds.count == 1)
         #expect(mySounds.first?.fileName == "clip.caf")
@@ -112,7 +63,6 @@ struct SoundPickerLogicTests {
         let unused = AlarmSound(name: "Unused", fileName: "unused.caf")
         let mySounds = SoundPickerLogic.mySounds(in: [used, unused])
 
-        #expect(SoundPickerLogic.shouldShowRecent(recentCount: 1, importedCount: 2) == false)
         #expect(mySounds.count == 2)
         #expect(mySounds.map(\.fileName).contains("used.caf"))
         #expect(mySounds.map(\.fileName).contains("unused.caf"))
@@ -127,7 +77,6 @@ struct SoundPickerLogicTests {
         let mySounds = SoundPickerLogic.mySounds(in: [a, b, c])
 
         // 保有3本・使用済み2本 → Recent は表示される
-        #expect(SoundPickerLogic.shouldShowRecent(recentCount: 2, importedCount: 3) == true)
         // 使用済みの2本（a, b）も My Sounds に残る（= Recent と重複して表示される）
         #expect(mySounds.count == 3)
         #expect(mySounds.map(\.fileName) == ["a.caf", "b.caf", "c.caf"])
@@ -172,7 +121,6 @@ struct SoundPickerLogicTests {
         let usedPreset = AlarmSound(name: "Chime", fileName: "chime.caf", isPreset: true)
 
         // インポート音源0本 → Recent は表示されない
-        #expect(SoundPickerLogic.shouldShowRecent(recentCount: 1, importedCount: 0) == false)
 
         // それでも preset セクションには出る
         let presets = SoundPickerLogic.presetSounds(in: [usedPreset])
@@ -211,5 +159,48 @@ struct SoundPickerLogicTests {
         #expect(Set(my.map(\.fileName)).union(presets.map(\.fileName)) == Set(sounds.map(\.fileName)))
         // 積集合なし（二重採番なし）
         #expect(Set(my.map(\.fileName)).isDisjoint(with: presets.map(\.fileName)))
+    }
+
+    // MARK: - 最近使った順（#123）
+
+    @Test
+    func mySoundsByRecentUse_ordersRecentFirst() {
+        let a = AlarmSound(name: "A", fileName: "a.caf")
+        let b = AlarmSound(name: "B", fileName: "b.caf")
+        let c = AlarmSound(name: "C", fileName: "c.caf")
+
+        let sorted = SoundPickerLogic.mySoundsByRecentUse(
+            in: [a, b, c],
+            recentFileNames: ["c.caf", "a.caf"]
+        )
+
+        #expect(sorted.map(\.fileName) == ["c.caf", "a.caf", "b.caf"])
+    }
+
+    @Test
+    func mySoundsByRecentUse_unusedKeepOriginalOrder() {
+        let a = AlarmSound(name: "A", fileName: "a.caf")
+        let b = AlarmSound(name: "B", fileName: "b.caf")
+        let c = AlarmSound(name: "C", fileName: "c.caf")
+
+        let sorted = SoundPickerLogic.mySoundsByRecentUse(
+            in: [a, b, c],
+            recentFileNames: []
+        )
+
+        #expect(sorted.map(\.fileName) == ["a.caf", "b.caf", "c.caf"])
+    }
+
+    @Test
+    func mySoundsByRecentUse_excludesPresets() {
+        let preset = AlarmSound(name: "Preset", fileName: "p.caf", isPreset: true)
+        let mine = AlarmSound(name: "Mine", fileName: "m.caf")
+
+        let sorted = SoundPickerLogic.mySoundsByRecentUse(
+            in: [preset, mine],
+            recentFileNames: ["p.caf", "m.caf"]
+        )
+
+        #expect(sorted.map(\.fileName) == ["m.caf"])
     }
 }

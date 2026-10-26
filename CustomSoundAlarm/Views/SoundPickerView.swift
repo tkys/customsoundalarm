@@ -36,32 +36,12 @@ struct SoundSelectionView: View {
         List {
             addSection
             importedSection
-            recentSection
             presetSection
             errorSection
         }
         .warmListBackground()
         .navigationTitle(String(localized: "sound"))
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    Button {
-                        showingVideoImport = true
-                    } label: {
-                        Label("add_from_video", systemImage: "video.badge.waveform")
-                    }
-                    Button {
-                        isImporting = true
-                    } label: {
-                        Label("add_from_audio", systemImage: "doc.badge.plus")
-                    }
-                } label: {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.title2)
-                }
-            }
-        }
         .onDisappear { audioPlayer.stop() }
         // オンボ場面4からの直接取り込み（#98 Phase 4）: push アニメーション完了後に開く
         // （push 中に sheet/fileImporter を出すと無言で出ない — レビュー指摘1）
@@ -114,6 +94,7 @@ struct SoundSelectionView: View {
                         )
                 }
             }
+            .accessibilityIdentifier("soundPicker.addVideo")
 
             Button {
                 isImporting = true
@@ -130,6 +111,7 @@ struct SoundSelectionView: View {
                         )
                 }
             }
+            .accessibilityIdentifier("soundPicker.addAudio")
         } header: {
             WarmSectionHeader(title: String(localized: "add_section"))
         } footer: {
@@ -144,7 +126,15 @@ struct SoundSelectionView: View {
         // #85: My Sounds は所有する音源の完全な一覧。Recent に載っている音を
         // 除外しない（かつての除外で「使用したら消える」「1〜2本のとき完全に
         // 見えなくなる」問題があった。Recent との重複は許容する）
-        let imported = SoundPickerLogic.mySounds(in: soundStore.sounds)
+        let existing = Set(soundStore.sounds.map(\.fileName))
+        let recentNames = SoundUsageHistory.recentFileNames(
+            limit: soundStore.sounds.count,
+            existingFileNames: existing
+        )
+        let imported = SoundPickerLogic.mySoundsByRecentUse(
+            in: soundStore.sounds,
+            recentFileNames: recentNames
+        )
         Section {
             if imported.isEmpty {
                 VStack(spacing: 8) {
@@ -186,52 +176,6 @@ struct SoundSelectionView: View {
             }
         } header: {
             WarmSectionHeader(title: String(localized: "imported_sounds"))
-        }
-    }
-
-    // MARK: - Recent Sounds
-
-    /// 現存する音のうち最近使ったもの（新しい順、最大5件）。
-    private var recentSounds: [AlarmSound] {
-        let existing = Set(soundStore.sounds.map(\.fileName))
-        return SoundUsageHistory.recentFileNames(limit: 5, existingFileNames: existing)
-            .compactMap { name in soundStore.sounds.first { $0.fileName == name } }
-    }
-
-    private var importedCount: Int {
-        soundStore.sounds.filter { !$0.isPreset }.count
-    }
-
-    @ViewBuilder
-    private var recentSection: some View {
-        let recents = recentSounds
-        let shouldShow = SoundPickerLogic.shouldShowRecent(
-            recentCount: recents.count,
-            importedCount: importedCount
-        )
-        if shouldShow {
-            Section {
-                ForEach(recents, id: \.id) { sound in
-                    soundRow(name: sound.name, sound: sound, isPreset: sound.isPreset, fromRecent: true)
-                        .contextMenu {
-                            if !sound.isPreset {
-                                Button {
-                                    renameText = sound.name
-                                    renamingSound = sound
-                                } label: {
-                                    Label("rename", systemImage: "pencil")
-                                }
-                                Button(role: .destructive) {
-                                    soundStore.remove(sound)
-                                } label: {
-                                    Label("delete", systemImage: "trash")
-                                }
-                            }
-                        }
-                }
-            } header: {
-                WarmSectionHeader(title: String(localized: "recent_sounds"))
-            }
         }
     }
 
@@ -286,7 +230,7 @@ struct SoundSelectionView: View {
 
     // MARK: - Sound Row
 
-    private func soundRow(name: String, sound: AlarmSound?, isPreset: Bool, fromRecent: Bool = false) -> some View {
+    private func soundRow(name: String, sound: AlarmSound?, isPreset: Bool) -> some View {
         let isPlaying = sound != nil && audioPlayer.playingFileName == sound?.fileName
 
         return HStack {
@@ -314,9 +258,6 @@ struct SoundSelectionView: View {
             Button {
                 selectedSound = sound
                 audioPlayer.stop()
-                if fromRecent {
-                    AnalyticsService.shared.capture(.soundPickerRecentUsed)
-                }
             } label: {
                 HStack {
                     Text(name)

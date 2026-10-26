@@ -43,4 +43,30 @@ final class UICleanupUITests: XCTestCase {
             "＋ボタンは「アラームを追加」と読み上げるべき"
         )
     }
+
+    func testSoundPickerHasNoRecentSectionOrPlusMenu() {
+        app.launchArguments = [
+            "-uitest-open-add-alarm",
+            "-AppleLanguages", "(ja)",
+            "-AppleLocale", "ja_JP"
+        ]
+        app.launch()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10))
+
+        let soundRow = app.buttons["addAlarm.soundRow"]
+        XCTAssertTrue(soundRow.waitForExistence(timeout: 5))
+        soundRow.tap()
+
+        let navBar = app.navigationBars["サウンド"]
+        XCTAssertTrue(navBar.waitForExistence(timeout: 5), "sound picker should open")
+
+        XCTAssertFalse(app.staticTexts["最近使った"].exists, "最近使ったセクションは削除済み")
+        XCTAssertEqual(
+            navBar.buttons.count,
+            1,
+            "サウンド選択のナビゲーションバーは戻るボタンだけ（＋メニューなし）。実際: \(navBar.buttons.allElementsBoundByIndex.map(\.label))"
+        )
+        XCTAssertEqual(app.buttons.matching(identifier: "soundPicker.addVideo").count, 1)
+        XCTAssertEqual(app.buttons.matching(identifier: "soundPicker.addAudio").count, 1)
+    }
 }

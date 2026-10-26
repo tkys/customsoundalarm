@@ -463,23 +463,19 @@ struct VideoImportFlow: View {
     }
 
     /// 変換後のサイズ見積り。動画は600秒上限だが選択範囲に応じて表示する（#79-8）
+    @ViewBuilder
     private var sizeEstimateRow: some View {
         let selectionSeconds = endTime - startTime
-        let size = AudioSizeEstimate.formattedSize(
-            bytes: AudioSizeEstimate.estimatedFileSize(seconds: selectionSeconds)
-        )
-        return VStack(spacing: 4) {
-            Text(String(format: String(localized: "estimated_size"), size))
+        if AudioSizeEstimate.shouldShowWarning(seconds: selectionSeconds) {
+            let size = AudioSizeEstimate.formattedSize(
+                bytes: AudioSizeEstimate.estimatedFileSize(seconds: selectionSeconds)
+            )
+            Text(String(format: String(localized: "size_warning"), size))
                 .font(.caption2)
-                .foregroundStyle(.secondary)
-            if AudioSizeEstimate.requiresWarning(seconds: selectionSeconds) {
-                Text(String(format: String(localized: "large_file_warning"), size))
-                    .font(.caption2)
-                    .foregroundStyle(.orange)
-                    .multilineTextAlignment(.center)
-            }
+                .foregroundStyle(.orange)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
         }
-        .frame(maxWidth: .infinity)
     }
 }
 

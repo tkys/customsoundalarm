@@ -11,8 +11,8 @@ enum AudioSizeEstimate {
     /// PCM 16bit / 44.1kHz / モノラル の秒あたりバイト数
     static let bytesPerSecond: Double = 44_100 * 2
 
-    /// 警告を出すしきい値（秒）。10分
-    static let warningThresholdSeconds: Double = 600
+    /// サイズ注意を出すしきい値（バイト）。20MB（#123）
+    static let sizeWarningThresholdBytes: Double = 20_000_000
 
     /// 変換後のおおよそのファイルサイズ（バイト）
     static func estimatedFileSize(seconds: Double) -> Double {
@@ -29,8 +29,12 @@ enum AudioSizeEstimate {
         return String(format: "%.1f MB", mb)
     }
 
-    /// 警告表示が必要な尺か（10分以上）
-    static func requiresWarning(seconds: Double) -> Bool {
-        seconds >= warningThresholdSeconds
+    /// 20MB 以上のときだけ容量の注意を表示する（#123）。
+    static func shouldShowWarning(bytes: Double) -> Bool {
+        bytes >= sizeWarningThresholdBytes
+    }
+
+    static func shouldShowWarning(seconds: Double) -> Bool {
+        shouldShowWarning(bytes: estimatedFileSize(seconds: seconds))
     }
 }
