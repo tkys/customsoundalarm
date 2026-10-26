@@ -42,6 +42,8 @@ struct ContentView: View {
                         } label: {
                             Image(systemName: "moon.zzz")
                         }
+                        .accessibilityLabel(Text("night_mode"))
+                        .accessibilityIdentifier("alarmList.bedside")
                     }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -49,6 +51,8 @@ struct ContentView: View {
                     } label: {
                         Image(systemName: "plus")
                     }
+                    .accessibilityLabel(Text("add_alarm"))
+                    .accessibilityIdentifier("alarmList.add")
                 }
                 }
                 .task {
@@ -182,17 +186,7 @@ struct ContentView: View {
                     .padding(.bottom, 4)
             }
         } description: {
-            VStack(spacing: 8) {
-                Text("empty_description")
-                HStack(spacing: 4) {
-                    Image(systemName: "video.badge.waveform")
-                    Text("・")
-                    Image(systemName: "doc.badge.plus")
-                    Text("empty_tip")
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
+            Text("empty_description")
         } actions: {
             Button {
                 addAlarmRequest = AddAlarmRequest(source: nil)
@@ -325,6 +319,10 @@ struct AlarmRow: View {
                     set: { _ in onToggle() }
                 ))
                 .labelsHidden()
+                .accessibilityLabel(Text(AlarmRowAccessibility.toggleLabel(
+                    time: alarm.timeString,
+                    label: alarm.label
+                )))
             }
             .padding(.vertical, 4)
         }

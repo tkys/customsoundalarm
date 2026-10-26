@@ -2,7 +2,6 @@
 "alarm_title" = "Alarms";
 "empty_title" = "Wake Up to Your Favorite Sound";
 "empty_description" = "Import sounds from videos or audio files\nand set them as your alarm";
-"empty_tip" = "Import from videos & audio files";
 "add_alarm" = "Add Alarm";
 "default_sound" = "Default";
 
@@ -48,13 +47,12 @@
 "rename" = "Rename";
 "sound_name_placeholder" = "Sound Name";
 "presets" = "Ready to Use";
-"recent_sounds" = "Recent";
 "imported_sounds" = "My Sounds";
 "converting" = "Converting...";
 "add_from_video" = "Add from Video";
 "add_from_audio" = "Add Audio File";
 "add_section" = "Add";
-"add_section_footer" = "Video: Select from Camera Roll and trim\nAudio File: Supports MP3, AAC, WAV, M4A";
+"add_section_footer" = "Import from MP3, AAC, WAV, M4A, or video (MOV, MP4).";
 
 /* Waveform Crop (#77 / #79) */
 "waveform_loading" = "Generating waveform...";
@@ -65,8 +63,6 @@
 "time_end" = "End";
 "time_length" = "Length";
 "time_total" = "Total";
-"estimated_size" = "Converted size: ~%@";
-"large_file_warning" = "This will create a large file (~%@). Make sure you have enough storage.";
 
 /* Discard confirmation (#82) */
 "close" = "Close";
@@ -233,3 +229,6 @@
 "backup_alarm_info_title" = "Oversleep guard";
 "backup_alarm_info_mechanism" = "If the alarm isn't stopped within the time you set, it plays the same sound again, louder.";
 "backup_alarm_info_accessibility" = "About oversleep guard";
+
+"night_mode" = "Night mode";
+"size_warning" = "Long sounds use about %@ of storage.";

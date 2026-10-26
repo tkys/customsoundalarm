@@ -13,15 +13,26 @@ enum SoundPickerLogic {
         return importedCount == 0
     }
 
-    /// 「最近使った」セクションを表示するかを判定する。
-    /// 音が少ないときは「自分の音」と重複して冗長になるため非表示にする。
-    /// - Parameters:
-    ///   - recentCount: 最近使った音の件数
-    ///   - importedCount: 自分の音の件数
-    ///   - threshold: この件数以上の自分の音があるときのみ最近使ったを表示（既定3）
-    static func shouldShowRecent(recentCount: Int, importedCount: Int, threshold: Int = 3) -> Bool {
-        guard recentCount > 0 else { return false }
-        return importedCount >= threshold
+    /// 「追加した音」を最近使った順に並べる（#123）。
+    /// 履歴に無い音は元の順序のまま後ろに置く。
+    static func mySoundsByRecentUse(
+        in sounds: [AlarmSound],
+        recentFileNames: [String]
+    ) -> [AlarmSound] {
+        let imported = sounds.filter { !$0.isPreset }
+        // 同じ名前が2回あっても落ちないよう、先に出た（新しい）方を採る
+        let rank = Dictionary(
+            recentFileNames.enumerated().map { ($0.element, $0.offset) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        return imported.enumerated()
+            .sorted { lhs, rhs in
+                let left = rank[lhs.element.fileName] ?? Int.max
+                let right = rank[rhs.element.fileName] ?? Int.max
+                if left != right { return left < right }
+                return lhs.offset < rhs.offset
+            }
+            .map(\.element)
     }
 
     /// My Sounds セクションに表示する音源（#85）。
@@ -40,7 +51,7 @@ enum SoundPickerLogic {
     /// **プリセット音源の完全な一覧**を返す。mySounds と同じ規則（所有する音源の
     /// 完全な一覧・Recent による除外をしない）に従う。プリセット利用者は
     /// インポート音源0本のことが多く、その場合 Recent は常に非表示
-    /// （shouldShowRecent の importedCount >= 3 を満たさない）のため、
+    /// （「最近使った」を統合したため）のため、
     /// 除外すると使ったプリセットがどこにも出なくなる。
     static func presetSounds(in sounds: [AlarmSound]) -> [AlarmSound] {
         sounds.filter { $0.isPreset }

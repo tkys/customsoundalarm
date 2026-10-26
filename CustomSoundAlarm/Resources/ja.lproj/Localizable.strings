@@ -2,7 +2,6 @@
 "alarm_title" = "アラーム";
 "empty_title" = "お気に入りの音で目覚めよう";
 "empty_description" = "動画やファイルから好きな音を取り込んで\nアラームに設定できます";
-"empty_tip" = "動画・音声ファイルから取り込めます";
 "add_alarm" = "アラームを追加";
 "default_sound" = "デフォルト";
 
@@ -48,13 +47,12 @@
 "rename" = "名前を変更";
 "sound_name_placeholder" = "サウンド名";
 "presets" = "すぐ使える音";
-"recent_sounds" = "最近使った";
 "imported_sounds" = "追加した音";
 "converting" = "変換中...";
 "add_from_video" = "動画から音声を追加";
 "add_from_audio" = "音声ファイルから追加";
 "add_section" = "追加";
-"add_section_footer" = "動画: カメラロールから選択してトリム\n音声ファイル: MP3, AAC, WAV, M4A 形式に対応";
+"add_section_footer" = "MP3・AAC・WAV・M4A、動画（MOV・MP4）から取り込めます";
 
 /* Waveform Crop (#77 / #79) */
 "waveform_loading" = "波形を生成中...";
@@ -65,8 +63,6 @@
 "time_end" = "終了";
 "time_length" = "長さ";
 "time_total" = "元の長さ";
-"estimated_size" = "変換後のサイズ: 約 %@";
-"large_file_warning" = "大きいファイルになります（約 %@）。端末の容量にご注意ください。";
 
 /* Discard confirmation (#82) */
 "close" = "閉じる";
@@ -233,3 +229,6 @@
 "backup_alarm_info_title" = "寝過ごし防止";
 "backup_alarm_info_mechanism" = "アラームを止めないまま設定した時間がたつと、同じ音を大きくしてもう一度鳴らします。";
 "backup_alarm_info_accessibility" = "寝過ごし防止の説明";
+
+"night_mode" = "ナイトモード";
+"size_warning" = "長い音は約 %@ の容量を使います";
