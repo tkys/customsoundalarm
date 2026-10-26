@@ -51,6 +51,26 @@ struct CustomSoundAlarmApp: App {
                         availableSourceFileNames: Set(SoundStore.shared.sounds.map(\.fileName))
                     )
 
+                    #if DEBUG
+                    // UIテスト用: 追加・編集画面を直接開く（#122）
+                    if AppGroup.isUITestOpenAddAlarm || AppGroup.isUITestOpenEditAlarm {
+                        AppGroup.hasCompletedOnboarding = true
+                    }
+                    if AppGroup.isUITestOpenEditAlarm {
+                        AlarmStore.shared.resetForUITest()
+                        AlarmStore.shared.add(AlarmEntry(
+                            hour: 7,
+                            minute: 0,
+                            isEnabled: false,
+                            label: "UITest Alarm",
+                            repeatWeekdays: [],
+                            soundFileName: "",
+                            snoozeMinutes: 9,
+                            backupMinutes: nil
+                        ))
+                    }
+                    #endif
+
                     // PostHog 計測の初期化（Info.plist にキーが無い場合は安全に無効化）
                     AnalyticsService.shared.configure()
                     setUserProperties()

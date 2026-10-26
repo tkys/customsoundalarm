@@ -3,7 +3,6 @@ import Foundation
 /// 音量案内を開いた場所（計測の `from`・#121）
 enum VolumeGuideSource: String, Sendable, Equatable {
     case testRing = "test_ring"
-    case loudness
 }
 
 /// 音量案内の画像選び分け（#121）。

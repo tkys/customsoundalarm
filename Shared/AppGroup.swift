@@ -107,6 +107,24 @@ enum AppGroup {
 #endif
     }
 
+    /// UIテスト用: 追加画面を直接開く（DEBUGのみ・#122）
+    static var isUITestOpenAddAlarm: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-open-add-alarm")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: 編集画面を直接開く（DEBUGのみ・#122）
+    static var isUITestOpenEditAlarm: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-open-edit-alarm")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: DEBUG時のみ有効なアラーム一覧シード
     static var isUITestSeedAlarms: Bool {
 #if DEBUG
@@ -156,12 +174,6 @@ enum AppGroup {
     /// 記録中の試しアラーム ID（テスト・DismissAlarmIntent の照合用）
     static var testAlarmIDs: Set<UUID> {
         Set(testAlarmRecords.map(\.id))
-    }
-
-    /// 「アラームの音量」注記を表示済みか（#109・一度だけ）
-    static var testRingVolumeNoteShown: Bool {
-        get { userDefaults.bool(forKey: "test_ring_volume_note_shown") }
-        set { userDefaults.set(newValue, forKey: "test_ring_volume_note_shown") }
     }
 
     /// 本体アラームのスヌーズ回数（entryID → 回数・#110）。
