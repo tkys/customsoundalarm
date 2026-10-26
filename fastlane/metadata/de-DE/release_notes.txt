@@ -1,7 +1,15 @@
-■ Wecker nach Uhrzeit sortiert
-Wie in der Uhr-App sind deine Wecker jetzt von früh nach spät sortiert.
+■ Verschlafschutz (Pro, frühe Version)
+Wenn du deinen Wecker bis zur gewählten Zeit nicht ausgeschaltet hast, spielt er denselben Ton noch einmal lauter ab. Wenn du ihn während der frühen Version einschaltest, kannst du ihn auch nach der offiziellen Veröffentlichung weiter nutzen.
 
-■ Lautere importierte Töne
-Ist ein Video oder eine Audiodatei zu leise, macht die App den Ton beim Import lauter – ohne Verzerrung. Bereits importierte Töne bleiben unverändert.
+■ Jetzt klingeln
+Tippe im Weckerbildschirm auf „Ring now“, um deinen Wecker sofort in echter Lautstärke zu hören.
+
+■ Hilfe, wenn es zu leise ist
+Die Weckerlautstärke richtet sich nach „Klingel- und Hinweistöne“ in den Einstellungen. „Too quiet?“ zeigt dir, wo du sie änderst.
+
+■ Übersichtlicherer Weckerbildschirm
+Die Einstellungen sind jetzt ähnlich wie in der Uhr-App angeordnet, und ein bearbeiteter Wecker wird beim Sichern eingeschaltet.
+
+■ Bessere VoiceOver-Beschriftungen
 
 Danke, dass du My Sound Alarm nutzt!

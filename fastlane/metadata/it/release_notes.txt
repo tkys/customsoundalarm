@@ -1,7 +1,15 @@
-■ Sveglie in ordine di orario
-Come nell'app Orologio, le tue sveglie ora sono ordinate dalla più presto alla più tardi.
+■ Anti-sonno (Pro, accesso anticipato)
+Se non hai fermato la sveglia entro l’orario scelto, riproduce lo stesso suono più forte. Se la attivi durante l’accesso anticipato, potrai continuare a usarla dopo il rilascio ufficiale.
 
-■ Suoni importati più forti
-Se un video o un file audio è troppo basso, l'app ne alza il volume durante l'importazione, senza distorsioni. I suoni già importati non cambiano.
+■ Suona ora
+Tocca “Ring now” nella schermata della sveglia per sentirla subito, al volume reale.
+
+■ Aiuto quando è troppo bassa
+Il volume delle sveglie segue “Suoneria e avvisi” in Impostazioni. “Too quiet?” ti mostra dove modificarlo.
+
+■ Schermata della sveglia più semplice
+Le impostazioni sono ordinate in modo più simile all’app Orologio e una sveglia modificata viene attivata quando la salvi.
+
+■ Etichette VoiceOver migliorate
 
 Grazie per usare My Sound Alarm!

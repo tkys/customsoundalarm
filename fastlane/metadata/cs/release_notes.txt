@@ -1,7 +1,15 @@
-■ Budíky seřazené podle času
-Stejně jako v aplikaci Hodiny jsou teď tvoje budíky seřazené od nejdřívějšího po nejpozdější.
+■ Ochrana proti zaspání (Pro, předběžný přístup)
+Pokud budík do zvolené doby nevypnete, přehraje stejný zvuk znovu a hlasitěji. Pokud ji zapnete během předběžného přístupu, budete ji moci používat i po oficiálním vydání.
 
-■ Hlasitější importované zvuky
-Když je video nebo zvukový soubor příliš tichý, aplikace mu při importu zvýší hlasitost, bez zkreslení. Dříve importované zvuky zůstávají beze změny.
+■ Zazvonit hned
+Klepnutím na „Ring now“ na obrazovce budíku si ho hned poslechnete ve skutečné hlasitosti.
 
-Děkujeme, že používáš My Sound Alarm!
+■ Pomoc, když je budík potichu
+Hlasitost budíku se řídí položkou „Vyzvánění a upozornění“ v Nastavení. „Too quiet?“ ukáže, kde ji změnit.
+
+■ Jednodušší obrazovka budíku
+Nastavení jsou seřazena podobně jako v aplikaci Hodiny a upravený budík se po uložení zapne.
+
+■ Lepší popisky pro VoiceOver
+
+Děkujeme, že používáte My Sound Alarm!

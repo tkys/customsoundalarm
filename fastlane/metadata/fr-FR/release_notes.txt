@@ -1,7 +1,15 @@
-■ Alarmes triées par heure
-Comme dans l'app Horloge, tes alarmes sont maintenant triées de la plus tôt à la plus tard.
+■ Anti-grasse matinée (Pro, accès anticipé)
+Si vous n’avez pas arrêté votre alarme à l’heure choisie, elle rejoue le même son, plus fort. Si vous l’activez pendant l’accès anticipé, vous pourrez continuer à l’utiliser après la sortie officielle.
 
-■ Sons importés plus forts
-Quand une vidéo ou un fichier audio est trop faible, l'app augmente son volume à l'import, sans distorsion. Les sons déjà importés ne changent pas.
+■ Sonner maintenant
+Touchez « Ring now » dans l’écran de l’alarme pour l’entendre tout de suite, à son vrai volume.
 
-Merci d'utiliser My Sound Alarm !
+■ Aide quand le son est trop faible
+Le volume des alarmes suit « Sonnerie et alertes » dans Réglages. « Too quiet? » vous montre où le modifier.
+
+■ Un écran d’alarme plus simple
+Les réglages sont organisés davantage comme dans l’app Horloge, et une alarme modifiée est activée à l’enregistrement.
+
+■ Meilleures étiquettes VoiceOver
+
+Merci d’utiliser My Sound Alarm !
