@@ -233,3 +233,5 @@
 "backup_alarm_info_title" = "Oversleep guard";
 "backup_alarm_info_mechanism" = "If the alarm isn't stopped within the time you set, it plays the same sound again, louder.";
 "backup_alarm_info_accessibility" = "About oversleep guard";
+
+"night_mode" = "Night mode";
