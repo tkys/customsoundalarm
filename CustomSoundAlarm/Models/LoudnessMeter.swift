@@ -37,20 +37,22 @@ enum LoudnessMeter {
               buffer.format.channelCount == 1,
               let channel = buffer.floatChannelData?[0]
         else { return nil }
-
         let count = Int(buffer.frameLength)
         guard count > 0 else { return nil }
+        return measure(samples: Array(UnsafeBufferPointer(start: channel, count: count)))
+    }
 
-        var samples = [Double](repeating: 0, count: count)
+    static func measure(samples: [Float]) -> Measurement? {
+        let count = samples.count
+        guard count > 0 else { return nil }
+
         var peak: Double = 0
-        for index in 0..<count {
-            let value = Double(channel[index])
-            samples[index] = value
-            peak = max(peak, abs(value))
+        for value in samples {
+            peak = max(peak, abs(Double(value)))
         }
         guard peak > 0 else { return nil }
 
-        let shelf = biquad(samples, b: shelfB, a: shelfA)
+        let shelf = biquad(samples.map(Double.init), b: shelfB, a: shelfA)
         let filtered = biquad(shelf, b: highPassB, a: highPassA)
 
         let blockSize = Int(AudioSampleLoader.sampleRate * blockDuration)
