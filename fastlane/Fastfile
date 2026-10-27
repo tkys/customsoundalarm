@@ -72,10 +72,11 @@ platform :ios do
       app_identifier: "com.tkysdev.customsoundalarm",
       metadata_path: "./fastlane/metadata",
       screenshots_path: "./fastlane/screenshots",
-      # v1.7.1: PPO（#2）終了。テスト版の #2 を採用したので上げる。
-      # PPO 実行中は true にすること（テスト対象の素材を新バージョンで触ると結果が崩れる）
-      skip_screenshots: false,
-      overwrite_screenshots: true,
+      # v1.8.0: スクショは変えない（新バージョンは前の版の画像を引き継ぐ）。
+      # 手元の screenshots は 3 言語分だけなので、上書きすると他の言語に影響しうる。
+      # スクショを差し替える版だけ false / overwrite true にする。PPO 実行中は必ず true。
+      skip_screenshots: true,
+      overwrite_screenshots: false,
       skip_metadata: false,
       force: true,
       run_precheck_before_submit: false,
