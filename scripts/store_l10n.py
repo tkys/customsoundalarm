@@ -597,7 +597,9 @@ POZNÁMKY
 """,
 )
 
-LIMITS = {"subtitle": 30, "keywords": 100, "promo": 170, "description": 4000}
+from store_aso import ASO  # noqa: E402  (name/subtitle/keywords override)
+
+LIMITS = {"name": 30, "subtitle": 30, "keywords": 100, "promo": 170, "description": 4000}
 BANNED = ["free", "gratuit", "kostenlos", "gratis", "grátis", "gratuito", "무료", "免费", "darmow", "zdarma", "مجان"]
 
 
@@ -607,16 +609,19 @@ def main():
     support = open(os.path.join(en, "support_url.txt"), encoding="utf-8").read()
     errors = []
     for loc, d in L.items():
+        d = dict(d, name="My Sound Alarm")
+        if loc in ASO:
+            d["name"], d["subtitle"], d["keywords"] = ASO[loc]
         for k, lim in LIMITS.items():
             if len(d[k]) > lim:
                 errors.append(f"{loc} {k}: {len(d[k])} > {lim}")
-        low = (d["subtitle"] + d["keywords"] + d["promo"] + d["description"]).lower()
+        low = (d["name"] + d["subtitle"] + d["keywords"] + d["promo"] + d["description"]).lower()
         errors += [f"{loc}: contains '{w}'" for w in BANNED if w in low]
         if " " in d["keywords"] or ", " in d["keywords"]:
             errors.append(f"{loc} keywords: contains spaces")
         out = os.path.join(ROOT, loc)
         os.makedirs(out, exist_ok=True)
-        files = {"name.txt": "My Sound Alarm\n", "subtitle.txt": d["subtitle"] + "\n",
+        files = {"name.txt": d["name"] + "\n", "subtitle.txt": d["subtitle"] + "\n",
                  "keywords.txt": d["keywords"] + "\n", "promotional_text.txt": d["promo"] + "\n",
                  "description.txt": d["description"], "privacy_url.txt": privacy, "support_url.txt": support}
         for fn, body in files.items():

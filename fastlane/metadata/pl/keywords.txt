@@ -1,1 +1,1 @@
-budzik,dzwonek,muzyka,piosenka,wideo,audio,mp3,przyciąć,poranek,zegar,dźwięk,powtarzanie
+dzwonek,piosenka,audio,mp3,przyciąć,poranek,zegar,dźwięk,powtarzanie,refren,głośny,zaspanie
