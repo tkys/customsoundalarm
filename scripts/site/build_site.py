@@ -40,7 +40,7 @@ PAGES = {
         "s2_title": "Rings in Silent mode",
         "s2_body": "Alarms are scheduled with AlarmKit, the alarm framework Apple added in iOS 26. They appear on the Lock Screen like Clock alarms and ring in Silent mode and when a Focus is on, even with the app closed.",
         "voices_title": "From the App Store",
-        "rating_summary": "Rated {avg} out of 5 on the App Store, from {count} ratings in {regions} countries and regions.",
+        "rating_summary": "{count} ratings on the App Store from {regions} countries and regions, {as_of}.",
         "stars_label": "{n} out of 5 stars",
         "voices_note": "Every written review so far, in the reviewer's own words (one shortened to its title). Translations are ours.",
         "faq_title": "Questions",
@@ -81,7 +81,7 @@ PAGES = {
         "s2_title": "マナーモードでも鳴る",
         "s2_body": "アラームは、iOS 26 で Apple が用意した AlarmKit で登録します。時計アプリのアラームと同じようにロック画面に表示され、マナーモードや集中モードでも、アプリを閉じていても鳴ります。",
         "voices_title": "App Store のレビュー",
-        "rating_summary": "App Store の評価は 5 点中 {avg}（{regions} の国と地域から {count} 件）。",
+        "rating_summary": "App Store で {regions} の国と地域から {count} 件の評価（{as_of}）。",
         "stars_label": "5 点中 {n} 点",
         "voices_note": "これまでに書かれたレビューを原文のまま載せています（1件はタイトルのみ）。訳は当サイトによるものです。",
         "faq_title": "よくある質問",
@@ -130,6 +130,9 @@ COUNTRY = {
 }
 STOREFRONTS = ("us jp gb ca au de fr es it nl se no dk fi pl cz pt br mx ar cl co kr tw hk cn sg th vn id my ph in "
                "sa ae eg tr ru ua il za nz at ch be ie gr hu ro sk").split()
+# Star breakdown from App Store Connect > Ratings and Reviews (all countries and regions).
+# The public lookup API lags and has no breakdown, so update this by hand from ASC.
+RATINGS_ASC = {"as_of": "2026-10-27", "counts": {5: 54, 4: 7, 3: 2, 2: 0, 1: 2}}
 # Used when the App Store can't be reached at build time (2026-10-25).
 RATINGS_FALLBACK = {"count": 59, "avg": 4.8, "regions": 20}
 
@@ -170,8 +173,24 @@ def reviews_html(lang, c, r):
         meta = f'{COUNTRY[lang][v["cc"]]} · {v["date"]}'
         items.append(f'<li><span class="stars" aria-label="{c["stars_label"].format(n=v["stars"])}">{stars(v["stars"])}</span>'
                      f'<span class="rmeta">{esc(meta)}</span>{quote}</li>')
-    summary = c["rating_summary"].format(avg=f'{r["avg"]:.1f}', count=r["count"], regions=r["regions"])
-    return (f'<section class="voices"><h2>{esc(c["voices_title"])}</h2><p class="rsum">{esc(summary)}</p>'
+    counts = RATINGS_ASC["counts"]
+    total = sum(counts.values())
+    avg = sum(k * v for k, v in counts.items()) / total
+    top = max(counts.values())
+    bars = "".join(
+        f'<div class="bar"><span class="bl" aria-hidden="true">{"★" * k}</span>'
+        f'<span class="bt"><span class="bf" style="width:{counts[k] / top * 100:.1f}%"></span></span>'
+        f'<span class="bn">{counts[k]}</span></div>'
+        for k in (5, 4, 3, 2, 1)
+    )
+    y, m, d = RATINGS_ASC["as_of"].split("-")
+    as_of = f"{int(y)}年{int(m)}月{int(d)}日時点" if lang == "ja" else f"as of {RATINGS_ASC['as_of']}"
+    summary = c["rating_summary"].format(count=total, regions=r["regions"], as_of=as_of)
+    score = (f'<div class="score" role="img" aria-label="{esc(c["stars_label"].format(n=f"{avg:.1f}"))}">'
+             f'<div class="big">{avg:.1f}</div><div class="bigstars" aria-hidden="true">★★★★★</div></div>')
+    return (f'<section class="voices"><h2>{esc(c["voices_title"])}</h2>'
+            f'<div class="rating">{score}<div class="bars">{bars}</div></div>'
+            f'<p class="rsum">{esc(summary)}</p>'
             f'<ul>{"".join(items)}</ul><p class="note">{esc(c["voices_note"])}</p></section>')
 
 
@@ -213,7 +232,17 @@ h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
 .rmeta{font-size:15px;color:var(--muted)}
 .voices p{margin:6px 0 0}
 .voices .tr{color:var(--muted);font-size:16px}
-.rsum{margin:0;color:var(--muted)}
+.rsum{margin:8px 0 0;color:var(--muted);font-size:15px}
+.rating{display:flex;gap:28px;align-items:center;margin:16px 0 0}
+.score{text-align:center;flex:none}
+.big{font-size:56px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.bigstars{color:var(--accent);letter-spacing:.1em;margin-top:6px}
+.bars{flex:1;max-width:360px}
+.bar{display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.6}
+.bl{width:5.5em;text-align:right;color:var(--muted);letter-spacing:.02em;font-size:11px}
+.bt{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bf{display:block;height:100%;background:var(--accent);border-radius:3px}
+.bn{width:2em;color:var(--muted);text-align:right}
 .note{font-size:14px;color:var(--muted);margin-top:12px}
 footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wrap}
 .made{color:var(--muted);flex-basis:100%}
