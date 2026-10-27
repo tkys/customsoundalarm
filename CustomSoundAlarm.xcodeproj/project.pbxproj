@@ -128,6 +128,7 @@
 		BF8FC8ADB1FF1994D0007850 /* AudioSizeEstimateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B61E2495643F1EB1F7D5B676 /* AudioSizeEstimateTests.swift */; };
 		BF9B0277F257A5780994AA1D /* PresetMusicBox.caf in Resources */ = {isa = PBXBuildFile; fileRef = AAA02B1AE43B835B2A27D6CF /* PresetMusicBox.caf */; };
 		C280DD997F519388BF6F63EA /* PresetCrescendo.caf in Resources */ = {isa = PBXBuildFile; fileRef = 8CDCD4DBBDF46DDC920E75C1 /* PresetCrescendo.caf */; };
+		C2C14FB1C2CE09E379641C6C /* BackupInfoCopyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0C11CF28102F4B31F7C745 /* BackupInfoCopyTests.swift */; };
 		C2DDC277EDB71B4EDECDB483 /* BackupAlarmAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D128D94B509E214BD5AD642 /* BackupAlarmAccess.swift */; };
 		C45DD562A29FED6F010CA636 /* AlarmRowAccessibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39CEFD6CAD362010B0DDCD66 /* AlarmRowAccessibility.swift */; };
 		C4CC98722FBE4B800784E5A6 /* SoundStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E385B754D493555537FB767D /* SoundStore.swift */; };
@@ -244,11 +245,12 @@
 		190EF3C9FEF4F542A73F1D4C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1B79F944B04148C7CBF5A918 /* SoundThumbnailLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundThumbnailLogic.swift; sourceTree = "<group>"; };
 		1BE5898324CCBE597E195B5F /* TestRingLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestRingLogic.swift; sourceTree = "<group>"; };
+		1C0C11CF28102F4B31F7C745 /* BackupInfoCopyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupInfoCopyTests.swift; sourceTree = "<group>"; };
 		1C27A2CC78C9B9184B31B7A2 /* StopActionPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopActionPlanner.swift; sourceTree = "<group>"; };
 		1D89A44681D6F654589718A8 /* AudioCropView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCropView.swift; sourceTree = "<group>"; };
-		1E06038B29521FD9EA2F1451 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		1F5142944F490CB52A70183C /* UpdatePromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePromptView.swift; sourceTree = "<group>"; };
 		1FD7FD210ABD24FE40E75208 /* AlarmListOrdering.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmListOrdering.swift; sourceTree = "<group>"; };
+		20AF79F0A1531B92DBEB5B92 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		225524FA5A69D50318058FBA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		23DB4089CA75EB37CAB33C33 /* PresetBackupLoud.caf */ = {isa = PBXFileReference; path = PresetBackupLoud.caf; sourceTree = "<group>"; };
 		24379AD8FA9D85958FCF6612 /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
@@ -408,15 +410,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		043E388ED1E7FCCB53AACC55 /* csa-lufs */ = {
-			isa = PBXGroup;
-			children = (
-				1E06038B29521FD9EA2F1451 /* Secrets.xcconfig */,
-			);
-			name = "csa-lufs";
-			path = .;
-			sourceTree = "<group>";
-		};
 		0C5EA315F7E98D295A7D95DA /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -433,6 +426,7 @@
 				B61E2495643F1EB1F7D5B676 /* AudioSizeEstimateTests.swift */,
 				F47DD8DA1C541713D7985324 /* BackupAlarmAccessTests.swift */,
 				7A0F8A84526D39579BDC803A /* BackupAlarmLogicTests.swift */,
+				1C0C11CF28102F4B31F7C745 /* BackupInfoCopyTests.swift */,
 				24E2AD930FA1F4B67D2F024E /* BackupSoundResolverTests.swift */,
 				B3DBC304EE97CA1784412B68 /* BackupStopAnalyticsTests.swift */,
 				8B0D5FB2BAFE575463DA794F /* BedsideClockLogicTests.swift */,
@@ -471,6 +465,15 @@
 				1E9B4C6A716D10464E9E3C72 /* Services */,
 			);
 			path = CustomSoundAlarmTests;
+			sourceTree = "<group>";
+		};
+		15FB274FD8E62C30F0437557 /* csa-infocopy */ = {
+			isa = PBXGroup;
+			children = (
+				20AF79F0A1531B92DBEB5B92 /* Secrets.xcconfig */,
+			);
+			name = "csa-infocopy";
+			path = .;
 			sourceTree = "<group>";
 		};
 		1E9B4C6A716D10464E9E3C72 /* Services */ = {
@@ -517,7 +520,7 @@
 		4EA1E92D7338F6EDA96ED5FB = {
 			isa = PBXGroup;
 			children = (
-				043E388ED1E7FCCB53AACC55 /* csa-lufs */,
+				15FB274FD8E62C30F0437557 /* csa-infocopy */,
 				A3C533A61126660D3EEFBD5E /* CustomSoundAlarm */,
 				0D084D462AC55950BA713396 /* CustomSoundAlarmTests */,
 				48BD05F70D893BD47B7DEA10 /* CustomSoundAlarmUITests */,
@@ -1043,6 +1046,7 @@
 				BF8FC8ADB1FF1994D0007850 /* AudioSizeEstimateTests.swift in Sources */,
 				E05E09CFBDC4416DC8D56E77 /* BackupAlarmAccessTests.swift in Sources */,
 				B008EDC97FA0FCC4F5A8E8BE /* BackupAlarmLogicTests.swift in Sources */,
+				C2C14FB1C2CE09E379641C6C /* BackupInfoCopyTests.swift in Sources */,
 				CC71E409E3F7BE3AE95C9C3F /* BackupLoudVariantServiceTests.swift in Sources */,
 				07A52D1D923BC31083E2AD6C /* BackupSoundResolverTests.swift in Sources */,
 				ECE8042290AEA21C987955E4 /* BackupStopAnalyticsTests.swift in Sources */,
@@ -1245,7 +1249,7 @@
 		};
 		77ECEE071B9B56F3B1690269 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1E06038B29521FD9EA2F1451 /* Secrets.xcconfig */;
+			baseConfigurationReference = 20AF79F0A1531B92DBEB5B92 /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
@@ -1369,7 +1373,7 @@
 		};
 		D89907F4FAAA42AE6A67D447 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1E06038B29521FD9EA2F1451 /* Secrets.xcconfig */;
+			baseConfigurationReference = 20AF79F0A1531B92DBEB5B92 /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;

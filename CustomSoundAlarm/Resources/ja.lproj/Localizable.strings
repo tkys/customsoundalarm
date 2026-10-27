@@ -227,7 +227,9 @@
 "volume_guide_link" = "音が小さいときは";
 "test_ring_ringing_now" = "鳴らしています";
 "backup_alarm_info_title" = "寝過ごし防止";
-"backup_alarm_info_mechanism" = "アラームを止めないまま設定した時間がたつと、同じ音を大きくしてもう一度鳴らします。";
+"backup_alarm_info_mechanism" = "アラームを止めないまま設定した時間がたつと、もう一度鳴らします。";
+"backup_alarm_info_louder" = "そのときは同じ音を、音割れしない範囲で大きくして鳴らします。もとの音が小さいほど、大きく上げます。";
+"backup_alarm_info_volume" = "実際に鳴る大きさは、設定の「着信音と通知音」の音量で決まります。";
 "backup_alarm_info_accessibility" = "寝過ごし防止の説明";
 
 "night_mode" = "ナイトモード";
