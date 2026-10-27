@@ -1,7 +1,15 @@
-■ Alarmes em ordem de horário
-Como no app Relógio, seus alarmes agora ficam em ordem do mais cedo para o mais tarde.
+■ Proteção contra perder a hora (Pro, acesso antecipado)
+Se você não desligar o alarme até o horário escolhido, ele toca o mesmo som de novo, mais alto. Se você ativar durante o acesso antecipado, poderá continuar usando depois do lançamento oficial.
 
-■ Sons importados mais altos
-Quando um vídeo ou arquivo de áudio está baixo, o app aumenta o volume ao importar, sem distorção. Os sons que você já importou continuam iguais.
+■ Tocar agora
+Toque em "Ring now" na tela do alarme para ouvi-lo na hora, no volume real.
+
+■ Ajuda quando está baixo
+O volume dos alarmes segue "Toques e alertas" nos Ajustes. "Too quiet?" mostra onde mudar.
+
+■ Tela de alarme mais simples
+Os ajustes ficam em uma ordem mais parecida com a do app Relógio, e um alarme editado é ativado ao salvar.
+
+■ Rótulos do VoiceOver melhorados
 
 Obrigado por usar o My Sound Alarm!
