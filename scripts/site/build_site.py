@@ -9,12 +9,14 @@ Run:  python3 scripts/site/build_site.py
 Re-run after editing copy. support.html / privacy.html are not touched.
 """
 import html
+import re
 import json
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from i18n_pages import LOCALES  # noqa: E402
+from i18n_docs import EMAIL, PRIVACY, SUPPORT, UPDATED  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..", "..", "docs")
 BASE = "https://tkys.github.io/customsoundalarm/"
@@ -258,6 +260,9 @@ h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
 .note{font-size:14px;color:var(--muted);margin-top:12px}
 .langs{margin:40px 0 0;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 16px;font-size:15px}
 .langs a[aria-current]{color:var(--text);text-decoration:none;font-weight:600}
+.doc h1{font-size:34px;margin-top:28px}
+.perms{padding-inline-start:1.2em}
+.perms li{margin:6px 0}
 footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wrap}
 .made{color:var(--muted);flex-basis:100%}
 """
@@ -273,9 +278,23 @@ def phrases(s):
     return "".join(f'<span class="ph">{esc(p)}{"、" if i < len(parts) - 1 else ""}</span>' for i, p in enumerate(parts))
 
 
+# Apple's official localized badges (Marketing Toolbox), saved unaltered in assets/img/badges/
+BADGE_FILE = {"en": "en-us", "ja": "ja-jp", "fr": "fr-fr", "de": "de-de", "es": "es-es", "pt-BR": "pt-br",
+              "it": "it-it", "nl": "nl-nl", "ko": "ko-kr", "zh-Hans": "zh-cn", "pl": "pl-pl", "cs": "cs-cz",
+              "ar": "ar-sa"}
+
+
+def badge_width(name, height=52):
+    """Badges differ in width per language; keep Apple's aspect ratio."""
+    with open(os.path.join(ROOT, "assets", "img", "badges", f"{name}.svg"), encoding="utf-8") as f:
+        w, h = re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"', f.read()).groups()
+    return round(height * float(w) / float(h))
+
+
 def badge(c, img, position):
+    name = BADGE_FILE[c["html_lang"]]
     return (f'<a class="badge" href="{APP_STORE_URL}" data-pos="{position}" rel="noopener">'
-            f'<img src="{img}app-store-badge.svg" alt="{esc(c["badge_alt"])}" width="156" height="52"></a>')
+            f'<img src="{img}badges/{name}.svg" alt="{esc(c["badge_alt"])}" width="{badge_width(name)}" height="52"></a>')
 
 
 def waveform_svg(c):
@@ -354,7 +373,7 @@ document.addEventListener("click",function(e){{var a=e.target.closest("a.badge")
 </script>"""
 
 
-def redirect_script():
+def redirect_script(suffix=""):
     """On the English root only: send first-time visitors to their browser language.
 
     - Only when someone lands on the root directly. A ?lang=… link from our own language
@@ -370,13 +389,13 @@ def redirect_script():
 (function(){try{
 var q=new URLSearchParams(location.search);if(q.has("lang"))return;
 if(document.referrer&&new URL(document.referrer).pathname.indexOf(location.pathname)===0&&new URL(document.referrer).host===location.host)return;
-var map=%s,ls=navigator.languages||[navigator.language];
+var map=%s,sfx=%s,ls=navigator.languages||[navigator.language];
 for(var i=0;i<ls.length;i++){var t=(ls[i]||"").toLowerCase();
 if(t.indexOf("en")===0)return;
-if(t.indexOf("zh")===0){if(t==="zh-cn"||t==="zh-sg"||t.indexOf("zh-hans")===0){location.replace("zh-hans/"+location.search+location.hash);}return;}
-var k=t.split("-")[0];if(map[k]){location.replace(map[k]+location.search+location.hash);return;}}
+if(t.indexOf("zh")===0){if(t==="zh-cn"||t==="zh-sg"||t.indexOf("zh-hans")===0){location.replace("zh-hans/"+sfx+location.search+location.hash);}return;}
+var k=t.split("-")[0];if(map[k]){location.replace(map[k]+sfx+location.search+location.hash);return;}}
 }catch(e){}})();
-</script>""" % json.dumps(targets)
+</script>""" % (json.dumps(targets), json.dumps(suffix))
 
 
 def page(lang, c, ratings):
@@ -444,7 +463,68 @@ def page(lang, c, ratings):
 <div><h2>{phrases(c["end_title"])}</h2>{badge(c, img, "bottom")}</div></section>
 </main>
 <nav id="languages" class="langs" aria-label="Language">{langs}</nav>
-<footer><span class="made">{esc(c["made_by"])}</span><a href="{prefix}support.html">{esc(c["footer_support"])}</a><a href="{prefix}privacy.html">{esc(c["footer_privacy"])}</a></footer>
+<footer><span class="made">{esc(c["made_by"])}</span><a href="support.html">{esc(c["footer_support"])}</a><a href="privacy.html">{esc(c["footer_privacy"])}</a></footer>
+</div>
+{analytics(lang)}
+</body>
+</html>
+"""
+
+
+def doc_page(lang, c, kind):
+    """support.html / privacy.html in the page's language (same look as the landing page)."""
+    prefix = "../" if c["path"] else ""
+    img = f"{prefix}assets/img/"
+    key = c["html_lang"]
+    mail = f'<a href="mailto:{EMAIL}">{EMAIL}</a>'
+    if kind == "support":
+        d = SUPPORT[key]
+        title = d["title"]
+        body = (f'<p class="lead">{esc(d["intro"]).replace("{email}", mail)}</p>'
+                + "".join(f"<h3>{esc(q)}</h3><p>{esc(a)}</p>" for q, a in d["faq"])
+                + f'<p class="req">{esc(d["req"])}</p>')
+    else:
+        d = PRIVACY[key]
+        title = d["title"]
+        perms = "".join(f"<li><b>{esc(n)}</b> — {esc(t)}</li>" for n, t in d["perms"])
+        body = (f'<p class="req">{esc(d["updated"].format(date=UPDATED))}</p>'
+                + (f'<p class="note">{esc(d["note"])}</p>' if d["note"] else "")
+                + "".join(f"<p>{esc(p)}</p>" for p in d["paras"][:3])
+                + f'<p>{esc(d["perms_intro"])}</p><ul class="perms">{perms}</ul>'
+                + "".join(f"<p>{esc(p)}</p>" for p in d["paras"][3:])
+                + f'<p>{esc(d["contact"]).replace("{email}", mail)}</p>')
+    langs = " ".join(
+        f'<a href="{BASE + o["path"]}{kind}.html{"?lang=en" if not o["path"] else ""}" hreflang="{o["html_lang"]}" lang="{o["html_lang"]}"'
+        f'{" aria-current=page" if l == lang else ""}>{esc(o["lang_name"])}</a>'
+        for l, o in PAGES.items()
+    )
+    alts = "\n".join(
+        f'<link rel="alternate" hreflang="{PAGES[l]["html_lang"]}" href="{BASE + PAGES[l]["path"]}{kind}.html">'
+        for l in PAGES
+    ) + f'\n<link rel="alternate" hreflang="x-default" href="{BASE}{kind}.html">'
+    return f"""<!doctype html>
+<html lang="{c["html_lang"]}" dir="{c["dir"]}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>{esc(title)} – My Sound Alarm</title>
+<link rel="canonical" href="{BASE + c["path"]}{kind}.html">
+{alts}
+{redirect_script(kind + ".html") if lang == "en" else ""}
+<link rel="icon" href="{img}icon.png">
+<style>{CSS}</style>
+</head>
+<body>
+<div class="wrap">
+<header><a class="brand" href="{BASE + c["path"]}"><img src="{img}icon.png" alt="">My Sound Alarm</a>
+<a href="#languages">{esc(c["lang_name"])} ▾</a></header>
+<main class="doc">
+<h1>{esc(title)}</h1>
+{body}
+</main>
+<nav id="languages" class="langs" aria-label="Language">{langs}</nav>
+<footer><span class="made">{esc(c["made_by"])}</span><a href="{BASE + c["path"]}">My Sound Alarm</a><a href="support.html">{esc(c["footer_support"])}</a><a href="privacy.html">{esc(c["footer_privacy"])}</a></footer>
 </div>
 {analytics(lang)}
 </body>
@@ -454,12 +534,13 @@ def page(lang, c, ratings):
 
 def sitemap():
     urls = []
-    for l, c in PAGES.items():
-        alts = "".join(
-            f'<xhtml:link rel="alternate" hreflang="{PAGES[o]["html_lang"]}" href="{BASE + PAGES[o]["path"]}"/>'
-            for o in PAGES
-        )
-        urls.append(f"<url><loc>{BASE + c['path']}</loc>{alts}</url>")
+    for page_file in ("", "support.html", "privacy.html"):
+        for l, c in PAGES.items():
+            alts = "".join(
+                f'<xhtml:link rel="alternate" hreflang="{PAGES[o]["html_lang"]}" href="{BASE + PAGES[o]["path"] + page_file}"/>'
+                for o in PAGES
+            )
+            urls.append(f"<url><loc>{BASE + c['path'] + page_file}</loc>{alts}</url>")
     return ('<?xml version="1.0" encoding="UTF-8"?>\n'
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
             'xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' + "\n".join(urls) + "\n</urlset>\n")
@@ -477,6 +558,8 @@ def main():
     print("ratings:", ratings)
     quoted = json.dumps([[v["title"], v["body"], v["tr"]] for v in REVIEWS], ensure_ascii=False).lower()
     assert not [w for w in BANNED if w in quoted], "banned word in quoted reviews"
+    docs = json.dumps([SUPPORT, PRIVACY], ensure_ascii=False).lower()
+    assert not [w for w in BANNED if w in docs], [w for w in BANNED if w in docs]
     for lang, c in PAGES.items():
         text = json.dumps(c, ensure_ascii=False).lower()
         bad = [w for w in BANNED if w in text]
@@ -485,6 +568,9 @@ def main():
         os.makedirs(os.path.dirname(out), exist_ok=True)
         with open(out, "w", encoding="utf-8") as f:
             f.write(page(lang, c, ratings))
+        for kind in ("support", "privacy"):
+            with open(os.path.join(ROOT, c["path"], f"{kind}.html"), "w", encoding="utf-8") as f:
+                f.write(doc_page(lang, c, kind))
         print("wrote", os.path.relpath(out, ROOT))
     with open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write(sitemap())

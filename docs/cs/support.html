@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="cs" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Podpora – My Sound Alarm</title>
+<link rel="canonical" href="https://tkys.github.io/customsoundalarm/cs/support.html">
+<link rel="alternate" hreflang="en" href="https://tkys.github.io/customsoundalarm/support.html">
+<link rel="alternate" hreflang="ja" href="https://tkys.github.io/customsoundalarm/ja/support.html">
+<link rel="alternate" hreflang="fr" href="https://tkys.github.io/customsoundalarm/fr/support.html">
+<link rel="alternate" hreflang="de" href="https://tkys.github.io/customsoundalarm/de/support.html">
+<link rel="alternate" hreflang="es" href="https://tkys.github.io/customsoundalarm/es/support.html">
+<link rel="alternate" hreflang="pt-BR" href="https://tkys.github.io/customsoundalarm/pt-br/support.html">
+<link rel="alternate" hreflang="it" href="https://tkys.github.io/customsoundalarm/it/support.html">
+<link rel="alternate" hreflang="nl" href="https://tkys.github.io/customsoundalarm/nl/support.html">
+<link rel="alternate" hreflang="ko" href="https://tkys.github.io/customsoundalarm/ko/support.html">
+<link rel="alternate" hreflang="zh-Hans" href="https://tkys.github.io/customsoundalarm/zh-hans/support.html">
+<link rel="alternate" hreflang="pl" href="https://tkys.github.io/customsoundalarm/pl/support.html">
+<link rel="alternate" hreflang="cs" href="https://tkys.github.io/customsoundalarm/cs/support.html">
+<link rel="alternate" hreflang="ar" href="https://tkys.github.io/customsoundalarm/ar/support.html">
+<link rel="alternate" hreflang="x-default" href="https://tkys.github.io/customsoundalarm/support.html">
+
+<link rel="icon" href="../assets/img/icon.png">
+<style>
+:root{color-scheme:light;--text:#1C1714;--muted:#5E5650;--line:#E7E2DD;--accent:#FF843B;--ink:#4A1A6B;--wave:#D6D1CC}
+/* App colors: orange (AccentColor) is for graphics only — 2.4:1 on white is too low for text; text accents use the icon's purple. */
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#fff;color:var(--text);font:18px/1.7 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif}
+a{color:var(--ink);text-underline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 0 8px;font-size:16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;text-decoration:none;color:var(--text)}
+.brand img{width:32px;height:32px;border-radius:8px}
+h1,h2,h3{word-break:auto-phrase;text-wrap:balance}
+.ph{display:inline-block}
+p,li{word-break:auto-phrase}
+:lang(ko) h1,:lang(ko) h2,:lang(ko) h3,:lang(ko) p{word-break:keep-all}
+h1{font-size:clamp(32px,6.4vw,48px);line-height:1.2;letter-spacing:-.015em;margin:36px 0 14px}
+.lead{font-size:20px;color:var(--muted);margin:0 0 24px;max-width:34em}
+.badge img{height:52px;width:auto;display:block}
+.req{font-size:15px;color:var(--muted);margin:10px 0 0}
+figure{margin:44px 0 8px}
+.wavebox{position:relative;padding-bottom:26px;direction:ltr}
+.wave{display:block;width:100%;height:auto}
+.wavelabel{position:absolute;bottom:0;transform:translateX(-50%);white-space:nowrap;font-size:14px;font-weight:600;color:var(--ink)}
+figcaption{font-size:16px;color:var(--muted);margin-top:8px}
+h2{font-size:26px;line-height:1.35;margin:56px 0 10px}
+.shot{display:block;width:100%;max-width:340px;height:auto;border:1px solid var(--line);border-radius:22px;margin:18px 0 0}
+.side{float:inline-end;width:132px;height:auto;margin-block:0 12px;margin-inline:20px 0}
+.clear{clear:both}
+h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
+.faq p{margin:0;color:var(--muted)}
+.end{margin:64px 0 0;padding-top:32px;border-top:1px solid var(--line);display:flex;gap:28px;align-items:center}
+.end h2{margin:0 0 18px}
+.end-art{width:180px;height:auto;flex:none}
+@media (max-width:560px){.end{flex-direction:column;align-items:flex-start}.end-art{width:220px}}
+.voices ul{list-style:none;margin:18px 0 0;padding:0}
+.voices li{padding:16px 0;border-top:1px solid var(--line)}
+.stars{color:var(--accent);letter-spacing:.08em;margin-right:10px}
+.rmeta{font-size:15px;color:var(--muted)}
+.voices p{margin:6px 0 0}
+.voices .tr{color:var(--muted);font-size:16px}
+.rsum{margin:8px 0 0;color:var(--muted);font-size:15px}
+.rating{display:flex;gap:28px;align-items:center;margin:16px 0 0}
+.score{text-align:center;flex:none}
+.big{font-size:56px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.bigstars{color:var(--accent);letter-spacing:.1em;margin-top:6px}
+.bars{flex:1;max-width:360px}
+.bar{display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.6}
+.bl{width:5.5em;text-align:end;color:var(--muted);letter-spacing:.02em;font-size:11px}
+.bt{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bf{display:block;height:100%;background:var(--accent);border-radius:3px}
+.bn{width:2em;color:var(--muted);text-align:end}
+.note{font-size:14px;color:var(--muted);margin-top:12px}
+.langs{margin:40px 0 0;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 16px;font-size:15px}
+.langs a[aria-current]{color:var(--text);text-decoration:none;font-weight:600}
+.doc h1{font-size:34px;margin-top:28px}
+.perms{padding-inline-start:1.2em}
+.perms li{margin:6px 0}
+footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wrap}
+.made{color:var(--muted);flex-basis:100%}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><a class="brand" href="https://tkys.github.io/customsoundalarm/cs/"><img src="../assets/img/icon.png" alt="">My Sound Alarm</a>
+<a href="#languages">Čeština ▾</a></header>
+<main class="doc">
+<h1>Podpora</h1>
+<p class="lead">Otázky, hlášení chyb i nápady jsou vítány. Napiš na <a href="mailto:tkysdev@gmail.com">tkysdev@gmail.com</a> v jakémkoli jazyce.</p><h3>Jaké soubory můžu použít?</h3><p>Zvukové soubory MP3, AAC, WAV nebo M4A a videa (MOV, MP4) z knihovny fotek nebo z aplikace Soubory. Soubor můžeš do My Sound Alarm poslat i z jiné aplikace tlačítkem Sdílet. Skladby ze streamovacích služeb, jako je Apple Music nebo Spotify, jsou chráněné a nedají se importovat.</p><h3>Jak dlouhý může být zvuk?</h3><p>Z videa až 10 minut. Zvukové soubory se dají importovat celé. Budík opakuje vybranou část, takže obvykle nejlépe funguje 20–30 sekund.</p><h3>Budík nezazvonil.</h3><p>Zkontroluj v Nastavení &gt; Aplikace &gt; My Sound Alarm, že má aplikace povolené budíky. Budíky se plánují přes AlarmKit od Applu, takže zvoní v tichém režimu, v režimu soustředění i při zavřené aplikaci. Pokud budík pořád nezvoní, napiš nám svou verzi iOS a co se stalo.</p><h3>Budík je moc potichu.</h3><p>Hlasitost budíku se řídí položkou Nastavení &gt; Zvuky a haptika &gt; Vyzvánění a upozornění. Hlasitost v Ovládacím centru na budíky nemá vliv. Na iPhonech s Face ID ztlumí „Funkce rozpoznávání pozornosti“ upozornění, když se díváš na displej (Nastavení &gt; Face ID a kód).</p><h3>Můžu vypnout vibrace?</h3><p>Aplikace nemůže změnit vibrace budíku, řídí je iPhone. Všechny vibrace vypneš v Nastavení &gt; Zpřístupnění &gt; Dotyk &gt; Vibrace. Platí to pro všechny aplikace.</p><h3>Co je ochrana proti zaspání?</h3><p>Pokud budík do zvolené doby nevypneš, zazvoní znovu stejným zvukem, hlasitěji. Je to funkce Pro v předběžném přístupu. Pokud ji začneš používat během předběžného přístupu, zůstane ti i po oficiálním vydání.</p><p class="req">Vyžaduje iPhone se systémem iOS 26 nebo novějším.</p>
+</main>
+<nav id="languages" class="langs" aria-label="Language"><a href="https://tkys.github.io/customsoundalarm/support.html?lang=en" hreflang="en" lang="en">English</a> <a href="https://tkys.github.io/customsoundalarm/ja/support.html" hreflang="ja" lang="ja">日本語</a> <a href="https://tkys.github.io/customsoundalarm/fr/support.html" hreflang="fr" lang="fr">Français</a> <a href="https://tkys.github.io/customsoundalarm/de/support.html" hreflang="de" lang="de">Deutsch</a> <a href="https://tkys.github.io/customsoundalarm/es/support.html" hreflang="es" lang="es">Español</a> <a href="https://tkys.github.io/customsoundalarm/pt-br/support.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a> <a href="https://tkys.github.io/customsoundalarm/it/support.html" hreflang="it" lang="it">Italiano</a> <a href="https://tkys.github.io/customsoundalarm/nl/support.html" hreflang="nl" lang="nl">Nederlands</a> <a href="https://tkys.github.io/customsoundalarm/ko/support.html" hreflang="ko" lang="ko">한국어</a> <a href="https://tkys.github.io/customsoundalarm/zh-hans/support.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a> <a href="https://tkys.github.io/customsoundalarm/pl/support.html" hreflang="pl" lang="pl">Polski</a> <a href="https://tkys.github.io/customsoundalarm/cs/support.html" hreflang="cs" lang="cs" aria-current=page>Čeština</a> <a href="https://tkys.github.io/customsoundalarm/ar/support.html" hreflang="ar" lang="ar">العربية</a></nav>
+<footer><span class="made">Vytvořil tkys, nezávislý vývojář z Japonska.</span><a href="https://tkys.github.io/customsoundalarm/cs/">My Sound Alarm</a><a href="support.html">Podpora</a><a href="privacy.html">Soukromí</a></footer>
+</div>
+<script>
+// Owner opt-out: open the page once with ?internal=1 on each of your devices (?internal=0 to undo).
+var csaInternal=false;try{var q=new URLSearchParams(location.search).get("internal");if(q==="1")localStorage.setItem("csa_internal","1");if(q==="0")localStorage.removeItem("csa_internal");csaInternal=localStorage.getItem("csa_internal")==="1";}catch(e){}
+if(location.hostname==="tkys.github.io"&&!csaInternal){
+!function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+posthog.init("phc_uuFAFy25bfEjsVPtVzRBdAiy8yyPLi7NB75MGSQeGXEo",{api_host:"https://us.i.posthog.com",persistence:"memory",person_profiles:"identified_only",disable_session_recording:true,capture_pageview:true});
+posthog.register({site_lang:"cs"});
+document.addEventListener("click",function(e){var a=e.target.closest("a.badge");if(a)posthog.capture("app_store_link_clicked",{position:a.dataset.pos||""});});
+}
+</script>
+</body>
+</html>
