@@ -715,15 +715,23 @@ struct BackupAlarmInfoView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("backup_alarm_info_mechanism")
-                    .font(.body)
-                Text("backup_alarm_early_access_note")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                Spacer()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("backup_alarm_info_mechanism")
+                        .font(.body)
+                    // もとの音が小さいほど大きく上げる（#134 の仕組みをそのまま説明）
+                    Text("backup_alarm_info_louder")
+                        .font(.body)
+                    Text("backup_alarm_info_volume")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Text("backup_alarm_early_access_note")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(20)
             }
-            .padding(20)
             .navigationTitle(String(localized: "backup_alarm_info_title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
