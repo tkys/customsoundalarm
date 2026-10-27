@@ -4,12 +4,17 @@
 One content dict per language -> one static HTML page per language.
   en -> docs/index.html (also x-default)
   ja -> docs/ja/index.html
+  other languages (scripts/site/i18n_pages.py) -> docs/<path>/index.html
 Run:  python3 scripts/site/build_site.py
 Re-run after editing copy. support.html / privacy.html are not touched.
 """
 import html
 import json
 import os
+import sys
+
+sys.path.insert(0, os.path.dirname(__file__))
+from i18n_pages import LOCALES  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..", "..", "docs")
 BASE = "https://tkys.github.io/customsoundalarm/"
@@ -24,11 +29,10 @@ POSTHOG_HOST = "https://us.i.posthog.com"
 PAGES = {
     "en": {
         "path": "",
-        "html_lang": "en",
+        "html_lang": "en", "og_locale": "en_US", "lang_name": "English", "as_of_fmt": "as of {y}-{m}-{d}",
         "title": "My Sound Alarm: set part of a song or a video's sound as your iPhone alarm",
         "meta": "Set the part of a song you love, or the sound from a video, as your iPhone alarm. Pick it on a waveform and it repeats until you stop it. Scheduled with Apple's AlarmKit (iOS 26), so it rings in Silent mode and when a Focus is on.",
         "badge_alt": "Download on the App Store",
-        "nav_lang": "日本語",
         "hero_title": "Wake up to your favorite part of a song",
         "hero_body": "Choose a chorus from a song file, or the sound from a video, and make it your iPhone alarm. It plays on repeat until you stop it.",
         "req": "Rings in Silent mode and when a Focus is on. For iPhone with iOS\u00a026 or later.",
@@ -65,11 +69,10 @@ PAGES = {
     },
     "ja": {
         "path": "ja/",
-        "html_lang": "ja",
+        "html_lang": "ja", "og_locale": "ja_JP", "lang_name": "日本語", "as_of_fmt": "{y}年{m}月{d}日時点",
         "title": "My Sound Alarm｜好きな曲・動画の音を iPhone のアラームに",
         "meta": "好きな曲の好きな部分や動画の音を、iPhone のアラームに。波形で選んだ部分が、止めるまでくり返し鳴ります。iOS 26 の AlarmKit でアラームを登録するので、マナーモードや集中モードでも鳴ります。",
         "badge_alt": "App Store からダウンロード",
-        "nav_lang": "English",
         "hero_title": "好きな曲の、好きなところで起きる",
         "hero_body": "曲のいちばん好きな部分や動画の音を、iPhone のアラームに。止めるまで、くり返し鳴ります。",
         "req": "マナーモードや集中モードでも鳴ります。iOS\u00a026 以降の iPhone 向け。",
@@ -165,12 +168,16 @@ def stars(n):
 def reviews_html(lang, c, r):
     items = []
     for v in REVIEWS:
-        tr = v["tr"].get(lang)
+        tr = v["tr"].get(lang) or c.get("review_tr", {}).get(v["cc"])
+        if v["lang"] == c["html_lang"].split("-")[0]:
+            tr = None  # already in the page language
         original = f'<b>{esc(v["title"])}</b>' + (f'<br>{esc(v["body"])}' if v["body"] else "")
-        quote = f'<p class="orig" lang="{v["lang"]}">{original}</p>'
+        # dir=auto: a Latin-script review keeps its own direction inside an RTL page
+        quote = f'<p class="orig" lang="{v["lang"]}" dir="auto">{original}</p>'
         if tr:
             quote += f'<p class="tr">{esc(tr)}</p>'
-        meta = f'{COUNTRY[lang][v["cc"]]} · {v["date"]}'
+        country = COUNTRY.get(lang, {}).get(v["cc"]) or c["countries"][v["cc"]]
+        meta = f'{country} · {v["date"]}'
         items.append(f'<li><span class="stars" aria-label="{c["stars_label"].format(n=v["stars"])}">{stars(v["stars"])}</span>'
                      f'<span class="rmeta">{esc(meta)}</span>{quote}</li>')
     counts = RATINGS_ASC["counts"]
@@ -184,7 +191,7 @@ def reviews_html(lang, c, r):
         for k in (5, 4, 3, 2, 1)
     )
     y, m, d = RATINGS_ASC["as_of"].split("-")
-    as_of = f"{int(y)}年{int(m)}月{int(d)}日時点" if lang == "ja" else f"as of {RATINGS_ASC['as_of']}"
+    as_of = c["as_of_fmt"].format(y=int(y), m=int(m), d=int(d))
     summary = c["rating_summary"].format(count=total, regions=r["regions"], as_of=as_of)
     score = (f'<div class="score" role="img" aria-label="{esc(c["stars_label"].format(n=f"{avg:.1f}"))}">'
              f'<div class="big">{avg:.1f}</div><div class="bigstars" aria-hidden="true">★★★★★</div></div>')
@@ -193,6 +200,10 @@ def reviews_html(lang, c, r):
             f'<p class="rsum">{esc(summary)}</p>'
             f'<ul>{"".join(items)}</ul><p class="note">{esc(c["voices_note"])}</p></section>')
 
+
+PAGES.update(LOCALES)
+for _c in PAGES.values():
+    _c.setdefault("dir", "ltr")
 
 CSS = """
 :root{color-scheme:light;--text:#1C1714;--muted:#5E5650;--line:#E7E2DD;--accent:#FF843B;--ink:#4A1A6B;--wave:#D6D1CC}
@@ -207,18 +218,19 @@ header{display:flex;justify-content:space-between;align-items:center;padding:18p
 h1,h2,h3{word-break:auto-phrase;text-wrap:balance}
 .ph{display:inline-block}
 p,li{word-break:auto-phrase}
+:lang(ko) h1,:lang(ko) h2,:lang(ko) h3,:lang(ko) p{word-break:keep-all}
 h1{font-size:clamp(32px,6.4vw,48px);line-height:1.2;letter-spacing:-.015em;margin:36px 0 14px}
 .lead{font-size:20px;color:var(--muted);margin:0 0 24px;max-width:34em}
 .badge img{height:52px;width:auto;display:block}
 .req{font-size:15px;color:var(--muted);margin:10px 0 0}
 figure{margin:44px 0 8px}
-.wavebox{position:relative;padding-bottom:26px}
+.wavebox{position:relative;padding-bottom:26px;direction:ltr}
 .wave{display:block;width:100%;height:auto}
 .wavelabel{position:absolute;bottom:0;transform:translateX(-50%);white-space:nowrap;font-size:14px;font-weight:600;color:var(--ink)}
 figcaption{font-size:16px;color:var(--muted);margin-top:8px}
 h2{font-size:26px;line-height:1.35;margin:56px 0 10px}
 .shot{display:block;width:100%;max-width:340px;height:auto;border:1px solid var(--line);border-radius:22px;margin:18px 0 0}
-.side{float:right;width:132px;height:auto;margin:0 0 12px 20px}
+.side{float:inline-end;width:132px;height:auto;margin-block:0 12px;margin-inline:20px 0}
 .clear{clear:both}
 h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
 .faq p{margin:0;color:var(--muted)}
@@ -239,11 +251,13 @@ h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
 .bigstars{color:var(--accent);letter-spacing:.1em;margin-top:6px}
 .bars{flex:1;max-width:360px}
 .bar{display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.6}
-.bl{width:5.5em;text-align:right;color:var(--muted);letter-spacing:.02em;font-size:11px}
+.bl{width:5.5em;text-align:end;color:var(--muted);letter-spacing:.02em;font-size:11px}
 .bt{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
 .bf{display:block;height:100%;background:var(--accent);border-radius:3px}
-.bn{width:2em;color:var(--muted);text-align:right}
+.bn{width:2em;color:var(--muted);text-align:end}
 .note{font-size:14px;color:var(--muted);margin-top:12px}
+.langs{margin:40px 0 0;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 16px;font-size:15px}
+.langs a[aria-current]{color:var(--text);text-decoration:none;font-weight:600}
 footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wrap}
 .made{color:var(--muted);flex-basis:100%}
 """
@@ -304,7 +318,7 @@ def jsonld(lang, c):
         "downloadUrl": APP_STORE_URL,
         "sameAs": APP_STORE_URL,
         "image": BASE + "assets/img/icon.png",
-        "screenshot": BASE + f"assets/img/crop-{lang}.jpg",
+        "screenshot": BASE + ("assets/img/crop-ja.jpg" if lang == "ja" else "assets/img/crop-en.jpg"),
         "author": {"@type": "Person", "name": "tkys", "url": "https://github.com/tkys"},
     }
     faq = {
@@ -340,10 +354,40 @@ document.addEventListener("click",function(e){{var a=e.target.closest("a.badge")
 </script>"""
 
 
+def redirect_script():
+    """On the English root only: send first-time visitors to their browser language.
+
+    - Only when someone lands on the root directly. A ?lang=… link from our own language
+      list, or arriving from another page of this site, keeps them where they chose.
+    - Nothing is stored on the device. Crawlers read each language page directly (hreflang).
+    - Relative paths, so local previews stay local; query/hash are kept (?internal=1 etc.).
+    """
+    targets = {
+        o["html_lang"].split("-")[0].lower(): o["path"]
+        for o in PAGES.values() if o["path"] and o["html_lang"] != "zh-Hans"
+    }
+    return """<script>
+(function(){try{
+var q=new URLSearchParams(location.search);if(q.has("lang"))return;
+if(document.referrer&&new URL(document.referrer).pathname.indexOf(location.pathname)===0&&new URL(document.referrer).host===location.host)return;
+var map=%s,ls=navigator.languages||[navigator.language];
+for(var i=0;i<ls.length;i++){var t=(ls[i]||"").toLowerCase();
+if(t.indexOf("en")===0)return;
+if(t.indexOf("zh")===0){if(t==="zh-cn"||t==="zh-sg"||t.indexOf("zh-hans")===0){location.replace("zh-hans/"+location.search+location.hash);}return;}
+var k=t.split("-")[0];if(map[k]){location.replace(map[k]+location.search+location.hash);return;}}
+}catch(e){}})();
+</script>""" % json.dumps(targets)
+
+
 def page(lang, c, ratings):
-    other = "ja" if lang == "en" else "en"
-    oc = PAGES[other]
     prefix = "../" if c["path"] else ""
+    # Language list in the footer; the root link carries ?lang so the redirect below leaves it alone
+    langs = " ".join(
+        f'<a href="{BASE + o["path"]}{"?lang=en" if not o["path"] else ""}" hreflang="{o["html_lang"]}" lang="{o["html_lang"]}"'
+        f'{" aria-current=page" if l == lang else ""}>{esc(o["lang_name"])}</a>'
+        for l, o in PAGES.items()
+    )
+    shot = "crop-ja.jpg" if lang == "ja" else "crop-en.jpg"  # the app UI is English outside Japanese
     img = f"{prefix}assets/img/"
     alts = "\n".join(
         f'<link rel="alternate" hreflang="{PAGES[l]["html_lang"]}" href="{BASE + PAGES[l]["path"]}">'
@@ -353,7 +397,7 @@ def page(lang, c, ratings):
     for q, a in c["faq"]:
         faqs.append(f"<h3>{esc(q)}</h3><p>{esc(a)}</p>")
     return f"""<!doctype html>
-<html lang="{c["html_lang"]}">
+<html lang="{c["html_lang"]}" dir="{c["dir"]}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -368,7 +412,8 @@ def page(lang, c, ratings):
 <meta property="og:type" content="website">
 <meta property="og:url" content="{BASE + c["path"]}">
 <meta property="og:site_name" content="My Sound Alarm">
-<meta property="og:locale" content="{"ja_JP" if lang == "ja" else "en_US"}">
+<meta property="og:locale" content="{c["og_locale"]}">
+{redirect_script() if lang == "en" else ""}
 <meta name="twitter:card" content="summary_large_image">
 <link rel="apple-touch-icon" href="{img}icon.png">
 <meta name="apple-itunes-app" content="app-id={APP_ID}">
@@ -379,7 +424,7 @@ def page(lang, c, ratings):
 <body>
 <div class="wrap">
 <header><a class="brand" href="{BASE + c["path"]}"><img src="{img}icon.png" alt="">My Sound Alarm</a>
-<a href="{BASE + oc["path"]}" hreflang="{oc["html_lang"]}">{esc(c["nav_lang"])}</a></header>
+<a href="#languages">{esc(c["lang_name"])} ▾</a></header>
 <main>
 <h1>{phrases(c["hero_title"])}</h1>
 <p class="lead">{esc(c["hero_body"])}</p>
@@ -388,7 +433,7 @@ def page(lang, c, ratings):
 <figure>{waveform_svg(c)}<figcaption>{esc(c["wave_caption"])}</figcaption></figure>
 <h2>{esc(c["s1_title"])}</h2>
 <p>{esc(c["s1_body"])}</p>
-<img class="shot" src="{img}crop-{lang}.jpg" alt="{esc(c["s1_img_alt"])}" width="340" height="383">
+<img class="shot" src="{img}{shot}" alt="{esc(c["s1_img_alt"])}" width="340" height="383">
 <h2>{esc(c["s2_title"])}</h2>
 <img class="side" src="{img}silent.jpg" alt="" width="132" height="132" loading="lazy">
 <p>{esc(c["s2_body"])}</p>
@@ -398,6 +443,7 @@ def page(lang, c, ratings):
 <section class="end"><img class="end-art" src="{img}hero.jpg" alt="" width="420" height="560" loading="lazy">
 <div><h2>{phrases(c["end_title"])}</h2>{badge(c, img, "bottom")}</div></section>
 </main>
+<nav id="languages" class="langs" aria-label="Language">{langs}</nav>
 <footer><span class="made">{esc(c["made_by"])}</span><a href="{prefix}support.html">{esc(c["footer_support"])}</a><a href="{prefix}privacy.html">{esc(c["footer_privacy"])}</a></footer>
 </div>
 {analytics(lang)}
@@ -419,7 +465,11 @@ def sitemap():
             'xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' + "\n".join(urls) + "\n</urlset>\n")
 
 
-BANNED = ["free", "無料", "必ず", "絶対", "guarantee"]
+BANNED = ["free", "無料", "必ず", "絶対", "guarantee",
+          "gratuit", "kostenlos", "gratis", "gratuito", "gratuita", "gratuitamente",
+          "무료", "免费", "darmow", "za darmo", "zdarma", "bezplat", "مجان",
+          "toujours garanti", "garantiert", "garantizado", "garantido", "garantito", "gegarandeerd",
+          "보장", "保证", "gwarantowan", "zaručen", "مضمون"]
 
 
 def main():

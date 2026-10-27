@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -9,6 +9,17 @@
 <link rel="canonical" href="https://tkys.github.io/customsoundalarm/">
 <link rel="alternate" hreflang="en" href="https://tkys.github.io/customsoundalarm/">
 <link rel="alternate" hreflang="ja" href="https://tkys.github.io/customsoundalarm/ja/">
+<link rel="alternate" hreflang="fr" href="https://tkys.github.io/customsoundalarm/fr/">
+<link rel="alternate" hreflang="de" href="https://tkys.github.io/customsoundalarm/de/">
+<link rel="alternate" hreflang="es" href="https://tkys.github.io/customsoundalarm/es/">
+<link rel="alternate" hreflang="pt-BR" href="https://tkys.github.io/customsoundalarm/pt-br/">
+<link rel="alternate" hreflang="it" href="https://tkys.github.io/customsoundalarm/it/">
+<link rel="alternate" hreflang="nl" href="https://tkys.github.io/customsoundalarm/nl/">
+<link rel="alternate" hreflang="ko" href="https://tkys.github.io/customsoundalarm/ko/">
+<link rel="alternate" hreflang="zh-Hans" href="https://tkys.github.io/customsoundalarm/zh-hans/">
+<link rel="alternate" hreflang="pl" href="https://tkys.github.io/customsoundalarm/pl/">
+<link rel="alternate" hreflang="cs" href="https://tkys.github.io/customsoundalarm/cs/">
+<link rel="alternate" hreflang="ar" href="https://tkys.github.io/customsoundalarm/ar/">
 <link rel="alternate" hreflang="x-default" href="https://tkys.github.io/customsoundalarm/">
 <meta property="og:title" content="My Sound Alarm: set part of a song or a video&#x27;s sound as your iPhone alarm">
 <meta property="og:description" content="Set the part of a song you love, or the sound from a video, as your iPhone alarm. Pick it on a waveform and it repeats until you stop it. Scheduled with Apple&#x27;s AlarmKit (iOS 26), so it rings in Silent mode and when a Focus is on.">
@@ -17,6 +28,17 @@
 <meta property="og:url" content="https://tkys.github.io/customsoundalarm/">
 <meta property="og:site_name" content="My Sound Alarm">
 <meta property="og:locale" content="en_US">
+<script>
+(function(){try{
+var q=new URLSearchParams(location.search);if(q.has("lang"))return;
+if(document.referrer&&new URL(document.referrer).pathname.indexOf(location.pathname)===0&&new URL(document.referrer).host===location.host)return;
+var map={"ja": "ja/", "fr": "fr/", "de": "de/", "es": "es/", "pt": "pt-br/", "it": "it/", "nl": "nl/", "ko": "ko/", "pl": "pl/", "cs": "cs/", "ar": "ar/"},ls=navigator.languages||[navigator.language];
+for(var i=0;i<ls.length;i++){var t=(ls[i]||"").toLowerCase();
+if(t.indexOf("en")===0)return;
+if(t.indexOf("zh")===0){if(t==="zh-cn"||t==="zh-sg"||t.indexOf("zh-hans")===0){location.replace("zh-hans/"+location.search+location.hash);}return;}
+var k=t.split("-")[0];if(map[k]){location.replace(map[k]+location.search+location.hash);return;}}
+}catch(e){}})();
+</script>
 <meta name="twitter:card" content="summary_large_image">
 <link rel="apple-touch-icon" href="assets/img/icon.png">
 <meta name="apple-itunes-app" content="app-id=6760616800">
@@ -34,18 +56,19 @@ header{display:flex;justify-content:space-between;align-items:center;padding:18p
 h1,h2,h3{word-break:auto-phrase;text-wrap:balance}
 .ph{display:inline-block}
 p,li{word-break:auto-phrase}
+:lang(ko) h1,:lang(ko) h2,:lang(ko) h3,:lang(ko) p{word-break:keep-all}
 h1{font-size:clamp(32px,6.4vw,48px);line-height:1.2;letter-spacing:-.015em;margin:36px 0 14px}
 .lead{font-size:20px;color:var(--muted);margin:0 0 24px;max-width:34em}
 .badge img{height:52px;width:auto;display:block}
 .req{font-size:15px;color:var(--muted);margin:10px 0 0}
 figure{margin:44px 0 8px}
-.wavebox{position:relative;padding-bottom:26px}
+.wavebox{position:relative;padding-bottom:26px;direction:ltr}
 .wave{display:block;width:100%;height:auto}
 .wavelabel{position:absolute;bottom:0;transform:translateX(-50%);white-space:nowrap;font-size:14px;font-weight:600;color:var(--ink)}
 figcaption{font-size:16px;color:var(--muted);margin-top:8px}
 h2{font-size:26px;line-height:1.35;margin:56px 0 10px}
 .shot{display:block;width:100%;max-width:340px;height:auto;border:1px solid var(--line);border-radius:22px;margin:18px 0 0}
-.side{float:right;width:132px;height:auto;margin:0 0 12px 20px}
+.side{float:inline-end;width:132px;height:auto;margin-block:0 12px;margin-inline:20px 0}
 .clear{clear:both}
 h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
 .faq p{margin:0;color:var(--muted)}
@@ -66,11 +89,13 @@ h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
 .bigstars{color:var(--accent);letter-spacing:.1em;margin-top:6px}
 .bars{flex:1;max-width:360px}
 .bar{display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.6}
-.bl{width:5.5em;text-align:right;color:var(--muted);letter-spacing:.02em;font-size:11px}
+.bl{width:5.5em;text-align:end;color:var(--muted);letter-spacing:.02em;font-size:11px}
 .bt{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
 .bf{display:block;height:100%;background:var(--accent);border-radius:3px}
-.bn{width:2em;color:var(--muted);text-align:right}
+.bn{width:2em;color:var(--muted);text-align:end}
 .note{font-size:14px;color:var(--muted);margin-top:12px}
+.langs{margin:40px 0 0;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 16px;font-size:15px}
+.langs a[aria-current]{color:var(--text);text-decoration:none;font-weight:600}
 footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wrap}
 .made{color:var(--muted);flex-basis:100%}
 </style>
@@ -80,7 +105,7 @@ footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wr
 <body>
 <div class="wrap">
 <header><a class="brand" href="https://tkys.github.io/customsoundalarm/"><img src="assets/img/icon.png" alt="">My Sound Alarm</a>
-<a href="https://tkys.github.io/customsoundalarm/ja/" hreflang="ja">日本語</a></header>
+<a href="#languages">English ▾</a></header>
 <main>
 <h1><span class="ph">Wake up to your favorite part of a song</span></h1>
 <p class="lead">Choose a chorus from a song file, or the sound from a video, and make it your iPhone alarm. It plays on repeat until you stop it.</p>
@@ -94,11 +119,12 @@ footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wr
 <img class="side" src="assets/img/silent.jpg" alt="" width="132" height="132" loading="lazy">
 <p>Alarms are scheduled with AlarmKit, the alarm framework Apple added in iOS 26. They appear on the Lock Screen like Clock alarms and ring in Silent mode and when a Focus is on, even with the app closed.</p>
 <div class="clear"></div>
-<section class="voices"><h2>From the App Store</h2><div class="rating"><div class="score" role="img" aria-label="4.7 out of 5 stars"><div class="big">4.7</div><div class="bigstars" aria-hidden="true">★★★★★</div></div><div class="bars"><div class="bar"><span class="bl" aria-hidden="true">★★★★★</span><span class="bt"><span class="bf" style="width:100.0%"></span></span><span class="bn">54</span></div><div class="bar"><span class="bl" aria-hidden="true">★★★★</span><span class="bt"><span class="bf" style="width:13.0%"></span></span><span class="bn">7</span></div><div class="bar"><span class="bl" aria-hidden="true">★★★</span><span class="bt"><span class="bf" style="width:3.7%"></span></span><span class="bn">2</span></div><div class="bar"><span class="bl" aria-hidden="true">★★</span><span class="bt"><span class="bf" style="width:0.0%"></span></span><span class="bn">0</span></div><div class="bar"><span class="bl" aria-hidden="true">★</span><span class="bt"><span class="bf" style="width:3.7%"></span></span><span class="bn">2</span></div></div></div><p class="rsum">65 ratings on the App Store from 20 countries and regions, as of 2026-10-27.</p><ul><li><span class="stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rmeta">South Korea · 2026-09</span><p class="orig" lang="en"><b>This app is the goat.</b><br>It contains what i really wanted, thank you for creating this app.</p></li><li><span class="stars" aria-label="3 out of 5 stars">★★★☆☆</span><span class="rmeta">France · 2026-09</span><p class="orig" lang="fr"><b>Enlever les vibrations</b><br>Super application qui fonctionne très bien, même en mode avion, ne pas déranger etc Seul bémol il est impossible depuis l’application d’enlever les vibrations ou de les modifier</p><p class="tr">A great app that works very well, even in Airplane mode, Do Not Disturb and so on. The one drawback: you can&#x27;t turn off or change the vibration from the app.</p></li><li><span class="stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rmeta">Spain · 2026-08</span><p class="orig" lang="en"><b>Simply what I want for an alarm clock</b></p></li></ul><p class="note">Every written review so far, in the reviewer&#x27;s own words (one shortened to its title). Translations are ours.</p></section>
+<section class="voices"><h2>From the App Store</h2><div class="rating"><div class="score" role="img" aria-label="4.7 out of 5 stars"><div class="big">4.7</div><div class="bigstars" aria-hidden="true">★★★★★</div></div><div class="bars"><div class="bar"><span class="bl" aria-hidden="true">★★★★★</span><span class="bt"><span class="bf" style="width:100.0%"></span></span><span class="bn">54</span></div><div class="bar"><span class="bl" aria-hidden="true">★★★★</span><span class="bt"><span class="bf" style="width:13.0%"></span></span><span class="bn">7</span></div><div class="bar"><span class="bl" aria-hidden="true">★★★</span><span class="bt"><span class="bf" style="width:3.7%"></span></span><span class="bn">2</span></div><div class="bar"><span class="bl" aria-hidden="true">★★</span><span class="bt"><span class="bf" style="width:0.0%"></span></span><span class="bn">0</span></div><div class="bar"><span class="bl" aria-hidden="true">★</span><span class="bt"><span class="bf" style="width:3.7%"></span></span><span class="bn">2</span></div></div></div><p class="rsum">65 ratings on the App Store from 20 countries and regions, as of 2026-10-27.</p><ul><li><span class="stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rmeta">South Korea · 2026-09</span><p class="orig" lang="en" dir="auto"><b>This app is the goat.</b><br>It contains what i really wanted, thank you for creating this app.</p></li><li><span class="stars" aria-label="3 out of 5 stars">★★★☆☆</span><span class="rmeta">France · 2026-09</span><p class="orig" lang="fr" dir="auto"><b>Enlever les vibrations</b><br>Super application qui fonctionne très bien, même en mode avion, ne pas déranger etc Seul bémol il est impossible depuis l’application d’enlever les vibrations ou de les modifier</p><p class="tr">A great app that works very well, even in Airplane mode, Do Not Disturb and so on. The one drawback: you can&#x27;t turn off or change the vibration from the app.</p></li><li><span class="stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rmeta">Spain · 2026-08</span><p class="orig" lang="en" dir="auto"><b>Simply what I want for an alarm clock</b></p></li></ul><p class="note">Every written review so far, in the reviewer&#x27;s own words (one shortened to its title). Translations are ours.</p></section>
 <section class="faq"><h2>Questions</h2><h3>How do I set a song as my alarm on iPhone?</h3><p>The Clock app can play a song from your library, but always from the beginning. With My Sound Alarm, open an audio file (MP3, AAC, WAV or M4A) or a video, select the part you want on the waveform, and save it as the alarm sound.</p><h3>Can I use songs from Apple Music or Spotify?</h3><p>No. Songs from streaming services are protected and can&#x27;t be imported. You can use audio files saved in the Files app, recordings of your voice, and videos in your photo library.</p><h3>Can I use the sound from a video?</h3><p>Yes. Choose a video from your photo library or the Files app. The app pulls the audio out of the video, and you choose which part plays.</p><h3>Is there a 40-second limit, like custom ringtones?</h3><p>No. Custom iPhone ringtones stop at about 40 seconds. My Sound Alarm takes up to 10 minutes from a video, and long audio files can be imported as they are. A short section works best because it repeats.</p><h3>Will it ring in Silent mode, when a Focus is on, or with the app closed?</h3><p>Yes, as long as you allow alarms for the app when it asks. Alarms are scheduled with Apple&#x27;s AlarmKit, so the app doesn&#x27;t need to be running.</p><h3>How do I make the alarm louder?</h3><p>Alarm volume follows Settings &gt; Sounds &amp; Haptics &gt; Ringtone and Alerts. Turn on Change with Buttons to use the volume buttons. The volume in Control Center is for music and videos and doesn&#x27;t change alarm volume.</p></section>
 <section class="end"><img class="end-art" src="assets/img/hero.jpg" alt="" width="420" height="560" loading="lazy">
 <div><h2><span class="ph">Tomorrow morning, wake up to your favorite chorus.</span></h2><a class="badge" href="https://apps.apple.com/app/id6760616800" data-pos="bottom" rel="noopener"><img src="assets/img/app-store-badge.svg" alt="Download on the App Store" width="156" height="52"></a></div></section>
 </main>
+<nav id="languages" class="langs" aria-label="Language"><a href="https://tkys.github.io/customsoundalarm/?lang=en" hreflang="en" lang="en" aria-current=page>English</a> <a href="https://tkys.github.io/customsoundalarm/ja/" hreflang="ja" lang="ja">日本語</a> <a href="https://tkys.github.io/customsoundalarm/fr/" hreflang="fr" lang="fr">Français</a> <a href="https://tkys.github.io/customsoundalarm/de/" hreflang="de" lang="de">Deutsch</a> <a href="https://tkys.github.io/customsoundalarm/es/" hreflang="es" lang="es">Español</a> <a href="https://tkys.github.io/customsoundalarm/pt-br/" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a> <a href="https://tkys.github.io/customsoundalarm/it/" hreflang="it" lang="it">Italiano</a> <a href="https://tkys.github.io/customsoundalarm/nl/" hreflang="nl" lang="nl">Nederlands</a> <a href="https://tkys.github.io/customsoundalarm/ko/" hreflang="ko" lang="ko">한국어</a> <a href="https://tkys.github.io/customsoundalarm/zh-hans/" hreflang="zh-Hans" lang="zh-Hans">简体中文</a> <a href="https://tkys.github.io/customsoundalarm/pl/" hreflang="pl" lang="pl">Polski</a> <a href="https://tkys.github.io/customsoundalarm/cs/" hreflang="cs" lang="cs">Čeština</a> <a href="https://tkys.github.io/customsoundalarm/ar/" hreflang="ar" lang="ar">العربية</a></nav>
 <footer><span class="made">Made by tkys, an independent developer in Japan.</span><a href="support.html">Support</a><a href="privacy.html">Privacy Policy</a></footer>
 </div>
 <script>
