@@ -144,7 +144,7 @@ STOREFRONTS = ("us jp gb ca au de fr es it nl se no dk fi pl cz pt br mx ar cl c
                "sa ae eg tr ru ua il za nz at ch be ie gr hu ro sk").split()
 # Star breakdown from App Store Connect > Ratings and Reviews (all countries and regions).
 # The public lookup API lags and has no breakdown, so update this by hand from ASC.
-RATINGS_ASC = {"as_of": "2026-10-27", "counts": {5: 54, 4: 7, 3: 2, 2: 0, 1: 2}}
+RATINGS_ASC = {"as_of": "2026-10-29", "counts": {5: 59, 4: 7, 3: 2, 2: 0, 1: 2}}
 # Used when the App Store can't be reached at build time (2026-10-25).
 RATINGS_FALLBACK = {"count": 59, "avg": 4.8, "regions": 20}
 
