@@ -21,9 +21,10 @@ from i18n_docs import EMAIL, PRIVACY, SUPPORT, UPDATED  # noqa: E402
 ROOT = os.path.join(os.path.dirname(__file__), "..", "..", "docs")
 BASE = "https://tkys.github.io/customsoundalarm/"
 APP_ID = "6760616800"
-# Point this at a custom product page for web visitors once it exists
-# (App Store Connect > Custom Product Pages), e.g. ...?ppid=<id>
-APP_STORE_URL = f"https://apps.apple.com/app/id{APP_ID}"
+# Campaign link from App Store Connect (App Analytics > campaign link, campaign "website"):
+# installs from this site show up as the "website" campaign in App Analytics > Sources.
+# One campaign for all languages (a campaign needs 5+ installs to show; the language split is in PostHog).
+APP_STORE_URL = f"https://apps.apple.com/app/apple-store/id{APP_ID}?pt=128010919&ct=website&mt=8"
 # PostHog project for the website (public "phc_" key). Empty = no tracking.
 POSTHOG_KEY = "phc_uuFAFy25bfEjsVPtVzRBdAiy8yyPLi7NB75MGSQeGXEo"
 POSTHOG_HOST = "https://us.i.posthog.com"
