@@ -51,6 +51,7 @@ LOCALES = {
         "footer_support": "Assistance",
         "footer_privacy": "Confidentialité",
         "review_tr": {
+            "KR2": "Trop bien\nBonjour ! Personnellement, j’adore Hearts2Hearts, mais l’alarme de l’iPhone ne permet de mettre qu’un court extrait d’une chanson. En cherchant, j’ai trouvé cette app ! Ici, même moi qui ne m’y connais pas trop en téléphone, je peux régler une alarme très facilement juste en filmant une vidéo !! 🎀🎀 Me réveiller en écoutant ma chanson préférée, ça a plein d’avantages 😌",
             "KR": "La meilleure app. Elle contient exactement ce que je voulais, merci de l’avoir créée.",
             "ES": "Exactement ce que je veux d’un réveil",
         },
@@ -96,6 +97,7 @@ LOCALES = {
         "footer_support": "Support",
         "footer_privacy": "Datenschutz",
         "review_tr": {
+            "KR2": "Super!\nHallo! Ich mag Hearts2Hearts sehr, aber beim iPhone-Wecker kann man nur ein kurzes Stück eines Songs einstellen. Beim Suchen habe ich diese App gefunden! Hier kann sogar ich, obwohl ich mit dem Handy nicht gut umgehen kann, ganz einfach einen Wecker stellen – einfach indem ich ein Video aufnehme!! 🎀🎀 Mit meinem Lieblingssong aufzuwachen hat so viele Vorteile 😌",
             "KR": "Die beste App. Sie hat genau das, was ich wollte – danke, dass du sie gemacht hast.",
             "FR": "Eine tolle App, die sehr gut funktioniert, auch im Flugmodus, bei „Nicht stören“ usw. Einziger Nachteil: Man kann die Vibration in der App weder ausschalten noch ändern.",
             "ES": "Genau das, was ich von einem Wecker will",
@@ -142,6 +144,7 @@ LOCALES = {
         "footer_support": "Soporte",
         "footer_privacy": "Privacidad",
         "review_tr": {
+            "KR2": "¡Me encanta!\n¡Hola! A mí me gusta mucho Hearts2Hearts, pero la alarma del iPhone solo deja poner un trozo corto de una canción. Buscando, encontré esta app. Aquí, incluso yo, que no me manejo bien con el móvil, puedo poner una alarma facilísimo solo grabando un vídeo!! 🎀🎀 Despertarme escuchando mi canción favorita tiene un montón de ventajas 😌",
             "KR": "La mejor app. Tiene justo lo que quería, gracias por crearla.",
             "FR": "Una app genial que funciona muy bien, incluso en modo avión, con No molestar, etc. El único pero: desde la app no se puede quitar ni cambiar la vibración.",
             "ES": "Justo lo que quiero de un despertador",
@@ -188,6 +191,7 @@ LOCALES = {
         "footer_support": "Suporte",
         "footer_privacy": "Privacidade",
         "review_tr": {
+            "KR2": "Amei\nOi! Eu gosto muito de Hearts2Hearts, mas o alarme do iPhone só deixa colocar um trecho curto da música. Procurando, achei este app! Aqui, até eu, que não mando bem no celular, consigo definir um alarme bem fácil só gravando um vídeo!! 🎀🎀 Acordar ouvindo minha música favorita tem um monte de vantagens 😌",
             "KR": "O melhor app. Tem exatamente o que eu queria, obrigado por criar.",
             "FR": "Um app ótimo que funciona muito bem, até no modo avião, no Não Perturbe etc. O único porém: pelo app não dá para desligar nem mudar a vibração.",
             "ES": "Exatamente o que eu quero de um despertador",
@@ -234,6 +238,7 @@ LOCALES = {
         "footer_support": "Supporto",
         "footer_privacy": "Privacy",
         "review_tr": {
+            "KR2": "Bellissima\nCiao! Personalmente adoro le Hearts2Hearts, ma la sveglia dell’iPhone permette di impostare solo un pezzo breve di una canzone. Cercando ho trovato questa app! Qui anche io, che con il telefono non me la cavo bene, riesco a impostare una sveglia facilissimo solo registrando un video!! 🎀🎀 Svegliarmi con la mia canzone preferita ha un sacco di lati positivi 😌",
             "KR": "L’app migliore. Ha proprio quello che volevo, grazie per averla creata.",
             "FR": "Un’app fantastica che funziona benissimo, anche in modalità aereo, con Non disturbare ecc. L’unico difetto: dall’app non si può togliere né modificare la vibrazione.",
             "ES": "Esattamente quello che voglio da una sveglia",
@@ -280,6 +285,7 @@ LOCALES = {
         "footer_support": "Ondersteuning",
         "footer_privacy": "Privacy",
         "review_tr": {
+            "KR2": "Zo leuk\nHoi! Ik ben fan van Hearts2Hearts, maar met de iPhone-wekker kun je maar een kort stukje van een nummer instellen. Toen ik zocht, vond ik deze app! Hier kan zelfs ik, terwijl ik niet zo handig ben met mijn telefoon, heel makkelijk een wekker instellen door gewoon een video op te nemen!! 🎀🎀 Wakker worden met mijn favoriete nummer heeft zoveel voordelen 😌",
             "KR": "De beste app. Hij heeft precies wat ik wilde, bedankt dat je hem hebt gemaakt.",
             "FR": "Een geweldige app die heel goed werkt, ook in vliegtuigmodus, met Niet storen enz. Enige minpunt: je kunt de trilling in de app niet uitzetten of aanpassen.",
             "ES": "Precies wat ik van een wekker wil",
@@ -372,6 +378,7 @@ LOCALES = {
         "footer_support": "支持",
         "footer_privacy": "隐私政策",
         "review_tr": {
+            "KR2": "太好用了\n你好！我个人很喜欢 Hearts2Hearts，可是 iPhone 的闹钟只能设定歌曲很短的一段。找了找就发现了这个 App！在这里，连不太会用手机的我，也能拍个视频就超简单地设好闹钟！！🎀🎀 听着最爱的歌起床，好处真是数不完 😌",
             "KR": "最好的 App。正是我想要的，谢谢你做出它。",
             "FR": "非常好用的 App，在飞行模式、勿扰模式等情况下也能正常工作。唯一的缺点是无法在 App 里关闭或调整振动。",
             "ES": "正是我想要的闹钟",
@@ -418,6 +425,7 @@ LOCALES = {
         "footer_support": "Pomoc",
         "footer_privacy": "Prywatność",
         "review_tr": {
+            "KR2": "Super\nCześć! Bardzo lubię Hearts2Hearts, ale budzik w iPhonie pozwala ustawić tylko krótki fragment piosenki. W poszukiwaniach trafiła mi się ta aplikacja! Tutaj nawet ja, choć słabo radzę sobie z telefonem, mogę bardzo łatwo ustawić budzik, po prostu nagrywając wideo!! 🎀🎀 Budzenie się przy ulubionej piosence ma mnóstwo zalet 😌",
             "KR": "Najlepsza aplikacja. Ma dokładnie to, czego chciałem – dzięki, że ją stworzyłeś.",
             "FR": "Świetna aplikacja, która działa bardzo dobrze, nawet w trybie samolotowym, przy włączonym „Nie przeszkadzać” itd. Jedyny minus: w aplikacji nie da się wyłączyć ani zmienić wibracji.",
             "ES": "Dokładnie to, czego chcę od budzika",
@@ -464,6 +472,7 @@ LOCALES = {
         "footer_support": "Podpora",
         "footer_privacy": "Soukromí",
         "review_tr": {
+            "KR2": "Super\nAhoj! Osobně mě hrozně baví Hearts2Hearts, ale budík v iPhonu umožňuje nastavit jen krátký úsek písničky. Při hledání mi do cesty přišla tahle aplikace! Tady i já, i když mi telefon moc nejde, můžu úplně snadno nastavit budík jen tím, že natočím video!! 🎀🎀 Probouzet se u oblíbené písničky má spoustu výhod 😌",
             "KR": "Nejlepší aplikace. Má přesně to, co jsem chtěl – díky, žes ji vytvořil.",
             "FR": "Skvělá aplikace, která funguje velmi dobře, i v režimu letadlo, při „Nerušit“ atd. Jediná vada: v aplikaci nejde vypnout ani změnit vibrace.",
             "ES": "Přesně to, co od budíku chci",
@@ -510,6 +519,7 @@ LOCALES = {
         "footer_support": "الدعم",
         "footer_privacy": "الخصوصية",
         "review_tr": {
+            "KR2": "رائع جدًا\nمرحبًا! أحب فرقة Hearts2Hearts كثيرًا، لكن منبه iPhone لا يسمح إلا بجزء قصير من الأغنية. وبعد البحث وجدت هذا التطبيق! هنا، ورغم أن استخدام الهاتف ليس من نقاط قوتي، أستطيع ضبط منبه بسهولة كبيرة بمجرد تصوير فيديو!! 🎀🎀 الاستيقاظ على أغنيتي المفضلة له فوائد كثيرة 😌",
             "KR": "أفضل تطبيق. فيه ما كنت أريده تمامًا، شكرًا لصنعه.",
             "FR": "تطبيق رائع يعمل جيدًا جدًا، حتى في وضع الطيران ووضع عدم الإزعاج وغيرهما. العيب الوحيد: لا يمكن إيقاف الاهتزاز أو تغييره من التطبيق.",
             "ES": "تمامًا ما أريده من منبه",

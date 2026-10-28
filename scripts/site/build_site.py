@@ -116,6 +116,12 @@ PAGES = {
 # "tr" = our translation into the page language; omitted when the review is already in it.
 # Only the title of the Spanish review is quoted: its body uses a word we keep off the site.
 REVIEWS = [
+    # Featured: says in the user's own words what the app is for (shown near the top).
+    {"id": "KR2", "featured": True, "stars": 5, "cc": "KR", "date": "2026-10", "lang": "ko",
+     "title": '넘 조아여',
+     "body": '안녕하세요!\n갠적으로 전 하투하를 좋아하는데,,💫\n아이폰 알람에서는 노래 길이가\n짧게만 알람설정이 가능하더라구요.\n그래서 찾아보다 이 앱을 찾았어요!\n여기서는 폰을 잘 못쓰는 저 조차도\n영상촬영을 해서 너무나도 쉽게\n알람을 정할 수 있어요!! 🎀🎀\n내 최애 노래를 들으며 일어나니깐\n좋은게 한둘이 아니네요,, 😌',
+     "tr": {"ja": "すごくいい\nこんにちは！個人的に Hearts2Hearts が好きなんですが、iPhone のアラームでは曲を短くしか設定できなくて。それで探していたら、このアプリを見つけました！ここでは、スマホが得意じゃない私でも、動画を撮るだけでとても簡単にアラームを設定できます!! 🎀🎀 推しの曲を聴きながら起きられるので、いいことがひとつやふたつじゃありません 😌",
+            "en": "So good\nHi! I really love Hearts2Hearts, but the iPhone alarm only lets you set a short part of a song. So I searched and found this app! Here, even I, who isn't good with phones, can set an alarm so easily just by recording a video!! 🎀🎀 Waking up to my favorite song is good in more ways than one 😌"}},
     {"stars": 5, "cc": "KR", "date": "2026-09", "lang": "en",
      "title": "This app is the goat.",
      "body": "It contains what i really wanted, thank you for creating this app.",
@@ -168,21 +174,37 @@ def stars(n):
     return "★" * n + "☆" * (5 - n)
 
 
+def review_parts(v, lang, c):
+    """Stars, caption and quote (original + our translation) for one review."""
+    tr = v["tr"].get(lang) or c.get("review_tr", {}).get(v.get("id", v["cc"]))
+    if v["lang"] == c["html_lang"].split("-")[0]:
+        tr = None  # already in the page language
+    original = f'<b>{esc(v["title"])}</b>' + (f'<br>{esc(v["body"]).replace(chr(10), "<br>")}' if v["body"] else "")
+    # dir=auto: a Latin-script review keeps its own direction inside an RTL page
+    quote = f'<p class="orig" lang="{v["lang"]}" dir="auto">{original}</p>'
+    if tr:
+        quote += f'<p class="tr">{esc(tr).replace(chr(10), "<br>")}</p>'
+    country = COUNTRY.get(lang, {}).get(v["cc"]) or c["countries"][v["cc"]]
+    meta = f'{country} · {v["date"]}'
+    star = f'<span class="stars" aria-label="{c["stars_label"].format(n=v["stars"])}">{stars(v["stars"])}</span>'
+    return star, meta, quote
+
+
+def featured_html(lang, c):
+    """One real review, near the top, that says what the app is for in the user's own words."""
+    v = next((r for r in REVIEWS if r.get("featured")), None)
+    if not v:
+        return ""
+    star, meta, quote = review_parts(v, lang, c)
+    return (f'<figure class="featured"><blockquote>{quote}</blockquote>'
+            f'<figcaption>{star}<span class="rmeta">{esc(meta)} · App Store</span></figcaption></figure>')
+
+
 def reviews_html(lang, c, r):
     items = []
     for v in REVIEWS:
-        tr = v["tr"].get(lang) or c.get("review_tr", {}).get(v["cc"])
-        if v["lang"] == c["html_lang"].split("-")[0]:
-            tr = None  # already in the page language
-        original = f'<b>{esc(v["title"])}</b>' + (f'<br>{esc(v["body"])}' if v["body"] else "")
-        # dir=auto: a Latin-script review keeps its own direction inside an RTL page
-        quote = f'<p class="orig" lang="{v["lang"]}" dir="auto">{original}</p>'
-        if tr:
-            quote += f'<p class="tr">{esc(tr)}</p>'
-        country = COUNTRY.get(lang, {}).get(v["cc"]) or c["countries"][v["cc"]]
-        meta = f'{country} · {v["date"]}'
-        items.append(f'<li><span class="stars" aria-label="{c["stars_label"].format(n=v["stars"])}">{stars(v["stars"])}</span>'
-                     f'<span class="rmeta">{esc(meta)}</span>{quote}</li>')
+        star, meta, quote = review_parts(v, lang, c)
+        items.append(f'<li>{star}<span class="rmeta">{esc(meta)}</span>{quote}</li>')
     counts = RATINGS_ASC["counts"]
     total = sum(counts.values())
     avg = sum(k * v for k, v in counts.items()) / total
@@ -264,6 +286,12 @@ h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
 .doc h1{font-size:34px;margin-top:28px}
 .perms{padding-inline-start:1.2em}
 .perms li{margin:6px 0}
+.featured{margin:44px 0 0;padding:20px 22px;border-inline-start:4px solid var(--accent);background:#FFF8F2;border-radius:0 12px 12px 0}
+[dir=rtl] .featured{border-radius:12px 0 0 12px}
+.featured blockquote{margin:0}
+.featured .orig{font-size:17px;line-height:1.7;margin:0}
+.featured .tr{color:var(--muted);font-size:16px;margin:10px 0 0}
+.featured figcaption{margin-top:12px}
 footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wrap}
 .made{color:var(--muted);flex-basis:100%}
 """
@@ -451,6 +479,7 @@ def page(lang, c, ratings):
 {badge(c, img, "hero")}
 <p class="req">{esc(c["req"])}</p>
 <figure>{waveform_svg(c)}<figcaption>{esc(c["wave_caption"])}</figcaption></figure>
+{featured_html(lang, c)}
 <h2>{esc(c["s1_title"])}</h2>
 <p>{esc(c["s1_body"])}</p>
 <img class="shot" src="{img}{shot}" alt="{esc(c["s1_img_alt"])}" width="340" height="383">
