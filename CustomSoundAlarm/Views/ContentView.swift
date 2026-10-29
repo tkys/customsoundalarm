@@ -18,6 +18,8 @@ struct ContentView: View {
     @State private var showingOnboarding = false
     /// オンボ場面4で選ばれた取り込み入口（追加画面に伝える・#98 Phase 4）
     @State private var addAlarmRequest: AddAlarmRequest?
+    /// アップデート案内（#116）
+    @State private var updateChecker = UpdateChecker.shared
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.requestReview) private var requestReview
@@ -40,6 +42,8 @@ struct ContentView: View {
                         } label: {
                             Image(systemName: "moon.zzz")
                         }
+                        .accessibilityLabel(Text("night_mode"))
+                        .accessibilityIdentifier("alarmList.bedside")
                     }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -47,10 +51,24 @@ struct ContentView: View {
                     } label: {
                         Image(systemName: "plus")
                     }
+                    .accessibilityLabel(Text("add_alarm"))
+                    .accessibilityIdentifier("alarmList.add")
                 }
                 }
                 .task {
                     evaluateOnboarding()
+                    #if DEBUG
+                    if AppGroup.isUITestOpenAddAlarm {
+                        addAlarmRequest = AddAlarmRequest(source: nil)
+                    } else if AppGroup.isUITestOpenEditAlarm,
+                              let alarm = alarmStore.alarms.first {
+                        selectedAlarm = alarm
+                    }
+                    #endif
+                    await updateChecker.check(isOnboardingVisible: showingOnboarding)
+                }
+                .safeAreaInset(edge: .bottom) {
+                    AdSlot(slot: .bannerAlarmList)
                 }
 
                 if showingOnboarding {
@@ -59,6 +77,9 @@ struct ContentView: View {
                         withAnimation { showingOnboarding = false }
                         if source.opensAddScreen {
                             addAlarmRequest = AddAlarmRequest(source: source)
+                        }
+                        Task {
+                            await updateChecker.check(isOnboardingVisible: false)
                         }
                     }
                     .environment(\.colorScheme, .light)
@@ -75,6 +96,21 @@ struct ContentView: View {
             .fullScreenCover(isPresented: $showingBedsideClock) {
                 BedsideClockView()
             }
+            .fullScreenCover(item: requiredPromptBinding) { prompt in
+                UpdatePromptView(
+                    prompt: prompt,
+                    onUpdate: { updateChecker.handleUpdateTap() },
+                    onLater: nil
+                )
+            }
+            .sheet(item: recommendedPromptBinding) { prompt in
+                UpdatePromptView(
+                    prompt: prompt,
+                    onUpdate: { updateChecker.handleUpdateTap() },
+                    onLater: { updateChecker.dismissRecommended() }
+                )
+                .presentationDetents([.medium])
+            }
         }
         .onChange(of: scenePhase) { _, phase in
             // ユーザーが自ら落ち着いてアプリを前面に出したタイミングで、
@@ -84,7 +120,32 @@ struct ContentView: View {
             ReviewRequestManager.shared.requestReviewIfAppropriate {
                 requestReview()
             }
+            Task {
+                await updateChecker.check(isOnboardingVisible: showingOnboarding)
+            }
         }
+    }
+
+    // MARK: - Update prompt bindings (#116)
+
+    /// 必須は閉じられない（setter は何もしない）
+    private var requiredPromptBinding: Binding<UpdatePrompt?> {
+        Binding(
+            get: { updateChecker.prompt?.kind == .required ? updateChecker.prompt : nil },
+            set: { _ in }
+        )
+    }
+
+    /// おすすめは「あとで」/スワイプで閉じる（同じ latest_build では再表示しない）
+    private var recommendedPromptBinding: Binding<UpdatePrompt?> {
+        Binding(
+            get: { updateChecker.prompt?.kind == .recommended ? updateChecker.prompt : nil },
+            set: { newValue in
+                if newValue == nil {
+                    updateChecker.dismissRecommended()
+                }
+            }
+        )
     }
 
     /// オンボの表示判定（#98 Phase 1/2）。
@@ -92,7 +153,9 @@ struct ContentView: View {
     private func evaluateOnboarding() {
 #if DEBUG
         let effectiveHasCompleted: Bool
-        if AppGroup.isUITestFreshOnboarding {
+        if AppGroup.isUITestUpdateRequired || AppGroup.isUITestUpdateRecommended {
+            effectiveHasCompleted = true
+        } else if AppGroup.isUITestFreshOnboarding {
             effectiveHasCompleted = false
         } else {
             effectiveHasCompleted = AppGroup.hasCompletedOnboarding
@@ -126,17 +189,7 @@ struct ContentView: View {
                     .padding(.bottom, 4)
             }
         } description: {
-            VStack(spacing: 8) {
-                Text("empty_description")
-                HStack(spacing: 4) {
-                    Image(systemName: "video.badge.waveform")
-                    Text("・")
-                    Image(systemName: "doc.badge.plus")
-                    Text("empty_tip")
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
+            Text("empty_description")
         } actions: {
             Button {
                 addAlarmRequest = AddAlarmRequest(source: nil)
@@ -269,6 +322,10 @@ struct AlarmRow: View {
                     set: { _ in onToggle() }
                 ))
                 .labelsHidden()
+                .accessibilityLabel(Text(AlarmRowAccessibility.toggleLabel(
+                    time: alarm.timeString,
+                    label: alarm.label
+                )))
             }
             .padding(.vertical, 4)
         }

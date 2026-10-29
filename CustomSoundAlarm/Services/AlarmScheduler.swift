@@ -27,6 +27,14 @@ final class AlarmScheduler {
     /// 試しに鳴らすボタンの権限状態（#109）
     private(set) var testRingPermission: TestRingPermission = .unknown
 
+    /// いずれかのアラームが鳴動中か（アップデート案内の抑制・#116）
+    private(set) var isAlarmRinging: Bool = false
+
+    /// 試しに鳴らすアラームが登録中/鳴動中か（アップデート案内の抑制・#116）
+    var isTestRingActive: Bool {
+        !AppGroup.testAlarmRecords.isEmpty
+    }
+
     /// 試しアラームの記録ごとの掃除タスク（60秒後にキャンセルする）
     @ObservationIgnored
     private var testRingCleanupTasks: [UUID: Task<Void, Never>] = [:]
@@ -131,7 +139,9 @@ final class AlarmScheduler {
 
         let activeAlarmIDs: Set<Alarm.ID>
         do {
-            activeAlarmIDs = Set(try manager.alarms.map(\.id))
+            let alarms = try manager.alarms
+            activeAlarmIDs = Set(alarms.map(\.id))
+            isAlarmRinging = alarms.contains { $0.state == .alerting }
         } catch {
             logger.error("Failed to fetch alarms for reconciliation: \(error.localizedDescription)")
             return
@@ -153,6 +163,9 @@ final class AlarmScheduler {
                 alarmIDMap.removeValue(forKey: alarm.id)
                 if let backupID = backupAlarmIDMap.removeValue(forKey: alarm.id) {
                     try? manager.cancel(id: backupID)
+                    var soundNames = AppGroup.backupSoundNames
+                    soundNames.removeValue(forKey: alarm.id)
+                    AppGroup.backupSoundNames = soundNames
                     logger.info("Reconcile: cancelled backup for one-time alarm: \(alarm.label)")
                 }
                 var counts = AppGroup.snoozeCounts
@@ -274,6 +287,12 @@ final class AlarmScheduler {
             return entry.id
         })
 
+        // 生成方式の版が古い .loud.caf は次の同期で作り直す（#134）
+        for entry in entries
+        where entry.isEnabled && entry.backupMinutes != nil && !entry.soundFileName.isEmpty {
+            _ = await BackupLoudVariantService.ensureVariant(for: entry.soundFileName)
+        }
+
         let backupDiff = BackupAlarmLogic.computeBackupSyncDiff(
             oldMap: backupAlarmIDMap,
             entries: entries,
@@ -284,6 +303,9 @@ final class AlarmScheduler {
         for entryID in backupDiff.cancelEntryIDs {
             guard let backupID = backupAlarmIDMap[entryID] else { continue }
             try? manager.cancel(id: backupID)
+            var soundNames = AppGroup.backupSoundNames
+            soundNames.removeValue(forKey: entryID)
+            AppGroup.backupSoundNames = soundNames
             logger.info("Cancelled backup alarm for removed entry: \(entryID)")
         }
         for (_, oldBackupID) in backupDiff.rescheduleAlarmIDs {
@@ -466,11 +488,16 @@ final class AlarmScheduler {
 
         let alarmID = Alarm.ID()
         let displayName = SoundStore.shared.displayName(for: entry.soundFileName)
+        let soundFileName = BackupLoudVariantService.resolvedSoundFileName(for: entry)
+        var soundNames = AppGroup.backupSoundNames
+        soundNames[entry.id] = soundFileName
+        AppGroup.backupSoundNames = soundNames
         let config = BackupAlarmFactory.configuration(
             for: entry,
             fireDate: nextDate,
             alarmID: alarmID,
-            displayName: displayName
+            displayName: displayName,
+            soundFileName: soundFileName
         )
 
         do {
@@ -499,6 +526,11 @@ final class AlarmScheduler {
                 try? manager.cancel(id: backupID)
             }
         }
+        var soundNames = AppGroup.backupSoundNames
+        for entryID in orphanIDs {
+            soundNames.removeValue(forKey: entryID)
+        }
+        AppGroup.backupSoundNames = soundNames
         saveBackupIDMap()
         logger.info("Cancelled \(orphanIDs.count) orphan backup alarm(s)")
     }
@@ -510,7 +542,12 @@ final class AlarmScheduler {
     /// 停止・60 秒経過・次回起動時でキャンセルする。
     /// - Returns: 登録できたら true
     @discardableResult
-    func scheduleTestRing(soundFileName: String, kind: TestRingKind, now: Date = Date()) async -> Bool {
+    func scheduleTestRing(
+        soundFileName: String,
+        kind: TestRingKind,
+        hasBackup: Bool = false,
+        now: Date = Date()
+    ) async -> Bool {
         refreshTestRingPermission()
         guard canScheduleTestRing else {
             logger.warning("Test ring skipped: AlarmKit not authorized")
@@ -532,7 +569,7 @@ final class AlarmScheduler {
             var records = AppGroup.testAlarmRecords
             records.append(TestAlarmRecord(id: alarmID, scheduledAt: now, kind: kind))
             AppGroup.testAlarmRecords = records
-            AnalyticsService.shared.capture(.testRingScheduled(kind: kind))
+            AnalyticsService.shared.capture(.testRingScheduled(kind: kind, hasBackup: hasBackup))
             scheduleTestRingCleanup(for: alarmID)
             logger.info("Scheduled test ring in \(TestRingLogic.delay)s (kind=\(kind.rawValue))")
             return true
@@ -544,7 +581,7 @@ final class AlarmScheduler {
     }
 
     /// 試しアラーム用の AlarmKit 設定（一回限り・スヌーズなし・停止のみ）。
-    private func makeTestRingConfiguration(
+    private nonisolated func makeTestRingConfiguration(
         for plan: TestRingLogic.Plan,
         alarmID: UUID
     ) -> AlarmManager.AlarmConfiguration<CustomAlarmMetadata> {
@@ -621,6 +658,7 @@ final class AlarmScheduler {
         observationTask = Task {
             for await alarms in manager.alarmUpdates {
                 guard !Task.isCancelled else { break }
+                isAlarmRinging = alarms.contains { $0.state == .alerting }
                 for alarm in alarms {
                     switch alarm.state {
                     case .alerting:

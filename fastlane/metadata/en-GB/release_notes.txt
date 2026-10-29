@@ -1,7 +1,15 @@
-■ Alarms in time order
-Like the Clock app, your alarms are now sorted from earliest to latest.
+■ Oversleep guard (Pro, early access)
+If you haven't stopped your alarm by the time you choose, it plays the same sound again, louder. If you turn it on during early access, you can keep using it after the full release.
 
-■ Louder imported sounds
-When a video or audio file is quiet, the app now raises its volume when you import it, without distortion. Sounds you already imported stay the same.
+■ Ring now
+Tap "Ring now" on the alarm screen to hear your alarm right away, at its real volume.
+
+■ Help when it's too quiet
+Alarm volume follows Ringtone and Alerts in Settings. "Too quiet?" shows you where to change it.
+
+■ A simpler alarm screen
+Settings are arranged more like the Clock app, and an alarm you edit is turned on when you save it.
+
+■ Better VoiceOver labels
 
 Thanks for using My Sound Alarm!

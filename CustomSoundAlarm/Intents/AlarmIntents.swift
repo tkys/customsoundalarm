@@ -98,11 +98,13 @@ struct DismissAlarmIntent: LiveActivityIntent {
                 case .scheduleNextBackup(let entryID):
                     guard let entry, let nextDate else { continue }
                     let newID = UUID()
+                    let soundFileName = AppGroup.backupSoundNames[entryID] ?? BackupAlarmSound.fileName
                     let config = BackupAlarmFactory.configuration(
                         for: entry,
                         fireDate: nextDate,
                         alarmID: newID,
-                        displayName: ""
+                        displayName: "",
+                        soundFileName: soundFileName
                     )
                     if (try? await AlarmManager.shared.schedule(id: newID, configuration: config)) != nil {
                         var map = AlarmIDMaps.loadBackup()
@@ -118,6 +120,8 @@ struct DismissAlarmIntent: LiveActivityIntent {
                 map.removeValue(forKey: entryID)
                 AlarmIDMaps.saveBackup(map)
             }
+
+            let snoozesBefore = entryID.flatMap { AppGroup.snoozeCounts[$0] }
 
             if let entryID {
                 var counts = AppGroup.snoozeCounts
@@ -144,6 +148,18 @@ struct DismissAlarmIntent: LiveActivityIntent {
                 var canceled = AppGroup.backupCanceledAt
                 canceled.removeValue(forKey: entryID)
                 AppGroup.backupCanceledAt = canceled
+
+                // 寝過ごし防止が鳴って止められた（主指標・#124）。
+                // アプリが閉じていても AlarmEventBuffer 経由で届く。
+                if let pending = BackupStopAnalytics.pendingEvent(
+                    role: .backup(entryID: entryID),
+                    entry: entry,
+                    snoozesBefore: snoozesBefore,
+                    hour: hour,
+                    timestamp: now
+                ) {
+                    AlarmEventBuffer.enqueue(pending)
+                }
             case .unknown:
                 break
             }

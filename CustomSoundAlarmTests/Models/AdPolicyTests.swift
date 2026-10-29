@@ -236,7 +236,9 @@ struct AdPolicyTests {
 
     @Test
     func forbiddenContexts_areDenied() {
-        let contexts: [AdContext] = [.alarmList, .bedside, .onboarding, .alarmRinging, .testRinging]
+        // 仕様変更（2026-10-30）: アラーム一覧は下部バナーの対象になったため、
+        // 禁止画面のリストから外した。昼の可否は bannerAlarmList_* で検証する。
+        let contexts: [AdContext] = [.bedside, .onboarding, .alarmRinging, .testRinging]
         for context in contexts {
             let banner = policy().canShowBanner(context: context)
             #expect(!banner.allowed)
@@ -335,5 +337,32 @@ struct AdPolicyTests {
 
         AppGroup.lastInterstitialShownAt = nil
         #expect(AppGroup.lastInterstitialShownAt == nil)
+    }
+
+    // MARK: - アラーム一覧の下部バナー（2026-10-30 仕様変更）
+
+    @Test
+    func bannerAlarmList_isAllowedDuringDay() {
+        let decision = policy().canShowBanner(context: .alarmList)
+        #expect(decision.allowed)
+        #expect(decision.reason == .eligible)
+        #expect(AdContext.alarmList.slot == .bannerAlarmList)
+        #expect(policy().decision(for: .bannerAlarmList).allowed)
+    }
+
+    @Test
+    func bannerAlarmList_isDeniedInQuietHours() {
+        let at21 = AdPolicy(input: input(now: date(2024, 1, 15, 21, 0)))
+        #expect(at21.canShowBanner(context: .alarmList).reason == .quietHours)
+
+        let at659 = AdPolicy(input: input(now: date(2024, 1, 15, 6, 59)))
+        #expect(at659.canShowBanner(context: .alarmList).reason == .quietHours)
+    }
+
+    @Test
+    func bannerAlarmList_isDeniedInForbiddenStates() {
+        for context in [AdContext.bedside, .onboarding, .alarmRinging, .testRinging] {
+            #expect(policy().canShowBanner(context: context).reason == .forbiddenContext)
+        }
     }
 }

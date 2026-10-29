@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // MARK: - Mode
 
@@ -20,6 +21,7 @@ enum AlarmDetailMode: Identifiable {
 /// HIG: DatePickerで時刻選択、サウンドはナビゲーション遷移で選択
 struct AlarmDetailView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     @State private var alarmStore = AlarmStore.shared
     @State private var soundStore = SoundStore.shared
     @State private var scheduler = AlarmScheduler.shared
@@ -35,7 +37,6 @@ struct AlarmDetailView: View {
     @State private var selectedSound: AlarmSound?
     @State private var repeatWeekdays: Set<Int>
     @State private var snoozeMinutes: Int
-    @State private var isEnabled: Bool
     @State private var backupMinutes: Int?
 
     /// オンボ指定の初期動作を1回だけ適用したか
@@ -50,11 +51,10 @@ struct AlarmDetailView: View {
     @State private var isSchedulingTestRing = false
     @State private var testRingMessage: String?
     @State private var backupTestRingMessage: String?
-    @State private var showTestRingVolumeNote = AppGroup.testRingVolumeNoteShown
 
-    /// 音の大きさの目安（#109 C）
-    @State private var selectedLoudness: SoundLoudness.Level?
-    @State private var backupLoudness: SoundLoudness.Level?
+    /// 音量の案内（#121）・寝過ごし防止の説明（#122）
+    @State private var showingVolumeGuide = false
+    @State private var showingBackupInfo = false
 
     init(mode: AlarmDetailMode, initialImport: OnboardingSource? = nil) {
         self.mode = mode
@@ -71,7 +71,6 @@ struct AlarmDetailView: View {
                 initialValue: SoundStore.shared.sounds.first { $0.fileName == entry.soundFileName }
             )
             _snoozeMinutes = State(initialValue: entry.snoozeMinutes)
-            _isEnabled = State(initialValue: entry.isEnabled)
             _backupMinutes = State(initialValue: entry.backupMinutes)
         } else {
             _selectedTime = State(initialValue: Date())
@@ -83,7 +82,6 @@ struct AlarmDetailView: View {
             _selectedSound = State(initialValue: initialSound)
             _repeatWeekdays = State(initialValue: [])
             _snoozeMinutes = State(initialValue: 9)
-            _isEnabled = State(initialValue: true)
             _backupMinutes = State(initialValue: nil)
         }
     }
@@ -91,15 +89,20 @@ struct AlarmDetailView: View {
     var body: some View {
         NavigationStack {
             Form {
+                if !scheduler.canScheduleTestRing {
+                    permissionSection
+                }
                 timeSection
-                soundSection
+                // 繰り返し〜スヌーズは1つのまとまり（時計アプリと同じく行の並び・#122）
+                Section {
+                    repeatSection
+                    labelSection
+                    soundSection
+                    testRingSection
+                    snoozeSection
+                }
                 backupAlarmSection
-                trialRingSection
-                repeatSection
-                snoozeSection
-                labelSection
                 if case .edit = mode {
-                    toggleSection
                     deleteSection
                 }
             }
@@ -131,9 +134,6 @@ struct AlarmDetailView: View {
                 showingVideoImport: $showingVideoImport,
                 errorMessage: $importErrorMessage
             )
-            .task(id: selectedSound?.fileName) {
-                await refreshLoudness()
-            }
             .task {
                 scheduler.refreshTestRingPermission()
                 // 追加画面のシート提示完了後に取り込みを開く（約0.35秒待つ）
@@ -142,6 +142,13 @@ struct AlarmDetailView: View {
             }
             .onAppear {
                 scheduler.refreshTestRingPermission()
+            }
+            .sheet(isPresented: $showingVolumeGuide) {
+                AlarmVolumeGuideView(source: .testRing)
+            }
+            .sheet(isPresented: $showingBackupInfo) {
+                BackupAlarmInfoView()
+                    .presentationDetents([.medium])
             }
             .alert("error", isPresented: Binding(
                 get: { importErrorMessage != nil },
@@ -196,7 +203,7 @@ struct AlarmDetailView: View {
     // MARK: - Sound (OOUI: アラームのプロパティとしてアクセス)
 
     private var soundSection: some View {
-        Section {
+        Group {
             NavigationLink {
                 SoundSelectionView(selectedSound: $selectedSound)
             } label: {
@@ -217,10 +224,31 @@ struct AlarmDetailView: View {
                     }
                 }
             }
+            .accessibilityIdentifier("addAlarm.soundRow")
         }
     }
 
-    // MARK: - Final Alarm (#110)
+    // MARK: - Permission (#122)
+
+    private var permissionSection: some View {
+        Section {
+            HStack(spacing: 10) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+                Text("alarm_permission_required")
+                Spacer()
+                Button("open_settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        openURL(url)
+                    }
+                }
+                .accessibilityIdentifier("addAlarm.openSettings")
+            }
+            .accessibilityIdentifier("addAlarm.permissionRow")
+        }
+    }
+
+    // MARK: - Oversleep guard (#110 / #122)
 
     private var isBackupAvailable: Bool {
         BackupAlarmAccess.isAvailable(
@@ -247,15 +275,27 @@ struct AlarmDetailView: View {
 
     private var backupAlarmSection: some View {
         Section {
-            Toggle(isOn: backupToggle) {
-                HStack(spacing: 6) {
-                    Text("backup_alarm_toggle")
-                    badge("PRO")
-                    badge(String(localized: "backup_alarm_early_access_badge"))
+            HStack(spacing: 8) {
+                Text("backup_alarm_toggle")
+                badge("PRO")
+                Button {
+                    showingBackupInfo = true
+                } label: {
+                    Image(systemName: "info.circle")
                 }
+                .buttonStyle(.borderless)
+                .accessibilityLabel(Text("backup_alarm_info_accessibility"))
+                .accessibilityIdentifier("addAlarm.backupInfo")
+
+                Spacer()
+
+                Toggle("", isOn: backupToggle)
+                    .labelsHidden()
+                    .accessibilityLabel(Text("backup_alarm_toggle"))
+                    .accessibilityIdentifier("addAlarm.backupToggle")
+                    // 使えない環境でも、既にオンならオフにはできる
+                    .disabled(!isBackupAvailable && backupMinutes == nil)
             }
-            // 使えない環境でも、既にオンならオフにはできる
-            .disabled(!isBackupAvailable && backupMinutes == nil)
 
             if let minutes = backupMinutes {
                 Picker("backup_alarm_minutes", selection: Binding(
@@ -267,67 +307,71 @@ struct AlarmDetailView: View {
                             .tag(option)
                     }
                 }
+                .accessibilityIdentifier("addAlarm.backupMinutes")
 
-                Text(String(format: String(localized: "backup_alarm_description"), minutes))
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                Button {
+                    scheduleTestRing(kind: .backup)
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: "speaker.wave.3.fill")
+                        Text("test_ring_backup_title")
+                        Spacer()
+                        if isSchedulingTestRing {
+                            ProgressView()
+                        }
+                    }
+                }
+                .disabled(!scheduler.canScheduleTestRing || isSchedulingTestRing)
+                .accessibilityIdentifier("addAlarm.backupTestRing")
 
-                if minutes <= snoozeMinutes {
-                    Text("backup_alarm_before_snooze")
+                if let backupTestRingMessage {
+                    Text(backupTestRingMessage)
                         .font(.footnote)
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(.secondary)
                 }
             }
-
-            Button {
-                scheduleTestRing(kind: .backup)
-            } label: {
-                HStack(spacing: 10) {
-                    Image(systemName: "speaker.wave.3.fill")
-                    Text("test_ring_backup_title")
-                    Spacer()
-                    if isSchedulingTestRing {
-                        ProgressView()
+        } footer: {
+            if let minutes = backupMinutes {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(backupDescriptionText)
+                    if minutes <= snoozeMinutes {
+                        Text("backup_alarm_before_snooze")
+                            .foregroundStyle(.orange)
                     }
                 }
             }
-            .disabled(!scheduler.canScheduleTestRing || isSchedulingTestRing)
-
-            if !scheduler.canScheduleTestRing {
-                Text("test_ring_permission_required")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-
-            if let backupTestRingMessage {
-                Text(backupTestRingMessage)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-
-            HStack {
-                Text("loudness_own")
-                Spacer()
-                Text(loudnessLabel(selectedLoudness))
-                    .foregroundStyle(.secondary)
-            }
-            HStack {
-                Text("loudness_backup")
-                Spacer()
-                Text(backupLoudness == nil ? "—" : String(localized: "loudness_max"))
-                    .foregroundStyle(.secondary)
-            }
-
-            if showTestRingVolumeNote {
-                Text("test_ring_volume_note")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-            }
-        } header: {
-            Text("backup_alarm_section")
-        } footer: {
-            Text("backup_alarm_early_access_note")
         }
+    }
+
+    /// 「7:00 のアラームを 7:15 までに止めなかったら…」を端末の時刻書式で組み立てる（#119）
+    private var backupDescriptionText: String {
+        guard let minutes = backupMinutes else { return "" }
+        let components = Calendar.current.dateComponents([.hour, .minute], from: selectedTime)
+        let times = BackupAlarmLogic.displayTimes(
+            hour: components.hour ?? 7,
+            minute: components.minute ?? 0,
+            backupMinutes: minutes
+        )
+        let calendar = Calendar.current
+        let now = Date()
+        let originalDate = calendar.date(
+            bySettingHour: times.originalHour,
+            minute: times.originalMinute,
+            second: 0,
+            of: now
+        ) ?? now
+        let backupDate = calendar.date(
+            bySettingHour: times.backupHour,
+            minute: times.backupMinute,
+            second: 0,
+            of: now
+        ) ?? now
+        let style = Date.FormatStyle(date: .omitted, time: .shortened)
+        return String(
+            format: String(localized: "backup_alarm_description_fmt"),
+            originalDate.formatted(style),
+            backupDate.formatted(style)
+        )
     }
 
     private func badge(_ text: String) -> some View {
@@ -339,30 +383,40 @@ struct AlarmDetailView: View {
             .foregroundStyle(Color.accentColor)
     }
 
-    // MARK: - Trial Ring (#109)
+    // MARK: - Trial Ring (#109 / #122)
 
-    /// 本物の AlarmKit で 5 秒後に鳴らす。アプリ内の試し聴きとは音量の系統が違うため、
-    /// 「実際に鳴るか」を確認する導線として置く。
-    private var trialRingSection: some View {
-        Section {
-            Button {
-                scheduleTestRing(kind: .own)
-            } label: {
-                HStack(spacing: 10) {
-                    Image(systemName: "bell.badge.waveform.fill")
-                    Text("test_ring_title")
-                    Spacer()
-                    if isSchedulingTestRing {
-                        ProgressView()
+    /// 本物の AlarmKit で1秒後に鳴らす。結果は行の中で短く表示する。
+    private var testRingSection: some View {
+        Group {
+            HStack(spacing: 12) {
+                Button {
+                    scheduleTestRing(kind: .own)
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "bell.badge.waveform.fill")
+                        Text("test_ring_title")
+                        if isSchedulingTestRing {
+                            ProgressView()
+                        }
                     }
                 }
-            }
-            .disabled(!scheduler.canScheduleTestRing || isSchedulingTestRing)
+                .buttonStyle(.borderless)
+                .disabled(!scheduler.canScheduleTestRing || isSchedulingTestRing)
+                .accessibilityIdentifier("addAlarm.testRing")
 
-            if !scheduler.canScheduleTestRing {
-                Text("test_ring_permission_required")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                Spacer()
+
+                Button {
+                    showingVolumeGuide = true
+                } label: {
+                    HStack(spacing: 2) {
+                        Text("volume_guide_link")
+                        Image(systemName: "chevron.right")
+                            .font(.caption2)
+                    }
+                }
+                .buttonStyle(.borderless)
+                .accessibilityIdentifier("addAlarm.volumeGuide")
             }
 
             if let testRingMessage {
@@ -370,35 +424,7 @@ struct AlarmDetailView: View {
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
-
-            if showTestRingVolumeNote {
-                Text("test_ring_volume_note")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-            }
-        } header: {
-            Text("test_ring_section")
         }
-    }
-
-    private func loudnessLabel(_ level: SoundLoudness.Level?) -> String {
-        switch level {
-        case .quiet: String(localized: "loudness_quiet")
-        case .normal: String(localized: "loudness_normal")
-        case .loud: String(localized: "loudness_loud")
-        case nil: "—"
-        }
-    }
-
-    /// 選択中の音と最終アラーム音の大きさを測る（SoundLoudnessStore がキャッシュする）
-    private func refreshLoudness() async {
-        let store = SoundLoudnessStore.shared
-        if let sound = selectedSound {
-            selectedLoudness = await store.level(for: sound.fileName)
-        } else {
-            selectedLoudness = nil
-        }
-        backupLoudness = await store.level(for: BackupAlarmSound.fileName)
     }
 
     private func scheduleTestRing(kind: TestRingKind) {
@@ -410,21 +436,27 @@ struct AlarmDetailView: View {
             testRingMessage = nil
         }
 
-        // 最終アラーム用の音は一覧に出さないバンドル音源（#109 B）
-        let fileName = kind == .backup
-            ? BackupAlarmSound.fileName
-            : (selectedSound?.fileName ?? "")
-
         Task {
+            let fileName: String
+            if kind == .backup {
+                // 選択中の音を大きくした版で試す。無ければその場で生成（#119）
+                fileName = await BackupLoudVariantService.ensureVariant(
+                    for: selectedSound?.fileName ?? ""
+                ) ?? BackupAlarmSound.fileName
+            } else {
+                fileName = selectedSound?.fileName ?? ""
+            }
+
             let scheduled = await scheduler.scheduleTestRing(
                 soundFileName: fileName,
-                kind: kind
+                kind: kind,
+                hasBackup: backupMinutes != nil
             )
             isSchedulingTestRing = false
 
             let message: String
             if scheduled {
-                message = String(localized: "test_ring_scheduled_message")
+                message = String(localized: "test_ring_ringing_now")
             } else {
                 #if targetEnvironment(simulator)
                 message = String(localized: "test_ring_simulator_unavailable")
@@ -437,20 +469,21 @@ struct AlarmDetailView: View {
             } else {
                 testRingMessage = message
             }
-            guard scheduled else { return }
 
-            // 鳴った後に一度だけ、音量の系統が違うことを控えめに伝える
-            guard !AppGroup.testRingVolumeNoteShown else { return }
-            try? await Task.sleep(for: .seconds(TestRingLogic.delay + 1))
-            showTestRingVolumeNote = true
-            AppGroup.testRingVolumeNoteShown = true
+            // 行の中の短い結果は数秒で消す
+            try? await Task.sleep(for: .seconds(4))
+            if kind == .backup {
+                if backupTestRingMessage == message { backupTestRingMessage = nil }
+            } else if testRingMessage == message {
+                testRingMessage = nil
+            }
         }
     }
 
     // MARK: - Repeat
 
     private var repeatSection: some View {
-        Section {
+        Group {
             NavigationLink {
                 RepeatSelectionView(selectedDays: $repeatWeekdays)
             } label: {
@@ -461,105 +494,60 @@ struct AlarmDetailView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            .accessibilityIdentifier("addAlarm.repeatRow")
         }
     }
 
-    // MARK: - Snooze
+    // MARK: - Snooze (#122: pull-down menu)
 
-    /// クイック選択のチップ（#91-1: よく使う値をワンタップで）
-    private let snoozeQuickOptions: [Int] = [1, 2, 5, 10]
-    /// 微調整の範囲（0 = オフ。旧選択肢の上限に合わせる）
-    private let snoozeRange = 0...30
+    private var snoozeOptions: [Int] {
+        var options = [0, 1, 2, 5, 9, 10]
+        if !options.contains(snoozeMinutes) {
+            options.append(snoozeMinutes)
+            options.sort()
+        }
+        return options
+    }
 
     private var snoozeSection: some View {
-        Section {
-            VStack(alignment: .leading, spacing: 12) {
-                // 見出し行 + −／＋ の微調整（任意の値は引き続き設定可能）
-                HStack {
-                    Text("snooze")
-                    Spacer()
-                    HStack(spacing: 14) {
-                        Button {
-                            snoozeMinutes = max(snoozeRange.lowerBound, snoozeMinutes - 1)
-                        } label: {
-                            Image(systemName: "minus.circle.fill")
-                                .font(.title2)
-                                .foregroundStyle(snoozeMinutes > snoozeRange.lowerBound ? Color.accentColor : Color.gray.opacity(0.4))
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(snoozeMinutes <= snoozeRange.lowerBound)
-
-                        Text(snoozeSummaryText)
-                            .monospacedDigit()
-                            .frame(minWidth: 48)
-
-                        Button {
-                            snoozeMinutes = min(snoozeRange.upperBound, snoozeMinutes + 1)
-                        } label: {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.title2)
-                                .foregroundStyle(snoozeMinutes < snoozeRange.upperBound ? Color.accentColor : Color.gray.opacity(0.4))
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(snoozeMinutes >= snoozeRange.upperBound)
-                    }
-                }
-
-                // クイック選択チップ
-                HStack(spacing: 8) {
-                    ForEach(snoozeQuickOptions, id: \.self) { minutes in
-                        Button {
+        Group {
+            HStack {
+                Text("snooze")
+                Spacer()
+                Menu {
+                    ForEach(snoozeOptions, id: \.self) { minutes in
+                        Button(SnoozeDisplay.text(for: minutes)) {
                             snoozeMinutes = minutes
-                        } label: {
-                            Text(snoozeText(for: minutes))
-                                .font(.subheadline.weight(.medium))
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 7)
-                                .background(
-                                    Capsule().fill(
-                                        snoozeMinutes == minutes
-                                            ? AnyShapeStyle(Brand.saveButtonGradient)
-                                            : AnyShapeStyle(Color.accentColor.opacity(0.12))
-                                    )
-                                )
-                                .foregroundStyle(snoozeMinutes == minutes ? .white : Color.accentColor)
                         }
-                        .buttonStyle(.plain)
                     }
-                    Spacer()
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(snoozeSummaryText)
+                        Image(systemName: "chevron.up.chevron.down")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    .foregroundStyle(.secondary)
                 }
+                .accessibilityIdentifier("addAlarm.snoozeMenu")
             }
-            .padding(.vertical, 2)
+            .accessibilityIdentifier("addAlarm.snoozeRow")
         }
-    }
-
-    /// チップ・サマリ表示の文言（#91-1）。「N分」形式で任意値にも対応
-    private func snoozeText(for minutes: Int) -> String {
-        SnoozeDisplay.text(for: minutes)
     }
 
     private var snoozeSummaryText: String {
         SnoozeDisplay.text(for: snoozeMinutes)
     }
 
-    // MARK: - Toggle
-
-    private var toggleSection: some View {
-        Section {
-            Toggle(isOn: $isEnabled) {
-                Text("alarm_enabled")
-            }
-        }
-    }
-
     // MARK: - Label
 
     private var labelSection: some View {
-        Section {
+        Group {
             HStack {
                 Text("label")
                 TextField("alarm_placeholder", text: $label)
                     .multilineTextAlignment(.trailing)
+                    .accessibilityIdentifier("addAlarm.labelRow")
             }
         }
     }
@@ -611,7 +599,7 @@ struct AlarmDetailView: View {
 
         switch mode {
         case .add:
-            let entry = AlarmEntry(
+            let entry = AlarmSaveLogic.newEntry(
                 hour: resolvedHour,
                 minute: resolvedMinute,
                 label: label,
@@ -622,7 +610,12 @@ struct AlarmDetailView: View {
             )
             alarmStore.add(entry)
             AnalyticsService.shared.capture(
-                .alarmCreated(hasCustomSound: hasCustomSound, isRepeating: isRepeating, snoozeMinutes: snoozeMinutes),
+                .alarmCreated(
+                    hasCustomSound: hasCustomSound,
+                    isRepeating: isRepeating,
+                    snoozeMinutes: snoozeMinutes,
+                    backupMinutes: backupMinutes ?? 0
+                ),
                 properties: hoursUntilProperties(for: entry)
             )
             if let backupMinutes {
@@ -630,18 +623,25 @@ struct AlarmDetailView: View {
             }
             savedEntry = entry
         case .edit(let existing):
-            var updated = existing
-            updated.hour = resolvedHour
-            updated.minute = resolvedMinute
-            updated.label = label
-            updated.repeatWeekdays = Array(repeatWeekdays).sorted()
-            updated.soundFileName = soundFileName
-            updated.snoozeMinutes = snoozeMinutes
-            updated.isEnabled = isEnabled
-            updated.backupMinutes = backupMinutes
+            let updated = AlarmSaveLogic.updatedEntry(
+                from: existing,
+                hour: resolvedHour,
+                minute: resolvedMinute,
+                label: label,
+                repeatWeekdays: Array(repeatWeekdays).sorted(),
+                soundFileName: soundFileName,
+                snoozeMinutes: snoozeMinutes,
+                backupMinutes: backupMinutes
+            )
             alarmStore.update(updated)
             AnalyticsService.shared.capture(
-                .alarmEdited(hasCustomSound: hasCustomSound, isRepeating: isRepeating, snoozeMinutes: snoozeMinutes),
+                .alarmEdited(
+                    hasCustomSound: hasCustomSound,
+                    isRepeating: isRepeating,
+                    snoozeMinutes: snoozeMinutes,
+                    backupMinutes: backupMinutes ?? 0,
+                    wasEnabled: existing.isEnabled
+                ),
                 properties: hoursUntilProperties(for: updated)
             )
             if existing.backupMinutes != updated.backupMinutes {
@@ -658,7 +658,15 @@ struct AlarmDetailView: View {
             AppGroup.backupEarlyAccessGranted = true
         }
 
-        AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
+        if backupMinutes != nil, let sourceFileName = selectedSound?.fileName, !sourceFileName.isEmpty {
+            // 大きくした版の生成が終わってから最終アラームを登録する（#119）
+            Task {
+                _ = await BackupLoudVariantService.ensureVariant(for: sourceFileName)
+                AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
+            }
+        } else {
+            AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
+        }
 
         // 保存後のフィードバック（ON: 発火までの時間 / OFF: このアラームはオフです）
         let feedback = PostSaveFeedback.resolve(for: savedEntry, currentDate: Date())
@@ -696,6 +704,43 @@ struct AlarmDetailView: View {
         return days.compactMap { d in
             (1...7).contains(d) ? labels[d - 1] : nil
         }.joined(separator: " ")
+    }
+}
+
+// MARK: - BackupAlarmInfoView
+
+/// 寝過ごし防止の仕組みと先行公開の説明（#122）
+struct BackupAlarmInfoView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("backup_alarm_info_mechanism")
+                        .font(.body)
+                    // もとの音が小さいほど大きく上げる（#134 の仕組みをそのまま説明）
+                    Text("backup_alarm_info_louder")
+                        .font(.body)
+                    Text("backup_alarm_info_volume")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Text("backup_alarm_early_access_note")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(20)
+            }
+            .navigationTitle(String(localized: "backup_alarm_info_title"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("close") { dismiss() }
+                }
+            }
+        }
+        .accessibilityIdentifier("backupInfo.root")
     }
 }
 

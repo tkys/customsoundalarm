@@ -1,7 +1,15 @@
-■ Budziki według godziny
-Tak jak w aplikacji Zegar, twoje budziki są teraz ułożone od najwcześniejszego do najpóźniejszego.
+■ Ochrona przed zaspaniem (Pro, wczesny dostęp)
+Jeśli nie wyłączysz budzika do wybranej godziny, odtworzy ten sam dźwięk ponownie, głośniej. Jeśli włączysz ją we wczesnym dostępie, będziesz mógł z niej korzystać także po oficjalnym wydaniu.
 
-■ Głośniejsze zaimportowane dźwięki
-Gdy wideo lub plik audio jest za cichy, aplikacja podgłaśnia go podczas importu, bez zniekształceń. Dźwięki zaimportowane wcześniej się nie zmieniają.
+■ Zadzwoń teraz
+Stuknij „Ring now” na ekranie budzika, aby od razu usłyszeć go z prawdziwą głośnością.
 
-Dziękujemy, że korzystasz z My Sound Alarm!
+■ Pomoc, gdy jest za cicho
+Głośność budzika zależy od „Dzwonek i alerty” w Ustawieniach. „Too quiet?” pokazuje, gdzie ją zmienić.
+
+■ Prostszy ekran budzika
+Ustawienia są ułożone bardziej jak w aplikacji Zegar, a edytowany budzik włącza się po zapisaniu.
+
+■ Lepsze etykiety VoiceOver
+
+Dziękujemy za korzystanie z My Sound Alarm!

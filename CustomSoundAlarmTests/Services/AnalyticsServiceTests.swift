@@ -44,6 +44,8 @@ struct AnalyticsEventTests {
     @Test
     func eventNameMapping() {
         #expect(AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: false, snoozeMinutes: 0).name == "alarm_created")
+        #expect(AnalyticsEvent.backupAlarmStopped(minutes: 15, snoozesBefore: 2, hour: 7).name == "backup_alarm_stopped")
+        #expect(AnalyticsEvent.soundSelected(kind: .imported, rankBucket: "2-3").name == "sound_selected")
         #expect(AnalyticsEvent.customSoundImported(source: .video).name == "custom_sound_imported")
         #expect(AnalyticsEvent.customSoundImported(source: .audio).name == "custom_sound_imported")
         #expect(AnalyticsEvent.soundPreviewPlayed.name == "sound_preview_played")
@@ -74,6 +76,19 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.backupAlarmDisabled(minutes: 20).name == "backup_alarm_disabled")
         #expect(AnalyticsEvent.backupAlarmFired(snoozesBefore: 2).name == "backup_alarm_fired")
         #expect(AnalyticsEvent.backupAlarmCancelledByStop.name == "backup_alarm_cancelled_by_stop")
+        // #119: 大きくした版
+        #expect(AnalyticsEvent.backupLoudVariantGenerated(
+            gainDbBucket: "12~20", durationBucket: "60s", source: .imported
+        ).name == "backup_loud_variant_generated")
+        #expect(AnalyticsEvent.backupLoudVariantFailed(reason: .silentSource).name == "backup_loud_variant_failed")
+        // #121: 音量案内
+        #expect(AnalyticsEvent.volumeGuideOpened(from: .testRing).name == "volume_guide_opened")
+        // #116: アップデート案内
+        #expect(AnalyticsEvent.updatePromptShown(
+            kind: .required, currentBuild: 9, targetBuild: 10
+        ).name == "update_prompt_shown")
+        #expect(AnalyticsEvent.updatePromptTapped(kind: .recommended).name == "update_prompt_tapped")
+        #expect(AnalyticsEvent.updatePromptDismissed(kind: .recommended).name == "update_prompt_dismissed")
         // #111: 広告枠の機会
         #expect(AnalyticsEvent.adSlotEligible(
             slot: .bannerSounds, allowed: true, reason: .eligible, region: .standard
@@ -86,10 +101,23 @@ struct AnalyticsEventTests {
     func alarmCreatedProperties_whenCustomAndRepeating() {
         let props = AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: true, snoozeMinutes: 9).properties
 
-        #expect(props.count == 3)
+        #expect(props.count == 4)
         #expect(props["has_custom_sound"] as? Bool == true)
         #expect(props["is_repeating"] as? Bool == true)
         #expect(props["snooze_minutes"] as? Int == 9)
+        #expect(props["backup_minutes"] as? Int == 0)
+    }
+
+    @Test
+    func alarmCreatedProperties_withBackupMinutes() {
+        let props = AnalyticsEvent.alarmCreated(
+            hasCustomSound: true,
+            isRepeating: false,
+            snoozeMinutes: 9,
+            backupMinutes: 20
+        ).properties
+
+        #expect(props["backup_minutes"] as? Int == 20)
     }
 
     @Test
@@ -99,6 +127,7 @@ struct AnalyticsEventTests {
         #expect(props["has_custom_sound"] as? Bool == false)
         #expect(props["is_repeating"] as? Bool == false)
         #expect(props["snooze_minutes"] as? Int == 0)
+        #expect(props["backup_minutes"] as? Int == 0)
     }
 
     // MARK: custom_sound_imported
@@ -132,15 +161,17 @@ struct AnalyticsEventTests {
     func testRingScheduledProperties_kindOwn() {
         let props = AnalyticsEvent.testRingScheduled(kind: .own).properties
 
-        #expect(props.count == 1)
+        #expect(props.count == 2)
         #expect(props["kind"] as? String == "own")
+        #expect(props["has_backup"] as? Bool == false)
     }
 
     @Test
     func testRingScheduledProperties_kindBackup() {
-        let props = AnalyticsEvent.testRingScheduled(kind: .backup).properties
+        let props = AnalyticsEvent.testRingScheduled(kind: .backup, hasBackup: true).properties
 
         #expect(props["kind"] as? String == "backup")
+        #expect(props["has_backup"] as? Bool == true)
     }
 
     @Test
@@ -182,6 +213,128 @@ struct AnalyticsEventTests {
     @Test
     func backupAlarmCancelledProperties_areEmpty() {
         #expect(AnalyticsEvent.backupAlarmCancelledByStop.properties.isEmpty)
+    }
+
+    // MARK: update_prompt (#116)
+
+    @Test
+    func updatePromptShownProperties() {
+        let props = AnalyticsEvent.updatePromptShown(
+            kind: .required,
+            currentBuild: 9,
+            targetBuild: 10
+        ).properties
+
+        #expect(props.count == 3)
+        #expect(props["kind"] as? String == "required")
+        #expect(props["current_build"] as? Int == 9)
+        #expect(props["target_build"] as? Int == 10)
+    }
+
+    @Test
+    func updatePromptTappedProperties() {
+        let props = AnalyticsEvent.updatePromptTapped(kind: .recommended).properties
+        #expect(props.count == 1)
+        #expect(props["kind"] as? String == "recommended")
+    }
+
+    @Test
+    func updatePromptDismissedProperties() {
+        let props = AnalyticsEvent.updatePromptDismissed(kind: .recommended).properties
+        #expect(props.count == 1)
+        #expect(props["kind"] as? String == "recommended")
+    }
+
+    // MARK: backup_loud_variant (#119)
+
+    @Test
+    func backupLoudVariantGeneratedProperties() {
+        let props = AnalyticsEvent.backupLoudVariantGenerated(
+            gainDbBucket: "12~20",
+            durationBucket: "60s",
+            source: .imported
+        ).properties
+
+        #expect(props.count == 3)
+        #expect(props["gain_db_bucket"] as? String == "12~20")
+        #expect(props["duration_bucket"] as? String == "60s")
+        #expect(props["source"] as? String == "imported")
+    }
+
+    @Test
+    func backupLoudVariantGeneratedProperties_outputLufsBucket() {
+        let props = AnalyticsEvent.backupLoudVariantGenerated(
+            gainDbBucket: "12~20",
+            durationBucket: "60s",
+            source: .imported,
+            outputLufsBucket: ">=-9"
+        ).properties
+
+        #expect(props.count == 4)
+        #expect(props["output_lufs_bucket"] as? String == ">=-9")
+    }
+
+    @Test
+    func customSoundImportedProperties_lufsBucket() {
+        let props = AnalyticsEvent.customSoundImported(
+            source: .audio,
+            lufsBucket: "-14~-20"
+        ).properties
+
+        #expect(props["lufs_bucket"] as? String == "-14~-20")
+    }
+
+    @Test
+    func backupLoudVariantFailedProperties() {
+        let props = AnalyticsEvent.backupLoudVariantFailed(reason: .silentSource).properties
+        #expect(props.count == 1)
+        #expect(props["reason"] as? String == "silent_source")
+    }
+
+    // MARK: volume_guide_opened (#121)
+
+    @Test
+    func volumeGuideOpenedProperties() {
+        let props = AnalyticsEvent.volumeGuideOpened(from: .testRing).properties
+        #expect(props.count == 1)
+        #expect(props["from"] as? String == "test_ring")
+    }
+
+    // MARK: backup_alarm_stopped / sound_selected (#124)
+
+    @Test
+    func backupAlarmStoppedProperties() {
+        let props = AnalyticsEvent.backupAlarmStopped(
+            minutes: 15,
+            snoozesBefore: 2,
+            hour: 7
+        ).properties
+
+        #expect(props.count == 3)
+        #expect(props["minutes"] as? Int == 15)
+        #expect(props["snoozes_before"] as? Int == 2)
+        #expect(props["hour"] as? Int == 7)
+    }
+
+    @Test
+    func backupAlarmStoppedProperties_nilSnoozesIsOmitted() {
+        let props = AnalyticsEvent.backupAlarmStopped(
+            minutes: 30,
+            snoozesBefore: nil,
+            hour: 6
+        ).properties
+
+        #expect(props["minutes"] as? Int == 30)
+        #expect(props["hour"] as? Int == 6)
+        #expect(props["snoozes_before"] == nil)
+    }
+
+    @Test
+    func soundSelectedProperties() {
+        let props = AnalyticsEvent.soundSelected(kind: .preset, rankBucket: "4-10").properties
+        #expect(props.count == 2)
+        #expect(props["kind"] as? String == "preset")
+        #expect(props["rank_bucket"] as? String == "4-10")
     }
 
     // MARK: ad_slot_eligible (#111)
@@ -241,6 +394,7 @@ struct AnalyticsEventTests {
             .videoImportFailed(reason: .unknown),
             .alarmDuplicated,
             .soundPickerRecentUsed,
+            .adSlotEligible(slot: .bannerSounds, allowed: true, reason: .eligible, region: .standard),
             .alarmFired(wasAppForeground: true, hour: 8, isRepeating: false, detection: "observer"),
             .alarmStopped(hour: 8),
             .alarmSnoozed(from: "observer"),
@@ -260,15 +414,31 @@ struct AnalyticsEventTests {
 
     @Test
     func alarmEditedProperties_matchAlarmCreatedShape() {
-        // 仕様: alarm_created と props を揃える（has_custom_sound / is_repeating / snooze_minutes）
+        // alarm_created と共通の props + was_enabled（#124）
         let edited = AnalyticsEvent.alarmEdited(hasCustomSound: true, isRepeating: false, snoozeMinutes: 9).properties
         let created = AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: false, snoozeMinutes: 9).properties
 
-        #expect(edited.count == 3)
-        #expect(Set(edited.keys) == Set(created.keys))
+        #expect(edited.count == 5)
+        #expect(Set(edited.keys).subtracting(["was_enabled"]) == Set(created.keys))
         #expect(edited["has_custom_sound"] as? Bool == true)
         #expect(edited["is_repeating"] as? Bool == false)
         #expect(edited["snooze_minutes"] as? Int == 9)
+        #expect(edited["backup_minutes"] as? Int == 0)
+        #expect(edited["was_enabled"] as? Bool == true)
+    }
+
+    @Test
+    func alarmEditedProperties_wasDisabledBeforeEdit() {
+        let props = AnalyticsEvent.alarmEdited(
+            hasCustomSound: false,
+            isRepeating: false,
+            snoozeMinutes: 9,
+            backupMinutes: 15,
+            wasEnabled: false
+        ).properties
+
+        #expect(props["was_enabled"] as? Bool == false)
+        #expect(props["backup_minutes"] as? Int == 15)
     }
 
     @Test

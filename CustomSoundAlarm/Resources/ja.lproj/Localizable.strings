@@ -2,7 +2,6 @@
 "alarm_title" = "アラーム";
 "empty_title" = "お気に入りの音で目覚めよう";
 "empty_description" = "動画やファイルから好きな音を取り込んで\nアラームに設定できます";
-"empty_tip" = "動画・音声ファイルから取り込めます";
 "add_alarm" = "アラームを追加";
 "default_sound" = "デフォルト";
 
@@ -48,13 +47,12 @@
 "rename" = "名前を変更";
 "sound_name_placeholder" = "サウンド名";
 "presets" = "すぐ使える音";
-"recent_sounds" = "最近使った";
 "imported_sounds" = "追加した音";
 "converting" = "変換中...";
 "add_from_video" = "動画から音声を追加";
 "add_from_audio" = "音声ファイルから追加";
 "add_section" = "追加";
-"add_section_footer" = "動画: カメラロールから選択してトリム\n音声ファイル: MP3, AAC, WAV, M4A 形式に対応";
+"add_section_footer" = "MP3・AAC・WAV・M4A、動画（MOV・MP4）から取り込めます";
 
 /* Waveform Crop (#77 / #79) */
 "waveform_loading" = "波形を生成中...";
@@ -65,8 +63,6 @@
 "time_end" = "終了";
 "time_length" = "長さ";
 "time_total" = "元の長さ";
-"estimated_size" = "変換後のサイズ: 約 %@";
-"large_file_warning" = "大きいファイルになります（約 %@）。端末の容量にご注意ください。";
 
 /* Discard confirmation (#82) */
 "close" = "閉じる";
@@ -169,7 +165,6 @@
 "alarm_will_ring_in" = "%@後に鳴ります";
 
 /* Alarm Edit */
-"alarm_enabled" = "アラームをオン";
 "alarm_is_off" = "このアラームはオフです";
 
 /* Video Trimmer */
@@ -196,33 +191,46 @@
 "onb.later" = "あとで";
 
 /* Trial ring (#109) */
-"test_ring_section" = "試しに鳴らす";
-"test_ring_title" = "5秒後に鳴らす";
-"test_ring_scheduled_message" = "5秒後に鳴ります。止めると終わります。";
-"test_ring_permission_required" = "アラームの許可が必要です。";
-"test_ring_volume_note" = "アラームの音量は「設定 → サウンドと触覚 → 着信音と通知音」で決まります。";
+"test_ring_title" = "今すぐ鳴らす";
 "test_ring_failed" = "試しに鳴らせませんでした。";
 "test_ring_simulator_unavailable" = "試しに鳴らすは実機でのみ使えます。";
 "test_ring_alarm_title" = "試しのアラーム";
-"test_ring_backup_title" = "最終アラームの音で試す";
+"test_ring_backup_title" = "寝過ごし防止の音を試す";
 
 /* Loudness (#109 C) */
-"loudness_section" = "音の大きさ";
-"loudness_own" = "あなたの音";
-"loudness_backup" = "最終アラームの音";
-"loudness_quiet" = "小さめ";
-"loudness_normal" = "ふつう";
-"loudness_loud" = "大きめ";
-"loudness_max" = "最大";
 
 /* Backup alarm (#110) */
-"backup_alarm_title" = "最終アラーム";
-"backup_alarm_section" = "最終アラーム";
-"backup_alarm_toggle" = "最終アラーム";
-"backup_alarm_early_access_badge" = "先行公開中";
-"backup_alarm_minutes" = "締め切り";
+"backup_alarm_toggle" = "寝過ごし防止";
+"backup_alarm_title_fmt" = "寝過ごし防止：%@";
+"backup_alarm_description_fmt" = "%@ のアラームを %@ までに止めなかったら、同じ音を大きくしてもう一度鳴らします。";
+"backup_alarm_minutes" = "何分後に鳴らす";
 "backup_alarm_minutes_fmt" = "%d分後";
-"backup_alarm_description" = "止めずに%d分たつと、大きめの音でもう一度鳴らします。";
-"backup_alarm_before_snooze" = "スヌーズより前に最終アラームが鳴ります";
+"backup_alarm_before_snooze" = "スヌーズより先に鳴ります。";
 "backup_alarm_early_access_note" = "先行公開中に使い始めた方は、正式版以降もそのまま使えます。";
-"backup_alarm_row_badge" = "最終アラームあり";
+"backup_alarm_row_badge" = "寝過ごし防止あり";
+
+/* Update gate (#116) */
+"update_required_title" = "アップデートが必要です";
+"update_required_message" = "このバージョンには問題が見つかりました。App Store で最新版に更新してください。設定済みのアラームはそのまま鳴ります。";
+"update_recommended_title" = "新しいバージョンがあります";
+"update_button" = "App Store で更新";
+"update_later" = "あとで";
+
+/* Volume guide (#121) */
+"volume_guide_title" = "アラームの音量を上げるには";
+"volume_guide_step1" = "設定 → サウンドと触覚 →「着信音と通知音」のスライダーを右へ";
+"volume_guide_step2" = "「ボタンで変更」をオンにすると、本体の音量ボタンでも変えられます（音楽などを再生していないとき）";
+"volume_guide_image_label" = "設定の「サウンドと触覚」の画面。「着信音と通知音」のスライダーと「ボタンで変更」に印";
+"volume_guide_warning" = "コントロールセンターの音量は、音楽や動画の音量です。アラームには効きません。";
+"alarm_permission_required" = "アラームの許可が必要です";
+"open_settings" = "設定を開く";
+"volume_guide_link" = "音が小さいときは";
+"test_ring_ringing_now" = "鳴らしています";
+"backup_alarm_info_title" = "寝過ごし防止";
+"backup_alarm_info_mechanism" = "アラームを止めないまま設定した時間がたつと、もう一度鳴らします。";
+"backup_alarm_info_louder" = "そのときは同じ音を、音割れしない範囲で大きくして鳴らします。もとの音が小さいほど、大きく上げます。";
+"backup_alarm_info_volume" = "実際に鳴る大きさは、設定の「着信音と通知音」の音量で決まります。";
+"backup_alarm_info_accessibility" = "寝過ごし防止の説明";
+
+"night_mode" = "ナイトモード";
+"size_warning" = "長い音は約 %@ の容量を使います";

@@ -60,6 +60,8 @@ final class SoundStore {
 
     func remove(_ sound: AlarmSound) {
         sounds.removeAll { $0.id == sound.id }
+        // 最終アラーム用の大きくした版も一緒に消す（#119）
+        BackupLoudVariantService.deleteVariant(for: sound.fileName)
         if !sound.isPreset {
             try? AudioConverter.shared.deleteSound(fileName: sound.fileName)
             // サムネイルも一緒に消す（#86）
@@ -149,7 +151,8 @@ final class SoundStore {
                     AnalyticsService.shared.capture(.customSoundImported(
                         source: isVideo ? .video : .audio,
                         peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
-                        gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb)
+                        gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
+                        lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore)
                     ))
                     try? fm.removeItem(at: file)
                     try? fm.removeItem(at: audioFile)

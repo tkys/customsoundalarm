@@ -38,6 +38,75 @@ enum AppGroup {
         }
     }
 
+    /// アップデート設定のキャッシュ（#116）
+    static var cachedAppConfigData: Data? {
+        get { userDefaults.data(forKey: "cached_app_config_data") }
+        set {
+            if let newValue {
+                userDefaults.set(newValue, forKey: "cached_app_config_data")
+            } else {
+                userDefaults.removeObject(forKey: "cached_app_config_data")
+            }
+        }
+    }
+
+    /// アップデート設定を最後に取得した日時（キャッシュの鮮度判定・#116）
+    static var cachedAppConfigFetchedAt: Date? {
+        get { userDefaults.object(forKey: "cached_app_config_fetched_at") as? Date }
+        set {
+            if let newValue {
+                userDefaults.set(newValue, forKey: "cached_app_config_fetched_at")
+            } else {
+                userDefaults.removeObject(forKey: "cached_app_config_fetched_at")
+            }
+        }
+    }
+
+    /// アップデート設定を最後に確認した日時（1時間に1回の制限・#116）
+    static var lastUpdateCheckAt: Date? {
+        get { userDefaults.object(forKey: "last_update_check_at") as? Date }
+        set {
+            if let newValue {
+                userDefaults.set(newValue, forKey: "last_update_check_at")
+            } else {
+                userDefaults.removeObject(forKey: "last_update_check_at")
+            }
+        }
+    }
+
+    /// 「あとで」で閉じたおすすめの latest_build（#116）
+    static var dismissedRecommendedBuild: Int? {
+        get {
+            guard userDefaults.object(forKey: "dismissed_recommended_build") != nil else { return nil }
+            return userDefaults.integer(forKey: "dismissed_recommended_build")
+        }
+        set {
+            if let newValue {
+                userDefaults.set(newValue, forKey: "dismissed_recommended_build")
+            } else {
+                userDefaults.removeObject(forKey: "dismissed_recommended_build")
+            }
+        }
+    }
+
+    /// UIテスト用: 必須アップデートを強制（DEBUGのみ・#116）
+    static var isUITestUpdateRequired: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-update-required")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: おすすめアップデートを強制（DEBUGのみ・#116）
+    static var isUITestUpdateRecommended: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-update-recommended")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: DEBUG時のみ有効なfresh onboarding強制フラグ
     static var isUITestFreshOnboarding: Bool {
 #if DEBUG
@@ -45,6 +114,33 @@ enum AppGroup {
 #else
         return false
 #endif
+    }
+
+    /// UI テストとして起動されたか（いずれかの -uitest- 引数がある）。DEBUG のみ
+    static var isUITestRun: Bool {
+#if DEBUG
+        CommandLine.arguments.contains { $0.hasPrefix("-uitest-") }
+#else
+        false
+#endif
+    }
+
+    /// UIテスト用: 追加画面を直接開く（DEBUGのみ・#122）
+    static var isUITestOpenAddAlarm: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-open-add-alarm")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: 編集画面を直接開く（DEBUGのみ・#122）
+    static var isUITestOpenEditAlarm: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-open-edit-alarm")
+    #else
+        false
+    #endif
     }
 
     /// UIテスト用: DEBUG時のみ有効なアラーム一覧シード
@@ -98,12 +194,6 @@ enum AppGroup {
         Set(testAlarmRecords.map(\.id))
     }
 
-    /// 「アラームの音量」注記を表示済みか（#109・一度だけ）
-    static var testRingVolumeNoteShown: Bool {
-        get { userDefaults.bool(forKey: "test_ring_volume_note_shown") }
-        set { userDefaults.set(newValue, forKey: "test_ring_volume_note_shown") }
-    }
-
     /// 本体アラームのスヌーズ回数（entryID → 回数・#110）。
     /// 最終アラーム発火時の `snoozes_before` に使う。
     static var snoozeCounts: [UUID: Int] {
@@ -116,6 +206,21 @@ enum AppGroup {
         set {
             guard let data = try? JSONEncoder().encode(newValue) else { return }
             userDefaults.set(data, forKey: "snooze_counts")
+        }
+    }
+
+    /// 最終アラームで使う音のファイル名（entryID → fileName・#119）。
+    /// 停止 Intent が次回分を登録するときに参照する。
+    static var backupSoundNames: [UUID: String] {
+        get {
+            guard let data = userDefaults.data(forKey: "backup_sound_names"),
+                  let map = try? JSONDecoder().decode([UUID: String].self, from: data)
+            else { return [:] }
+            return map
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else { return }
+            userDefaults.set(data, forKey: "backup_sound_names")
         }
     }
 

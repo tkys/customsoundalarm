@@ -39,6 +39,43 @@ struct CustomSoundAlarmApp: App {
                         AppGroup.firstLaunchDate = Date()
                     }
 
+                    #if DEBUG
+                    // UIテスト用: アップデート案内を強制（#116）
+                    if AppGroup.isUITestUpdateRequired || AppGroup.isUITestUpdateRecommended {
+                        AppGroup.hasCompletedOnboarding = true
+                        AppGroup.lastUpdateCheckAt = nil
+                        AppGroup.cachedAppConfigData = nil
+                        AppGroup.cachedAppConfigFetchedAt = nil
+                        AppGroup.dismissedRecommendedBuild = nil
+                    }
+                    #endif
+
+                    // 使われていない「大きくした版」を掃除（#119）
+                    BackupLoudVariantService.cleanupUnusedVariants(
+                        entries: AlarmStore.shared.alarms,
+                        availableSourceFileNames: Set(SoundStore.shared.sounds.map(\.fileName))
+                    )
+
+                    #if DEBUG
+                    // UIテスト用: 追加・編集画面を直接開く（#122）
+                    if AppGroup.isUITestOpenAddAlarm || AppGroup.isUITestOpenEditAlarm {
+                        AppGroup.hasCompletedOnboarding = true
+                    }
+                    if AppGroup.isUITestOpenEditAlarm {
+                        AlarmStore.shared.resetForUITest()
+                        AlarmStore.shared.add(AlarmEntry(
+                            hour: 7,
+                            minute: 0,
+                            isEnabled: false,
+                            label: "UITest Alarm",
+                            repeatWeekdays: [],
+                            soundFileName: "",
+                            snoozeMinutes: 9,
+                            backupMinutes: nil
+                        ))
+                    }
+                    #endif
+
                     // PostHog 計測の初期化（Info.plist にキーが無い場合は安全に無効化）
                     AnalyticsService.shared.configure()
                     setUserProperties()
@@ -119,6 +156,15 @@ private func setUserProperties() {
 
     AnalyticsService.shared.setUserProperties(userPropertiesPayload())
 
+    // 最初にインストールしたビルド番号（#124）。取れたときだけ送る。
+    Task {
+        if let build = await FirstInstallBuild.load() {
+            AnalyticsService.shared.setUserProperties(
+                userPropertiesPayload(firstInstallBuild: build)
+            )
+        }
+    }
+
     // 既存のカスタム音源で秒数が未記録のものがある場合のみ、一度だけ遅延バックフィルして再送する。
     // 起動直後のクリティカルパスを重くしないため 1 秒遅延させ、計測済み音源は対象外なので
     // 起動のたびに全ファイルを読むことはない（#68・追加時記録との併用）。
@@ -135,7 +181,7 @@ private func setUserProperties() {
 /// ユーザープロパティのペイロードを組み立てる。
 /// サウンドの長さ・件数の分布は区分（バケット）で送る（生の秒数は不要・#68）。
 @MainActor
-private func userPropertiesPayload() -> [String: Any] {
+private func userPropertiesPayload(firstInstallBuild: Int? = nil) -> [String: Any] {
     let customSounds = SoundStore.shared.sounds.filter { !$0.isPreset }
     let durations = customSounds.compactMap(\.durationSeconds)
     let totalSeconds = durations.reduce(0, +)
@@ -145,12 +191,18 @@ private func userPropertiesPayload() -> [String: Any] {
     let alarmCount = AlarmStore.shared.alarms.count
     let firstVersion = AppGroup.firstInstallVersion ?? "unknown"
 
-    return [
+    var payload: [String: Any] = [
         "custom_sound_count": customSoundCount,
         "alarm_count": alarmCount,
         "first_install_version": firstVersion,
         "sound_total_seconds_bucket": AnalyticsBuckets.secondsBucket(seconds: totalSeconds),
         "sound_max_seconds_bucket": maxSeconds.map { AnalyticsBuckets.secondsBucket(seconds: $0) }
-            ?? AnalyticsBuckets.secondsBucket(seconds: 0)
+            ?? AnalyticsBuckets.secondsBucket(seconds: 0),
+        "backup_alarm_count": AnalyticsUserProperties.backupAlarmCount(alarms: AlarmStore.shared.alarms),
+        "backup_early_access": AppGroup.backupEarlyAccessGranted
     ]
+    if let firstInstallBuild {
+        payload["first_install_build"] = firstInstallBuild
+    }
+    return payload
 }

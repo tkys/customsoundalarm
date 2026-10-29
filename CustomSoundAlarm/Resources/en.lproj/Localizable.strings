@@ -2,7 +2,6 @@
 "alarm_title" = "Alarms";
 "empty_title" = "Wake Up to Your Favorite Sound";
 "empty_description" = "Import sounds from videos or audio files\nand set them as your alarm";
-"empty_tip" = "Import from videos & audio files";
 "add_alarm" = "Add Alarm";
 "default_sound" = "Default";
 
@@ -48,13 +47,12 @@
 "rename" = "Rename";
 "sound_name_placeholder" = "Sound Name";
 "presets" = "Ready to Use";
-"recent_sounds" = "Recent";
 "imported_sounds" = "My Sounds";
 "converting" = "Converting...";
 "add_from_video" = "Add from Video";
 "add_from_audio" = "Add Audio File";
 "add_section" = "Add";
-"add_section_footer" = "Video: Select from Camera Roll and trim\nAudio File: Supports MP3, AAC, WAV, M4A";
+"add_section_footer" = "Import from MP3, AAC, WAV, M4A, or video (MOV, MP4).";
 
 /* Waveform Crop (#77 / #79) */
 "waveform_loading" = "Generating waveform...";
@@ -65,8 +63,6 @@
 "time_end" = "End";
 "time_length" = "Length";
 "time_total" = "Total";
-"estimated_size" = "Converted size: ~%@";
-"large_file_warning" = "This will create a large file (~%@). Make sure you have enough storage.";
 
 /* Discard confirmation (#82) */
 "close" = "Close";
@@ -169,7 +165,6 @@
 "alarm_will_ring_in" = "Rings in %@";
 
 /* Alarm Edit */
-"alarm_enabled" = "Alarm Enabled";
 "alarm_is_off" = "This alarm is off";
 
 /* Video Trimmer */
@@ -196,33 +191,46 @@
 "onb.later" = "Later";
 
 /* Trial ring (#109) */
-"test_ring_section" = "Try It";
-"test_ring_title" = "Ring in 5 seconds";
-"test_ring_scheduled_message" = "It will ring in 5 seconds. Stop it to finish.";
-"test_ring_permission_required" = "Alarm permission is required.";
-"test_ring_volume_note" = "Alarm volume is controlled in Settings > Sounds & Haptics > Ringtone and Alert Volume.";
+"test_ring_title" = "Ring now";
 "test_ring_failed" = "Couldn't schedule the test alarm.";
 "test_ring_simulator_unavailable" = "Trial ring is available on a real device only.";
 "test_ring_alarm_title" = "Test Alarm";
-"test_ring_backup_title" = "Try the final alarm sound";
+"test_ring_backup_title" = "Try the oversleep guard sound";
 
 /* Loudness (#109 C) */
-"loudness_section" = "Sound Level";
-"loudness_own" = "Your sound";
-"loudness_backup" = "Final alarm sound";
-"loudness_quiet" = "Quieter";
-"loudness_normal" = "Normal";
-"loudness_loud" = "Louder";
-"loudness_max" = "Maximum";
 
 /* Backup alarm (#110) */
-"backup_alarm_title" = "Final Alarm";
-"backup_alarm_section" = "Final Alarm";
-"backup_alarm_toggle" = "Final Alarm";
-"backup_alarm_early_access_badge" = "Early access";
-"backup_alarm_minutes" = "Deadline";
+"backup_alarm_toggle" = "Oversleep guard";
+"backup_alarm_title_fmt" = "Oversleep guard: %@";
+"backup_alarm_description_fmt" = "If you haven't turned off the %@ alarm by %@, it plays the same sound again, louder.";
+"backup_alarm_minutes" = "Ring again after";
 "backup_alarm_minutes_fmt" = "%d min after";
-"backup_alarm_description" = "If you don't stop it for %d min, it rings again with a louder sound.";
-"backup_alarm_before_snooze" = "The final alarm rings before snooze ends.";
-"backup_alarm_early_access_note" = "If you start using this during early access, it stays available after launch.";
-"backup_alarm_row_badge" = "Final alarm on";
+"backup_alarm_before_snooze" = "This rings before your snooze ends.";
+"backup_alarm_early_access_note" = "If you start using it during early access, you keep it after the full release.";
+"backup_alarm_row_badge" = "Oversleep guard on";
+
+/* Update gate (#116) */
+"update_required_title" = "Update Required";
+"update_required_message" = "A problem was found in this version. Please update to the latest version on the App Store. Your existing alarms will still ring.";
+"update_recommended_title" = "A New Version Is Available";
+"update_button" = "Update on the App Store";
+"update_later" = "Later";
+
+/* Volume guide (#121) */
+"volume_guide_title" = "How to make alarms louder";
+"volume_guide_step1" = "Settings → Sounds & Haptics → move the Ringtone and Alerts slider right";
+"volume_guide_step2" = "Turn on Change with Buttons to use the volume buttons too (when nothing else is playing)";
+"volume_guide_image_label" = "Settings, Sounds & Haptics, with the Ringtone and Alerts slider and the Change with Buttons switch marked";
+"volume_guide_warning" = "The volume in Control Center is for music and videos. It doesn't change alarm volume.";
+"alarm_permission_required" = "Alarm permission is required";
+"open_settings" = "Open Settings";
+"volume_guide_link" = "Too quiet?";
+"test_ring_ringing_now" = "Ringing now";
+"backup_alarm_info_title" = "Oversleep guard";
+"backup_alarm_info_mechanism" = "If the alarm isn't stopped within the time you set, it rings again.";
+"backup_alarm_info_louder" = "It plays the same sound, made louder without distortion. The quieter the original sound, the more it is raised.";
+"backup_alarm_info_volume" = "How loud it actually rings depends on Ringtone and Alerts volume in Settings.";
+"backup_alarm_info_accessibility" = "About oversleep guard";
+
+"night_mode" = "Night mode";
+"size_warning" = "Long sounds use about %@ of storage.";

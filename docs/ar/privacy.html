@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>سياسة الخصوصية – My Sound Alarm</title>
+<link rel="canonical" href="https://tkys.github.io/customsoundalarm/ar/privacy.html">
+<link rel="alternate" hreflang="en" href="https://tkys.github.io/customsoundalarm/privacy.html">
+<link rel="alternate" hreflang="ja" href="https://tkys.github.io/customsoundalarm/ja/privacy.html">
+<link rel="alternate" hreflang="fr" href="https://tkys.github.io/customsoundalarm/fr/privacy.html">
+<link rel="alternate" hreflang="de" href="https://tkys.github.io/customsoundalarm/de/privacy.html">
+<link rel="alternate" hreflang="es" href="https://tkys.github.io/customsoundalarm/es/privacy.html">
+<link rel="alternate" hreflang="pt-BR" href="https://tkys.github.io/customsoundalarm/pt-br/privacy.html">
+<link rel="alternate" hreflang="it" href="https://tkys.github.io/customsoundalarm/it/privacy.html">
+<link rel="alternate" hreflang="nl" href="https://tkys.github.io/customsoundalarm/nl/privacy.html">
+<link rel="alternate" hreflang="ko" href="https://tkys.github.io/customsoundalarm/ko/privacy.html">
+<link rel="alternate" hreflang="zh-Hans" href="https://tkys.github.io/customsoundalarm/zh-hans/privacy.html">
+<link rel="alternate" hreflang="pl" href="https://tkys.github.io/customsoundalarm/pl/privacy.html">
+<link rel="alternate" hreflang="cs" href="https://tkys.github.io/customsoundalarm/cs/privacy.html">
+<link rel="alternate" hreflang="ar" href="https://tkys.github.io/customsoundalarm/ar/privacy.html">
+<link rel="alternate" hreflang="x-default" href="https://tkys.github.io/customsoundalarm/privacy.html">
+
+<link rel="icon" href="../assets/img/icon.png">
+<style>
+:root{color-scheme:light;--text:#1C1714;--muted:#5E5650;--line:#E7E2DD;--accent:#FF843B;--ink:#4A1A6B;--wave:#D6D1CC}
+/* App colors: orange (AccentColor) is for graphics only — 2.4:1 on white is too low for text; text accents use the icon's purple. */
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#fff;color:var(--text);font:18px/1.7 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif}
+a{color:var(--ink);text-underline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 0 8px;font-size:16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;text-decoration:none;color:var(--text)}
+.brand img{width:32px;height:32px;border-radius:8px}
+h1,h2,h3{word-break:auto-phrase;text-wrap:balance}
+.ph{display:inline-block}
+p,li{word-break:auto-phrase}
+:lang(ko) h1,:lang(ko) h2,:lang(ko) h3,:lang(ko) p{word-break:keep-all}
+h1{font-size:clamp(32px,6.4vw,48px);line-height:1.2;letter-spacing:-.015em;margin:36px 0 14px}
+.lead{font-size:20px;color:var(--muted);margin:0 0 24px;max-width:34em}
+.badge img{height:52px;width:auto;display:block}
+.req{font-size:15px;color:var(--muted);margin:10px 0 0}
+figure{margin:44px 0 8px}
+.wavebox{position:relative;padding-bottom:26px;direction:ltr}
+.wave{display:block;width:100%;height:auto}
+.wavelabel{position:absolute;bottom:0;transform:translateX(-50%);white-space:nowrap;font-size:14px;font-weight:600;color:var(--ink)}
+figcaption{font-size:16px;color:var(--muted);margin-top:8px}
+h2{font-size:26px;line-height:1.35;margin:56px 0 10px}
+.shot{display:block;width:100%;max-width:340px;height:auto;border:1px solid var(--line);border-radius:22px;margin:18px 0 0}
+.side{float:inline-end;width:132px;height:auto;margin-block:0 12px;margin-inline:20px 0}
+.clear{clear:both}
+h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
+.faq p{margin:0;color:var(--muted)}
+.end{margin:64px 0 0;padding-top:32px;border-top:1px solid var(--line);display:flex;gap:28px;align-items:center}
+.end h2{margin:0 0 18px}
+.end-art{width:180px;height:auto;flex:none}
+@media (max-width:560px){.end{flex-direction:column;align-items:flex-start}.end-art{width:220px}}
+.voices ul{list-style:none;margin:18px 0 0;padding:0}
+.voices li{padding:16px 0;border-top:1px solid var(--line)}
+.stars{color:var(--accent);letter-spacing:.08em;margin-right:10px}
+.rmeta{font-size:15px;color:var(--muted)}
+.voices p{margin:6px 0 0}
+.voices .tr{color:var(--muted);font-size:16px}
+.rsum{margin:8px 0 0;color:var(--muted);font-size:15px}
+.rating{display:flex;gap:28px;align-items:center;margin:16px 0 0}
+.score{text-align:center;flex:none}
+.big{font-size:56px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.bigstars{color:var(--accent);letter-spacing:.1em;margin-top:6px}
+.bars{flex:1;max-width:360px}
+.bar{display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.6}
+.bl{width:5.5em;text-align:end;color:var(--muted);letter-spacing:.02em;font-size:11px}
+.bt{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bf{display:block;height:100%;background:var(--accent);border-radius:3px}
+.bn{width:2em;color:var(--muted);text-align:end}
+.note{font-size:14px;color:var(--muted);margin-top:12px}
+.langs{margin:40px 0 0;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 16px;font-size:15px}
+.langs a[aria-current]{color:var(--text);text-decoration:none;font-weight:600}
+.doc h1{font-size:34px;margin-top:28px}
+.perms{padding-inline-start:1.2em}
+.perms li{margin:6px 0}
+.featured{margin:44px 0 0;padding:20px 22px;border-inline-start:4px solid var(--accent);background:#FFF8F2;border-radius:0 12px 12px 0}
+[dir=rtl] .featured{border-radius:12px 0 0 12px}
+.featured blockquote{margin:0}
+.featured .orig{font-size:17px;line-height:1.7;margin:0}
+.featured .tr{color:var(--muted);font-size:16px;margin:10px 0 0}
+.featured figcaption{margin-top:12px}
+footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wrap}
+.made{color:var(--muted);flex-basis:100%}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><a class="brand" href="https://tkys.github.io/customsoundalarm/ar/"><img src="../assets/img/icon.png" alt="">My Sound Alarm</a>
+<a href="#languages">العربية ▾</a></header>
+<main class="doc">
+<h1>سياسة الخصوصية</h1>
+<p class="req">آخر تحديث: 2026-10-27</p><p class="note">هذه السياسة مترجمة من الإنجليزية. عند وجود اختلاف، تُعتمد النسخة الإنجليزية.</p><p>يستخدم My Sound Alarm (&quot;التطبيق&quot;) خدمة التحليلات PostHog التابعة لجهة خارجية لجمع بيانات استخدام مجهولة الهوية بهدف تحسين المنتج. لا يجمع التطبيق معلومات شخصية مثل اسمك أو بريدك الإلكتروني أو بيانات الاتصال بك.</p><p>يبقى محتواك على جهازك. تُحفظ إعدادات المنبهات والملفات الصوتية المستوردة على جهازك وفي حاوية App Group المتزامنة مع iCloud، ولا يُرسل هذا المحتوى إلى PostHog أو إلى أي خادم خارجي آخر.</p><p>يقتصر ما يُرسل إلى PostHog على أحداث استخدام مجهولة الهوية — مثل إنشاء منبه أو استيراد صوت أو تشغيل معاينة — مع معلومات غير معرِّفة عن الجهاز والتطبيق، مثل إصدار iOS وإصدار التطبيق ونوع الجهاز واللغة. ترتبط هذه البيانات فقط بمعرّف مجهول عشوائي يعيّنه PostHog، ولا ترتبط بهويتك.</p><p>يطلب التطبيق الوصول إلى ميزات الجهاز التالية:</p><ul class="perms"><li><b>مكتبة الصور</b> — لاختيار مقاطع الفيديو التي يُستخرج منها الصوت. تُعالج المقاطع على الجهاز ولا تُرفع إلى أي مكان.</li><li><b>الميكروفون</b> — لميزات التسجيل المستقبلية. يُحفظ الصوت على الجهاز فقط.</li><li><b>AlarmKit</b> — لجدولة المنبهات على جهازك.</li></ul><p>يستخدم التطبيق تحليلات مجهولة الهوية عبر PostHog لتحسين التطبيق. لا يستخدم أدوات تتبع إعلانية ولا يتتبعك عبر تطبيقات أو مواقع شركات أخرى. يستقبل PostHog البيانات المجهولة الموضحة أعلاه على https://us.i.posthog.com.</p><p>يستخدم هذا الموقع أيضًا PostHog لعدّ مشاهدات الصفحات والنقرات على رابط App Store. لا يستخدم ملفات تعريف الارتباط ولا يحفظ أي شيء على جهازك: يبقى معرّف مجهول في الذاكرة فقط أثناء الزيارة ويختفي عند إغلاق الصفحة. تسجيل الجلسات متوقف.</p><p>لأي أسئلة، راسلنا على <a href="mailto:tkysdev@gmail.com">tkysdev@gmail.com</a>.</p>
+</main>
+<nav id="languages" class="langs" aria-label="Language"><a href="https://tkys.github.io/customsoundalarm/privacy.html?lang=en" hreflang="en" lang="en">English</a> <a href="https://tkys.github.io/customsoundalarm/ja/privacy.html" hreflang="ja" lang="ja">日本語</a> <a href="https://tkys.github.io/customsoundalarm/fr/privacy.html" hreflang="fr" lang="fr">Français</a> <a href="https://tkys.github.io/customsoundalarm/de/privacy.html" hreflang="de" lang="de">Deutsch</a> <a href="https://tkys.github.io/customsoundalarm/es/privacy.html" hreflang="es" lang="es">Español</a> <a href="https://tkys.github.io/customsoundalarm/pt-br/privacy.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a> <a href="https://tkys.github.io/customsoundalarm/it/privacy.html" hreflang="it" lang="it">Italiano</a> <a href="https://tkys.github.io/customsoundalarm/nl/privacy.html" hreflang="nl" lang="nl">Nederlands</a> <a href="https://tkys.github.io/customsoundalarm/ko/privacy.html" hreflang="ko" lang="ko">한국어</a> <a href="https://tkys.github.io/customsoundalarm/zh-hans/privacy.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a> <a href="https://tkys.github.io/customsoundalarm/pl/privacy.html" hreflang="pl" lang="pl">Polski</a> <a href="https://tkys.github.io/customsoundalarm/cs/privacy.html" hreflang="cs" lang="cs">Čeština</a> <a href="https://tkys.github.io/customsoundalarm/ar/privacy.html" hreflang="ar" lang="ar" aria-current=page>العربية</a></nav>
+<footer><span class="made">من صنع tkys، مطوّر مستقل في اليابان.</span><a href="https://tkys.github.io/customsoundalarm/ar/">My Sound Alarm</a><a href="support.html">الدعم</a><a href="privacy.html">الخصوصية</a></footer>
+</div>
+<script>
+// Owner opt-out: open the page once with ?internal=1 on each of your devices (?internal=0 to undo).
+var csaInternal=false;try{var q=new URLSearchParams(location.search).get("internal");if(q==="1")localStorage.setItem("csa_internal","1");if(q==="0")localStorage.removeItem("csa_internal");csaInternal=localStorage.getItem("csa_internal")==="1";}catch(e){}
+if(location.hostname==="tkys.github.io"&&!csaInternal){
+!function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+posthog.init("phc_uuFAFy25bfEjsVPtVzRBdAiy8yyPLi7NB75MGSQeGXEo",{api_host:"https://us.i.posthog.com",persistence:"memory",person_profiles:"identified_only",disable_session_recording:true,capture_pageview:true});
+posthog.register({site_lang:"ar"});
+document.addEventListener("click",function(e){var a=e.target.closest("a.badge");if(a)posthog.capture("app_store_link_clicked",{position:a.dataset.pos||""});});
+}
+</script>
+</body>
+</html>

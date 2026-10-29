@@ -1,7 +1,15 @@
-■ Wekkers op tijd gesorteerd
-Net als in de Klok-app staan je wekkers nu van vroeg naar laat.
+■ Verslaapbeveiliging (Pro, vroege toegang)
+Als je je wekker niet hebt uitgezet vóór de tijd die je kiest, speelt hij hetzelfde geluid nog een keer, harder. Zet je hem aan tijdens de vroege toegang, dan kun je hem na de officiële release blijven gebruiken.
 
-■ Luidere geïmporteerde geluiden
-Is een video of audiobestand te zacht, dan maakt de app het geluid bij het importeren luider, zonder vervorming. Geluiden die je al hebt geïmporteerd blijven hetzelfde.
+■ Nu afspelen
+Tik op „Ring now” in het wekkerscherm om je wekker meteen op het echte volume te horen.
+
+■ Hulp als het te zacht is
+Het wekkervolume volgt „Beltoon en meldingen” in Instellingen. „Too quiet?” laat zien waar je dat wijzigt.
+
+■ Eenvoudiger wekkerscherm
+De instellingen staan nu meer zoals in de Klok-app, en een bewerkte wekker wordt aangezet wanneer je hem bewaart.
+
+■ Betere VoiceOver-labels
 
 Bedankt voor het gebruiken van My Sound Alarm!

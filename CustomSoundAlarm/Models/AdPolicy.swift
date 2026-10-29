@@ -4,10 +4,11 @@ import Foundation
 enum AdSlotKind: String, Sendable, CaseIterable {
     case bannerSounds = "banner_sounds"
     case bannerImport = "banner_import"
+    case bannerAlarmList = "banner_alarm_list"
     case interstitialImportSaved = "interstitial_import_saved"
 
     var isBanner: Bool {
-        self == .bannerSounds || self == .bannerImport
+        self == .bannerSounds || self == .bannerImport || self == .bannerAlarmList
     }
 
     var isInterstitial: Bool {
@@ -20,10 +21,10 @@ enum AdContext: String, Sendable, CaseIterable {
     // バナーを出してよい画面
     case soundsList
     case importScreen
+    case alarmList
     // 全画面を出してよいタイミング
     case importSaved
     // 出さない画面・状態
-    case alarmList
     case bedside
     case onboarding
     case alarmRinging
@@ -33,8 +34,9 @@ enum AdContext: String, Sendable, CaseIterable {
         switch self {
         case .soundsList: .bannerSounds
         case .importScreen: .bannerImport
+        case .alarmList: .bannerAlarmList
         case .importSaved: .interstitialImportSaved
-        case .alarmList, .bedside, .onboarding, .alarmRinging, .testRinging: nil
+        case .bedside, .onboarding, .alarmRinging, .testRinging: nil
         }
     }
 }
@@ -100,6 +102,7 @@ struct AdPolicy {
         switch slot {
         case .bannerSounds: canShowBanner(context: .soundsList)
         case .bannerImport: canShowBanner(context: .importScreen)
+        case .bannerAlarmList: canShowBanner(context: .alarmList)
         case .interstitialImportSaved: canShowInterstitial(context: .importSaved)
         }
     }

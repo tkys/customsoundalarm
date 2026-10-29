@@ -211,23 +211,19 @@ struct AudioCropView: View {
     }
 
     /// 変換後のサイズ見積り。音声は尺無制限のため生成前に見せる（#79-8）
+    @ViewBuilder
     private var sizeEstimateRow: some View {
         let selectionSeconds = endTime - startTime
-        let size = AudioSizeEstimate.formattedSize(
-            bytes: AudioSizeEstimate.estimatedFileSize(seconds: selectionSeconds)
-        )
-        return VStack(spacing: 4) {
-            Text(String(format: String(localized: "estimated_size"), size))
+        if AudioSizeEstimate.shouldShowWarning(seconds: selectionSeconds) {
+            let size = AudioSizeEstimate.formattedSize(
+                bytes: AudioSizeEstimate.estimatedFileSize(seconds: selectionSeconds)
+            )
+            Text(String(format: String(localized: "size_warning"), size))
                 .font(.caption2)
-                .foregroundStyle(.secondary)
-            if AudioSizeEstimate.requiresWarning(seconds: selectionSeconds) {
-                Text(String(format: String(localized: "large_file_warning"), size))
-                    .font(.caption2)
-                    .foregroundStyle(.orange)
-                    .multilineTextAlignment(.center)
-            }
+                .foregroundStyle(.orange)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
         }
-        .frame(maxWidth: .infinity)
     }
 
     private func loadDuration() async {
@@ -282,7 +278,8 @@ struct AudioCropView: View {
                 AnalyticsService.shared.capture(.customSoundImported(
                     source: .audio,
                     peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
-                    gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb)
+                    gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
+                    lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore)
                 ))
                 await AdPresenter.presentInterstitialIfAllowed(after: .importSaved)
 
