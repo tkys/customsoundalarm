@@ -1,1 +1,1 @@
-Probuď se u hudby, kterou máš rád. Vystřihni jen refrén z videa nebo zvukového souboru a bude hrát dokola, dokud nevstaneš.
+Aplikace budíku, která tě probudí refrénem písničky nebo zvukem z videa. Vybraná část se opakuje, dokud ji nevypneš – i v tichém režimu.

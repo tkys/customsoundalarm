@@ -1,45 +1,41 @@
-Acorde com a música que você ama. Fique só com a parte que você quer: o refrão, o gancho, o verso que você canta junto.
+O My Sound Alarm é um app de despertador para iPhone que acorda você com o seu trecho favorito de uma música ou o som de um vídeo. Você configura os alarmes neste app, e o trecho escolhido repete até você desligar.
 
-RECURSOS PRINCIPAIS
+RECURSOS
 
-Acorde com sua parte favorita
-Quase ninguém quer a música inteira, só um trecho. Abra um vídeo ou um arquivo de áudio, veja a forma de onda e arraste para escolher o trecho. Você pode ouvir enquanto ajusta. A forma de onda mostra onde o som é alto e onde é baixo.
+Acorde com o seu trecho favorito
+Abra um vídeo ou arquivo de áudio, veja a forma de onda e selecione um intervalo. Use só o refrão ou a música inteira. Dá para ouvir enquanto ajusta. Quando chega ao fim, começa de novo.
 
-Um trecho curto funciona bem. O alarme toca até o fim e começa de novo, até você levantar. Vinte ou trinta segundos do refrão costumam bastar.
-
-Seus próprios arquivos
-O app usa o áudio que você já tem: um arquivo de música, uma gravação de voz, o som de um vídeo salvo. Sem assinatura. Sem catálogo para procurar.
+Sem limite de duração
+Os toques personalizados do iPhone param em cerca de 40 segundos. O My Sound Alarm aceita até 10 minutos de um vídeo, e arquivos de áudio longos podem ser importados como estão.
 
 O som de um vídeo
-Escolha um vídeo do rolo da câmera e fique só com o som. Ótimo para vídeos salvos ou gravados por você.
+Escolha um vídeo da fototeca ou do app Arquivos e fique só com o som.
 
 Importar arquivos de áudio
-Compatível com MP3, AAC, WAV e M4A. Abra pelo app Arquivos.
+MP3, AAC, WAV e M4A. Adicione pelo app Arquivos ou envie de outro app pelo botão Compartilhar.
 
-O sistema de alarmes da Apple
-O app usa o AlarmKit, o sistema de alarmes da Apple. Seu alarme toca do mesmo jeito que o do app Relógio. Não é um truque em segundo plano que pode falhar na hora errada.
+Toca no modo silencioso
+O My Sound Alarm agenda os alarmes com o AlarmKit, o sistema de alarmes que a Apple incluiu no iOS 26. Eles aparecem na Tela Bloqueada como os do app Relógio nativo e tocam no modo silencioso e com um Foco ativado, mesmo com o My Sound Alarm fechado.
 
-Reconheça seus sons
-Cada alarme mostra uma imagem do seu som: um quadro do vídeo ou a capa do arquivo. Fica fácil diferenciar seus alarmes.
+“Ring now”
+Ouça na hora o som escolhido, no mesmo volume de um alarme de verdade.
 
-Sem limite de 40 segundos
-Um toque de iPhone só pode ter cerca de 40 segundos. Aqui você pode usar até 10 minutos de um vídeo, e arquivos de áudio não têm limite de duração.
+Proteção contra perder a hora (Pro, acesso antecipado)
+Se você não desligar um alarme até o horário escolhido, ele toca o mesmo som de novo, mais alto. Se começar a usar durante o acesso antecipado, continua com ele depois do lançamento oficial.
 
-Compartilhar
-Envie áudio ou vídeo de outros apps para este app.
+Repetição e soneca
+Escolha os dias de cada alarme. A soneca pode ficar desativada ou em 1, 2, 5, 9 ou 10 minutos.
 
-Dias de repetição
-Escolha os dias de cada alarme: dias úteis, fins de semana ou os dias que quiser.
-
-Soneca
-Escolha 1, 2, 5 ou 10 minutos com um toque, ou qualquer outro valor.
+Seus sons de relance
+Cada alarme mostra uma imagem do seu vídeo ou a capa do seu arquivo de áudio.
 
 Modo noturno
-Seu iPhone vira um relógio de cabeceira. Números grandes e suaves, fáceis de ler no escuro.
+Seu iPhone vira um relógio de cabeceira, com números grandes e suaves para ler no escuro.
 
-FORMATOS COMPATÍVEIS
-MP3 / AAC / WAV / M4A / Áudio de vídeo (MOV, MP4)
+FORMATOS
+MP3 / AAC / WAV / M4A / Som de vídeo (MOV, MP4)
 
 OBSERVAÇÕES
 - Requer iOS 26 ou posterior (AlarmKit)
-- Sons mais longos ocupam mais espaço. Um som de alarme de 10 minutos ocupa cerca de 50 MB.
+- Sons mais longos ocupam mais espaço. Um som de 10 minutos tem cerca de 50 MB.
+- Músicas de serviços de streaming como Apple Music ou Spotify não podem ser importadas.

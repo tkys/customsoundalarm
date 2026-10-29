@@ -1,45 +1,41 @@
-Réveille-toi avec la musique que tu aimes. Garde seulement le passage que tu veux : le refrain, l'accroche, la phrase que tu chantes.
+My Sound Alarm est une app de réveil pour iPhone qui te réveille avec ton passage préféré d’une chanson ou le son d’une vidéo. Tu règles tes alarmes dans cette app, et le passage choisi se répète jusqu’à ce que tu l’arrêtes.
 
-FONCTIONS PRINCIPALES
+FONCTIONS
 
 Réveille-toi sur ton passage préféré
-On ne veut pas toute la chanson, juste un moment. Ouvre une vidéo ou un fichier audio, regarde la forme d'onde et fais glisser pour choisir le passage. Tu peux l'écouter pendant que tu ajustes. La forme d'onde montre où le son est fort et où il est calme.
+Ouvre une vidéo ou un fichier audio, regarde la forme d’onde et sélectionne une plage. Garde juste le refrain ou la chanson entière. Tu peux écouter pendant que tu ajustes. Arrivé à la fin, il recommence.
 
-Un passage court fonctionne bien. L'alarme le joue jusqu'au bout, puis recommence, jusqu'à ce que tu te lèves. Vingt ou trente secondes de refrain suffisent souvent.
+Pas de limite de durée
+Les sonneries personnalisées de l’iPhone s’arrêtent à environ 40 secondes. My Sound Alarm prend jusqu’à 10 minutes d’une vidéo, et les longs fichiers audio peuvent être importés tels quels.
 
-Tes propres fichiers
-L'app utilise l'audio que tu as déjà : un fichier de musique, un enregistrement de voix, le son d'une vidéo enregistrée. Aucun abonnement. Aucun catalogue à parcourir.
+Le son d’une vidéo
+Choisis une vidéo de ta photothèque ou de l’app Fichiers et garde seulement le son.
 
-Le son d'une vidéo
-Choisis une vidéo dans ta pellicule et garde uniquement le son. Idéal pour les vidéos enregistrées ou que tu as filmées toi-même.
+Import de fichiers audio
+MP3, AAC, WAV et M4A. Ajoute-les depuis l’app Fichiers, ou envoie-les depuis une autre app avec le bouton Partager.
 
-Importer des fichiers audio
-MP3, AAC, WAV et M4A sont pris en charge. Ouvre-les depuis l'app Fichiers.
+Sonne en mode silencieux
+My Sound Alarm programme ses alarmes avec AlarmKit, le système d’alarmes ajouté par Apple dans iOS 26. Elles s’affichent sur l’écran verrouillé comme celles de l’app Horloge intégrée et sonnent en mode silencieux et quand un mode de concentration est activé, même quand My Sound Alarm est fermée.
 
-Le système d'alarme d'Apple
-L'app utilise AlarmKit, le système d'alarme d'Apple. Ton alarme sonne comme celle de l'app Horloge. Ce n'est pas une astuce en arrière-plan qui peut échouer au mauvais moment.
+« Ring now »
+Écoute tout de suite le son choisi, au même volume qu’une vraie alarme.
 
-Repère tes sons
-Chaque alarme affiche une image de son son : une image de ta vidéo ou la pochette de ton fichier. Tu distingues facilement tes alarmes.
+Anti-grasse matinée (Pro, accès anticipé)
+Si tu n’as pas arrêté une alarme à l’heure choisie, elle rejoue le même son, plus fort. Si tu commences à l’utiliser pendant l’accès anticipé, tu la gardes après la sortie officielle.
 
-Pas de limite de 40 secondes
-Une sonnerie d'iPhone dure environ 40 secondes au maximum. Ici, tu peux prendre jusqu'à 10 minutes d'une vidéo, et les fichiers audio n'ont aucune limite de durée.
+Répétition et rappel d’alarme
+Choisis les jours de chaque alarme. Le rappel d’alarme peut être désactivé ou réglé sur 1, 2, 5, 9 ou 10 minutes.
 
-Feuille de partage
-Envoie de l'audio ou de la vidéo vers l'app depuis d'autres apps.
-
-Jours de répétition
-Choisis les jours de chaque alarme : en semaine, le week-end ou les jours que tu veux.
-
-Rappel d'alarme
-Choisis 1, 2, 5 ou 10 minutes d'un geste, ou n'importe quelle autre durée.
+Tes sons en un coup d’œil
+Chaque alarme affiche une image de ta vidéo ou l’illustration de ton fichier audio.
 
 Mode nuit
-Ton iPhone devient un réveil de chevet. Les chiffres sont grands et doux, lisibles dans une pièce sombre.
+Ton iPhone devient un réveil de chevet, avec de grands chiffres doux lisibles dans le noir.
 
-FORMATS PRIS EN CHARGE
-MP3 / AAC / WAV / M4A / Audio de vidéo (MOV, MP4)
+FORMATS
+MP3 / AAC / WAV / M4A / Son de vidéo (MOV, MP4)
 
-REMARQUES
+À SAVOIR
 - Nécessite iOS 26 ou version ultérieure (AlarmKit)
-- Un son long occupe plus d'espace. Un son d'alarme de 10 minutes fait environ 50 Mo.
+- Un son long prend plus de place. Un son de 10 minutes fait environ 50 Mo.
+- Les morceaux des services de streaming comme Apple Music ou Spotify ne peuvent pas être importés.

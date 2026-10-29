@@ -1,45 +1,41 @@
-Budź się przy muzyce, którą kochasz. Zostaw tylko ten fragment, który chcesz: refren, chwytliwy motyw, wers, który nucisz.
+My Sound Alarm to aplikacja-budzik na iPhone’a, która budzi cię ulubionym fragmentem piosenki albo dźwiękiem z wideo. Budziki ustawiasz w tej aplikacji, a wybrany fragment powtarza się, dopóki go nie wyłączysz.
 
-GŁÓWNE FUNKCJE
+FUNKCJE
 
 Budź się przy ulubionym fragmencie
-Mało kto chce całą piosenkę, tylko jej fragment. Otwórz wideo lub plik audio, spójrz na wykres fali i przeciągnij, aby wybrać fragment. Możesz go słuchać podczas ustawiania. Wykres fali pokazuje, gdzie dźwięk jest głośny, a gdzie cichy.
+Otwórz wideo lub plik audio, spójrz na wykres fali i zaznacz zakres. Zostaw sam refren albo całą piosenkę. Możesz słuchać podczas dopasowywania. Gdy dojdzie do końca, zaczyna od nowa.
 
-Krótki fragment sprawdza się dobrze. Budzik odtwarza go do końca i zaczyna od nowa, aż wstaniesz. Często wystarczy dwadzieścia lub trzydzieści sekund refrenu.
-
-Twoje własne pliki
-Aplikacja korzysta z dźwięków, które już masz: pliku z muzyką, nagrania głosu, dźwięku z zapisanego wideo. Bez subskrypcji. Bez katalogu do przeszukiwania.
+Bez limitu długości
+Własne dzwonki w iPhonie kończą się po około 40 sekundach. My Sound Alarm przyjmuje do 10 minut z wideo, a długie pliki audio można zaimportować w całości.
 
 Dźwięk z wideo
-Wybierz wideo z biblioteki zdjęć i zostaw tylko dźwięk. Idealne do zapisanych lub nagranych przez ciebie filmów.
+Wybierz wideo z biblioteki zdjęć lub z aplikacji Pliki i zostaw sam dźwięk.
 
 Import plików audio
-Obsługiwane są MP3, AAC, WAV i M4A. Otwórz je z aplikacji Pliki.
+MP3, AAC, WAV i M4A. Dodaj je z aplikacji Pliki albo wyślij z innej aplikacji przyciskiem Udostępnij.
 
-System budzika Apple
-Aplikacja korzysta z AlarmKit, systemu budzika Apple. Twój budzik dzwoni tak samo jak w aplikacji Zegar. To nie sztuczka działająca w tle, która może zawieść w złym momencie.
+Dzwoni w trybie cichym
+My Sound Alarm planuje swoje budziki przez AlarmKit, system budzików dodany przez Apple w iOS 26. Pojawiają się na ekranie blokady jak budziki z wbudowanej aplikacji Zegar i dzwonią w trybie cichym i przy włączonym trybie skupienia, nawet gdy My Sound Alarm jest zamknięta.
 
-Rozpoznawaj swoje dźwięki
-Każdy budzik pokazuje obrazek swojego dźwięku: klatkę z wideo lub okładkę pliku. Łatwo odróżnisz swoje budziki.
+„Ring now”
+Posłuchaj wybranego dźwięku od razu, z tą samą głośnością co prawdziwy budzik.
 
-Bez limitu 40 sekund
-Dzwonek iPhone'a może trwać tylko około 40 sekund. Tutaj możesz wziąć do 10 minut z wideo, a pliki audio nie mają limitu długości.
+Ochrona przed zaspaniem (Pro, wczesny dostęp)
+Jeśli nie wyłączysz budzika do wybranej godziny, odtworzy ten sam dźwięk ponownie, głośniej. Jeśli zaczniesz z niej korzystać we wczesnym dostępie, zachowasz ją po oficjalnym wydaniu.
 
-Arkusz udostępniania
-Wysyłaj dźwięk lub wideo do tej aplikacji z innych aplikacji.
+Powtarzanie i drzemka
+Wybierz dni dla każdego budzika. Drzemka może być wyłączona albo trwać 1, 2, 5, 9 lub 10 minut.
 
-Dni powtarzania
-Wybierz dni dla każdego budzika: dni robocze, weekend lub dowolne dni.
-
-Drzemka
-Wybierz 1, 2, 5 lub 10 minut jednym dotknięciem albo dowolną inną wartość.
+Twoje dźwięki na pierwszy rzut oka
+Każdy budzik pokazuje kadr z wideo albo okładkę pliku audio.
 
 Tryb nocny
-Twój iPhone staje się zegarem przy łóżku. Duże, łagodne cyfry, czytelne w ciemnym pokoju.
+Twój iPhone staje się zegarem przy łóżku, z dużymi, łagodnymi cyframi czytelnymi w ciemności.
 
-OBSŁUGIWANE FORMATY
+FORMATY
 MP3 / AAC / WAV / M4A / Dźwięk z wideo (MOV, MP4)
 
 UWAGI
 - Wymaga iOS 26 lub nowszego (AlarmKit)
-- Dłuższy dźwięk zajmuje więcej miejsca. 10-minutowy dźwięk budzika zajmuje około 50 MB.
+- Dłuższe dźwięki zajmują więcej miejsca. Dźwięk 10-minutowy to około 50 MB.
+- Utworów z serwisów streamingowych, takich jak Apple Music czy Spotify, nie da się zaimportować.

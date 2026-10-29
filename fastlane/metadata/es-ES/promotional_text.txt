@@ -1,1 +1,1 @@
-Despierta con la música que te gusta. Recorta solo el estribillo de un vídeo o un archivo de audio y sonará en bucle hasta que te levantes.
+Una app de despertador que te despierta con el estribillo de una canción o el sonido de un vídeo. Lo que elijas se repite hasta que lo detengas, también en modo silencio.

@@ -1,45 +1,41 @@
-Wach auf mit der Musik, die du liebst. Behalte nur den Teil, den du willst: den Refrain, die Hook, die Zeile, die du mitsingst.
+My Sound Alarm ist eine Wecker-App fürs iPhone, die dich mit deinem Lieblingsteil eines Songs oder dem Ton aus einem Video weckt. Du stellst deine Wecker in dieser App, und der gewählte Teil wiederholt sich, bis du ihn ausschaltest.
 
 FUNKTIONEN
 
 Wach auf mit deinem Lieblingsteil
-Die meisten wollen nicht den ganzen Song, sondern nur einen Teil davon. Öffne ein Video oder eine Audiodatei, sieh dir die Wellenform an und ziehe, um den Abschnitt auszuwählen. Du kannst ihn beim Anpassen anhören. Die Wellenform zeigt, wo es laut und wo es leise ist.
+Öffne ein Video oder eine Audiodatei, schau auf die Wellenform und wähl einen Bereich aus. Nimm nur den Refrain oder den ganzen Song. Du kannst beim Anpassen reinhören. Am Ende fängt er wieder von vorn an.
 
-Ein kurzer Abschnitt funktioniert gut. Der Wecker spielt ihn bis zum Ende und dann wieder von vorn, bis du aufstehst. Zwanzig oder dreißig Sekunden Refrain reichen oft.
+Keine Längenbegrenzung
+Eigene iPhone-Klingeltöne enden nach etwa 40 Sekunden. My Sound Alarm übernimmt bis zu 10 Minuten aus einem Video, und lange Audiodateien lassen sich so importieren, wie sie sind.
 
-Deine eigenen Dateien
-Die App nutzt Audio, das du schon hast: eine Musikdatei, eine Sprachaufnahme, den Ton aus einem gespeicherten Video. Kein Abo. Kein Musikkatalog zum Durchsuchen.
-
-Ton aus einem Video
-Wähle ein Video aus deiner Mediathek und behalte nur den Ton. Ideal für gespeicherte oder selbst gefilmte Videos.
+Ton aus Videos
+Wähl ein Video aus deiner Fotomediathek oder der Dateien-App und behalte nur den Ton.
 
 Audiodateien importieren
-MP3, AAC, WAV und M4A werden unterstützt. Öffne sie aus der Dateien-App.
+MP3, AAC, WAV und M4A. Füge sie aus der Dateien-App hinzu oder schick sie aus einer anderen App über die Teilen-Taste.
 
-Apples Wecker-System
-Die App nutzt AlarmKit, das Wecker-System von Apple. Dein Wecker klingelt wie der in der Uhr-App. Kein Hintergrund-Trick, der im falschen Moment versagt.
+Klingelt im Stummmodus
+My Sound Alarm plant seine Wecker mit AlarmKit, dem Wecker-Framework, das Apple mit iOS 26 eingeführt hat. Sie erscheinen wie Wecker der integrierten Uhr-App auf dem Sperrbildschirm und klingeln im Stummmodus und wenn ein Fokus aktiv ist – auch wenn My Sound Alarm geschlossen ist.
+
+„Ring now“
+Hör den gewählten Ton sofort, in derselben Lautstärke wie ein echter Wecker.
+
+Verschlafschutz (Pro, frühe Version)
+Wenn du einen Wecker bis zur gewählten Zeit nicht ausgeschaltet hast, spielt er denselben Ton noch einmal lauter. Wenn du ihn in dieser Zeit zu nutzen beginnst, behältst du ihn auch nach der offiziellen Veröffentlichung.
+
+Wiederholen und Schlummern
+Wähl die Tage für jeden Wecker. Schlummern ist aus oder 1, 2, 5, 9 oder 10 Minuten.
 
 Deine Töne auf einen Blick
-Jeder Wecker zeigt ein Bild seines Tons: ein Bild aus deinem Video oder das Cover deiner Datei. So unterscheidest du deine Wecker leicht.
-
-Keine 40-Sekunden-Grenze
-Ein iPhone-Klingelton darf nur etwa 40 Sekunden lang sein. Hier kannst du bis zu 10 Minuten aus einem Video nehmen, und Audiodateien haben gar keine Längenbegrenzung.
-
-Teilen-Menü
-Sende Audio oder Video aus anderen Apps an diese App.
-
-Wiederholung
-Wähle die Tage für jeden Wecker: werktags, am Wochenende oder an beliebigen Tagen.
-
-Schlummern
-Wähle 1, 2, 5 oder 10 Minuten mit einem Tippen oder jeden anderen Wert.
+Jeder Wecker zeigt ein Bild aus deinem Video oder das Cover deiner Audiodatei.
 
 Nachtmodus
-Dein iPhone wird zur Uhr am Bett. Große, sanfte Ziffern, gut lesbar im dunklen Zimmer.
+Dein iPhone wird zur Nachttischuhr, mit großen, sanften Ziffern, die du im Dunkeln lesen kannst.
 
 FORMATE
-MP3 / AAC / WAV / M4A / Ton aus Video (MOV, MP4)
+MP3 / AAC / WAV / M4A / Ton aus Videos (MOV, MP4)
 
 HINWEISE
-- Benötigt iOS 26 oder neuer (AlarmKit)
-- Längere Töne brauchen mehr Speicher. Ein 10-Minuten-Weckton belegt etwa 50 MB.
+- Erfordert iOS 26 oder neuer (AlarmKit)
+- Längere Töne belegen mehr Speicher. Ein 10-minütiger Ton hat etwa 50 MB.
+- Songs aus Streamingdiensten wie Apple Music oder Spotify lassen sich nicht importieren.

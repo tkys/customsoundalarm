@@ -1,1 +1,1 @@
-Svegliati con la musica che ami. Taglia solo il ritornello da un video o da un file audio: suonerà in loop finché non ti alzi.
+Un’app sveglia che ti sveglia con il ritornello di una canzone o con l’audio di un video. La parte che scegli si ripete finché non la fermi, anche in modalità silenziosa.

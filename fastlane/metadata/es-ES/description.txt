@@ -1,45 +1,41 @@
-Despierta con la música que te gusta. Quédate solo con la parte que quieres: el estribillo, el gancho, la frase que cantas.
+My Sound Alarm es una app de despertador para iPhone que te despierta con tu parte favorita de una canción o el sonido de un vídeo. Configuras tus alarmas en esta app, y la parte que elijas se repite hasta que la detengas.
 
-FUNCIONES PRINCIPALES
+FUNCIONES
 
 Despierta con tu parte favorita
-Casi nadie quiere la canción entera, solo una parte. Abre un vídeo o un archivo de audio, mira la forma de onda y arrastra para elegir el fragmento. Puedes escucharlo mientras lo ajustas. La forma de onda te muestra dónde suena fuerte y dónde suave.
+Abre un vídeo o un archivo de audio, mira la forma de onda y selecciona un tramo. Quédate solo con el estribillo o con la canción entera. Puedes escucharlo mientras lo ajustas. Al llegar al final, vuelve a empezar.
 
-Un fragmento corto funciona bien. La alarma lo reproduce hasta el final y vuelve a empezar, hasta que te levantas. Veinte o treinta segundos del estribillo suelen bastar.
-
-Tus propios archivos
-La app usa el audio que ya tienes: un archivo de música, una grabación de voz, el sonido de un vídeo guardado. Sin suscripción. Sin catálogo que buscar.
+Sin límite de duración
+Los tonos personalizados del iPhone se cortan a los 40 segundos aproximadamente. My Sound Alarm admite hasta 10 minutos de un vídeo, y los archivos de audio largos se pueden importar tal cual.
 
 El sonido de un vídeo
-Elige un vídeo del carrete y quédate solo con el sonido. Ideal para vídeos guardados o grabados por ti.
+Elige un vídeo de tu fototeca o de la app Archivos y quédate solo con el sonido.
 
-Importar archivos de audio
-Compatible con MP3, AAC, WAV y M4A. Ábrelos desde la app Archivos.
+Importa archivos de audio
+MP3, AAC, WAV y M4A. Añádelos desde la app Archivos o envíalos desde otra app con el botón Compartir.
 
-El sistema de alarmas de Apple
-La app usa AlarmKit, el sistema de alarmas de Apple. Tu alarma suena igual que la de la app Reloj. No es un truco en segundo plano que puede fallar justo cuando lo necesitas.
+Suena en modo silencio
+My Sound Alarm programa sus alarmas con AlarmKit, el sistema de alarmas que Apple añadió en iOS 26. Aparecen en la pantalla bloqueada como las de la app Reloj integrada y suenan en modo silencio y con un modo de concentración activado, incluso con My Sound Alarm cerrada.
 
-Reconoce tus sonidos
-Cada alarma muestra una imagen de su sonido: un fotograma de tu vídeo o la portada de tu archivo. Así distingues tus alarmas fácilmente.
+«Ring now»
+Escucha al momento el sonido que elegiste, con el mismo volumen que una alarma de verdad.
 
-Sin límite de 40 segundos
-Un tono de iPhone solo puede durar unos 40 segundos. Aquí puedes tomar hasta 10 minutos de un vídeo, y los archivos de audio no tienen límite de duración.
+Protección contra quedarse dormido (Pro, acceso anticipado)
+Si no has detenido una alarma a la hora que elijas, vuelve a sonar con el mismo sonido, más fuerte. Si empiezas a usarla durante el acceso anticipado, la conservas después del lanzamiento oficial.
 
-Hoja para compartir
-Envía audio o vídeo a esta app desde otras apps.
+Repetición y posponer
+Elige los días de cada alarma. Posponer puede estar desactivado o en 1, 2, 5, 9 o 10 minutos.
 
-Días de repetición
-Elige los días de cada alarma: entre semana, el fin de semana o los días que quieras.
-
-Posponer
-Elige 1, 2, 5 o 10 minutos con un toque, o el valor que prefieras.
+Tus sonidos de un vistazo
+Cada alarma muestra una imagen de tu vídeo o la portada de tu archivo de audio.
 
 Modo noche
-Tu iPhone se convierte en un reloj de mesita. Números grandes y suaves, fáciles de leer a oscuras.
+Tu iPhone se convierte en un reloj de mesilla, con números grandes y suaves que puedes leer a oscuras.
 
-FORMATOS COMPATIBLES
-MP3 / AAC / WAV / M4A / Audio de vídeo (MOV, MP4)
+FORMATOS
+MP3 / AAC / WAV / M4A / Sonido de vídeo (MOV, MP4)
 
 NOTAS
 - Requiere iOS 26 o posterior (AlarmKit)
-- Un sonido más largo ocupa más espacio. Un sonido de alarma de 10 minutos ocupa unos 50 MB.
+- Los sonidos largos ocupan más espacio. Un sonido de 10 minutos ocupa unos 50 MB.
+- Las canciones de servicios de streaming como Apple Music o Spotify no se pueden importar.

@@ -1,1 +1,1 @@
-Budź się przy muzyce, którą kochasz. Wytnij tylko refren z wideo lub pliku audio, a będzie grał w kółko, aż wstaniesz.
+Aplikacja-budzik, która budzi cię refrenem piosenki albo dźwiękiem z wideo. Wybrany fragment powtarza się, dopóki go nie wyłączysz – także w trybie cichym.

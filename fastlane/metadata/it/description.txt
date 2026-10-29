@@ -1,45 +1,41 @@
-Svegliati con la musica che ami. Tieni solo la parte che vuoi: il ritornello, il passaggio, la frase che canti.
+My Sound Alarm è un’app sveglia per iPhone che ti sveglia con la tua parte preferita di una canzone o con l’audio di un video. Imposti le sveglie in questa app, e la parte che scegli si ripete finché non la fermi.
 
-FUNZIONI PRINCIPALI
+FUNZIONI
 
 Svegliati con la tua parte preferita
-Quasi nessuno vuole la canzone intera, solo una parte. Apri un video o un file audio, guarda la forma d'onda e trascina per scegliere il passaggio. Puoi ascoltarlo mentre lo regoli. La forma d'onda mostra dove il suono è forte e dove è piano.
+Apri un video o un file audio, guarda la forma d’onda e seleziona un intervallo. Tieni solo il ritornello o la canzone intera. Puoi ascoltare mentre regoli. Quando arriva alla fine, ricomincia.
 
-Un passaggio breve funziona bene. La sveglia lo suona fino alla fine e poi ricomincia, finché non ti alzi. Venti o trenta secondi di ritornello spesso bastano.
+Nessun limite di durata
+Le suonerie personalizzate dell’iPhone si fermano a circa 40 secondi. My Sound Alarm accetta fino a 10 minuti da un video, e i file audio lunghi si possono importare così come sono.
 
-I tuoi file
-L'app usa l'audio che hai già: un file musicale, una registrazione vocale, il suono di un video salvato. Nessun abbonamento. Nessun catalogo da sfogliare.
-
-Il suono di un video
-Scegli un video dal Rullino e tieni solo il suono. Perfetto per video salvati o girati da te.
+L’audio di un video
+Scegli un video dalla libreria foto o dall’app File e tieni solo l’audio.
 
 Importa file audio
-Supporta MP3, AAC, WAV e M4A. Aprili dall'app File.
+MP3, AAC, WAV e M4A. Aggiungili dall’app File o inviali da un’altra app con il pulsante Condividi.
 
-Il sistema di sveglie di Apple
-L'app usa AlarmKit, il sistema di sveglie di Apple. La tua sveglia suona come quella dell'app Orologio. Non è un trucco in background che può fallire nel momento sbagliato.
+Suona in modalità silenziosa
+My Sound Alarm programma le sue sveglie con AlarmKit, il sistema di sveglie introdotto da Apple in iOS 26. Compaiono sulla schermata di blocco come quelle dell’app Orologio integrata e suonano in modalità silenziosa e con una modalità Full Immersion attiva, anche con My Sound Alarm chiusa.
 
-Riconosci i tuoi suoni
-Ogni sveglia mostra un'immagine del suo suono: un fotogramma del video o la copertina del file. Così distingui facilmente le sveglie.
+“Ring now”
+Ascolta subito il suono scelto, allo stesso volume di una vera sveglia.
 
-Nessun limite di 40 secondi
-Una suoneria dell'iPhone dura al massimo circa 40 secondi. Qui puoi prendere fino a 10 minuti da un video, e i file audio non hanno limiti di durata.
+Anti-sonno (Pro, accesso anticipato)
+Se non hai fermato una sveglia entro l’orario scelto, suona di nuovo con lo stesso suono, più forte. Se inizi a usarla durante l’accesso anticipato, la mantieni dopo il rilascio ufficiale.
 
-Condivisione
-Invia audio o video a questa app da altre app.
+Ripetizione e posticipa
+Scegli i giorni di ogni sveglia. Posticipa può essere disattivato o di 1, 2, 5, 9 o 10 minuti.
 
-Giorni di ripetizione
-Scegli i giorni per ogni sveglia: feriali, weekend o quelli che vuoi.
-
-Posticipa
-Scegli 1, 2, 5 o 10 minuti con un tocco, o qualsiasi altro valore.
+I tuoi suoni a colpo d’occhio
+Ogni sveglia mostra un’immagine del tuo video o la copertina del tuo file audio.
 
 Modalità notte
-Il tuo iPhone diventa un orologio da comodino. Cifre grandi e morbide, leggibili al buio.
+Il tuo iPhone diventa un orologio da comodino, con numeri grandi e morbidi da leggere al buio.
 
-FORMATI SUPPORTATI
+FORMATI
 MP3 / AAC / WAV / M4A / Audio da video (MOV, MP4)
 
 NOTE
-- Richiede iOS 26 o successivo (AlarmKit)
-- Un suono più lungo occupa più spazio. Un suono di sveglia di 10 minuti occupa circa 50 MB.
+- Richiede iOS 26 o versioni successive (AlarmKit)
+- I suoni lunghi occupano più spazio. Un suono di 10 minuti pesa circa 50 MB.
+- I brani dei servizi di streaming come Apple Music o Spotify non si possono importare.

@@ -1,45 +1,41 @@
-Word wakker met muziek waar je van houdt. Bewaar alleen het stuk dat je wilt: het refrein, de hook, de zin die je meezingt.
+My Sound Alarm is een wekker-app voor iPhone die je wekt met je favoriete stuk van een nummer of het geluid van een video. Je stelt je wekkers in deze app in, en het gekozen stuk herhaalt tot je het uitzet.
 
 FUNCTIES
 
 Word wakker met je favoriete stuk
-Bijna niemand wil het hele nummer, alleen een stukje. Open een video of audiobestand, bekijk de golfvorm en sleep om het stuk te kiezen. Je kunt meeluisteren terwijl je het aanpast. De golfvorm laat zien waar het geluid hard en waar het zacht is.
+Open een video of audiobestand, bekijk de golfvorm en selecteer een bereik. Neem alleen het refrein of het hele nummer. Je kunt meeluisteren terwijl je het aanpast. Aan het eind begint het opnieuw.
 
-Een kort stuk werkt goed. De wekker speelt het tot het einde en begint dan opnieuw, tot je opstaat. Twintig of dertig seconden refrein is vaak genoeg.
+Geen lengtelimiet
+Eigen iPhone-beltonen stoppen na ongeveer 40 seconden. My Sound Alarm neemt tot 10 minuten uit een video, en lange audiobestanden kun je importeren zoals ze zijn.
 
-Je eigen bestanden
-De app gebruikt audio die je al hebt: een muziekbestand, een spraakopname, het geluid van een opgeslagen video. Geen abonnement. Geen catalogus om door te zoeken.
-
-Geluid uit een video
-Kies een video uit je fotobibliotheek en houd alleen het geluid. Handig voor opgeslagen of zelf gefilmde video's.
+Het geluid van een video
+Kies een video uit je fotobibliotheek of de Bestanden-app en houd alleen het geluid over.
 
 Audiobestanden importeren
-MP3, AAC, WAV en M4A werken allemaal. Open ze vanuit de Bestanden-app.
+MP3, AAC, WAV en M4A. Voeg ze toe vanuit de Bestanden-app of stuur ze vanuit een andere app met de deelknop.
 
-Het wekkersysteem van Apple
-De app gebruikt AlarmKit, het wekkersysteem van Apple. Je wekker gaat af zoals die in de Klok-app. Geen achtergrondtruc die op het verkeerde moment faalt.
+Gaat af in de stille modus
+My Sound Alarm plant zijn wekkers in met AlarmKit, het wekkersysteem dat Apple in iOS 26 heeft toegevoegd. Ze verschijnen op het toegangsscherm zoals wekkers van de ingebouwde Klok-app en gaan af in de stille modus en als een focus aan staat, ook als My Sound Alarm gesloten is.
 
-Herken je geluiden
-Elke wekker toont een afbeelding van zijn geluid: een beeld uit je video of de hoes van je bestand. Zo houd je je wekkers makkelijk uit elkaar.
+‘Ring now’
+Hoor het gekozen geluid meteen, op hetzelfde volume als een echte wekker.
 
-Geen limiet van 40 seconden
-Een iPhone-beltoon mag maar ongeveer 40 seconden duren. Hier kun je tot 10 minuten uit een video halen, en audiobestanden hebben geen lengtelimiet.
+Verslaapbeveiliging (Pro, vroege toegang)
+Als je een wekker niet hebt uitgezet vóór de tijd die je kiest, speelt hij hetzelfde geluid nog een keer, harder. Als je hem tijdens de vroege toegang gaat gebruiken, houd je hem na de officiële release.
 
-Deelmenu
-Stuur audio of video vanuit andere apps naar deze app.
+Herhalen en sluimeren
+Kies de dagen voor elke wekker. Sluimeren kan uit staan of 1, 2, 5, 9 of 10 minuten zijn.
 
-Herhaaldagen
-Kies de dagen voor elke wekker: doordeweeks, in het weekend of welke dagen je maar wilt.
-
-Sluimeren
-Kies met één tik 1, 2, 5 of 10 minuten, of elke andere waarde.
+Je geluiden in één oogopslag
+Elke wekker toont een beeld uit je video of de illustratie van je audiobestand.
 
 Nachtmodus
-Je iPhone wordt een klok naast je bed. Grote, zachte cijfers, goed leesbaar in een donkere kamer.
+Je iPhone wordt een nachtkastjesklok, met grote, zachte cijfers die je in het donker kunt lezen.
 
-ONDERSTEUNDE FORMATEN
+FORMATEN
 MP3 / AAC / WAV / M4A / Geluid uit video (MOV, MP4)
 
 OPMERKINGEN
 - Vereist iOS 26 of nieuwer (AlarmKit)
-- Een langer geluid neemt meer ruimte in. Een wekkergeluid van 10 minuten is ongeveer 50 MB.
+- Langere geluiden nemen meer ruimte in. Een geluid van 10 minuten is ongeveer 50 MB.
+- Nummers uit streamingdiensten zoals Apple Music of Spotify kunnen niet worden geïmporteerd.

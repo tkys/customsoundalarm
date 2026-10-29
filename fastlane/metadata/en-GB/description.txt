@@ -1,45 +1,41 @@
-Wake up to the music you love. Keep only the part you want — the chorus, the hook, the line you sing along to.
+My Sound Alarm is an iPhone alarm clock app that wakes you up to your favourite part of a song, or to the sound from a video. You set your alarms in this app, and the part you choose plays on repeat until you stop it.
 
 KEY FEATURES
 
 Wake Up to the Part You Love
-Most people do not want a whole song. They want one part of it. Open a video or an audio file, look at the waveform, and drag to select the section you like. You can listen while you adjust it. The waveform shows you where the sound is loud and where it is quiet.
+Open a video or an audio file, look at the waveform, and select a range. Keep just the chorus or the whole song. You can listen while you adjust it. When it reaches the end, it starts again.
 
-A short section works well. Your alarm plays it to the end, then plays it again, until you get up. Twenty or thirty seconds of the chorus is often all you need.
-
-Your Own Files
-This app uses the audio you already have. A song file. A voice recording. Sound from a video you saved. You do not need a subscription. There is no music catalog to search.
+No Length Limit
+Custom iPhone ringtones stop at about 40 seconds. My Sound Alarm takes up to 10 minutes from a video, and long audio files can be imported as they are.
 
 Take the Audio From a Video
-Choose a video from your Camera Roll and keep only the sound. This works well for videos you saved or recorded yourself.
+Choose a video from your photo library or the Files app and keep only the sound.
 
 Import Audio Files
-MP3, AAC, WAV, and M4A files all work. You can open them from the Files app.
+MP3, AAC, WAV and M4A all work. Add them from the Files app, or send them from another app with the Share button.
 
-Built on Apple's Alarm System
-This app uses AlarmKit, the alarm system from Apple. Your alarm rings the same way the built-in Clock app rings. It is not a background trick that can fail when you need it.
+Rings in Silent Mode
+My Sound Alarm schedules its alarms with AlarmKit, the alarm framework Apple added in iOS 26. They appear on the Lock Screen like alarms from the built-in Clock app and ring in Silent mode and when a Focus is on, even when My Sound Alarm is closed.
+
+Ring Now
+Hear the sound you chose right away, at the same volume as a real alarm.
+
+Oversleep Guard (Pro, early access)
+If you haven't stopped an alarm by the time you choose, it plays the same sound again, louder. If you start using it during early access, you keep it after the full release.
+
+Repeat Days and Snooze
+Choose the days for each alarm. Snooze can be off or 1, 2, 5, 9 or 10 minutes.
 
 See Your Sounds
-Each alarm shows a picture of its sound: a frame from your video, or the album art from your file. It is easy to tell your alarms apart.
-
-No 40-Second Limit
-An iPhone ringtone can only be about 40 seconds long. This app is different. You can take up to 10 minutes from a video, and audio files have no time limit at all.
-
-Share Sheet
-Send audio or video to this app from other apps.
-
-Repeat Days
-Choose the days for each alarm. Weekdays, weekends, or any days you want.
-
-Snooze
-Pick 1, 2, 5 or 10 minutes with one tap, or set any value you like.
+Each alarm shows a frame from your video or the artwork from your audio file.
 
 Night Mode
-Your iPhone becomes a bedside clock. The numbers are large and soft, so you can read them in a dark room.
+Your iPhone becomes a bedside clock, with large, soft numbers you can read in a dark room.
 
 SUPPORTED FORMATS
 MP3 / AAC / WAV / M4A / Audio from video (MOV, MP4)
 
 NOTES
-- Needs iOS 26 or later (AlarmKit)
-- A longer sound uses more storage. A 10-minute alarm sound is about 50 MB.
+- Requires iOS 26 or later (AlarmKit)
+- Longer sounds use more storage. A 10-minute sound is about 50 MB.
+- Songs from streaming services such as Apple Music or Spotify can't be imported.

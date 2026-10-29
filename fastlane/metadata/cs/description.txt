@@ -1,45 +1,41 @@
-Probuď se u hudby, kterou máš rád. Nech si jen tu část, kterou chceš: refrén, chytlavý motiv, verš, který si zpíváš.
+My Sound Alarm je aplikace budíku pro iPhone, která tě probudí oblíbenou částí písničky nebo zvukem z videa. Budíky nastavuješ v této aplikaci a vybraná část se opakuje, dokud ji nevypneš.
 
-HLAVNÍ FUNKCE
+FUNKCE
 
-Probuď se u své oblíbené části
-Málokdo chce celou písničku, jen její část. Otevři video nebo zvukový soubor, podívej se na průběh vlny a tažením vyber úsek. Při úpravách si ho můžeš pustit. Průběh vlny ukazuje, kde je zvuk hlasitý a kde tichý.
+Probuď se u oblíbené části
+Otevři video nebo zvukový soubor, podívej se na průběh zvuku a vyber úsek. Nech si jen refrén, nebo celou písničku. Při úpravách můžeš poslouchat. Když dohraje do konce, začne znovu.
 
-Krátký úsek funguje dobře. Budík ho přehraje do konce a pak začne znovu, dokud nevstaneš. Často stačí dvacet nebo třicet sekund refrénu.
-
-Tvoje vlastní soubory
-Aplikace používá zvuk, který už máš: hudební soubor, nahrávku hlasu, zvuk z uloženého videa. Bez předplatného. Bez katalogu, ve kterém bys musel hledat.
+Bez omezení délky
+Vlastní vyzváněcí tóny v iPhonu končí asi po 40 sekundách. My Sound Alarm vezme z videa až 10 minut a dlouhé zvukové soubory se dají importovat celé.
 
 Zvuk z videa
-Vyber video z knihovny fotek a nech si jen zvuk. Hodí se pro uložená videa i ta, která sis natočil sám.
+Vyber video z knihovny fotek nebo z aplikace Soubory a nech si jen zvuk.
 
 Import zvukových souborů
-Podporuje MP3, AAC, WAV a M4A. Otevři je z aplikace Soubory.
+MP3, AAC, WAV a M4A. Přidej je z aplikace Soubory, nebo je pošli z jiné aplikace tlačítkem Sdílet.
 
-Budíkový systém od Applu
-Aplikace používá AlarmKit, budíkový systém od Applu. Tvůj budík zvoní stejně jako v aplikaci Hodiny. Není to trik na pozadí, který může selhat ve špatnou chvíli.
+Zvoní v tichém režimu
+My Sound Alarm plánuje své budíky přes AlarmKit, systém budíků, který Apple přidal v iOS 26. Zobrazují se na zamčené obrazovce jako budíky z vestavěné aplikace Hodiny a zvoní v tichém režimu i při zapnutém režimu soustředění, i když je My Sound Alarm zavřená.
 
-Poznej své zvuky
-Každý budík ukazuje obrázek svého zvuku: snímek z videa nebo obal souboru. Budíky tak snadno rozlišíš.
+„Ring now“
+Poslechni si vybraný zvuk hned, ve stejné hlasitosti jako skutečný budík.
 
-Žádný limit 40 sekund
-Vyzvánění iPhonu může trvat jen asi 40 sekund. Tady můžeš z videa vzít až 10 minut a zvukové soubory nemají žádný limit délky.
+Ochrana proti zaspání (Pro, předběžný přístup)
+Pokud budík do zvolené doby nevypneš, přehraje stejný zvuk znovu a hlasitěji. Pokud ji začneš používat během předběžného přístupu, zůstane ti i po oficiálním vydání.
 
-Sdílení
-Posílej zvuk nebo video do této aplikace z jiných aplikací.
+Opakování a odložení
+Vyber dny pro každý budík. Odložení může být vypnuté, nebo 1, 2, 5, 9 či 10 minut.
 
-Dny opakování
-Vyber dny pro každý budík: všední dny, víkend nebo jakékoli dny.
-
-Odložení
-Vyber 1, 2, 5 nebo 10 minut jedním klepnutím, nebo jakoukoli jinou hodnotu.
+Tvoje zvuky na první pohled
+Každý budík ukazuje záběr z videa nebo obal zvukového souboru.
 
 Noční režim
-Z iPhonu se stanou hodiny u postele. Velké, jemné číslice, dobře čitelné v tmavé místnosti.
+Z iPhonu se stanou hodiny u postele, s velkými jemnými číslicemi čitelnými ve tmě.
 
-PODPOROVANÉ FORMÁTY
+FORMÁTY
 MP3 / AAC / WAV / M4A / Zvuk z videa (MOV, MP4)
 
 POZNÁMKY
 - Vyžaduje iOS 26 nebo novější (AlarmKit)
-- Delší zvuk zabírá více místa. 10minutový zvuk budíku zabírá asi 50 MB.
+- Delší zvuky zabírají víc místa. 10minutový zvuk má asi 50 MB.
+- Skladby ze streamovacích služeb, jako je Apple Music nebo Spotify, se nedají importovat.

@@ -1,1 +1,1 @@
-Réveille-toi avec la musique que tu aimes. Garde seulement le refrain d'une vidéo ou d'un fichier audio : il se répète jusqu'à ce que tu te lèves.
+Une app de réveil qui te réveille avec le refrain d’une chanson ou le son d’une vidéo. Le passage choisi se répète jusqu’à ce que tu l’arrêtes, même en mode silencieux.
