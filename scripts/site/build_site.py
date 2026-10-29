@@ -49,6 +49,7 @@ PAGES = {
         "voices_title": "From the App Store",
         "rating_summary": "{count} ratings on the App Store from {regions} countries and regions, {as_of}.",
         "stars_label": "{n} out of 5 stars",
+        "usage_line": "More than {fired} alarms have rung with My Sound Alarm, in over {regions} countries and regions in the last 30 days ({as_of}).",
         "voices_note": "Every written review so far, in the reviewer's own words (one shortened to its title). Translations are ours.",
         "faq_title": "Questions",
         "faq": [
@@ -89,6 +90,7 @@ PAGES = {
         "voices_title": "App Store のレビュー",
         "rating_summary": "App Store で {regions} の国と地域から {count} 件の評価（{as_of}）。",
         "stars_label": "5 点中 {n} 点",
+        "usage_line": "My Sound Alarm で鳴ったアラームは {fired} 回以上。直近30日では {regions} 以上の国と地域で使われています（{as_of}）。",
         "voices_note": "これまでに書かれたレビューを原文のまま載せています（1件はタイトルのみ）。訳は当サイトによるものです。",
         "faq_title": "よくある質問",
         "faq": [
@@ -145,6 +147,10 @@ STOREFRONTS = ("us jp gb ca au de fr es it nl se no dk fi pl cz pt br mx ar cl c
 # Star breakdown from App Store Connect > Ratings and Reviews (all countries and regions).
 # The public lookup API lags and has no breakdown, so update this by hand from ASC.
 RATINGS_ASC = {"as_of": "2026-10-29", "counts": {5: 59, 4: 7, 3: 2, 2: 0, 1: 2}}
+# Usage from PostHog (store installs only; dev/simulator/TestFlight excluded). Update by hand monthly.
+# fired: alarm_fired since tracking began (2026-07-26), so the real total is higher -> "or more".
+# regions: countries/regions with active users in the last 30 days (108 on 2026-10-29).
+USAGE = {"as_of": "2026-10-29", "fired": 32000, "regions": 100}
 # Used when the App Store can't be reached at build time (2026-10-25).
 RATINGS_FALLBACK = {"count": 59, "avg": 4.8, "regions": 20}
 
@@ -190,6 +196,13 @@ def review_parts(v, lang, c):
     return star, meta, quote
 
 
+def usage_line(c, as_of):
+    sep = {"fr": "\u202f", "pl": "\u00a0", "cs": "\u00a0", "de": ".", "es": ".", "pt-BR": ".", "it": ".", "nl": "."}.get(c["html_lang"], ",")
+    fired = f'{USAGE["fired"]:,}'.replace(",", sep)
+    y, m, d = USAGE["as_of"].split("-")
+    return c["usage_line"].format(fired=fired, regions=USAGE["regions"], as_of=c["as_of_fmt"].format(y=int(y), m=int(m), d=int(d)))
+
+
 def featured_html(lang, c):
     """One real review, near the top, that says what the app is for in the user's own words."""
     v = next((r for r in REVIEWS if r.get("featured")), None)
@@ -223,6 +236,7 @@ def reviews_html(lang, c, r):
     return (f'<section class="voices"><h2>{esc(c["voices_title"])}</h2>'
             f'<div class="rating">{score}<div class="bars">{bars}</div></div>'
             f'<p class="rsum">{esc(summary)}</p>'
+            f'<p class="rsum">{esc(usage_line(c, as_of))}</p>'
             f'<ul>{"".join(items)}</ul><p class="note">{esc(c["voices_note"])}</p></section>')
 
 

@@ -30,6 +30,7 @@ LOCALES = {
         "voices_title": "Avis sur l’App Store",
         "rating_summary": "{count} notes sur l’App Store, de {regions} pays et régions, {as_of}.",
         "stars_label": "{n} étoiles sur 5",
+        "usage_line": "Plus de {fired} alarmes ont sonné avec My Sound Alarm, dans plus de {regions} pays et régions ces 30 derniers jours ({as_of}).",
         "voices_note": "Tous les avis écrits jusqu’ici, dans les mots de leurs auteurs (l’un réduit à son titre). Traductions de notre part.",
         "faq_title": "Questions",
         "faq": [
@@ -76,6 +77,7 @@ LOCALES = {
         "voices_title": "Aus dem App Store",
         "rating_summary": "{count} Bewertungen im App Store aus {regions} Ländern und Regionen, Stand {as_of}.",
         "stars_label": "{n} von 5 Sternen",
+        "usage_line": "Mit My Sound Alarm haben schon über {fired} Wecker geklingelt – in den letzten 30 Tagen in über {regions} Ländern und Regionen (Stand {as_of}).",
         "voices_note": "Alle bisher geschriebenen Rezensionen im Wortlaut (eine nur mit ihrem Titel). Übersetzungen von uns.",
         "faq_title": "Fragen",
         "faq": [
@@ -123,6 +125,7 @@ LOCALES = {
         "voices_title": "Desde el App Store",
         "rating_summary": "{count} valoraciones en el App Store de {regions} países y regiones, a {as_of}.",
         "stars_label": "{n} de 5 estrellas",
+        "usage_line": "Más de {fired} alarmas han sonado con My Sound Alarm, en más de {regions} países y regiones en los últimos 30 días (a {as_of}).",
         "voices_note": "Todas las reseñas escritas hasta ahora, con las palabras de sus autores (una reducida a su título). Las traducciones son nuestras.",
         "faq_title": "Preguntas",
         "faq": [
@@ -170,6 +173,7 @@ LOCALES = {
         "voices_title": "Da App Store",
         "rating_summary": "{count} avaliações na App Store, de {regions} países e regiões, em {as_of}.",
         "stars_label": "{n} de 5 estrelas",
+        "usage_line": "Mais de {fired} alarmes já tocaram com o My Sound Alarm, em mais de {regions} países e regiões nos últimos 30 dias (em {as_of}).",
         "voices_note": "Todas as avaliações escritas até agora, nas palavras de quem escreveu (uma reduzida ao título). As traduções são nossas.",
         "faq_title": "Perguntas",
         "faq": [
@@ -217,6 +221,7 @@ LOCALES = {
         "voices_title": "Da App Store",
         "rating_summary": "{count} valutazioni su App Store da {regions} paesi e regioni, al {as_of}.",
         "stars_label": "{n} stelle su 5",
+        "usage_line": "Con My Sound Alarm hanno suonato oltre {fired} sveglie, in più di {regions} paesi e regioni negli ultimi 30 giorni (al {as_of}).",
         "voices_note": "Tutte le recensioni scritte finora, con le parole di chi le ha scritte (una ridotta al titolo). Le traduzioni sono nostre.",
         "faq_title": "Domande",
         "faq": [
@@ -264,6 +269,7 @@ LOCALES = {
         "voices_title": "Uit de App Store",
         "rating_summary": "{count} beoordelingen in de App Store uit {regions} landen en regio’s, per {as_of}.",
         "stars_label": "{n} van 5 sterren",
+        "usage_line": "Met My Sound Alarm zijn al meer dan {fired} wekkers afgegaan, de afgelopen 30 dagen in meer dan {regions} landen en regio’s (per {as_of}).",
         "voices_note": "Alle geschreven recensies tot nu toe, in de woorden van de schrijver (één ingekort tot de titel). Vertalingen van ons.",
         "faq_title": "Vragen",
         "faq": [
@@ -311,6 +317,7 @@ LOCALES = {
         "voices_title": "App Store 리뷰",
         "rating_summary": "App Store에서 {regions}개 국가 및 지역의 평가 {count}개({as_of} 기준).",
         "stars_label": "5점 만점에 {n}점",
+        "usage_line": "My Sound Alarm으로 울린 알람은 {fired}회 이상. 최근 30일 동안 {regions}개 이상의 국가 및 지역에서 쓰였습니다({as_of} 기준).",
         "voices_note": "지금까지 작성된 모든 리뷰를 원문 그대로 싣습니다(1건은 제목만). 번역은 저희가 했습니다.",
         "faq_title": "자주 묻는 질문",
         "faq": [
@@ -357,6 +364,7 @@ LOCALES = {
         "voices_title": "来自 App Store",
         "rating_summary": "App Store 上来自 {regions} 个国家和地区的 {count} 个评分（截至 {as_of}）。",
         "stars_label": "5 星中的 {n} 星",
+        "usage_line": "用 My Sound Alarm 响起的闹钟已超过 {fired} 次，最近 30 天在 {regions} 多个国家和地区被使用（截至 {as_of}）。",
         "voices_note": "至今所有书面评论，均为原文（其中一条只保留标题）。译文由本站提供。",
         "faq_title": "常见问题",
         "faq": [
@@ -404,6 +412,7 @@ LOCALES = {
         "voices_title": "Z App Store",
         "rating_summary": "{count} ocen w App Store z {regions} krajów i regionów, stan na {as_of}.",
         "stars_label": "{n} z 5 gwiazdek",
+        "usage_line": "Z My Sound Alarm zadzwoniło już ponad {fired} budzików – w ostatnich 30 dniach w ponad {regions} krajach i regionach (stan na {as_of}).",
         "voices_note": "Wszystkie dotychczasowe recenzje pisemne, słowami autorów (jedna skrócona do tytułu). Tłumaczenia nasze.",
         "faq_title": "Pytania",
         "faq": [
@@ -451,6 +460,7 @@ LOCALES = {
         "voices_title": "Z App Storu",
         "rating_summary": "{count} hodnocení v App Storu z {regions} zemí a oblastí, k {as_of}.",
         "stars_label": "{n} z 5 hvězdiček",
+        "usage_line": "S My Sound Alarm už zazvonilo přes {fired} budíků – za posledních 30 dní ve více než {regions} zemích a oblastech (k {as_of}).",
         "voices_note": "Všechny dosud napsané recenze slovy jejich autorů (jedna zkrácená na nadpis). Překlady jsou naše.",
         "faq_title": "Otázky",
         "faq": [
@@ -498,6 +508,7 @@ LOCALES = {
         "voices_title": "من App Store",
         "rating_summary": "{count} تقييمًا على App Store من {regions} دولة ومنطقة، حتى {as_of}.",
         "stars_label": "{n} من 5 نجوم",
+        "usage_line": "رنّ أكثر من {fired} منبه باستخدام My Sound Alarm، في أكثر من {regions} دولة ومنطقة خلال آخر 30 يومًا (حتى {as_of}).",
         "voices_note": "كل المراجعات المكتوبة حتى الآن بكلمات أصحابها (واحدة مختصرة إلى عنوانها). الترجمات من عندنا.",
         "faq_title": "أسئلة",
         "faq": [
