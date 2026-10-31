@@ -34,6 +34,11 @@ struct CustomSoundAlarmApp: App {
                     }
 #endif
 
+                    // 広告の7日間猶予用に初回起動日を記録（#111）
+                    if AppGroup.firstLaunchDate == nil {
+                        AppGroup.firstLaunchDate = Date()
+                    }
+
                     #if DEBUG
                     // UIテスト用: アップデート案内を強制（#116）
                     if AppGroup.isUITestUpdateRequired || AppGroup.isUITestUpdateRecommended {

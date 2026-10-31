@@ -67,6 +67,9 @@ struct ContentView: View {
                     #endif
                     await updateChecker.check(isOnboardingVisible: showingOnboarding)
                 }
+                .safeAreaInset(edge: .bottom) {
+                    AdSlot(slot: .bannerAlarmList)
+                }
 
                 if showingOnboarding {
                     OnboardingView { source in

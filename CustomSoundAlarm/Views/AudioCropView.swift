@@ -160,6 +160,9 @@ struct AudioCropView: View {
             .padding(.bottom, 12)
         }
         .background(Color.warmListBackground.ignoresSafeArea())
+        .safeAreaInset(edge: .bottom) {
+            AdSlot(slot: .bannerImport)
+        }
         .navigationTitle(String(localized: "add_from_audio"))
         .navigationBarTitleDisplayMode(.inline)
         // 閉じるボタン（#82-2: 誤クローズ防止の代替出口。編集中は破棄を確認する）
@@ -278,6 +281,7 @@ struct AudioCropView: View {
                     gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
                     lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore)
                 ))
+                await AdPresenter.presentInterstitialIfAllowed(after: .importSaved)
 
                 // 一時コピーを破棄して閉じる
                 try? FileManager.default.removeItem(at: source.url)

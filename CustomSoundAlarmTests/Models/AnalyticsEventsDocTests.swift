@@ -28,6 +28,7 @@ struct AnalyticsEventsDocTests {
         "update_prompt_tapped",
         "update_prompt_dismissed",
         "sound_selected",
+        "ad_slot_eligible",
         "sound_preview_played",
         "custom_sound_imported",
         "video_import_started",

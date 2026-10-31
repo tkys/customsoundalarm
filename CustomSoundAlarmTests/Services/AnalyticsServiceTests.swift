@@ -89,6 +89,10 @@ struct AnalyticsEventTests {
         ).name == "update_prompt_shown")
         #expect(AnalyticsEvent.updatePromptTapped(kind: .recommended).name == "update_prompt_tapped")
         #expect(AnalyticsEvent.updatePromptDismissed(kind: .recommended).name == "update_prompt_dismissed")
+        // #111: 広告枠の機会
+        #expect(AnalyticsEvent.adSlotEligible(
+            slot: .bannerSounds, allowed: true, reason: .eligible, region: .standard
+        ).name == "ad_slot_eligible")
     }
 
     // MARK: alarm_created
@@ -333,6 +337,39 @@ struct AnalyticsEventTests {
         #expect(props["rank_bucket"] as? String == "4-10")
     }
 
+    // MARK: ad_slot_eligible (#111)
+
+    @Test
+    func adSlotEligibleProperties() {
+        let props = AnalyticsEvent.adSlotEligible(
+            slot: .bannerImport,
+            allowed: false,
+            reason: .quietHours,
+            region: .limitedOnly
+        ).properties
+
+        #expect(props.count == 4)
+        #expect(props["slot"] as? String == "banner_import")
+        #expect(props["allowed"] as? Bool == false)
+        #expect(props["reason"] as? String == "quiet_hours")
+        #expect(props["region"] as? String == "limited")
+    }
+
+    @Test
+    func adSlotEligibleProperties_interstitial() {
+        let props = AnalyticsEvent.adSlotEligible(
+            slot: .interstitialImportSaved,
+            allowed: true,
+            reason: .eligible,
+            region: .standard
+        ).properties
+
+        #expect(props["slot"] as? String == "interstitial_import_saved")
+        #expect(props["allowed"] as? Bool == true)
+        #expect(props["reason"] as? String == "eligible")
+        #expect(props["region"] as? String == "standard")
+    }
+
     // MARK: sound_preview_played
 
     @Test
@@ -357,6 +394,7 @@ struct AnalyticsEventTests {
             .videoImportFailed(reason: .unknown),
             .alarmDuplicated,
             .soundPickerRecentUsed,
+            .adSlotEligible(slot: .bannerSounds, allowed: true, reason: .eligible, region: .standard),
             .alarmFired(wasAppForeground: true, hour: 8, isRepeating: false, detection: "observer"),
             .alarmStopped(hour: 8),
             .alarmSnoozed(from: "observer"),
