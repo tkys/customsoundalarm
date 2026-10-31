@@ -23,7 +23,7 @@ struct AdPolicyTests {
         now: Date,
         timeZone: TimeZone = AdPolicyTests.utc,
         firstLaunchDate: Date? = nil,
-        originalAppVersion: String? = "11",
+        originalAppVersion: String? = String(AdsConfig.introductionBuild),
         isPro: Bool = false,
         lastInterstitialShownAt: Date? = nil,
         region: AdRegion = .standard
@@ -78,8 +78,8 @@ struct AdPolicyTests {
     @Test
     func existingBuilds_areDenied() {
         let now = Self.utcDate(2024, 1, 15, 12, 0)
-        // 実値: v1.5.0=6 / v1.7.1=9 / v1.8.0=10（広告導入は 1.9.0=11 予定）
-        for build in ["6", "9", "10"] {
+        // 実値: v1.5.0=6 / v1.7.1=9 / v1.8.0=10 / v1.8.1=11（広告導入は 1.9.0=12）
+        for build in ["6", "9", "10", "11"] {
             let p = AdPolicy(input: input(now: now, originalAppVersion: build))
             let decision = p.canShowBanner(context: .soundsList)
             #expect(!decision.allowed, "build \(build) must not see ads")
@@ -87,10 +87,18 @@ struct AdPolicyTests {
         }
     }
 
+    /// 1.8.1（ビルド11）は広告・制限の導入前に出るので、そこで入れた人は既存ユーザー（2026-10-30）
+    @Test
+    func build181_isExistingUser() {
+        #expect(AdsConfig.introductionBuild == 12, "1.9.0 = build 12; 1.8.1 (11) users must stay exempt")
+        let p = AdPolicy(input: input(now: Self.utcDate(2024, 1, 15, 12, 0), originalAppVersion: "11"))
+        #expect(p.canShowBanner(context: .soundsList).reason == .existingUser)
+    }
+
     @Test
     func introductionBuildAndLater_areAllowed() {
         let now = Self.utcDate(2024, 1, 15, 12, 0)
-        for build in ["11", "12"] {
+        for build in [String(AdsConfig.introductionBuild), String(AdsConfig.introductionBuild + 1)] {
             let p = AdPolicy(input: input(now: now, originalAppVersion: build))
             #expect(p.canShowBanner(context: .soundsList).allowed, "build \(build)")
         }
@@ -157,7 +165,7 @@ struct AdPolicyTests {
             now: now,
             timeZone: Self.utc,
             firstLaunchDate: nil,
-            originalAppVersion: "11",
+            originalAppVersion: String(AdsConfig.introductionBuild),
             introductionBuild: AdsConfig.introductionBuild,
             isPro: false,
             lastInterstitialShownAt: nil,

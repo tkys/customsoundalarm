@@ -13,8 +13,9 @@ enum AdsConfig {
     /// `AppTransaction.originalAppVersion` は **CFBundleVersion（ビルド番号）** を返すため、
     /// マーケティングバージョンではなくビルド番号で比較する。
     /// 1.9.0 のビルド番号が確定したら、リリース前にこの値を合わせること。
-    /// （暫定: 1.8.0=10 の次を想定した 11）
-    static let introductionBuild: Int = 11
+    /// 1.8.0=10、1.8.1=11（広告・制限なし）を先に出すため、1.9.0=12（2026-10-30）。
+    /// 11 のままだと 1.8.1 で入れた人が「新規」扱いになり、広告と音3つ制限の対象になってしまう。
+    static let introductionBuild: Int = 12
 
     /// 初回起動からの猶予（日）
     static let firstLaunchGraceDays: Int = 7
