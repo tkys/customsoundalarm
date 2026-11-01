@@ -1,0 +1,4 @@
+CFBundleDisplayName = "My Sound Alarm";
+NSAlarmKitUsageDescription = "Usato per far suonare le sveglie con i tuoi suoni preferiti.";
+NSMicrophoneUsageDescription = "Usato per registrare suoni di sveglia con il microfono.";
+NSPhotoLibraryUsageDescription = "Usato per accedere alla libreria foto ed estrarre l’audio dai video.";

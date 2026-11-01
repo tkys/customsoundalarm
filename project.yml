@@ -9,6 +9,17 @@ options:
   knownRegions:
     - en
     - ja
+    - ar
+    - cs
+    - de
+    - es
+    - fr
+    - it
+    - ko
+    - nl
+    - pl
+    - pt-BR
+    - zh-Hans
 
 packages:
   PostHog:

@@ -1,0 +1,4 @@
+CFBundleDisplayName = "My Sound Alarm";
+NSAlarmKitUsageDescription = "يُستخدم لرنين المنبهات بأصواتك المفضلة.";
+NSMicrophoneUsageDescription = "يُستخدم لتسجيل أصوات المنبهات بالميكروفون.";
+NSPhotoLibraryUsageDescription = "يُستخدم للوصول إلى مكتبة الصور لاستخراج الصوت من الفيديوهات.";

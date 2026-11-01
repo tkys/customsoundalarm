@@ -1,0 +1,240 @@
+/* ContentView */
+"alarm_title" = "المنبهات";
+"empty_title" = "استيقظ على صوتك المفضل";
+"empty_description" = "استورد أصواتًا من فيديو أو ملفات صوتية\nواستخدمها كمنبه";
+"add_alarm" = "إضافة منبه";
+"default_sound" = "افتراضي";
+
+/* Day labels (short) */
+"day_sun" = "أحد";
+"day_mon" = "اثنين";
+"day_tue" = "ثلاثاء";
+"day_wed" = "أربعاء";
+"day_thu" = "خميس";
+"day_fri" = "جمعة";
+"day_sat" = "سبت";
+
+/* Repeat summaries */
+"every_day" = "كل يوم";
+"weekdays" = "أيام الأسبوع";
+"weekends" = "عطلة نهاية الأسبوع";
+"never" = "أبدًا";
+
+/* AlarmDetailView */
+"edit_alarm" = "تعديل المنبه";
+"cancel" = "إلغاء";
+"save" = "حفظ";
+"time" = "الوقت";
+"sound" = "الصوت";
+"none" = "بلا";
+"repeat" = "التكرار";
+"label" = "الاسم";
+"alarm_placeholder" = "منبه";
+"delete_alarm" = "حذف المنبه";
+"delete_alarm_confirm" = "هل أنت متأكد من حذف هذا المنبه؟";
+"delete" = "حذف";
+
+/* RepeatSelectionView - Weekday labels (full) */
+"every_monday" = "كل يوم اثنين";
+"every_tuesday" = "كل يوم ثلاثاء";
+"every_wednesday" = "كل يوم أربعاء";
+"every_thursday" = "كل يوم خميس";
+"every_friday" = "كل يوم جمعة";
+"every_saturday" = "كل يوم سبت";
+"every_sunday" = "كل يوم أحد";
+
+/* SoundPickerView */
+"rename" = "إعادة تسمية";
+"sound_name_placeholder" = "اسم الصوت";
+"presets" = "جاهزة للاستخدام";
+"imported_sounds" = "أصواتي";
+"converting" = "جارٍ التحويل…";
+"add_from_video" = "إضافة من فيديو";
+"add_from_audio" = "إضافة ملف صوتي";
+"add_section" = "إضافة";
+"add_section_footer" = "استورد من MP3 أو AAC أو WAV أو M4A أو فيديو MOV أو MP4.";
+
+/* Waveform Crop (#77 / #79) */
+"waveform_loading" = "جارٍ إنشاء الموجة الصوتية…";
+"crop_and_save" = "إضافة التحديد";
+"import_whole_audio" = "إضافة الملف كاملًا";
+"crop_hint_footer" = "اسحب الموجة العلوية لتحديد الموضع التقريبي، والموجة السفلية المكبّرة للضبط الدقيق.";
+"time_start" = "البداية";
+"time_end" = "النهاية";
+"time_length" = "المدة";
+"time_total" = "الإجمالي";
+
+/* Discard confirmation (#82) */
+"close" = "إغلاق";
+"discard" = "تجاهل";
+"discard_edits_title" = "تجاهل التعديلات؟";
+"discard_edits_message" = "لن يتم حفظ تحديدك.";
+
+/* Sound name formatting (#93) */
+"imported_sound_default" = "صوت مستورد";
+"my_sounds_empty_title" = "اجعل أي صوت منبهك";
+"my_sounds_empty_description" = "استورد موسيقى من فيديو أو ملفاتك الصوتية\nالمفضلة لاستخدامها كصوت منبه";
+"file_access_denied" = "تم رفض الوصول إلى الملف";
+
+/* VideoTrimView */
+"add_from_video_title" = "إضافة صوت من فيديو";
+"loading" = "جارٍ التحميل…";
+"select_video" = "اختر فيديو";
+"preview" = "معاينة";
+"selected_duration" = "المحدد: %@";
+"stop" = "إيقاف";
+"preview_selection" = "تشغيل";
+"start" = "البداية";
+"end" = "النهاية";
+"range" = "النطاق";
+"duration_warning" = "التحديد يتجاوز 30 ثانية. يُنصح بأصوات منبه بطول 30 ثانية أو أقل.";
+
+/* ShareExtension */
+"saving" = "جارٍ الحفظ…";
+"no_data_received" = "لم يتم استلام أي بيانات";
+"no_audio_found" = "لم يتم العثور على ملف صوتي متوافق";
+"file_load_failed" = "تعذّر تحميل الملف";
+"saved_format" = "تم حفظ «%@»";
+
+/* AlarmScheduler */
+"stop_alarm" = "إيقاف";
+"snooze" = "غفوة";
+
+/* AlarmIntents */
+"dismiss_alarm_intent" = "إيقاف المنبه";
+"snooze_intent" = "غفوة";
+
+/* AudioConverter errors */
+"error_buffer_creation" = "تعذّر إنشاء مخزن الصوت المؤقت";
+"error_converter_creation" = "تعذّر إنشاء محوّل الصوت";
+"error_conversion_failed" = "فشل تحويل الصوت: %@";
+"error_conversion_status" = "خطأ في حالة التحويل";
+"error_empty_file" = "الملف المحوّل فارغ";
+
+/* VideoAudioExtractor errors */
+"error_no_audio_track" = "لا يحتوي هذا الفيديو على مسار صوتي";
+"error_export_session" = "تعذّر إنشاء جلسة التصدير";
+"error_extraction_failed" = "فشل استخراج الصوت: %@";
+"error_unknown" = "خطأ غير معروف";
+
+/* Sound missing (fallback when the referenced sound is deleted) */
+"sound_missing" = "الصوت غير موجود";
+
+/* Preset sound names */
+"preset_marimba" = "ماريمبا";
+"preset_bell" = "جرس ناعم";
+"preset_crescendo" = "تصاعد";
+"preset_beep" = "صفير كلاسيكي";
+"preset_ascending" = "تصاعدي";
+"preset_dual_tone" = "نغمة مزدوجة";
+"preset_music_box" = "صندوق موسيقى";
+
+/* Bedside Clock */
+"bedside_today" = "اليوم";
+"bedside_tomorrow" = "غدًا";
+"bedside_no_alarm" = "لا يوجد منبه";
+"bedside_theme_white" = "أبيض";
+"bedside_theme_amber" = "كهرماني";
+"bedside_brightness" = "السطوع";
+"bedside_show_countdown" = "العد التنازلي";
+"bedside_show_sound_name" = "اسم الصوت";
+"bedside_show_date" = "التاريخ";
+"bedside_show_seconds" = "الثواني";
+"bedside_font_size" = "حجم النص";
+"bedside_layout" = "نمط الساعة";
+"bedside_layout_digital_large" = "رقمي";
+"bedside_layout_minimal" = "بسيط";
+"bedside_layout_digital_bold" = "عريض";
+"bedside_layout_flip" = "Flip (Pro)";
+"bedside_exit" = "الخروج من الوضع الليلي";
+"bedside_exit_hint" = "اضغط مطولًا للخروج";
+
+/* Live Activity */
+"snoozing" = "في غفوة";
+
+/* Snooze */
+"snooze_off" = "إيقاف";
+"snooze_minutes_fmt" = "%d د";
+
+/* Convenience Phase 1 (duplicate / countdown / save toast) */
+"duplicate_alarm" = "تكرار";
+"countdown_minutes" = "%ld د";
+"countdown_hours_minutes" = "%1$ld س %2$ld د";
+"countdown_days_hours" = "%1$ld ي %2$ld س";
+"countdown_until" = "بعد %@";
+"alarm_will_ring_in" = "يرن بعد %@";
+
+/* Alarm Edit */
+"alarm_is_off" = "هذا المنبه متوقف";
+
+/* Video Trimmer */
+"no_video" = "لا يوجد فيديو";
+
+/* Video Import Source */
+"video_source_title" = "اختيار مصدر الفيديو";
+"video_source_photo" = "مكتبة الصور";
+"video_source_file" = "الملفات";
+"error_file_access_denied" = "تم رفض الوصول إلى الملف.";
+"error_file_copy_failed" = "تعذّر نسخ الملف.";
+"error_unsupported_video_format" = "تنسيق فيديو غير مدعوم.";
+
+/* Onboarding (#98) */
+"onb.hero.title" = "استيقظ على الجزء الذي تحبه";
+"onb.loop.title" = "اختر اللازمة. ستتكرر حتى تستيقظ.";
+"onb.next" = "التالي";
+"onb.silent.title" = "ليَرن حتى في الوضع الصامت";
+"onb.continue" = "متابعة";
+"onb.source.title" = "من أين يأتي الصوت الذي تحبه؟";
+"onb.source.video" = "من فيديو";
+"onb.source.audio" = "من ملف صوتي";
+"onb.source.preset" = "جرّب صوتًا مدمجًا";
+"onb.later" = "لاحقًا";
+
+/* Trial ring (#109) */
+"test_ring_title" = "رنّ الآن";
+"test_ring_failed" = "تعذّر جدولة منبه الاختبار.";
+"test_ring_simulator_unavailable" = "تجربة الرنين متاحة على جهاز حقيقي فقط.";
+"test_ring_alarm_title" = "منبه اختبار";
+"test_ring_backup_title" = "جرّب صوت الحماية من النوم الزائد";
+
+/* Why the trial ring can't ring (#150) */
+"test_ring_reason_not_authorized" = "لم يُسمح بالمنبهات بعد. افتح الإعدادات واسمح بالمنبهات.";
+"test_ring_reason_denied" = "الوصول إلى المنبهات محظور. افتح الإعدادات واسمح بالمنبهات.";
+
+/* Loudness (#109 C) */
+
+/* Backup alarm (#110) */
+"backup_alarm_toggle" = "الحماية من النوم الزائد";
+"backup_alarm_title_fmt" = "الحماية من النوم الزائد: %@";
+"backup_alarm_description_fmt" = "إذا لم توقف منبه %@ بحلول %@، فسيعيد تشغيل الصوت نفسه بصوت أعلى.";
+"backup_alarm_minutes" = "الرنين مرة أخرى بعد";
+"backup_alarm_minutes_fmt" = "بعد %d د";
+"backup_alarm_before_snooze" = "يرن قبل انتهاء الغفوة.";
+"backup_alarm_early_access_note" = "إذا بدأت استخدامها خلال الوصول المبكر، فستحتفظ بها بعد الإصدار الرسمي.";
+"backup_alarm_row_badge" = "الحماية من النوم الزائد مفعّلة";
+
+/* Update gate (#116) */
+"update_required_title" = "التحديث مطلوب";
+"update_required_message" = "لمتابعة استخدام My Sound Alarm، يُرجى التحديث إلى أحدث إصدار. ستظل المنبهات التي أعددتها ترن حتى تحدّث.";
+"update_recommended_title" = "يتوفر إصدار جديد";
+"update_button" = "التحديث على App Store";
+"update_later" = "لاحقًا";
+
+/* Volume guide (#121) */
+"volume_guide_title" = "كيف تجعل المنبهات أعلى صوتًا";
+"volume_guide_step1" = "الإعدادات → الأصوات والحس اللمسي → حرّك شريط النغمات والتنبيهات إلى اليمين";
+"volume_guide_step2" = "فعّل التغيير بالأزرار لاستخدام أزرار مستوى الصوت أيضًا (عندما لا يعمل صوت آخر)";
+"volume_guide_image_label" = "شاشة الإعدادات > الأصوات والحس اللمسي، مع تحديد شريط النغمات والتنبيهات ومفتاح التغيير بالأزرار";
+"volume_guide_warning" = "مستوى الصوت في مركز التحكم مخصص للموسيقى والفيديو، ولا يغيّر مستوى صوت المنبهات.";
+"alarm_permission_required" = "إذن المنبهات مطلوب";
+"open_settings" = "فتح الإعدادات";
+"volume_guide_link" = "الصوت منخفض؟";
+"test_ring_ringing_now" = "يرن الآن";
+"backup_alarm_info_title" = "الحماية من النوم الزائد";
+"backup_alarm_info_mechanism" = "إذا لم يتم إيقاف المنبه خلال المدة التي حددتها، فسيرن مرة أخرى.";
+"backup_alarm_info_louder" = "يشغّل الصوت نفسه بصوت أعلى ودون تشويه. وكلما كان الصوت الأصلي أهدأ، زاد رفعه.";
+"backup_alarm_info_volume" = "مستوى الرنين الفعلي يعتمد على مستوى النغمات والتنبيهات في الإعدادات.";
+"backup_alarm_info_accessibility" = "حول الحماية من النوم الزائد";
+
+"night_mode" = "الوضع الليلي";
+"size_warning" = "الأصوات الطويلة تستخدم نحو %@ من المساحة.";

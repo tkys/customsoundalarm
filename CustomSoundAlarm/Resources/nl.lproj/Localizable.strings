@@ -1,0 +1,240 @@
+/* ContentView */
+"alarm_title" = "Wekkers";
+"empty_title" = "Word wakker met je favoriete geluid";
+"empty_description" = "Importeer geluiden uit video’s of audiobestanden\nen gebruik ze als wekker";
+"add_alarm" = "Wekker toevoegen";
+"default_sound" = "Standaard";
+
+/* Day labels (short) */
+"day_sun" = "zo.";
+"day_mon" = "ma.";
+"day_tue" = "di.";
+"day_wed" = "wo.";
+"day_thu" = "do.";
+"day_fri" = "vr.";
+"day_sat" = "za.";
+
+/* Repeat summaries */
+"every_day" = "Elke dag";
+"weekdays" = "Werkdagen";
+"weekends" = "Weekend";
+"never" = "Nooit";
+
+/* AlarmDetailView */
+"edit_alarm" = "Wekker bewerken";
+"cancel" = "Annuleer";
+"save" = "Bewaar";
+"time" = "Tijd";
+"sound" = "Geluid";
+"none" = "Geen";
+"repeat" = "Herhaal";
+"label" = "Label";
+"alarm_placeholder" = "Wekker";
+"delete_alarm" = "Wekker verwijderen";
+"delete_alarm_confirm" = "Weet je zeker dat je deze wekker wilt verwijderen?";
+"delete" = "Verwijder";
+
+/* RepeatSelectionView - Weekday labels (full) */
+"every_monday" = "Elke maandag";
+"every_tuesday" = "Elke dinsdag";
+"every_wednesday" = "Elke woensdag";
+"every_thursday" = "Elke donderdag";
+"every_friday" = "Elke vrijdag";
+"every_saturday" = "Elke zaterdag";
+"every_sunday" = "Elke zondag";
+
+/* SoundPickerView */
+"rename" = "Wijzig naam";
+"sound_name_placeholder" = "Naam van geluid";
+"presets" = "Klaar voor gebruik";
+"imported_sounds" = "Mijn geluiden";
+"converting" = "Converteren…";
+"add_from_video" = "Toevoegen uit video";
+"add_from_audio" = "Audiobestand toevoegen";
+"add_section" = "Voeg toe";
+"add_section_footer" = "Importeer uit MP3, AAC, WAV, M4A of video (MOV, MP4).";
+
+/* Waveform Crop (#77 / #79) */
+"waveform_loading" = "Golfvorm genereren…";
+"crop_and_save" = "Selectie toevoegen";
+"import_whole_audio" = "Heel bestand toevoegen";
+"crop_hint_footer" = "Sleep de bovenste golfvorm voor een ruwe positie en de onderste, vergrote golfvorm voor fijne afstelling.";
+"time_start" = "Begin";
+"time_end" = "Einde";
+"time_length" = "Duur";
+"time_total" = "Totaal";
+
+/* Discard confirmation (#82) */
+"close" = "Sluit";
+"discard" = "Verwerp";
+"discard_edits_title" = "Wijzigingen verwerpen?";
+"discard_edits_message" = "Je selectie wordt niet bewaard.";
+
+/* Sound name formatting (#93) */
+"imported_sound_default" = "Geïmporteerd geluid";
+"my_sounds_empty_title" = "Maak van elk geluid je wekker";
+"my_sounds_empty_description" = "Importeer muziek uit video’s of je favoriete\naudiobestanden om als wekkergeluid te gebruiken";
+"file_access_denied" = "Toegang tot bestand geweigerd";
+
+/* VideoTrimView */
+"add_from_video_title" = "Audio uit video toevoegen";
+"loading" = "Laden…";
+"select_video" = "Kies een video";
+"preview" = "Voorbeeld";
+"selected_duration" = "Selectie: %@";
+"stop" = "Stop";
+"preview_selection" = "Speel af";
+"start" = "Begin";
+"end" = "Einde";
+"range" = "Bereik";
+"duration_warning" = "De selectie is langer dan 30 seconden. Wekkergeluiden van 30 seconden of korter worden aanbevolen.";
+
+/* ShareExtension */
+"saving" = "Bewaren…";
+"no_data_received" = "Geen gegevens ontvangen";
+"no_audio_found" = "Geen compatibel audiobestand gevonden";
+"file_load_failed" = "Bestand laden mislukt";
+"saved_format" = "‘%@’ bewaard";
+
+/* AlarmScheduler */
+"stop_alarm" = "Stop";
+"snooze" = "Sluimeren";
+
+/* AlarmIntents */
+"dismiss_alarm_intent" = "Wekker stoppen";
+"snooze_intent" = "Sluimeren";
+
+/* AudioConverter errors */
+"error_buffer_creation" = "Kan audiobuffer niet maken";
+"error_converter_creation" = "Kan audioconverter niet maken";
+"error_conversion_failed" = "Audioconversie mislukt: %@";
+"error_conversion_status" = "Fout in conversiestatus";
+"error_empty_file" = "Geconverteerd bestand is leeg";
+
+/* VideoAudioExtractor errors */
+"error_no_audio_track" = "Deze video heeft geen audiotrack";
+"error_export_session" = "Kan exportsessie niet maken";
+"error_extraction_failed" = "Audio-extractie mislukt: %@";
+"error_unknown" = "Onbekende fout";
+
+/* Sound missing (fallback when the referenced sound is deleted) */
+"sound_missing" = "Geluid niet gevonden";
+
+/* Preset sound names */
+"preset_marimba" = "Marimba";
+"preset_bell" = "Zachte bel";
+"preset_crescendo" = "Crescendo";
+"preset_beep" = "Retro-piep";
+"preset_ascending" = "Oplopend";
+"preset_dual_tone" = "Dubbele toon";
+"preset_music_box" = "Speeldoos";
+
+/* Bedside Clock */
+"bedside_today" = "Vandaag";
+"bedside_tomorrow" = "Morgen";
+"bedside_no_alarm" = "Geen wekker";
+"bedside_theme_white" = "Wit";
+"bedside_theme_amber" = "Amber";
+"bedside_brightness" = "Helderheid";
+"bedside_show_countdown" = "Aftellen";
+"bedside_show_sound_name" = "Naam van geluid";
+"bedside_show_date" = "Datum";
+"bedside_show_seconds" = "Seconden";
+"bedside_font_size" = "Tekstgrootte";
+"bedside_layout" = "Klokstijl";
+"bedside_layout_digital_large" = "Digitaal";
+"bedside_layout_minimal" = "Minimaal";
+"bedside_layout_digital_bold" = "Vet";
+"bedside_layout_flip" = "Flip (Pro)";
+"bedside_exit" = "Nachtmodus verlaten";
+"bedside_exit_hint" = "Houd ingedrukt om te verlaten";
+
+/* Live Activity */
+"snoozing" = "Sluimeren";
+
+/* Snooze */
+"snooze_off" = "Uit";
+"snooze_minutes_fmt" = "%d min";
+
+/* Convenience Phase 1 (duplicate / countdown / save toast) */
+"duplicate_alarm" = "Dupliceer";
+"countdown_minutes" = "%ld min";
+"countdown_hours_minutes" = "%1$ld u %2$ld min";
+"countdown_days_hours" = "%1$ld d %2$ld u";
+"countdown_until" = "over %@";
+"alarm_will_ring_in" = "Gaat af over %@";
+
+/* Alarm Edit */
+"alarm_is_off" = "Deze wekker staat uit";
+
+/* Video Trimmer */
+"no_video" = "Geen video";
+
+/* Video Import Source */
+"video_source_title" = "Kies videobron";
+"video_source_photo" = "Fotobibliotheek";
+"video_source_file" = "Bestanden";
+"error_file_access_denied" = "Toegang tot het bestand is geweigerd.";
+"error_file_copy_failed" = "Kan het bestand niet kopiëren.";
+"error_unsupported_video_format" = "Niet-ondersteunde video-indeling.";
+
+/* Onboarding (#98) */
+"onb.hero.title" = "Word wakker met het stuk dat je mooi vindt";
+"onb.loop.title" = "Kies het refrein. Het speelt tot je op bent.";
+"onb.next" = "Volgende";
+"onb.silent.title" = "Zo gaat hij af, ook in de stille modus";
+"onb.continue" = "Ga door";
+"onb.source.title" = "Waar komt het geluid vandaan?";
+"onb.source.video" = "Uit een video";
+"onb.source.audio" = "Uit een audiobestand";
+"onb.source.preset" = "Probeer een ingebouwd geluid";
+"onb.later" = "Later";
+
+/* Trial ring (#109) */
+"test_ring_title" = "Laat nu afgaan";
+"test_ring_failed" = "Kon de testwekker niet inplannen.";
+"test_ring_simulator_unavailable" = "De testwekker is alleen beschikbaar op een echt apparaat.";
+"test_ring_alarm_title" = "Testwekker";
+"test_ring_backup_title" = "Probeer het geluid van de verslaapbeveiliging";
+
+/* Why the trial ring can't ring (#150) */
+"test_ring_reason_not_authorized" = "Wekkers zijn nog niet toegestaan. Open Instellingen en sta wekkers toe.";
+"test_ring_reason_denied" = "Toegang tot wekkers is geblokkeerd. Open Instellingen en sta wekkers toe.";
+
+/* Loudness (#109 C) */
+
+/* Backup alarm (#110) */
+"backup_alarm_toggle" = "Verslaapbeveiliging";
+"backup_alarm_title_fmt" = "Verslaapbeveiliging: %@";
+"backup_alarm_description_fmt" = "Als je de wekker van %@ niet voor %@ hebt uitgezet, speelt hij hetzelfde geluid opnieuw, harder.";
+"backup_alarm_minutes" = "Opnieuw afgaan na";
+"backup_alarm_minutes_fmt" = "%d min later";
+"backup_alarm_before_snooze" = "Hij gaat af voordat je sluimeren eindigt.";
+"backup_alarm_early_access_note" = "Als je hem tijdens de vroege toegang gaat gebruiken, houd je hem na de definitieve versie.";
+"backup_alarm_row_badge" = "Verslaapbeveiliging aan";
+
+/* Update gate (#116) */
+"update_required_title" = "Update vereist";
+"update_required_message" = "Om My Sound Alarm te blijven gebruiken, werk bij naar de nieuwste versie. Wekkers die je al hebt ingesteld, gaan af tot je bijwerkt.";
+"update_recommended_title" = "Er is een nieuwe versie";
+"update_button" = "Werk bij in de App Store";
+"update_later" = "Later";
+
+/* Volume guide (#121) */
+"volume_guide_title" = "Zo maak je wekkers harder";
+"volume_guide_step1" = "Instellingen → Geluiden en voelbare feedback → schuif de regelaar Beltoon en meldingen naar rechts";
+"volume_guide_step2" = "Zet Wijzig met knoppen aan om ook de volumeknoppen te gebruiken (als er niets anders speelt)";
+"volume_guide_image_label" = "Het scherm Instellingen > Geluiden en voelbare feedback, met de regelaar Beltoon en meldingen en de schakelaar Wijzig met knoppen gemarkeerd";
+"volume_guide_warning" = "Het volume in het bedieningspaneel is voor muziek en video’s. Het verandert het wekkervolume niet.";
+"alarm_permission_required" = "Toestemming voor wekkers vereist";
+"open_settings" = "Open Instellingen";
+"volume_guide_link" = "Te zacht?";
+"test_ring_ringing_now" = "Gaat nu af";
+"backup_alarm_info_title" = "Verslaapbeveiliging";
+"backup_alarm_info_mechanism" = "Als de wekker niet binnen de ingestelde tijd wordt gestopt, gaat hij opnieuw af.";
+"backup_alarm_info_louder" = "Hij speelt hetzelfde geluid, harder en zonder vervorming. Hoe zachter het originele geluid, hoe meer het wordt verhoogd.";
+"backup_alarm_info_volume" = "Hoe hard hij echt gaat, hangt af van het volume van Beltoon en meldingen in Instellingen.";
+"backup_alarm_info_accessibility" = "Over de verslaapbeveiliging";
+
+"night_mode" = "Nachtmodus";
+"size_warning" = "Lange geluiden gebruiken ongeveer %@ opslag.";

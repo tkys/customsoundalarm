@@ -1,0 +1,4 @@
+CFBundleDisplayName = "My Sound Alarm";
+NSAlarmKitUsageDescription = "Używane do dzwonienia budzików ulubionymi dźwiękami.";
+NSMicrophoneUsageDescription = "Używane do nagrywania dźwięków budzika mikrofonem.";
+NSPhotoLibraryUsageDescription = "Używane do dostępu do biblioteki zdjęć w celu wyodrębnienia dźwięku z wideo.";

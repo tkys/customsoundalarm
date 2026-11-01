@@ -1,0 +1,240 @@
+/* ContentView */
+"alarm_title" = "Budziki";
+"empty_title" = "Budź się przy ulubionym dźwięku";
+"empty_description" = "Importuj dźwięki z wideo lub plików audio\ni ustaw je jako budzik";
+"add_alarm" = "Dodaj budzik";
+"default_sound" = "Domyślny";
+
+/* Day labels (short) */
+"day_sun" = "niedz.";
+"day_mon" = "pon.";
+"day_tue" = "wt.";
+"day_wed" = "śr.";
+"day_thu" = "czw.";
+"day_fri" = "pt.";
+"day_sat" = "sob.";
+
+/* Repeat summaries */
+"every_day" = "Codziennie";
+"weekdays" = "Dni robocze";
+"weekends" = "Weekendy";
+"never" = "Nigdy";
+
+/* AlarmDetailView */
+"edit_alarm" = "Edytuj budzik";
+"cancel" = "Anuluj";
+"save" = "Zapisz";
+"time" = "Godzina";
+"sound" = "Dźwięk";
+"none" = "Brak";
+"repeat" = "Powtarzaj";
+"label" = "Etykieta";
+"alarm_placeholder" = "Budzik";
+"delete_alarm" = "Usuń budzik";
+"delete_alarm_confirm" = "Czy na pewno chcesz usunąć ten budzik?";
+"delete" = "Usuń";
+
+/* RepeatSelectionView - Weekday labels (full) */
+"every_monday" = "W każdy poniedziałek";
+"every_tuesday" = "W każdy wtorek";
+"every_wednesday" = "W każdą środę";
+"every_thursday" = "W każdy czwartek";
+"every_friday" = "W każdy piątek";
+"every_saturday" = "W każdą sobotę";
+"every_sunday" = "W każdą niedzielę";
+
+/* SoundPickerView */
+"rename" = "Zmień nazwę";
+"sound_name_placeholder" = "Nazwa dźwięku";
+"presets" = "Gotowe do użycia";
+"imported_sounds" = "Moje dźwięki";
+"converting" = "Konwertowanie…";
+"add_from_video" = "Dodaj z wideo";
+"add_from_audio" = "Dodaj plik audio";
+"add_section" = "Dodaj";
+"add_section_footer" = "Importuj z MP3, AAC, WAV, M4A lub wideo (MOV, MP4).";
+
+/* Waveform Crop (#77 / #79) */
+"waveform_loading" = "Generowanie przebiegu fali…";
+"crop_and_save" = "Dodaj zaznaczenie";
+"import_whole_audio" = "Dodaj cały plik";
+"crop_hint_footer" = "Przeciągnij górny przebieg fali, aby zgrubnie ustawić pozycję, a dolny, powiększony, aby precyzyjnie dopasować.";
+"time_start" = "Początek";
+"time_end" = "Koniec";
+"time_length" = "Długość";
+"time_total" = "Razem";
+
+/* Discard confirmation (#82) */
+"close" = "Zamknij";
+"discard" = "Odrzuć";
+"discard_edits_title" = "Odrzucić zmiany?";
+"discard_edits_message" = "Zaznaczenie nie zostanie zapisane.";
+
+/* Sound name formatting (#93) */
+"imported_sound_default" = "Zaimportowany dźwięk";
+"my_sounds_empty_title" = "Zrób budzik z dowolnego dźwięku";
+"my_sounds_empty_description" = "Importuj muzykę z wideo lub ulubionych plików audio,\naby użyć jej jako dźwięku budzika";
+"file_access_denied" = "Odmowa dostępu do pliku";
+
+/* VideoTrimView */
+"add_from_video_title" = "Dodaj dźwięk z wideo";
+"loading" = "Wczytywanie…";
+"select_video" = "Wybierz wideo";
+"preview" = "Podgląd";
+"selected_duration" = "Zaznaczono: %@";
+"stop" = "Zatrzymaj";
+"preview_selection" = "Odtwórz";
+"start" = "Początek";
+"end" = "Koniec";
+"range" = "Zakres";
+"duration_warning" = "Zaznaczenie przekracza 30 sekund. Zalecane są dźwięki budzika o długości do 30 sekund.";
+
+/* ShareExtension */
+"saving" = "Zapisywanie…";
+"no_data_received" = "Nie otrzymano danych";
+"no_audio_found" = "Nie znaleziono zgodnego pliku audio";
+"file_load_failed" = "Nie udało się wczytać pliku";
+"saved_format" = "Zapisano „%@”";
+
+/* AlarmScheduler */
+"stop_alarm" = "Zatrzymaj";
+"snooze" = "Drzemka";
+
+/* AlarmIntents */
+"dismiss_alarm_intent" = "Zatrzymaj budzik";
+"snooze_intent" = "Drzemka";
+
+/* AudioConverter errors */
+"error_buffer_creation" = "Nie udało się utworzyć bufora audio";
+"error_converter_creation" = "Nie udało się utworzyć konwertera audio";
+"error_conversion_failed" = "Konwersja audio nie powiodła się: %@";
+"error_conversion_status" = "Błąd stanu konwersji";
+"error_empty_file" = "Przekonwertowany plik jest pusty";
+
+/* VideoAudioExtractor errors */
+"error_no_audio_track" = "To wideo nie ma ścieżki audio";
+"error_export_session" = "Nie udało się utworzyć sesji eksportu";
+"error_extraction_failed" = "Wyodrębnianie audio nie powiodło się: %@";
+"error_unknown" = "Nieznany błąd";
+
+/* Sound missing (fallback when the referenced sound is deleted) */
+"sound_missing" = "Nie znaleziono dźwięku";
+
+/* Preset sound names */
+"preset_marimba" = "Marimba";
+"preset_bell" = "Delikatny dzwonek";
+"preset_crescendo" = "Crescendo";
+"preset_beep" = "Retro sygnał";
+"preset_ascending" = "Rosnący";
+"preset_dual_tone" = "Podwójny ton";
+"preset_music_box" = "Pozytywka";
+
+/* Bedside Clock */
+"bedside_today" = "Dzisiaj";
+"bedside_tomorrow" = "Jutro";
+"bedside_no_alarm" = "Brak budzika";
+"bedside_theme_white" = "Biały";
+"bedside_theme_amber" = "Bursztynowy";
+"bedside_brightness" = "Jasność";
+"bedside_show_countdown" = "Odliczanie";
+"bedside_show_sound_name" = "Nazwa dźwięku";
+"bedside_show_date" = "Data";
+"bedside_show_seconds" = "Sekundy";
+"bedside_font_size" = "Rozmiar tekstu";
+"bedside_layout" = "Styl zegara";
+"bedside_layout_digital_large" = "Cyfrowy";
+"bedside_layout_minimal" = "Minimalny";
+"bedside_layout_digital_bold" = "Pogrubiony";
+"bedside_layout_flip" = "Flip (Pro)";
+"bedside_exit" = "Wyjdź z trybu nocnego";
+"bedside_exit_hint" = "Przytrzymaj, aby wyjść";
+
+/* Live Activity */
+"snoozing" = "Drzemka";
+
+/* Snooze */
+"snooze_off" = "Wyłączona";
+"snooze_minutes_fmt" = "%d min";
+
+/* Convenience Phase 1 (duplicate / countdown / save toast) */
+"duplicate_alarm" = "Duplikuj";
+"countdown_minutes" = "%ld min";
+"countdown_hours_minutes" = "%1$ld godz. %2$ld min";
+"countdown_days_hours" = "%1$ld dni %2$ld godz.";
+"countdown_until" = "za %@";
+"alarm_will_ring_in" = "Zadzwoni za %@";
+
+/* Alarm Edit */
+"alarm_is_off" = "Ten budzik jest wyłączony";
+
+/* Video Trimmer */
+"no_video" = "Brak wideo";
+
+/* Video Import Source */
+"video_source_title" = "Wybierz źródło wideo";
+"video_source_photo" = "Biblioteka zdjęć";
+"video_source_file" = "Pliki";
+"error_file_access_denied" = "Odmówiono dostępu do pliku.";
+"error_file_copy_failed" = "Nie udało się skopiować pliku.";
+"error_unsupported_video_format" = "Nieobsługiwany format wideo.";
+
+/* Onboarding (#98) */
+"onb.hero.title" = "Budź się przy ulubionym fragmencie";
+"onb.loop.title" = "Wybierz refren. Będzie grał, aż wstaniesz.";
+"onb.next" = "Dalej";
+"onb.silent.title" = "Aby dzwonił nawet w trybie cichym";
+"onb.continue" = "Kontynuuj";
+"onb.source.title" = "Skąd pochodzi twój ulubiony dźwięk?";
+"onb.source.video" = "Z wideo";
+"onb.source.audio" = "Z pliku audio";
+"onb.source.preset" = "Wypróbuj wbudowany dźwięk";
+"onb.later" = "Później";
+
+/* Trial ring (#109) */
+"test_ring_title" = "Zadzwoń teraz";
+"test_ring_failed" = "Nie udało się zaplanować budzika testowego.";
+"test_ring_simulator_unavailable" = "Test dzwonienia jest dostępny tylko na prawdziwym urządzeniu.";
+"test_ring_alarm_title" = "Budzik testowy";
+"test_ring_backup_title" = "Wypróbuj dźwięk ochrony przed zaspaniem";
+
+/* Why the trial ring can't ring (#150) */
+"test_ring_reason_not_authorized" = "Budziki nie są jeszcze dozwolone. Otwórz Ustawienia i zezwól na budziki.";
+"test_ring_reason_denied" = "Dostęp do budzików jest zablokowany. Otwórz Ustawienia i zezwól na budziki.";
+
+/* Loudness (#109 C) */
+
+/* Backup alarm (#110) */
+"backup_alarm_toggle" = "Ochrona przed zaspaniem";
+"backup_alarm_title_fmt" = "Ochrona przed zaspaniem: %@";
+"backup_alarm_description_fmt" = "Jeśli nie wyłączysz budzika o %@ do %@, odtworzy ten sam dźwięk ponownie, głośniej.";
+"backup_alarm_minutes" = "Zadzwoń ponownie po";
+"backup_alarm_minutes_fmt" = "po %d min";
+"backup_alarm_before_snooze" = "Dzwoni przed końcem drzemki.";
+"backup_alarm_early_access_note" = "Jeśli zaczniesz jej używać we wczesnym dostępie, zachowasz ją po pełnym wydaniu.";
+"backup_alarm_row_badge" = "Ochrona przed zaspaniem włączona";
+
+/* Update gate (#116) */
+"update_required_title" = "Wymagana aktualizacja";
+"update_required_message" = "Aby dalej korzystać z My Sound Alarm, zaktualizuj do najnowszej wersji. Ustawione budziki będą dzwonić do czasu aktualizacji.";
+"update_recommended_title" = "Dostępna jest nowa wersja";
+"update_button" = "Zaktualizuj w App Store";
+"update_later" = "Później";
+
+/* Volume guide (#121) */
+"volume_guide_title" = "Jak zwiększyć głośność budzików";
+"volume_guide_step1" = "Ustawienia → Dźwięki i haptyka → przesuń suwak Dzwonek i alerty w prawo";
+"volume_guide_step2" = "Włącz Zmieniaj przyciskami, aby używać też przycisków głośności (gdy nic innego nie gra)";
+"volume_guide_image_label" = "Ekran Ustawienia > Dźwięki i haptyka z zaznaczonym suwakiem Dzwonek i alerty oraz przełącznikiem Zmieniaj przyciskami";
+"volume_guide_warning" = "Głośność w Centrum sterowania dotyczy muzyki i wideo. Nie zmienia głośności budzików.";
+"alarm_permission_required" = "Wymagane pozwolenie na budziki";
+"open_settings" = "Otwórz Ustawienia";
+"volume_guide_link" = "Za cicho?";
+"test_ring_ringing_now" = "Dzwoni teraz";
+"backup_alarm_info_title" = "Ochrona przed zaspaniem";
+"backup_alarm_info_mechanism" = "Jeśli budzik nie zostanie zatrzymany w ustawionym czasie, zadzwoni ponownie.";
+"backup_alarm_info_louder" = "Odtwarza ten sam dźwięk, głośniej i bez zniekształceń. Im cichszy oryginalny dźwięk, tym bardziej jest podgłaśniany.";
+"backup_alarm_info_volume" = "Rzeczywista głośność zależy od głośności Dzwonek i alerty w Ustawieniach.";
+"backup_alarm_info_accessibility" = "O ochronie przed zaspaniem";
+
+"night_mode" = "Tryb nocny";
+"size_warning" = "Długie dźwięki zajmują około %@ miejsca.";

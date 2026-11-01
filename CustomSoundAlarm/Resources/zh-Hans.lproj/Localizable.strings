@@ -1,0 +1,240 @@
+/* ContentView */
+"alarm_title" = "闹钟";
+"empty_title" = "用你喜欢的声音醒来";
+"empty_description" = "从视频或音频文件导入声音\n并将其设为闹钟";
+"add_alarm" = "添加闹钟";
+"default_sound" = "默认";
+
+/* Day labels (short) */
+"day_sun" = "周日";
+"day_mon" = "周一";
+"day_tue" = "周二";
+"day_wed" = "周三";
+"day_thu" = "周四";
+"day_fri" = "周五";
+"day_sat" = "周六";
+
+/* Repeat summaries */
+"every_day" = "每天";
+"weekdays" = "工作日";
+"weekends" = "周末";
+"never" = "永不";
+
+/* AlarmDetailView */
+"edit_alarm" = "编辑闹钟";
+"cancel" = "取消";
+"save" = "存储";
+"time" = "时间";
+"sound" = "声音";
+"none" = "无";
+"repeat" = "重复";
+"label" = "标签";
+"alarm_placeholder" = "闹钟";
+"delete_alarm" = "删除闹钟";
+"delete_alarm_confirm" = "确定要删除这个闹钟吗？";
+"delete" = "删除";
+
+/* RepeatSelectionView - Weekday labels (full) */
+"every_monday" = "每周一";
+"every_tuesday" = "每周二";
+"every_wednesday" = "每周三";
+"every_thursday" = "每周四";
+"every_friday" = "每周五";
+"every_saturday" = "每周六";
+"every_sunday" = "每周日";
+
+/* SoundPickerView */
+"rename" = "重命名";
+"sound_name_placeholder" = "声音名称";
+"presets" = "即用";
+"imported_sounds" = "我的声音";
+"converting" = "正在转换…";
+"add_from_video" = "从视频添加";
+"add_from_audio" = "添加音频文件";
+"add_section" = "添加";
+"add_section_footer" = "可从 MP3、AAC、WAV、M4A 或视频（MOV、MP4）导入。";
+
+/* Waveform Crop (#77 / #79) */
+"waveform_loading" = "正在生成波形…";
+"crop_and_save" = "添加所选片段";
+"import_whole_audio" = "添加整个文件";
+"crop_hint_footer" = "拖动上方波形大致定位，拖动下方放大波形精细调整。";
+"time_start" = "开始";
+"time_end" = "结束";
+"time_length" = "时长";
+"time_total" = "总计";
+
+/* Discard confirmation (#82) */
+"close" = "关闭";
+"discard" = "丢弃";
+"discard_edits_title" = "要丢弃所做的更改吗？";
+"discard_edits_message" = "你的选择不会被存储。";
+
+/* Sound name formatting (#93) */
+"imported_sound_default" = "导入的声音";
+"my_sounds_empty_title" = "让任何声音成为你的闹钟";
+"my_sounds_empty_description" = "从视频或你喜欢的音频文件导入音乐\n作为闹钟声音";
+"file_access_denied" = "文件访问被拒绝";
+
+/* VideoTrimView */
+"add_from_video_title" = "从视频添加音频";
+"loading" = "正在载入…";
+"select_video" = "选择视频";
+"preview" = "预览";
+"selected_duration" = "已选：%@";
+"stop" = "停止";
+"preview_selection" = "播放";
+"start" = "开始";
+"end" = "结束";
+"range" = "范围";
+"duration_warning" = "所选片段超过 30 秒。建议使用 30 秒或更短的闹钟声音。";
+
+/* ShareExtension */
+"saving" = "正在存储…";
+"no_data_received" = "未收到数据";
+"no_audio_found" = "未找到兼容的音频文件";
+"file_load_failed" = "无法载入文件";
+"saved_format" = "已存储“%@”";
+
+/* AlarmScheduler */
+"stop_alarm" = "停止";
+"snooze" = "稍后提醒";
+
+/* AlarmIntents */
+"dismiss_alarm_intent" = "停止闹钟";
+"snooze_intent" = "稍后提醒";
+
+/* AudioConverter errors */
+"error_buffer_creation" = "无法创建音频缓冲区";
+"error_converter_creation" = "无法创建音频转换器";
+"error_conversion_failed" = "音频转换失败：%@";
+"error_conversion_status" = "转换状态错误";
+"error_empty_file" = "转换后的文件为空";
+
+/* VideoAudioExtractor errors */
+"error_no_audio_track" = "此视频没有音频轨道";
+"error_export_session" = "无法创建导出会话";
+"error_extraction_failed" = "音频提取失败：%@";
+"error_unknown" = "未知错误";
+
+/* Sound missing (fallback when the referenced sound is deleted) */
+"sound_missing" = "找不到声音";
+
+/* Preset sound names */
+"preset_marimba" = "马林巴";
+"preset_bell" = "柔和铃声";
+"preset_crescendo" = "渐强";
+"preset_beep" = "复古哔声";
+"preset_ascending" = "上升音";
+"preset_dual_tone" = "双音";
+"preset_music_box" = "八音盒";
+
+/* Bedside Clock */
+"bedside_today" = "今天";
+"bedside_tomorrow" = "明天";
+"bedside_no_alarm" = "未设闹钟";
+"bedside_theme_white" = "白色";
+"bedside_theme_amber" = "琥珀色";
+"bedside_brightness" = "亮度";
+"bedside_show_countdown" = "倒计时";
+"bedside_show_sound_name" = "声音名称";
+"bedside_show_date" = "日期";
+"bedside_show_seconds" = "秒";
+"bedside_font_size" = "文字大小";
+"bedside_layout" = "时钟样式";
+"bedside_layout_digital_large" = "数字";
+"bedside_layout_minimal" = "极简";
+"bedside_layout_digital_bold" = "粗体";
+"bedside_layout_flip" = "翻页（Pro）";
+"bedside_exit" = "退出夜间模式";
+"bedside_exit_hint" = "按住以退出";
+
+/* Live Activity */
+"snoozing" = "稍后提醒中";
+
+/* Snooze */
+"snooze_off" = "关闭";
+"snooze_minutes_fmt" = "%d 分钟";
+
+/* Convenience Phase 1 (duplicate / countdown / save toast) */
+"duplicate_alarm" = "复制";
+"countdown_minutes" = "%ld 分钟";
+"countdown_hours_minutes" = "%1$ld 小时 %2$ld 分钟";
+"countdown_days_hours" = "%1$ld 天 %2$ld 小时";
+"countdown_until" = "%@ 后";
+"alarm_will_ring_in" = "%@ 后响铃";
+
+/* Alarm Edit */
+"alarm_is_off" = "此闹钟已关闭";
+
+/* Video Trimmer */
+"no_video" = "无视频";
+
+/* Video Import Source */
+"video_source_title" = "选择视频来源";
+"video_source_photo" = "照片图库";
+"video_source_file" = "文件";
+"error_file_access_denied" = "文件访问被拒绝。";
+"error_file_copy_failed" = "无法复制文件。";
+"error_unsupported_video_format" = "不支持的视频格式。";
+
+/* Onboarding (#98) */
+"onb.hero.title" = "用你喜欢的那段醒来";
+"onb.loop.title" = "选好副歌。它会一直响到你起床。";
+"onb.next" = "下一步";
+"onb.silent.title" = "静音模式下也会响";
+"onb.continue" = "继续";
+"onb.source.title" = "你喜欢的声音在哪里？";
+"onb.source.video" = "来自视频";
+"onb.source.audio" = "来自音频文件";
+"onb.source.preset" = "试试内置声音";
+"onb.later" = "稍后";
+
+/* Trial ring (#109) */
+"test_ring_title" = "立即响铃";
+"test_ring_failed" = "无法安排测试闹钟。";
+"test_ring_simulator_unavailable" = "试听响铃仅在真实设备上可用。";
+"test_ring_alarm_title" = "测试闹钟";
+"test_ring_backup_title" = "试听防睡过头声音";
+
+/* Why the trial ring can't ring (#150) */
+"test_ring_reason_not_authorized" = "尚未允许闹钟。请打开“设置”并允许闹钟。";
+"test_ring_reason_denied" = "闹钟访问已被阻止。请打开“设置”并允许闹钟。";
+
+/* Loudness (#109 C) */
+
+/* Backup alarm (#110) */
+"backup_alarm_toggle" = "防睡过头";
+"backup_alarm_title_fmt" = "防睡过头：%@";
+"backup_alarm_description_fmt" = "如果到 %@ 还没有停止 %@ 的闹钟，它会用同一个声音再响一次，声音更大。";
+"backup_alarm_minutes" = "再次响铃时间";
+"backup_alarm_minutes_fmt" = "%d 分钟后";
+"backup_alarm_before_snooze" = "它会在稍后提醒结束前响铃。";
+"backup_alarm_early_access_note" = "如果你在抢先体验期间开始使用，正式发布后仍可继续使用。";
+"backup_alarm_row_badge" = "防睡过头已开启";
+
+/* Update gate (#116) */
+"update_required_title" = "需要更新";
+"update_required_message" = "要继续使用 My Sound Alarm，请更新到最新版本。已设置的闹钟在更新前仍会响铃。";
+"update_recommended_title" = "有新版本可用";
+"update_button" = "在 App Store 中更新";
+"update_later" = "稍后";
+
+/* Volume guide (#121) */
+"volume_guide_title" = "如何让闹钟更响";
+"volume_guide_step1" = "设置 → 声音与触感 → 向右移动“铃声和提醒”滑块";
+"volume_guide_step2" = "打开“用按钮调整”，这样也能使用音量按钮（在没有其他声音播放时）";
+"volume_guide_image_label" = "“设置”>“声音与触感”屏幕，标出了“铃声和提醒”滑块和“用按钮调整”开关";
+"volume_guide_warning" = "控制中心的音量用于音乐和视频，不会改变闹钟音量。";
+"alarm_permission_required" = "需要闹钟权限";
+"open_settings" = "打开设置";
+"volume_guide_link" = "声音太小？";
+"test_ring_ringing_now" = "正在响铃";
+"backup_alarm_info_title" = "防睡过头";
+"backup_alarm_info_mechanism" = "如果在设定时间内没有停止闹钟，它会再次响铃。";
+"backup_alarm_info_louder" = "它会用同一个声音，在不失真的情况下调大音量。原始声音越小，提升得越多。";
+"backup_alarm_info_volume" = "实际响铃音量取决于“设置”中的“铃声和提醒”音量。";
+"backup_alarm_info_accessibility" = "关于防睡过头";
+
+"night_mode" = "夜间模式";
+"size_warning" = "长声音约占用 %@ 的存储空间。";

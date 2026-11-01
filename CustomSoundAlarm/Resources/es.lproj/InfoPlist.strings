@@ -1,0 +1,4 @@
+CFBundleDisplayName = "My Sound Alarm";
+NSAlarmKitUsageDescription = "Se usa para hacer sonar alarmas con tus sonidos favoritos.";
+NSMicrophoneUsageDescription = "Se usa para grabar sonidos de alarma con el micrófono.";
+NSPhotoLibraryUsageDescription = "Se usa para acceder a la fototeca y extraer el audio de los vídeos.";

@@ -108,6 +108,15 @@ struct AlarmDetailView: View {
             .navigationTitle(isEditing ? String(localized: "edit_alarm") : String(localized: "add_alarm"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // 長い言語（de の "Wecker hinzufügen" 等）でも省略記号で切れないよう、
+                // タイトルだけ必要に応じて縮小する（#149）。
+                ToolbarItem(placement: .principal) {
+                    Text(isEditing ? String(localized: "edit_alarm") : String(localized: "add_alarm"))
+                        .font(.headline)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.65)
+                        .accessibilityAddTraits(.isHeader)
+                }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("cancel") { dismiss() }
                 }
@@ -139,6 +148,7 @@ struct AlarmDetailView: View {
             }
             .onAppear {
                 scheduler.refreshTestRingPermission()
+                openUITestWaveformCropIfNeeded()
             }
             .sheet(isPresented: $showingVolumeGuide) {
                 AlarmVolumeGuideView(source: .testRing)
@@ -183,17 +193,25 @@ struct AlarmDetailView: View {
         return false
     }
 
+    /// UIテスト用: 同梱のプリセット音で波形クロップ画面を開く（DEBUGのみ・#149）。
+    /// RTL 言語でも波形が左→右のままか screenshot で確認するために使う。
+    private func openUITestWaveformCropIfNeeded() {
+        #if DEBUG
+        guard AppGroup.isUITestOpenWaveformCrop, pendingAudio == nil,
+              let url = Bundle.main.url(forResource: "PresetMarimba", withExtension: "caf")
+        else { return }
+        pendingAudio = PendingAudioImport(url: url, name: String(localized: "preset_marimba"))
+        #endif
+    }
+
     // MARK: - Time (HIG: DatePicker)
 
     private var timeSection: some View {
         Section {
-            DatePicker(
-                "time",
-                selection: $selectedTime,
-                displayedComponents: .hourAndMinute
-            )
-            .datePickerStyle(.wheel)
-            .labelsHidden()
+            // 時刻は「時 → 分」の並びを保つ（#149）。RTL でもホイールだけは LTR。
+            TimeWheelPicker(date: $selectedTime)
+                .frame(maxWidth: .infinity)
+                .frame(height: 216)
         }
     }
 

@@ -1,0 +1,4 @@
+CFBundleDisplayName = "My Sound Alarm";
+NSAlarmKitUsageDescription = "Wird verwendet, um Wecker mit deinen Lieblingstönen klingeln zu lassen.";
+NSMicrophoneUsageDescription = "Wird verwendet, um Weckertöne mit dem Mikrofon aufzunehmen.";
+NSPhotoLibraryUsageDescription = "Wird verwendet, um auf die Fotomediathek zuzugreifen und Audio aus Videos zu extrahieren.";
