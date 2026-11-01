@@ -211,7 +211,7 @@
 
 /* Update gate (#116) */
 "update_required_title" = "Update Required";
-"update_required_message" = "A problem was found in this version. Please update to the latest version on the App Store. Your existing alarms will still ring.";
+"update_required_message" = "To keep using My Sound Alarm, please update to the latest version. Alarms you've already set will keep ringing until you update.";
 "update_recommended_title" = "A New Version Is Available";
 "update_button" = "Update on the App Store";
 "update_later" = "Later";
