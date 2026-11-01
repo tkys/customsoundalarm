@@ -192,7 +192,7 @@
 
 /* Trial ring (#109) */
 "test_ring_title" = "今すぐ鳴らす";
-"test_ring_failed" = "試しに鳴らせませんでした。もう一度お試しください。";
+"test_ring_failed" = "試しに鳴らせませんでした。";
 "test_ring_simulator_unavailable" = "試しに鳴らすは実機でのみ使えます。";
 "test_ring_alarm_title" = "試しのアラーム";
 "test_ring_backup_title" = "寝過ごし防止の音を試す";
@@ -215,7 +215,7 @@
 
 /* Update gate (#116) */
 "update_required_title" = "アップデートが必要です";
-"update_required_message" = "このバージョンには問題が見つかりました。App Store で最新版に更新してください。設定済みのアラームはそのまま鳴ります。";
+"update_required_message" = "引き続きお使いいただくには、最新版へのアップデートが必要です。設定済みのアラームは、アップデートするまでそのまま鳴ります。";
 "update_recommended_title" = "新しいバージョンがあります";
 "update_button" = "App Store で更新";
 "update_later" = "あとで";
