@@ -89,9 +89,6 @@ struct AlarmDetailView: View {
     var body: some View {
         NavigationStack {
             Form {
-                if !scheduler.canScheduleTestRing {
-                    permissionSection
-                }
                 timeSection
                 // 繰り返し〜スヌーズは1つのまとまり（時計アプリと同じく行の並び・#122）
                 Section {
@@ -228,26 +225,6 @@ struct AlarmDetailView: View {
         }
     }
 
-    // MARK: - Permission (#122)
-
-    private var permissionSection: some View {
-        Section {
-            HStack(spacing: 10) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.orange)
-                Text("alarm_permission_required")
-                Spacer()
-                Button("open_settings") {
-                    if let url = URL(string: UIApplication.openSettingsURLString) {
-                        openURL(url)
-                    }
-                }
-                .accessibilityIdentifier("addAlarm.openSettings")
-            }
-            .accessibilityIdentifier("addAlarm.permissionRow")
-        }
-    }
-
     // MARK: - Oversleep guard (#110 / #122)
 
     private var isBackupAvailable: Bool {
@@ -297,7 +274,7 @@ struct AlarmDetailView: View {
                     .disabled(!isBackupAvailable && backupMinutes == nil)
             }
 
-            if let minutes = backupMinutes {
+            if backupMinutes != nil {
                 Picker("backup_alarm_minutes", selection: Binding(
                     get: { backupMinutes ?? BackupAlarmLogic.defaultMinutes },
                     set: { backupMinutes = $0 }
@@ -321,7 +298,7 @@ struct AlarmDetailView: View {
                         }
                     }
                 }
-                .disabled(!scheduler.canScheduleTestRing || isSchedulingTestRing)
+                .disabled(isSchedulingTestRing)
                 .accessibilityIdentifier("addAlarm.backupTestRing")
 
                 if let backupTestRingMessage {
@@ -383,46 +360,81 @@ struct AlarmDetailView: View {
             .foregroundStyle(Color.accentColor)
     }
 
-    // MARK: - Trial Ring (#109 / #122)
+    // MARK: - Trial Ring (#109 / #122 / #150)
 
-    /// 本物の AlarmKit で1秒後に鳴らす。結果は行の中で短く表示する。
+    /// 鳴らせない理由の恒常表示（許可が無い／拒否済みの間、行の下に出し続ける・#150）。
+    private var testRingPermissionReason: TestRingReasonDisplay? {
+        guard let reason = TestRingReasonLogic.permissionReason(
+            permission: scheduler.testRingPermission
+        ) else { return nil }
+        return TestRingReasonLogic.display(for: reason)
+    }
+
+    /// 本物の AlarmKit で1秒後に鳴らす。鳴らせない理由はその場で、
+    /// 一時的な結果（成功・登録失敗・シミュレータ）は行の中で短く表示する。
     private var testRingSection: some View {
         Group {
-            HStack(spacing: 12) {
-                Button {
-                    scheduleTestRing(kind: .own)
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "bell.badge.waveform.fill")
-                        Text("test_ring_title")
-                        if isSchedulingTestRing {
-                            ProgressView()
-                        }
+            Button {
+                scheduleTestRing(kind: .own)
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "bell.badge.waveform.fill")
+                    Text("test_ring_title")
+                    if isSchedulingTestRing {
+                        ProgressView()
                     }
                 }
-                .buttonStyle(.borderless)
-                .disabled(!scheduler.canScheduleTestRing || isSchedulingTestRing)
-                .accessibilityIdentifier("addAlarm.testRing")
-
-                Spacer()
-
-                Button {
-                    showingVolumeGuide = true
-                } label: {
-                    HStack(spacing: 2) {
-                        Text("volume_guide_link")
-                        Image(systemName: "chevron.right")
-                            .font(.caption2)
-                    }
-                }
-                .buttonStyle(.borderless)
-                .accessibilityIdentifier("addAlarm.volumeGuide")
             }
+            .buttonStyle(.borderless)
+            // 無効化したボタンだけを見せない（#150）: 押せるときは押させて理由を出す
+            .disabled(isSchedulingTestRing)
+            .accessibilityIdentifier("addAlarm.testRing")
 
-            if let testRingMessage {
+            if let testRingPermissionReason {
+                reasonRow(testRingPermissionReason, messageIdentifier: "addAlarm.testRingReason")
+            } else if let testRingMessage {
                 Text(testRingMessage)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+            }
+
+            // 「音が小さいときは」は押し間違い防止のため行の下の小さなリンク（#150）
+            Button {
+                showingVolumeGuide = true
+            } label: {
+                HStack(spacing: 2) {
+                    Text("volume_guide_link")
+                    Image(systemName: "chevron.right")
+                        .font(.caption2)
+                }
+                .font(.footnote)
+            }
+            .buttonStyle(.borderless)
+            .foregroundStyle(.secondary)
+            .accessibilityIdentifier("addAlarm.volumeGuide")
+        }
+    }
+
+    /// 理由の行：短い理由 + 直し方（許可の問題なら「設定を開く」）。
+    private func reasonRow(
+        _ display: TestRingReasonDisplay,
+        messageIdentifier: String
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(String(localized: String.LocalizationValue(display.messageKey)))
+                .font(.footnote)
+                .foregroundStyle(.orange)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier(messageIdentifier)
+            if display.showsOpenSettings {
+                Button("open_settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        openURL(url)
+                    }
+                }
+                .font(.footnote.weight(.medium))
+                .buttonStyle(.borderless)
+                .accessibilityIdentifier("addAlarm.openSettings")
             }
         }
     }
@@ -447,23 +459,30 @@ struct AlarmDetailView: View {
                 fileName = selectedSound?.fileName ?? ""
             }
 
-            let scheduled = await scheduler.scheduleTestRing(
+            let result = await scheduler.scheduleTestRing(
                 soundFileName: fileName,
                 kind: kind,
                 hasBackup: backupMinutes != nil
             )
             isSchedulingTestRing = false
 
-            let message: String
-            if scheduled {
-                message = String(localized: "test_ring_ringing_now")
-            } else {
-                #if targetEnvironment(simulator)
-                message = String(localized: "test_ring_simulator_unavailable")
-                #else
-                message = String(localized: "test_ring_failed")
-                #endif
+            // 許可の理由は常時行の下に出ているため、本体の行では重複表示しない（#150）
+            let permissionReasonShown =
+                TestRingReasonLogic.permissionReason(permission: scheduler.testRingPermission) != nil
+            let message: String? = switch result {
+            case .scheduled:
+                String(localized: "test_ring_ringing_now")
+            case .failed(let reason):
+                kind == .own && permissionReasonShown
+                    ? nil
+                    : String(
+                        localized: String.LocalizationValue(
+                            TestRingReasonLogic.display(for: reason).messageKey
+                        )
+                    )
             }
+            guard let message else { return }
+
             if kind == .backup {
                 backupTestRingMessage = message
             } else {

@@ -71,6 +71,11 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.testRingScheduled(kind: .own).name == "test_ring_scheduled")
         #expect(AnalyticsEvent.testRingScheduled(kind: .backup).name == "test_ring_scheduled")
         #expect(AnalyticsEvent.testRingStopped(hour: 8).name == "test_ring_stopped")
+        // #150: 今すぐ鳴らすの失敗
+        #expect(AnalyticsEvent.testRingFailed(reason: .notAuthorized, kind: .own).name == "test_ring_failed")
+        #expect(AnalyticsEvent.testRingFailed(reason: .denied, kind: .backup).name == "test_ring_failed")
+        #expect(AnalyticsEvent.testRingFailed(reason: .scheduleError, kind: .own).name == "test_ring_failed")
+        #expect(AnalyticsEvent.testRingFailed(reason: .simulator, kind: .own).name == "test_ring_failed")
         // #110: 最終アラーム
         #expect(AnalyticsEvent.backupAlarmEnabled(minutes: 15).name == "backup_alarm_enabled")
         #expect(AnalyticsEvent.backupAlarmDisabled(minutes: 20).name == "backup_alarm_disabled")
@@ -180,6 +185,24 @@ struct AnalyticsEventTests {
 
         #expect(props.count == 1)
         #expect(props["hour"] as? Int == 6)
+    }
+
+    // MARK: test_ring_failed (#150)
+
+    @Test
+    func testRingFailedProperties_reasonAndKind() {
+        let props = AnalyticsEvent.testRingFailed(reason: .denied, kind: .backup).properties
+
+        #expect(props.count == 2)
+        #expect(props["reason"] as? String == "denied")
+        #expect(props["kind"] as? String == "backup")
+    }
+
+    @Test
+    func testRingFailedProperties_allReasonIdentifiers() {
+        #expect(AnalyticsEvent.testRingFailed(reason: .notAuthorized, kind: .own).properties["reason"] as? String == "not_authorized")
+        #expect(AnalyticsEvent.testRingFailed(reason: .scheduleError, kind: .own).properties["reason"] as? String == "schedule_error")
+        #expect(AnalyticsEvent.testRingFailed(reason: .simulator, kind: .own).properties["reason"] as? String == "simulator")
     }
 
     // MARK: 最終アラーム (#110)

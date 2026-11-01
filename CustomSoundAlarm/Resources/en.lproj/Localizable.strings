@@ -192,10 +192,14 @@
 
 /* Trial ring (#109) */
 "test_ring_title" = "Ring now";
-"test_ring_failed" = "Couldn't schedule the test alarm.";
+"test_ring_failed" = "Couldn't schedule the test alarm. Please try again.";
 "test_ring_simulator_unavailable" = "Trial ring is available on a real device only.";
 "test_ring_alarm_title" = "Test Alarm";
 "test_ring_backup_title" = "Try the oversleep guard sound";
+
+/* Why the trial ring can't ring (#150) */
+"test_ring_reason_not_authorized" = "Alarms aren't allowed yet. Open Settings and allow alarms.";
+"test_ring_reason_denied" = "Alarm access is blocked. Open Settings and allow alarms.";
 
 /* Loudness (#109 C) */
 
