@@ -1,1 +1,1 @@
-Word wakker met muziek waar je van houdt. Knip alleen het refrein uit een video of audiobestand en het speelt herhaald tot je opstaat.
+Een wekker-app die je wekt met het refrein van een nummer of het geluid van een video. Het gekozen stuk herhaalt tot je het uitzet, ook in de stille modus.

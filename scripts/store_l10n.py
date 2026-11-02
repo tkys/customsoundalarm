@@ -597,8 +597,10 @@ POZNÁMKY
 """,
 )
 
-LIMITS = {"subtitle": 30, "keywords": 100, "promo": 170, "description": 4000}
-BANNED = ["free", "gratuit", "kostenlos", "gratis", "grátis", "gratuito", "무료", "免费", "darmow", "zdarma", "مجان"]
+from store_aso import ASO, DESC  # noqa: E402  (name/subtitle/keywords + description/promo)
+
+LIMITS = {"name": 30, "subtitle": 30, "keywords": 100, "promo": 170, "description": 4000}
+BANNED = ["必ず", "絶対", "無料", "always", "guarantee", "free", "gratuit", "kostenlos", "gratis", "grátis", "gratuito", "무료", "免费", "darmow", "zdarma", "مجان"]
 
 
 def main():
@@ -606,17 +608,24 @@ def main():
     privacy = open(os.path.join(en, "privacy_url.txt"), encoding="utf-8").read()
     support = open(os.path.join(en, "support_url.txt"), encoding="utf-8").read()
     errors = []
-    for loc, d in L.items():
+    # ja / en-US / en-GB are not in L: they come only from store_aso.py
+    base = {loc: {} for loc in ASO if loc not in L}
+    for loc, d in list(L.items()) + list(base.items()):
+        d = dict(d, name="My Sound Alarm")
+        if loc in ASO:
+            d["name"], d["subtitle"], d["keywords"] = ASO[loc]
+        if loc in DESC:
+            d["promo"], d["description"] = DESC[loc]
         for k, lim in LIMITS.items():
             if len(d[k]) > lim:
                 errors.append(f"{loc} {k}: {len(d[k])} > {lim}")
-        low = (d["subtitle"] + d["keywords"] + d["promo"] + d["description"]).lower()
+        low = (d["name"] + d["subtitle"] + d["keywords"] + d["promo"] + d["description"]).lower()
         errors += [f"{loc}: contains '{w}'" for w in BANNED if w in low]
         if " " in d["keywords"] or ", " in d["keywords"]:
             errors.append(f"{loc} keywords: contains spaces")
         out = os.path.join(ROOT, loc)
         os.makedirs(out, exist_ok=True)
-        files = {"name.txt": "My Sound Alarm\n", "subtitle.txt": d["subtitle"] + "\n",
+        files = {"name.txt": d["name"] + "\n", "subtitle.txt": d["subtitle"] + "\n",
                  "keywords.txt": d["keywords"] + "\n", "promotional_text.txt": d["promo"] + "\n",
                  "description.txt": d["description"], "privacy_url.txt": privacy, "support_url.txt": support}
         for fn, body in files.items():

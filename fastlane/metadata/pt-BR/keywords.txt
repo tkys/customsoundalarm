@@ -1,1 +1,1 @@
-despertador,alarme,toque,música,canção,vídeo,áudio,mp3,cortar,manhã,relógio,som,repetir
+toque,canção,áudio,mp3,cortar,manhã,relógio,som,repetir,refrão,alto,sono,acordar

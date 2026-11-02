@@ -1,1 +1,1 @@
-budík,vyzvánění,hudba,písnička,video,audio,mp3,stříhat,ráno,hodiny,zvuk,opakování,tón
+vyzvánění,hudba,audio,mp3,stříhat,ráno,hodiny,zvuk,opakování,tón,hlasitý,zaspat

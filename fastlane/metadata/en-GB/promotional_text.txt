@@ -1,1 +1,1 @@
-Wake up to the music you love. Cut just the chorus from a video or an audio file, and it plays on repeat until you get up.
+An alarm clock app that wakes you up to the chorus of a song or the sound from a video. The part you choose plays on repeat until you stop it, even in Silent mode.

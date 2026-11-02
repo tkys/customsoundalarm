@@ -1,1 +1,1 @@
-wake,custom,long,full,song,music,ringtone,video,extract,mp3,morning,clock,loud,snooze
+wake,custom,long,full,ringtone,extract,mp3,morning,clock,loud,snooze,oversleep,sleeper,chorus,loop
