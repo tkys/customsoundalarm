@@ -216,7 +216,7 @@
 
 /* Update gate (#116) */
 "update_required_title" = "Je vyžadována aktualizace";
-"update_required_message" = "Abys mohl My Sound Alarm dál používat, aktualizuj na nejnovější verzi. Nastavené budíky budou zvonit, dokud neaktualizuješ.";
+"update_required_message" = "Pro další používání My Sound Alarm aktualizuj na nejnovější verzi. Nastavené budíky budou zvonit, dokud neaktualizuješ.";
 "update_recommended_title" = "Je dostupná nová verze";
 "update_button" = "Aktualizovat v App Store";
 "update_later" = "Později";

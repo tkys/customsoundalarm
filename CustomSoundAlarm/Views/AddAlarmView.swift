@@ -22,6 +22,7 @@ enum AlarmDetailMode: Identifiable {
 struct AlarmDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
+    @Environment(\.layoutDirection) private var layoutDirection
     @State private var alarmStore = AlarmStore.shared
     @State private var soundStore = SoundStore.shared
     @State private var scheduler = AlarmScheduler.shared
@@ -208,10 +209,22 @@ struct AlarmDetailView: View {
 
     private var timeSection: some View {
         Section {
-            // 時刻は「時 → 分」の並びを保つ（#149）。RTL でもホイールだけは LTR。
-            TimeWheelPicker(date: $selectedTime)
-                .frame(maxWidth: .infinity)
-                .frame(height: 216)
+            // 時刻は「時 → 分」の並びを保つ（#149）。
+            // RTL（アラビア語）だけ UIKit 版でホイールを LTR に固定し、
+            // それ以外は従来の SwiftUI DatePicker のまま（影響範囲を RTL に限定）。
+            if layoutDirection == .rightToLeft {
+                TimeWheelPicker(date: $selectedTime)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 216)
+            } else {
+                DatePicker(
+                    "time",
+                    selection: $selectedTime,
+                    displayedComponents: .hourAndMinute
+                )
+                .datePickerStyle(.wheel)
+                .labelsHidden()
+            }
         }
     }
 
