@@ -192,14 +192,15 @@
 
 /* Trial ring (#109) */
 "test_ring_title" = "Faire sonner";
-"test_ring_failed" = "Impossible de programmer l’alarme de test.";
+"test_ring_failed" = "Impossible de programmer l’alarme de test. Réessayez.";
 "test_ring_simulator_unavailable" = "Le test de sonnerie n’est disponible que sur un appareil réel.";
 "test_ring_alarm_title" = "Alarme de test";
 "test_ring_backup_title" = "Tester le son de l’anti-grasse matinée";
 
 /* Why the trial ring can't ring (#150) */
-"test_ring_reason_not_authorized" = "Les alarmes ne sont pas encore autorisées. Ouvrez Réglages et autorisez les alarmes.";
-"test_ring_reason_denied" = "L’accès aux alarmes est bloqué. Ouvrez Réglages et autorisez les alarmes.";
+"test_ring_reason_not_authorized" = "Les alarmes ne sont pas encore autorisées : elles ne sonneront pas tant que vous ne les autorisez pas.";
+"test_ring_reason_denied" = "Les alarmes sont désactivées pour My Sound Alarm : elles ne sonneront pas. Ouvrez Réglages et activez les alarmes.";
+"allow_alarms" = "Autoriser les alarmes";
 
 /* Loudness (#109 C) */
 

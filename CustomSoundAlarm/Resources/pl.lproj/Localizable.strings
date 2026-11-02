@@ -192,14 +192,15 @@
 
 /* Trial ring (#109) */
 "test_ring_title" = "Zadzwoń teraz";
-"test_ring_failed" = "Nie udało się zaplanować budzika testowego.";
+"test_ring_failed" = "Nie udało się zaplanować budzika testowego. Spróbuj ponownie.";
 "test_ring_simulator_unavailable" = "Test dzwonienia jest dostępny tylko na prawdziwym urządzeniu.";
 "test_ring_alarm_title" = "Budzik testowy";
 "test_ring_backup_title" = "Wypróbuj dźwięk ochrony przed zaspaniem";
 
 /* Why the trial ring can't ring (#150) */
-"test_ring_reason_not_authorized" = "Budziki nie są jeszcze dozwolone. Otwórz Ustawienia i zezwól na budziki.";
-"test_ring_reason_denied" = "Dostęp do budzików jest zablokowany. Otwórz Ustawienia i zezwól na budziki.";
+"test_ring_reason_not_authorized" = "Budziki nie są jeszcze dozwolone, więc nie zadzwonią, dopóki nie wyrazisz zgody.";
+"test_ring_reason_denied" = "Budziki są wyłączone dla My Sound Alarm, więc nie zadzwonią. Otwórz Ustawienia i włącz budziki.";
+"allow_alarms" = "Zezwól na budziki";
 
 /* Loudness (#109 C) */
 

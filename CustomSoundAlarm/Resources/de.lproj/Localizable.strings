@@ -192,14 +192,15 @@
 
 /* Trial ring (#109) */
 "test_ring_title" = "Jetzt klingeln";
-"test_ring_failed" = "Testwecker konnte nicht geplant werden.";
+"test_ring_failed" = "Der Testwecker konnte nicht geplant werden. Bitte versuche es erneut.";
 "test_ring_simulator_unavailable" = "Der Testton ist nur auf einem echten Gerät verfügbar.";
 "test_ring_alarm_title" = "Testwecker";
 "test_ring_backup_title" = "Ton des Verschlafschutzes testen";
 
 /* Why the trial ring can't ring (#150) */
-"test_ring_reason_not_authorized" = "Alarme sind noch nicht erlaubt. Öffne Einstellungen und erlaube Alarme.";
-"test_ring_reason_denied" = "Der Alarmzugriff ist blockiert. Öffne Einstellungen und erlaube Alarme.";
+"test_ring_reason_not_authorized" = "Alarme sind noch nicht erlaubt. Sie klingeln erst, wenn du sie erlaubst.";
+"test_ring_reason_denied" = "Alarme sind für My Sound Alarm ausgeschaltet. Sie klingeln nicht. Öffne Einstellungen und schalte Alarme ein.";
+"allow_alarms" = "Alarme erlauben";
 
 /* Loudness (#109 C) */
 

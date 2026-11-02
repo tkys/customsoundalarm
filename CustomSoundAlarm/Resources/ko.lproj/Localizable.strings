@@ -192,14 +192,15 @@
 
 /* Trial ring (#109) */
 "test_ring_title" = "지금 울리기";
-"test_ring_failed" = "테스트 알람을 예약하지 못했습니다.";
+"test_ring_failed" = "테스트 알람을 예약하지 못했습니다. 다시 시도해 주세요.";
 "test_ring_simulator_unavailable" = "테스트 울리기는 실제 기기에서만 사용할 수 있습니다.";
 "test_ring_alarm_title" = "테스트 알람";
 "test_ring_backup_title" = "늦잠 방지 소리 테스트";
 
 /* Why the trial ring can't ring (#150) */
-"test_ring_reason_not_authorized" = "아직 알람이 허용되지 않았습니다. 설정을 열고 알람을 허용하세요.";
-"test_ring_reason_denied" = "알람 접근이 차단되었습니다. 설정을 열고 알람을 허용하세요.";
+"test_ring_reason_not_authorized" = "아직 알람이 허용되지 않아, 허용할 때까지 알람이 울리지 않습니다.";
+"test_ring_reason_denied" = "My Sound Alarm의 알람이 꺼져 있어 알람이 울리지 않습니다. 설정을 열고 알람을 켜세요.";
+"allow_alarms" = "알람 허용";
 
 /* Loudness (#109 C) */
 

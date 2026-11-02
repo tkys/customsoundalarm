@@ -192,14 +192,15 @@
 
 /* Trial ring (#109) */
 "test_ring_title" = "Zazvonit teď";
-"test_ring_failed" = "Testovací budík se nepodařilo naplánovat.";
+"test_ring_failed" = "Testovací budík se nepodařilo naplánovat. Zkus to znovu.";
 "test_ring_simulator_unavailable" = "Test zvonění je dostupný jen na skutečném zařízení.";
 "test_ring_alarm_title" = "Testovací budík";
 "test_ring_backup_title" = "Vyzkoušet zvuk ochrany proti zaspání";
 
 /* Why the trial ring can't ring (#150) */
-"test_ring_reason_not_authorized" = "Budíky zatím nejsou povolené. Otevři Nastavení a povol budíky.";
-"test_ring_reason_denied" = "Přístup k budíkům je zablokovaný. Otevři Nastavení a povol budíky.";
+"test_ring_reason_not_authorized" = "Budíky zatím nejsou povolené, takže nezazvoní, dokud je nepovolíš.";
+"test_ring_reason_denied" = "Budíky jsou pro My Sound Alarm vypnuté, takže nezazvoní. Otevři Nastavení a zapni budíky.";
+"allow_alarms" = "Povolit budíky";
 
 /* Loudness (#109 C) */
 

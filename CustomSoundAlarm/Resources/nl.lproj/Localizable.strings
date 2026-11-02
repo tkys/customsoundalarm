@@ -192,14 +192,15 @@
 
 /* Trial ring (#109) */
 "test_ring_title" = "Laat nu afgaan";
-"test_ring_failed" = "Kon de testwekker niet inplannen.";
+"test_ring_failed" = "Kon de testwekker niet inplannen. Probeer het opnieuw.";
 "test_ring_simulator_unavailable" = "De testwekker is alleen beschikbaar op een echt apparaat.";
 "test_ring_alarm_title" = "Testwekker";
 "test_ring_backup_title" = "Probeer het geluid van de verslaapbeveiliging";
 
 /* Why the trial ring can't ring (#150) */
-"test_ring_reason_not_authorized" = "Wekkers zijn nog niet toegestaan. Open Instellingen en sta wekkers toe.";
-"test_ring_reason_denied" = "Toegang tot wekkers is geblokkeerd. Open Instellingen en sta wekkers toe.";
+"test_ring_reason_not_authorized" = "Wekkers zijn nog niet toegestaan. Ze gaan pas af als je ze toestaat.";
+"test_ring_reason_denied" = "Wekkers staan uit voor My Sound Alarm, dus ze gaan niet af. Open Instellingen en zet wekkers aan.";
+"allow_alarms" = "Wekkers toestaan";
 
 /* Loudness (#109 C) */
 

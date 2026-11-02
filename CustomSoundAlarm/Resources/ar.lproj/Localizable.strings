@@ -192,14 +192,15 @@
 
 /* Trial ring (#109) */
 "test_ring_title" = "رنّ الآن";
-"test_ring_failed" = "تعذّر جدولة منبه الاختبار.";
+"test_ring_failed" = "تعذّر جدولة منبه الاختبار. يُرجى المحاولة مرة أخرى.";
 "test_ring_simulator_unavailable" = "تجربة الرنين متاحة على جهاز حقيقي فقط.";
 "test_ring_alarm_title" = "منبه اختبار";
 "test_ring_backup_title" = "جرّب صوت الحماية من النوم الزائد";
 
 /* Why the trial ring can't ring (#150) */
-"test_ring_reason_not_authorized" = "لم يُسمح بالمنبهات بعد. افتح الإعدادات واسمح بالمنبهات.";
-"test_ring_reason_denied" = "الوصول إلى المنبهات محظور. افتح الإعدادات واسمح بالمنبهات.";
+"test_ring_reason_not_authorized" = "لم يُسمح بالمنبهات بعد، لذلك لن ترنّ حتى تسمح بها.";
+"test_ring_reason_denied" = "المنبهات متوقفة لتطبيق My Sound Alarm، لذلك لن ترنّ. افتح الإعدادات وشغّل المنبهات.";
+"allow_alarms" = "السماح بالمنبهات";
 
 /* Loudness (#109 C) */
 

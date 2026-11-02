@@ -192,14 +192,15 @@
 
 /* Trial ring (#109) */
 "test_ring_title" = "Tocar agora";
-"test_ring_failed" = "Não foi possível programar o alarme de teste.";
+"test_ring_failed" = "Não foi possível programar o alarme de teste. Tente novamente.";
 "test_ring_simulator_unavailable" = "O teste de toque está disponível apenas em um dispositivo real.";
 "test_ring_alarm_title" = "Alarme de teste";
 "test_ring_backup_title" = "Testar o som da proteção contra perder a hora";
 
 /* Why the trial ring can't ring (#150) */
-"test_ring_reason_not_authorized" = "Os alarmes ainda não foram permitidos. Abra Ajustes e permita os alarmes.";
-"test_ring_reason_denied" = "O acesso aos alarmes está bloqueado. Abra Ajustes e permita os alarmes.";
+"test_ring_reason_not_authorized" = "Os alarmes ainda não foram permitidos, então não vão tocar até que você os permita.";
+"test_ring_reason_denied" = "Os alarmes estão desativados para o My Sound Alarm, então não vão tocar. Abra Ajustes e ative os alarmes.";
+"allow_alarms" = "Permitir alarmes";
 
 /* Loudness (#109 C) */
 

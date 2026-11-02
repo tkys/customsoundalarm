@@ -192,14 +192,15 @@
 
 /* Trial ring (#109) */
 "test_ring_title" = "Suona ora";
-"test_ring_failed" = "Impossibile programmare la sveglia di prova.";
+"test_ring_failed" = "Impossibile programmare la sveglia di prova. Riprova.";
 "test_ring_simulator_unavailable" = "La prova suoneria è disponibile solo su un dispositivo reale.";
 "test_ring_alarm_title" = "Sveglia di prova";
 "test_ring_backup_title" = "Prova il suono dell’Anti-sonno";
 
 /* Why the trial ring can't ring (#150) */
-"test_ring_reason_not_authorized" = "Le sveglie non sono ancora consentite. Apri Impostazioni e consenti le sveglie.";
-"test_ring_reason_denied" = "L’accesso alle sveglie è bloccato. Apri Impostazioni e consenti le sveglie.";
+"test_ring_reason_not_authorized" = "Le sveglie non sono ancora consentite, quindi non suoneranno finché non le consenti.";
+"test_ring_reason_denied" = "Le sveglie sono disattivate per My Sound Alarm, quindi non suoneranno. Apri Impostazioni e attiva le sveglie.";
+"allow_alarms" = "Consenti sveglie";
 
 /* Loudness (#109 C) */
 

@@ -25,11 +25,13 @@ struct TestRingReasonLogicTests {
     func display_permissionReasonsOfferSettings() {
         let notAuthorized = TestRingReasonLogic.display(for: .notAuthorized)
         #expect(notAuthorized.messageKey == "test_ring_reason_not_authorized")
-        #expect(notAuthorized.showsOpenSettings, "許可がまだなら『設定を開く』を出す")
+        #expect(!notAuthorized.showsOpenSettings, "許可がまだなら設定へ送らない（設定に項目がまだ無い）")
+        #expect(notAuthorized.requestsPermission, "許可がまだならその場で許可を求める")
 
         let denied = TestRingReasonLogic.display(for: .denied)
         #expect(denied.messageKey == "test_ring_reason_denied")
         #expect(denied.showsOpenSettings, "拒否済みなら『設定を開く』を出す")
+        #expect(!denied.requestsPermission, "拒否済みはダイアログが出ないので設定へ送る")
     }
 
     @Test

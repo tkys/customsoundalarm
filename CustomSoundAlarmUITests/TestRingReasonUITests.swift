@@ -56,7 +56,7 @@ final class TestRingReasonUITests: XCTestCase {
             reason.waitForExistence(timeout: 5),
             "拒否済みなら『今すぐ鳴らす』の下に理由が出るはず: \(app.debugDescription)"
         )
-        XCTAssertEqual(reason.label, "アラームの許可が拒否されています。設定を開いて「アラーム」を許可してください。")
+        XCTAssertEqual(reason.label, "アラームの許可がオフのため、アラームは鳴りません。設定を開いて「アラーム」をオンにしてください。")
 
         let settings = findElement("addAlarm.openSettings")
         XCTAssertTrue(settings.waitForExistence(timeout: 3), "直し方に『設定を開く』が出るはず")
@@ -79,14 +79,14 @@ final class TestRingReasonUITests: XCTestCase {
             reason.waitForExistence(timeout: 5),
             "denied: the reason should appear below 'Ring now': \(app.debugDescription)"
         )
-        XCTAssertEqual(reason.label, "Alarm access is blocked. Open Settings and allow alarms.")
+        XCTAssertEqual(reason.label, "Alarms are turned off for My Sound Alarm, so they won't ring. Open Settings and turn on Alarms.")
 
         let settings = findElement("addAlarm.openSettings")
         XCTAssertTrue(settings.waitForExistence(timeout: 3), "'Open Settings' should appear")
         XCTAssertEqual(settings.label, "Open Settings")
     }
 
-    func testNotDeterminedShowsReasonAndOpenSettingsJapanese() {
+    func testNotDeterminedShowsReasonAndAllowButtonJapanese() {
         launchAdd(
             permissionFlag: "-uitest-test-ring-not-determined",
             language: "ja",
@@ -99,8 +99,11 @@ final class TestRingReasonUITests: XCTestCase {
             reason.waitForExistence(timeout: 5),
             "許可がまだなら『今すぐ鳴らす』の下に理由が出るはず: \(app.debugDescription)"
         )
-        XCTAssertEqual(reason.label, "まだ許可が下りていないため鳴らせません。設定を開いて「アラーム」を許可してください。")
-        XCTAssertTrue(findElement("addAlarm.openSettings").waitForExistence(timeout: 3))
+        XCTAssertEqual(reason.label, "アラームがまだ許可されていません。許可するまで、アラームは鳴りません。")
+        let allow = findElement("addAlarm.allowAlarms")
+        XCTAssertTrue(allow.waitForExistence(timeout: 3), "許可がまだならその場で『許可する』を出す")
+        XCTAssertEqual(allow.label, "許可する")
+        XCTAssertFalse(findElement("addAlarm.openSettings").exists, "許可がまだなら設定へは送らない")
     }
 
     /// 「音が小さいときは」はメインのボタンと同じ行の右端ではなく、行の下（#150）。

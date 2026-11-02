@@ -192,14 +192,15 @@
 
 /* Trial ring (#109) */
 "test_ring_title" = "立即响铃";
-"test_ring_failed" = "无法安排测试闹钟。";
+"test_ring_failed" = "无法安排测试闹钟。请重试。";
 "test_ring_simulator_unavailable" = "试听响铃仅在真实设备上可用。";
 "test_ring_alarm_title" = "测试闹钟";
 "test_ring_backup_title" = "试听防睡过头声音";
 
 /* Why the trial ring can't ring (#150) */
-"test_ring_reason_not_authorized" = "尚未允许闹钟。请打开“设置”并允许闹钟。";
-"test_ring_reason_denied" = "闹钟访问已被阻止。请打开“设置”并允许闹钟。";
+"test_ring_reason_not_authorized" = "尚未允许闹钟，因此在允许之前闹钟不会响。";
+"test_ring_reason_denied" = "My Sound Alarm 的闹钟已关闭，因此闹钟不会响。请打开“设置”并开启闹钟。";
+"allow_alarms" = "允许闹钟";
 
 /* Loudness (#109 C) */
 
