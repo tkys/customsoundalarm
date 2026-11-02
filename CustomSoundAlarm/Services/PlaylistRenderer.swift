@@ -51,10 +51,21 @@ enum PlaylistRenderer {
         let crossfadeFrames = request.fade.gapFade == .crossfade
             ? Int((PlaylistGapFade.crossfade.seconds * PlaylistRenderLogic.sampleRate).rounded())
             : 0
-        let overlapFrames = (0..<max(0, trackFrames.count - 1)).reduce(0) { total, index in
-            total + min(crossfadeFrames, min(trackFrames[index], trackFrames[index + 1]))
+        // 実際のストリーミングと同じ順で、書き出されるフレーム数を予測する
+        // （エンドフェードの基準を実際の長さに合わせる）。
+        var totalOutputFrames = 0
+        var predictedTailFrames = 0
+        for (index, frames) in trackFrames.enumerated() {
+            let isLast = index == trackFrames.count - 1
+            let headFrames = index == 0
+                ? 0
+                : min(crossfadeFrames, predictedTailFrames, frames)
+            let tailFrames = isLast
+                ? 0
+                : min(crossfadeFrames, max(0, frames - headFrames))
+            totalOutputFrames += frames - tailFrames
+            predictedTailFrames = tailFrames
         }
-        let totalOutputFrames = trackFrames.reduce(0, +) - overlapFrames
 
         let writer = try StreamingWriter(
             outputURL: request.outputURL,
@@ -90,11 +101,12 @@ enum PlaylistRenderer {
                     try writer.write(mixed)
                 }
 
-                // 次の曲のクロスフェード用に、この曲の末尾だけを保持する。
-                // 最後の曲は次が無いので、末尾もそのまま書き出す。
+                // 先頭をミックスした残りの部分から、末尾だけを次の曲のために保持する。
+                // 先頭（head）はすでに書き出し済みなので pendingTail に含めない。
                 let isLast = index == readers.count - 1
-                let tailFrames = isLast ? 0 : min(crossfadeFrames, frames)
-                let restTailCount = max(0, tailFrames - head.count)
+                let tailFrames = isLast
+                    ? 0
+                    : min(crossfadeFrames, max(0, frames - head.count))
                 var restTail: [Float] = []
                 var readFromRest = 0
                 while readFromRest < frames - head.count {
@@ -103,13 +115,13 @@ enum PlaylistRenderer {
                     if chunk.isEmpty { break }
                     readFromRest += chunk.count
                     restTail.append(contentsOf: chunk)
-                    if restTail.count > restTailCount {
-                        let writeCount = restTail.count - restTailCount
+                    if restTail.count > tailFrames {
+                        let writeCount = restTail.count - tailFrames
                         try writer.write(Array(restTail.prefix(writeCount)))
                         restTail.removeFirst(writeCount)
                     }
                 }
-                pendingTail = isLast ? [] : head + restTail
+                pendingTail = isLast ? [] : restTail
             } else {
                 var trackWritten = 0
                 while trackWritten < frames {

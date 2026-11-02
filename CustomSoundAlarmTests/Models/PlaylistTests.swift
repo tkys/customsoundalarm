@@ -242,15 +242,15 @@ struct PlaylistRenderLogicTests {
     func fallback_skipsMissingFirstTrack() {
         let tracks = [
             PlaylistTrack(soundFileName: "Missing.caf"),
-            PlaylistTrack(soundFileName: "PresetMarimba.caf")
+            PlaylistTrack(soundFileName: "Second.caf")
         ]
         let result = PlaylistFallbackLogic.fileName(
             tracks: tracks,
             fallbackFileName: "AlsoMissing.caf",
-            isAvailable: { $0 == "PresetMarimba.caf" },
+            isAvailable: { $0 == "Second.caf" },
             defaultFileName: "PresetMarimba.caf"
         )
-        #expect(result == "PresetMarimba.caf")
+        #expect(result == "Second.caf")
     }
 
     @Test

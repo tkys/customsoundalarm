@@ -244,4 +244,46 @@ struct PlaylistRendererTests {
             ))
         }
     }
+
+    @Test
+    func threeTrackCrossfade_usesEachTracksTail() throws {
+        let a = try makeCAF(seconds: 5, value: 0.1)
+        let b = try makeCAF(seconds: 5, value: 0.2)
+        let c = try makeCAF(seconds: 5, value: 0.3)
+        let output = outputURL()
+        defer {
+            try? FileManager.default.removeItem(at: a)
+            try? FileManager.default.removeItem(at: b)
+            try? FileManager.default.removeItem(at: c)
+            try? FileManager.default.removeItem(at: output)
+        }
+
+        let result = try PlaylistRenderer.generate(PlaylistRenderRequest(
+            trackURLs: [a, b, c],
+            fade: PlaylistFadeSettings(gapFade: .crossfade),
+            applyFadeIn: true,
+            outputURL: output
+        ))
+
+        // A(5) + B(5) + C(5) - 2s - 2s = 11s
+        #expect(abs(result.durationSeconds - 11) < 0.05)
+        let samples = loadOutput(output)
+        #expect(samples.count > Int(10.5 * sampleRate))
+
+        func value(at seconds: Double) -> Float {
+            let index = min(samples.count - 1, Int(seconds * sampleRate))
+            return samples[index]
+        }
+
+        // A/B crossfade: 3-5s
+        #expect(abs(value(at: 4.0) - 0.15) < 0.02)
+        // B only: 5-6s
+        #expect(abs(value(at: 5.5) - 0.2) < 0.01)
+        // B/C crossfade: 6-8s. 先頭（Bの最初の2秒）ではなく末尾が使われること。
+        #expect(abs(value(at: 6.0) - 0.2) < 0.02)
+        #expect(abs(value(at: 7.0) - 0.25) < 0.02)
+        #expect(abs(value(at: 8.0) - 0.3) < 0.02)
+        // C only
+        #expect(abs(value(at: 9.5) - 0.3) < 0.01)
+    }
 }
