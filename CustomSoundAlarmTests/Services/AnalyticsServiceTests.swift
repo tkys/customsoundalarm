@@ -98,6 +98,11 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.adSlotEligible(
             slot: .bannerSounds, allowed: true, reason: .eligible, region: .standard
         ).name == "ad_slot_eligible")
+        // #147: 実際の表示・失敗
+        #expect(AnalyticsEvent.adShown(slot: .bannerSounds).name == "ad_shown")
+        #expect(AnalyticsEvent.adFailed(
+            slot: .interstitialImportSaved, code: "no_fill"
+        ).name == "ad_failed")
     }
 
     // MARK: alarm_created
@@ -393,6 +398,26 @@ struct AnalyticsEventTests {
         #expect(props["region"] as? String == "standard")
     }
 
+    // MARK: ad_shown / ad_failed (#147)
+
+    @Test
+    func adShownProperties() {
+        let props = AnalyticsEvent.adShown(slot: .bannerAlarmList).properties
+        #expect(props.count == 1)
+        #expect(props["slot"] as? String == "banner_alarm_list")
+    }
+
+    @Test
+    func adFailedProperties() {
+        let props = AnalyticsEvent.adFailed(
+            slot: .interstitialImportSaved,
+            code: AdFailureCode.noFill.rawValue
+        ).properties
+        #expect(props.count == 2)
+        #expect(props["slot"] as? String == "interstitial_import_saved")
+        #expect(props["code"] as? String == "no_fill")
+    }
+
     // MARK: sound_preview_played
 
     @Test
@@ -418,6 +443,8 @@ struct AnalyticsEventTests {
             .alarmDuplicated,
             .soundPickerRecentUsed,
             .adSlotEligible(slot: .bannerSounds, allowed: true, reason: .eligible, region: .standard),
+            .adShown(slot: .bannerSounds),
+            .adFailed(slot: .bannerImport, code: "no_fill"),
             .alarmFired(wasAppForeground: true, hour: 8, isRepeating: false, detection: "observer"),
             .alarmStopped(hour: 8),
             .alarmSnoozed(from: "observer"),

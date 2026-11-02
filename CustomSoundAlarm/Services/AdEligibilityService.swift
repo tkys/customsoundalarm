@@ -59,7 +59,26 @@ final class AdEligibilityService {
     /// 枠の表示可否を判定する（AdsConfig のスイッチは含まない）。
     func decision(for slot: AdSlotKind, now: Date = Date()) async -> AdDecision {
         await load()
-        let input = AdPolicyInput(
+        return AdPolicy(input: policyInput(now: now)).decision(for: slot)
+    }
+
+    /// スクリーンショット用の上書きを含む入力（DEBUGのみ）。
+    private func policyInput(now: Date) -> AdPolicyInput {
+#if DEBUG
+        if AppGroup.isUITestForceAdsEligible {
+            return AdPolicyInput(
+                now: now,
+                timeZone: .current,
+                firstLaunchDate: now.addingTimeInterval(-30 * 24 * 60 * 60),
+                originalAppVersion: String(AdsConfig.introductionBuild),
+                introductionBuild: AdsConfig.introductionBuild,
+                isPro: false,
+                lastInterstitialShownAt: nil,
+                region: .standard
+            )
+        }
+#endif
+        return AdPolicyInput(
             now: now,
             timeZone: .current,
             firstLaunchDate: AppGroup.firstLaunchDate,
@@ -69,11 +88,10 @@ final class AdEligibilityService {
             lastInterstitialShownAt: AppGroup.lastInterstitialShownAt,
             region: region
         )
-        return AdPolicy(input: input).decision(for: slot)
     }
 }
 
-/// `ad_slot_eligible` の送信を一元化する（#111）。
+/// `ad_slot_eligible` / `ad_shown` / `ad_failed` の送信を一元化する（#111 / #147）。
 @MainActor
 enum AdReporting {
     static func report(slot: AdSlotKind, decision: AdDecision) {
@@ -82,6 +100,17 @@ enum AdReporting {
             allowed: decision.allowed,
             reason: decision.reason,
             region: decision.region
+        ))
+    }
+
+    static func reportShown(slot: AdSlotKind) {
+        AnalyticsService.shared.capture(.adShown(slot: slot))
+    }
+
+    static func reportFailed(slot: AdSlotKind, error: Error) {
+        AnalyticsService.shared.capture(.adFailed(
+            slot: slot,
+            code: AdFailureCode.from(error).rawValue
         ))
     }
 }

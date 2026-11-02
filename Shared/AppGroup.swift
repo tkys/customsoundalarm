@@ -161,6 +161,16 @@ enum AppGroup {
     #endif
     }
 
+    /// スクリーンショット用: シミュレータで広告の表示条件を満たす（DEBUGのみ・#147）。
+    /// 本番の判定には影響しない。`AdsConfig.isEnabled` は別途一時的に true にする必要がある。
+    static var isUITestForceAdsEligible: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-force-ads-eligible")
+    #else
+        false
+    #endif
+    }
+
     /// オンボーディングを完了したか（#98）。
     /// 未完了かつアラーム0件・取り込み音源0件の新規インストールにだけオンボを出す。
     /// 既存ユーザーは初回起動時に条件を満たさなければ立てて以後出さない

@@ -200,6 +200,9 @@ struct AudioCropView: View {
         .task {
             await loadDuration()
         }
+        .task {
+            await AdPresenter.preloadInterstitialIfAllowed()
+        }
         .onDisappear {
             previewer.stop()
         }
@@ -282,11 +285,12 @@ struct AudioCropView: View {
                     gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
                     lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore)
                 ))
-                await AdPresenter.presentInterstitialIfAllowed(after: .importSaved)
-
                 // 一時コピーを破棄して閉じる
                 try? FileManager.default.removeItem(at: source.url)
                 dismiss()
+
+                // シートを閉じた後に全画面広告を出す（広告がシートごと消えないように）
+                await AdPresenter.presentInterstitialIfAllowed(after: .importSaved)
             } catch {
                 errorMessage = error.localizedDescription
             }

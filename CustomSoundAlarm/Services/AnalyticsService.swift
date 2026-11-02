@@ -157,6 +157,16 @@ enum AnalyticsEvent: Sendable {
     /// - region: standard / limited
     case adSlotEligible(slot: AdSlotKind, allowed: Bool, reason: AdDecisionReason, region: AdRegion)
 
+    /// 広告が実際に表示された（インプレッション・#147）
+    /// - slot: banner_sounds / banner_import / banner_alarm_list / interstitial_import_saved
+    case adShown(slot: AdSlotKind)
+
+    /// 広告の読み込み・表示に失敗した（#147）
+    /// - slot: 同上
+    /// - code: invalid_request / no_fill / network_error / server_error / timeout /
+    ///   internal_error / presentation_failed / unknown
+    case adFailed(slot: AdSlotKind, code: String)
+
     // MARK: Phase 4（ベッドサイドモード・#68）
 
     /// ベッドサイドモードに入った
@@ -232,6 +242,8 @@ enum AnalyticsEvent: Sendable {
         case .updatePromptTapped: return "update_prompt_tapped"
         case .updatePromptDismissed: return "update_prompt_dismissed"
         case .adSlotEligible: return "ad_slot_eligible"
+        case .adShown: return "ad_shown"
+        case .adFailed: return "ad_failed"
         case .bedsideEntered: return "bedside_entered"
         case .bedsideExited: return "bedside_exited"
         case .bedsideSettingChanged: return "bedside_setting_changed"
@@ -360,6 +372,13 @@ enum AnalyticsEvent: Sendable {
                 "allowed": allowed,
                 "reason": reason.rawValue,
                 "region": region.rawValue
+            ]
+        case let .adShown(slot):
+            return ["slot": slot.rawValue]
+        case let .adFailed(slot, code):
+            return [
+                "slot": slot.rawValue,
+                "code": code
             ]
         case let .bedsideEntered(layout, theme, hour):
             return [

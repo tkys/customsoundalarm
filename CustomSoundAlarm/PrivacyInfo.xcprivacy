@@ -7,6 +7,11 @@
 		PostHog SDK 同梱の PrivacyInfo.xcprivacy に加え、アプリ本体が原因で収集される
 		データを申告する。トラッキングには使用しない（NSPrivacyTracking = false）。
 		PII（メール等）は一切送信せず、ユーザー識別は PostHog 既定の匿名IDによる。
+
+		Google Mobile Ads SDK（#147）は SDK 同梱の PrivacyInfo.xcprivacy で
+		Advertising Data / Device ID 等の広告関連データを申告している。
+		アプリ本体は広告目的のデータを独自に収集しないため、ここには重複して追加しない。
+		ATT は使用しない（NSUserTrackingUsageDescription を追加しない）。
 	-->
 	<key>NSPrivacyTracking</key>
 	<false/>
