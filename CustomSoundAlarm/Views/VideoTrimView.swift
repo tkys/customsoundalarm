@@ -54,6 +54,9 @@ struct VideoImportFlow: View {
         .safeAreaInset(edge: .bottom) {
             AdSlot(slot: .bannerImport)
         }
+        .task {
+            await AdPresenter.preloadInterstitialIfAllowed()
+        }
         .navigationTitle(String(localized: "add_from_video_title"))
         .navigationBarTitleDisplayMode(.inline)
         // 閉じるボタン（#82-2: シート化に伴う明示的な出口。編集中は破棄を確認する）
@@ -457,8 +460,9 @@ struct VideoImportFlow: View {
                     gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
                     lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore)
                 ))
-                await AdPresenter.presentInterstitialIfAllowed(after: .importSaved)
                 dismiss()
+                // シートを閉じた後に全画面広告を出す（広告がシートごと消えないように）
+                await AdPresenter.presentInterstitialIfAllowed(after: .importSaved)
             } catch {
                 errorMessage = error.localizedDescription
                 // 計測: reason は安定識別子のみ（PII/パス混入を避けるため localizedDescription 不使用）

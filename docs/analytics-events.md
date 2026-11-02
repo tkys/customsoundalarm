@@ -35,6 +35,8 @@
 | `update_prompt_dismissed` | `kind` string（recommended） | おすすめを「あとで」/スワイプで閉じた | おすすめの受容 | アプリ動作中のみ | 1.8.0 |
 | `sound_selected` | `kind` string（imported/preset/default）, `rank_bucket` string（1/2-3/4-10/11+） | サウンド選択で音を選んだ | 音の種類・並び順の影響 | アプリ動作中のみ | 1.8.0 |
 | `ad_slot_eligible` | `slot` string（banner_sounds/banner_import/banner_alarm_list/interstitial_import_saved）, `allowed` bool, `reason` string（eligible/existing_user/version_unavailable/pro/first_week/quiet_hours/frequency_cap/forbidden_context/wrong_context）, `region` string（standard/limited） | 広告枠の判定時（`AdsConfig.isEnabled = false` でも送る） | 1.9.0 前に実際の表示機会を測る | アプリ動作中のみ | 1.9.0 |
+| `ad_shown` | `slot` string（banner_sounds/banner_import/banner_alarm_list/interstitial_import_saved） | 広告のインプレッション記録時 | 実際に広告が見られた割合 | アプリ動作中のみ | 1.9.0 |
+| `ad_failed` | `slot` string（同上）, `code` string（invalid_request/no_fill/network_error/server_error/timeout/internal_error/presentation_failed/unknown） | 広告の読み込み・表示失敗時 | 在庫不足・通信・実装起因の切り分け | アプリ動作中のみ | 1.9.0 |
 | `sound_preview_played` | — | サウンドの試聴 | 試聴行動 | アプリ動作中のみ | 既存 |
 | `custom_sound_imported` | `source` string（video/audio）, `peak_db_bucket` string, `gain_db_bucket` string, `lufs_bucket` string（取り込み前のLUFS区分） | カスタムサウンド取り込み成功 | 取り込み経路・音量 | アプリ動作中のみ | 既存（`lufs_bucket` は1.8.0） |
 | `video_import_started` | `source` string（photo_library/file） | 動画取り込み開始 | 動画経路 | アプリ動作中のみ | 既存 |

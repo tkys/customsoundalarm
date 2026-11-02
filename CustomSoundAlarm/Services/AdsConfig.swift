@@ -1,12 +1,34 @@
 import CoreGraphics
 import Foundation
 
-/// 広告の全体スイッチと定数（#111）。
-/// このIssueでは広告 SDK を入れないため、`isEnabled` は false のまま。
+/// 広告の全体スイッチと定数（#111 / #147）。
+/// 1.9.0 のリリース作業で `isEnabled` を true にするまで、広告は表示しない。
 enum AdsConfig {
 
-    /// 全体スイッチ。false の間は何も表示せず、判定と計測だけ動く。
+    /// 全体スイッチ。false の間は SDK を初期化せず、判定と計測だけ動く。
     static let isEnabled: Bool = false
+
+    // MARK: - Ad unit IDs（#147）
+
+    /// バナー（音の一覧・取り込み画面・アラーム一覧の下部）
+    static let bannerUnitID: String = {
+#if DEBUG
+        // DEBUG は必ず Google のテスト用ユニット ID（本番の広告を出さない）。
+        // 適応型バナーのデモ ID は固定サイズ用と別（2026-10-30 時点）。
+        "ca-app-pub-3940256099942544/2435281174"
+#else
+        "ca-app-pub-6406716969732954/8895842537"
+#endif
+    }()
+
+    /// 全画面（取り込み保存直後・週1回まで）
+    static let interstitialUnitID: String = {
+#if DEBUG
+        "ca-app-pub-3940256099942544/4411468910"
+#else
+        "ca-app-pub-6406716969732954/5698833558"
+#endif
+    }()
 
     /// 広告導入ビルド（これより前にインストールしたユーザーには出さない）。
     ///
