@@ -426,6 +426,17 @@ struct AlarmDetailView: View {
                 .foregroundStyle(.orange)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityIdentifier(messageIdentifier)
+            if display.requestsPermission {
+                Button("allow_alarms") {
+                    Task {
+                        _ = await scheduler.requestAuthorization()
+                        scheduler.refreshTestRingPermission()
+                    }
+                }
+                .font(.footnote.weight(.medium))
+                .buttonStyle(.borderless)
+                .accessibilityIdentifier("addAlarm.allowAlarms")
+            }
             if display.showsOpenSettings {
                 Button("open_settings") {
                     if let url = URL(string: UIApplication.openSettingsURLString) {

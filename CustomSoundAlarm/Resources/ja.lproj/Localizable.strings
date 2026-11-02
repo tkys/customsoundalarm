@@ -198,8 +198,9 @@
 "test_ring_backup_title" = "寝過ごし防止の音を試す";
 
 /* 今すぐ鳴らせれない理由（#150） */
-"test_ring_reason_not_authorized" = "まだ許可が下りていないため鳴らせません。設定を開いて「アラーム」を許可してください。";
-"test_ring_reason_denied" = "アラームの許可が拒否されています。設定を開いて「アラーム」を許可してください。";
+"test_ring_reason_not_authorized" = "アラームがまだ許可されていません。許可するまで、アラームは鳴りません。";
+"test_ring_reason_denied" = "アラームの許可がオフのため、アラームは鳴りません。設定を開いて「アラーム」をオンにしてください。";
+"allow_alarms" = "許可する";
 
 /* Loudness (#109 C) */
 

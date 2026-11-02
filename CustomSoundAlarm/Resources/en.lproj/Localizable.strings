@@ -198,8 +198,9 @@
 "test_ring_backup_title" = "Try the oversleep guard sound";
 
 /* Why the trial ring can't ring (#150) */
-"test_ring_reason_not_authorized" = "Alarms aren't allowed yet. Open Settings and allow alarms.";
-"test_ring_reason_denied" = "Alarm access is blocked. Open Settings and allow alarms.";
+"test_ring_reason_not_authorized" = "Alarms aren't allowed yet, so they won't ring until you allow them.";
+"test_ring_reason_denied" = "Alarms are turned off for My Sound Alarm, so they won't ring. Open Settings and turn on Alarms.";
+"allow_alarms" = "Allow Alarms";
 
 /* Loudness (#109 C) */
 

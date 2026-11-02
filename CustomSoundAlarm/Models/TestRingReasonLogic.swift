@@ -17,8 +17,12 @@ enum TestRingFailureReason: String, Equatable, Sendable {
 struct TestRingReasonDisplay: Equatable, Sendable {
     /// 理由の Localizable キー
     let messageKey: String
-    /// 直し方として「設定を開く」を出すか（許可の問題だけ true）
+    /// 直し方として「設定を開く」を出すか（拒否済みのときだけ true）
     let showsOpenSettings: Bool
+    /// 直し方として「許可する」（その場で許可ダイアログ）を出すか。
+    /// 一度も許可を求めていない間は、設定アプリに「アラーム」の項目がまだ無いため、
+    /// 設定へ送らずにアプリから許可を求める。
+    var requestsPermission: Bool = false
 }
 
 /// 「今すぐ鳴らす」の理由表示の純ロジック（#150）。
@@ -42,7 +46,8 @@ enum TestRingReasonLogic {
         case .notAuthorized:
             TestRingReasonDisplay(
                 messageKey: "test_ring_reason_not_authorized",
-                showsOpenSettings: true
+                showsOpenSettings: false,
+                requestsPermission: true
             )
         case .denied:
             TestRingReasonDisplay(
