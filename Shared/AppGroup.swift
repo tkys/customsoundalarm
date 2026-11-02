@@ -240,6 +240,30 @@ enum AppGroup {
         set { userDefaults.set(newValue, forKey: "backup_early_access_granted") }
     }
 
+    /// プレイリスト一覧（JSON・#151）
+    static var playlistsData: Data? {
+        get { userDefaults.data(forKey: "playlists") }
+        set {
+            if let newValue {
+                userDefaults.set(newValue, forKey: "playlists")
+            } else {
+                userDefaults.removeObject(forKey: "playlists")
+            }
+        }
+    }
+
+    /// プレイリストの書き出しキャッシュ（JSON・#151）
+    static var playlistRenderCacheData: Data? {
+        get { userDefaults.data(forKey: "playlist_render_cache") }
+        set {
+            if let newValue {
+                userDefaults.set(newValue, forKey: "playlist_render_cache")
+            } else {
+                userDefaults.removeObject(forKey: "playlist_render_cache")
+            }
+        }
+    }
+
     /// 停止によって取り消した最終アラームの記録（entryID → 停止時刻・#110）。
     /// 次回同期で同じ締め切りを復活させないための抑制に使う。
     static var backupCanceledAt: [UUID: Date] {

@@ -227,8 +227,25 @@ final class SoundStore {
             add(AlarmSound(
                 name: String(localized: String.LocalizationValue(def.labelKey)),
                 fileName: def.fileName,
-                isPreset: true
+                isPreset: true,
+                durationSeconds: AudioConverter.shared.measureDurationSeconds(
+                    fileName: def.fileName
+                )
             ))
+        }
+        // 既存ユーザーのプリセットにも長さを記録する（プレイリストの合計時間表示・#151）
+        var didBackfill = false
+        for index in sounds.indices
+        where sounds[index].isPreset && sounds[index].durationSeconds == nil {
+            if let seconds = AudioConverter.shared.measureDurationSeconds(
+                fileName: sounds[index].fileName
+            ) {
+                sounds[index].durationSeconds = seconds
+                didBackfill = true
+            }
+        }
+        if didBackfill {
+            save()
         }
         if !toRegister.isEmpty {
             logger.info("Registered \(toRegister.count) preset sound(s)")
