@@ -17,7 +17,7 @@ MP3, AAC, WAV e M4A. Aggiungili dall’app File o inviali da un’altra app con 
 Suona in modalità silenziosa
 My Sound Alarm programma le sue sveglie con AlarmKit, il sistema di sveglie introdotto da Apple in iOS 26. Compaiono sulla schermata di blocco come quelle dell’app Orologio integrata e suonano in modalità silenziosa e con una modalità Full Immersion attiva, anche con My Sound Alarm chiusa.
 
-“Ring now”
+“Suona ora”
 Ascolta subito il suono scelto, allo stesso volume di una vera sveglia.
 
 Anti-sonno (Pro, accesso anticipato)

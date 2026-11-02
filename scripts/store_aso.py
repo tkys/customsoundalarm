@@ -152,7 +152,7 @@ MP3, AAC, WAV et M4A. Ajoute-les depuis l’app Fichiers, ou envoie-les depuis u
 Sonne en mode silencieux
 My Sound Alarm programme ses alarmes avec AlarmKit, le système d’alarmes ajouté par Apple dans iOS 26. Elles s’affichent sur l’écran verrouillé comme celles de l’app Horloge intégrée et sonnent en mode silencieux et quand un mode de concentration est activé, même quand My Sound Alarm est fermée.
 
-« Ring now »
+« Faire sonner »
 Écoute tout de suite le son choisi, au même volume qu’une vraie alarme.
 
 Anti-grasse matinée (Pro, accès anticipé)
@@ -196,7 +196,7 @@ MP3, AAC, WAV und M4A. Füge sie aus der Dateien-App hinzu oder schick sie aus e
 Klingelt im Stummmodus
 My Sound Alarm plant seine Wecker mit AlarmKit, dem Wecker-Framework, das Apple mit iOS 26 eingeführt hat. Sie erscheinen wie Wecker der integrierten Uhr-App auf dem Sperrbildschirm und klingeln im Stummmodus und wenn ein Fokus aktiv ist – auch wenn My Sound Alarm geschlossen ist.
 
-„Ring now“
+„Jetzt klingeln“
 Hör den gewählten Ton sofort, in derselben Lautstärke wie ein echter Wecker.
 
 Verschlafschutz (Pro, frühe Version)
@@ -239,7 +239,7 @@ MP3, AAC, WAV y M4A. Añádelos desde la app Archivos o envíalos desde otra app
 Suena en modo silencio
 My Sound Alarm programa sus alarmas con AlarmKit, el sistema de alarmas que Apple añadió en iOS 26. Aparecen en la pantalla bloqueada como las de la app Reloj integrada y suenan en modo silencio y con un modo de concentración activado, incluso con My Sound Alarm cerrada.
 
-«Ring now»
+«Hacer sonar ahora»
 Escucha al momento el sonido que elegiste, con el mismo volumen que una alarma de verdad.
 
 {guard} (Pro, acceso anticipado)
@@ -287,7 +287,7 @@ MP3, AAC, WAV e M4A. Adicione pelo app Arquivos ou envie de outro app pelo botã
 Toca no modo silencioso
 O My Sound Alarm agenda os alarmes com o AlarmKit, o sistema de alarmes que a Apple incluiu no iOS 26. Eles aparecem na Tela Bloqueada como os do app Relógio nativo e tocam no modo silencioso e com um Foco ativado, mesmo com o My Sound Alarm fechado.
 
-“Ring now”
+“Tocar agora”
 Ouça na hora o som escolhido, no mesmo volume de um alarme de verdade.
 
 Proteção contra perder a hora (Pro, acesso antecipado)
@@ -331,7 +331,7 @@ MP3, AAC, WAV e M4A. Aggiungili dall’app File o inviali da un’altra app con 
 Suona in modalità silenziosa
 My Sound Alarm programma le sue sveglie con AlarmKit, il sistema di sveglie introdotto da Apple in iOS 26. Compaiono sulla schermata di blocco come quelle dell’app Orologio integrata e suonano in modalità silenziosa e con una modalità Full Immersion attiva, anche con My Sound Alarm chiusa.
 
-“Ring now”
+“Suona ora”
 Ascolta subito il suono scelto, allo stesso volume di una vera sveglia.
 
 Anti-sonno (Pro, accesso anticipato)
@@ -375,7 +375,7 @@ MP3, AAC, WAV en M4A. Voeg ze toe vanuit de Bestanden-app of stuur ze vanuit een
 Gaat af in de stille modus
 My Sound Alarm plant zijn wekkers in met AlarmKit, het wekkersysteem dat Apple in iOS 26 heeft toegevoegd. Ze verschijnen op het toegangsscherm zoals wekkers van de ingebouwde Klok-app en gaan af in de stille modus en als een focus aan staat, ook als My Sound Alarm gesloten is.
 
-‘Ring now’
+‘Laat nu afgaan’
 Hoor het gekozen geluid meteen, op hetzelfde volume als een echte wekker.
 
 Verslaapbeveiliging (Pro, vroege toegang)
@@ -419,7 +419,7 @@ MP3, AAC, WAV, M4A를 지원합니다. 파일 앱이나 다른 앱의 공유 버
 [무음 모드에서도 울림]
 My Sound Alarm의 알람은 Apple이 iOS 26에 추가한 AlarmKit으로 등록됩니다. iPhone 기본 시계 앱의 알람처럼 잠금 화면에 표시되고, 무음 모드나 집중 모드가 켜져 있어도, 이 앱을 닫아도 울립니다.
 
-["Ring now"]
+["지금 울리기"]
 고른 소리를 실제 알람과 같은 음량으로 바로 들어볼 수 있습니다.
 
 [늦잠 방지 (Pro, 사전 공개)]
@@ -463,7 +463,7 @@ iPhone 的自制铃声最长约 40 秒，而 My Sound Alarm 可以从视频中�
 【静音模式下也会响】
 My Sound Alarm 的闹钟通过 Apple 在 iOS 26 中加入的 AlarmKit 设定。它会像 iPhone 自带“时钟”App 的闹钟一样显示在锁定屏幕上，静音模式下、专注模式打开时，甚至关闭 My Sound Alarm 后也会响。
 
-【“Ring now”】
+【“立即响铃”】
 用和真正闹钟相同的音量，马上试听你选的声音。
 
 【防睡过头（Pro，抢先体验）】
@@ -507,7 +507,7 @@ MP3, AAC, WAV i M4A. Dodaj je z aplikacji Pliki albo wyślij z innej aplikacji p
 Dzwoni w trybie cichym
 My Sound Alarm planuje swoje budziki przez AlarmKit, system budzików dodany przez Apple w iOS 26. Pojawiają się na ekranie blokady jak budziki z wbudowanej aplikacji Zegar i dzwonią w trybie cichym i przy włączonym trybie skupienia, nawet gdy My Sound Alarm jest zamknięta.
 
-„Ring now”
+„Zadzwoń teraz”
 Posłuchaj wybranego dźwięku od razu, z tą samą głośnością co prawdziwy budzik.
 
 Ochrona przed zaspaniem (Pro, wczesny dostęp)
@@ -551,7 +551,7 @@ MP3, AAC, WAV a M4A. Přidej je z aplikace Soubory, nebo je pošli z jiné aplik
 Zvoní v tichém režimu
 My Sound Alarm plánuje své budíky přes AlarmKit, systém budíků, který Apple přidal v iOS 26. Zobrazují se na zamčené obrazovce jako budíky z vestavěné aplikace Hodiny a zvoní v tichém režimu i při zapnutém režimu soustředění, i když je My Sound Alarm zavřená.
 
-„Ring now“
+„Zazvonit teď“
 Poslechni si vybraný zvuk hned, ve stejné hlasitosti jako skutečný budík.
 
 Ochrana proti zaspání (Pro, předběžný přístup)
@@ -595,7 +595,7 @@ DESC["ar-SA"] = ("تطبيق منبه يوقظك على لازمة أغنية أ
 يرن في الوضع الصامت
 يجدول My Sound Alarm منبهاته باستخدام AlarmKit، وهو نظام المنبهات الذي أضافته Apple في iOS 26. تظهر على شاشة القفل مثل منبهات تطبيق الساعة المدمج، وترن في الوضع الصامت وعند تشغيل وضع التركيز، حتى عندما يكون My Sound Alarm مغلقًا.
 
-«Ring now»
+«رنّ الآن»
 استمع فورًا إلى الصوت الذي اخترته، بمستوى صوت المنبه الحقيقي نفسه.
 
 الحماية من النوم الزائد (Pro، وصول مبكر)

@@ -17,7 +17,7 @@ MP3, AAC, WAV et M4A. Ajoute-les depuis l’app Fichiers, ou envoie-les depuis u
 Sonne en mode silencieux
 My Sound Alarm programme ses alarmes avec AlarmKit, le système d’alarmes ajouté par Apple dans iOS 26. Elles s’affichent sur l’écran verrouillé comme celles de l’app Horloge intégrée et sonnent en mode silencieux et quand un mode de concentration est activé, même quand My Sound Alarm est fermée.
 
-« Ring now »
+« Faire sonner »
 Écoute tout de suite le son choisi, au même volume qu’une vraie alarme.
 
 Anti-grasse matinée (Pro, accès anticipé)

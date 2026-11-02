@@ -17,7 +17,7 @@ MP3, AAC, WAV e M4A. Adicione pelo app Arquivos ou envie de outro app pelo botã
 Toca no modo silencioso
 O My Sound Alarm agenda os alarmes com o AlarmKit, o sistema de alarmes que a Apple incluiu no iOS 26. Eles aparecem na Tela Bloqueada como os do app Relógio nativo e tocam no modo silencioso e com um Foco ativado, mesmo com o My Sound Alarm fechado.
 
-“Ring now”
+“Tocar agora”
 Ouça na hora o som escolhido, no mesmo volume de um alarme de verdade.
 
 Proteção contra perder a hora (Pro, acesso antecipado)

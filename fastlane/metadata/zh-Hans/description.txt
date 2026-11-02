@@ -17,7 +17,7 @@ iPhone 的自制铃声最长约 40 秒，而 My Sound Alarm 可以从视频中�
 【静音模式下也会响】
 My Sound Alarm 的闹钟通过 Apple 在 iOS 26 中加入的 AlarmKit 设定。它会像 iPhone 自带“时钟”App 的闹钟一样显示在锁定屏幕上，静音模式下、专注模式打开时，甚至关闭 My Sound Alarm 后也会响。
 
-【“Ring now”】
+【“立即响铃”】
 用和真正闹钟相同的音量，马上试听你选的声音。
 
 【防睡过头（Pro，抢先体验）】

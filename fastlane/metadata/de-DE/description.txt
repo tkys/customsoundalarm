@@ -17,7 +17,7 @@ MP3, AAC, WAV und M4A. Füge sie aus der Dateien-App hinzu oder schick sie aus e
 Klingelt im Stummmodus
 My Sound Alarm plant seine Wecker mit AlarmKit, dem Wecker-Framework, das Apple mit iOS 26 eingeführt hat. Sie erscheinen wie Wecker der integrierten Uhr-App auf dem Sperrbildschirm und klingeln im Stummmodus und wenn ein Fokus aktiv ist – auch wenn My Sound Alarm geschlossen ist.
 
-„Ring now“
+„Jetzt klingeln“
 Hör den gewählten Ton sofort, in derselben Lautstärke wie ein echter Wecker.
 
 Verschlafschutz (Pro, frühe Version)

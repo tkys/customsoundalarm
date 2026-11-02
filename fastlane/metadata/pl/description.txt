@@ -17,7 +17,7 @@ MP3, AAC, WAV i M4A. Dodaj je z aplikacji Pliki albo wyślij z innej aplikacji p
 Dzwoni w trybie cichym
 My Sound Alarm planuje swoje budziki przez AlarmKit, system budzików dodany przez Apple w iOS 26. Pojawiają się na ekranie blokady jak budziki z wbudowanej aplikacji Zegar i dzwonią w trybie cichym i przy włączonym trybie skupienia, nawet gdy My Sound Alarm jest zamknięta.
 
-„Ring now”
+„Zadzwoń teraz”
 Posłuchaj wybranego dźwięku od razu, z tą samą głośnością co prawdziwy budzik.
 
 Ochrona przed zaspaniem (Pro, wczesny dostęp)
