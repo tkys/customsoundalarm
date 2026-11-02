@@ -22,12 +22,16 @@ struct BannerAdView: UIViewRepresentable {
     }
 
     func makeUIView(context: Context) -> BannerView {
-        let banner = BannerView(adSize: largeAnchoredAdaptiveBanner(width: width))
+        // 幅が決まる前（0）にリクエストしない。幅が決まったら updateUIView で読み込む。
+        let adSize = width > 0 ? largeAnchoredAdaptiveBanner(width: width) : AdSizeBanner
+        let banner = BannerView(adSize: adSize)
         banner.adUnitID = adUnitID
         banner.delegate = context.coordinator
         banner.rootViewController = AdPresentationContext.topViewController()
         context.coordinator.loadedWidth = width
-        banner.load(Request())
+        if width > 0 {
+            banner.load(Request())
+        }
         return banner
     }
 

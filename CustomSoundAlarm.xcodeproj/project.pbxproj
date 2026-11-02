@@ -19,6 +19,7 @@
 		09591C8F94E7D65C2407B130 /* PostSaveFeedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA17D126F33619A4E3697AF3 /* PostSaveFeedback.swift */; };
 		09A9378250DD2EA2F26CBD2C /* WaveformCropMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 478FF0ACA4F2EDDFD24927AE /* WaveformCropMath.swift */; };
 		09F6723522770C29343C5021 /* UpdatePromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5142944F490CB52A70183C /* UpdatePromptView.swift */; };
+		0A3EB3D2F246FA1C0F25F93B /* AdInterstitialCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 233E98D54912530CEA16B8B3 /* AdInterstitialCache.swift */; };
 		0BC4DDB0DD49A7675FCE56AA /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 16A967010CC8A7BA89BF9FAB /* GoogleMobileAds */; };
 		0FC81C95AFD84CD57AF0D6E2 /* FirstInstallBuild.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4624431BFD895A8C3EE23EEA /* FirstInstallBuild.swift */; };
 		1199524F1AF81748B8D10430 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9BB3A7C3D6A98F224779C5 /* AlarmSound.swift */; };
@@ -286,6 +287,7 @@
 		1F5142944F490CB52A70183C /* UpdatePromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePromptView.swift; sourceTree = "<group>"; };
 		1FD7FD210ABD24FE40E75208 /* AlarmListOrdering.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmListOrdering.swift; sourceTree = "<group>"; };
 		225524FA5A69D50318058FBA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		233E98D54912530CEA16B8B3 /* AdInterstitialCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdInterstitialCache.swift; sourceTree = "<group>"; };
 		23DB4089CA75EB37CAB33C33 /* PresetBackupLoud.caf */ = {isa = PBXFileReference; path = PresetBackupLoud.caf; sourceTree = "<group>"; };
 		24379AD8FA9D85958FCF6612 /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
 		2479D3B847DB243890A3160E /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -621,6 +623,7 @@
 			children = (
 				4A89DA50508B26893F44B997 /* AdEligibilityService.swift */,
 				3C49C0AB759E01BED743650E /* AdFailureCode.swift */,
+				233E98D54912530CEA16B8B3 /* AdInterstitialCache.swift */,
 				1335EEC99267C16174F74C8D /* AdPresentationContext.swift */,
 				E5B48004266069E0F6CD1A39 /* AdPresenter.swift */,
 				04CC2D170F5119D0BECAB880 /* AdsConfig.swift */,
@@ -1016,6 +1019,7 @@
 			files = (
 				4C35F92D19F5251221B9FCCF /* AdEligibilityService.swift in Sources */,
 				CF851059FE7BC1FD896A1E0C /* AdFailureCode.swift in Sources */,
+				0A3EB3D2F246FA1C0F25F93B /* AdInterstitialCache.swift in Sources */,
 				8D580A2B7E7C5B81DE5EF2EF /* AdPolicy.swift in Sources */,
 				5BE1DB9C545D39FC59B8F1F2 /* AdPresentationContext.swift in Sources */,
 				1915E848984C5B0678A75976 /* AdPresenter.swift in Sources */,

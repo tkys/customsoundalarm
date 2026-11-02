@@ -11,12 +11,14 @@ enum AdPresentTrigger: Sendable {
 @MainActor
 enum AdPresenter {
     private static var interstitial: InterstitialAd?
+    private static var interstitialLoadedAt: Date?
     private static var isLoadingInterstitial = false
 
     /// 取り込み画面を開いたときに事前読み込みする。
     /// 表示はしないので `ad_slot_eligible` は送らない（保存時に1回だけ送る）。
     static func preloadInterstitialIfAllowed() async {
         guard AdsConfig.isEnabled else { return }
+        discardStaleInterstitialIfNeeded()
         guard interstitial == nil, !isLoadingInterstitial else { return }
 
         let slot = AdSlotKind.interstitialImportSaved
@@ -36,7 +38,10 @@ enum AdPresenter {
             )
             ad.fullScreenContentDelegate = InterstitialPresenterDelegate.shared
             interstitial = ad
+            interstitialLoadedAt = Date()
         } catch {
+            interstitial = nil
+            interstitialLoadedAt = nil
             AdReporting.reportFailed(slot: slot, error: error)
         }
     }
@@ -55,6 +60,7 @@ enum AdPresenter {
         guard AdsConfig.isEnabled, decision.allowed else { return }
         await AdSDKCoordinator.shared.prepare(decision: decision)
 
+        discardStaleInterstitialIfNeeded()
         if interstitial == nil {
             await preloadInterstitialIfAllowed()
         }
@@ -66,13 +72,23 @@ enum AdPresenter {
             try ad.canPresent(from: presenter)
         } catch {
             interstitial = nil
+            interstitialLoadedAt = nil
             AdReporting.reportFailed(slot: slot, error: error)
             return
         }
 
         interstitial = nil
+        interstitialLoadedAt = nil
         ad.fullScreenContentDelegate = InterstitialPresenterDelegate.shared
         ad.present(from: presenter)
+    }
+
+    /// 読み込み後55分を超えた広告は破棄する（Google は1時間で失効）。
+    private static func discardStaleInterstitialIfNeeded(now: Date = Date()) {
+        guard let loadedAt = interstitialLoadedAt else { return }
+        guard !AdInterstitialCache.isFresh(loadedAt: loadedAt, now: now) else { return }
+        interstitial = nil
+        interstitialLoadedAt = nil
     }
 
     /// シートの閉じるアニメーション中は presentedViewController が残るため、

@@ -202,6 +202,41 @@ struct AdSDKCoordinatorTests {
     }
 }
 
+// MARK: - AdInterstitialCache
+
+struct AdInterstitialCacheTests {
+    private let loadedAt = Date(timeIntervalSince1970: 1_000_000)
+
+    @Test
+    func freshImmediatelyAfterLoad() {
+        #expect(AdInterstitialCache.isFresh(loadedAt: loadedAt, now: loadedAt))
+    }
+
+    @Test
+    func freshAt54Minutes59Seconds() {
+        let now = loadedAt.addingTimeInterval(54 * 60 + 59)
+        #expect(AdInterstitialCache.isFresh(loadedAt: loadedAt, now: now))
+    }
+
+    @Test
+    func staleAt55Minutes() {
+        let now = loadedAt.addingTimeInterval(55 * 60)
+        #expect(!AdInterstitialCache.isFresh(loadedAt: loadedAt, now: now))
+    }
+
+    @Test
+    func staleAfter55Minutes() {
+        let now = loadedAt.addingTimeInterval(55 * 60 + 1)
+        #expect(!AdInterstitialCache.isFresh(loadedAt: loadedAt, now: now))
+    }
+
+    @Test
+    func staleWhenClockMovesBackwards() {
+        let now = loadedAt.addingTimeInterval(-1)
+        #expect(!AdInterstitialCache.isFresh(loadedAt: loadedAt, now: now))
+    }
+}
+
 // MARK: - AdFailureCode
 
 struct AdFailureCodeTests {
