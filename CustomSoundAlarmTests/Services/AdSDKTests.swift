@@ -2,6 +2,39 @@ import Foundation
 import Testing
 @testable import CustomSoundAlarm
 
+// MARK: - Test support
+
+/// `AdPolicy` の実判定から `AdDecision` を作る。
+/// ゲート／コーディネータのテストを、手作りの `AdDecision` ではなく
+/// 実際の既存ユーザー・PRO 判定に結び付ける。
+private enum AdSDKTestSupport {
+    static let utc = TimeZone(identifier: "UTC")!
+
+    static func decision(
+        originalAppVersion: String? = String(AdsConfig.introductionBuild),
+        isPro: Bool = false
+    ) -> AdDecision {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = utc
+        var components = DateComponents()
+        components.year = 2024; components.month = 1; components.day = 15
+        components.hour = 12; components.minute = 0; components.second = 0
+        let now = calendar.date(from: components)!
+
+        let input = AdPolicyInput(
+            now: now,
+            timeZone: utc,
+            firstLaunchDate: now.addingTimeInterval(-30 * 24 * 60 * 60),
+            originalAppVersion: originalAppVersion,
+            introductionBuild: AdsConfig.introductionBuild,
+            isPro: isPro,
+            lastInterstitialShownAt: nil,
+            region: .standard
+        )
+        return AdPolicy(input: input).canShowBanner(context: .soundsList)
+    }
+}
+
 // MARK: - AdSDKGate
 
 struct AdSDKGateTests {
@@ -23,13 +56,15 @@ struct AdSDKGateTests {
 
     @Test
     func existingUser_neverInitializes() {
-        let existing = decision(allowed: false, reason: .existingUser)
+        let existing = AdSDKTestSupport.decision(originalAppVersion: "11")
+        #expect(existing.reason == .existingUser)
         #expect(!AdSDKGate.mayInitialize(isEnabled: true, decision: existing))
     }
 
     @Test
     func pro_neverInitializes() {
-        let pro = decision(allowed: false, reason: .pro)
+        let pro = AdSDKTestSupport.decision(isPro: true)
+        #expect(pro.reason == .pro)
         #expect(!AdSDKGate.mayInitialize(isEnabled: true, decision: pro))
     }
 
@@ -116,7 +151,7 @@ struct AdSDKCoordinatorTests {
 
         await coordinator.prepare(
             isEnabled: true,
-            decision: decision(allowed: false, reason: .existingUser)
+            decision: AdSDKTestSupport.decision(originalAppVersion: "11")
         )
 
         #expect(initializer.calls.isEmpty)
@@ -130,7 +165,7 @@ struct AdSDKCoordinatorTests {
 
         await coordinator.prepare(
             isEnabled: true,
-            decision: decision(allowed: false, reason: .pro)
+            decision: AdSDKTestSupport.decision(isPro: true)
         )
 
         #expect(initializer.calls.isEmpty)
