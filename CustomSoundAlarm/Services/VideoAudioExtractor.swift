@@ -51,16 +51,15 @@ final class VideoAudioExtractor {
         let outputURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("\(UUID().uuidString).m4a")
 
-        exportSession.outputURL = outputURL
-        exportSession.outputFileType = .m4a
         exportSession.timeRange = timeRange
 
-        await exportSession.export()
-
-        guard exportSession.status == .completed else {
-            throw VideoExtractionError.exportFailed(
-                exportSession.error?.localizedDescription ?? String(localized: "error_unknown")
-            )
+        // iOS 18 で非推奨の export()/status/error は使わず、
+        // async 版の export(to:as:) を使う（#150）。失敗は throw で返る。
+        do {
+            try await exportSession.export(to: outputURL, as: .m4a)
+        } catch {
+            logger.error("Export failed: \(error.localizedDescription)")
+            throw VideoExtractionError.exportFailed(error.localizedDescription)
         }
 
         logger.info("Extracted audio: \(actualEnd - startTime)s from video")

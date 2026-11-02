@@ -12,6 +12,13 @@ enum TestRingPermission: Equatable, Sendable {
     case denied
 }
 
+/// 試し鳴らしの登録結果（#150）。
+/// 失敗時は理由を添え、画面のその場表示と `test_ring_failed` 計測に使う。
+enum TestRingResult: Equatable, Sendable {
+    case scheduled
+    case failed(TestRingFailureReason)
+}
+
 // MARK: - AlarmScheduler
 
 @Observable
@@ -73,6 +80,12 @@ final class AlarmScheduler {
 
     /// 試しに鳴らすボタンの権限状態を更新する（#109）
     func refreshTestRingPermission() {
+        #if DEBUG
+        if let override = Self.uiTestPermissionOverride {
+            testRingPermission = override
+            return
+        }
+        #endif
         switch manager.authorizationState {
         case .authorized: testRingPermission = .allowed
         case .denied: testRingPermission = .denied
@@ -80,6 +93,16 @@ final class AlarmScheduler {
         @unknown default: testRingPermission = .unknown
         }
     }
+
+    #if DEBUG
+    /// UIテスト用: 「今すぐ鳴らす」の権限状態を強制する（#150）。
+    /// 引数なしなら nil（実際の状態を使う）。
+    static var uiTestPermissionOverride: TestRingPermission? {
+        if CommandLine.arguments.contains("-uitest-test-ring-denied") { return .denied }
+        if CommandLine.arguments.contains("-uitest-test-ring-not-determined") { return .unknown }
+        return nil
+    }
+    #endif
 
     /// 試しに鳴らせる状態か（ボタンの有効条件）
     var canScheduleTestRing: Bool {
@@ -540,25 +563,29 @@ final class AlarmScheduler {
     /// 選択中のサウンド（または最終アラーム用の音）で 5 秒後に一度だけ鳴らす。
     /// AlarmStore には保存しない。成功したら ID を AppGroup に記録し、
     /// 停止・60 秒経過・次回起動時でキャンセルする。
-    /// - Returns: 登録できたら true
+    /// 失敗は理由を添えて返し、`test_ring_failed` を記録する（#150）。
     @discardableResult
     func scheduleTestRing(
         soundFileName: String,
         kind: TestRingKind,
         hasBackup: Bool = false,
         now: Date = Date()
-    ) async -> Bool {
+    ) async -> TestRingResult {
         refreshTestRingPermission()
         guard canScheduleTestRing else {
-            logger.warning("Test ring skipped: AlarmKit not authorized")
-            return false
+            let reason: TestRingFailureReason =
+                testRingPermission == .denied ? .denied : .notAuthorized
+            logger.warning("Test ring skipped: AlarmKit not authorized (\(reason.rawValue))")
+            AnalyticsService.shared.capture(.testRingFailed(reason: reason, kind: kind))
+            return .failed(reason)
         }
 
         #if targetEnvironment(simulator)
         // シミュレータで AlarmKit を鳴らすと SpringBoard が落ちるため登録しない。
         // 鳴動確認は実機で行う（#109）。
         logger.warning("Test ring is disabled on the simulator")
-        return false
+        AnalyticsService.shared.capture(.testRingFailed(reason: .simulator, kind: kind))
+        return .failed(.simulator)
         #else
         let plan = TestRingLogic.makePlan(now: now, soundFileName: soundFileName, kind: kind)
         let alarmID = UUID()
@@ -572,10 +599,11 @@ final class AlarmScheduler {
             AnalyticsService.shared.capture(.testRingScheduled(kind: kind, hasBackup: hasBackup))
             scheduleTestRingCleanup(for: alarmID)
             logger.info("Scheduled test ring in \(TestRingLogic.delay)s (kind=\(kind.rawValue))")
-            return true
+            return .scheduled
         } catch {
             logger.error("Failed to schedule test ring: \(error.localizedDescription)")
-            return false
+            AnalyticsService.shared.capture(.testRingFailed(reason: .scheduleError, kind: kind))
+            return .failed(.scheduleError)
         }
         #endif
     }

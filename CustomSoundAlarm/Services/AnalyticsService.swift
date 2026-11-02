@@ -93,6 +93,11 @@ enum AnalyticsEvent: Sendable {
     /// 本番の alarm_stopped と区別するため、Intent 側で testAlarmIDs を照合して送る
     case testRingStopped(hour: Int)
 
+    /// 試しに鳴らすの登録に失敗した（#150）
+    /// - reason: not_authorized / denied / schedule_error / simulator
+    /// - kind: own（選択中の音）/ backup（寝過ごし防止の音）
+    case testRingFailed(reason: TestRingFailureReason, kind: TestRingKind)
+
     // MARK: 最終アラーム・#110
 
     /// 最終アラームをオンにした
@@ -213,6 +218,7 @@ enum AnalyticsEvent: Sendable {
         case .alarmSnoozed: return "alarm_snoozed"
         case .testRingScheduled: return "test_ring_scheduled"
         case .testRingStopped: return "test_ring_stopped"
+        case .testRingFailed: return "test_ring_failed"
         case .backupAlarmEnabled: return "backup_alarm_enabled"
         case .backupAlarmDisabled: return "backup_alarm_disabled"
         case .backupAlarmFired: return "backup_alarm_fired"
@@ -294,6 +300,11 @@ enum AnalyticsEvent: Sendable {
             ]
         case let .testRingStopped(hour):
             return ["hour": hour]
+        case let .testRingFailed(reason, kind):
+            return [
+                "reason": reason.rawValue,
+                "kind": kind.rawValue
+            ]
         case let .backupAlarmEnabled(minutes):
             return ["minutes": minutes]
         case let .backupAlarmDisabled(minutes):
