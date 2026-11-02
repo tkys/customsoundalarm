@@ -209,8 +209,8 @@ struct ContentView: View {
             ForEach(displayed, id: \.id) { alarm in
                 AlarmRow(
                     alarm: alarm,
-                    soundName: soundStore.displayName(for: alarm.soundFileName),
-                    sound: soundStore.sounds.first { $0.fileName == alarm.soundFileName },
+                    soundName: AlarmSoundDisplay.name(for: alarm),
+                    sound: AlarmSoundDisplay.representativeSound(for: alarm),
                     onToggle: {
                         alarmStore.toggleEnabled(alarm)
                         AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
@@ -277,7 +277,7 @@ struct AlarmRow: View {
                             Text(alarm.label)
                             Text("・")
                         }
-                        SoundIndicator(isCustom: !alarm.soundFileName.isEmpty, size: 10)
+                        SoundIndicator(isCustom: AlarmSoundDisplay.isCustom(alarm), size: 10)
                         Text(soundName.isEmpty ? String(localized: "default_sound") : soundName)
                             // 音名が最も長くなりがちなので、まず音名自体を1行・末尾省略にしておく
                             .lineLimit(1)

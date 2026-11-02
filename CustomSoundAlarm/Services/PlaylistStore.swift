@@ -32,6 +32,16 @@ final class PlaylistStore {
         save()
     }
 
+    /// 新規・既存を問わず保存する（#151 の編集画面用）。
+    func upsert(_ playlist: Playlist) {
+        if let index = playlists.firstIndex(where: { $0.id == playlist.id }) {
+            playlists[index] = playlist
+        } else {
+            playlists.append(playlist)
+        }
+        save()
+    }
+
     func remove(id: UUID) {
         playlists.removeAll { $0.id == id }
         save()

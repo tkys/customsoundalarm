@@ -39,6 +39,12 @@ struct AlarmDetailView: View {
     @State private var repeatWeekdays: Set<Int>
     @State private var snoozeMinutes: Int
     @State private var backupMinutes: Int?
+    @State private var soundMode: PlaylistSoundMode
+    @State private var playlistID: UUID?
+    @State private var fadeSettings: PlaylistFadeSettings
+    @State private var playlistStore = PlaylistStore.shared
+    @State private var showingPlaylistPicker = false
+    @State private var showingPlaylistRequired = false
 
     /// オンボ指定の初期動作を1回だけ適用したか
     @State private var didApplyInitialImport = false
@@ -73,6 +79,9 @@ struct AlarmDetailView: View {
             )
             _snoozeMinutes = State(initialValue: entry.snoozeMinutes)
             _backupMinutes = State(initialValue: entry.backupMinutes)
+            _soundMode = State(initialValue: entry.soundMode)
+            _playlistID = State(initialValue: entry.playlistID)
+            _fadeSettings = State(initialValue: entry.fadeSettings)
         } else {
             _selectedTime = State(initialValue: Date())
             _label = State(initialValue: String(localized: "alarm_placeholder"))
@@ -84,6 +93,9 @@ struct AlarmDetailView: View {
             _repeatWeekdays = State(initialValue: [])
             _snoozeMinutes = State(initialValue: 9)
             _backupMinutes = State(initialValue: nil)
+            _soundMode = State(initialValue: .single)
+            _playlistID = State(initialValue: nil)
+            _fadeSettings = State(initialValue: .disabled)
         }
     }
 
@@ -95,10 +107,17 @@ struct AlarmDetailView: View {
                 Section {
                     repeatSection
                     labelSection
-                    soundSection
+                    soundModeRow
+                    if soundMode.isPlaylist {
+                        playlistRow
+                    } else {
+                        soundSection
+                    }
+                    fadeSettingsRow
                     testRingSection
                     snoozeSection
                 }
+                playlistAccessSection
                 backupAlarmSection
                 if case .edit = mode {
                     deleteSection
@@ -146,6 +165,12 @@ struct AlarmDetailView: View {
                 // 追加画面のシート提示完了後に取り込みを開く（約0.35秒待つ）
                 try? await Task.sleep(for: .milliseconds(500))
                 applyInitialImportOnce()
+                #if DEBUG
+                if AppGroup.isUITestOpenPlaylist {
+                    soundMode = .playlistOrder
+                    showingPlaylistPicker = true
+                }
+                #endif
             }
             .onAppear {
                 scheduler.refreshTestRingPermission()
@@ -157,6 +182,16 @@ struct AlarmDetailView: View {
             .sheet(isPresented: $showingBackupInfo) {
                 BackupAlarmInfoView()
                     .presentationDetents([.medium])
+            }
+            .sheet(isPresented: $showingPlaylistPicker) {
+                NavigationStack {
+                    PlaylistPickerView(selectedPlaylistID: $playlistID)
+                }
+            }
+            .alert("playlist_required_title", isPresented: $showingPlaylistRequired) {
+                Button("ok", role: .cancel) {}
+            } message: {
+                Text("playlist_required_message")
             }
             .alert("error", isPresented: Binding(
                 get: { importErrorMessage != nil },
@@ -225,6 +260,78 @@ struct AlarmDetailView: View {
                 .datePickerStyle(.wheel)
                 .labelsHidden()
             }
+        }
+    }
+
+    // MARK: - Sound mode / Playlist (#151)
+
+    private var soundModeRow: some View {
+        Picker("sound_mode", selection: $soundMode) {
+            Text("sound_mode_single").tag(PlaylistSoundMode.single)
+            Text("sound_mode_playlist_order").tag(PlaylistSoundMode.playlistOrder)
+            Text("sound_mode_playlist_shuffle").tag(PlaylistSoundMode.playlistShuffle)
+            Text("sound_mode_playlist_random").tag(PlaylistSoundMode.playlistRandom)
+        }
+        .accessibilityIdentifier("addAlarm.soundMode")
+        .onChange(of: soundMode) { _, newValue in
+            if newValue.isPlaylist, playlistID == nil {
+                playlistID = playlistStore.playlists.first?.id
+            }
+        }
+    }
+
+    private var playlistRow: some View {
+        Button {
+            showingPlaylistPicker = true
+        } label: {
+            HStack {
+                Text("playlist")
+                Spacer()
+                Text(playlistName)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            }
+        }
+        .accessibilityIdentifier("addAlarm.playlistRow")
+    }
+
+    private var playlistName: String {
+        guard let playlist = playlistStore.playlist(id: playlistID) else {
+            return String(localized: "playlist_select")
+        }
+        return playlist.name
+    }
+
+    private var fadeSettingsRow: some View {
+        NavigationLink {
+            FadeSettingsView(
+                fadeSettings: $fadeSettings,
+                isPlaylist: soundMode.isPlaylist
+            )
+        } label: {
+            HStack {
+                Text("fade_settings")
+                Spacer()
+                Text(fadeSettings.summary)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            }
+        }
+        .accessibilityIdentifier("addAlarm.fadeSettingsRow")
+    }
+
+    private var playlistAccessSection: some View {
+        Section {
+            EarlyAccessBadge()
+            Text("playlist_early_access_note")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        } footer: {
+            Text("fade_backup_note")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -649,12 +756,25 @@ struct AlarmDetailView: View {
         let components = Calendar.current.dateComponents([.hour, .minute], from: selectedTime)
         let resolvedHour = components.hour ?? 7
         let resolvedMinute = components.minute ?? 0
-        let soundFileName = selectedSound?.fileName ?? ""
-        let hasCustomSound = selectedSound.map { !$0.isPreset } ?? false
+
+        if soundMode.isPlaylist {
+            guard let playlistID,
+                  let playlist = playlistStore.playlist(id: playlistID),
+                  !playlist.tracks.isEmpty else {
+                showingPlaylistRequired = true
+                return
+            }
+        }
+
+        let soundFileName = soundMode.isPlaylist ? "" : (selectedSound?.fileName ?? "")
+        let hasCustomSound = !soundMode.isPlaylist
+            && (selectedSound.map { !$0.isPreset } ?? false)
         let isRepeating = !repeatWeekdays.isEmpty
 
         // サウンド使用履歴を記録（新規作成時のデフォルト選択 + ピッカーの「最近使った」表示用）
-        SoundUsageHistory.recordUsage(soundFileName)
+        if !soundMode.isPlaylist {
+            SoundUsageHistory.recordUsage(soundFileName)
+        }
 
         let savedEntry: AlarmEntry
 
@@ -667,7 +787,10 @@ struct AlarmDetailView: View {
                 repeatWeekdays: Array(repeatWeekdays).sorted(),
                 soundFileName: soundFileName,
                 snoozeMinutes: snoozeMinutes,
-                backupMinutes: backupMinutes
+                backupMinutes: backupMinutes,
+                soundMode: soundMode,
+                playlistID: soundMode.isPlaylist ? playlistID : nil,
+                fadeSettings: fadeSettings
             )
             alarmStore.add(entry)
             AnalyticsService.shared.capture(
@@ -675,7 +798,11 @@ struct AlarmDetailView: View {
                     hasCustomSound: hasCustomSound,
                     isRepeating: isRepeating,
                     snoozeMinutes: snoozeMinutes,
-                    backupMinutes: backupMinutes ?? 0
+                    backupMinutes: backupMinutes ?? 0,
+                    soundMode: soundMode,
+                    fadeIn: fadeSettings.fadeIn,
+                    gapFade: fadeSettings.gapFade,
+                    endFade: fadeSettings.endFade
                 ),
                 properties: hoursUntilProperties(for: entry)
             )
@@ -692,7 +819,10 @@ struct AlarmDetailView: View {
                 repeatWeekdays: Array(repeatWeekdays).sorted(),
                 soundFileName: soundFileName,
                 snoozeMinutes: snoozeMinutes,
-                backupMinutes: backupMinutes
+                backupMinutes: backupMinutes,
+                soundMode: soundMode,
+                playlistID: soundMode.isPlaylist ? playlistID : nil,
+                fadeSettings: fadeSettings
             )
             alarmStore.update(updated)
             AnalyticsService.shared.capture(
@@ -701,7 +831,11 @@ struct AlarmDetailView: View {
                     isRepeating: isRepeating,
                     snoozeMinutes: snoozeMinutes,
                     backupMinutes: backupMinutes ?? 0,
-                    wasEnabled: existing.isEnabled
+                    wasEnabled: existing.isEnabled,
+                    soundMode: soundMode,
+                    fadeIn: fadeSettings.fadeIn,
+                    gapFade: fadeSettings.gapFade,
+                    endFade: fadeSettings.endFade
                 ),
                 properties: hoursUntilProperties(for: updated)
             )
@@ -718,8 +852,16 @@ struct AlarmDetailView: View {
         if BackupAlarmAccess.shouldGrantEarlyAccess(isEnabled: backupMinutes != nil) {
             AppGroup.backupEarlyAccessGranted = true
         }
+        if PlaylistAccess.shouldGrantEarlyAccess(
+            usedPlaylistFeatures: savedEntry.usesPlaylistFeatures
+        ) {
+            AppGroup.playlistEarlyAccessGranted = true
+        }
 
-        if backupMinutes != nil, let sourceFileName = selectedSound?.fileName, !sourceFileName.isEmpty {
+        if backupMinutes != nil,
+           !soundMode.isPlaylist,
+           let sourceFileName = selectedSound?.fileName,
+           !sourceFileName.isEmpty {
             // 大きくした版の生成が終わってから最終アラームを登録する（#119）
             Task {
                 _ = await BackupLoudVariantService.ensureVariant(for: sourceFileName)

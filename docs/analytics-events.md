@@ -11,13 +11,13 @@
 
 | イベント名 | プロパティ（型） | 送るタイミング | 答えたい問い | App closed? | 追加版 |
 | --- | --- | --- | --- | --- | --- |
-| `alarm_created` | `has_custom_sound` bool, `is_repeating` bool, `snooze_minutes` int, `backup_minutes` int（オフは0）, `hours_until` int（任意） | アラーム新規作成時 | 作成行動・寝過ごし防止の利用率 | アプリ動作中のみ | 既存（`backup_minutes` は1.8.0） |
-| `alarm_edited` | `has_custom_sound` bool, `is_repeating` bool, `snooze_minutes` int, `backup_minutes` int（オフは0）, `was_enabled` bool, `hours_until` int（任意） | アラーム編集保存時 | 編集で自動オンにした割合 | アプリ動作中のみ | 既存（`backup_minutes`/`was_enabled` は1.8.0） |
+| `alarm_created` | `has_custom_sound` bool, `is_repeating` bool, `snooze_minutes` int, `backup_minutes` int（オフは0）, `sound_mode` string（single/playlist_order/playlist_shuffle/playlist_random）, `fade_in` string（off/10/30/60）, `gap_fade` string（off/short/long/crossfade）, `end_fade` bool, `hours_until` int（任意） | アラーム新規作成時 | 作成行動・寝過ごし防止・プレイリストの利用率 | アプリ動作中のみ | 既存（プレイリスト項目は1.8.2） |
+| `alarm_edited` | `has_custom_sound` bool, `is_repeating` bool, `snooze_minutes` int, `backup_minutes` int（オフは0）, `was_enabled` bool, `sound_mode` string, `fade_in` string, `gap_fade` string, `end_fade` bool, `hours_until` int（任意） | アラーム編集保存時 | 編集で自動オンにした割合・プレイリスト設定 | アプリ動作中のみ | 既存（プレイリスト項目は1.8.2） |
 | `alarm_deleted` | — | アラーム削除時 | 離脱・整理行動 | アプリ動作中のみ | 既存 |
 | `alarm_duplicated` | — | アラーム複製時 | 複製の利用 | アプリ動作中のみ | 既存 |
 | `alarm_permission` | `status` string（authorized/denied/not_determined/request_failed/unknown） | 権限状態が変わったとき（永続化比較） | 許可率・拒否の影響 | アプリ動作中のみ | 既存 |
-| `alarm_fired` | `was_app_foreground` bool, `hour` int, `is_repeating` bool, `detection` string（observer/reconcile） | アラーム発火検知 | 実際に鳴ったか | アプリ動作中／起動時にも補完 | 既存 |
-| `alarm_stopped` | `hour` int | 本体アラームの停止（Intent） | 停止行動 | **届く** | 既存 |
+| `alarm_fired` | `was_app_foreground` bool, `hour` int, `is_repeating` bool, `detection` string（observer/reconcile）, `sound_mode` string | アラーム発火検知 | 実際に鳴ったか・プレイリストで鳴ったか | アプリ動作中／起動時にも補完 | 既存（`sound_mode` は1.8.2） |
+| `alarm_stopped` | `hour` int, `sound_mode` string | 本体アラームの停止（Intent） | 停止行動・プレイリストの継続 | **届く** | 既存（`sound_mode` は1.8.2） |
 | `alarm_snoozed` | `from` string（observer/reconcile） | スヌーズ待機への遷移 | スヌーズ行動 | アプリ動作中／起動時にも補完 | 既存 |
 | `test_ring_scheduled` | `kind` string（own/backup）, `has_backup` bool | 「今すぐ鳴らす」「寝過ごし防止の音を試す」の登録成功時 | 試し鳴らしの利用率 | アプリ動作中のみ | 1.8.0（`has_backup` も1.8.0） |
 | `test_ring_stopped` | `hour` int | 試し鳴らしの停止（Intent） | 試し鳴らしの完了率 | **届く** | 1.8.0 |
@@ -34,6 +34,10 @@
 | `update_prompt_tapped` | `kind` string | 「App Store で更新」タップ | 更新への遷移 | アプリ動作中のみ | 1.8.0 |
 | `update_prompt_dismissed` | `kind` string（recommended） | おすすめを「あとで」/スワイプで閉じた | おすすめの受容 | アプリ動作中のみ | 1.8.0 |
 | `sound_selected` | `kind` string（imported/preset/default）, `rank_bucket` string（1/2-3/4-10/11+） | サウンド選択で音を選んだ | 音の種類・並び順の影響 | アプリ動作中のみ | 1.8.0 |
+| `playlist_created` | `track_count` int, `total_seconds_bucket` string（under_1min/1_5min/5_10min/10min） | プレイリストを新規作成 | プレイリスト作成者の割合・規模 | アプリ動作中のみ | 1.8.2 |
+| `playlist_edited` | — | プレイリストを編集 | 編集の利用 | アプリ動作中のみ | 1.8.2 |
+| `playlist_render_failed` | `reason` string（no_tracks/too_long/render_failed/write_failed/missing_playlist） | プレイリストの書き出し失敗 | 失敗原因 | アプリ動作中のみ | 1.8.2 |
+| `playlist_render_fallback` | — | 書き出し失敗時に1曲目／既定音で鳴らした | フォールバックの頻度 | アプリ動作中のみ | 1.8.2 |
 | `ad_slot_eligible` | `slot` string（banner_sounds/banner_import/banner_alarm_list/interstitial_import_saved）, `allowed` bool, `reason` string（eligible/existing_user/version_unavailable/pro/first_week/quiet_hours/frequency_cap/forbidden_context/wrong_context）, `region` string（standard/limited） | 広告枠の判定時（`AdsConfig.isEnabled = false` でも送る） | 1.9.0 前に実際の表示機会を測る | アプリ動作中のみ | 1.9.0 |
 | `sound_preview_played` | — | サウンドの試聴 | 試聴行動 | アプリ動作中のみ | 既存 |
 | `custom_sound_imported` | `source` string（video/audio）, `peak_db_bucket` string, `gain_db_bucket` string, `lufs_bucket` string（取り込み前のLUFS区分） | カスタムサウンド取り込み成功 | 取り込み経路・音量 | アプリ動作中のみ | 既存（`lufs_bucket` は1.8.0） |
@@ -68,9 +72,21 @@
 | `sound_max_seconds_bucket` | string | 最長の取り込み音源の秒数区分 | 既存 |
 | `backup_alarm_count` | int | 寝過ごし防止がオンのアラーム数 | 1.8.0 |
 | `backup_early_access` | bool | 先行公開の権利を持っているか | 1.8.0 |
+| `playlist_count` | int | 作成したプレイリストの数 | 1.8.2 |
+| `playlist_early_access` | bool | プレイリスト先行公開の権利を持っているか | 1.8.2 |
 | `first_install_build` | int（取れなければ送らない） | 最初にインストールしたビルド番号（`CFBundleVersion`） | 1.8.0 |
 | `is_internal` | bool | DEBUG opt-in の内部利用（PostHog 側で除外） | 既存 |
 | `build_type` | string（debug） | DEBUG ビルドの super property | 既存 |
+
+## プレイリスト先行公開（#151 / 1.8.2）
+
+4週間の先行公開で使われ方を測るための指標です。
+
+- **作成者の割合**: `playlist_created` を送ったユーザー / 起動ユーザー。
+- **プレイリストで鳴った回数**: `alarm_fired` / `alarm_stopped` の `sound_mode` が `playlist_*` のイベント数。
+- **2週後も使っている人**: `alarm_fired` の `sound_mode` が `playlist_*` のユーザーのうち、2週間後も同じイベントを送っている人の割合。
+- コホート: ユーザープロパティ `playlist_count` / `playlist_early_access`。
+- 書き出し品質: `playlist_render_failed` / `playlist_render_fallback`。
 
 ## 主指標と補助指標（寝過ごし防止）
 

@@ -9,7 +9,6 @@ struct BedsideClockView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @State private var alarmStore = AlarmStore.shared
-    @State private var soundStore = SoundStore.shared
 
     @State private var now = Date()
     @State private var offset = CGSize.zero
@@ -162,8 +161,8 @@ struct BedsideClockView: View {
                 }
 
                 if settings.showSoundName {
-                    if let alarm = nextEnabledAlarm(), !alarm.soundFileName.isEmpty {
-                        let soundName = soundStore.displayName(for: alarm.soundFileName)
+                    if let alarm = nextEnabledAlarm(), AlarmSoundDisplay.hasSound(alarm) {
+                        let soundName = AlarmSoundDisplay.name(for: alarm)
                         Text(soundName)
                             .font(.caption2)
                             .foregroundStyle(theme.infoColor)

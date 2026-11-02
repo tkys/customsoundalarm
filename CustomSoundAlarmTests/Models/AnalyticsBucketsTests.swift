@@ -85,4 +85,17 @@ struct AnalyticsBucketsTests {
         #expect(AnalyticsBuckets.secondsBucket(seconds: 180) == "1_5min")
         #expect(AnalyticsBuckets.secondsBucket(seconds: 600) == "5_15min")
     }
+
+    // MARK: - playlistSecondsBucket（#151）
+
+    @Test
+    func playlistSecondsBucket_boundaries() {
+        #expect(AnalyticsBuckets.playlistSecondsBucket(seconds: 0) == "under_1min")
+        #expect(AnalyticsBuckets.playlistSecondsBucket(seconds: 59.999) == "under_1min")
+        #expect(AnalyticsBuckets.playlistSecondsBucket(seconds: 60) == "1_5min")
+        #expect(AnalyticsBuckets.playlistSecondsBucket(seconds: 299.999) == "1_5min")
+        #expect(AnalyticsBuckets.playlistSecondsBucket(seconds: 300) == "5_10min")
+        #expect(AnalyticsBuckets.playlistSecondsBucket(seconds: 599.999) == "5_10min")
+        #expect(AnalyticsBuckets.playlistSecondsBucket(seconds: 600) == "10min")
+    }
 }

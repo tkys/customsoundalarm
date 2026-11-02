@@ -18,7 +18,11 @@ enum AnalyticsEvent: Sendable {
         hasCustomSound: Bool,
         isRepeating: Bool,
         snoozeMinutes: Int,
-        backupMinutes: Int = 0
+        backupMinutes: Int = 0,
+        soundMode: PlaylistSoundMode = .single,
+        fadeIn: PlaylistFadeIn = .off,
+        gapFade: PlaylistGapFade = .off,
+        endFade: Bool = false
     )
 
     /// カスタムサウンドのインポート成功
@@ -43,7 +47,11 @@ enum AnalyticsEvent: Sendable {
         isRepeating: Bool,
         snoozeMinutes: Int,
         backupMinutes: Int = 0,
-        wasEnabled: Bool = true
+        wasEnabled: Bool = true,
+        soundMode: PlaylistSoundMode = .single,
+        fadeIn: PlaylistFadeIn = .off,
+        gapFade: PlaylistGapFade = .off,
+        endFade: Bool = false
     )
 
     /// アラーム削除
@@ -74,12 +82,18 @@ enum AnalyticsEvent: Sendable {
     /// - hour: 発火時刻の時（PII なし・時刻帯のみ）
     /// - is_repeating: 繰り返しアラームか
     /// - detection: "observer" または "reconcile"
-    case alarmFired(wasAppForeground: Bool, hour: Int, isRepeating: Bool, detection: String)
+    case alarmFired(
+        wasAppForeground: Bool,
+        hour: Int,
+        isRepeating: Bool,
+        detection: String,
+        soundMode: PlaylistSoundMode = .single
+    )
 
     /// アラーム停止（DismissAlarmIntent の buffer 経由）
     /// - hour: 停止時刻の「時」（PII なし・時刻帯のみ）。アプリ起動時にフラッシュされるため
     ///   PostHog のイベント時刻は信頼できない、明示的に送出する
-    case alarmStopped(hour: Int)
+    case alarmStopped(hour: Int, soundMode: PlaylistSoundMode = .single)
 
     /// アラームスヌーズ（状態遷移 .alerting → .countdown を検知）
     /// - from: "observer" または "reconcile"
@@ -118,6 +132,20 @@ enum AnalyticsEvent: Sendable {
 
     /// サウンド選択で音を選んだ（#124）
     case soundSelected(kind: SoundSelectionKind, rankBucket: String)
+
+    // MARK: プレイリスト・#151
+
+    /// プレイリストを作成した
+    case playlistCreated(trackCount: Int, totalSecondsBucket: String)
+
+    /// プレイリストを編集した
+    case playlistEdited
+
+    /// プレイリストの書き出しに失敗した（フォールバックした）
+    case playlistRenderFailed(reason: PlaylistRenderFailureReason)
+
+    /// 書き出し失敗時に1曲目／既定音で鳴らした
+    case playlistRenderFallback
 
     /// 大きくした版を生成した（#119）
     case backupLoudVariantGenerated(
@@ -225,6 +253,10 @@ enum AnalyticsEvent: Sendable {
         case .backupAlarmCancelledByStop: return "backup_alarm_cancelled_by_stop"
         case .backupAlarmStopped: return "backup_alarm_stopped"
         case .soundSelected: return "sound_selected"
+        case .playlistCreated: return "playlist_created"
+        case .playlistEdited: return "playlist_edited"
+        case .playlistRenderFailed: return "playlist_render_failed"
+        case .playlistRenderFallback: return "playlist_render_fallback"
         case .backupLoudVariantGenerated: return "backup_loud_variant_generated"
         case .backupLoudVariantFailed: return "backup_loud_variant_failed"
         case .volumeGuideOpened: return "volume_guide_opened"
@@ -247,12 +279,25 @@ enum AnalyticsEvent: Sendable {
     /// ここを単一情報源とすることで、送信内容のテストが SDK 非依存で可能。
     var properties: [String: Any] {
         switch self {
-        case let .alarmCreated(hasCustomSound, isRepeating, snoozeMinutes, backupMinutes):
+        case let .alarmCreated(
+            hasCustomSound,
+            isRepeating,
+            snoozeMinutes,
+            backupMinutes,
+            soundMode,
+            fadeIn,
+            gapFade,
+            endFade
+        ):
             return [
                 "has_custom_sound": hasCustomSound,
                 "is_repeating": isRepeating,
                 "snooze_minutes": snoozeMinutes,
-                "backup_minutes": backupMinutes
+                "backup_minutes": backupMinutes,
+                "sound_mode": soundMode.analyticsValue,
+                "fade_in": fadeIn.analyticsValue,
+                "gap_fade": gapFade.analyticsValue,
+                "end_fade": endFade
             ]
         case let .customSoundImported(source, peakDbBucket, gainDbBucket, lufsBucket):
             var d: [String: Any] = ["source": source.rawValue]
@@ -262,13 +307,27 @@ enum AnalyticsEvent: Sendable {
             return d
         case .soundPreviewPlayed:
             return [:]
-        case let .alarmEdited(hasCustomSound, isRepeating, snoozeMinutes, backupMinutes, wasEnabled):
+        case let .alarmEdited(
+            hasCustomSound,
+            isRepeating,
+            snoozeMinutes,
+            backupMinutes,
+            wasEnabled,
+            soundMode,
+            fadeIn,
+            gapFade,
+            endFade
+        ):
             return [
                 "has_custom_sound": hasCustomSound,
                 "is_repeating": isRepeating,
                 "snooze_minutes": snoozeMinutes,
                 "backup_minutes": backupMinutes,
-                "was_enabled": wasEnabled
+                "was_enabled": wasEnabled,
+                "sound_mode": soundMode.analyticsValue,
+                "fade_in": fadeIn.analyticsValue,
+                "gap_fade": gapFade.analyticsValue,
+                "end_fade": endFade
             ]
         case .alarmDeleted:
             return [:]
@@ -282,15 +341,19 @@ enum AnalyticsEvent: Sendable {
             return [:]
         case .soundPickerRecentUsed:
             return [:]
-        case let .alarmFired(wasAppForeground, hour, isRepeating, detection):
+        case let .alarmFired(wasAppForeground, hour, isRepeating, detection, soundMode):
             return [
                 "was_app_foreground": wasAppForeground,
                 "hour": hour,
                 "is_repeating": isRepeating,
-                "detection": detection
+                "detection": detection,
+                "sound_mode": soundMode.analyticsValue
             ]
-        case let .alarmStopped(hour):
-            return ["hour": hour]
+        case let .alarmStopped(hour, soundMode):
+            return [
+                "hour": hour,
+                "sound_mode": soundMode.analyticsValue
+            ]
         case let .alarmSnoozed(from):
             return ["from": from]
         case let .testRingScheduled(kind, hasBackup):
@@ -330,6 +393,17 @@ enum AnalyticsEvent: Sendable {
                 "kind": kind.rawValue,
                 "rank_bucket": rankBucket
             ]
+        case let .playlistCreated(trackCount, totalSecondsBucket):
+            return [
+                "track_count": trackCount,
+                "total_seconds_bucket": totalSecondsBucket
+            ]
+        case .playlistEdited:
+            return [:]
+        case let .playlistRenderFailed(reason):
+            return ["reason": reason.rawValue]
+        case .playlistRenderFallback:
+            return [:]
         case let .backupLoudVariantGenerated(gainDbBucket, durationBucket, source, outputLufsBucket):
             var props: [String: Any] = [
                 "gain_db_bucket": gainDbBucket,

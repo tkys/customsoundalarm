@@ -180,10 +180,14 @@ final class AlarmScheduler {
                     wasAppForeground: false,
                     hour: alarm.hour,
                     isRepeating: false,
-                    detection: "reconcile"
+                    detection: "reconcile",
+                    soundMode: alarm.soundMode
                 ))
                 store.toggleEnabled(alarm)
                 alarmIDMap.removeValue(forKey: alarm.id)
+                var primaryNames = AppGroup.primarySoundNames
+                primaryNames.removeValue(forKey: alarm.id)
+                AppGroup.primarySoundNames = primaryNames
                 if let backupID = backupAlarmIDMap.removeValue(forKey: alarm.id) {
                     try? manager.cancel(id: backupID)
                     var soundNames = AppGroup.backupSoundNames
@@ -243,6 +247,14 @@ final class AlarmScheduler {
     private func performSync(_ entries: [AlarmEntry]) async {
         guard !Task.isCancelled else { return }
 
+        // 現在 AlarmKit に登録中のファイル名を渡し、鳴らす予定のファイルを消さない（#151）
+        let registeredSoundFileNames = Set(AppGroup.primarySoundNames.values)
+            .union(AppGroup.backupSoundNames.values)
+        PlaylistRenderService.shared.cleanupUnusedFiles(
+            inputs: entries.map(\.playlistRenderInput),
+            keeping: registeredSoundFileNames
+        )
+
         guard await requestAuthorization() else {
             logger.warning("AlarmKit not authorized, skipping alarm sync")
             return
@@ -283,6 +295,18 @@ final class AlarmScheduler {
             }
         }
 
+        // 無効・削除されたアラームの登録中ファイル名を落とす（掃除は次回同期で行う）
+        let enabledIDs = Set(entries.filter(\.isEnabled).map(\.id))
+        let backupIDs = Set(
+            entries.filter { $0.isEnabled && $0.backupMinutes != nil }.map(\.id)
+        )
+        var primaryNames = AppGroup.primarySoundNames
+        primaryNames = primaryNames.filter { enabledIDs.contains($0.key) }
+        AppGroup.primarySoundNames = primaryNames
+        var backupNames = AppGroup.backupSoundNames
+        backupNames = backupNames.filter { backupIDs.contains($0.key) }
+        AppGroup.backupSoundNames = backupNames
+
         // Schedule new/changed entries
         var newMap = diff.keptMap
         for entry in diff.scheduleEntries {
@@ -310,10 +334,21 @@ final class AlarmScheduler {
             return entry.id
         })
 
-        // 生成方式の版が古い .loud.caf は次の同期で作り直す（#134）
-        for entry in entries
-        where entry.isEnabled && entry.backupMinutes != nil && !entry.soundFileName.isEmpty {
-            _ = await BackupLoudVariantService.ensureVariant(for: entry.soundFileName)
+        // 生成方式の版が古い .loud.caf は次の同期で作り直す（#134）。
+        // プレイリストは書き出し（fade-in なし）を用意する（#151）。
+        for entry in entries where entry.isEnabled && entry.backupMinutes != nil {
+            if entry.soundMode.isPlaylist {
+                let prepared = await PlaylistRenderService.shared.prepareBackupSound(
+                    for: entry.playlistRenderInput
+                )
+                if prepared == nil,
+                   let source = backupSourceFileName(for: entry),
+                   !source.isEmpty {
+                    _ = await BackupLoudVariantService.ensureVariant(for: source)
+                }
+            } else if let source = backupSourceFileName(for: entry), !source.isEmpty {
+                _ = await BackupLoudVariantService.ensureVariant(for: source)
+            }
         }
 
         let backupDiff = BackupAlarmLogic.computeBackupSyncDiff(
@@ -356,7 +391,44 @@ final class AlarmScheduler {
 
     /// 単一アラームをスケジュール（成功時に Alarm.ID を返す）
     private func scheduleAlarm(for entry: AlarmEntry) async -> Alarm.ID? {
-        let displayName = SoundStore.shared.displayName(for: entry.soundFileName)
+        let resolution = await PlaylistRenderService.shared.prepareSound(
+            for: entry.playlistRenderInput
+        )
+        let alarmID = Alarm.ID()
+        // AlarmKit の設定は値型のみで不変。SDK の nonisolated API に渡すため
+        // 明示的に unsafe を付ける（既存の scheduleAlarm と同じ扱い）。
+        nonisolated(unsafe) let config = makeAlarmConfiguration(
+            for: entry,
+            soundFileName: resolution.fileName,
+            displayName: soundDisplayName(for: entry),
+            alarmID: alarmID
+        )
+
+        do {
+            _ = try await manager.schedule(id: alarmID, configuration: config)
+            var names = AppGroup.primarySoundNames
+            names[entry.id] = resolution.fileName
+            AppGroup.primarySoundNames = names
+            // 新しい発火サイクルなのでスヌーズ回数をリセット（#110）
+            var counts = AppGroup.snoozeCounts
+            if counts.removeValue(forKey: entry.id) != nil {
+                AppGroup.snoozeCounts = counts
+            }
+            logger.info("Scheduled alarm: \(entry.timeString) - \(entry.label)")
+            return alarmID
+        } catch {
+            logger.error("Failed to schedule alarm \(entry.label): \(error.localizedDescription)")
+            return nil
+        }
+    }
+
+    /// AlarmKit の設定を組み立てる（通常同期と停止後の再登録で共用）。
+    private func makeAlarmConfiguration(
+        for entry: AlarmEntry,
+        soundFileName: String,
+        displayName: String,
+        alarmID: Alarm.ID
+    ) -> AlarmManager.AlarmConfiguration<CustomAlarmMetadata> {
         let metadata = CustomAlarmMetadata(entry: entry, soundDisplayName: displayName)
 
         let hasSnooze = entry.snoozeMinutes > 0
@@ -466,27 +538,79 @@ final class AlarmScheduler {
             countdownDuration = nil
         }
 
-        let alarmID = Alarm.ID()
-        let config = AlarmManager.AlarmConfiguration<CustomAlarmMetadata>(
+        return AlarmManager.AlarmConfiguration<CustomAlarmMetadata>(
             countdownDuration: countdownDuration,
             schedule: schedule,
             attributes: attributes,
             stopIntent: DismissAlarmIntent(alarmID: alarmID.uuidString),
-            sound: entry.soundFileName.isEmpty ? .default : .named(entry.soundFileName)
+            sound: soundFileName.isEmpty ? .default : .named(soundFileName)
         )
+    }
 
+    /// プレイリストのバックアップ用に、存在する最初の曲を返す（#151）。
+    private func backupSourceFileName(for entry: AlarmEntry) -> String? {
+        if entry.soundMode.isPlaylist {
+            let playlist = PlaylistStore.shared.playlist(id: entry.playlistID)
+            if let track = playlist?.tracks.first(where: {
+                soundFileExists($0.soundFileName)
+            }) {
+                return track.soundFileName
+            }
+            return soundFileExists(entry.soundFileName) ? entry.soundFileName : nil
+        }
+        return soundFileExists(entry.soundFileName) ? entry.soundFileName : nil
+    }
+
+    private func soundFileExists(_ fileName: String) -> Bool {
+        guard !fileName.isEmpty else { return false }
+        let base = fileName.replacingOccurrences(of: ".caf", with: "")
+        if Bundle.main.url(forResource: base, withExtension: "caf") != nil {
+            return true
+        }
+        let url = AudioConverter.shared.soundsDirectory.appendingPathComponent(fileName)
+        return FileManager.default.fileExists(atPath: url.path)
+    }
+
+    /// 再生する音の表示名（プレイリストならプレイリスト名）
+    private func soundDisplayName(for entry: AlarmEntry) -> String {
+        if entry.soundMode.isPlaylist {
+            return PlaylistStore.shared.playlist(id: entry.playlistID)?.name
+                ?? String(localized: "playlist")
+        }
+        return SoundStore.shared.displayName(for: entry.soundFileName)
+    }
+
+    /// 停止後にシャッフル／1曲ランダムの次回分を作り直す（#151）。
+    /// 新しいアラームを登録できてから古い方を消す（登録失敗で鳴らなくならないように）。
+    @MainActor
+    func reschedulePrimaryAfterStop(entry: AlarmEntry, oldAlarmID: UUID) async {
+        guard entry.isEnabled,
+              !entry.repeatWeekdays.isEmpty,
+              entry.soundMode.changesOrderOnStop else {
+            return
+        }
+        let resolution = await PlaylistRenderService.shared.prepareSound(
+            for: entry.playlistRenderInput,
+            forceNewOrder: true
+        )
+        let alarmID = Alarm.ID()
+        nonisolated(unsafe) let config = makeAlarmConfiguration(
+            for: entry,
+            soundFileName: resolution.fileName,
+            displayName: soundDisplayName(for: entry),
+            alarmID: alarmID
+        )
         do {
             _ = try await manager.schedule(id: alarmID, configuration: config)
-            // 新しい発火サイクルなのでスヌーズ回数をリセット（#110）
-            var counts = AppGroup.snoozeCounts
-            if counts.removeValue(forKey: entry.id) != nil {
-                AppGroup.snoozeCounts = counts
-            }
-            logger.info("Scheduled alarm: \(entry.timeString) - \(entry.label)")
-            return alarmID
+            try? manager.cancel(id: oldAlarmID)
+            alarmIDMap[entry.id] = alarmID
+            saveIDMap()
+            var names = AppGroup.primarySoundNames
+            names[entry.id] = resolution.fileName
+            AppGroup.primarySoundNames = names
+            logger.info("Rescheduled playlist alarm for next occurrence: \(entry.label)")
         } catch {
-            logger.error("Failed to schedule alarm \(entry.label): \(error.localizedDescription)")
-            return nil
+            logger.error("Failed to reschedule playlist alarm \(entry.label): \(error.localizedDescription)")
         }
     }
 
@@ -510,8 +634,22 @@ final class AlarmScheduler {
         }
 
         let alarmID = Alarm.ID()
-        let displayName = SoundStore.shared.displayName(for: entry.soundFileName)
-        let soundFileName = BackupLoudVariantService.resolvedSoundFileName(for: entry)
+        let displayName = soundDisplayName(for: entry)
+        let soundFileName: String
+        if let playlistBackup = await PlaylistRenderService.shared.prepareBackupSound(
+            for: entry.playlistRenderInput
+        ) {
+            soundFileName = playlistBackup.fileName
+        } else {
+            // 書き出し失敗時は、存在する最初の曲の「大きくした版」を使う（#151）
+            let source = backupSourceFileName(for: entry) ?? ""
+            if !source.isEmpty {
+                _ = await BackupLoudVariantService.ensureVariant(for: source)
+            }
+            soundFileName = BackupLoudVariantService.resolvedSoundFileName(
+                forSourceFileName: source
+            )
+        }
         var soundNames = AppGroup.backupSoundNames
         soundNames[entry.id] = soundFileName
         AppGroup.backupSoundNames = soundNames
@@ -751,7 +889,8 @@ final class AlarmScheduler {
                 wasAppForeground: true,
                 hour: alarm.hour,
                 isRepeating: !alarm.repeatWeekdays.isEmpty,
-                detection: "observer"
+                detection: "observer",
+                soundMode: alarm.soundMode
             ))
         }
 

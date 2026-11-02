@@ -361,4 +361,74 @@ struct AlarmEntryTests {
     func backupMinutes_duplicatedKeepsNil() {
         #expect(AlarmEntry(backupMinutes: nil).duplicated().backupMinutes == nil)
     }
+
+    // MARK: - プレイリスト（#151）
+
+    @Test
+    func playlistFields_roundTrip() throws {
+        let playlistID = UUID()
+        let original = AlarmEntry(
+            soundMode: .playlistShuffle,
+            playlistID: playlistID,
+            fadeSettings: PlaylistFadeSettings(
+                fadeIn: .thirty,
+                gapFade: .crossfade,
+                endFade: true
+            )
+        )
+        let data = try JSONEncoder().encode(original)
+        let decoded = try JSONDecoder().decode(AlarmEntry.self, from: data)
+
+        #expect(decoded.soundMode == .playlistShuffle)
+        #expect(decoded.playlistID == playlistID)
+        #expect(decoded.fadeSettings.fadeIn == .thirty)
+        #expect(decoded.fadeSettings.gapFade == .crossfade)
+        #expect(decoded.fadeSettings.endFade)
+        #expect(decoded.usesPlaylistFeatures)
+    }
+
+    @Test
+    func oldEntryWithoutPlaylistFields_decodesAsSingle() throws {
+        let json = """
+        {
+          "id": "11111111-1111-1111-1111-111111111111",
+          "hour": 7,
+          "minute": 0,
+          "isEnabled": true,
+          "label": "alarm",
+          "repeatWeekdays": [],
+          "soundFileName": "PresetMarimba.caf",
+          "snoozeMinutes": 9
+        }
+        """
+        let entry = try JSONDecoder().decode(
+            AlarmEntry.self,
+            from: Data(json.utf8)
+        )
+        #expect(entry.soundMode == .single)
+        #expect(entry.playlistID == nil)
+        #expect(entry.fadeSettings == .disabled)
+        #expect(!entry.usesPlaylistFeatures)
+    }
+
+    @Test
+    func duplicated_copiesPlaylistFields() {
+        let playlistID = UUID()
+        let copy = AlarmEntry(
+            soundMode: .playlistRandom,
+            playlistID: playlistID,
+            fadeSettings: PlaylistFadeSettings(fadeIn: .ten)
+        ).duplicated()
+
+        #expect(copy.soundMode == .playlistRandom)
+        #expect(copy.playlistID == playlistID)
+        #expect(copy.fadeSettings.fadeIn == .ten)
+    }
+
+    @Test
+    func fadeOnlyEntry_usesPlaylistFeatures() {
+        #expect(AlarmEntry(
+            fadeSettings: PlaylistFadeSettings(fadeIn: .ten)
+        ).usesPlaylistFeatures)
+    }
 }

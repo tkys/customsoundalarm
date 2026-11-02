@@ -183,8 +183,7 @@ final class PlaylistRenderService {
     /// （呼び出し側は従来の「大きくした版」を使う）。
     /// バックアップには「やさしく鳴り始める」を適用しない。
     func prepareBackupSound(
-        for input: PlaylistRenderInput,
-        forceNewOrder: Bool = false
+        for input: PlaylistRenderInput
     ) async -> PlaylistSoundResolution? {
         guard input.soundMode.isPlaylist else { return nil }
 
