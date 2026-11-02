@@ -285,8 +285,18 @@ final class AlarmScheduler {
             }
         }
 
-        // Cancel old alarms for entries being rescheduled (before scheduling new ones)
-        for (_, oldAlarmID) in diff.rescheduleAlarmIDs {
+        // Cancel old alarms for entries being rescheduled (before scheduling new ones).
+        // プレイリストのアラームは、新しい登録に成功するまで古い方を残す
+        // （差し替えに失敗しても前の音で鳴る・#151）。
+        let playlistEntryIDs = Set(
+            entries.filter(\.usesPlaylistFeatures).map(\.id)
+        )
+        var deferredOldAlarmIDs: [UUID: Alarm.ID] = [:]
+        for (entryID, oldAlarmID) in diff.rescheduleAlarmIDs {
+            if playlistEntryIDs.contains(entryID) {
+                deferredOldAlarmIDs[entryID] = oldAlarmID
+                continue
+            }
             do {
                 try manager.cancel(id: oldAlarmID)
                 logger.info("Cancelled old alarm for reschedule: \(oldAlarmID)")
@@ -313,6 +323,13 @@ final class AlarmScheduler {
             guard !Task.isCancelled else { return }
             if let alarmID = await scheduleAlarm(for: entry) {
                 newMap[entry.id] = alarmID
+                if let oldAlarmID = deferredOldAlarmIDs.removeValue(forKey: entry.id) {
+                    try? manager.cancel(id: oldAlarmID)
+                }
+            } else if let oldAlarmID = deferredOldAlarmIDs[entry.id] {
+                // 新しい登録に失敗したので、前のアラームを残す（#151）
+                newMap[entry.id] = oldAlarmID
+                logger.warning("Reschedule failed; keeping previous alarm for entry: \(entry.id)")
             }
         }
 
