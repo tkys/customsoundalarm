@@ -1,0 +1,241 @@
+/* ContentView */
+"alarm_title" = "Sveglie";
+"empty_title" = "Svegliati con il tuo suono preferito";
+"empty_description" = "Importa suoni da video o file audio\ne usali come sveglia";
+"add_alarm" = "Aggiungi sveglia";
+"default_sound" = "Predefinito";
+
+/* Day labels (short) */
+"day_sun" = "dom.";
+"day_mon" = "lun.";
+"day_tue" = "mar.";
+"day_wed" = "mer.";
+"day_thu" = "gio.";
+"day_fri" = "ven.";
+"day_sat" = "sab.";
+
+/* Repeat summaries */
+"every_day" = "Ogni giorno";
+"weekdays" = "Giorni feriali";
+"weekends" = "Fine settimana";
+"never" = "Mai";
+
+/* AlarmDetailView */
+"edit_alarm" = "Modifica sveglia";
+"cancel" = "Annulla";
+"save" = "Salva";
+"time" = "Ora";
+"sound" = "Suono";
+"none" = "Nessuno";
+"repeat" = "Ripeti";
+"label" = "Etichetta";
+"alarm_placeholder" = "Sveglia";
+"delete_alarm" = "Elimina sveglia";
+"delete_alarm_confirm" = "Vuoi davvero eliminare questa sveglia?";
+"delete" = "Elimina";
+
+/* RepeatSelectionView - Weekday labels (full) */
+"every_monday" = "Ogni lunedì";
+"every_tuesday" = "Ogni martedì";
+"every_wednesday" = "Ogni mercoledì";
+"every_thursday" = "Ogni giovedì";
+"every_friday" = "Ogni venerdì";
+"every_saturday" = "Ogni sabato";
+"every_sunday" = "Ogni domenica";
+
+/* SoundPickerView */
+"rename" = "Rinomina";
+"sound_name_placeholder" = "Nome del suono";
+"presets" = "Pronti all’uso";
+"imported_sounds" = "I miei suoni";
+"converting" = "Conversione…";
+"add_from_video" = "Aggiungi da video";
+"add_from_audio" = "Aggiungi file audio";
+"add_section" = "Aggiungi";
+"add_section_footer" = "Importa da MP3, AAC, WAV, M4A o video (MOV, MP4).";
+
+/* Waveform Crop (#77 / #79) */
+"waveform_loading" = "Generazione della forma d’onda…";
+"crop_and_save" = "Aggiungi selezione";
+"import_whole_audio" = "Aggiungi file intero";
+"crop_hint_footer" = "Trascina la forma d’onda in alto per una posizione approssimativa e quella in basso ingrandita per la regolazione precisa.";
+"time_start" = "Inizio";
+"time_end" = "Fine";
+"time_length" = "Durata";
+"time_total" = "Totale";
+
+/* Discard confirmation (#82) */
+"close" = "Chiudi";
+"discard" = "Scarta";
+"discard_edits_title" = "Vuoi scartare le modifiche?";
+"discard_edits_message" = "La selezione non verrà salvata.";
+
+/* Sound name formatting (#93) */
+"imported_sound_default" = "Suono importato";
+"my_sounds_empty_title" = "Trasforma qualsiasi suono nella tua sveglia";
+"my_sounds_empty_description" = "Importa musica da video o i tuoi file audio\npreferiti da usare come suono della sveglia";
+"file_access_denied" = "Accesso al file negato";
+
+/* VideoTrimView */
+"add_from_video_title" = "Aggiungi audio da video";
+"loading" = "Caricamento…";
+"select_video" = "Seleziona un video";
+"preview" = "Anteprima";
+"selected_duration" = "Selezione: %@";
+"stop" = "Interrompi";
+"preview_selection" = "Riproduci";
+"start" = "Inizio";
+"end" = "Fine";
+"range" = "Intervallo";
+"duration_warning" = "La selezione supera i 30 secondi. Si consigliano suoni di sveglia di 30 secondi o meno.";
+
+/* ShareExtension */
+"saving" = "Salvataggio…";
+"no_data_received" = "Nessun dato ricevuto";
+"no_audio_found" = "Nessun file audio compatibile trovato";
+"file_load_failed" = "Impossibile caricare il file";
+"saved_format" = "“%@” salvato";
+
+/* AlarmScheduler */
+"stop_alarm" = "Interrompi";
+"snooze" = "Posticipa";
+
+/* AlarmIntents */
+"dismiss_alarm_intent" = "Interrompi sveglia";
+"snooze_intent" = "Posticipa";
+
+/* AudioConverter errors */
+"error_buffer_creation" = "Impossibile creare il buffer audio";
+"error_converter_creation" = "Impossibile creare il convertitore audio";
+"error_conversion_failed" = "Conversione audio non riuscita: %@";
+"error_conversion_status" = "Errore nello stato della conversione";
+"error_empty_file" = "Il file convertito è vuoto";
+
+/* VideoAudioExtractor errors */
+"error_no_audio_track" = "Questo video non ha una traccia audio";
+"error_export_session" = "Impossibile creare la sessione di esportazione";
+"error_extraction_failed" = "Estrazione audio non riuscita: %@";
+"error_unknown" = "Errore sconosciuto";
+
+/* Sound missing (fallback when the referenced sound is deleted) */
+"sound_missing" = "Suono non trovato";
+
+/* Preset sound names */
+"preset_marimba" = "Marimba";
+"preset_bell" = "Campanella dolce";
+"preset_crescendo" = "Crescendo";
+"preset_beep" = "Bip retrò";
+"preset_ascending" = "Crescente";
+"preset_dual_tone" = "Doppio tono";
+"preset_music_box" = "Carillon";
+
+/* Bedside Clock */
+"bedside_today" = "Oggi";
+"bedside_tomorrow" = "Domani";
+"bedside_no_alarm" = "Nessuna sveglia";
+"bedside_theme_white" = "Bianco";
+"bedside_theme_amber" = "Ambra";
+"bedside_brightness" = "Luminosità";
+"bedside_show_countdown" = "Conto alla rovescia";
+"bedside_show_sound_name" = "Nome del suono";
+"bedside_show_date" = "Data";
+"bedside_show_seconds" = "Secondi";
+"bedside_font_size" = "Dimensione testo";
+"bedside_layout" = "Stile orologio";
+"bedside_layout_digital_large" = "Digitale";
+"bedside_layout_minimal" = "Minimal";
+"bedside_layout_digital_bold" = "Grassetto";
+"bedside_layout_flip" = "Flip (Pro)";
+"bedside_exit" = "Esci dalla modalità notte";
+"bedside_exit_hint" = "Tieni premuto per uscire";
+
+/* Live Activity */
+"snoozing" = "Posticipata";
+
+/* Snooze */
+"snooze_off" = "Disattivato";
+"snooze_minutes_fmt" = "%d min";
+
+/* Convenience Phase 1 (duplicate / countdown / save toast) */
+"duplicate_alarm" = "Duplica";
+"countdown_minutes" = "%ld min";
+"countdown_hours_minutes" = "%1$ld h %2$ld min";
+"countdown_days_hours" = "%1$ld g %2$ld h";
+"countdown_until" = "tra %@";
+"alarm_will_ring_in" = "Suona tra %@";
+
+/* Alarm Edit */
+"alarm_is_off" = "Questa sveglia è disattivata";
+
+/* Video Trimmer */
+"no_video" = "Nessun video";
+
+/* Video Import Source */
+"video_source_title" = "Seleziona origine video";
+"video_source_photo" = "Libreria foto";
+"video_source_file" = "File";
+"error_file_access_denied" = "Accesso al file negato.";
+"error_file_copy_failed" = "Impossibile copiare il file.";
+"error_unsupported_video_format" = "Formato video non supportato.";
+
+/* Onboarding (#98) */
+"onb.hero.title" = "Svegliati con la parte che ami";
+"onb.loop.title" = "Scegli il ritornello. Suona finché non ti alzi.";
+"onb.next" = "Avanti";
+"onb.silent.title" = "Così suona, anche in silenzioso";
+"onb.continue" = "Continua";
+"onb.source.title" = "Da dove viene il suono che ami?";
+"onb.source.video" = "Da un video";
+"onb.source.audio" = "Da un file audio";
+"onb.source.preset" = "Prova un suono integrato";
+"onb.later" = "Più tardi";
+
+/* Trial ring (#109) */
+"test_ring_title" = "Suona ora";
+"test_ring_failed" = "Impossibile programmare la sveglia di prova. Riprova.";
+"test_ring_simulator_unavailable" = "La prova suoneria è disponibile solo su un dispositivo reale.";
+"test_ring_alarm_title" = "Sveglia di prova";
+"test_ring_backup_title" = "Prova il suono dell’Anti-sonno";
+
+/* Why the trial ring can't ring (#150) */
+"test_ring_reason_not_authorized" = "Le sveglie non sono ancora consentite, quindi non suoneranno finché non le consenti.";
+"test_ring_reason_denied" = "Le sveglie sono disattivate per My Sound Alarm, quindi non suoneranno. Apri Impostazioni e attiva le sveglie.";
+"allow_alarms" = "Consenti sveglie";
+
+/* Loudness (#109 C) */
+
+/* Backup alarm (#110) */
+"backup_alarm_toggle" = "Anti-sonno";
+"backup_alarm_title_fmt" = "Anti-sonno: %@";
+"backup_alarm_description_fmt" = "Se non hai fermato la sveglia delle %@ entro le %@, riproduce lo stesso suono, più forte.";
+"backup_alarm_minutes" = "Suona di nuovo dopo";
+"backup_alarm_minutes_fmt" = "%d min dopo";
+"backup_alarm_before_snooze" = "Suona prima che finisca il posticipo.";
+"backup_alarm_early_access_note" = "Se inizi a usarla durante l’accesso anticipato, la mantieni dopo la versione finale.";
+"backup_alarm_row_badge" = "Anti-sonno attivo";
+
+/* Update gate (#116) */
+"update_required_title" = "Aggiornamento necessario";
+"update_required_message" = "Per continuare a usare My Sound Alarm, aggiorna all’ultima versione. Le sveglie già impostate continueranno a suonare finché non aggiorni.";
+"update_recommended_title" = "È disponibile una nuova versione";
+"update_button" = "Aggiorna sull’App Store";
+"update_later" = "Più tardi";
+
+/* Volume guide (#121) */
+"volume_guide_title" = "Come aumentare il volume delle sveglie";
+"volume_guide_step1" = "Impostazioni → Suoni e feedback aptico → sposta a destra il cursore Suoneria e avvisi";
+"volume_guide_step2" = "Attiva Cambia con i tasti per usare anche i tasti del volume (quando non è in riproduzione altro)";
+"volume_guide_image_label" = "La schermata Impostazioni > Suoni e feedback aptico, con il cursore Suoneria e avvisi e l’interruttore Cambia con i tasti indicati";
+"volume_guide_warning" = "Il volume del Centro di Controllo è per musica e video. Non cambia il volume delle sveglie.";
+"alarm_permission_required" = "È necessaria l’autorizzazione per le sveglie";
+"open_settings" = "Apri Impostazioni";
+"volume_guide_link" = "Volume basso?";
+"test_ring_ringing_now" = "In riproduzione";
+"backup_alarm_info_title" = "Anti-sonno";
+"backup_alarm_info_mechanism" = "Se la sveglia non viene fermata entro il tempo impostato, suona di nuovo.";
+"backup_alarm_info_louder" = "Riproduce lo stesso suono, più forte e senza distorsioni. Più il suono originale è basso, più viene alzato.";
+"backup_alarm_info_volume" = "Il volume effettivo dipende dal volume di Suoneria e avvisi in Impostazioni.";
+"backup_alarm_info_accessibility" = "Informazioni sull’Anti-sonno";
+
+"night_mode" = "Modalità notte";
+"size_warning" = "I suoni lunghi occupano circa %@ di spazio.";

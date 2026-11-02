@@ -1,0 +1,241 @@
+/* ContentView */
+"alarm_title" = "Budíky";
+"empty_title" = "Probuď se svým oblíbeným zvukem";
+"empty_description" = "Importuj zvuky z videa nebo zvukových souborů\na nastav je jako budík";
+"add_alarm" = "Přidat budík";
+"default_sound" = "Výchozí";
+
+/* Day labels (short) */
+"day_sun" = "ne";
+"day_mon" = "po";
+"day_tue" = "út";
+"day_wed" = "st";
+"day_thu" = "čt";
+"day_fri" = "pá";
+"day_sat" = "so";
+
+/* Repeat summaries */
+"every_day" = "Každý den";
+"weekdays" = "Pracovní dny";
+"weekends" = "Víkendy";
+"never" = "Nikdy";
+
+/* AlarmDetailView */
+"edit_alarm" = "Upravit budík";
+"cancel" = "Zrušit";
+"save" = "Uložit";
+"time" = "Čas";
+"sound" = "Zvuk";
+"none" = "Žádný";
+"repeat" = "Opakovat";
+"label" = "Popisek";
+"alarm_placeholder" = "Budík";
+"delete_alarm" = "Smazat budík";
+"delete_alarm_confirm" = "Opravdu chceš tento budík smazat?";
+"delete" = "Smazat";
+
+/* RepeatSelectionView - Weekday labels (full) */
+"every_monday" = "Každé pondělí";
+"every_tuesday" = "Každé úterý";
+"every_wednesday" = "Každou středu";
+"every_thursday" = "Každý čtvrtek";
+"every_friday" = "Každý pátek";
+"every_saturday" = "Každou sobotu";
+"every_sunday" = "Každou neděli";
+
+/* SoundPickerView */
+"rename" = "Přejmenovat";
+"sound_name_placeholder" = "Název zvuku";
+"presets" = "Připraveno k použití";
+"imported_sounds" = "Moje zvuky";
+"converting" = "Převádění…";
+"add_from_video" = "Přidat z videa";
+"add_from_audio" = "Přidat zvukový soubor";
+"add_section" = "Přidat";
+"add_section_footer" = "Importuj z MP3, AAC, WAV, M4A nebo videa (MOV, MP4).";
+
+/* Waveform Crop (#77 / #79) */
+"waveform_loading" = "Vytváření průběhu zvuku…";
+"crop_and_save" = "Přidat výběr";
+"import_whole_audio" = "Přidat celý soubor";
+"crop_hint_footer" = "Tažením horního průběhu zvuku hrubě nastavíš pozici, dolním zvětšeným průběhem doladíš přesně.";
+"time_start" = "Začátek";
+"time_end" = "Konec";
+"time_length" = "Délka";
+"time_total" = "Celkem";
+
+/* Discard confirmation (#82) */
+"close" = "Zavřít";
+"discard" = "Zahodit";
+"discard_edits_title" = "Zahodit úpravy?";
+"discard_edits_message" = "Výběr se neuloží.";
+
+/* Sound name formatting (#93) */
+"imported_sound_default" = "Importovaný zvuk";
+"my_sounds_empty_title" = "Udělej budík z jakéhokoli zvuku";
+"my_sounds_empty_description" = "Importuj hudbu z videa nebo oblíbených zvukových\nsouborů a použij ji jako zvuk budíku";
+"file_access_denied" = "Přístup k souboru byl zamítnut";
+
+/* VideoTrimView */
+"add_from_video_title" = "Přidat zvuk z videa";
+"loading" = "Načítání…";
+"select_video" = "Vyber video";
+"preview" = "Náhled";
+"selected_duration" = "Vybráno: %@";
+"stop" = "Zastavit";
+"preview_selection" = "Přehrát";
+"start" = "Začátek";
+"end" = "Konec";
+"range" = "Rozsah";
+"duration_warning" = "Výběr přesahuje 30 sekund. Doporučujeme zvuky budíku do 30 sekund.";
+
+/* ShareExtension */
+"saving" = "Ukládání…";
+"no_data_received" = "Nebyla přijata žádná data";
+"no_audio_found" = "Nebyl nalezen kompatibilní zvukový soubor";
+"file_load_failed" = "Soubor se nepodařilo načíst";
+"saved_format" = "Uloženo „%@“";
+
+/* AlarmScheduler */
+"stop_alarm" = "Zastavit";
+"snooze" = "Odložit";
+
+/* AlarmIntents */
+"dismiss_alarm_intent" = "Zastavit budík";
+"snooze_intent" = "Odložit";
+
+/* AudioConverter errors */
+"error_buffer_creation" = "Nepodařilo se vytvořit zvukovou vyrovnávací paměť";
+"error_converter_creation" = "Nepodařilo se vytvořit zvukový převodník";
+"error_conversion_failed" = "Převod zvuku se nepodařil: %@";
+"error_conversion_status" = "Chyba stavu převodu";
+"error_empty_file" = "Převedený soubor je prázdný";
+
+/* VideoAudioExtractor errors */
+"error_no_audio_track" = "Toto video nemá zvukovou stopu";
+"error_export_session" = "Nepodařilo se vytvořit relaci exportu";
+"error_extraction_failed" = "Extrakce zvuku se nepodařila: %@";
+"error_unknown" = "Neznámá chyba";
+
+/* Sound missing (fallback when the referenced sound is deleted) */
+"sound_missing" = "Zvuk nenalezen";
+
+/* Preset sound names */
+"preset_marimba" = "Marimba";
+"preset_bell" = "Jemný zvonek";
+"preset_crescendo" = "Crescendo";
+"preset_beep" = "Retro pípnutí";
+"preset_ascending" = "Stoupající";
+"preset_dual_tone" = "Dvojitý tón";
+"preset_music_box" = "Hrací skříňka";
+
+/* Bedside Clock */
+"bedside_today" = "Dnes";
+"bedside_tomorrow" = "Zítra";
+"bedside_no_alarm" = "Žádný budík";
+"bedside_theme_white" = "Bílá";
+"bedside_theme_amber" = "Jantarová";
+"bedside_brightness" = "Jas";
+"bedside_show_countdown" = "Odpočet";
+"bedside_show_sound_name" = "Název zvuku";
+"bedside_show_date" = "Datum";
+"bedside_show_seconds" = "Sekundy";
+"bedside_font_size" = "Velikost textu";
+"bedside_layout" = "Styl hodin";
+"bedside_layout_digital_large" = "Digitální";
+"bedside_layout_minimal" = "Minimalistický";
+"bedside_layout_digital_bold" = "Tučné";
+"bedside_layout_flip" = "Flip (Pro)";
+"bedside_exit" = "Ukončit noční režim";
+"bedside_exit_hint" = "Podržením ukončíš";
+
+/* Live Activity */
+"snoozing" = "Odloženo";
+
+/* Snooze */
+"snooze_off" = "Vypnuto";
+"snooze_minutes_fmt" = "%d min";
+
+/* Convenience Phase 1 (duplicate / countdown / save toast) */
+"duplicate_alarm" = "Duplikovat";
+"countdown_minutes" = "%ld min";
+"countdown_hours_minutes" = "%1$ld h %2$ld min";
+"countdown_days_hours" = "%1$ld d %2$ld h";
+"countdown_until" = "za %@";
+"alarm_will_ring_in" = "Zazvoní za %@";
+
+/* Alarm Edit */
+"alarm_is_off" = "Tento budík je vypnutý";
+
+/* Video Trimmer */
+"no_video" = "Žádné video";
+
+/* Video Import Source */
+"video_source_title" = "Vybrat zdroj videa";
+"video_source_photo" = "Knihovna fotek";
+"video_source_file" = "Soubory";
+"error_file_access_denied" = "Přístup k souboru byl zamítnut.";
+"error_file_copy_failed" = "Soubor se nepodařilo zkopírovat.";
+"error_unsupported_video_format" = "Nepodporovaný formát videa.";
+
+/* Onboarding (#98) */
+"onb.hero.title" = "Probuď se u oblíbené části";
+"onb.loop.title" = "Vyber refrén. Hraje, dokud nevstaneš.";
+"onb.next" = "Další";
+"onb.silent.title" = "Aby zvonil i v tichém režimu";
+"onb.continue" = "Pokračovat";
+"onb.source.title" = "Odkud je zvuk, který máš rád?";
+"onb.source.video" = "Z videa";
+"onb.source.audio" = "Ze zvukového souboru";
+"onb.source.preset" = "Vyzkoušet vestavěný zvuk";
+"onb.later" = "Později";
+
+/* Trial ring (#109) */
+"test_ring_title" = "Zazvonit teď";
+"test_ring_failed" = "Testovací budík se nepodařilo naplánovat. Zkus to znovu.";
+"test_ring_simulator_unavailable" = "Test zvonění je dostupný jen na skutečném zařízení.";
+"test_ring_alarm_title" = "Testovací budík";
+"test_ring_backup_title" = "Vyzkoušet zvuk ochrany proti zaspání";
+
+/* Why the trial ring can't ring (#150) */
+"test_ring_reason_not_authorized" = "Budíky zatím nejsou povolené, takže nezazvoní, dokud je nepovolíš.";
+"test_ring_reason_denied" = "Budíky jsou pro My Sound Alarm vypnuté, takže nezazvoní. Otevři Nastavení a zapni budíky.";
+"allow_alarms" = "Povolit budíky";
+
+/* Loudness (#109 C) */
+
+/* Backup alarm (#110) */
+"backup_alarm_toggle" = "Ochrana proti zaspání";
+"backup_alarm_title_fmt" = "Ochrana proti zaspání: %@";
+"backup_alarm_description_fmt" = "Pokud budík na %@ nevypneš do %@, přehraje stejný zvuk znovu a hlasitěji.";
+"backup_alarm_minutes" = "Zazvonit znovu po";
+"backup_alarm_minutes_fmt" = "po %d min";
+"backup_alarm_before_snooze" = "Zazvoní před koncem odložení.";
+"backup_alarm_early_access_note" = "Pokud ji začneš používat během předběžného přístupu, zůstane ti i po ostrém vydání.";
+"backup_alarm_row_badge" = "Ochrana proti zaspání zapnuta";
+
+/* Update gate (#116) */
+"update_required_title" = "Je vyžadována aktualizace";
+"update_required_message" = "Pro další používání My Sound Alarm aktualizuj na nejnovější verzi. Nastavené budíky budou zvonit, dokud neaktualizuješ.";
+"update_recommended_title" = "Je dostupná nová verze";
+"update_button" = "Aktualizovat v App Store";
+"update_later" = "Později";
+
+/* Volume guide (#121) */
+"volume_guide_title" = "Jak zesílit budíky";
+"volume_guide_step1" = "Nastavení → Zvuky a haptika → posuň posuvník Vyzvánění a upozornění doprava";
+"volume_guide_step2" = "Zapni Změnit tlačítky, aby šla použít i tlačítka hlasitosti (když nic jiného nehraje)";
+"volume_guide_image_label" = "Obrazovka Nastavení > Zvuky a haptika s vyznačeným posuvníkem Vyzvánění a upozornění a přepínačem Změnit tlačítky";
+"volume_guide_warning" = "Hlasitost v Ovládacím centru platí pro hudbu a videa. Hlasitost budíků nemění.";
+"alarm_permission_required" = "Je vyžadováno povolení k budíkům";
+"open_settings" = "Otevřít Nastavení";
+"volume_guide_link" = "Moc potichu?";
+"test_ring_ringing_now" = "Zvoní teď";
+"backup_alarm_info_title" = "Ochrana proti zaspání";
+"backup_alarm_info_mechanism" = "Pokud budík nezastavíš v nastaveném čase, zazvoní znovu.";
+"backup_alarm_info_louder" = "Přehraje stejný zvuk, hlasitěji a bez zkreslení. Čím tišší je původní zvuk, tím více se zesílí.";
+"backup_alarm_info_volume" = "Skutečná hlasitost závisí na hlasitosti Vyzvánění a upozornění v Nastavení.";
+"backup_alarm_info_accessibility" = "O ochraně proti zaspání";
+
+"night_mode" = "Noční režim";
+"size_warning" = "Dlouhé zvuky zabírají asi %@ úložiště.";

@@ -1,0 +1,241 @@
+/* ContentView */
+"alarm_title" = "알람";
+"empty_title" = "좋아하는 소리로 일어나세요";
+"empty_description" = "동영상이나 오디오 파일에서 소리를 가져와\n알람으로 설정하세요";
+"add_alarm" = "알람 추가";
+"default_sound" = "기본";
+
+/* Day labels (short) */
+"day_sun" = "일";
+"day_mon" = "월";
+"day_tue" = "화";
+"day_wed" = "수";
+"day_thu" = "목";
+"day_fri" = "금";
+"day_sat" = "토";
+
+/* Repeat summaries */
+"every_day" = "매일";
+"weekdays" = "주중";
+"weekends" = "주말";
+"never" = "안 함";
+
+/* AlarmDetailView */
+"edit_alarm" = "알람 편집";
+"cancel" = "취소";
+"save" = "저장";
+"time" = "시간";
+"sound" = "사운드";
+"none" = "없음";
+"repeat" = "반복";
+"label" = "레이블";
+"alarm_placeholder" = "알람";
+"delete_alarm" = "알람 삭제";
+"delete_alarm_confirm" = "이 알람을 삭제할까요?";
+"delete" = "삭제";
+
+/* RepeatSelectionView - Weekday labels (full) */
+"every_monday" = "매주 월요일";
+"every_tuesday" = "매주 화요일";
+"every_wednesday" = "매주 수요일";
+"every_thursday" = "매주 목요일";
+"every_friday" = "매주 금요일";
+"every_saturday" = "매주 토요일";
+"every_sunday" = "매주 일요일";
+
+/* SoundPickerView */
+"rename" = "이름 변경";
+"sound_name_placeholder" = "사운드 이름";
+"presets" = "바로 사용";
+"imported_sounds" = "내 사운드";
+"converting" = "변환 중…";
+"add_from_video" = "동영상에서 추가";
+"add_from_audio" = "오디오 파일 추가";
+"add_section" = "추가";
+"add_section_footer" = "MP3, AAC, WAV, M4A 또는 동영상(MOV, MP4)에서 가져옵니다.";
+
+/* Waveform Crop (#77 / #79) */
+"waveform_loading" = "파형 생성 중…";
+"crop_and_save" = "선택 부분 추가";
+"import_whole_audio" = "파일 전체 추가";
+"crop_hint_footer" = "위 파형을 드래그해 대략적인 위치를, 아래 확대된 파형으로 정확하게 조정하세요.";
+"time_start" = "시작";
+"time_end" = "끝";
+"time_length" = "길이";
+"time_total" = "전체";
+
+/* Discard confirmation (#82) */
+"close" = "닫기";
+"discard" = "버리기";
+"discard_edits_title" = "편집 내용을 버릴까요?";
+"discard_edits_message" = "선택한 내용은 저장되지 않습니다.";
+
+/* Sound name formatting (#93) */
+"imported_sound_default" = "가져온 사운드";
+"my_sounds_empty_title" = "어떤 소리든 알람으로";
+"my_sounds_empty_description" = "동영상이나 좋아하는 오디오 파일에서\n음악을 가져와 알람 소리로 사용하세요";
+"file_access_denied" = "파일 접근이 거부됨";
+
+/* VideoTrimView */
+"add_from_video_title" = "동영상에서 오디오 추가";
+"loading" = "불러오는 중…";
+"select_video" = "동영상 선택";
+"preview" = "미리보기";
+"selected_duration" = "선택: %@";
+"stop" = "중지";
+"preview_selection" = "재생";
+"start" = "시작";
+"end" = "끝";
+"range" = "범위";
+"duration_warning" = "선택한 구간이 30초를 넘습니다. 30초 이하의 알람 소리를 권장합니다.";
+
+/* ShareExtension */
+"saving" = "저장 중…";
+"no_data_received" = "받은 데이터가 없습니다";
+"no_audio_found" = "호환되는 오디오 파일을 찾지 못했습니다";
+"file_load_failed" = "파일을 불러오지 못했습니다";
+"saved_format" = "'%@' 저장됨";
+
+/* AlarmScheduler */
+"stop_alarm" = "중지";
+"snooze" = "다시 알림";
+
+/* AlarmIntents */
+"dismiss_alarm_intent" = "알람 중지";
+"snooze_intent" = "다시 알림";
+
+/* AudioConverter errors */
+"error_buffer_creation" = "오디오 버퍼를 만들지 못했습니다";
+"error_converter_creation" = "오디오 변환기를 만들지 못했습니다";
+"error_conversion_failed" = "오디오 변환 실패: %@";
+"error_conversion_status" = "변환 상태 오류";
+"error_empty_file" = "변환된 파일이 비어 있습니다";
+
+/* VideoAudioExtractor errors */
+"error_no_audio_track" = "이 동영상에는 오디오 트랙이 없습니다";
+"error_export_session" = "내보내기 세션을 만들지 못했습니다";
+"error_extraction_failed" = "오디오 추출 실패: %@";
+"error_unknown" = "알 수 없는 오류";
+
+/* Sound missing (fallback when the referenced sound is deleted) */
+"sound_missing" = "사운드를 찾을 수 없음";
+
+/* Preset sound names */
+"preset_marimba" = "마림바";
+"preset_bell" = "부드러운 종";
+"preset_crescendo" = "크레셴도";
+"preset_beep" = "레트로 비프";
+"preset_ascending" = "상승";
+"preset_dual_tone" = "두 가지 음";
+"preset_music_box" = "오르골";
+
+/* Bedside Clock */
+"bedside_today" = "오늘";
+"bedside_tomorrow" = "내일";
+"bedside_no_alarm" = "알람 없음";
+"bedside_theme_white" = "흰색";
+"bedside_theme_amber" = "호박색";
+"bedside_brightness" = "밝기";
+"bedside_show_countdown" = "남은 시간";
+"bedside_show_sound_name" = "사운드 이름";
+"bedside_show_date" = "날짜";
+"bedside_show_seconds" = "초";
+"bedside_font_size" = "텍스트 크기";
+"bedside_layout" = "시계 스타일";
+"bedside_layout_digital_large" = "디지털";
+"bedside_layout_minimal" = "미니멀";
+"bedside_layout_digital_bold" = "굵게";
+"bedside_layout_flip" = "플립 (Pro)";
+"bedside_exit" = "나이트 모드 종료";
+"bedside_exit_hint" = "길게 눌러 종료";
+
+/* Live Activity */
+"snoozing" = "다시 알림 중";
+
+/* Snooze */
+"snooze_off" = "끔";
+"snooze_minutes_fmt" = "%d분";
+
+/* Convenience Phase 1 (duplicate / countdown / save toast) */
+"duplicate_alarm" = "복제";
+"countdown_minutes" = "%ld분";
+"countdown_hours_minutes" = "%1$ld시간 %2$ld분";
+"countdown_days_hours" = "%1$ld일 %2$ld시간";
+"countdown_until" = "%@ 후";
+"alarm_will_ring_in" = "%@ 후 울림";
+
+/* Alarm Edit */
+"alarm_is_off" = "이 알람은 꺼져 있습니다";
+
+/* Video Trimmer */
+"no_video" = "동영상 없음";
+
+/* Video Import Source */
+"video_source_title" = "동영상 소스 선택";
+"video_source_photo" = "사진 보관함";
+"video_source_file" = "파일";
+"error_file_access_denied" = "파일 접근이 거부되었습니다.";
+"error_file_copy_failed" = "파일을 복사하지 못했습니다.";
+"error_unsupported_video_format" = "지원하지 않는 동영상 형식입니다.";
+
+/* Onboarding (#98) */
+"onb.hero.title" = "좋아하는 부분으로 일어나세요";
+"onb.loop.title" = "후렴을 고르세요. 일어날 때까지 울립니다.";
+"onb.next" = "다음";
+"onb.silent.title" = "무음 모드에서도 울리도록";
+"onb.continue" = "계속";
+"onb.source.title" = "좋아하는 소리는 어디에 있나요?";
+"onb.source.video" = "동영상에서";
+"onb.source.audio" = "오디오 파일에서";
+"onb.source.preset" = "기본 사운드 사용해 보기";
+"onb.later" = "나중에";
+
+/* Trial ring (#109) */
+"test_ring_title" = "지금 울리기";
+"test_ring_failed" = "테스트 알람을 예약하지 못했습니다. 다시 시도해 주세요.";
+"test_ring_simulator_unavailable" = "테스트 울리기는 실제 기기에서만 사용할 수 있습니다.";
+"test_ring_alarm_title" = "테스트 알람";
+"test_ring_backup_title" = "늦잠 방지 소리 테스트";
+
+/* Why the trial ring can't ring (#150) */
+"test_ring_reason_not_authorized" = "아직 알람이 허용되지 않아, 허용할 때까지 알람이 울리지 않습니다.";
+"test_ring_reason_denied" = "My Sound Alarm의 알람이 꺼져 있어 알람이 울리지 않습니다. 설정을 열고 알람을 켜세요.";
+"allow_alarms" = "알람 허용";
+
+/* Loudness (#109 C) */
+
+/* Backup alarm (#110) */
+"backup_alarm_toggle" = "늦잠 방지";
+"backup_alarm_title_fmt" = "늦잠 방지: %@";
+"backup_alarm_description_fmt" = "%@ 알람을 %@까지 끄지 않으면 같은 소리를 더 크게 다시 울립니다.";
+"backup_alarm_minutes" = "다시 울릴 시간";
+"backup_alarm_minutes_fmt" = "%d분 후";
+"backup_alarm_before_snooze" = "다시 알림이 끝나기 전에 울립니다.";
+"backup_alarm_early_access_note" = "사전 공개 기간에 사용하기 시작하면 정식 출시 후에도 계속 사용할 수 있습니다.";
+"backup_alarm_row_badge" = "늦잠 방지 켜짐";
+
+/* Update gate (#116) */
+"update_required_title" = "업데이트 필요";
+"update_required_message" = "My Sound Alarm을 계속 사용하려면 최신 버전으로 업데이트하세요. 이미 설정한 알람은 업데이트할 때까지 계속 울립니다.";
+"update_recommended_title" = "새 버전이 있습니다";
+"update_button" = "App Store에서 업데이트";
+"update_later" = "나중에";
+
+/* Volume guide (#121) */
+"volume_guide_title" = "알람 소리를 크게 하는 방법";
+"volume_guide_step1" = "설정 → 사운드 및 햅틱 → ‘벨소리 및 알림’ 슬라이더를 오른쪽으로 이동";
+"volume_guide_step2" = "‘버튼으로 변경’을 켜면 볼륨 버튼도 사용할 수 있습니다(다른 소리가 재생 중이지 않을 때)";
+"volume_guide_image_label" = "설정 > 사운드 및 햅틱 화면에서 ‘벨소리 및 알림’ 슬라이더와 ‘버튼으로 변경’ 스위치를 표시";
+"volume_guide_warning" = "제어 센터의 볼륨은 음악과 동영상용입니다. 알람 볼륨은 바뀌지 않습니다.";
+"alarm_permission_required" = "알람 권한이 필요합니다";
+"open_settings" = "설정 열기";
+"volume_guide_link" = "소리가 작나요?";
+"test_ring_ringing_now" = "울리는 중";
+"backup_alarm_info_title" = "늦잠 방지";
+"backup_alarm_info_mechanism" = "설정한 시간 안에 알람을 끄지 않으면 다시 울립니다.";
+"backup_alarm_info_louder" = "같은 소리를 왜곡 없이 더 크게 재생합니다. 원래 소리가 작을수록 더 많이 키웁니다.";
+"backup_alarm_info_volume" = "실제 울리는 크기는 설정의 ‘벨소리 및 알림’ 볼륨에 따라 달라집니다.";
+"backup_alarm_info_accessibility" = "늦잠 방지 정보";
+
+"night_mode" = "나이트 모드";
+"size_warning" = "긴 소리는 약 %@의 저장 공간을 사용합니다.";

@@ -1,0 +1,4 @@
+CFBundleDisplayName = "My Sound Alarm";
+NSAlarmKitUsageDescription = "用于用你喜欢的声音响铃。";
+NSMicrophoneUsageDescription = "用于通过麦克风录制闹钟声音。";
+NSPhotoLibraryUsageDescription = "用于访问照片图库并从视频中提取音频。";

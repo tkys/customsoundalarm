@@ -107,6 +107,9 @@ struct WaveformCropView: View {
                 duration: duration
             )
         }
+        // 波形と選択範囲は時間軸なので、RTL でも左→右のまま（#149）。
+        // ZStack(alignment: .leading) や offset が鏡像にならないよう固定する。
+        .environment(\.layoutDirection, .leftToRight)
     }
 
     // MARK: - 主役の現在時刻（#80-3）

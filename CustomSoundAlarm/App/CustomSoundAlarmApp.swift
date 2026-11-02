@@ -28,7 +28,12 @@ struct CustomSoundAlarmApp: App {
                         for (h, m) in seeds {
                             // OFF で入れる: ON だと起動時の syncAlarms で AlarmKit に登録され、
                             // シミュレータで実際に鳴って SpringBoard が落ちる（2026-10 に発生）
-                            let alarm = AlarmEntry(hour: h, minute: m, isEnabled: false)
+                            let alarm = AlarmEntry(
+                                hour: h,
+                                minute: m,
+                                isEnabled: false,
+                                label: String(localized: "alarm_placeholder")
+                            )
                             AlarmStore.shared.add(alarm)
                         }
                     }

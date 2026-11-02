@@ -1,0 +1,241 @@
+/* ContentView */
+"alarm_title" = "Wecker";
+"empty_title" = "Wach auf mit deinem Lieblingston";
+"empty_description" = "Importiere Sounds aus Videos oder Audiodateien\nund verwende sie als Wecker";
+"add_alarm" = "Wecker hinzufügen";
+"default_sound" = "Standard";
+
+/* Day labels (short) */
+"day_sun" = "So";
+"day_mon" = "Mo";
+"day_tue" = "Di";
+"day_wed" = "Mi";
+"day_thu" = "Do";
+"day_fri" = "Fr";
+"day_sat" = "Sa";
+
+/* Repeat summaries */
+"every_day" = "Jeden Tag";
+"weekdays" = "Werktags";
+"weekends" = "Am Wochenende";
+"never" = "Nie";
+
+/* AlarmDetailView */
+"edit_alarm" = "Wecker bearbeiten";
+"cancel" = "Abbrechen";
+"save" = "Sichern";
+"time" = "Zeit";
+"sound" = "Ton";
+"none" = "Keine";
+"repeat" = "Wiederholen";
+"label" = "Bezeichnung";
+"alarm_placeholder" = "Wecker";
+"delete_alarm" = "Wecker löschen";
+"delete_alarm_confirm" = "Möchtest du diesen Wecker wirklich löschen?";
+"delete" = "Löschen";
+
+/* RepeatSelectionView - Weekday labels (full) */
+"every_monday" = "Jeden Montag";
+"every_tuesday" = "Jeden Dienstag";
+"every_wednesday" = "Jeden Mittwoch";
+"every_thursday" = "Jeden Donnerstag";
+"every_friday" = "Jeden Freitag";
+"every_saturday" = "Jeden Samstag";
+"every_sunday" = "Jeden Sonntag";
+
+/* SoundPickerView */
+"rename" = "Umbenennen";
+"sound_name_placeholder" = "Name des Tons";
+"presets" = "Sofort einsatzbereit";
+"imported_sounds" = "Meine Töne";
+"converting" = "Wird konvertiert…";
+"add_from_video" = "Aus Video hinzufügen";
+"add_from_audio" = "Audiodatei hinzufügen";
+"add_section" = "Hinzufügen";
+"add_section_footer" = "Importiere aus MP3, AAC, WAV, M4A oder Video (MOV, MP4).";
+
+/* Waveform Crop (#77 / #79) */
+"waveform_loading" = "Wellenform wird erzeugt…";
+"crop_and_save" = "Auswahl hinzufügen";
+"import_whole_audio" = "Ganze Datei hinzufügen";
+"crop_hint_footer" = "Zieh die obere Wellenform für die grobe Position, die untere vergrößerte für die Feinjustierung.";
+"time_start" = "Start";
+"time_end" = "Ende";
+"time_length" = "Länge";
+"time_total" = "Gesamt";
+
+/* Discard confirmation (#82) */
+"close" = "Schließen";
+"discard" = "Verwerfen";
+"discard_edits_title" = "Änderungen verwerfen?";
+"discard_edits_message" = "Deine Auswahl wird nicht gesichert.";
+
+/* Sound name formatting (#93) */
+"imported_sound_default" = "Importierter Ton";
+"my_sounds_empty_title" = "Mach jeden Ton zu deinem Wecker";
+"my_sounds_empty_description" = "Importiere Musik aus Videos oder deinen Lieblings-\naudiodateien als Weckertöne";
+"file_access_denied" = "Zugriff auf Datei verweigert";
+
+/* VideoTrimView */
+"add_from_video_title" = "Ton aus Video hinzufügen";
+"loading" = "Wird geladen…";
+"select_video" = "Wähle ein Video";
+"preview" = "Vorschau";
+"selected_duration" = "Auswahl: %@";
+"stop" = "Stopp";
+"preview_selection" = "Abspielen";
+"start" = "Start";
+"end" = "Ende";
+"range" = "Bereich";
+"duration_warning" = "Die Auswahl ist länger als 30 Sekunden. Weckertöne von 30 Sekunden oder weniger werden empfohlen.";
+
+/* ShareExtension */
+"saving" = "Wird gesichert…";
+"no_data_received" = "Keine Daten erhalten";
+"no_audio_found" = "Keine kompatible Audiodatei gefunden";
+"file_load_failed" = "Datei konnte nicht geladen werden";
+"saved_format" = "„%@“ gesichert";
+
+/* AlarmScheduler */
+"stop_alarm" = "Stopp";
+"snooze" = "Schlummern";
+
+/* AlarmIntents */
+"dismiss_alarm_intent" = "Wecker stoppen";
+"snooze_intent" = "Schlummern";
+
+/* AudioConverter errors */
+"error_buffer_creation" = "Audiopuffer konnte nicht erstellt werden";
+"error_converter_creation" = "Audiokonverter konnte nicht erstellt werden";
+"error_conversion_failed" = "Audiokonvertierung fehlgeschlagen: %@";
+"error_conversion_status" = "Fehler beim Konvertierungsstatus";
+"error_empty_file" = "Konvertierte Datei ist leer";
+
+/* VideoAudioExtractor errors */
+"error_no_audio_track" = "Dieses Video hat keine Tonspur";
+"error_export_session" = "Exportsitzung konnte nicht erstellt werden";
+"error_extraction_failed" = "Audioextraktion fehlgeschlagen: %@";
+"error_unknown" = "Unbekannter Fehler";
+
+/* Sound missing (fallback when the referenced sound is deleted) */
+"sound_missing" = "Ton nicht gefunden";
+
+/* Preset sound names */
+"preset_marimba" = "Marimba";
+"preset_bell" = "Sanfte Glocke";
+"preset_crescendo" = "Crescendo";
+"preset_beep" = "Retro-Piepton";
+"preset_ascending" = "Aufsteigend";
+"preset_dual_tone" = "Zweiklang";
+"preset_music_box" = "Spieluhr";
+
+/* Bedside Clock */
+"bedside_today" = "Heute";
+"bedside_tomorrow" = "Morgen";
+"bedside_no_alarm" = "Kein Wecker";
+"bedside_theme_white" = "Weiß";
+"bedside_theme_amber" = "Bernstein";
+"bedside_brightness" = "Helligkeit";
+"bedside_show_countdown" = "Countdown";
+"bedside_show_sound_name" = "Name des Tons";
+"bedside_show_date" = "Datum";
+"bedside_show_seconds" = "Sekunden";
+"bedside_font_size" = "Textgröße";
+"bedside_layout" = "Uhrstil";
+"bedside_layout_digital_large" = "Digital";
+"bedside_layout_minimal" = "Minimal";
+"bedside_layout_digital_bold" = "Fett";
+"bedside_layout_flip" = "Flip (Pro)";
+"bedside_exit" = "Nachtmodus beenden";
+"bedside_exit_hint" = "Zum Beenden gedrückt halten";
+
+/* Live Activity */
+"snoozing" = "Schlummert";
+
+/* Snooze */
+"snooze_off" = "Aus";
+"snooze_minutes_fmt" = "%d Min.";
+
+/* Convenience Phase 1 (duplicate / countdown / save toast) */
+"duplicate_alarm" = "Duplizieren";
+"countdown_minutes" = "%ld Min.";
+"countdown_hours_minutes" = "%1$ld Std. %2$ld Min.";
+"countdown_days_hours" = "%1$ld T %2$ld Std.";
+"countdown_until" = "in %@";
+"alarm_will_ring_in" = "Klingelt in %@";
+
+/* Alarm Edit */
+"alarm_is_off" = "Dieser Wecker ist aus";
+
+/* Video Trimmer */
+"no_video" = "Kein Video";
+
+/* Video Import Source */
+"video_source_title" = "Videoquelle auswählen";
+"video_source_photo" = "Fotomediathek";
+"video_source_file" = "Dateien";
+"error_file_access_denied" = "Der Zugriff auf die Datei wurde verweigert.";
+"error_file_copy_failed" = "Die Datei konnte nicht kopiert werden.";
+"error_unsupported_video_format" = "Nicht unterstütztes Videoformat.";
+
+/* Onboarding (#98) */
+"onb.hero.title" = "Wach auf mit deinem Lieblingsteil";
+"onb.loop.title" = "Wähl den Refrain. Er spielt, bis du auf bist.";
+"onb.next" = "Weiter";
+"onb.silent.title" = "Damit er auch im Stummmodus klingelt";
+"onb.continue" = "Fortfahren";
+"onb.source.title" = "Woher kommt dein Lieblingston?";
+"onb.source.video" = "Aus einem Video";
+"onb.source.audio" = "Aus einer Audiodatei";
+"onb.source.preset" = "Eingebauten Ton testen";
+"onb.later" = "Später";
+
+/* Trial ring (#109) */
+"test_ring_title" = "Jetzt klingeln";
+"test_ring_failed" = "Der Testwecker konnte nicht geplant werden. Bitte versuche es erneut.";
+"test_ring_simulator_unavailable" = "Der Testton ist nur auf einem echten Gerät verfügbar.";
+"test_ring_alarm_title" = "Testwecker";
+"test_ring_backup_title" = "Ton des Verschlafschutzes testen";
+
+/* Why the trial ring can't ring (#150) */
+"test_ring_reason_not_authorized" = "Alarme sind noch nicht erlaubt. Sie klingeln erst, wenn du sie erlaubst.";
+"test_ring_reason_denied" = "Alarme sind für My Sound Alarm ausgeschaltet. Sie klingeln nicht. Öffne Einstellungen und schalte Alarme ein.";
+"allow_alarms" = "Alarme erlauben";
+
+/* Loudness (#109 C) */
+
+/* Backup alarm (#110) */
+"backup_alarm_toggle" = "Verschlafschutz";
+"backup_alarm_title_fmt" = "Verschlafschutz: %@";
+"backup_alarm_description_fmt" = "Wenn du den Wecker um %@ nicht bis %@ gestoppt hast, spielt er denselben Ton erneut, lauter.";
+"backup_alarm_minutes" = "Erneut klingeln nach";
+"backup_alarm_minutes_fmt" = "%d Min. später";
+"backup_alarm_before_snooze" = "Er klingelt, bevor dein Schlummern endet.";
+"backup_alarm_early_access_note" = "Wenn du ihn während des Vorabzugangs nutzt, bleibt er nach der finalen Version verfügbar.";
+"backup_alarm_row_badge" = "Verschlafschutz an";
+
+/* Update gate (#116) */
+"update_required_title" = "Update erforderlich";
+"update_required_message" = "Um My Sound Alarm weiter zu nutzen, aktualisiere bitte auf die neueste Version. Bereits eingerichtete Wecker klingeln weiter, bis du aktualisierst.";
+"update_recommended_title" = "Eine neue Version ist verfügbar";
+"update_button" = "Im App Store aktualisieren";
+"update_later" = "Später";
+
+/* Volume guide (#121) */
+"volume_guide_title" = "So machst du Wecker lauter";
+"volume_guide_step1" = "Einstellungen → Töne & Haptik → ziehe den Regler Klingel- und Hinweistöne nach rechts";
+"volume_guide_step2" = "Aktiviere Mit Tasten ändern, um auch die Lautstärketasten zu verwenden (wenn nichts anderes läuft)";
+"volume_guide_image_label" = "Der Bildschirm Einstellungen > Töne & Haptik mit dem Regler Klingel- und Hinweistöne und dem Schalter Mit Tasten ändern";
+"volume_guide_warning" = "Die Lautstärke im Kontrollzentrum gilt für Musik und Videos. Sie ändert die Weckerlautstärke nicht.";
+"alarm_permission_required" = "Alarmberechtigung erforderlich";
+"open_settings" = "Einstellungen öffnen";
+"volume_guide_link" = "Zu leise?";
+"test_ring_ringing_now" = "Klingelt jetzt";
+"backup_alarm_info_title" = "Verschlafschutz";
+"backup_alarm_info_mechanism" = "Wird der Wecker nicht innerhalb der eingestellten Zeit gestoppt, klingelt er erneut.";
+"backup_alarm_info_louder" = "Er spielt denselben Ton, lauter und ohne Verzerrung. Je leiser der Originalton, desto stärker wird er angehoben.";
+"backup_alarm_info_volume" = "Wie laut er tatsächlich klingelt, hängt von der Lautstärke für Klingel- und Hinweistöne in den Einstellungen ab.";
+"backup_alarm_info_accessibility" = "Über den Verschlafschutz";
+
+"night_mode" = "Nachtmodus";
+"size_warning" = "Lange Töne belegen etwa %@ Speicher.";

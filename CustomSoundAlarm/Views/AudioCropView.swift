@@ -143,6 +143,7 @@ struct AudioCropView: View {
                     .foregroundStyle(.white)
                 }
                 .disabled(isProcessing || !canSave)
+                .accessibilityIdentifier("audioCrop.cropAndSave")
 
                 // 副アクション: 格下のテキストボタン（クロップを強制しない・#77/#80-7）
                 Button {

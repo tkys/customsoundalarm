@@ -1,0 +1,241 @@
+/* ContentView */
+"alarm_title" = "Alarmes";
+"empty_title" = "Réveillez-vous avec votre son préféré";
+"empty_description" = "Importez des sons depuis des vidéos ou des fichiers audio\net utilisez-les comme alarme";
+"add_alarm" = "Ajouter une alarme";
+"default_sound" = "Par défaut";
+
+/* Day labels (short) */
+"day_sun" = "dim.";
+"day_mon" = "lun.";
+"day_tue" = "mar.";
+"day_wed" = "mer.";
+"day_thu" = "jeu.";
+"day_fri" = "ven.";
+"day_sat" = "sam.";
+
+/* Repeat summaries */
+"every_day" = "Tous les jours";
+"weekdays" = "En semaine";
+"weekends" = "Le week-end";
+"never" = "Jamais";
+
+/* AlarmDetailView */
+"edit_alarm" = "Modifier l’alarme";
+"cancel" = "Annuler";
+"save" = "Enregistrer";
+"time" = "Heure";
+"sound" = "Son";
+"none" = "Aucun";
+"repeat" = "Répéter";
+"label" = "Étiquette";
+"alarm_placeholder" = "Alarme";
+"delete_alarm" = "Supprimer l’alarme";
+"delete_alarm_confirm" = "Voulez-vous vraiment supprimer cette alarme ?";
+"delete" = "Supprimer";
+
+/* RepeatSelectionView - Weekday labels (full) */
+"every_monday" = "Tous les lundis";
+"every_tuesday" = "Tous les mardis";
+"every_wednesday" = "Tous les mercredis";
+"every_thursday" = "Tous les jeudis";
+"every_friday" = "Tous les vendredis";
+"every_saturday" = "Tous les samedis";
+"every_sunday" = "Tous les dimanches";
+
+/* SoundPickerView */
+"rename" = "Renommer";
+"sound_name_placeholder" = "Nom du son";
+"presets" = "Prêts à l’emploi";
+"imported_sounds" = "Mes sons";
+"converting" = "Conversion…";
+"add_from_video" = "Ajouter depuis une vidéo";
+"add_from_audio" = "Ajouter un fichier audio";
+"add_section" = "Ajouter";
+"add_section_footer" = "Importez depuis MP3, AAC, WAV, M4A ou une vidéo (MOV, MP4).";
+
+/* Waveform Crop (#77 / #79) */
+"waveform_loading" = "Génération de la forme d’onde…";
+"crop_and_save" = "Ajouter la sélection";
+"import_whole_audio" = "Ajouter le fichier entier";
+"crop_hint_footer" = "Faites glisser la forme d’onde du haut pour un positionnement approximatif, celle du bas (zoomée) pour un réglage précis.";
+"time_start" = "Début";
+"time_end" = "Fin";
+"time_length" = "Durée";
+"time_total" = "Total";
+
+/* Discard confirmation (#82) */
+"close" = "Fermer";
+"discard" = "Abandonner";
+"discard_edits_title" = "Abandonner vos modifications ?";
+"discard_edits_message" = "Votre sélection ne sera pas enregistrée.";
+
+/* Sound name formatting (#93) */
+"imported_sound_default" = "Son importé";
+"my_sounds_empty_title" = "Faites de n’importe quel son votre alarme";
+"my_sounds_empty_description" = "Importez de la musique depuis des vidéos ou vos fichiers\naudio préférés pour les utiliser comme son d’alarme";
+"file_access_denied" = "Accès au fichier refusé";
+
+/* VideoTrimView */
+"add_from_video_title" = "Ajouter l’audio d’une vidéo";
+"loading" = "Chargement…";
+"select_video" = "Sélectionnez une vidéo";
+"preview" = "Aperçu";
+"selected_duration" = "Sélection : %@";
+"stop" = "Arrêter";
+"preview_selection" = "Lire";
+"start" = "Début";
+"end" = "Fin";
+"range" = "Plage";
+"duration_warning" = "La sélection dépasse 30 secondes. Des sons d’alarme de 30 secondes ou moins sont recommandés.";
+
+/* ShareExtension */
+"saving" = "Enregistrement…";
+"no_data_received" = "Aucune donnée reçue";
+"no_audio_found" = "Aucun fichier audio compatible trouvé";
+"file_load_failed" = "Échec du chargement du fichier";
+"saved_format" = "« %@ » enregistré";
+
+/* AlarmScheduler */
+"stop_alarm" = "Arrêter";
+"snooze" = "Rappel";
+
+/* AlarmIntents */
+"dismiss_alarm_intent" = "Arrêter l’alarme";
+"snooze_intent" = "Rappel";
+
+/* AudioConverter errors */
+"error_buffer_creation" = "Impossible de créer le tampon audio";
+"error_converter_creation" = "Impossible de créer le convertisseur audio";
+"error_conversion_failed" = "Échec de la conversion audio : %@";
+"error_conversion_status" = "Erreur d’état de la conversion";
+"error_empty_file" = "Le fichier converti est vide";
+
+/* VideoAudioExtractor errors */
+"error_no_audio_track" = "Cette vidéo n’a pas de piste audio";
+"error_export_session" = "Impossible de créer la session d’exportation";
+"error_extraction_failed" = "Échec de l’extraction audio : %@";
+"error_unknown" = "Erreur inconnue";
+
+/* Sound missing (fallback when the referenced sound is deleted) */
+"sound_missing" = "Son introuvable";
+
+/* Preset sound names */
+"preset_marimba" = "Marimba";
+"preset_bell" = "Cloche douce";
+"preset_crescendo" = "Crescendo";
+"preset_beep" = "Bip rétro";
+"preset_ascending" = "Croissant";
+"preset_dual_tone" = "Double tonalité";
+"preset_music_box" = "Boîte à musique";
+
+/* Bedside Clock */
+"bedside_today" = "Aujourd’hui";
+"bedside_tomorrow" = "Demain";
+"bedside_no_alarm" = "Aucune alarme";
+"bedside_theme_white" = "Blanc";
+"bedside_theme_amber" = "Ambre";
+"bedside_brightness" = "Luminosité";
+"bedside_show_countdown" = "Compte à rebours";
+"bedside_show_sound_name" = "Nom du son";
+"bedside_show_date" = "Date";
+"bedside_show_seconds" = "Secondes";
+"bedside_font_size" = "Taille du texte";
+"bedside_layout" = "Style d’horloge";
+"bedside_layout_digital_large" = "Numérique";
+"bedside_layout_minimal" = "Minimal";
+"bedside_layout_digital_bold" = "Gras";
+"bedside_layout_flip" = "Flip (Pro)";
+"bedside_exit" = "Quitter le mode nuit";
+"bedside_exit_hint" = "Maintenez appuyé pour quitter";
+
+/* Live Activity */
+"snoozing" = "Rappel en cours";
+
+/* Snooze */
+"snooze_off" = "Désactivé";
+"snooze_minutes_fmt" = "%d min";
+
+/* Convenience Phase 1 (duplicate / countdown / save toast) */
+"duplicate_alarm" = "Dupliquer";
+"countdown_minutes" = "%ld min";
+"countdown_hours_minutes" = "%1$ld h %2$ld min";
+"countdown_days_hours" = "%1$ld j %2$ld h";
+"countdown_until" = "dans %@";
+"alarm_will_ring_in" = "Sonne dans %@";
+
+/* Alarm Edit */
+"alarm_is_off" = "Cette alarme est désactivée";
+
+/* Video Trimmer */
+"no_video" = "Aucune vidéo";
+
+/* Video Import Source */
+"video_source_title" = "Sélectionner la source vidéo";
+"video_source_photo" = "Photothèque";
+"video_source_file" = "Fichiers";
+"error_file_access_denied" = "L’accès au fichier a été refusé.";
+"error_file_copy_failed" = "Impossible de copier le fichier.";
+"error_unsupported_video_format" = "Format vidéo non pris en charge.";
+
+/* Onboarding (#98) */
+"onb.hero.title" = "Levez-vous au passage que vous aimez";
+"onb.loop.title" = "Choisissez le refrain. Il joue jusqu’à votre réveil.";
+"onb.next" = "Suivant";
+"onb.silent.title" = "Pour sonner, même en mode silencieux";
+"onb.continue" = "Continuer";
+"onb.source.title" = "D’où vient le son que vous aimez ?";
+"onb.source.video" = "Depuis une vidéo";
+"onb.source.audio" = "Depuis un fichier audio";
+"onb.source.preset" = "Essayer un son intégré";
+"onb.later" = "Plus tard";
+
+/* Trial ring (#109) */
+"test_ring_title" = "Faire sonner";
+"test_ring_failed" = "Impossible de programmer l’alarme de test. Réessayez.";
+"test_ring_simulator_unavailable" = "Le test de sonnerie n’est disponible que sur un appareil réel.";
+"test_ring_alarm_title" = "Alarme de test";
+"test_ring_backup_title" = "Tester le son de l’anti-grasse matinée";
+
+/* Why the trial ring can't ring (#150) */
+"test_ring_reason_not_authorized" = "Les alarmes ne sont pas encore autorisées : elles ne sonneront pas tant que vous ne les autorisez pas.";
+"test_ring_reason_denied" = "Les alarmes sont désactivées pour My Sound Alarm : elles ne sonneront pas. Ouvrez Réglages et activez les alarmes.";
+"allow_alarms" = "Autoriser les alarmes";
+
+/* Loudness (#109 C) */
+
+/* Backup alarm (#110) */
+"backup_alarm_toggle" = "Anti-grasse matinée";
+"backup_alarm_title_fmt" = "Anti-grasse matinée : %@";
+"backup_alarm_description_fmt" = "Si vous n’avez pas arrêté l’alarme de %@ avant %@, elle rejoue le même son, plus fort.";
+"backup_alarm_minutes" = "Sonner à nouveau après";
+"backup_alarm_minutes_fmt" = "Après %d min";
+"backup_alarm_before_snooze" = "Elle sonne avant la fin de votre rappel.";
+"backup_alarm_early_access_note" = "Si vous l’utilisez pendant l’accès anticipé, elle reste disponible après la version finale.";
+"backup_alarm_row_badge" = "Anti-grasse matinée activée";
+
+/* Update gate (#116) */
+"update_required_title" = "Mise à jour requise";
+"update_required_message" = "Pour continuer à utiliser My Sound Alarm, mettez à jour vers la dernière version. Les alarmes déjà réglées continueront de sonner jusqu’à la mise à jour.";
+"update_recommended_title" = "Une nouvelle version est disponible";
+"update_button" = "Mettre à jour sur l’App Store";
+"update_later" = "Plus tard";
+
+/* Volume guide (#121) */
+"volume_guide_title" = "Comment augmenter le volume des alarmes";
+"volume_guide_step1" = "Réglages → Sons et vibrations → déplacez le curseur Sonnerie et alertes vers la droite";
+"volume_guide_step2" = "Activez Modifier avec les boutons pour utiliser aussi les boutons de volume (quand rien d’autre ne joue)";
+"volume_guide_image_label" = "L’écran Réglages > Sons et vibrations, avec le curseur Sonnerie et alertes et l’interrupteur Modifier avec les boutons indiqués";
+"volume_guide_warning" = "Le volume du Centre de contrôle concerne la musique et les vidéos. Il ne change pas le volume des alarmes.";
+"alarm_permission_required" = "L’autorisation des alarmes est requise";
+"open_settings" = "Ouvrir Réglages";
+"volume_guide_link" = "Trop faible ?";
+"test_ring_ringing_now" = "Sonnerie en cours";
+"backup_alarm_info_title" = "Anti-grasse matinée";
+"backup_alarm_info_mechanism" = "Si l’alarme n’est pas arrêtée dans le délai que vous avez défini, elle sonne de nouveau.";
+"backup_alarm_info_louder" = "Elle joue le même son, rendu plus fort sans distorsion. Plus le son d’origine est faible, plus il est augmenté.";
+"backup_alarm_info_volume" = "Le volume réel de la sonnerie dépend du volume Sonnerie et alertes dans Réglages.";
+"backup_alarm_info_accessibility" = "À propos de l’anti-grasse matinée";
+
+"night_mode" = "Mode nuit";
+"size_warning" = "Les sons longs utilisent environ %@ d’espace de stockage.";
