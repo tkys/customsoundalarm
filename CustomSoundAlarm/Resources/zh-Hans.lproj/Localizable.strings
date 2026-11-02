@@ -259,7 +259,7 @@
 "fade_in_30" = "30 秒";
 "fade_in_60" = "60 秒";
 "fade_in_seconds_fmt" = "%d 秒";
-"fade_in_footer" = "从轻声开始，逐渐提高到最大音量。因为位于文件开头，每次循环都会再次轻声开始。";
+"fade_in_footer" = "每次播放到结尾并回到开头时，都会再次轻声开始。";
 "gap_fade" = "曲目之间";
 "gap_fade_short" = "短（0.5 秒）";
 "gap_fade_long" = "长（2 秒）";
@@ -268,6 +268,7 @@
 "end_fade" = "结尾淡出";
 "end_fade_footer" = "在循环末尾短暂淡出。";
 "fade_backup_note" = "“轻柔开始”不适用于防赖床提醒。";
+"playlist_backup_note" = "播放列表闹钟的防赖床提醒会把第一首曲目放大播放。";
 "pro_early_access" = "PRO · 抢先体验";
 "playlist_early_access_note" = "如果在抢先体验期间开始使用，正式发布后仍可继续使用。";
 "playlist_title" = "播放列表";

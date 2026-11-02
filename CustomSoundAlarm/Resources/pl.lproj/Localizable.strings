@@ -259,7 +259,7 @@
 "fade_in_30" = "30 sekund";
 "fade_in_60" = "60 sekund";
 "fade_in_seconds_fmt" = "%d sekund";
-"fade_in_footer" = "Zaczyna cicho i stopniowo zwiększa głośność. Ponieważ jest na początku pliku, przy każdym powtórzeniu zaczyna się cicho.";
+"fade_in_footer" = "Za każdym razem, gdy utwór dojdzie do końca i wróci na początek, znów zaczyna się cicho.";
 "gap_fade" = "Między utworami";
 "gap_fade_short" = "Krótkie (0,5 s)";
 "gap_fade_long" = "Długie (2 s)";
@@ -268,6 +268,7 @@
 "end_fade" = "Wyciszenie końca";
 "end_fade_footer" = "Krótkie wyciszenie na końcu pętli.";
 "fade_backup_note" = "Łagodny start nie dotyczy zabezpieczenia przed zaspaniem.";
+"playlist_backup_note" = "W alarmach z playlistą zabezpieczenie przed zaspaniem odtwarza pierwszy utwór głośniej.";
 "pro_early_access" = "PRO · Wczesny dostęp";
 "playlist_early_access_note" = "Jeśli zaczniesz używać podczas wczesnego dostępu, możesz używać go po pełnej premierze.";
 "playlist_title" = "Playlisty";

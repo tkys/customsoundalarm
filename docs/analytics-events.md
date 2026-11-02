@@ -38,6 +38,7 @@
 | `playlist_edited` | — | プレイリストを編集 | 編集の利用 | アプリ動作中のみ | 1.8.2 |
 | `playlist_render_failed` | `reason` string（no_tracks/too_long/render_failed/write_failed/missing_playlist） | プレイリストの書き出し失敗 | 失敗原因 | アプリ動作中のみ | 1.8.2 |
 | `playlist_render_fallback` | — | 書き出し失敗時に1曲目／既定音で鳴らした | フォールバックの頻度 | アプリ動作中のみ | 1.8.2 |
+| `playlist_reschedule_failed` | `reason` string（schedule_failed） | 次回分の再登録に失敗し、前のアラームを残した | 差し替え失敗の頻度 | アプリ動作中のみ | 1.8.2 |
 | `ad_slot_eligible` | `slot` string（banner_sounds/banner_import/banner_alarm_list/interstitial_import_saved）, `allowed` bool, `reason` string（eligible/existing_user/version_unavailable/pro/first_week/quiet_hours/frequency_cap/forbidden_context/wrong_context）, `region` string（standard/limited） | 広告枠の判定時（`AdsConfig.isEnabled = false` でも送る） | 1.9.0 前に実際の表示機会を測る | アプリ動作中のみ | 1.9.0 |
 | `sound_preview_played` | — | サウンドの試聴 | 試聴行動 | アプリ動作中のみ | 既存 |
 | `custom_sound_imported` | `source` string（video/audio）, `peak_db_bucket` string, `gain_db_bucket` string, `lufs_bucket` string（取り込み前のLUFS区分） | カスタムサウンド取り込み成功 | 取り込み経路・音量 | アプリ動作中のみ | 既存（`lufs_bucket` は1.8.0） |

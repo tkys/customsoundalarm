@@ -259,7 +259,7 @@
 "fade_in_30" = "30초";
 "fade_in_60" = "60초";
 "fade_in_seconds_fmt" = "%d초";
-"fade_in_footer" = "작게 시작해 점점 커집니다. 파일 맨 앞이라 반복할 때마다 다시 작게 시작합니다.";
+"fade_in_footer" = "끝까지 재생된 뒤 처음으로 돌아갈 때마다 다시 작게 시작합니다.";
 "gap_fade" = "곡 사이";
 "gap_fade_short" = "짧게 (0.5초)";
 "gap_fade_long" = "길게 (2초)";
@@ -268,6 +268,7 @@
 "end_fade" = "끝 페이드";
 "end_fade_footer" = "반복 연결부의 끝을 짧게 페이드아웃합니다.";
 "fade_backup_note" = "부드럽게 시작은 과수면 방지에 적용되지 않습니다.";
+"playlist_backup_note" = "재생목록 알람의 과수면 방지는 첫 곡을 더 크게 재생합니다.";
 "pro_early_access" = "PRO · 사전 공개";
 "playlist_early_access_note" = "사전 공개 중에 사용을 시작하면 정식 출시 후에도 계속 사용할 수 있습니다.";
 "playlist_title" = "재생목록";

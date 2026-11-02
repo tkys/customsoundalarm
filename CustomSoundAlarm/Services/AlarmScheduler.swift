@@ -329,6 +329,9 @@ final class AlarmScheduler {
             } else if let oldAlarmID = deferredOldAlarmIDs[entry.id] {
                 // 新しい登録に失敗したので、前のアラームを残す（#151）
                 newMap[entry.id] = oldAlarmID
+                AnalyticsService.shared.capture(.playlistRescheduleFailed(
+                    reason: "schedule_failed"
+                ))
                 logger.warning("Reschedule failed; keeping previous alarm for entry: \(entry.id)")
             }
         }
@@ -352,18 +355,9 @@ final class AlarmScheduler {
         })
 
         // 生成方式の版が古い .loud.caf は次の同期で作り直す（#134）。
-        // プレイリストは書き出し（fade-in なし）を用意する（#151）。
+        // プレイリストの寝過ごし防止も、存在する最初の曲の「大きくした版」を使う（#151）。
         for entry in entries where entry.isEnabled && entry.backupMinutes != nil {
-            if entry.soundMode.isPlaylist {
-                let prepared = await PlaylistRenderService.shared.prepareBackupSound(
-                    for: entry.playlistRenderInput
-                )
-                if prepared == nil,
-                   let source = backupSourceFileName(for: entry),
-                   !source.isEmpty {
-                    _ = await BackupLoudVariantService.ensureVariant(for: source)
-                }
-            } else if let source = backupSourceFileName(for: entry), !source.isEmpty {
+            if let source = backupSourceFileName(for: entry), !source.isEmpty {
                 _ = await BackupLoudVariantService.ensureVariant(for: source)
             }
         }
@@ -565,7 +559,7 @@ final class AlarmScheduler {
     }
 
     /// プレイリストのバックアップ用に、存在する最初の曲を返す（#151）。
-    private func backupSourceFileName(for entry: AlarmEntry) -> String? {
+    func backupSourceFileName(for entry: AlarmEntry) -> String? {
         if entry.soundMode.isPlaylist {
             let playlist = PlaylistStore.shared.playlist(id: entry.playlistID)
             if let track = playlist?.tracks.first(where: {
@@ -652,21 +646,15 @@ final class AlarmScheduler {
 
         let alarmID = Alarm.ID()
         let displayName = soundDisplayName(for: entry)
-        let soundFileName: String
-        if let playlistBackup = await PlaylistRenderService.shared.prepareBackupSound(
-            for: entry.playlistRenderInput
-        ) {
-            soundFileName = playlistBackup.fileName
-        } else {
-            // 書き出し失敗時は、存在する最初の曲の「大きくした版」を使う（#151）
-            let source = backupSourceFileName(for: entry) ?? ""
-            if !source.isEmpty {
-                _ = await BackupLoudVariantService.ensureVariant(for: source)
-            }
-            soundFileName = BackupLoudVariantService.resolvedSoundFileName(
-                forSourceFileName: source
-            )
+        // プレイリストの寝過ごし防止は、存在する最初の曲の「大きくした版」で鳴らす（#151）。
+        // 生成できなければ予備音にフォールバックする。
+        let source = backupSourceFileName(for: entry) ?? ""
+        if !source.isEmpty {
+            _ = await BackupLoudVariantService.ensureVariant(for: source)
         }
+        let soundFileName = BackupLoudVariantService.resolvedSoundFileName(
+            forSourceFileName: source
+        )
         var soundNames = AppGroup.backupSoundNames
         soundNames[entry.id] = soundFileName
         AppGroup.backupSoundNames = soundNames

@@ -147,6 +147,9 @@ enum AnalyticsEvent: Sendable {
     /// 書き出し失敗時に1曲目／既定音で鳴らした
     case playlistRenderFallback
 
+    /// プレイリストの再登録に失敗し、前のアラームを残した
+    case playlistRescheduleFailed(reason: String)
+
     /// 大きくした版を生成した（#119）
     case backupLoudVariantGenerated(
         gainDbBucket: String,
@@ -257,6 +260,7 @@ enum AnalyticsEvent: Sendable {
         case .playlistEdited: return "playlist_edited"
         case .playlistRenderFailed: return "playlist_render_failed"
         case .playlistRenderFallback: return "playlist_render_fallback"
+        case .playlistRescheduleFailed: return "playlist_reschedule_failed"
         case .backupLoudVariantGenerated: return "backup_loud_variant_generated"
         case .backupLoudVariantFailed: return "backup_loud_variant_failed"
         case .volumeGuideOpened: return "volume_guide_opened"
@@ -404,6 +408,8 @@ enum AnalyticsEvent: Sendable {
             return ["reason": reason.rawValue]
         case .playlistRenderFallback:
             return [:]
+        case let .playlistRescheduleFailed(reason):
+            return ["reason": reason]
         case let .backupLoudVariantGenerated(gainDbBucket, durationBucket, source, outputLufsBucket):
             var props: [String: Any] = [
                 "gain_db_bucket": gainDbBucket,

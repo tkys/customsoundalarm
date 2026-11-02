@@ -105,6 +105,9 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.playlistEdited.name == "playlist_edited")
         #expect(AnalyticsEvent.playlistRenderFailed(reason: .tooLong).name == "playlist_render_failed")
         #expect(AnalyticsEvent.playlistRenderFallback.name == "playlist_render_fallback")
+        #expect(AnalyticsEvent.playlistRescheduleFailed(
+            reason: "schedule_failed"
+        ).name == "playlist_reschedule_failed")
     }
 
     // MARK: alarm_created
@@ -433,6 +436,7 @@ struct AnalyticsEventTests {
             .playlistEdited,
             .playlistRenderFailed(reason: .renderFailed),
             .playlistRenderFallback,
+            .playlistRescheduleFailed(reason: "schedule_failed"),
             .alarmFired(wasAppForeground: true, hour: 8, isRepeating: false, detection: "observer"),
             .alarmStopped(hour: 8),
             .alarmSnoozed(from: "observer"),
@@ -706,6 +710,15 @@ struct AnalyticsEventTests {
         let props = AnalyticsEvent.playlistRenderFailed(reason: .tooLong).properties
         #expect(props.count == 1)
         #expect(props["reason"] as? String == "too_long")
+    }
+
+    @Test
+    func playlistRescheduleFailedProperties() {
+        let props = AnalyticsEvent.playlistRescheduleFailed(
+            reason: "schedule_failed"
+        ).properties
+        #expect(props.count == 1)
+        #expect(props["reason"] as? String == "schedule_failed")
     }
 
     @Test

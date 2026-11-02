@@ -57,6 +57,8 @@ struct FadeSettingsView: View {
                     Text("end_fade_footer")
                     Text("fade_backup_note")
                         .foregroundStyle(.secondary)
+                    Text("playlist_backup_note")
+                        .foregroundStyle(.secondary)
                 }
             }
 

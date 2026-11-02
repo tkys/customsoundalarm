@@ -259,7 +259,7 @@
 "fade_in_30" = "30 secondi";
 "fade_in_60" = "60 secondi";
 "fade_in_seconds_fmt" = "%d secondi";
-"fade_in_footer" = "Inizia piano e sale al volume massimo. Poiché è all'inizio del file, riparte piano a ogni ciclo.";
+"fade_in_footer" = "Ogni volta che arriva alla fine e ricomincia, riparte piano.";
 "gap_fade" = "Tra i brani";
 "gap_fade_short" = "Breve (0,5 s)";
 "gap_fade_long" = "Lunga (2 s)";
@@ -268,6 +268,7 @@
 "end_fade" = "Dissolvenza finale";
 "end_fade_footer" = "Breve dissolvenza alla fine del ciclo.";
 "fade_backup_note" = "L'avvio delicato non si applica alla protezione per il sonno.";
+"playlist_backup_note" = "Nelle sveglie con playlist, la protezione per il sonno riproduce il primo brano più forte.";
 "pro_early_access" = "PRO · Accesso anticipato";
 "playlist_early_access_note" = "Se inizi a usarlo durante l'accesso anticipato, potrai continuare a usarlo dopo il rilascio.";
 "playlist_title" = "Playlist";

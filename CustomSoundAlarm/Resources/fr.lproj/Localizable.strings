@@ -259,7 +259,7 @@
 "fade_in_30" = "30 secondes";
 "fade_in_60" = "60 secondes";
 "fade_in_seconds_fmt" = "%d secondes";
-"fade_in_footer" = "Commence doucement puis monte au volume maximal. Comme il est au début du fichier, il redémarre doucement à chaque boucle.";
+"fade_in_footer" = "Chaque fois qu'il joue jusqu'à la fin et revient au début, il redémarre doucement.";
 "gap_fade" = "Entre les titres";
 "gap_fade_short" = "Court (0,5 s)";
 "gap_fade_long" = "Long (2 s)";
@@ -268,6 +268,7 @@
 "end_fade" = "Fondu de fin";
 "end_fade_footer" = "Court fondu à la fin de la boucle.";
 "fade_backup_note" = "Le démarrage en douceur ne s'applique pas au garde-fou anti-grasse matinée.";
+"playlist_backup_note" = "Pour les alarmes avec playlist, le garde-fou anti-grasse matinée joue le premier titre plus fort.";
 "pro_early_access" = "PRO · Accès anticipé";
 "playlist_early_access_note" = "Si vous commencez à l'utiliser pendant l'accès anticipé, vous pourrez continuer à l'utiliser après la sortie.";
 "playlist_title" = "Playlists";

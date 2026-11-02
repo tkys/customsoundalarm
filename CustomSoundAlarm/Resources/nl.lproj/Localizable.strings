@@ -259,7 +259,7 @@
 "fade_in_30" = "30 seconden";
 "fade_in_60" = "60 seconden";
 "fade_in_seconds_fmt" = "%d seconden";
-"fade_in_footer" = "Begint zacht en wordt geleidelijk luider. Omdat het aan het begin van het bestand staat, begint het bij elke herhaling weer zacht.";
+"fade_in_footer" = "Elke keer dat het tot het einde speelt en opnieuw begint, start het weer zacht.";
 "gap_fade" = "Tussen nummers";
 "gap_fade_short" = "Kort (0,5 s)";
 "gap_fade_long" = "Lang (2 s)";
@@ -268,6 +268,7 @@
 "end_fade" = "Einde uitfaden";
 "end_fade_footer" = "Korte fade aan het einde van de herhaling.";
 "fade_backup_note" = "Zachte start geldt niet voor de overslaapbeveiliging.";
+"playlist_backup_note" = "Bij afspeellijstalarmen speelt de overslaapbeveiliging het eerste nummer harder af.";
 "pro_early_access" = "PRO · Vroege toegang";
 "playlist_early_access_note" = "Als je het tijdens de vroege toegang gaat gebruiken, kun je het na de volledige release blijven gebruiken.";
 "playlist_title" = "Afspeellijsten";

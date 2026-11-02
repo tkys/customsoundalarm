@@ -259,7 +259,7 @@
 "fade_in_30" = "30 segundos";
 "fade_in_60" = "60 segundos";
 "fade_in_seconds_fmt" = "%d segundos";
-"fade_in_footer" = "Começa baixo e sobe até o volume total. Como fica no início do arquivo, começa baixo de novo a cada repetição.";
+"fade_in_footer" = "Sempre que toca até o fim e volta ao início, começa baixo de novo.";
 "gap_fade" = "Entre faixas";
 "gap_fade_short" = "Curto (0,5 s)";
 "gap_fade_long" = "Longo (2 s)";
@@ -268,6 +268,7 @@
 "end_fade" = "Fade no fim";
 "end_fade_footer" = "Fade curto no fim do loop.";
 "fade_backup_note" = "O início suave não se aplica ao alerta de sono.";
+"playlist_backup_note" = "Nos alarmes com playlist, o alerta de sono reproduz mais alto a primeira faixa.";
 "pro_early_access" = "PRO · Acesso antecipado";
 "playlist_early_access_note" = "Se começar a usar durante o acesso antecipado, poderá continuar usando após o lançamento completo.";
 "playlist_title" = "Playlists";

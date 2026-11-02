@@ -259,7 +259,7 @@
 "fade_in_30" = "30 Sekunden";
 "fade_in_60" = "60 Sekunden";
 "fade_in_seconds_fmt" = "%d Sekunden";
-"fade_in_footer" = "Beginnt leise und wird allmählich lauter. Da es am Anfang der Datei liegt, beginnt es bei jeder Schleife wieder leise.";
+"fade_in_footer" = "Jedes Mal, wenn es bis zum Ende läuft und wieder von vorne beginnt, startet es erneut leise.";
 "gap_fade" = "Zwischen Titeln";
 "gap_fade_short" = "Kurz (0,5 s)";
 "gap_fade_long" = "Lang (2 s)";
@@ -268,6 +268,7 @@
 "end_fade" = "Ende ausblenden";
 "end_fade_footer" = "Kurzes Ausblenden am Ende der Schleife.";
 "fade_backup_note" = "Der sanfte Start gilt nicht für die Überschlaf-Erinnerung.";
+"playlist_backup_note" = "Bei Playlist-Weckern spielt die Überschlaf-Erinnerung den ersten Titel lauter ab.";
 "pro_early_access" = "PRO · Vorabzugang";
 "playlist_early_access_note" = "Wenn du es während des Vorabzugangs verwendest, kannst du es nach der Veröffentlichung weiter nutzen.";
 "playlist_title" = "Playlists";

@@ -329,9 +329,12 @@ struct AlarmDetailView: View {
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         } footer: {
-            Text("fade_backup_note")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("fade_backup_note")
+                Text("playlist_backup_note")
+            }
+            .font(.footnote)
+            .foregroundStyle(.secondary)
         }
     }
 

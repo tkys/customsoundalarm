@@ -259,7 +259,7 @@
 "fade_in_30" = "30 seconds";
 "fade_in_60" = "60 seconds";
 "fade_in_seconds_fmt" = "%d seconds";
-"fade_in_footer" = "Starts quiet and rises to full volume. Because it is at the start of the file, it starts quiet again each loop.";
+"fade_in_footer" = "Each time it plays to the end and loops back, it starts quietly again.";
 "gap_fade" = "Between tracks";
 "gap_fade_short" = "Short (0.5s)";
 "gap_fade_long" = "Long (2s)";
@@ -268,6 +268,7 @@
 "end_fade" = "Fade out the end";
 "end_fade_footer" = "Short fade at the end of the loop.";
 "fade_backup_note" = "Gentle start is not applied to the oversleep guard.";
+"playlist_backup_note" = "For playlist alarms, the oversleep guard plays the first track made louder.";
 "pro_early_access" = "PRO · Early access";
 "playlist_early_access_note" = "If you start using it during early access, you can keep using it after the full release.";
 "playlist_title" = "Playlists";

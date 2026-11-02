@@ -259,7 +259,7 @@
 "fade_in_30" = "30 sekund";
 "fade_in_60" = "60 sekund";
 "fade_in_seconds_fmt" = "%d sekund";
-"fade_in_footer" = "Začíná tiše a postupně zesiluje. Protože je na začátku souboru, při každém opakování začne znovu tiše.";
+"fade_in_footer" = "Pokaždé, když dohraje do konce a vrátí se na začátek, začne znovu tiše.";
 "gap_fade" = "Mezi skladbami";
 "gap_fade_short" = "Krátké (0,5 s)";
 "gap_fade_long" = "Dlouhé (2 s)";
@@ -268,6 +268,7 @@
 "end_fade" = "Prolnutí konce";
 "end_fade_footer" = "Krátké prolnutí na konci smyčky.";
 "fade_backup_note" = "Jemný start se na hlídání přespání nepoužívá.";
+"playlist_backup_note" = "U playlistových budíků přehrává hlídání přespání první skladbu zesílenou.";
 "pro_early_access" = "PRO · Předběžný přístup";
 "playlist_early_access_note" = "Pokud jej začnete používat během předběžného přístupu, můžete jej používat i po plném vydání.";
 "playlist_title" = "Playlisty";

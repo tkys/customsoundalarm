@@ -115,27 +115,6 @@ struct PlaylistRenderServiceTests {
     }
 
     @Test
-    func backupPlaylist_skipsFadeInAndUsesBackupName() async {
-        let playlist = makePlaylist()
-        defer { PlaylistStore.shared.remove(id: playlist.id) }
-        let entryID = UUID()
-        defer { removeGeneratedFiles(entryID: entryID) }
-
-        let input = PlaylistRenderInput(
-            entryID: entryID,
-            playlistID: playlist.id,
-            soundMode: .playlistOrder,
-            fadeSettings: PlaylistFadeSettings(fadeIn: .thirty),
-            fallbackFileName: "PresetMarimba.caf"
-        )
-        let result = await PlaylistRenderService.shared.prepareBackupSound(for: input)
-
-        #expect(result != nil)
-        #expect(result?.fileName.hasSuffix(".playlist.backup.a.caf") == true)
-        #expect(result?.usedFallback == false)
-    }
-
-    @Test
     func cleanupKeepsRegisteredFileAndOnlyRemovesOldTemps() async throws {
         let playlist = makePlaylist()
         defer { PlaylistStore.shared.remove(id: playlist.id) }
@@ -189,23 +168,6 @@ struct PlaylistRenderServiceTests {
     }
 
     @Test
-    func backupRenderFailure_returnsNil() async {
-        let playlist = PlaylistStore.shared.add(
-            name: "missing-\(UUID().uuidString)",
-            tracks: [PlaylistTrack(soundFileName: "Missing.caf")]
-        )
-        defer { PlaylistStore.shared.remove(id: playlist.id) }
-        let input = PlaylistRenderInput(
-            entryID: UUID(),
-            playlistID: playlist.id,
-            soundMode: .playlistOrder,
-            fallbackFileName: "PresetMarimba.caf"
-        )
-        let result = await PlaylistRenderService.shared.prepareBackupSound(for: input)
-        #expect(result == nil)
-    }
-
-    @Test
     func forceNewOrder_onlyAffectsTheStoppedAlarm() async {
         let playlist = PlaylistStore.shared.add(
             name: "shuffle-\(UUID().uuidString)",
@@ -243,5 +205,43 @@ struct PlaylistRenderServiceTests {
         let secondB = await PlaylistRenderService.shared.prepareSound(for: inputB)
 
         #expect(secondB.fileName == firstB.fileName)
+    }
+
+    @Test
+    func cleanup_removesOldPlaylistBackupFilesUnlessRegistered() {
+        let entryID = UUID()
+        let input = PlaylistRenderInput(
+            entryID: entryID,
+            soundMode: .playlistOrder,
+            fallbackFileName: "PresetMarimba.caf"
+        )
+        let directory = AudioConverter.shared.soundsDirectory
+        let oldBackup = "\(entryID.uuidString).playlist.backup.a.caf"
+        let registeredBackup = "\(entryID.uuidString).playlist.backup.b.caf"
+        defer {
+            for name in [oldBackup, registeredBackup] {
+                try? FileManager.default.removeItem(
+                    at: directory.appendingPathComponent(name)
+                )
+            }
+        }
+        for name in [oldBackup, registeredBackup] {
+            FileManager.default.createFile(
+                atPath: directory.appendingPathComponent(name).path,
+                contents: Data()
+            )
+        }
+
+        PlaylistRenderService.shared.cleanupUnusedFiles(
+            inputs: [input],
+            keeping: [registeredBackup]
+        )
+
+        #expect(!FileManager.default.fileExists(
+            atPath: directory.appendingPathComponent(oldBackup).path
+        ))
+        #expect(FileManager.default.fileExists(
+            atPath: directory.appendingPathComponent(registeredBackup).path
+        ))
     }
 }

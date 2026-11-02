@@ -259,7 +259,7 @@
 "fade_in_30" = "30 segundos";
 "fade_in_60" = "60 segundos";
 "fade_in_seconds_fmt" = "%d segundos";
-"fade_in_footer" = "Empieza suave y sube hasta el volumen completo. Como está al principio del archivo, vuelve a empezar suave en cada repetición.";
+"fade_in_footer" = "Cada vez que suena hasta el final y vuelve al principio, empieza de nuevo suave.";
 "gap_fade" = "Entre pistas";
 "gap_fade_short" = "Corto (0,5 s)";
 "gap_fade_long" = "Largo (2 s)";
@@ -268,6 +268,7 @@
 "end_fade" = "Fundido final";
 "end_fade_footer" = "Fundido corto al final del bucle.";
 "fade_backup_note" = "El inicio suave no se aplica al aviso de sueño.";
+"playlist_backup_note" = "En las alarmas con lista, el aviso de sueño reproduce la primera pista más alta.";
 "pro_early_access" = "PRO · Acceso anticipado";
 "playlist_early_access_note" = "Si empiezas a usarlo durante el acceso anticipado, podrás seguir usándolo después del lanzamiento.";
 "playlist_title" = "Listas";
