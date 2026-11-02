@@ -225,11 +225,50 @@ struct PlaylistRenderLogicTests {
     }
 
     @Test
-    func peakScale_onlyReduces() {
-        #expect(PlaylistRenderLogic.peakScale(sourcePeak: 0.5, mixedPeak: 0.4) == 1)
-        #expect(PlaylistRenderLogic.peakScale(sourcePeak: 0.5, mixedPeak: 0.5) == 1)
-        #expect(PlaylistRenderLogic.peakScale(sourcePeak: 0.5, mixedPeak: 1.0) == 0.5)
-        #expect(PlaylistRenderLogic.peakScale(sourcePeak: 0, mixedPeak: 1.0) == 1)
+    func crossfadeMix_neverExceedsInputPeak() {
+        let values: [Float] = [-1, -0.5, 0, 0.25, 0.5, 1]
+        for a in values {
+            for b in values {
+                for step in 0...10 {
+                    let mix = Float(step) / 10
+                    let result = PlaylistRenderLogic.crossfadeMix(a: a, b: b, mix: mix)
+                    #expect(abs(result) <= max(abs(a), abs(b)) + 0.0001)
+                }
+            }
+        }
+    }
+
+    @Test
+    func fallback_skipsMissingFirstTrack() {
+        let tracks = [
+            PlaylistTrack(soundFileName: "Missing.caf"),
+            PlaylistTrack(soundFileName: "PresetMarimba.caf")
+        ]
+        let result = PlaylistFallbackLogic.fileName(
+            tracks: tracks,
+            fallbackFileName: "AlsoMissing.caf",
+            isAvailable: { $0 == "PresetMarimba.caf" },
+            defaultFileName: "PresetMarimba.caf"
+        )
+        #expect(result == "PresetMarimba.caf")
+    }
+
+    @Test
+    func fallback_usesInputThenDefault() {
+        let tracks = [PlaylistTrack(soundFileName: "Missing.caf")]
+        #expect(PlaylistFallbackLogic.fileName(
+            tracks: tracks,
+            fallbackFileName: "PresetBell.caf",
+            isAvailable: { $0 == "PresetBell.caf" },
+            defaultFileName: "PresetMarimba.caf"
+        ) == "PresetBell.caf")
+
+        #expect(PlaylistFallbackLogic.fileName(
+            tracks: tracks,
+            fallbackFileName: "Missing2.caf",
+            isAvailable: { _ in false },
+            defaultFileName: "PresetMarimba.caf"
+        ) == "PresetMarimba.caf")
     }
 
     @Test

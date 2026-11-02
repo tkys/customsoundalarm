@@ -97,13 +97,12 @@ enum PlaylistRenderLogic {
         return Float(indexFromEnd) / Float(fadeFrames)
     }
 
-    // MARK: - Peak guard
+    // MARK: - Crossfade
 
-    /// クロスフェードで足し合わせたピークが元のピークを超えないための倍率。
-    /// 下げる方向だけに使い、音割れを防ぐ。
-    static func peakScale(sourcePeak: Float, mixedPeak: Float) -> Float {
-        guard sourcePeak > 0, mixedPeak > sourcePeak else { return 1 }
-        return sourcePeak / mixedPeak
+    /// 線形クロスフェードの1サンプル。
+    /// `|a(1-m)+b*m| <= max(|a|,|b|)` なので、ピーク補正は不要。
+    static func crossfadeMix(a: Float, b: Float, mix: Float) -> Float {
+        a * (1 - mix) + b * mix
     }
 }
 
@@ -121,5 +120,24 @@ struct SplitMix64: RandomNumberGenerator {
         z = (z ^ (z >> 30)) &* 0xBF58_476D_1CE4_E5B9
         z = (z ^ (z >> 27)) &* 0x94D0_49BB_1331_11EB
         return z ^ (z >> 31)
+    }
+}
+
+/// 書き出し失敗時のフォールバック先を決める純ロジック（#151）。
+/// 存在する最初の曲 → 入力の音 → 既定のプリセット、の順。
+enum PlaylistFallbackLogic {
+    static func fileName(
+        tracks: [PlaylistTrack],
+        fallbackFileName: String,
+        isAvailable: (String) -> Bool,
+        defaultFileName: String
+    ) -> String {
+        if let track = tracks.first(where: { isAvailable($0.soundFileName) }) {
+            return track.soundFileName
+        }
+        if isAvailable(fallbackFileName) {
+            return fallbackFileName
+        }
+        return defaultFileName
     }
 }

@@ -32,6 +32,10 @@ private struct PlaylistRenderCacheEntry: Codable, Equatable {
     let fileName: String
     let slot: String
     let order: [String]
+    /// シャッフル/1曲ランダムの順番を決めた値（アラームごと）
+    let orderSeed: UInt64?
+    /// この順番を作ったアプリ起動セッション
+    let sessionToken: UUID?
     let renderVersion: Int
     let generatedAt: Date
 }
@@ -48,6 +52,7 @@ final class PlaylistRenderService {
 
     /// 生成方式の版。古いファイルは作り直す。
     private static let renderVersion = 1
+    private static let tempLifetime: TimeInterval = 10 * 60
 
     /// 計測は PR-B で接続する（PR-A では no-op）。
     var onRenderFailed: ((PlaylistRenderFailureReason) -> Void)?
@@ -95,7 +100,14 @@ final class PlaylistRenderService {
             return fallback(for: input, reason: .noTracks)
         }
 
-        let seed = orderSeed(for: input, forceNewOrder: forceNewOrder)
+        let key = "primary:\(input.entryID.uuidString)"
+        let cached = cache[key]
+        // 起動セッションが変わったとき、または停止後の作り直しだけ順番を変える。
+        let needsNewOrder = forceNewOrder
+            || (input.soundMode.changesOrderOnStop && cached?.sessionToken != sessionToken)
+        let seed = needsNewOrder
+            ? Self.newOrderSeed()
+            : (cached?.orderSeed ?? Self.newOrderSeed())
         let ordered = PlaylistRenderLogic.orderedTracks(
             tracks,
             mode: input.soundMode.isPlaylist ? input.soundMode : .playlistOrder,
@@ -113,8 +125,8 @@ final class PlaylistRenderService {
             input: input,
             ordered: resolved.map(\.0)
         )
-        let key = "primary:\(input.entryID.uuidString)"
-        if let cached = cache[key],
+        if !needsNewOrder,
+           let cached,
            cached.signature == signature,
            fileExists(cached.fileName) {
             return PlaylistSoundResolution(
@@ -147,6 +159,8 @@ final class PlaylistRenderService {
                 fileName: outputFileName,
                 slot: slot,
                 order: resolved.map(\.0.soundFileName),
+                orderSeed: seed,
+                sessionToken: sessionToken,
                 renderVersion: Self.renderVersion,
                 generatedAt: Date()
             )
@@ -176,26 +190,54 @@ final class PlaylistRenderService {
 
         let playlist = PlaylistStore.shared.playlist(id: input.playlistID)
         guard let playlist else {
-            return fallback(for: input, reason: .missingPlaylist)
+            reportFailure(.missingPlaylist)
+            return nil
         }
 
         let tracks = sourceTracks(for: input, playlist: playlist)
         guard !tracks.isEmpty else {
-            return fallback(for: input, reason: .noTracks)
+            reportFailure(.noTracks)
+            return nil
         }
 
-        let seed = orderSeed(for: input, forceNewOrder: forceNewOrder)
-        let ordered = PlaylistRenderLogic.orderedTracks(
-            tracks,
-            mode: input.soundMode,
-            seed: seed
-        )
+        let primaryKey = "primary:\(input.entryID.uuidString)"
+        let backupKey = "backup:\(input.entryID.uuidString)"
+        let primary = cache[primaryKey]
+        let seed = primary?.orderSeed
+            ?? cache[backupKey]?.orderSeed
+            ?? Self.newOrderSeed()
+        let ordered: [PlaylistTrack]
+        if let primaryOrder = primary?.order, !primaryOrder.isEmpty {
+            var remaining = tracks
+            let reordered = primaryOrder.compactMap { name -> PlaylistTrack? in
+                guard let index = remaining.firstIndex(where: {
+                    $0.soundFileName == name
+                }) else {
+                    return nil
+                }
+                return remaining.remove(at: index)
+            }
+            ordered = reordered.count == tracks.count
+                ? reordered
+                : PlaylistRenderLogic.orderedTracks(
+                    tracks,
+                    mode: input.soundMode,
+                    seed: seed
+                )
+        } else {
+            ordered = PlaylistRenderLogic.orderedTracks(
+                tracks,
+                mode: input.soundMode,
+                seed: seed
+            )
+        }
         let resolved = ordered.compactMap { track -> (PlaylistTrack, URL)? in
             guard let url = sourceURL(for: track.soundFileName) else { return nil }
             return (track, url)
         }
         guard !resolved.isEmpty else {
-            return fallback(for: input, reason: .noTracks)
+            reportFailure(.noTracks)
+            return nil
         }
 
         var backupFade = input.fadeSettings
@@ -205,7 +247,7 @@ final class PlaylistRenderService {
             ordered: resolved.map(\.0),
             backup: true
         )
-        let key = "backup:\(input.entryID.uuidString)"
+        let key = backupKey
         if let cached = cache[key],
            cached.signature == signature,
            fileExists(cached.fileName) {
@@ -239,6 +281,8 @@ final class PlaylistRenderService {
                 fileName: outputFileName,
                 slot: slot,
                 order: resolved.map(\.0.soundFileName),
+                orderSeed: seed,
+                sessionToken: primary?.sessionToken ?? sessionToken,
                 renderVersion: Self.renderVersion,
                 generatedAt: Date()
             )
@@ -250,16 +294,24 @@ final class PlaylistRenderService {
             )
         } catch let error as PlaylistRenderError {
             try? FileManager.default.removeItem(at: tempURL)
-            return fallback(for: input, reason: PlaylistRenderFailureReason(error))
+            reportFailure(PlaylistRenderFailureReason(error))
+            return nil
         } catch {
             try? FileManager.default.removeItem(at: tempURL)
-            return fallback(for: input, reason: .renderFailed)
+            reportFailure(.renderFailed)
+            return nil
         }
     }
 
     /// 使われなくなったスロット／削除されたアラームのファイルを削除する。
-    /// 現在のキャッシュが指すファイルは残す（次の同期で使う）。
-    func cleanupUnusedFiles(inputs: [PlaylistRenderInput]) {
+    /// - Parameters:
+    ///   - inputs: 現在プレイリスト機能を使っているアラーム
+    ///   - registeredFileNames: 現在 AlarmKit に登録している音ファイル名。
+    ///     PR-B で渡す。登録中のファイルは、キャッシュが切り替わっていても消さない。
+    func cleanupUnusedFiles(
+        inputs: [PlaylistRenderInput],
+        keeping registeredFileNames: Set<String> = []
+    ) {
         let byID = Dictionary(uniqueKeysWithValues: inputs.map { ($0.entryID, $0) })
         let validIDs = Set(inputs.filter(\.usesPlaylistFeatures).map(\.entryID.uuidString))
         let activeFileNames = Set(cache.compactMap { key, entry -> String? in
@@ -275,8 +327,22 @@ final class PlaylistRenderService {
 
         for file in files {
             let name = file.lastPathComponent
+
+            // 書き出し中の一時ファイルは、一定時間より古いものだけ消す。
+            if name.hasSuffix(".tmp.caf") {
+                let modified = try? file.resourceValues(
+                    forKeys: [.contentModificationDateKey]
+                ).contentModificationDate
+                if let modified, Date().timeIntervalSince(modified) > Self.tempLifetime {
+                    try? FileManager.default.removeItem(at: file)
+                }
+                continue
+            }
+
             guard name.hasSuffix(".caf"), name.contains(".playlist.") else { continue }
-            if activeFileNames.contains(name) { continue }
+            if activeFileNames.contains(name) || registeredFileNames.contains(name) {
+                continue
+            }
 
             let idPart = name.components(separatedBy: ".playlist.").first ?? ""
             guard let entryID = UUID(uuidString: idPart),
@@ -320,18 +386,6 @@ final class PlaylistRenderService {
         return FileManager.default.fileExists(atPath: url.path) ? url : nil
     }
 
-    private func orderSeed(
-        for input: PlaylistRenderInput,
-        forceNewOrder: Bool
-    ) -> UInt64 {
-        if forceNewOrder, input.soundMode.changesOrderOnStop {
-            sessionToken = UUID()
-        }
-        // 同じセッション・同じアラームでは同じ順序になる。
-        let text = "\(sessionToken.uuidString)|\(input.entryID.uuidString)"
-        return UInt64(truncatingIfNeeded: text.hashValue)
-    }
-
     private func signature(
         input: PlaylistRenderInput,
         ordered: [PlaylistTrack],
@@ -343,7 +397,6 @@ final class PlaylistRenderService {
         let fadeIn = backup ? "off" : fade.fadeIn.analyticsValue
         let gap = fade.gapFade.analyticsValue
         let end = fade.endFade ? "1" : "0"
-        let token = input.soundMode.changesOrderOnStop ? sessionToken.uuidString : "fixed"
         return [
             "v\(Self.renderVersion)",
             mode,
@@ -351,9 +404,17 @@ final class PlaylistRenderService {
             fadeIn,
             gap,
             end,
-            token,
             backup ? "backup" : "primary"
         ].joined(separator: "|")
+    }
+
+    private func reportFailure(_ reason: PlaylistRenderFailureReason) {
+        onRenderFailed?(reason)
+        onFallback?()
+    }
+
+    private static func newOrderSeed() -> UInt64 {
+        UInt64.random(in: 0...UInt64.max)
     }
 
     private func fallback(
@@ -361,8 +422,12 @@ final class PlaylistRenderService {
         reason: PlaylistRenderFailureReason
     ) -> PlaylistSoundResolution {
         let playlist = PlaylistStore.shared.playlist(id: input.playlistID)
-        let firstTrack = playlist?.tracks.first?.soundFileName
-        let fileName = firstTrack ?? input.fallbackFileName
+        let fileName = PlaylistFallbackLogic.fileName(
+            tracks: playlist?.tracks ?? [],
+            fallbackFileName: input.fallbackFileName,
+            isAvailable: { sourceURL(for: $0) != nil },
+            defaultFileName: defaultFallbackFileName
+        )
         onRenderFailed?(reason)
         onFallback?()
         return PlaylistSoundResolution(
@@ -370,6 +435,10 @@ final class PlaylistRenderService {
             usedFallback: true,
             isProcessed: false
         )
+    }
+
+    private var defaultFallbackFileName: String {
+        SoundStore.presetDefinitions.first?.fileName ?? "PresetMarimba.caf"
     }
 
     private func nextSlot(after current: String?) -> String {

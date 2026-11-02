@@ -2,6 +2,7 @@ import Foundation
 import Testing
 @testable import CustomSoundAlarm
 
+@Suite(.serialized)
 @MainActor
 struct PlaylistRenderServiceTests {
 
@@ -132,5 +133,115 @@ struct PlaylistRenderServiceTests {
         #expect(result != nil)
         #expect(result?.fileName.hasSuffix(".playlist.backup.a.caf") == true)
         #expect(result?.usedFallback == false)
+    }
+
+    @Test
+    func cleanupKeepsRegisteredFileAndOnlyRemovesOldTemps() async throws {
+        let playlist = makePlaylist()
+        defer { PlaylistStore.shared.remove(id: playlist.id) }
+        let entryID = UUID()
+        defer { removeGeneratedFiles(entryID: entryID) }
+        let input = PlaylistRenderInput(
+            entryID: entryID,
+            playlistID: playlist.id,
+            soundMode: .playlistOrder,
+            fadeSettings: PlaylistFadeSettings(fadeIn: .ten),
+            fallbackFileName: "PresetMarimba.caf"
+        )
+        let rendered = await PlaylistRenderService.shared.prepareSound(for: input)
+        #expect(!rendered.usedFallback)
+
+        let directory = AudioConverter.shared.soundsDirectory
+        let registeredName = "\(entryID.uuidString).playlist.registered.caf"
+        let oldSlotName = "\(entryID.uuidString).playlist.b.caf"
+        let orphanID = UUID()
+        let orphanName = "\(orphanID.uuidString).playlist.a.caf"
+        let freshTempName = "\(entryID.uuidString).playlist.a.fresh.tmp.caf"
+        let oldTempName = "\(entryID.uuidString).playlist.b.old.tmp.caf"
+
+        for name in [registeredName, oldSlotName, orphanName, freshTempName, oldTempName] {
+            FileManager.default.createFile(
+                atPath: directory.appendingPathComponent(name).path,
+                contents: Data()
+            )
+        }
+        try FileManager.default.setAttributes(
+            [.modificationDate: Date().addingTimeInterval(-11 * 60)],
+            ofItemAtPath: directory.appendingPathComponent(oldTempName).path
+        )
+
+        PlaylistRenderService.shared.cleanupUnusedFiles(
+            inputs: [input],
+            keeping: [registeredName]
+        )
+
+        func exists(_ name: String) -> Bool {
+            FileManager.default.fileExists(
+                atPath: directory.appendingPathComponent(name).path
+            )
+        }
+        #expect(exists(rendered.fileName))
+        #expect(exists(registeredName))
+        #expect(!exists(oldSlotName))
+        #expect(!exists(orphanName))
+        #expect(exists(freshTempName))
+        #expect(!exists(oldTempName))
+    }
+
+    @Test
+    func backupRenderFailure_returnsNil() async {
+        let playlist = PlaylistStore.shared.add(
+            name: "missing-\(UUID().uuidString)",
+            tracks: [PlaylistTrack(soundFileName: "Missing.caf")]
+        )
+        defer { PlaylistStore.shared.remove(id: playlist.id) }
+        let input = PlaylistRenderInput(
+            entryID: UUID(),
+            playlistID: playlist.id,
+            soundMode: .playlistOrder,
+            fallbackFileName: "PresetMarimba.caf"
+        )
+        let result = await PlaylistRenderService.shared.prepareBackupSound(for: input)
+        #expect(result == nil)
+    }
+
+    @Test
+    func forceNewOrder_onlyAffectsTheStoppedAlarm() async {
+        let playlist = PlaylistStore.shared.add(
+            name: "shuffle-\(UUID().uuidString)",
+            tracks: [
+                PlaylistTrack(soundFileName: "PresetMarimba.caf"),
+                PlaylistTrack(soundFileName: "PresetBell.caf")
+            ]
+        )
+        defer { PlaylistStore.shared.remove(id: playlist.id) }
+        let entryA = UUID()
+        let entryB = UUID()
+        defer {
+            removeGeneratedFiles(entryID: entryA)
+            removeGeneratedFiles(entryID: entryB)
+        }
+        let inputA = PlaylistRenderInput(
+            entryID: entryA,
+            playlistID: playlist.id,
+            soundMode: .playlistShuffle,
+            fallbackFileName: "PresetMarimba.caf"
+        )
+        let inputB = PlaylistRenderInput(
+            entryID: entryB,
+            playlistID: playlist.id,
+            soundMode: .playlistShuffle,
+            fallbackFileName: "PresetMarimba.caf"
+        )
+
+        _ = await PlaylistRenderService.shared.prepareSound(for: inputA)
+        let firstB = await PlaylistRenderService.shared.prepareSound(for: inputB)
+        _ = await PlaylistRenderService.shared.prepareSound(
+            for: inputA,
+            forceNewOrder: true
+        )
+        let secondB = await PlaylistRenderService.shared.prepareSound(for: inputB)
+
+        #expect(secondB.fileName == firstB.fileName)
     }
 }
