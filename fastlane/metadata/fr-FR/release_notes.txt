@@ -1,15 +1,9 @@
-■ Anti-grasse matinée (Pro, accès anticipé)
-Si vous n’avez pas arrêté votre alarme à l’heure choisie, elle rejoue le même son, plus fort. Si vous l’activez pendant l’accès anticipé, vous pourrez continuer à l’utiliser après la sortie officielle.
+■ Désormais en français
+My Sound Alarm est maintenant disponible en français, ainsi qu’en 12 autres langues. L’app suit la langue de votre appareil.
 
-■ Sonner maintenant
-Touchez « Ring now » dans l’écran de l’alarme pour l’entendre tout de suite, à son vrai volume.
+■ « Faire sonner » plus clair
+Si « Faire sonner » ne peut pas sonner (par exemple, parce que les alarmes ne sont pas encore autorisées), l’écran en indique la raison. Touchez « Autoriser les alarmes » pour régler cela sur place.
 
-■ Aide quand le son est trop faible
-Le volume des alarmes suit « Sonnerie et alertes » dans Réglages. « Too quiet? » vous montre où le modifier.
+■ Petites améliorations et finitions
 
-■ Un écran d’alarme plus simple
-Les réglages sont organisés davantage comme dans l’app Horloge, et une alarme modifiée est activée à l’enregistrement.
-
-■ Meilleures étiquettes VoiceOver
-
-Merci d’utiliser My Sound Alarm !
+Merci d’utiliser My Sound Alarm.

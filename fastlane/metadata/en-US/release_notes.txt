@@ -1,15 +1,9 @@
-■ Oversleep guard (Pro, early access)
-If you haven't stopped your alarm by the time you choose, it plays the same sound again, louder. If you turn it on during early access, you can keep using it after the full release.
+■ Now in 13 languages
+My Sound Alarm is now available in French, German, Spanish, Portuguese, Italian, Dutch, Korean, Simplified Chinese, Polish, Czech and Arabic, following your device language.
 
-■ Ring now
-Tap "Ring now" on the alarm screen to hear your alarm right away, at its real volume.
+■ Clearer “Ring now”
+If “Ring now” can’t ring — for example, because alarms aren’t allowed yet — the screen now tells you why. Tap “Allow Alarms” to fix it right there.
 
-■ Help when it's too quiet
-Alarm volume follows Ringtone and Alerts in Settings. "Too quiet?" shows you where to change it.
+■ Small improvements and polish
 
-■ A simpler alarm screen
-Settings are arranged more like the Clock app, and an alarm you edit is turned on when you save it.
-
-■ Better VoiceOver labels
-
-Thanks for using My Sound Alarm!
+Thank you for using My Sound Alarm.

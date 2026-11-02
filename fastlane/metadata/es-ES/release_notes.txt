@@ -1,15 +1,9 @@
-■ Protección contra quedarse dormido (Pro, acceso anticipado)
-Si no has detenido la alarma a la hora que elijas, vuelve a sonar con el mismo sonido, más fuerte. Si la activas durante el acceso anticipado, podrás seguir usándola después del lanzamiento oficial.
+■ Ahora en español
+My Sound Alarm ya está disponible en español y en otros 12 idiomas. La app sigue el idioma de tu dispositivo.
 
-■ Sonar ahora
-Toca «Ring now» en la pantalla de la alarma para escucharla al momento, con su volumen real.
+■ «Hacer sonar ahora», más claro
+Si «Hacer sonar ahora» no puede sonar (por ejemplo, porque las alarmas aún no están permitidas), la pantalla te explica el motivo. Toca «Permitir alarmas» para resolverlo ahí mismo.
 
-■ Ayuda cuando suena bajo
-El volumen de las alarmas depende de «Tonos y avisos» en Ajustes. «Too quiet?» te muestra dónde cambiarlo.
+■ Pequeñas mejoras y pulido
 
-■ Pantalla de alarma más sencilla
-Los ajustes se ordenan de forma más parecida a la app Reloj, y una alarma editada se activa al guardarla.
-
-■ Mejores etiquetas de VoiceOver
-
-¡Gracias por usar My Sound Alarm!
+Gracias por usar My Sound Alarm.

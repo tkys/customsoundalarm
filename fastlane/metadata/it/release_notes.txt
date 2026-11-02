@@ -1,15 +1,9 @@
-■ Anti-sonno (Pro, accesso anticipato)
-Se non hai fermato la sveglia entro l’orario scelto, riproduce lo stesso suono più forte. Se la attivi durante l’accesso anticipato, potrai continuare a usarla dopo il rilascio ufficiale.
+■ Ora in italiano
+My Sound Alarm è ora disponibile in italiano e in altre 12 lingue. L’app segue la lingua del tuo dispositivo.
 
-■ Suona ora
-Tocca “Ring now” nella schermata della sveglia per sentirla subito, al volume reale.
+■ “Suona ora” più chiaro
+Se “Suona ora” non può suonare (ad esempio perché le sveglie non sono ancora consentite), la schermata ora ne indica il motivo. Tocca “Consenti sveglie” per risolvere subito.
 
-■ Aiuto quando è troppo bassa
-Il volume delle sveglie segue “Suoneria e avvisi” in Impostazioni. “Too quiet?” ti mostra dove modificarlo.
+■ Piccoli miglioramenti e rifiniture
 
-■ Schermata della sveglia più semplice
-Le impostazioni sono ordinate in modo più simile all’app Orologio e una sveglia modificata viene attivata quando la salvi.
-
-■ Etichette VoiceOver migliorate
-
-Grazie per usare My Sound Alarm!
+Grazie per usare My Sound Alarm.

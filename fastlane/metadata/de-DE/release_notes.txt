@@ -1,15 +1,9 @@
-■ Verschlafschutz (Pro, frühe Version)
-Wenn du deinen Wecker bis zur gewählten Zeit nicht ausgeschaltet hast, spielt er denselben Ton noch einmal lauter ab. Wenn du ihn während der frühen Version einschaltest, kannst du ihn auch nach der offiziellen Veröffentlichung weiter nutzen.
+■ Jetzt auf Deutsch
+My Sound Alarm ist jetzt auf Deutsch und in 12 weiteren Sprachen verfügbar. Die App folgt der Sprache deines Geräts.
 
-■ Jetzt klingeln
-Tippe im Weckerbildschirm auf „Ring now“, um deinen Wecker sofort in echter Lautstärke zu hören.
+■ „Jetzt klingeln“ verständlicher
+Wenn „Jetzt klingeln“ nicht klingeln kann – zum Beispiel, weil Alarme noch nicht erlaubt sind –, zeigt der Bildschirm jetzt den Grund an. Mit „Alarme erlauben“ behebst du es direkt.
 
-■ Hilfe, wenn es zu leise ist
-Die Weckerlautstärke richtet sich nach „Klingel- und Hinweistöne“ in den Einstellungen. „Too quiet?“ zeigt dir, wo du sie änderst.
+■ Kleine Verbesserungen und Feinschliff
 
-■ Übersichtlicherer Weckerbildschirm
-Die Einstellungen sind jetzt ähnlich wie in der Uhr-App angeordnet, und ein bearbeiteter Wecker wird beim Sichern eingeschaltet.
-
-■ Bessere VoiceOver-Beschriftungen
-
-Danke, dass du My Sound Alarm nutzt!
+Danke, dass du My Sound Alarm nutzt.
