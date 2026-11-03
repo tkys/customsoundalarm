@@ -1,15 +1,12 @@
-■ Proteção contra perder a hora (Pro, acesso antecipado)
-Se você não desligar o alarme até o horário escolhido, ele toca o mesmo som de novo, mais alto. Se você ativar durante o acesso antecipado, poderá continuar usando depois do lançamento oficial.
+■ Playlists (PRO · Acesso antecipado)
+Junte seus sons em uma playlist e acorde com ela: em ordem, aleatória ou com uma faixa sorteada. Também dá para ativar “Início suave” e “Crossfade” entre as faixas. Quem começar a usar durante o acesso antecipado poderá continuar usando após a versão final.
 
-■ Tocar agora
-Toque em "Ring now" na tela do alarme para ouvi-lo na hora, no volume real.
+■ Agora em português
+O My Sound Alarm agora está disponível em português e em mais 12 idiomas. O app segue o idioma do seu aparelho.
 
-■ Ajuda quando está baixo
-O volume dos alarmes segue "Toques e alertas" nos Ajustes. "Too quiet?" mostra onde mudar.
+■ “Tocar agora” mais claro
+Se “Tocar agora” não puder tocar (por exemplo, porque os alarmes ainda não foram permitidos), a tela mostra o motivo. Toque em “Permitir alarmes” para resolver ali mesmo.
 
-■ Tela de alarme mais simples
-Os ajustes ficam em uma ordem mais parecida com a do app Relógio, e um alarme editado é ativado ao salvar.
+■ Pequenas melhorias e ajustes
 
-■ Rótulos do VoiceOver melhorados
-
-Obrigado por usar o My Sound Alarm!
+Obrigado por usar o My Sound Alarm.

@@ -1,15 +1,12 @@
-■ Ochrona przed zaspaniem (Pro, wczesny dostęp)
-Jeśli nie wyłączysz budzika do wybranej godziny, odtworzy ten sam dźwięk ponownie, głośniej. Jeśli włączysz ją we wczesnym dostępie, będziesz mógł z niej korzystać także po oficjalnym wydaniu.
+■ Playlisty (PRO · Wczesny dostęp)
+Zbierz swoje dźwięki w playlistę i budź się przy niej: po kolei, losowo lub przy jednym losowym utworze. Możesz też ustawić „Łagodny start” i „Przenikanie” między utworami. Jeśli zaczniesz korzystać w okresie wczesnego dostępu, zachowasz tę funkcję także po wydaniu pełnej wersji.
 
-■ Zadzwoń teraz
-Stuknij „Ring now” na ekranie budzika, aby od razu usłyszeć go z prawdziwą głośnością.
+■ Teraz po polsku
+My Sound Alarm jest już dostępny po polsku i w 12 innych językach. Aplikacja korzysta z języka urządzenia.
 
-■ Pomoc, gdy jest za cicho
-Głośność budzika zależy od „Dzwonek i alerty” w Ustawieniach. „Too quiet?” pokazuje, gdzie ją zmienić.
+■ Czytelniejsze „Zadzwoń teraz”
+Jeśli „Zadzwoń teraz” nie może zadzwonić (np. dlatego, że budziki nie są jeszcze dozwolone), ekran pokazuje teraz przyczynę. Stuknij „Zezwól na budziki”, aby od razu to naprawić.
 
-■ Prostszy ekran budzika
-Ustawienia są ułożone bardziej jak w aplikacji Zegar, a edytowany budzik włącza się po zapisaniu.
+■ Drobne usprawnienia i poprawki
 
-■ Lepsze etykiety VoiceOver
-
-Dziękujemy za korzystanie z My Sound Alarm!
+Dziękujemy za korzystanie z My Sound Alarm.

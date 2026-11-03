@@ -1,15 +1,12 @@
-■ Verslaapbeveiliging (Pro, vroege toegang)
-Als je je wekker niet hebt uitgezet vóór de tijd die je kiest, speelt hij hetzelfde geluid nog een keer, harder. Zet je hem aan tijdens de vroege toegang, dan kun je hem na de officiële release blijven gebruiken.
+■ Afspeellijsten (PRO · Vroege toegang)
+Zet je geluiden in een afspeellijst en word ermee wakker: op volgorde, in shuffle of met één willekeurig nummer. Je kunt ook een ‘Zachte start’ en een ‘Crossfade’ tussen nummers instellen. Begin je ermee tijdens de vroege toegang, dan kun je het na de definitieve versie blijven gebruiken.
 
-■ Nu afspelen
-Tik op „Ring now” in het wekkerscherm om je wekker meteen op het echte volume te horen.
+■ Nu in het Nederlands
+My Sound Alarm is nu beschikbaar in het Nederlands en in 12 andere talen. De app volgt de taal van je apparaat.
 
-■ Hulp als het te zacht is
-Het wekkervolume volgt „Beltoon en meldingen” in Instellingen. „Too quiet?” laat zien waar je dat wijzigt.
+■ Duidelijker ‘Laat nu afgaan’
+Als ‘Laat nu afgaan’ niet kan afgaan (bijvoorbeeld omdat wekkers nog niet zijn toegestaan), toont het scherm nu de reden. Tik op ‘Wekkers toestaan’ om het meteen op te lossen.
 
-■ Eenvoudiger wekkerscherm
-De instellingen staan nu meer zoals in de Klok-app, en een bewerkte wekker wordt aangezet wanneer je hem bewaart.
+■ Kleine verbeteringen en afwerking
 
-■ Betere VoiceOver-labels
-
-Bedankt voor het gebruiken van My Sound Alarm!
+Bedankt dat je My Sound Alarm gebruikt.
