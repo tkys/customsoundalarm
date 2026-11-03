@@ -179,130 +179,6 @@ final class PlaylistRenderService {
         }
     }
 
-    /// 最終アラーム用の音を用意する。プレイリストでなければ nil
-    /// （呼び出し側は従来の「大きくした版」を使う）。
-    /// バックアップには「やさしく鳴り始める」を適用しない。
-    func prepareBackupSound(
-        for input: PlaylistRenderInput,
-        forceNewOrder: Bool = false
-    ) async -> PlaylistSoundResolution? {
-        guard input.soundMode.isPlaylist else { return nil }
-
-        let playlist = PlaylistStore.shared.playlist(id: input.playlistID)
-        guard let playlist else {
-            reportFailure(.missingPlaylist)
-            return nil
-        }
-
-        let tracks = sourceTracks(for: input, playlist: playlist)
-        guard !tracks.isEmpty else {
-            reportFailure(.noTracks)
-            return nil
-        }
-
-        let primaryKey = "primary:\(input.entryID.uuidString)"
-        let backupKey = "backup:\(input.entryID.uuidString)"
-        let primary = cache[primaryKey]
-        let seed = primary?.orderSeed
-            ?? cache[backupKey]?.orderSeed
-            ?? Self.newOrderSeed()
-        let ordered: [PlaylistTrack]
-        if let primaryOrder = primary?.order, !primaryOrder.isEmpty {
-            var remaining = tracks
-            let reordered = primaryOrder.compactMap { name -> PlaylistTrack? in
-                guard let index = remaining.firstIndex(where: {
-                    $0.soundFileName == name
-                }) else {
-                    return nil
-                }
-                return remaining.remove(at: index)
-            }
-            ordered = reordered.count == tracks.count
-                ? reordered
-                : PlaylistRenderLogic.orderedTracks(
-                    tracks,
-                    mode: input.soundMode,
-                    seed: seed
-                )
-        } else {
-            ordered = PlaylistRenderLogic.orderedTracks(
-                tracks,
-                mode: input.soundMode,
-                seed: seed
-            )
-        }
-        let resolved = ordered.compactMap { track -> (PlaylistTrack, URL)? in
-            guard let url = sourceURL(for: track.soundFileName) else { return nil }
-            return (track, url)
-        }
-        guard !resolved.isEmpty else {
-            reportFailure(.noTracks)
-            return nil
-        }
-
-        var backupFade = input.fadeSettings
-        backupFade.fadeIn = .off
-        let signature = signature(
-            input: input,
-            ordered: resolved.map(\.0),
-            backup: true
-        )
-        let key = backupKey
-        if let cached = cache[key],
-           cached.signature == signature,
-           fileExists(cached.fileName) {
-            return PlaylistSoundResolution(
-                fileName: cached.fileName,
-                usedFallback: false,
-                isProcessed: true
-            )
-        }
-
-        let slot = nextSlot(after: cache[key]?.slot)
-        let outputFileName = "\(input.entryID.uuidString).playlist.backup.\(slot).caf"
-        let outputURL = soundsDirectory.appendingPathComponent(outputFileName)
-        let tempURL = soundsDirectory.appendingPathComponent(
-            "\(input.entryID.uuidString).playlist.backup.\(slot).\(UUID().uuidString).tmp.caf"
-        )
-        let request = PlaylistRenderRequest(
-            trackURLs: resolved.map(\.1),
-            fade: backupFade,
-            applyFadeIn: false,
-            outputURL: tempURL
-        )
-
-        do {
-            _ = try await Task.detached(priority: .utility) {
-                try PlaylistRenderer.generate(request)
-            }.value
-            try atomicInstall(tempURL, at: outputURL)
-            cache[key] = PlaylistRenderCacheEntry(
-                signature: signature,
-                fileName: outputFileName,
-                slot: slot,
-                order: resolved.map(\.0.soundFileName),
-                orderSeed: seed,
-                sessionToken: primary?.sessionToken ?? sessionToken,
-                renderVersion: Self.renderVersion,
-                generatedAt: Date()
-            )
-            saveCache()
-            return PlaylistSoundResolution(
-                fileName: outputFileName,
-                usedFallback: false,
-                isProcessed: true
-            )
-        } catch let error as PlaylistRenderError {
-            try? FileManager.default.removeItem(at: tempURL)
-            reportFailure(PlaylistRenderFailureReason(error))
-            return nil
-        } catch {
-            try? FileManager.default.removeItem(at: tempURL)
-            reportFailure(.renderFailed)
-            return nil
-        }
-    }
-
     /// 使われなくなったスロット／削除されたアラームのファイルを削除する。
     /// - Parameters:
     ///   - inputs: 現在プレイリスト機能を使っているアラーム
@@ -315,9 +191,8 @@ final class PlaylistRenderService {
         let byID = Dictionary(uniqueKeysWithValues: inputs.map { ($0.entryID, $0) })
         let validIDs = Set(inputs.filter(\.usesPlaylistFeatures).map(\.entryID.uuidString))
         let activeFileNames = Set(cache.compactMap { key, entry -> String? in
-            let idPart = key
-                .replacingOccurrences(of: "primary:", with: "")
-                .replacingOccurrences(of: "backup:", with: "")
+            guard key.hasPrefix("primary:") else { return nil }
+            let idPart = key.replacingOccurrences(of: "primary:", with: "")
             return validIDs.contains(idPart) ? entry.fileName : nil
         })
         let files = (try? FileManager.default.contentsOfDirectory(
@@ -340,6 +215,15 @@ final class PlaylistRenderService {
             }
 
             guard name.hasSuffix(".caf"), name.contains(".playlist.") else { continue }
+
+            // 旧方式のプレイリスト・バックアップは、登録中でなければ削除する（#151）
+            if name.contains(".playlist.backup.") {
+                if !registeredFileNames.contains(name) {
+                    try? FileManager.default.removeItem(at: file)
+                }
+                continue
+            }
+
             if activeFileNames.contains(name) || registeredFileNames.contains(name) {
                 continue
             }
@@ -356,9 +240,8 @@ final class PlaylistRenderService {
         }
 
         cache = cache.filter { key, _ in
-            let idPart = key
-                .replacingOccurrences(of: "primary:", with: "")
-                .replacingOccurrences(of: "backup:", with: "")
+            guard key.hasPrefix("primary:") else { return false }
+            let idPart = key.replacingOccurrences(of: "primary:", with: "")
             return validIDs.contains(idPart)
         }
         saveCache()
@@ -388,13 +271,12 @@ final class PlaylistRenderService {
 
     private func signature(
         input: PlaylistRenderInput,
-        ordered: [PlaylistTrack],
-        backup: Bool = false
+        ordered: [PlaylistTrack]
     ) -> String {
         let fade = input.fadeSettings
         let order = ordered.map(\.soundFileName).joined(separator: ",")
         let mode = input.soundMode.rawValue
-        let fadeIn = backup ? "off" : fade.fadeIn.analyticsValue
+        let fadeIn = fade.fadeIn.analyticsValue
         let gap = fade.gapFade.analyticsValue
         let end = fade.endFade ? "1" : "0"
         return [
@@ -403,8 +285,7 @@ final class PlaylistRenderService {
             order,
             fadeIn,
             gap,
-            end,
-            backup ? "backup" : "primary"
+            end
         ].joined(separator: "|")
     }
 
