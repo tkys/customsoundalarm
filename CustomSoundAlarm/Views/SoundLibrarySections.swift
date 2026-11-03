@@ -1,56 +1,46 @@
 import SwiftUI
-import UniformTypeIdentifiers
 
-/// サウンド選択画面
-/// OOUI: アラームのプロパティとしてナビゲーション遷移で表示
-/// 選択 + インポートを同一画面で完結させる
-struct SoundSelectionView: View {
+/// ライブラリとアラームの音選択で共通の「自分の音」「プリセット」（#160 PR-2）。
+///
+/// `List` の直下に置くと、そのまま2つの Section として表示される。
+struct SoundLibrarySections: View {
+    /// true = アラームの音を選ぶ / false = ライブラリで管理する
+    let isSelecting: Bool
     @Binding var selectedSound: AlarmSound?
+    /// 選択モードで1つ選ばれたとき（プレイリスト選択中はチェックを出さない）
+    var selectionActive: Bool = true
+    var onSelect: ((AlarmSound?) -> Void)?
+
     @State private var soundStore = SoundStore.shared
     @State private var audioPlayer = AudioPlayer.shared
     @State private var isImporting = false
+    @State private var pendingAudio: PendingAudioImport?
+    @State private var showingVideoImport = false
     @State private var errorMessage: String?
     @State private var renamingSound: AlarmSound?
     @State private var renameText = ""
 
-    /// オンボ場面4からの指定（#98 Phase 4）。表示直後に該当の取り込みを1回だけ開く
-    var initialImport: OnboardingSource?
+    private var importedSounds: [AlarmSound] {
+        let existing = Set(soundStore.sounds.map(\.fileName))
+        let recentNames = SoundUsageHistory.recentFileNames(
+            limit: soundStore.sounds.count,
+            existingFileNames: existing
+        )
+        return SoundPickerLogic.mySoundsByRecentUse(
+            in: soundStore.sounds,
+            recentFileNames: recentNames
+        )
+    }
 
-    /// 初期動作を1回だけ適用したか
-    @State private var didApplyInitialImport = false
-
-    /// 波形クロップ待ちの音声取り込み（#77）。非nilでシートを表示
-    @State private var pendingAudio: PendingAudioImport?
-
-    /// 動画取り込みをシート表示する（#82-2: NavigationLink push は
-    /// 画面左端の戻るジェスチャが左ハンドルと衝突して編集内容を失うため）
-    @State private var showingVideoImport = false
-
-    // プリセット開閉状態
-    @State private var presetExpanded: Bool = SoundPickerLogic.presetExpandedDefault(
-        importedCount: SoundStore.shared.sounds.filter { !$0.isPreset }.count,
-        userOverride: AppGroup.presetExpandedOverride
-    )
+    private var presets: [AlarmSound] {
+        SoundPickerLogic.presetSounds(in: soundStore.sounds)
+    }
 
     var body: some View {
-        List {
-            addSection
+        Group {
             importedSection
             presetSection
             errorSection
-        }
-        .warmListBackground()
-        .navigationTitle(String(localized: "sound"))
-        .navigationBarTitleDisplayMode(.inline)
-        .safeAreaInset(edge: .bottom) {
-            AdSlot(slot: .bannerSounds)
-        }
-        .onDisappear { audioPlayer.stop() }
-        // オンボ場面4からの直接取り込み（#98 Phase 4）: push アニメーション完了後に開く
-        // （push 中に sheet/fileImporter を出すと無言で出ない — レビュー指摘1）
-        .task {
-            try? await Task.sleep(for: .milliseconds(400))
-            applyInitialImportOnce()
         }
         .soundImport(
             selectedSound: $selectedSound,
@@ -77,11 +67,12 @@ struct SoundSelectionView: View {
         }
     }
 
-    // MARK: - Add Sound (最上位)
+    // MARK: - My Sounds
 
-    private var addSection: some View {
+    @ViewBuilder
+    private var importedSection: some View {
+        let imported = importedSounds
         Section {
-            // #82-2: NavigationLink push は戻るジェスチャが波形の左ハンドルと衝突するためシート表示
             Button {
                 showingVideoImport = true
             } label: {
@@ -115,30 +106,7 @@ struct SoundSelectionView: View {
                 }
             }
             .accessibilityIdentifier("soundPicker.addAudio")
-        } header: {
-            WarmSectionHeader(title: String(localized: "add_section"))
-        } footer: {
-            Text("add_section_footer")
-        }
-    }
 
-    // MARK: - Imported Sounds (主役)
-
-    @ViewBuilder
-    private var importedSection: some View {
-        // #85: My Sounds は所有する音源の完全な一覧。Recent に載っている音を
-        // 除外しない（かつての除外で「使用したら消える」「1〜2本のとき完全に
-        // 見えなくなる」問題があった。Recent との重複は許容する）
-        let existing = Set(soundStore.sounds.map(\.fileName))
-        let recentNames = SoundUsageHistory.recentFileNames(
-            limit: soundStore.sounds.count,
-            existingFileNames: existing
-        )
-        let imported = SoundPickerLogic.mySoundsByRecentUse(
-            in: soundStore.sounds,
-            recentFileNames: recentNames
-        )
-        Section {
             if imported.isEmpty {
                 VStack(spacing: 8) {
                     Image(systemName: "waveform.badge.plus")
@@ -155,8 +123,14 @@ struct SoundSelectionView: View {
                 .padding(.vertical, 12)
             } else {
                 ForEach(Array(imported.enumerated()), id: \.element.id) { index, sound in
-                    soundRow(name: sound.name, sound: sound, isPreset: false, position: index + 1)
-                        .contextMenu {
+                    soundRow(
+                        name: sound.name,
+                        sound: sound,
+                        isPreset: false,
+                        position: index + 1
+                    )
+                    .contextMenu {
+                        if !isSelecting {
                             Button {
                                 renameText = sound.name
                                 renamingSound = sound
@@ -169,8 +143,10 @@ struct SoundSelectionView: View {
                                 Label("delete", systemImage: "trash")
                             }
                         }
+                    }
                 }
                 .onDelete { indexSet in
+                    guard !isSelecting else { return }
                     let targets = imported
                     for index in indexSet {
                         soundStore.remove(targets[index])
@@ -182,49 +158,30 @@ struct SoundSelectionView: View {
         }
     }
 
-    // MARK: - Preset Sounds (折りたたみ)
+    // MARK: - Presets
 
     @ViewBuilder
     private var presetSection: some View {
-        // #85 レビュー: プリセットも「所有する音源の完全な一覧」の規則に従う。
-        // Recent による除外はしない（プリセット利用者はインポート0本が多く
-        // Recent が常に非表示になるため、除外すると使ったプリセットが
-        // どこにも出なくなる）
-        let presets = SoundPickerLogic.presetSounds(in: soundStore.sounds)
+        let presets = presets
         Section {
-            DisclosureGroup(
-                isExpanded: Binding(
-                    get: { presetExpanded },
-                    set: { newVal in
-                        presetExpanded = newVal
-                        AppGroup.presetExpandedOverride = newVal
-                    }
-                )
-            ) {
+            if isSelecting {
                 soundRow(
                     name: String(localized: "default_sound"),
                     sound: nil,
                     isPreset: true,
                     position: 1
                 )
-                ForEach(Array(presets.enumerated()), id: \.element.id) { index, sound in
-                    soundRow(
-                        name: sound.name,
-                        sound: sound,
-                        isPreset: true,
-                        position: index + 2
-                    )
-                }
-            } label: {
-                HStack {
-                    Text(String(localized: "presets"))
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Brand.purpleLight)
-                    Text("(\(presets.count + 1))")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
             }
+            ForEach(Array(presets.enumerated()), id: \.element.id) { index, sound in
+                soundRow(
+                    name: sound.name,
+                    sound: sound,
+                    isPreset: true,
+                    position: index + (isSelecting ? 2 : 1)
+                )
+            }
+        } header: {
+            WarmSectionHeader(title: String(localized: "presets"))
         }
     }
 
@@ -241,7 +198,7 @@ struct SoundSelectionView: View {
         }
     }
 
-    // MARK: - Sound Row
+    // MARK: - Row
 
     private func soundRow(
         name: String,
@@ -250,9 +207,12 @@ struct SoundSelectionView: View {
         position: Int
     ) -> some View {
         let isPlaying = sound != nil && audioPlayer.playingFileName == sound?.fileName
+        let isSelected = isSelecting
+            && selectionActive
+            && selectedSound?.id == sound?.id
+            && (sound != nil || selectedSound == nil)
 
         return HStack {
-            // Leading thumbnail with glow when playing（#86: サムネイル優先表示）
             ZStack {
                 if isPlaying {
                     Circle()
@@ -271,23 +231,25 @@ struct SoundSelectionView: View {
             }
             .frame(width: 38)
 
-            // 行全体をタップで選択（試聴は別ボタン）
-            // 判断: タップで試聴を併用しない（誤タップで音が鳴るのを避ける）
             Button {
-                selectedSound = sound
-                audioPlayer.stop()
-                let kind: SoundSelectionKind = sound == nil
-                    ? .default
-                    : (isPreset ? .preset : .imported)
-                AnalyticsService.shared.capture(.soundSelected(
-                    kind: kind,
-                    rankBucket: SoundSelectionAnalytics.rankBucket(position: position)
-                ))
+                if isSelecting {
+                    selectedSound = sound
+                    let kind: SoundSelectionKind = sound == nil
+                        ? .default
+                        : (isPreset ? .preset : .imported)
+                    AnalyticsService.shared.capture(.soundSelected(
+                        kind: kind,
+                        rankBucket: SoundSelectionAnalytics.rankBucket(position: position)
+                    ))
+                    onSelect?(sound)
+                } else if let sound {
+                    togglePreview(sound)
+                }
             } label: {
                 HStack {
                     Text(name)
                     Spacer()
-                    if selectedSound?.id == sound?.id {
+                    if isSelected {
                         Image(systemName: "checkmark")
                             .foregroundStyle(Color.accentColor)
                             .fontWeight(.semibold)
@@ -296,6 +258,11 @@ struct SoundSelectionView: View {
                 .contentShape(Rectangle())
             }
             .foregroundStyle(.primary)
+            .accessibilityIdentifier(
+                isPreset
+                    ? "library.preset.\(sound?.fileName ?? "default")"
+                    : "library.sound.\(sound?.fileName ?? "")"
+            )
 
             if let sound {
                 Button {
@@ -319,22 +286,11 @@ struct SoundSelectionView: View {
         }
     }
 
-    // MARK: - Import
-
-    private func applyInitialImportOnce() {
-        guard !didApplyInitialImport else { return }
-        didApplyInitialImport = true
-        switch OnboardingLogic.initialImportAction(for: initialImport) {
-        case .openVideoImport:
-            showingVideoImport = true
-        case .openFileImporter:
-            isImporting = true
-        case .preselectPreset:
-            if selectedSound == nil {
-                selectedSound = soundStore.sounds.first(where: \.isPreset)
-            }
-        case .none:
-            break
+    private func togglePreview(_ sound: AlarmSound) {
+        if audioPlayer.playingFileName == sound.fileName {
+            audioPlayer.stop()
+        } else {
+            audioPlayer.play(sound)
         }
     }
 }

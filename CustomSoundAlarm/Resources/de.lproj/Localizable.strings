@@ -299,3 +299,9 @@
 "transition_footer" = "Gilt beim Verbinden der Titel. Das Ende der gesamten Schleife wird immer kurz ausgeblendet.";
 "playlist_playback" = "Wiedergabe";
 "playlist_summary_fmt" = "%@ · %d Titel";
+
+/* Library (#160 PR-2) */
+"library_title" = "Bibliothek";
+"playlist_delete_title" = "Diese Playlist löschen?";
+"playlist_delete_message_count_fmt" = "%d Wecker verwenden diese Playlist. Sie wechseln zu einem einzelnen Ton.";
+"playlist_delete_message_unused" = "Diese Playlist wird gelöscht.";

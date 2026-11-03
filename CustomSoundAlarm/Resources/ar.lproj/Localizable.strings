@@ -299,3 +299,9 @@
 "transition_footer" = "يُطبَّق عند وصل المقاطع. يتم دائمًا تلاشي نهاية الحلقة بأكملها لفترة قصيرة.";
 "playlist_playback" = "التشغيل";
 "playlist_summary_fmt" = "%@ · %d مقاطع";
+
+/* Library (#160 PR-2) */
+"library_title" = "المكتبة";
+"playlist_delete_title" = "حذف قائمة التشغيل هذه؟";
+"playlist_delete_message_count_fmt" = "هناك %d منبهات تستخدم قائمة التشغيل هذه. سيتم تبديلها إلى صوت واحد.";
+"playlist_delete_message_unused" = "سيتم حذف قائمة التشغيل هذه.";

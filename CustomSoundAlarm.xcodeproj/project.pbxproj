@@ -11,6 +11,7 @@
 		00826992D978945FB8E00376 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30144856E697293FF8124FFB /* Theme.swift */; };
 		01D8AE3D8239E9167B1713F2 /* LoudnessNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDF3BC4964F024CADE907CD6 /* LoudnessNormalizer.swift */; };
 		02F994FB6922008DE5AD6E34 /* SnoozeDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 909CC0BDDAC75CCB1B88CB13 /* SnoozeDebug.swift */; };
+		03542F21B77DCECBAF0EBB57 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDF83A50CB608D370A449CB1 /* LibraryView.swift */; };
 		039DFCF8FECC7EDAE85815C2 /* BedsideClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0DC1BEE7AD4F2604D84B47 /* BedsideClockView.swift */; };
 		043932BFD53396C1BC14D7E2 /* BedsideSessionLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF6178AF1CDD5BAE8BDB8213 /* BedsideSessionLogicTests.swift */; };
 		07A52D1D923BC31083E2AD6C /* BackupSoundResolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E2AD930FA1F4B67D2F024E /* BackupSoundResolverTests.swift */; };
@@ -25,12 +26,14 @@
 		129D5F6BD98700109E871E7C /* SoundThumbnailLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3184B3675367A0DD9EE9BE /* SoundThumbnailLogicTests.swift */; };
 		13F64E29621686CC70130A49 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8617DE7DDFD767CAB2A28B9E /* AnalyticsService.swift */; };
 		1469CB324E866A50288AC7AE /* BackupAlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3E7D2ACD756BF6236CA208 /* BackupAlarmSound.swift */; };
+		1487ED2F5ACB768DBEDB3FC7 /* SoundLibrarySections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A12BBB21F377BA97946B8F4 /* SoundLibrarySections.swift */; };
 		18DDD5A8BECBE4FC643D4239 /* AudioCropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D89A44681D6F654589718A8 /* AudioCropView.swift */; };
 		18F0B33BAEF10105309AF978 /* LocalizationCompletenessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DDAA4ACE3FD77A7583E7E5C /* LocalizationCompletenessTests.swift */; };
 		1915E848984C5B0678A75976 /* AdPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B48004266069E0F6CD1A39 /* AdPresenter.swift */; };
 		19CBBC5748E50E3EB129EA2B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 190EF3C9FEF4F542A73F1D4C /* AppDelegate.swift */; };
 		1C78F8459FD9278AED11368F /* TestRingReasonLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0AD12CEFDEBEAFCAA3BD8 /* TestRingReasonLogicTests.swift */; };
 		1D51CFD3A640B15B6272B13A /* AlarmMetadataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C8C1415F3825EA19A5F8714 /* AlarmMetadataModel.swift */; };
+		224491F946CC3F89858E3B45 /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34DB563DC26D9419C7393961 /* RootTabView.swift */; };
 		2386C471E67DF4BBDB131B0B /* PlaylistRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32743460E649070F2158A2E1 /* PlaylistRenderer.swift */; };
 		23DA87EF8C3F2F9F829BC18F /* AlarmEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A90C5CB204A2C060BFDFD18D /* AlarmEntry.swift */; };
 		24E3C49276F57794BD6921CC /* AlarmCountdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF5897A9AC3BC0A9BE3F0981 /* AlarmCountdownTests.swift */; };
@@ -128,6 +131,7 @@
 		A245B9DF67296FC19D2A7E52 /* AnalyticsUserPropertiesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DD15446FC8AED1FA5995E36 /* AnalyticsUserPropertiesTests.swift */; };
 		A26BCE1081D8490AC02CC13B /* PlaylistAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 795943C6DD69CEC50F3284A8 /* PlaylistAccess.swift */; };
 		A43FAAB0CACE93DEEDAC50D0 /* WaveformCropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E6745639C63FD5653A7983 /* WaveformCropView.swift */; };
+		A461FF2EF1259FB019C1751F /* LibraryScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A05B14CC17242252CED6F3D /* LibraryScreenshotUITests.swift */; };
 		A4DB2776034D4F9AD948ADE1 /* BedsideClockLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0D5FB2BAFE575463DA794F /* BedsideClockLogicTests.swift */; };
 		A6689AABE6D5382FE56B16B2 /* TestRingReasonLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 342891BEFBC0EE2700050504 /* TestRingReasonLogic.swift */; };
 		A6BAC064241F6F757549257F /* UICleanupUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35A001003926BD1E82446655 /* UICleanupUITests.swift */; };
@@ -174,6 +178,7 @@
 		D2CABD81A248BCA690B15831 /* DSWaveformImage in Frameworks */ = {isa = PBXBuildFile; productRef = FB3771B3CDB2D5E122FB7BCE /* DSWaveformImage */; };
 		D40ADC32DC14E4FA6EDCD1C8 /* SoundPickerLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA4D6382156797331B6E9D10 /* SoundPickerLogicTests.swift */; };
 		D766B2A2DFEB09EFFA4CA9BB /* LookaheadLimiterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 924D4255B460ECA351D22BAE /* LookaheadLimiterTests.swift */; };
+		D7FAB91619BA070D83185B82 /* PlaylistRowLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6829F73FFAAD54C10C494B10 /* PlaylistRowLabel.swift */; };
 		D87B7C4687B99C1AE18947C5 /* CustomSoundAlarmWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4825530FCF833BE90C91E68E /* CustomSoundAlarmWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D9A54CD1724C2AAE6E2D2259 /* TrimRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FDFF3E0BB74C0B6C048D867 /* TrimRange.swift */; };
 		D9DFA2B45BA2D540D349018A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F63C69F723DEF9E2780F11B8 /* Assets.xcassets */; };
@@ -191,7 +196,6 @@
 		E17F8A2662BF0D60BC3DBB3E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA13D117730C6D5910D58FD4 /* InfoPlist.strings */; };
 		E30958483AC7255DECF60F65 /* CustomAlarmMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08EAAA2A211BCB98598A3FB2 /* CustomAlarmMetadataTests.swift */; };
 		E3D9000FAA6E9A9FB0EE6E9F /* StopActionPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C27A2CC78C9B9184B31B7A2 /* StopActionPlanner.swift */; };
-		E47416EAAA11DB6231D9B9E0 /* SoundPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177D78CF60700582FA34F061 /* SoundPickerView.swift */; };
 		E49876489CFF78962B42165F /* PresetRegistration.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF87781AE69B861793B5363A /* PresetRegistration.swift */; };
 		E7D70989DD795BD620BA010C /* SoundUsageHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171400DBA98E9AB1A2F8A3EF /* SoundUsageHistoryTests.swift */; };
 		EAFA2885CF8B11EEA706EBB9 /* FilmstripLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 332B16A2DA74A770013302DA /* FilmstripLogicTests.swift */; };
@@ -207,6 +211,7 @@
 		F6CDAD635A863BD92DBC0DD4 /* LocalizationScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA039F4D6BC942AF002376 /* LocalizationScreenshotUITests.swift */; };
 		F74C2F2D06E832333F67E2BB /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C4D5C0A271EE22A949F5B3 /* UpdateChecker.swift */; };
 		FA08CD754A23378BF8F6B7D9 /* VolumeGuideLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2893DD8F8EDFC017FFCCC42 /* VolumeGuideLogic.swift */; };
+		FA512B0F68BBCBCE98B5296A /* LibraryUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D69B25D7C52314B9B84AC57 /* LibraryUITests.swift */; };
 		FA9C0CA1632392A00A526AE5 /* AudioConverterPeakTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9388CDF77D14405C3A712EB1 /* AudioConverterPeakTests.swift */; };
 		FB09AF3122E802F2E7227043 /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = 1F39A85D2D50B8401865D3FC /* PostHog */; };
 		FC4035268F85AE59F20C0137 /* PlaylistBackupSoundTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3080FFC644C46B3A1D49FCC9 /* PlaylistBackupSoundTests.swift */; };
@@ -287,9 +292,9 @@
 		13164272F44EAF943FDAB6E2 /* PendingAlarmEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingAlarmEvent.swift; sourceTree = "<group>"; };
 		154742952C76B5CA8F92ADEE /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = cs; path = cs.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		171400DBA98E9AB1A2F8A3EF /* SoundUsageHistoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundUsageHistoryTests.swift; sourceTree = "<group>"; };
-		177D78CF60700582FA34F061 /* SoundPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundPickerView.swift; sourceTree = "<group>"; };
 		190EF3C9FEF4F542A73F1D4C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1916C23CC467044DFBB09DC4 /* PlaylistEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistEditorView.swift; sourceTree = "<group>"; };
+		1A05B14CC17242252CED6F3D /* LibraryScreenshotUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryScreenshotUITests.swift; sourceTree = "<group>"; };
 		1B5EC42528B2E0D968B34DF1 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
 		1B79F944B04148C7CBF5A918 /* SoundThumbnailLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundThumbnailLogic.swift; sourceTree = "<group>"; };
 		1BE5898324CCBE597E195B5F /* TestRingLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestRingLogic.swift; sourceTree = "<group>"; };
@@ -308,6 +313,7 @@
 		2A3184B3675367A0DD9EE9BE /* SoundThumbnailLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundThumbnailLogicTests.swift; sourceTree = "<group>"; };
 		2C816A34083D6731EF32C683 /* PresetBell.caf */ = {isa = PBXFileReference; path = PresetBell.caf; sourceTree = "<group>"; };
 		2C9089DCFC77CD429078E11D /* WaveformCropMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveformCropMathTests.swift; sourceTree = "<group>"; };
+		2D69B25D7C52314B9B84AC57 /* LibraryUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryUITests.swift; sourceTree = "<group>"; };
 		2FB72E92CB459EB4DF04750F /* LocalizationCopyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationCopyTests.swift; sourceTree = "<group>"; };
 		30144856E697293FF8124FFB /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		30491830A359CEF7B05E485B /* TimeWheelPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeWheelPicker.swift; sourceTree = "<group>"; };
@@ -317,6 +323,7 @@
 		332B16A2DA74A770013302DA /* FilmstripLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilmstripLogicTests.swift; sourceTree = "<group>"; };
 		342891BEFBC0EE2700050504 /* TestRingReasonLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestRingReasonLogic.swift; sourceTree = "<group>"; };
 		34ABD2BCFB6B643992BFEB52 /* CustomSoundAlarmUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CustomSoundAlarmUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		34DB563DC26D9419C7393961 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
 		35A001003926BD1E82446655 /* UICleanupUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UICleanupUITests.swift; sourceTree = "<group>"; };
 		374A8C503A86A5148E1D285D /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/Localizable.strings; sourceTree = "<group>"; };
 		39989820052720055A683E8A /* SyncDiffTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncDiffTests.swift; sourceTree = "<group>"; };
@@ -325,7 +332,6 @@
 		3DDAA4ACE3FD77A7583E7E5C /* LocalizationCompletenessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationCompletenessTests.swift; sourceTree = "<group>"; };
 		3F5E7E2144C8CE0DAC671F6C /* SoundNameFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundNameFormatter.swift; sourceTree = "<group>"; };
 		3F9D35522AC999425CF7052E /* AnalyticsServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsServiceTests.swift; sourceTree = "<group>"; };
-		42E932DCE56F14FB1F897092 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		430876287ED548429FC87FD8 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		43235842F39385B82B212B62 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		4506353486F1AE80B4A03D35 /* SoundThumbnail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundThumbnail.swift; sourceTree = "<group>"; };
@@ -337,6 +343,7 @@
 		4825530FCF833BE90C91E68E /* CustomSoundAlarmWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = CustomSoundAlarmWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		497D044998DD71049C2BB398 /* AlarmVolumeGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmVolumeGuideView.swift; sourceTree = "<group>"; };
 		49D88547F68818249FD38901 /* PresetAlarm.caf */ = {isa = PBXFileReference; path = PresetAlarm.caf; sourceTree = "<group>"; };
+		4A12BBB21F377BA97946B8F4 /* SoundLibrarySections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundLibrarySections.swift; sourceTree = "<group>"; };
 		4A89DA50508B26893F44B997 /* AdEligibilityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdEligibilityService.swift; sourceTree = "<group>"; };
 		4B9BB3A7C3D6A98F224779C5 /* AlarmSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSound.swift; sourceTree = "<group>"; };
 		4CE7FD745BFCC7894023B44C /* AdSlot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdSlot.swift; sourceTree = "<group>"; };
@@ -360,6 +367,7 @@
 		64D6AE2B8F518B3012B1F0DF /* AdPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdPolicyTests.swift; sourceTree = "<group>"; };
 		67B419A7C166A0C68EA15ECC /* PostSaveFeedbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostSaveFeedbackTests.swift; sourceTree = "<group>"; };
 		680A6054B3E702FD00B5AFB1 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
+		6829F73FFAAD54C10C494B10 /* PlaylistRowLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistRowLabel.swift; sourceTree = "<group>"; };
 		698201FC99D4305F48937BED /* UpdatePromptCopyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePromptCopyTests.swift; sourceTree = "<group>"; };
 		69D39B5C896786FC70AE0C56 /* LoudVariantMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoudVariantMetadata.swift; sourceTree = "<group>"; };
 		6C8C1415F3825EA19A5F8714 /* AlarmMetadataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmMetadataModel.swift; sourceTree = "<group>"; };
@@ -473,6 +481,7 @@
 		ECFB5D72956BEF5074D1BB4B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		EE105D13EE2FE60FAE50F6C7 /* AlarmScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmScheduler.swift; sourceTree = "<group>"; };
 		EE9B082F9E27521B1C0E40A7 /* VideoFileImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFileImporter.swift; sourceTree = "<group>"; };
+		F066254996FACA1408F39ECA /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		F35487F34D14483915469499 /* SoundLoudnessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundLoudnessTests.swift; sourceTree = "<group>"; };
 		F47DD8DA1C541713D7985324 /* BackupAlarmAccessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupAlarmAccessTests.swift; sourceTree = "<group>"; };
 		F5CFF36945506899B0D47930 /* PlaylistDeletionLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistDeletionLogic.swift; sourceTree = "<group>"; };
@@ -486,6 +495,7 @@
 		F9E617D0CFABFD4B4805B65B /* BedsideClockLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BedsideClockLogic.swift; sourceTree = "<group>"; };
 		FB65D02618898ACF54202398 /* Entitlements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entitlements.swift; sourceTree = "<group>"; };
 		FD1E788DE59D639CD662D601 /* PlaylistRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistRendererTests.swift; sourceTree = "<group>"; };
+		FDF83A50CB608D370A449CB1 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -603,6 +613,8 @@
 			children = (
 				60E74C9E35F8009FAF9BFF30 /* AddAlarmRedesignUITests.swift */,
 				F9BAB7FB702291B470B1E0B2 /* AlarmListUITests.swift */,
+				1A05B14CC17242252CED6F3D /* LibraryScreenshotUITests.swift */,
+				2D69B25D7C52314B9B84AC57 /* LibraryUITests.swift */,
 				BCEA039F4D6BC942AF002376 /* LocalizationScreenshotUITests.swift */,
 				BEF5EC40C9684D9E09E745BF /* OnboardingUITests.swift */,
 				C172CC4E8DD0E85C903D1702 /* PlaylistUITests.swift */,
@@ -613,19 +625,10 @@
 			path = CustomSoundAlarmUITests;
 			sourceTree = "<group>";
 		};
-		49E52ED97786F83CC374AB02 /* csa-issue160 */ = {
-			isa = PBXGroup;
-			children = (
-				42E932DCE56F14FB1F897092 /* Secrets.xcconfig */,
-			);
-			name = "csa-issue160";
-			path = .;
-			sourceTree = "<group>";
-		};
 		4EA1E92D7338F6EDA96ED5FB = {
 			isa = PBXGroup;
 			children = (
-				49E52ED97786F83CC374AB02 /* csa-issue160 */,
+				B7D9EE6CB7CBC79467B51453 /* csa-issue160-pr2 */,
 				A3C533A61126660D3EEFBD5E /* CustomSoundAlarm */,
 				0D084D462AC55950BA713396 /* CustomSoundAlarmTests */,
 				48BD05F70D893BD47B7DEA10 /* CustomSoundAlarmUITests */,
@@ -700,6 +703,15 @@
 			path = CustomSoundAlarm;
 			sourceTree = "<group>";
 		};
+		B7D9EE6CB7CBC79467B51453 /* csa-issue160-pr2 */ = {
+			isa = PBXGroup;
+			children = (
+				F066254996FACA1408F39ECA /* Secrets.xcconfig */,
+			);
+			name = "csa-issue160-pr2";
+			path = .;
+			sourceTree = "<group>";
+		};
 		BEFB31E2D1B40AB539C0B835 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -712,10 +724,13 @@
 				C5C2A02E12D039E82B55921A /* ContentView.swift */,
 				8CB35836AA202B969CE7437A /* EarlyAccessBadge.swift */,
 				7070484DAE7EA0EEC071F6AF /* FilmstripView.swift */,
+				FDF83A50CB608D370A449CB1 /* LibraryView.swift */,
 				E5E338088DF544D7FBE2B2E3 /* OnboardingView.swift */,
 				1916C23CC467044DFBB09DC4 /* PlaylistEditorView.swift */,
+				6829F73FFAAD54C10C494B10 /* PlaylistRowLabel.swift */,
+				34DB563DC26D9419C7393961 /* RootTabView.swift */,
 				D3212ED85A3858EC9B3B093C /* SoundImportPresenter.swift */,
-				177D78CF60700582FA34F061 /* SoundPickerView.swift */,
+				4A12BBB21F377BA97946B8F4 /* SoundLibrarySections.swift */,
 				4506353486F1AE80B4A03D35 /* SoundThumbnail.swift */,
 				30144856E697293FF8124FFB /* Theme.swift */,
 				30491830A359CEF7B05E485B /* TimeWheelPicker.swift */,
@@ -1100,6 +1115,7 @@
 				8732DB3B7B9E5AB7B3E337AC /* FilmstripLogic.swift in Sources */,
 				2B59BF3CF209333B9D1F4568 /* FilmstripView.swift in Sources */,
 				0FC81C95AFD84CD57AF0D6E2 /* FirstInstallBuild.swift in Sources */,
+				03542F21B77DCECBAF0EBB57 /* LibraryView.swift in Sources */,
 				868DC630FC1E03ECD9D22660 /* LookaheadLimiter.swift in Sources */,
 				D1FD508447D62062146C66A8 /* LoudVariantGenerator.swift in Sources */,
 				A978182355AC4CB61FF384AF /* LoudVariantMetadata.swift in Sources */,
@@ -1117,16 +1133,18 @@
 				F212C2E106E33B7B13108F82 /* PlaylistRenderService.swift in Sources */,
 				2386C471E67DF4BBDB131B0B /* PlaylistRenderer.swift in Sources */,
 				429D3CA47782ABE3531323AE /* PlaylistResyncLogic.swift in Sources */,
+				D7FAB91619BA070D83185B82 /* PlaylistRowLabel.swift in Sources */,
 				9AB8CE5853F70F472C9FF0FE /* PlaylistStore.swift in Sources */,
 				09591C8F94E7D65C2407B130 /* PostSaveFeedback.swift in Sources */,
 				E49876489CFF78962B42165F /* PresetRegistration.swift in Sources */,
 				8A585E588C19181D73579247 /* ReviewRequestManager.swift in Sources */,
+				224491F946CC3F89858E3B45 /* RootTabView.swift in Sources */,
 				02F994FB6922008DE5AD6E34 /* SnoozeDebug.swift in Sources */,
 				67E2ECB0C5A89061DAAC36E8 /* SoundImportPresenter.swift in Sources */,
+				1487ED2F5ACB768DBEDB3FC7 /* SoundLibrarySections.swift in Sources */,
 				AF344C2B4C52E31950FD773C /* SoundLoudness.swift in Sources */,
 				4838BF7CFC57112CF80940B3 /* SoundNameFormatter.swift in Sources */,
 				A8B97D0133B998C7274E2E6D /* SoundPickerLogic.swift in Sources */,
-				E47416EAAA11DB6231D9B9E0 /* SoundPickerView.swift in Sources */,
 				B09652C9C720AEFA38C57A48 /* SoundSelectionAnalytics.swift in Sources */,
 				C4CC98722FBE4B800784E5A6 /* SoundStore.swift in Sources */,
 				4C916E96BFFAEE4599B841A0 /* SoundThumbnail.swift in Sources */,
@@ -1261,6 +1279,8 @@
 			files = (
 				3A3BA3D6788E8B8C4CCBF7BA /* AddAlarmRedesignUITests.swift in Sources */,
 				76AA8590EB7C475474F3D115 /* AlarmListUITests.swift in Sources */,
+				A461FF2EF1259FB019C1751F /* LibraryScreenshotUITests.swift in Sources */,
+				FA512B0F68BBCBCE98B5296A /* LibraryUITests.swift in Sources */,
 				F6CDAD635A863BD92DBC0DD4 /* LocalizationScreenshotUITests.swift in Sources */,
 				357AE4A4448E50A66E43F0EC /* OnboardingUITests.swift in Sources */,
 				516197BFADFF4537B6042F70 /* PlaylistUITests.swift in Sources */,
@@ -1444,7 +1464,7 @@
 		};
 		77ECEE071B9B56F3B1690269 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 42E932DCE56F14FB1F897092 /* Secrets.xcconfig */;
+			baseConfigurationReference = F066254996FACA1408F39ECA /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
@@ -1568,7 +1588,7 @@
 		};
 		D89907F4FAAA42AE6A67D447 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 42E932DCE56F14FB1F897092 /* Secrets.xcconfig */;
+			baseConfigurationReference = F066254996FACA1408F39ECA /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;

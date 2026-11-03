@@ -95,9 +95,6 @@ final class LocalizationScreenshotUITests: XCTestCase {
         XCTAssertTrue(
             app.collectionViews["alarmSoundChoice.root"].waitForExistence(timeout: 10)
         )
-        let singleSound = app.buttons["alarmSoundChoice.single"]
-        XCTAssertTrue(singleSound.waitForExistence(timeout: 5))
-        singleSound.tap()
         XCTAssertTrue(app.buttons["soundPicker.addVideo"].waitForExistence(timeout: 10))
         snap("\(language)-import-sounds")
 

@@ -2,6 +2,14 @@ import Foundation
 
 /// プレイリスト削除時に、使っていたアラームを1つの音へ切り替える純ロジック（#160）。
 enum PlaylistDeletionLogic {
+    /// 削除の確認ダイアログに出す「使っているアラーム」の件数。
+    static func affectedAlarmCount(
+        playlistID: UUID,
+        alarms: [AlarmEntry]
+    ) -> Int {
+        alarms.filter { $0.playlistID == playlistID }.count
+    }
+
     static func updatedAlarms(
         playlistID: UUID,
         trackFileNames: [String],

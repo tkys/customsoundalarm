@@ -6,6 +6,8 @@ import SwiftUI
 struct PlaylistEditorView: View {
     let playlist: Playlist?
     let onSave: (Playlist) -> Void
+    /// ライブラリから push するときは戻るボタンがあるのでキャンセルを出さない
+    let showsCancel: Bool
 
     @Environment(\.dismiss) private var dismiss
     @State private var store = PlaylistStore.shared
@@ -15,8 +17,13 @@ struct PlaylistEditorView: View {
     @State private var transition: PlaylistTransition
     @State private var showingTrackPicker = false
 
-    init(playlist: Playlist?, onSave: @escaping (Playlist) -> Void) {
+    init(
+        playlist: Playlist?,
+        showsCancel: Bool = true,
+        onSave: @escaping (Playlist) -> Void
+    ) {
         self.playlist = playlist
+        self.showsCancel = showsCancel
         self.onSave = onSave
         _name = State(
             initialValue: playlist?.name
@@ -125,8 +132,10 @@ struct PlaylistEditorView: View {
             ToolbarItem(placement: .topBarLeading) {
                 EditButton()
             }
-            ToolbarItem(placement: .cancellationAction) {
-                Button("cancel") { dismiss() }
+            if showsCancel {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("cancel") { dismiss() }
+                }
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button("save") { save() }
@@ -179,103 +188,6 @@ struct PlaylistEditorView: View {
     }
 }
 
-// MARK: - PlaylistPickerView
-
-/// プレイリストの選択・管理（#151）。
-struct PlaylistPickerView: View {
-    @Binding var selectedPlaylistID: UUID?
-
-    @Environment(\.dismiss) private var dismiss
-    @State private var store = PlaylistStore.shared
-    @State private var editingPlaylist: Playlist?
-    @State private var showingNewPlaylist = false
-
-    var body: some View {
-        List {
-            if store.playlists.isEmpty {
-                Section {
-                    Text("playlist_empty")
-                        .foregroundStyle(.secondary)
-                }
-            } else {
-                Section {
-                    ForEach(store.playlists) { playlist in
-                        HStack(spacing: 12) {
-                            Button {
-                                selectedPlaylistID = playlist.id
-                                dismiss()
-                            } label: {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(playlist.name)
-                                        Text(String(
-                                            format: String(localized: "playlist_track_count_fmt"),
-                                            playlist.trackCount
-                                        ))
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                    }
-                                    Spacer()
-                                    if selectedPlaylistID == playlist.id {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundStyle(Color.accentColor)
-                                    }
-                                }
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityIdentifier("playlist.select.\(playlist.name)")
-
-                            Button {
-                                editingPlaylist = playlist
-                            } label: {
-                                Image(systemName: "pencil")
-                            }
-                            .buttonStyle(.borderless)
-                            .accessibilityLabel(Text("edit"))
-                        }
-                        .swipeActions {
-                            Button(role: .destructive) {
-                                PlaylistDeletionService.delete(playlistID: playlist.id)
-                                if selectedPlaylistID == playlist.id {
-                                    selectedPlaylistID = nil
-                                }
-                            } label: {
-                                Label("delete", systemImage: "trash")
-                            }
-                        }
-                    }
-                } footer: {
-                    Text("playlist_limit_note")
-                }
-            }
-        }
-        .navigationTitle(String(localized: "playlist_title"))
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showingNewPlaylist = true
-                } label: {
-                    Image(systemName: "plus")
-                }
-                .accessibilityIdentifier("playlist.add")
-            }
-        }
-        .sheet(isPresented: $showingNewPlaylist) {
-            NavigationStack {
-                PlaylistEditorView(playlist: nil) { playlist in
-                    selectedPlaylistID = playlist.id
-                }
-            }
-        }
-        .sheet(item: $editingPlaylist) { playlist in
-            NavigationStack {
-                PlaylistEditorView(playlist: playlist) { _ in }
-            }
-        }
-    }
-}
-
 // MARK: - PlaylistTrackPickerView
 
 /// プレイリストに追加する曲を選ぶ（#151）。
@@ -314,8 +226,12 @@ struct PlaylistTrackPickerView: View {
                             }) {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundStyle(Color.accentColor)
+                                    .accessibilityIdentifier(
+                                        "playlist.trackSelected.\(sound.fileName)"
+                                    )
                             }
                         }
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .accessibilityIdentifier("playlist.track.\(sound.fileName)")

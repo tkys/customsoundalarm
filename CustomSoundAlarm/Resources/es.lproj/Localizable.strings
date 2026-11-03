@@ -299,3 +299,9 @@
 "transition_footer" = "Se aplica al unir las pistas. El final del bucle completo siempre se funde brevemente.";
 "playlist_playback" = "Reproducción";
 "playlist_summary_fmt" = "%@ · %d pistas";
+
+/* Library (#160 PR-2) */
+"library_title" = "Biblioteca";
+"playlist_delete_title" = "¿Eliminar esta lista?";
+"playlist_delete_message_count_fmt" = "%d alarmas usan esta lista. Pasarán a un solo sonido.";
+"playlist_delete_message_unused" = "Se eliminará esta lista.";

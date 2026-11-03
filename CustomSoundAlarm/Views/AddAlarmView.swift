@@ -771,7 +771,8 @@ struct AlarmDetailView: View {
                 snoozeMinutes: snoozeMinutes,
                 backupMinutes: backupMinutes,
                 playlistID: playlistID,
-                fadeIn: fadeIn
+                fadeIn: fadeIn,
+                isEnabled: !AppGroup.isUITestDisableNewAlarm
             )
             alarmStore.add(entry)
             AnalyticsService.shared.capture(

@@ -64,10 +64,6 @@ final class UICleanupUITests: XCTestCase {
             choiceRoot.waitForExistence(timeout: 10),
             "sound choice should open: \(app.debugDescription)"
         )
-        let choice = app.buttons["alarmSoundChoice.single"]
-        XCTAssertTrue(choice.waitForExistence(timeout: 5))
-        choice.tap()
-
         let navBar = app.navigationBars["サウンド"]
         XCTAssertTrue(navBar.waitForExistence(timeout: 5), "sound picker should open")
 

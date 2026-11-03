@@ -35,6 +35,7 @@ struct ContentView: View {
                     }
                 }
                 .navigationTitle(String(localized: "alarm_title"))
+                .toolbar(showingOnboarding ? .hidden : .visible, for: .tabBar)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         Button {

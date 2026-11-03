@@ -47,7 +47,7 @@
 "rename" = "名前を変更";
 "sound_name_placeholder" = "サウンド名";
 "presets" = "すぐ使える音";
-"imported_sounds" = "追加した音";
+"imported_sounds" = "自分の音";
 "converting" = "変換中...";
 "add_from_video" = "動画から音声を追加";
 "add_from_audio" = "音声ファイルから追加";
@@ -299,3 +299,9 @@
 "transition_footer" = "曲をつなぐときに適用されます。ループ全体の末尾は常に短くフェードアウトします。";
 "playlist_playback" = "再生方法";
 "playlist_summary_fmt" = "%@・%d曲";
+
+/* Library (#160 PR-2) */
+"library_title" = "ライブラリ";
+"playlist_delete_title" = "プレイリストを削除しますか？";
+"playlist_delete_message_count_fmt" = "このプレイリストを使っているアラームが%d件あります。削除すると、存在する1曲目の「1つの音」に切り替わります。";
+"playlist_delete_message_unused" = "このプレイリストを削除します。";
