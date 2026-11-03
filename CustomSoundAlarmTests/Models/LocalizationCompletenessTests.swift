@@ -42,6 +42,22 @@ struct LocalizationCompletenessTests {
         return try #require(NSDictionary(contentsOfFile: path) as? [String: String])
     }
 
+    private func stringsDictKeys(for language: String) throws -> Set<String> {
+        guard let path = Bundle.main.path(
+            forResource: "Localizable",
+            ofType: "stringsdict",
+            inDirectory: nil,
+            forLocalization: language
+        ) else {
+            return []
+        }
+        let dict = try #require(
+            NSDictionary(contentsOfFile: path) as? [String: Any],
+            "\(language) Localizable.stringsdict should parse"
+        )
+        return Set(dict.keys)
+    }
+
     private func formatSpecifiers(in value: String) -> [String] {
         let regex = try! NSRegularExpression(pattern: #"%(?:\d+\$)?(?:ld|d|@|%)"#)
         let range = NSRange(value.startIndex..., in: value)
@@ -54,11 +70,15 @@ struct LocalizationCompletenessTests {
     func everyLanguageHasTheSameNonEmptyKeysAsEnglish() throws {
         let english = try strings(for: "en")
         #expect(english.count >= 170)
+        let englishKeys = Set(english.keys)
+            .union(try stringsDictKeys(for: "en"))
 
         for language in Self.languages {
             let localized = try strings(for: language)
-            let missing = Set(english.keys).subtracting(localized.keys).sorted()
-            let extra = Set(localized.keys).subtracting(english.keys).sorted()
+            let localizedKeys = Set(localized.keys)
+                .union(try stringsDictKeys(for: language))
+            let missing = englishKeys.subtracting(localizedKeys).sorted()
+            let extra = localizedKeys.subtracting(englishKeys).sorted()
             #expect(missing.isEmpty, "\(language) に足りないキー: \(missing)")
             #expect(extra.isEmpty, "\(language) に余分なキー: \(extra)")
 
@@ -66,6 +86,17 @@ struct LocalizationCompletenessTests {
                 #expect(!value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
                         "\(language) \(key) が空")
             }
+        }
+    }
+
+    @Test
+    func pluralDeleteMessageExistsInEveryLanguage() throws {
+        for language in Self.languages {
+            let keys = try stringsDictKeys(for: language)
+            #expect(
+                keys.contains("playlist_delete_message_count_fmt"),
+                "\(language) missing playlist_delete_message_count_fmt in stringsdict"
+            )
         }
     }
 

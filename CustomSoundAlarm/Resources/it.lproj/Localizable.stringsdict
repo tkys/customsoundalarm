@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>playlist_delete_message_count_fmt</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@alarms@</string>
+        <key>alarms</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+        <key>one</key>
+        <string>1 sveglia usa questa playlist. Se la elimini, suonerà con il primo brano della playlist.</string>
+        <key>other</key>
+        <string>%d sveglie usano questa playlist. Se la elimini, suoneranno con il primo brano della playlist.</string>
+        </dict>
+    </dict>
+</dict>
+</plist>

@@ -8,7 +8,7 @@ struct CustomSoundAlarmApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootTabView()
                 .task {
                     guard !hasLaunched else { return }
                     hasLaunched = true
@@ -22,6 +22,55 @@ struct CustomSoundAlarmApp: App {
                     }
                     if AppGroup.isUITestResetPlaylists {
                         PlaylistStore.shared.resetForUITest()
+                    }
+                    if AppGroup.isUITestSeedLibrary {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        PlaylistStore.shared.resetForUITest()
+                        SoundStore.shared.backfillMissingDurations()
+                        let morning = PlaylistStore.shared.add(
+                            name: "朝の支度",
+                            tracks: [
+                                PlaylistTrack(soundFileName: "PresetMarimba.caf"),
+                                PlaylistTrack(soundFileName: "PresetBell.caf"),
+                                PlaylistTrack(soundFileName: "PresetMusicBox.caf")
+                            ],
+                            playOrder: .shuffle,
+                            transition: .crossfade
+                        )
+                        let weekend = PlaylistStore.shared.add(
+                            name: "週末のカフェ",
+                            tracks: [
+                                PlaylistTrack(soundFileName: "PresetCrescendo.caf"),
+                                PlaylistTrack(soundFileName: "PresetBeep.caf")
+                            ],
+                            playOrder: .inOrder,
+                            transition: .short
+                        )
+                        AlarmStore.shared.add(AlarmEntry(
+                            hour: 7,
+                            minute: 30,
+                            isEnabled: false,
+                            label: String(localized: "alarm_title"),
+                            playlistID: morning.id
+                        ))
+                        AlarmStore.shared.add(AlarmEntry(
+                            hour: 8,
+                            minute: 0,
+                            isEnabled: false,
+                            label: String(localized: "alarm_title"),
+                            playlistID: weekend.id
+                        ))
+                        AlarmStore.shared.add(AlarmEntry(
+                            hour: 9,
+                            minute: 0,
+                            isEnabled: false,
+                            label: String(localized: "alarm_title"),
+                            playlistID: weekend.id
+                        ))
+                    }
+                    if AppGroup.isUITestOpenLibrary {
+                        AppGroup.hasCompletedOnboarding = true
                     }
                     // UIテスト用: アラーム一覧を時刻順で検証するためのシード
                     if AppGroup.isUITestSeedAlarms {

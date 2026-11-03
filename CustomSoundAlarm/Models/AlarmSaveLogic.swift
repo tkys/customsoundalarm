@@ -13,12 +13,13 @@ enum AlarmSaveLogic {
         snoozeMinutes: Int,
         backupMinutes: Int?,
         playlistID: UUID? = nil,
-        fadeIn: PlaylistFadeIn = .off
+        fadeIn: PlaylistFadeIn = .off,
+        isEnabled: Bool = true
     ) -> AlarmEntry {
         AlarmEntry(
             hour: hour,
             minute: minute,
-            isEnabled: true,
+            isEnabled: isEnabled,
             label: label,
             repeatWeekdays: repeatWeekdays,
             soundFileName: soundFileName,

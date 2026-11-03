@@ -296,6 +296,11 @@
 "transition_short" = "Kurze Überblendung (0,5 s)";
 "transition_long" = "Lange Überblendung (2 s)";
 "transition_crossfade" = "Crossfade";
-"transition_footer" = "Gilt beim Verbinden der Titel. Das Ende der gesamten Schleife wird immer kurz ausgeblendet.";
+"transition_footer" = "Gilt beim Verbinden der Titel.";
 "playlist_playback" = "Wiedergabe";
 "playlist_summary_fmt" = "%@ · %d Titel";
+
+/* Library (#160 PR-2) */
+"library_title" = "Bibliothek";
+"playlist_delete_title" = "Diese Playlist löschen?";
+"playlist_delete_message_unused" = "Diese Playlist wird gelöscht.";

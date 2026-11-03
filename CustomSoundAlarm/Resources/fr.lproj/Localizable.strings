@@ -296,6 +296,11 @@
 "transition_short" = "Fondu court (0,5 s)";
 "transition_long" = "Fondu long (2 s)";
 "transition_crossfade" = "Fondu enchaîné";
-"transition_footer" = "S'applique lors de l'assemblage des titres. La fin de la boucle complète est toujours légèrement fondue.";
+"transition_footer" = "S'applique lors de l'assemblage des titres.";
 "playlist_playback" = "Lecture";
 "playlist_summary_fmt" = "%@ · %d titres";
+
+/* Library (#160 PR-2) */
+"library_title" = "Bibliothèque";
+"playlist_delete_title" = "Supprimer cette playlist ?";
+"playlist_delete_message_unused" = "Cette playlist sera supprimée.";

@@ -308,9 +308,18 @@ final class AudioConverter {
     /// 計測失敗（ファイル欠損・無効なアセット等）は nil を返す。
     /// 起動のたびに全ファイルを読まないよう、追加時計測と欠損分の一度きり補完のみで使う。
     func measureDurationSeconds(fileName: String) -> Double? {
-        let url = soundsDirectory.appendingPathComponent(fileName)
-        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
-        let asset = AVURLAsset(url: url)
+        let sourceURL: URL
+        let importedURL = soundsDirectory.appendingPathComponent(fileName)
+        if FileManager.default.fileExists(atPath: importedURL.path) {
+            sourceURL = importedURL
+        } else {
+            // プリセットはアプリバンドル内にある（#160 プレイリストの合計時間）
+            let base = fileName.replacingOccurrences(of: ".caf", with: "")
+            guard let bundledURL = Bundle.main.url(forResource: base, withExtension: "caf")
+            else { return nil }
+            sourceURL = bundledURL
+        }
+        let asset = AVURLAsset(url: sourceURL)
         let seconds = CMTimeGetSeconds(asset.duration)
         guard seconds.isFinite, seconds > 0 else { return nil }
         return seconds

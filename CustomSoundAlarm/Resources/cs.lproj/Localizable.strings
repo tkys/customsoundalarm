@@ -296,6 +296,11 @@
 "transition_short" = "Krátké prolnutí (0,5 s)";
 "transition_long" = "Dlouhé prolnutí (2 s)";
 "transition_crossfade" = "Crossfade";
-"transition_footer" = "Použije se při spojování skladeb. Konec celé smyčky se vždy krátce prolne.";
+"transition_footer" = "Použije se při spojování skladeb.";
 "playlist_playback" = "Přehrávání";
 "playlist_summary_fmt" = "%@ · %d skladeb";
+
+/* Library (#160 PR-2) */
+"library_title" = "Knihovna";
+"playlist_delete_title" = "Smazat tento playlist?";
+"playlist_delete_message_unused" = "Tento playlist bude smazán.";

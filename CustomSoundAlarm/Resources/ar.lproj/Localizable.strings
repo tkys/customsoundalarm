@@ -296,6 +296,11 @@
 "transition_short" = "تلاشٍ قصير (0.5 ث)";
 "transition_long" = "تلاشٍ طويل (2 ث)";
 "transition_crossfade" = "تلاشي متقاطع";
-"transition_footer" = "يُطبَّق عند وصل المقاطع. يتم دائمًا تلاشي نهاية الحلقة بأكملها لفترة قصيرة.";
+"transition_footer" = "يُطبَّق عند وصل المقاطع.";
 "playlist_playback" = "التشغيل";
 "playlist_summary_fmt" = "%@ · %d مقاطع";
+
+/* Library (#160 PR-2) */
+"library_title" = "المكتبة";
+"playlist_delete_title" = "حذف قائمة التشغيل هذه؟";
+"playlist_delete_message_unused" = "سيتم حذف قائمة التشغيل هذه.";

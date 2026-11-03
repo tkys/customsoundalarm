@@ -385,4 +385,25 @@ struct PlaylistRenderLogicTests {
         )
         #expect(updated[0].soundFileName == "PresetMarimba.caf")
     }
+
+    @Test
+    func affectedAlarmCount_countsOnlyThePlaylistUsers() {
+        let target = UUID()
+        let other = UUID()
+        let alarms = [
+            AlarmEntry(playlistID: target),
+            AlarmEntry(isEnabled: false, playlistID: target),
+            AlarmEntry(playlistID: other),
+            AlarmEntry()
+        ]
+
+        #expect(PlaylistDeletionLogic.affectedAlarmCount(
+            playlistID: target,
+            alarms: alarms
+        ) == 2)
+        #expect(PlaylistDeletionLogic.affectedAlarmCount(
+            playlistID: UUID(),
+            alarms: alarms
+        ) == 0)
+    }
 }

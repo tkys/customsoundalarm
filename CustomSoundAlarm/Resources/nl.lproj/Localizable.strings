@@ -296,6 +296,11 @@
 "transition_short" = "Korte fade (0,5 s)";
 "transition_long" = "Lange fade (2 s)";
 "transition_crossfade" = "Crossfade";
-"transition_footer" = "Geldt bij het aan elkaar zetten van nummers. Het einde van de hele herhaling wordt altijd kort uitgefade.";
+"transition_footer" = "Geldt bij het aan elkaar zetten van nummers.";
 "playlist_playback" = "Weergave";
 "playlist_summary_fmt" = "%@ · %d nummers";
+
+/* Library (#160 PR-2) */
+"library_title" = "Bibliotheek";
+"playlist_delete_title" = "Deze afspeellijst verwijderen?";
+"playlist_delete_message_unused" = "Deze afspeellijst wordt verwijderd.";

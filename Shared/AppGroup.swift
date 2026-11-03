@@ -116,6 +116,34 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト・スクリーンショット用: ライブラリのサンプルを入れる（DEBUGのみ・#160）
+    static var isUITestSeedLibrary: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-library")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: 起動直後にライブラリタブを開く（DEBUGのみ・#160）
+    static var isUITestOpenLibrary: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-open-library")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: 新規アラームをオフで保存する（DEBUGのみ・#160）
+    /// シミュレータで実際に鳴って SpringBoard が落ちるのを避ける。
+    static var isUITestDisableNewAlarm: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-save-alarm-disabled")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: DEBUG時のみ有効なfresh onboarding強制フラグ
     static var isUITestFreshOnboarding: Bool {
 #if DEBUG
