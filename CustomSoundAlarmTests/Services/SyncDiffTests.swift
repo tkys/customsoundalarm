@@ -5,6 +5,24 @@ import AlarmKit
 
 struct SyncDiffTests {
 
+    private func signature(
+        _ entry: AlarmEntry,
+        sound: String = "PresetMarimba.caf",
+        display: String = "Marimba"
+    ) -> AlarmScheduleSignature {
+        AlarmScheduleSignature(
+            entry: entry,
+            soundFileName: sound,
+            displayName: display
+        )
+    }
+
+    private func fixedCalendar() -> Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        return calendar
+    }
+
     // MARK: - All new
 
     @Test
@@ -114,25 +132,261 @@ struct SyncDiffTests {
         #expect(diff.scheduleEntries.isEmpty)
     }
 
-    // MARK: - .scheduled → reschedule
+    // MARK: - .scheduled + signature (#163)
 
     @Test
-    func scheduledAlarm_rescheduled() {
+    func scheduledAlarmWithSameSignature_kept() {
         let e = AlarmEntry(hour: 7, minute: 0)
         let alarmID = Alarm.ID()
-        let entries = [e]
+        let sig = signature(e)
 
         let diff = computeSyncDiff(
             oldMap: [e.id: alarmID],
-            entries: entries,
-            activeStates: [alarmID: .scheduled]
+            entries: [e],
+            activeStates: [alarmID: .scheduled],
+            signatures: [e.id: sig],
+            desiredSignatures: [e.id: sig]
+        )
+
+        #expect(diff.keptMap == [e.id: alarmID])
+        #expect(diff.scheduleEntries.isEmpty)
+        #expect(diff.rescheduleReasons.isEmpty)
+        #expect(diff.signatureUpdates.isEmpty)
+    }
+
+    @Test
+    func scheduledAlarmWithChangedSignature_rescheduledAsChanged() {
+        let e = AlarmEntry(hour: 7, minute: 0)
+        var changed = e
+        changed.hour = 8
+        let alarmID = Alarm.ID()
+
+        let diff = computeSyncDiff(
+            oldMap: [e.id: alarmID],
+            entries: [changed],
+            activeStates: [alarmID: .scheduled],
+            signatures: [e.id: signature(e)],
+            desiredSignatures: [e.id: signature(changed)]
         )
 
         #expect(diff.keptMap.isEmpty)
-        #expect(diff.scheduleEntries.count == 1)
-        #expect(diff.scheduleEntries[0].id == e.id)
-        #expect(diff.rescheduleAlarmIDs.count == 1)
+        #expect(diff.scheduleEntries.map(\.id) == [e.id])
         #expect(diff.rescheduleAlarmIDs[e.id] == alarmID)
+        #expect(diff.rescheduleReasons[e.id] == .changed)
+    }
+
+    @Test
+    func scheduledAlarmWithoutSavedSignature_keptAndAdopts() {
+        let e = AlarmEntry(hour: 7, minute: 0)
+        let alarmID = Alarm.ID()
+        let desired = signature(e)
+
+        let diff = computeSyncDiff(
+            oldMap: [e.id: alarmID],
+            entries: [e],
+            activeStates: [alarmID: .scheduled],
+            desiredSignatures: [e.id: desired]
+        )
+
+        #expect(diff.keptMap == [e.id: alarmID])
+        #expect(diff.scheduleEntries.isEmpty)
+        #expect(diff.signatureUpdates[e.id] == desired)
+    }
+
+    @Test
+    func changedSignatureDuringFiringMinute_deferred() {
+        let calendar = fixedCalendar()
+        let now = calendar.date(
+            from: DateComponents(
+                year: 2026, month: 11, day: 4,
+                hour: 6, minute: 26, second: 30
+            )
+        )!
+        let e = AlarmEntry(hour: 6, minute: 25, repeatWeekdays: [4])
+        var changed = e
+        changed.label = "changed"
+        let alarmID = Alarm.ID()
+        #expect(AlarmSyncSafety.shouldDeferReschedule(
+            for: changed,
+            now: now,
+            calendar: calendar
+        ))
+
+        let diff = computeSyncDiff(
+            oldMap: [e.id: alarmID],
+            entries: [changed],
+            activeStates: [alarmID: .scheduled],
+            signatures: [e.id: signature(e)],
+            desiredSignatures: [e.id: signature(changed)],
+            now: now,
+            calendar: calendar
+        )
+
+        #expect(diff.keptMap == [e.id: alarmID])
+        #expect(diff.scheduleEntries.isEmpty)
+        #expect(diff.deferredEntryIDs == [e.id])
+        #expect(diff.rescheduleReasons.isEmpty)
+    }
+
+    @Test
+    func editedEntryDuringFiringMinute_isRescheduled() {
+        let calendar = fixedCalendar()
+        let now = calendar.date(
+            from: DateComponents(
+                year: 2026, month: 11, day: 4,
+                hour: 6, minute: 26, second: 30
+            )
+        )!
+        let e = AlarmEntry(hour: 6, minute: 25, repeatWeekdays: [4])
+        var changed = e
+        changed.label = "changed"
+        let alarmID = Alarm.ID()
+
+        let diff = computeSyncDiff(
+            oldMap: [e.id: alarmID],
+            entries: [changed],
+            activeStates: [alarmID: .scheduled],
+            signatures: [e.id: signature(e)],
+            desiredSignatures: [e.id: signature(changed)],
+            editedEntryIDs: [e.id],
+            now: now,
+            calendar: calendar
+        )
+
+        #expect(diff.keptMap.isEmpty)
+        #expect(diff.scheduleEntries.map(\.id) == [e.id])
+        #expect(diff.deferredEntryIDs.isEmpty)
+        #expect(diff.rescheduleReasons[e.id] == .changed)
+    }
+
+    @Test
+    func missingEntryDuringFiringMinute_isNotDeferred() {
+        let calendar = fixedCalendar()
+        let now = calendar.date(
+            from: DateComponents(
+                year: 2026, month: 11, day: 4,
+                hour: 6, minute: 26, second: 30
+            )
+        )!
+        let e = AlarmEntry(hour: 6, minute: 25, repeatWeekdays: [4])
+        let staleID = Alarm.ID()
+        let sig = signature(e)
+
+        // マップには ID が残っているが AlarmKit には登録が無い（state == nil）
+        let diff = computeSyncDiff(
+            oldMap: [e.id: staleID],
+            entries: [e],
+            activeStates: [:],
+            signatures: [e.id: sig],
+            desiredSignatures: [e.id: sig],
+            now: now,
+            calendar: calendar
+        )
+
+        #expect(diff.keptMap.isEmpty)
+        #expect(diff.scheduleEntries.map(\.id) == [e.id])
+        #expect(diff.rescheduleReasons[e.id] == .missing)
+        #expect(diff.deferredEntryIDs.isEmpty)
+    }
+
+    @Test
+    func forcedScheduledDuringFiringMinute_isDeferred() {
+        let calendar = fixedCalendar()
+        let now = calendar.date(
+            from: DateComponents(
+                year: 2026, month: 11, day: 4,
+                hour: 6, minute: 26, second: 30
+            )
+        )!
+        let e = AlarmEntry(hour: 6, minute: 25, repeatWeekdays: [4])
+        let alarmID = Alarm.ID()
+        let sig = signature(e)
+
+        let diff = computeSyncDiff(
+            oldMap: [e.id: alarmID],
+            entries: [e],
+            activeStates: [alarmID: .scheduled],
+            forceRescheduleEntryIDs: [e.id],
+            signatures: [e.id: sig],
+            desiredSignatures: [e.id: sig],
+            now: now,
+            calendar: calendar
+        )
+
+        #expect(diff.keptMap == [e.id: alarmID])
+        #expect(diff.scheduleEntries.isEmpty)
+        #expect(diff.deferredEntryIDs == [e.id])
+        #expect(diff.rescheduleReasons.isEmpty)
+    }
+
+    @Test
+    func deferredChangedSignature_retryAfterNinetySeconds_reschedules() {
+        let calendar = fixedCalendar()
+        let firstAttempt = calendar.date(
+            from: DateComponents(
+                year: 2026, month: 11, day: 4,
+                hour: 6, minute: 26, second: 30
+            )
+        )!
+        let e = AlarmEntry(hour: 6, minute: 25, repeatWeekdays: [4])
+        var changed = e
+        changed.label = "changed"
+        let alarmID = Alarm.ID()
+        let oldSignature = signature(e)
+        let newSignature = signature(changed)
+
+        let first = computeSyncDiff(
+            oldMap: [e.id: alarmID],
+            entries: [changed],
+            activeStates: [alarmID: .scheduled],
+            signatures: [e.id: oldSignature],
+            desiredSignatures: [e.id: newSignature],
+            now: firstAttempt,
+            calendar: calendar
+        )
+        #expect(first.deferredEntryIDs == [e.id])
+
+        // 90秒後（分が変わった後）の再試行では作り直す
+        let retry = computeSyncDiff(
+            oldMap: [e.id: alarmID],
+            entries: [changed],
+            activeStates: [alarmID: .scheduled],
+            signatures: [e.id: oldSignature],
+            desiredSignatures: [e.id: newSignature],
+            now: firstAttempt.addingTimeInterval(90),
+            calendar: calendar
+        )
+        #expect(retry.scheduleEntries.map(\.id) == [e.id])
+        #expect(retry.rescheduleReasons[e.id] == .changed)
+        #expect(retry.deferredEntryIDs.isEmpty)
+    }
+
+    @Test
+    func changedSignatureTwoMinutesLater_rescheduled() {
+        let calendar = fixedCalendar()
+        let now = calendar.date(
+            from: DateComponents(
+                year: 2026, month: 11, day: 4,
+                hour: 6, minute: 27, second: 0
+            )
+        )!
+        let e = AlarmEntry(hour: 6, minute: 25, repeatWeekdays: [4])
+        var changed = e
+        changed.label = "changed"
+        let alarmID = Alarm.ID()
+
+        let diff = computeSyncDiff(
+            oldMap: [e.id: alarmID],
+            entries: [changed],
+            activeStates: [alarmID: .scheduled],
+            signatures: [e.id: signature(e)],
+            desiredSignatures: [e.id: signature(changed)],
+            now: now,
+            calendar: calendar
+        )
+
+        #expect(diff.scheduleEntries.map(\.id) == [e.id])
+        #expect(diff.deferredEntryIDs.isEmpty)
     }
 
     // MARK: - Protected BUT disabled → cancel
@@ -194,23 +448,24 @@ struct SyncDiffTests {
     // MARK: - Double-sync regression test
 
     @Test
-    func doubleSync_doesNotIncreaseAlarmCount() {
+    func doubleSyncWithSameSignature_doesNotIncreaseAlarmCount() {
         let e = AlarmEntry(hour: 7, minute: 0)
         let firstAlarmID = Alarm.ID()
-        let entries = [e]
+        let sig = signature(e)
 
         let diff = computeSyncDiff(
             oldMap: [e.id: firstAlarmID],
-            entries: entries,
-            activeStates: [firstAlarmID: .scheduled]
+            entries: [e],
+            activeStates: [firstAlarmID: .scheduled],
+            signatures: [e.id: sig],
+            desiredSignatures: [e.id: sig]
         )
 
-        #expect(diff.scheduleEntries.count == 1)
-        #expect(diff.scheduleEntries[0].id == e.id)
-        #expect(diff.rescheduleAlarmIDs.count == 1)
-        #expect(diff.rescheduleAlarmIDs[e.id] == firstAlarmID)
-        #expect(diff.cancelEntryIDs.count + diff.rescheduleAlarmIDs.count >= diff.scheduleEntries.count,
-                "Each schedule must cancel one old alarm → no net increase")
+        // 2回目の同期では作り直さない（同じ分の鳴り直しを防ぐ）
+        #expect(diff.keptMap == [e.id: firstAlarmID])
+        #expect(diff.scheduleEntries.isEmpty)
+        #expect(diff.cancelEntryIDs.isEmpty)
+        #expect(diff.rescheduleAlarmIDs.isEmpty)
     }
 
     // MARK: - Mixed: keep + cancel + schedule
@@ -276,6 +531,7 @@ struct SyncDiffTests {
         #expect(diff.keptMap.isEmpty)
         #expect(diff.scheduleEntries.map(\.id) == [entry.id])
         #expect(diff.rescheduleAlarmIDs[entry.id] == alarmID)
+        #expect(diff.rescheduleReasons[entry.id] == .forced)
     }
 
     @Test

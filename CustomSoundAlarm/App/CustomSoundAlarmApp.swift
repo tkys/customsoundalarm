@@ -192,7 +192,15 @@ struct CustomSoundAlarmApp: App {
                             // （キル中に発火した一回限りアラームを自動 OFF）
                             AlarmScheduler.shared.reconcileOnLaunch()
                             // AlarmKit に現在の設定を反映
-                            AlarmScheduler.shared.syncAlarms(AlarmStore.shared.alarms)
+                            // 停止 Intent によるバックグラウンド起動なら intent として記録する（#163）
+                            let launchTrigger = AlarmSyncTriggerLogic.launchTrigger(
+                                now: Date(),
+                                lastStopIntentAt: AppGroup.lastStopIntentAt
+                            )
+                            AlarmScheduler.shared.syncAlarms(
+                                AlarmStore.shared.alarms,
+                                trigger: launchTrigger
+                            )
                             // 一回限りアラーム発火後の自動 OFF を監視
                             AlarmScheduler.shared.startObservingAlarmStates()
                         }
@@ -208,7 +216,10 @@ struct CustomSoundAlarmApp: App {
                         // 前面に戻るたびに再同期する（#110）。
                         // 差分同期は軽く、停止 Intent で取りこぼした最終アラームの保険にもなる。
                         AlarmStore.shared.reload()
-                        AlarmScheduler.shared.syncAlarms(AlarmStore.shared.alarms)
+                        AlarmScheduler.shared.syncAlarms(
+                            AlarmStore.shared.alarms,
+                            trigger: .foreground
+                        )
                     }
                 }
         }

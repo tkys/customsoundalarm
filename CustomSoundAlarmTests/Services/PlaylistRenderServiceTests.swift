@@ -77,6 +77,38 @@ struct PlaylistRenderServiceTests {
     }
 
     @Test
+    func cachedSoundFileName_returnsRenderedFileWithoutRendering() async {
+        let playlist = makePlaylist()
+        defer { PlaylistStore.shared.remove(id: playlist.id) }
+        let entryID = UUID()
+        defer { removeGeneratedFiles(entryID: entryID) }
+        let input = PlaylistRenderInput(
+            entryID: entryID,
+            playlistID: playlist.id,
+            fallbackFileName: "PresetMarimba.caf",
+            fadeIn: .off
+        )
+
+        let result = await PlaylistRenderService.shared.prepareSound(for: input)
+        #expect(!result.usedFallback)
+        #expect(
+            PlaylistRenderService.shared.cachedSoundFileName(for: input)
+                == result.fileName
+        )
+    }
+
+    @Test
+    func cachedSoundFileName_withoutCache_returnsNil() {
+        let input = PlaylistRenderInput(
+            entryID: UUID(),
+            playlistID: UUID(),
+            fallbackFileName: "PresetMarimba.caf",
+            fadeIn: .ten
+        )
+        #expect(PlaylistRenderService.shared.cachedSoundFileName(for: input) == nil)
+    }
+
+    @Test
     func singleWithoutFades_returnsOriginalFileName() async {
         let input = PlaylistRenderInput(
             entryID: UUID(),

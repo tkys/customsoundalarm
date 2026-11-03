@@ -721,7 +721,7 @@ struct AlarmDetailView: View {
                 Button("delete", role: .destructive) {
                     if case .edit(let entry) = mode {
                         alarmStore.remove(entry)
-                        AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
+                        AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
                     }
                     dismiss()
                 }
@@ -842,10 +842,18 @@ struct AlarmDetailView: View {
             // 大きくした版の生成が終わってから最終アラームを登録する（#119）
             Task {
                 _ = await BackupLoudVariantService.ensureVariant(for: sourceFileName)
-                AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
+                AlarmScheduler.shared.syncAlarms(
+                    alarmStore.alarms,
+                    editedEntryIDs: [savedEntry.id],
+                    trigger: .edit
+                )
             }
         } else {
-            AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
+            AlarmScheduler.shared.syncAlarms(
+                alarmStore.alarms,
+                editedEntryIDs: [savedEntry.id],
+                trigger: .edit
+            )
         }
 
         // 保存後のフィードバック（ON: 発火までの時間 / OFF: このアラームはオフです）

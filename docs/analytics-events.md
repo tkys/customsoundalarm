@@ -39,6 +39,8 @@
 | `playlist_render_failed` | `reason` string（no_tracks/too_long/render_failed/write_failed/missing_playlist） | プレイリストの書き出し失敗 | 失敗原因 | アプリ動作中のみ | 1.8.2 |
 | `playlist_render_fallback` | — | 書き出し失敗時に1曲目／既定音で鳴らした | フォールバックの頻度 | アプリ動作中のみ | 1.8.2 |
 | `playlist_reschedule_failed` | `reason` string（schedule_failed） | 次回分の再登録に失敗し、前のアラームを残した | 差し替え失敗の頻度 | アプリ動作中のみ | 1.8.2 |
+| `alarm_sync_rescheduled` | `trigger` string（launch/foreground/edit/playlist/intent/deferred_retry）, `changed_count` int, `missing_count` int, `forced_count` int | 同期でアラームを作り直したとき（1回の同期につき1イベント） | 鳴り直しの原因（変更・未登録・強制）の切り分け | アプリ動作中／起動時にも送る | 1.8.1 |
+| `alarm_sync_deferred` | `trigger` string, `count` int | 発火した分の中なので次の同期まで延期したとき | 安全柵が効いた回数の確認 | アプリ動作中／起動時にも送る | 1.8.1 |
 | `ad_slot_eligible` | `slot` string（banner_sounds/banner_import/banner_alarm_list/interstitial_import_saved）, `allowed` bool, `reason` string（eligible/existing_user/version_unavailable/pro/first_week/quiet_hours/frequency_cap/forbidden_context/wrong_context）, `region` string（standard/limited） | 広告枠の判定時（`AdsConfig.isEnabled = false` でも送る） | 1.9.0 前に実際の表示機会を測る | アプリ動作中のみ | 1.9.0 |
 | `sound_preview_played` | — | サウンドの試聴 | 試聴行動 | アプリ動作中のみ | 既存 |
 | `custom_sound_imported` | `source` string（video/audio）, `peak_db_bucket` string, `gain_db_bucket` string, `lufs_bucket` string（取り込み前のLUFS区分） | カスタムサウンド取り込み成功 | 取り込み経路・音量 | アプリ動作中のみ | 既存（`lufs_bucket` は1.8.0） |
@@ -102,6 +104,12 @@
 - **補助指標**: `backup_alarm_fired`（監視経由・アプリが開いているときだけ）。取りこぼしがあるため、主指標には使わない。
 - 採用率: `alarm_created` / `alarm_edited` の `backup_minutes`（0 = オフ）と `backup_alarm_enabled` / `backup_alarm_disabled`。
 - 継続比較: ユーザープロパティ `backup_alarm_count` / `backup_early_access` でコホートを分ける。
+
+## 同期ログ（#163 / DEBUG）
+
+- 同期が完了するたびに、`trigger`（launch / foreground / edit / playlist / intent / deferred_retry）・時刻・作り直し件数・延期件数・理由別件数を App Group のリングバッファに最新50件残します。
+- DEBUG ビルドでは「ライブラリ → 開発者向け → 同期ログ」から確認できます（本番ビルドには出ません）。
+- バックグラウンド起動直後の同期は、直近30秒以内に停止 Intent が動いていれば `intent` として記録します。
 
 ## 送られなくなったもの（#122 / #123）
 

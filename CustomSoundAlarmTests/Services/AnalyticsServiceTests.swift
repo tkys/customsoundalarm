@@ -108,6 +108,13 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.playlistRescheduleFailed(
             reason: "schedule_failed"
         ).name == "playlist_reschedule_failed")
+        // #163: 同期の作り直し
+        #expect(AnalyticsEvent.alarmSyncRescheduled(
+            trigger: .launch, changed: 2, missing: 1, forced: 0
+        ).name == "alarm_sync_rescheduled")
+        #expect(AnalyticsEvent.alarmSyncDeferred(
+            trigger: .intent, count: 1
+        ).name == "alarm_sync_deferred")
     }
 
     // MARK: alarm_created
@@ -435,6 +442,8 @@ struct AnalyticsEventTests {
             .playlistRenderFailed(reason: .renderFailed),
             .playlistRenderFallback,
             .playlistRescheduleFailed(reason: "schedule_failed"),
+            .alarmSyncRescheduled(trigger: .foreground, changed: 1, missing: 0, forced: 0),
+            .alarmSyncDeferred(trigger: .foreground, count: 1),
             .alarmFired(wasAppForeground: true, hour: 8, isRepeating: false, detection: "observer"),
             .alarmStopped(hour: 8),
             .alarmSnoozed(from: "observer"),
@@ -723,6 +732,32 @@ struct AnalyticsEventTests {
         let props = AnalyticsEvent.playlistRenderFailed(reason: .tooLong).properties
         #expect(props.count == 1)
         #expect(props["reason"] as? String == "too_long")
+    }
+
+    @Test
+    func alarmSyncRescheduledProperties_includeTriggerAndReasonCounts() {
+        let props = AnalyticsEvent.alarmSyncRescheduled(
+            trigger: .playlist,
+            changed: 3,
+            missing: 2,
+            forced: 1
+        ).properties
+        #expect(props.count == 4)
+        #expect(props["trigger"] as? String == "playlist")
+        #expect(props["changed_count"] as? Int == 3)
+        #expect(props["missing_count"] as? Int == 2)
+        #expect(props["forced_count"] as? Int == 1)
+    }
+
+    @Test
+    func alarmSyncDeferredProperties_includeTriggerAndCount() {
+        let props = AnalyticsEvent.alarmSyncDeferred(
+            trigger: .intent,
+            count: 2
+        ).properties
+        #expect(props.count == 2)
+        #expect(props["trigger"] as? String == "intent")
+        #expect(props["count"] as? Int == 2)
     }
 
     @Test

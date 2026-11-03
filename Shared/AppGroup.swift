@@ -298,6 +298,85 @@ enum AppGroup {
         }
     }
 
+    /// 通常アラームの登録内容の署名（entryID → signature・#163）。
+    /// 同じ署名の `.scheduled` アラームは同期で作り直さない。
+    static var primaryAlarmSignatures: [UUID: AlarmScheduleSignature] {
+        get {
+            guard let data = userDefaults.data(forKey: "primary_alarm_signatures"),
+                  let map = try? JSONDecoder().decode(
+                      [UUID: AlarmScheduleSignature].self,
+                      from: data
+                  )
+            else { return [:] }
+            return map
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else { return }
+            userDefaults.set(data, forKey: "primary_alarm_signatures")
+        }
+    }
+
+    /// 最終アラーム（寝過ごし防止）の登録内容の署名（entryID → signature・#163）。
+    static var backupAlarmSignatures: [UUID: BackupAlarmScheduleSignature] {
+        get {
+            guard let data = userDefaults.data(forKey: "backup_alarm_signatures"),
+                  let map = try? JSONDecoder().decode(
+                      [UUID: BackupAlarmScheduleSignature].self,
+                      from: data
+                  )
+            else { return [:] }
+            return map
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else { return }
+            userDefaults.set(data, forKey: "backup_alarm_signatures")
+        }
+    }
+
+    /// 同期の実行記録（最新50件・#163）。
+    static var alarmSyncLog: [AlarmSyncLogEntry] {
+        get {
+            guard let data = userDefaults.data(forKey: "alarm_sync_log"),
+                  let log = try? JSONDecoder().decode([AlarmSyncLogEntry].self, from: data)
+            else { return [] }
+            return log
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else { return }
+            userDefaults.set(data, forKey: "alarm_sync_log")
+        }
+    }
+
+    /// 停止時に発火分のため延期した、次回シャッフル順の作り直し待ち（#163）。
+    static var pendingShuffleRefreshEntryIDs: Set<UUID> {
+        get {
+            guard let data = userDefaults.data(forKey: "pending_shuffle_refresh_entry_ids"),
+                  let ids = try? JSONDecoder().decode(Set<UUID>.self, from: data)
+            else { return [] }
+            return ids
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else { return }
+            userDefaults.set(data, forKey: "pending_shuffle_refresh_entry_ids")
+        }
+    }
+
+    /// 最後に停止 Intent が動いた時刻（#163）。
+    /// バックグラウンド起動直後の同期を `intent` きっかけとして記録するために使う。
+    static var lastStopIntentAt: Date? {
+        get {
+            guard userDefaults.object(forKey: "last_stop_intent_at") != nil else { return nil }
+            return Date(timeIntervalSince1970: userDefaults.double(forKey: "last_stop_intent_at"))
+        }
+        set {
+            if let newValue {
+                userDefaults.set(newValue.timeIntervalSince1970, forKey: "last_stop_intent_at")
+            } else {
+                userDefaults.removeObject(forKey: "last_stop_intent_at")
+            }
+        }
+    }
+
     /// プレイリスト一覧（JSON・#151）
     static var playlistsData: Data? {
         get { userDefaults.data(forKey: "playlists") }
