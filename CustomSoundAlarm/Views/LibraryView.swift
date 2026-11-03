@@ -19,6 +19,19 @@ struct LibraryView: View {
                     isSelecting: false,
                     selectedSound: $selectedSound
                 )
+
+                #if DEBUG
+                Section {
+                    NavigationLink {
+                        SyncLogView()
+                    } label: {
+                        Label("同期ログ", systemImage: "waveform.path.ecg")
+                    }
+                    .accessibilityIdentifier("library.syncLog")
+                } header: {
+                    Text("開発者向け")
+                }
+                #endif
             }
             .accessibilityIdentifier("library.root")
             .warmListBackground()

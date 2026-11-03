@@ -105,18 +105,26 @@ enum BackupAlarmLogic {
         var cancelEntryIDs: Set<UUID>
         var rescheduleAlarmIDs: [UUID: UUID]
         var scheduleEntries: [AlarmEntry]
+        /// 署名が未保存だったため、そのまま残して保存する署名（#163）
+        var signatureUpdates: [UUID: BackupAlarmScheduleSignature]
+        /// 作り直した理由（entryID → reason・#163）
+        var rescheduleReasons: [UUID: AlarmSyncRescheduleReason]
     }
 
     /// `backupAlarmIDMap` の遷移を計算する純粋関数。
     ///
     /// - 鳴動/スヌーズ中は維持
     /// - 停止直後の抑制中（`suppressedEntryIDs`）は何もしない（次回分を消さない）
-    /// - それ以外は次の締め切りで登録し直す
+    /// - 署名が同じ `.scheduled` は作り直さない（#163）
+    /// - 署名が未保存なら残して現在の署名を保存する
     static func computeBackupSyncDiff(
         oldMap: [UUID: UUID],
         entries: [AlarmEntry],
         activeStates: [UUID: Alarm.State],
-        suppressedEntryIDs: Set<UUID> = []
+        suppressedEntryIDs: Set<UUID> = [],
+        forceRescheduleEntryIDs: Set<UUID> = [],
+        signatures: [UUID: BackupAlarmScheduleSignature] = [:],
+        desiredSignatures: [UUID: BackupAlarmScheduleSignature] = [:]
     ) -> BackupSyncDiff {
         let wanted = entries.filter { $0.isEnabled && $0.backupMinutes != nil }
         let wantedIDs = Set(wanted.map(\.id))
@@ -125,29 +133,71 @@ enum BackupAlarmLogic {
         var cancelEntryIDs = Set<UUID>()
         var rescheduleAlarmIDs: [UUID: UUID] = [:]
         var scheduleEntries: [AlarmEntry] = []
+        var signatureUpdates: [UUID: BackupAlarmScheduleSignature] = [:]
+        var rescheduleReasons: [UUID: AlarmSyncRescheduleReason] = [:]
 
         for entryID in oldMap.keys where !wantedIDs.contains(entryID) {
             cancelEntryIDs.insert(entryID)
         }
 
+        func schedule(_ entry: AlarmEntry, reason: AlarmSyncRescheduleReason) {
+            if let oldAlarmID = oldMap[entry.id] {
+                rescheduleAlarmIDs[entry.id] = oldAlarmID
+            }
+            scheduleEntries.append(entry)
+            rescheduleReasons[entry.id] = reason
+        }
+
         for entry in wanted {
+            let oldAlarmID = oldMap[entry.id]
+            let state = oldAlarmID.flatMap { activeStates[$0] }
+
             if suppressedEntryIDs.contains(entry.id) {
                 // 停止直後: いま登録されている次回分をそのまま残す
-                if let alarmID = oldMap[entry.id] {
+                if let alarmID = oldAlarmID {
                     keptMap[entry.id] = alarmID
                 }
                 continue
             }
 
-            if let alarmID = oldMap[entry.id],
-               let state = activeStates[alarmID],
+            if let alarmID = oldAlarmID,
                state == .countdown || state == .alerting || state == .paused {
                 keptMap[entry.id] = alarmID
-            } else {
-                if let oldAlarmID = oldMap[entry.id] {
-                    rescheduleAlarmIDs[entry.id] = oldAlarmID
+                continue
+            }
+
+            let isForced = forceRescheduleEntryIDs.contains(entry.id)
+            if isForced {
+                schedule(entry, reason: .forced)
+                continue
+            }
+
+            guard let alarmID = oldAlarmID else {
+                schedule(entry, reason: .missing)
+                continue
+            }
+
+            if state != .scheduled {
+                // マップが古い（AlarmKit に無い）ときは登録し直す。
+                schedule(entry, reason: .missing)
+                continue
+            }
+
+            guard let desired = desiredSignatures[entry.id] else {
+                // 署名を作れない異常時は、既存の登録を維持する。
+                keptMap[entry.id] = alarmID
+                continue
+            }
+
+            if let saved = signatures[entry.id] {
+                if saved == desired {
+                    keptMap[entry.id] = alarmID
+                } else {
+                    schedule(entry, reason: .changed)
                 }
-                scheduleEntries.append(entry)
+            } else {
+                keptMap[entry.id] = alarmID
+                signatureUpdates[entry.id] = desired
             }
         }
 
@@ -155,7 +205,10 @@ enum BackupAlarmLogic {
             keptMap: keptMap,
             cancelEntryIDs: cancelEntryIDs,
             rescheduleAlarmIDs: rescheduleAlarmIDs,
-            scheduleEntries: scheduleEntries
+            scheduleEntries: scheduleEntries,
+            signatureUpdates: signatureUpdates,
+            rescheduleReasons: rescheduleReasons
         )
     }
+
 }

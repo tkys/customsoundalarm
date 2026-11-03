@@ -55,6 +55,9 @@ final class AlarmScheduler {
     /// sync の直列化用（連続操作時に前回をキャンセルして最新のみ実行）
     private var syncTask: Task<Void, Never>?
 
+    /// 延期した作り直しの再試行（#163）。アプリが生きている間のベストエフォート。
+    private var deferredRetryTask: Task<Void, Never>?
+
     /// 状態監視タスク（重複防止用にハンドル保持）
     private var observationTask: Task<Void, Never>?
 
@@ -239,13 +242,17 @@ final class AlarmScheduler {
     /// 全アラームを同期（直列化: 連続呼び出し時は前回をキャンセルし最新のみ実行）
     func syncAlarms(
         _ entries: [AlarmEntry],
-        forceRescheduleEntryIDs: Set<UUID> = []
+        forceRescheduleEntryIDs: Set<UUID> = [],
+        editedEntryIDs: Set<UUID> = [],
+        trigger: AlarmSyncTrigger
     ) {
         syncTask?.cancel()
         syncTask = Task {
             await performSync(
                 entries,
-                forceRescheduleEntryIDs: forceRescheduleEntryIDs
+                forceRescheduleEntryIDs: forceRescheduleEntryIDs,
+                editedEntryIDs: editedEntryIDs,
+                trigger: trigger
             )
         }
     }
@@ -258,12 +265,18 @@ final class AlarmScheduler {
             playlistID: playlistID
         )
         guard !entryIDs.isEmpty else { return }
-        syncAlarms(entries, forceRescheduleEntryIDs: entryIDs)
+        syncAlarms(
+            entries,
+            forceRescheduleEntryIDs: entryIDs,
+            trigger: .playlist
+        )
     }
 
     private func performSync(
         _ entries: [AlarmEntry],
-        forceRescheduleEntryIDs: Set<UUID> = []
+        forceRescheduleEntryIDs: Set<UUID> = [],
+        editedEntryIDs: Set<UUID> = [],
+        trigger: AlarmSyncTrigger
     ) async {
         guard !Task.isCancelled else { return }
 
@@ -288,11 +301,60 @@ final class AlarmScheduler {
             return
         }
 
+        // 停止時に発火分のため延期したシャッフル順の作り直し（#163）
+        let enabledEntryIDs = Set(entries.filter(\.isEnabled).map(\.id))
+        var pendingShuffleRefresh = AppGroup.pendingShuffleRefreshEntryIDs
+        pendingShuffleRefresh.formIntersection(enabledEntryIDs)
+        AppGroup.pendingShuffleRefreshEntryIDs = pendingShuffleRefresh
+        // バックグラウンド起動（intent）では新しい順番の書き出しをせず、
+        // 前面復帰か次の同期に回す（#163 レビュー）。
+        let pendingShuffleForThisSync = trigger == .intent
+            ? Set<UUID>()
+            : pendingShuffleRefresh
+        var effectiveForceEntryIDs = forceRescheduleEntryIDs
+        effectiveForceEntryIDs.formUnion(pendingShuffleForThisSync)
+
+        // 署名計算（#163）。プレイリストは内容が変わっていなければキャッシュを使う。
+        // 計測イベントは実際に登録するときだけ送る（reportEvents: false）。
+        var desiredSignatures: [UUID: AlarmScheduleSignature] = [:]
+        for entry in entries where entry.isEnabled {
+            guard !Task.isCancelled else { return }
+            if trigger == .intent {
+                // バックグラウンド起動では描画しない。キャッシュがあればその署名、
+                // 無ければ署名を作らず既存の登録を維持する。
+                if let soundFileName = PlaylistRenderService.shared.cachedSoundFileName(
+                    for: entry.playlistRenderInput
+                ) {
+                    desiredSignatures[entry.id] = AlarmScheduleSignature(
+                        entry: entry,
+                        soundFileName: soundFileName,
+                        displayName: soundDisplayName(for: entry)
+                    )
+                }
+                continue
+            }
+            let resolution = await PlaylistRenderService.shared.prepareSound(
+                for: entry.playlistRenderInput,
+                forceNewOrder: pendingShuffleForThisSync.contains(entry.id),
+                reportEvents: false
+            )
+            desiredSignatures[entry.id] = AlarmScheduleSignature(
+                entry: entry,
+                soundFileName: resolution.fileName,
+                displayName: soundDisplayName(for: entry)
+            )
+        }
+
+        let syncNow = Date()
         let diff = computeSyncDiff(
             oldMap: alarmIDMap,
             entries: entries,
             activeStates: activeStates,
-            forceRescheduleEntryIDs: forceRescheduleEntryIDs
+            forceRescheduleEntryIDs: effectiveForceEntryIDs,
+            signatures: AppGroup.primaryAlarmSignatures,
+            desiredSignatures: desiredSignatures,
+            editedEntryIDs: editedEntryIDs,
+            now: syncNow
         )
 
         // Cancel alarms for disabled/deleted entries
@@ -327,7 +389,7 @@ final class AlarmScheduler {
         }
 
         // 無効・削除されたアラームの登録中ファイル名を落とす（掃除は次回同期で行う）
-        let enabledIDs = Set(entries.filter(\.isEnabled).map(\.id))
+        let enabledIDs = enabledEntryIDs
         let backupIDs = Set(
             entries.filter { $0.isEnabled && $0.backupMinutes != nil }.map(\.id)
         )
@@ -340,10 +402,12 @@ final class AlarmScheduler {
 
         // Schedule new/changed entries
         var newMap = diff.keptMap
+        var newlyScheduledIDs = Set<UUID>()
         for entry in diff.scheduleEntries {
             guard !Task.isCancelled else { return }
             if let alarmID = await scheduleAlarm(for: entry) {
                 newMap[entry.id] = alarmID
+                newlyScheduledIDs.insert(entry.id)
                 if let oldAlarmID = deferredOldAlarmIDs.removeValue(forKey: entry.id) {
                     try? manager.cancel(id: oldAlarmID)
                 }
@@ -359,15 +423,27 @@ final class AlarmScheduler {
 
         guard !Task.isCancelled else { return }
 
+        // 署名の保存（#163）。延期・鳴動中のエントリは古い署名を残す。
+        var primarySignatures = AppGroup.primaryAlarmSignatures
+        primarySignatures = primarySignatures.filter { enabledIDs.contains($0.key) }
+        for (entryID, signature) in diff.signatureUpdates {
+            primarySignatures[entryID] = signature
+        }
+        AppGroup.primaryAlarmSignatures = primarySignatures
+
+        // 作り直しが完了したシャッフル順の待ちを外す（延期・失敗は残す）
+        AppGroup.pendingShuffleRefreshEntryIDs = pendingShuffleRefresh
+            .subtracting(newlyScheduledIDs)
+
         // 最終アラーム（#110）: 本体と必ず一緒に同期する。
         // 停止 Intent が次回分を登録している場合があるので、永続化された最新マップを読む。
         backupAlarmIDMap = AlarmIDMaps.loadBackup()
-        let now = Date()
+        let backupNow = Date()
         let suppressedEntryIDs = Set(entries.compactMap { entry -> UUID? in
             guard let canceledAt = AppGroup.backupCanceledAt[entry.id],
                   let nextDate = BackupAlarmLogic.nextBackupDate(
                       for: entry,
-                      after: now,
+                      after: backupNow,
                       skippingCurrentOccurrence: false
                   ),
                   BackupAlarmLogic.isSuppressed(nextFireDate: nextDate, canceledAt: canceledAt)
@@ -383,11 +459,32 @@ final class AlarmScheduler {
             }
         }
 
+        var desiredBackupSignatures: [UUID: BackupAlarmScheduleSignature] = [:]
+        for entry in entries where entry.isEnabled && entry.backupMinutes != nil {
+            guard let nextDate = BackupAlarmLogic.nextBackupDate(
+                for: entry,
+                after: backupNow,
+                skippingCurrentOccurrence: false
+            ) else { continue }
+            let source = backupSourceFileName(for: entry) ?? ""
+            let soundFileName = BackupLoudVariantService.resolvedSoundFileName(
+                forSourceFileName: source
+            )
+            desiredBackupSignatures[entry.id] = BackupAlarmScheduleSignature(
+                entry: entry,
+                fireDate: nextDate,
+                soundFileName: soundFileName
+            )
+        }
+
         let backupDiff = BackupAlarmLogic.computeBackupSyncDiff(
             oldMap: backupAlarmIDMap,
             entries: entries,
             activeStates: activeStates,
-            suppressedEntryIDs: suppressedEntryIDs
+            suppressedEntryIDs: suppressedEntryIDs,
+            forceRescheduleEntryIDs: effectiveForceEntryIDs,
+            signatures: AppGroup.backupAlarmSignatures,
+            desiredSignatures: desiredBackupSignatures
         )
 
         for entryID in backupDiff.cancelEntryIDs {
@@ -403,14 +500,29 @@ final class AlarmScheduler {
         }
 
         var newBackupMap = backupDiff.keptMap
+        var newlyScheduledBackupIDs = Set<UUID>()
         for entry in backupDiff.scheduleEntries {
             guard !Task.isCancelled else { return }
             if let backupID = await scheduleBackupAlarm(for: entry) {
                 newBackupMap[entry.id] = backupID
+                newlyScheduledBackupIDs.insert(entry.id)
             }
         }
 
         guard !Task.isCancelled else { return }
+
+        // 最終アラームの署名保存（#163）
+        var backupSignatures = AppGroup.backupAlarmSignatures
+        backupSignatures = backupSignatures.filter { backupIDs.contains($0.key) }
+        for (entryID, signature) in backupDiff.signatureUpdates {
+            backupSignatures[entryID] = signature
+        }
+        for entryID in newlyScheduledBackupIDs {
+            if let signature = desiredBackupSignatures[entryID] {
+                backupSignatures[entryID] = signature
+            }
+        }
+        AppGroup.backupAlarmSignatures = backupSignatures
 
         alarmIDMap = newMap
         backupAlarmIDMap = newBackupMap
@@ -418,7 +530,68 @@ final class AlarmScheduler {
         saveIDMap()
         saveBackupIDMap()
 
-        logger.info("Synced \(self.scheduledAlarmCount) alarms (\(diff.keptMap.count) kept, \(diff.scheduleEntries.count) scheduled, \(diff.cancelEntryIDs.count) cancelled, \(diff.rescheduleAlarmIDs.count) rescheduled), backups: \(newBackupMap.count)")
+        // 同期の記録（#163）。原因切り分け用に最新50件を残す。
+        // 実際に登録できたものだけを「作り直した」として数える。
+        let allReasons = Array(diff.rescheduleReasons.filter {
+            newlyScheduledIDs.contains($0.key)
+        }.values)
+            + Array(backupDiff.rescheduleReasons.filter {
+                newlyScheduledBackupIDs.contains($0.key)
+            }.values)
+        let changedCount = allReasons.filter { $0 == .changed }.count
+        let missingCount = allReasons.filter { $0 == .missing }.count
+        let forcedCount = allReasons.filter { $0 == .forced }.count
+        let rescheduledCount = allReasons.count
+        let deferredCount = diff.deferredEntryIDs.count
+
+        if rescheduledCount > 0 {
+            AnalyticsService.shared.capture(.alarmSyncRescheduled(
+                trigger: trigger,
+                changed: changedCount,
+                missing: missingCount,
+                forced: forcedCount
+            ))
+        }
+        if deferredCount > 0 {
+            AnalyticsService.shared.capture(.alarmSyncDeferred(
+                trigger: trigger,
+                count: deferredCount
+            ))
+            scheduleDeferredRetry()
+        } else {
+            deferredRetryTask?.cancel()
+            deferredRetryTask = nil
+        }
+
+        let logEntry = AlarmSyncLogEntry(
+            trigger: trigger,
+            timestamp: Date(),
+            rescheduledCount: rescheduledCount,
+            deferredCount: deferredCount,
+            changedCount: changedCount,
+            missingCount: missingCount,
+            forcedCount: forcedCount
+        )
+        AppGroup.alarmSyncLog = AlarmSyncLog.appending(
+            logEntry,
+            to: AppGroup.alarmSyncLog
+        )
+
+        logger.info("Synced \(self.scheduledAlarmCount) alarms (\(diff.keptMap.count) kept, \(diff.scheduleEntries.count) scheduled, \(diff.cancelEntryIDs.count) cancelled, \(diff.rescheduleAlarmIDs.count) rescheduled, \(deferredCount) deferred, trigger: \(trigger.rawValue)), backups: \(newBackupMap.count)")
+    }
+
+    /// 延期した作り直しを90秒後に再試行する（#163）。
+    /// 分が変わった後のベストエフォート。アプリが停止・終了したら次回起動時に任せる。
+    private func scheduleDeferredRetry() {
+        deferredRetryTask?.cancel()
+        deferredRetryTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(90))
+            guard !Task.isCancelled else { return }
+            self?.syncAlarms(
+                AlarmStore.shared.alarms,
+                trigger: .deferredRetry
+            )
+        }
     }
 
     /// 単一アラームをスケジュール（成功時に Alarm.ID を返す）
@@ -441,6 +614,14 @@ final class AlarmScheduler {
             var names = AppGroup.primarySoundNames
             names[entry.id] = resolution.fileName
             AppGroup.primarySoundNames = names
+            // 実際に登録した内容の署名を保存する（#163）
+            var signatures = AppGroup.primaryAlarmSignatures
+            signatures[entry.id] = AlarmScheduleSignature(
+                entry: entry,
+                soundFileName: resolution.fileName,
+                displayName: soundDisplayName(for: entry)
+            )
+            AppGroup.primaryAlarmSignatures = signatures
             // 新しい発火サイクルなのでスヌーズ回数をリセット（#110）
             var counts = AppGroup.snoozeCounts
             if counts.removeValue(forKey: entry.id) != nil {
@@ -621,6 +802,15 @@ final class AlarmScheduler {
               AlarmSoundModeResolver.changesOrderOnStop(for: entry) else {
             return
         }
+        let now = Date()
+        guard !AlarmSyncSafety.shouldDeferReschedule(for: entry, now: now) else {
+            // 発火した分の中では登録し直さない。次の同期で新しい順番を作る（#163）
+            var pending = AppGroup.pendingShuffleRefreshEntryIDs
+            pending.insert(entry.id)
+            AppGroup.pendingShuffleRefreshEntryIDs = pending
+            logger.info("Deferred shuffle reschedule during firing minute: \(entry.label)")
+            return
+        }
         let resolution = await PlaylistRenderService.shared.prepareSound(
             for: entry.playlistRenderInput,
             forceNewOrder: true
@@ -640,6 +830,14 @@ final class AlarmScheduler {
             var names = AppGroup.primarySoundNames
             names[entry.id] = resolution.fileName
             AppGroup.primarySoundNames = names
+            // 停止後の作り直しも署名を更新し、次の同期でさらに作り直さない（#163）
+            var signatures = AppGroup.primaryAlarmSignatures
+            signatures[entry.id] = AlarmScheduleSignature(
+                entry: entry,
+                soundFileName: resolution.fileName,
+                displayName: soundDisplayName(for: entry)
+            )
+            AppGroup.primaryAlarmSignatures = signatures
             logger.info("Rescheduled playlist alarm for next occurrence: \(entry.label)")
         } catch {
             logger.error("Failed to reschedule playlist alarm \(entry.label): \(error.localizedDescription)")
@@ -689,6 +887,14 @@ final class AlarmScheduler {
 
         do {
             _ = try await manager.schedule(id: alarmID, configuration: config)
+            // 発火前の同期で作り直さないよう、登録した内容の署名を保存する（#163）
+            var signatures = AppGroup.backupAlarmSignatures
+            signatures[entry.id] = BackupAlarmScheduleSignature(
+                entry: entry,
+                fireDate: nextDate,
+                soundFileName: soundFileName
+            )
+            AppGroup.backupAlarmSignatures = signatures
             logger.info("Scheduled one-shot backup alarm at \(nextDate) for \(entry.label)")
             return alarmID
         } catch {
@@ -975,7 +1181,7 @@ final class AlarmScheduler {
 
 /// 差分同期のための計算結果。`computeSyncDiff` が返す。
 struct SyncDiff: Sendable {
-    /// 保護状態のためマップに残す entryID → Alarm.ID
+    /// そのまま残す entryID → Alarm.ID
     var keptMap: [UUID: Alarm.ID]
     /// 削除/無効化されたためキャンセルが必要な entryID
     var cancelEntryIDs: Set<UUID>
@@ -983,50 +1189,129 @@ struct SyncDiff: Sendable {
     var rescheduleAlarmIDs: [UUID: Alarm.ID]
     /// 新規または変更があったためスケジュールが必要な AlarmEntry
     var scheduleEntries: [AlarmEntry]
+    /// 署名が未保存だったため、そのまま残して保存する署名（#163）
+    var signatureUpdates: [UUID: AlarmScheduleSignature]
+    /// 作り直した理由（entryID → reason・#163）
+    var rescheduleReasons: [UUID: AlarmSyncRescheduleReason]
+    /// 発火した分の中なので次の同期まで延期した entryID（#163）
+    var deferredEntryIDs: Set<UUID>
 }
 
 /// 差分同期のための alarmIDMap 遷移を計算する純粋関数。
 /// 副作用がなく、単体テスト可能。
+///
+/// `.scheduled` のアラームは署名が同じなら作り直さない（#163）。
+/// 署名が未保存（アップデート直後）なら、そのまま残して現在の署名を保存する。
+/// 発火した分（今の分・直前の分）の繰り返しアラームは、作り直しが必要でも延期する。
 func computeSyncDiff(
     oldMap: [UUID: Alarm.ID],
     entries: [AlarmEntry],
     activeStates: [Alarm.ID: Alarm.State],
-    forceRescheduleEntryIDs: Set<UUID> = []
+    forceRescheduleEntryIDs: Set<UUID> = [],
+    signatures: [UUID: AlarmScheduleSignature] = [:],
+    desiredSignatures: [UUID: AlarmScheduleSignature] = [:],
+    editedEntryIDs: Set<UUID> = [],
+    now: Date = Date(),
+    calendar: Calendar = .current
 ) -> SyncDiff {
     let enabledEntryIDs = Set(entries.filter(\.isEnabled).map(\.id))
     var keptMap: [UUID: Alarm.ID] = [:]
     var cancelEntryIDs = Set<UUID>()
     var rescheduleAlarmIDs: [UUID: Alarm.ID] = [:]
     var scheduleEntries: [AlarmEntry] = []
+    var signatureUpdates: [UUID: AlarmScheduleSignature] = [:]
+    var rescheduleReasons: [UUID: AlarmSyncRescheduleReason] = [:]
+    var deferredEntryIDs = Set<UUID>()
 
     for entryID in oldMap.keys where !enabledEntryIDs.contains(entryID) {
         cancelEntryIDs.insert(entryID)
     }
 
+    func schedule(_ entry: AlarmEntry, reason: AlarmSyncRescheduleReason) {
+        if let oldAlarmID = oldMap[entry.id] {
+            rescheduleAlarmIDs[entry.id] = oldAlarmID
+        }
+        scheduleEntries.append(entry)
+        rescheduleReasons[entry.id] = reason
+    }
+
     for entry in entries where entry.isEnabled {
-        let state = oldMap[entry.id].flatMap { activeStates[$0] }
+        let oldAlarmID = oldMap[entry.id]
+        let state = oldAlarmID.flatMap { activeStates[$0] }
         let isProtected = state == .countdown || state == .alerting || state == .paused
-        if let alarmID = oldMap[entry.id], isProtected {
+
+        if let alarmID = oldAlarmID, isProtected {
             // 鳴動中・スヌーズ中は今回の音を優先し、次回の同期で反映する。
             keptMap[entry.id] = alarmID
-        } else if let alarmID = oldMap[entry.id],
-                  !forceRescheduleEntryIDs.contains(entry.id),
-                  state != nil,
-                  state != .scheduled {
-            // プレイリスト編集などで強制指定されたエントリは、ここでも作り直す。
-            keptMap[entry.id] = alarmID
-        } else {
-            if let oldAlarmID = oldMap[entry.id] {
-                rescheduleAlarmIDs[entry.id] = oldAlarmID
-            }
-            scheduleEntries.append(entry)
+            continue
         }
+
+        let isForced = forceRescheduleEntryIDs.contains(entry.id)
+        let reason: AlarmSyncRescheduleReason
+        var needsReschedule = false
+
+        if let alarmID = oldAlarmID, !isForced,
+           state == .scheduled,
+           let desired = desiredSignatures[entry.id] {
+            if let saved = signatures[entry.id] {
+                if saved == desired {
+                    keptMap[entry.id] = alarmID
+                    continue
+                }
+                reason = .changed
+                needsReschedule = true
+            } else {
+                // 署名が未保存（アップデート直後）は全件を作り直さず、
+                // そのまま残して現在の署名を保存する。
+                keptMap[entry.id] = alarmID
+                signatureUpdates[entry.id] = desired
+                continue
+            }
+        } else if isForced {
+            reason = .forced
+            needsReschedule = true
+        } else if oldAlarmID == nil {
+            reason = .missing
+            needsReschedule = true
+        } else if state == .scheduled, desiredSignatures[entry.id] == nil {
+            // 署名を作れない異常時は、既存の登録を維持する。
+            keptMap[entry.id] = oldAlarmID!
+            continue
+        } else {
+            // AlarmKit に登録があるが状態が読めない（マップが古い）とき。
+            reason = .missing
+            needsReschedule = true
+        }
+
+        guard needsReschedule else { continue }
+
+        // 延期するのは「AlarmKit に .scheduled で残っていて、署名変更/強制で
+        // 作り直したい」場合だけ。AlarmKit に無い（.missing）なら、
+        // 次回鳴らなくなる方が困るので延期せずすぐ登録する（#163 レビュー）。
+        if state == .scheduled,
+           reason == .changed || reason == .forced,
+           oldAlarmID != nil,
+           AlarmSyncSafety.shouldDeferReschedule(
+               for: entry,
+               editedEntryIDs: editedEntryIDs,
+               now: now,
+               calendar: calendar
+           ) {
+            keptMap[entry.id] = oldAlarmID!
+            deferredEntryIDs.insert(entry.id)
+            continue
+        }
+
+        schedule(entry, reason: reason)
     }
 
     return SyncDiff(
         keptMap: keptMap,
         cancelEntryIDs: cancelEntryIDs,
         rescheduleAlarmIDs: rescheduleAlarmIDs,
-        scheduleEntries: scheduleEntries
+        scheduleEntries: scheduleEntries,
+        signatureUpdates: signatureUpdates,
+        rescheduleReasons: rescheduleReasons,
+        deferredEntryIDs: deferredEntryIDs
     )
 }

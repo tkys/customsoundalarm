@@ -214,7 +214,7 @@ struct ContentView: View {
                     sound: AlarmSoundDisplay.representativeSound(for: alarm),
                     onToggle: {
                         alarmStore.toggleEnabled(alarm)
-                        AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
+                        AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
                     },
                     onTap: {
                         selectedAlarm = alarm
@@ -224,7 +224,7 @@ struct ContentView: View {
                 .contextMenu {
                     Button {
                         alarmStore.duplicate(alarm)
-                        AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
+                        AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
                     } label: {
                         Label("duplicate_alarm", systemImage: "plus.square.on.square")
                     }
@@ -237,7 +237,7 @@ struct ContentView: View {
                         alarmStore.remove(alarm)
                     }
                 }
-                AlarmScheduler.shared.syncAlarms(alarmStore.alarms)
+                AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
             }
         }
         .animation(.default, value: alarmStore.alarms)

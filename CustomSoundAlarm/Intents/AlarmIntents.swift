@@ -22,6 +22,8 @@ struct DismissAlarmIntent: LiveActivityIntent {
 
     func perform() async throws -> some IntentResult {
         let now = Date()
+        // バックグラウンド起動直後の同期を intent きっかけとして記録する（#163）
+        AppGroup.lastStopIntentAt = now
         let hour = Calendar.current.component(.hour, from: now)
         let stoppedID = UUID(uuidString: alarmID)
 
@@ -118,6 +120,13 @@ struct DismissAlarmIntent: LiveActivityIntent {
                         var map = AlarmIDMaps.loadBackup()
                         map[entryID] = newID
                         AlarmIDMaps.saveBackup(map)
+                        var signatures = AppGroup.backupAlarmSignatures
+                        signatures[entryID] = BackupAlarmScheduleSignature(
+                            entry: entry,
+                            fireDate: nextDate,
+                            soundFileName: soundFileName
+                        )
+                        AppGroup.backupAlarmSignatures = signatures
                         scheduledNext = true
                     }
                 }
@@ -127,6 +136,9 @@ struct DismissAlarmIntent: LiveActivityIntent {
                 var map = AlarmIDMaps.loadBackup()
                 map.removeValue(forKey: entryID)
                 AlarmIDMaps.saveBackup(map)
+                var signatures = AppGroup.backupAlarmSignatures
+                signatures.removeValue(forKey: entryID)
+                AppGroup.backupAlarmSignatures = signatures
             }
 
             let snoozesBefore = entryID.flatMap { AppGroup.snoozeCounts[$0] }

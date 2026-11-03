@@ -154,6 +154,19 @@ enum AnalyticsEvent: Sendable {
     /// プレイリストの再登録に失敗し、前のアラームを残した
     case playlistRescheduleFailed(reason: String)
 
+    /// 同期でアラームを作り直した（#163）。1回の同期につき1イベント。
+    /// - trigger: launch / foreground / edit / playlist / intent / deferred_retry
+    /// - changed / missing / forced: 理由ごとの件数
+    case alarmSyncRescheduled(
+        trigger: AlarmSyncTrigger,
+        changed: Int,
+        missing: Int,
+        forced: Int
+    )
+
+    /// 発火した分の中なので、作り直しを次の同期まで延期した（#163）
+    case alarmSyncDeferred(trigger: AlarmSyncTrigger, count: Int)
+
     /// 大きくした版を生成した（#119）
     case backupLoudVariantGenerated(
         gainDbBucket: String,
@@ -265,6 +278,8 @@ enum AnalyticsEvent: Sendable {
         case .playlistRenderFailed: return "playlist_render_failed"
         case .playlistRenderFallback: return "playlist_render_fallback"
         case .playlistRescheduleFailed: return "playlist_reschedule_failed"
+        case .alarmSyncRescheduled: return "alarm_sync_rescheduled"
+        case .alarmSyncDeferred: return "alarm_sync_deferred"
         case .backupLoudVariantGenerated: return "backup_loud_variant_generated"
         case .backupLoudVariantFailed: return "backup_loud_variant_failed"
         case .volumeGuideOpened: return "volume_guide_opened"
@@ -411,6 +426,18 @@ enum AnalyticsEvent: Sendable {
             return [:]
         case let .playlistRescheduleFailed(reason):
             return ["reason": reason]
+        case let .alarmSyncRescheduled(trigger, changed, missing, forced):
+            return [
+                "trigger": trigger.analyticsValue,
+                "changed_count": changed,
+                "missing_count": missing,
+                "forced_count": forced
+            ]
+        case let .alarmSyncDeferred(trigger, count):
+            return [
+                "trigger": trigger.analyticsValue,
+                "count": count
+            ]
         case let .backupLoudVariantGenerated(gainDbBucket, durationBucket, source, outputLufsBucket):
             var props: [String: Any] = [
                 "gain_db_bucket": gainDbBucket,

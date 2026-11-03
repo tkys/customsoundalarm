@@ -168,6 +168,18 @@ struct BackupAlarmLogicTests {
         UUID(uuidString: String(format: "00000000-0000-0000-0000-%012d", n))!
     }
 
+    private func signature(
+        _ entry: AlarmEntry,
+        fireDate: Date = Date(timeIntervalSince1970: 1_700_000_000),
+        sound: String = "PresetMarimba.caf"
+    ) -> BackupAlarmScheduleSignature {
+        BackupAlarmScheduleSignature(
+            entry: entry,
+            fireDate: fireDate,
+            soundFileName: sound
+        )
+    }
+
     @Test
     func diff_newEntry_schedules() {
         let entry = AlarmEntry(id: uuid(1), backupMinutes: 15)
@@ -240,16 +252,67 @@ struct BackupAlarmLogicTests {
     }
 
     @Test
-    func diff_scheduled_isRescheduled() {
+    func diff_scheduledWithSameSignature_isKept() {
+        let entry = AlarmEntry(id: uuid(1), backupMinutes: 20)
+        let oldID = uuid(99)
+        let sig = signature(entry)
+        let diff = BackupAlarmLogic.computeBackupSyncDiff(
+            oldMap: [entry.id: oldID],
+            entries: [entry],
+            activeStates: [oldID: .scheduled],
+            signatures: [entry.id: sig],
+            desiredSignatures: [entry.id: sig]
+        )
+        #expect(diff.keptMap[entry.id] == oldID)
+        #expect(diff.scheduleEntries.isEmpty)
+        #expect(diff.rescheduleAlarmIDs.isEmpty)
+    }
+
+    @Test
+    func diff_scheduledWithChangedSignature_isRescheduled() {
         let entry = AlarmEntry(id: uuid(1), backupMinutes: 20)
         let oldID = uuid(99)
         let diff = BackupAlarmLogic.computeBackupSyncDiff(
             oldMap: [entry.id: oldID],
             entries: [entry],
-            activeStates: [oldID: .scheduled]
+            activeStates: [oldID: .scheduled],
+            signatures: [entry.id: signature(entry, fireDate: Date(timeIntervalSince1970: 1_700_000_000))],
+            desiredSignatures: [entry.id: signature(entry, fireDate: Date(timeIntervalSince1970: 1_700_086_400))]
         )
         #expect(diff.rescheduleAlarmIDs[entry.id] == oldID)
         #expect(diff.scheduleEntries.map(\.id) == [entry.id])
+        #expect(diff.rescheduleReasons[entry.id] == .changed)
+    }
+
+    @Test
+    func diff_scheduledButStateUnknown_reschedules() {
+        let entry = AlarmEntry(id: uuid(1), backupMinutes: 20)
+        let oldID = uuid(99)
+        let diff = BackupAlarmLogic.computeBackupSyncDiff(
+            oldMap: [entry.id: oldID],
+            entries: [entry],
+            activeStates: [:],
+            desiredSignatures: [entry.id: signature(entry)]
+        )
+        #expect(diff.rescheduleAlarmIDs[entry.id] == oldID)
+        #expect(diff.scheduleEntries.map(\.id) == [entry.id])
+        #expect(diff.rescheduleReasons[entry.id] == .missing)
+    }
+
+    @Test
+    func diff_scheduledWithoutSavedSignature_isKeptAndAdopts() {
+        let entry = AlarmEntry(id: uuid(1), backupMinutes: 20)
+        let oldID = uuid(99)
+        let desired = signature(entry)
+        let diff = BackupAlarmLogic.computeBackupSyncDiff(
+            oldMap: [entry.id: oldID],
+            entries: [entry],
+            activeStates: [oldID: .scheduled],
+            desiredSignatures: [entry.id: desired]
+        )
+        #expect(diff.keptMap[entry.id] == oldID)
+        #expect(diff.scheduleEntries.isEmpty)
+        #expect(diff.signatureUpdates[entry.id] == desired)
     }
 
     @Test
