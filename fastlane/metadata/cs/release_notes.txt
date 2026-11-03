@@ -1,3 +1,6 @@
+■ Playlisty (PRO · Předběžný přístup)
+Seskupte své zvuky do playlistu a nechte se jím budit: popořadě, náhodně nebo s jednou náhodnou skladbou. Nastavit lze také „Jemný start“ a „Crossfade“ mezi skladbami. Pokud začnete funkci používat během předběžného přístupu, budete ji moci používat i po vydání finální verze.
+
 ■ Nově v češtině
 My Sound Alarm je nyní k dispozici v češtině a v 12 dalších jazycích. Aplikace se řídí jazykem zařízení.
 
