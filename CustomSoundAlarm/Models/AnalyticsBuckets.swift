@@ -41,4 +41,14 @@ enum AnalyticsBuckets {
         default: return "over_15min"
         }
     }
+
+    /// プレイリストの合計時間（秒）→ 区分（#151）。
+    static func playlistSecondsBucket(seconds: TimeInterval) -> String {
+        switch seconds {
+        case ..<60: return "under_1min"
+        case ..<300: return "1_5min"
+        case ..<600: return "5_10min"
+        default: return "10min"
+        }
+    }
 }

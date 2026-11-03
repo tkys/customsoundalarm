@@ -152,6 +152,15 @@ enum AppGroup {
 #endif
     }
 
+    /// UIテスト用: プレイリスト管理画面を直接開く（DEBUGのみ・#151）
+    static var isUITestOpenPlaylist: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-open-playlist")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: 同梱のプリセット音で波形クロップ画面を直接開く（DEBUGのみ・#149）
     static var isUITestOpenWaveformCrop: Bool {
     #if DEBUG
@@ -238,6 +247,51 @@ enum AppGroup {
     static var backupEarlyAccessGranted: Bool {
         get { userDefaults.bool(forKey: "backup_early_access_granted") }
         set { userDefaults.set(newValue, forKey: "backup_early_access_granted") }
+    }
+
+    /// 先行公開中にプレイリスト／フェードを使い始めた権利（#151）。
+    static var playlistEarlyAccessGranted: Bool {
+        get { userDefaults.bool(forKey: "playlist_early_access_granted") }
+        set { userDefaults.set(newValue, forKey: "playlist_early_access_granted") }
+    }
+
+    /// 通常アラームに登録中の音ファイル名（entryID → fileName・#151）。
+    /// プレイリストの掃除で「AlarmKit に登録中のファイル」を消さないために使う。
+    static var primarySoundNames: [UUID: String] {
+        get {
+            guard let data = userDefaults.data(forKey: "primary_sound_names"),
+                  let map = try? JSONDecoder().decode([UUID: String].self, from: data)
+            else { return [:] }
+            return map
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else { return }
+            userDefaults.set(data, forKey: "primary_sound_names")
+        }
+    }
+
+    /// プレイリスト一覧（JSON・#151）
+    static var playlistsData: Data? {
+        get { userDefaults.data(forKey: "playlists") }
+        set {
+            if let newValue {
+                userDefaults.set(newValue, forKey: "playlists")
+            } else {
+                userDefaults.removeObject(forKey: "playlists")
+            }
+        }
+    }
+
+    /// プレイリストの書き出しキャッシュ（JSON・#151）
+    static var playlistRenderCacheData: Data? {
+        get { userDefaults.data(forKey: "playlist_render_cache") }
+        set {
+            if let newValue {
+                userDefaults.set(newValue, forKey: "playlist_render_cache")
+            } else {
+                userDefaults.removeObject(forKey: "playlist_render_cache")
+            }
+        }
     }
 
     /// 停止によって取り消した最終アラームの記録（entryID → 停止時刻・#110）。

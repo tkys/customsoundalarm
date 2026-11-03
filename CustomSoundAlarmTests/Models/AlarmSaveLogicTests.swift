@@ -60,4 +60,49 @@ struct AlarmSaveLogicTests {
         #expect(updated.snoozeMinutes == 10)
         #expect(updated.backupMinutes == 20)
     }
+
+    @Test
+    func newEntry_carriesPlaylistFields() {
+        let playlistID = UUID()
+        let entry = AlarmSaveLogic.newEntry(
+            hour: 7,
+            minute: 0,
+            label: "Playlist",
+            repeatWeekdays: [],
+            soundFileName: "",
+            snoozeMinutes: 9,
+            backupMinutes: nil,
+            soundMode: .playlistShuffle,
+            playlistID: playlistID,
+            fadeSettings: PlaylistFadeSettings(fadeIn: .thirty)
+        )
+
+        #expect(entry.soundMode == .playlistShuffle)
+        #expect(entry.playlistID == playlistID)
+        #expect(entry.fadeSettings.fadeIn == .thirty)
+        #expect(entry.usesPlaylistFeatures)
+    }
+
+    @Test
+    func updatedEntry_carriesPlaylistFields() {
+        let existing = AlarmEntry()
+        let playlistID = UUID()
+        let updated = AlarmSaveLogic.updatedEntry(
+            from: existing,
+            hour: 8,
+            minute: 15,
+            label: "New",
+            repeatWeekdays: [],
+            soundFileName: "",
+            snoozeMinutes: 9,
+            backupMinutes: nil,
+            soundMode: .playlistOrder,
+            playlistID: playlistID,
+            fadeSettings: PlaylistFadeSettings(gapFade: .crossfade)
+        )
+
+        #expect(updated.soundMode == .playlistOrder)
+        #expect(updated.playlistID == playlistID)
+        #expect(updated.fadeSettings.gapFade == .crossfade)
+    }
 }

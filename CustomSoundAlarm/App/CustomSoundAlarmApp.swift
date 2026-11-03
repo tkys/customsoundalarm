@@ -85,6 +85,15 @@ struct CustomSoundAlarmApp: App {
                     AnalyticsService.shared.configure()
                     setUserProperties()
 
+                    // プレイリスト書き出しの計測フックと、起動時のシャッフル順更新（#151）
+                    PlaylistRenderService.shared.beginNewSession()
+                    PlaylistRenderService.shared.onRenderFailed = { reason in
+                        AnalyticsService.shared.capture(.playlistRenderFailed(reason: reason))
+                    }
+                    PlaylistRenderService.shared.onFallback = {
+                        AnalyticsService.shared.capture(.playlistRenderFallback)
+                    }
+
                     // #98: オンボの要否は Entitlements のネットワーク待ちより前に
                     // 同期的に決める（ContentView も即座に同じ入力で判定する。await の後で
                     // App が評価するとレースし、ユーザーがオンボ完了後に二重で
@@ -204,7 +213,9 @@ private func userPropertiesPayload(firstInstallBuild: Int? = nil) -> [String: An
         "sound_max_seconds_bucket": maxSeconds.map { AnalyticsBuckets.secondsBucket(seconds: $0) }
             ?? AnalyticsBuckets.secondsBucket(seconds: 0),
         "backup_alarm_count": AnalyticsUserProperties.backupAlarmCount(alarms: AlarmStore.shared.alarms),
-        "backup_early_access": AppGroup.backupEarlyAccessGranted
+        "backup_early_access": AppGroup.backupEarlyAccessGranted,
+        "playlist_count": PlaylistStore.shared.playlists.count,
+        "playlist_early_access": AppGroup.playlistEarlyAccessGranted
     ]
     if let firstInstallBuild {
         payload["first_install_build"] = firstInstallBuild

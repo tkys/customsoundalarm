@@ -23,9 +23,15 @@ enum BackupLoudVariantService {
 
     /// 最終アラームで使う音（大きくした版 or 予備音）
     static func resolvedSoundFileName(for entry: AlarmEntry) -> String {
+        resolvedSoundFileName(forSourceFileName: entry.soundFileName)
+    }
+
+    /// 元の音ファイル名から、大きくした版 or 予備音を解決する。
+    /// プレイリストのフォールバック（存在する最初の曲）でも使う（#151）。
+    static func resolvedSoundFileName(forSourceFileName sourceFileName: String) -> String {
         BackupSoundResolver.resolve(
-            sourceFileName: entry.soundFileName,
-            availableVariantFileName: existingVariantFileName(for: entry.soundFileName),
+            sourceFileName: sourceFileName,
+            availableVariantFileName: existingVariantFileName(for: sourceFileName),
             fallbackFileName: BackupAlarmSound.fileName
         )
     }

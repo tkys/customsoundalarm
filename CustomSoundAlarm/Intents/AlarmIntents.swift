@@ -57,6 +57,7 @@ struct DismissAlarmIntent: LiveActivityIntent {
         // 2) 本体 / 最終アラーム
         let primary = AlarmIDMaps.loadPrimary()
         let backup = AlarmIDMaps.loadBackup()
+        var stoppedSoundMode: PlaylistSoundMode = .single
 
         if let stoppedID {
             let entries = AppGroup.savedAlarmEntries
@@ -67,6 +68,7 @@ struct DismissAlarmIntent: LiveActivityIntent {
             )
             let entryID = action.entryID
             let entry = entryID.flatMap { id in entries.first { $0.id == id } }
+            stoppedSoundMode = entry?.soundMode ?? .single
             let primaryID = entryID.flatMap { primary[$0] }
             let primaryState = alarms.first(where: { $0.id == primaryID })?.state
 
@@ -163,11 +165,27 @@ struct DismissAlarmIntent: LiveActivityIntent {
             case .unknown:
                 break
             }
+
+            // シャッフル／1曲ランダムは、停止した次の回に向けて順番を作り直す（#151）。
+            if case .primary = action.role,
+               let entry,
+               !entry.repeatWeekdays.isEmpty,
+               entry.soundMode.changesOrderOnStop,
+               let oldPrimaryID = primaryID,
+               stoppedID == oldPrimaryID {
+                await AlarmScheduler.shared.reschedulePrimaryAfterStop(
+                    entry: entry,
+                    oldAlarmID: oldPrimaryID
+                )
+            }
         }
 
         AlarmEventBuffer.enqueue(PendingAlarmEvent(
-            name: AnalyticsEvent.alarmStopped(hour: hour).name,
-            properties: [:],
+            name: AnalyticsEvent.alarmStopped(
+                hour: hour,
+                soundMode: stoppedSoundMode
+            ).name,
+            properties: ["sound_mode": stoppedSoundMode.analyticsValue],
             hour: hour,
             timestamp: now
         ))
