@@ -57,6 +57,7 @@
 		40E09DAD762A7FB37CCFA143 /* PresetBundleRetentionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC359E963EA8352F684AE02E /* PresetBundleRetentionTests.swift */; };
 		41B44F296D997D7D38BA3DD8 /* SyncDiffTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39989820052720055A683E8A /* SyncDiffTests.swift */; };
 		41DC434508EB16DCF232F213 /* AlarmIDMaps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 748C317406BF7128A8FD08F3 /* AlarmIDMaps.swift */; };
+		429D3CA47782ABE3531323AE /* PlaylistResyncLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8267931ECD28007465925431 /* PlaylistResyncLogic.swift */; };
 		442664997A989CFE11611D8B /* AlarmScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE105D13EE2FE60FAE50F6C7 /* AlarmScheduler.swift */; };
 		4442998D1B45AA91B6DAF454 /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = BE932E485F167BB33E9C66C0 /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		45341B2B36C70B2535AE4DF0 /* SoundSelectionAnalyticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76C5A5982AF0B810A2B6C4DB /* SoundSelectionAnalyticsTests.swift */; };
@@ -376,6 +377,7 @@
 		7B785B0AA836FD95FBE5E416 /* CustomSoundAlarm.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CustomSoundAlarm.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FDFF3E0BB74C0B6C048D867 /* TrimRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrimRange.swift; sourceTree = "<group>"; };
 		81628E68814A83420FFE059D /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		8267931ECD28007465925431 /* PlaylistResyncLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistResyncLogic.swift; sourceTree = "<group>"; };
 		845AA156BD0327AFDA5CE60B /* VolumeGuideLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeGuideLogicTests.swift; sourceTree = "<group>"; };
 		85A905CD44F94EC80ECDCA40 /* SoundStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundStoreTests.swift; sourceTree = "<group>"; };
 		8617DE7DDFD767CAB2A28B9E /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
@@ -764,6 +766,7 @@
 				795943C6DD69CEC50F3284A8 /* PlaylistAccess.swift */,
 				F5CFF36945506899B0D47930 /* PlaylistDeletionLogic.swift */,
 				C1A2D25582E5891BFB320CC1 /* PlaylistRenderLogic.swift */,
+				8267931ECD28007465925431 /* PlaylistResyncLogic.swift */,
 				BA17D126F33619A4E3697AF3 /* PostSaveFeedback.swift */,
 				BF87781AE69B861793B5363A /* PresetRegistration.swift */,
 				926207D66F4AC1F8A93ADF07 /* SoundLoudness.swift */,
@@ -1113,6 +1116,7 @@
 				C59275DD89DD7183C9E6EC68 /* PlaylistRenderLogic.swift in Sources */,
 				F212C2E106E33B7B13108F82 /* PlaylistRenderService.swift in Sources */,
 				2386C471E67DF4BBDB131B0B /* PlaylistRenderer.swift in Sources */,
+				429D3CA47782ABE3531323AE /* PlaylistResyncLogic.swift in Sources */,
 				9AB8CE5853F70F472C9FF0FE /* PlaylistStore.swift in Sources */,
 				09591C8F94E7D65C2407B130 /* PostSaveFeedback.swift in Sources */,
 				E49876489CFF78962B42165F /* PresetRegistration.swift in Sources */,

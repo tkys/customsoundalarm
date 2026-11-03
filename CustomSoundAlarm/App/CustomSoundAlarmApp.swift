@@ -97,6 +97,11 @@ struct CustomSoundAlarmApp: App {
                         AnalyticsService.shared.capture(.playlistRenderFallback)
                     }
 
+                    // プレイリストの編集・音の削除で、使っているアラームを再登録する（#160）
+                    PlaylistStore.shared.onPlaylistChanged = { playlistID in
+                        AlarmScheduler.shared.resync(entriesUsingPlaylist: playlistID)
+                    }
+
                     // #98: オンボの要否は Entitlements のネットワーク待ちより前に
                     // 同期的に決める（ContentView も即座に同じ入力で判定する。await の後で
                     // App が評価するとレースし、ユーザーがオンボ完了後に二重で

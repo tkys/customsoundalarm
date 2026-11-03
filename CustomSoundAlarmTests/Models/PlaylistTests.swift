@@ -59,6 +59,39 @@ struct PlaylistAccessTests {
     }
 }
 
+// MARK: - Resync selection (#160)
+
+struct PlaylistResyncLogicTests {
+
+    @Test
+    func selectsOnlyEnabledEntriesUsingThePlaylist() {
+        let target = UUID()
+        let other = UUID()
+        let usingTarget = AlarmEntry(playlistID: target)
+        let usingOther = AlarmEntry(playlistID: other)
+        let disabledTarget = AlarmEntry(isEnabled: false, playlistID: target)
+        let singleSound = AlarmEntry()
+
+        let ids = PlaylistResyncLogic.entryIDs(
+            entries: [usingTarget, usingOther, disabledTarget, singleSound],
+            playlistID: target
+        )
+
+        #expect(ids == [usingTarget.id])
+        #expect(!ids.contains(usingOther.id))
+        #expect(!ids.contains(disabledTarget.id))
+        #expect(!ids.contains(singleSound.id))
+    }
+
+    @Test
+    func emptyWhenNoEntryUsesThePlaylist() {
+        let ids = PlaylistResyncLogic.entryIDs(
+            entries: [AlarmEntry(playlistID: UUID()), AlarmEntry()],
+            playlistID: UUID()
+        )
+        #expect(ids.isEmpty)
+    }
+}
 // MARK: - Render logic
 
 struct PlaylistRenderLogicTests {

@@ -237,14 +237,34 @@ final class AlarmScheduler {
     // MARK: - Scheduling
 
     /// 全アラームを同期（直列化: 連続呼び出し時は前回をキャンセルし最新のみ実行）
-    func syncAlarms(_ entries: [AlarmEntry]) {
+    func syncAlarms(
+        _ entries: [AlarmEntry],
+        forceRescheduleEntryIDs: Set<UUID> = []
+    ) {
         syncTask?.cancel()
         syncTask = Task {
-            await performSync(entries)
+            await performSync(
+                entries,
+                forceRescheduleEntryIDs: forceRescheduleEntryIDs
+            )
         }
     }
 
-    private func performSync(_ entries: [AlarmEntry]) async {
+    /// プレイリストの編集・音削除後に、そのプレイリストを使うアラームを再登録する（#160）。
+    func resync(entriesUsingPlaylist playlistID: UUID) {
+        let entries = AlarmStore.shared.alarms
+        let entryIDs = PlaylistResyncLogic.entryIDs(
+            entries: entries,
+            playlistID: playlistID
+        )
+        guard !entryIDs.isEmpty else { return }
+        syncAlarms(entries, forceRescheduleEntryIDs: entryIDs)
+    }
+
+    private func performSync(
+        _ entries: [AlarmEntry],
+        forceRescheduleEntryIDs: Set<UUID> = []
+    ) async {
         guard !Task.isCancelled else { return }
 
         // 現在 AlarmKit に登録中のファイル名を渡し、鳴らす予定のファイルを消さない（#151）
@@ -271,7 +291,8 @@ final class AlarmScheduler {
         let diff = computeSyncDiff(
             oldMap: alarmIDMap,
             entries: entries,
-            activeStates: activeStates
+            activeStates: activeStates,
+            forceRescheduleEntryIDs: forceRescheduleEntryIDs
         )
 
         // Cancel alarms for disabled/deleted entries
@@ -969,7 +990,8 @@ struct SyncDiff: Sendable {
 func computeSyncDiff(
     oldMap: [UUID: Alarm.ID],
     entries: [AlarmEntry],
-    activeStates: [Alarm.ID: Alarm.State]
+    activeStates: [Alarm.ID: Alarm.State],
+    forceRescheduleEntryIDs: Set<UUID> = []
 ) -> SyncDiff {
     let enabledEntryIDs = Set(entries.filter(\.isEnabled).map(\.id))
     var keptMap: [UUID: Alarm.ID] = [:]
@@ -982,9 +1004,16 @@ func computeSyncDiff(
     }
 
     for entry in entries where entry.isEnabled {
-        if let alarmID = oldMap[entry.id],
-           let state = activeStates[alarmID],
-           state == .countdown || state == .alerting || state == .paused {
+        let state = oldMap[entry.id].flatMap { activeStates[$0] }
+        let isProtected = state == .countdown || state == .alerting || state == .paused
+        if let alarmID = oldMap[entry.id], isProtected {
+            // 鳴動中・スヌーズ中は今回の音を優先し、次回の同期で反映する。
+            keptMap[entry.id] = alarmID
+        } else if let alarmID = oldMap[entry.id],
+                  !forceRescheduleEntryIDs.contains(entry.id),
+                  state != nil,
+                  state != .scheduled {
+            // プレイリスト編集などで強制指定されたエントリは、ここでも作り直す。
             keptMap[entry.id] = alarmID
         } else {
             if let oldAlarmID = oldMap[entry.id] {

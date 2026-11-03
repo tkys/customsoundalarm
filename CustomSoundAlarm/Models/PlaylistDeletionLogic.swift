@@ -36,8 +36,9 @@ enum PlaylistDeletionService {
             defaultFileName: SoundStore.presetDefinitions.first?.fileName
                 ?? "PresetMarimba.caf"
         )
-        for alarm in updated where alarm.playlistID == nil {
-            store.update(alarm)
+        // 変わったアラームだけ保存する（無関係なアラームを触らない）
+        for (old, new) in zip(store.alarms, updated) where old != new {
+            store.update(new)
         }
         PlaylistStore.shared.remove(id: playlistID)
         AlarmScheduler.shared.syncAlarms(store.alarms)
