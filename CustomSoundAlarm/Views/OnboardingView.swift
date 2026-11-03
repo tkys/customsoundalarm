@@ -202,7 +202,7 @@ struct OnboardingView: View {
             permissionGranted = authorized
             if authorized {
                 AlarmScheduler.shared.reconcileOnLaunch()
-                AlarmScheduler.shared.syncAlarms(AlarmStore.shared.alarms)
+                AlarmScheduler.shared.syncAlarms(AlarmStore.shared.alarms, trigger: .launch)
                 AlarmScheduler.shared.startObservingAlarmStates()
             }
             isRequestingPermission = false

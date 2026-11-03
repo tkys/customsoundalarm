@@ -140,6 +140,25 @@ final class LibraryUITests: XCTestCase {
         XCTAssertFalse(row.waitForExistence(timeout: 5))
     }
 
+    func testDebugSyncLogOpens() {
+        let app = launch(["-uitest-open-library", "-uitest-seed-library"])
+        XCTAssertTrue(app.collectionViews["library.root"].waitForExistence(timeout: 15))
+
+        let row = app.buttons["library.syncLog"]
+        for _ in 0..<6 where !row.exists {
+            app.collectionViews["library.root"].swipeUp()
+        }
+        XCTAssertTrue(
+            row.waitForExistence(timeout: 5),
+            "DEBUG の同期ログ行が見つからない: \(app.debugDescription)"
+        )
+        row.tap()
+        XCTAssertTrue(
+            app.collectionViews["syncLog.root"].waitForExistence(timeout: 5),
+            "同期ログ画面が開かない: \(app.debugDescription)"
+        )
+    }
+
     func testPlaylistDeleteConfirmationUsesSingularInEnglish() {
         let app = launch(
             ["-uitest-seed-library", "-uitest-open-library"],

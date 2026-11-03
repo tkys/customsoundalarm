@@ -49,7 +49,7 @@ enum PlaylistDeletionService {
             store.update(new)
         }
         PlaylistStore.shared.remove(id: playlistID)
-        AlarmScheduler.shared.syncAlarms(store.alarms)
+        AlarmScheduler.shared.syncAlarms(store.alarms, trigger: .playlist)
     }
 
     private static func isAvailable(_ fileName: String) -> Bool {

@@ -77,10 +77,13 @@ final class PlaylistRenderService {
     }
 
     /// 通常アラーム用の音を用意する。
-    /// - Parameter forceNewOrder: 停止時にシャッフル/ランダムを作り直すときに true
+    /// - Parameters:
+    ///   - forceNewOrder: 停止時にシャッフル/ランダムを作り直すときに true
+    ///   - reportEvents: false のときは署名計算用で、失敗・フォールバックを計測しない
     func prepareSound(
         for input: PlaylistRenderInput,
-        forceNewOrder: Bool = false
+        forceNewOrder: Bool = false,
+        reportEvents: Bool = true
     ) async -> PlaylistSoundResolution {
         guard input.usesPlaylistFeatures else {
             return PlaylistSoundResolution(
@@ -92,12 +95,12 @@ final class PlaylistRenderService {
 
         let playlist = PlaylistStore.shared.playlist(id: input.playlistID)
         if input.isPlaylist, playlist == nil {
-            return fallback(for: input, reason: .missingPlaylist)
+            return fallback(for: input, reason: .missingPlaylist, reportEvents: reportEvents)
         }
 
         let tracks = sourceTracks(for: input, playlist: playlist)
         guard !tracks.isEmpty else {
-            return fallback(for: input, reason: .noTracks)
+            return fallback(for: input, reason: .noTracks, reportEvents: reportEvents)
         }
 
         let key = "primary:\(input.entryID.uuidString)"
@@ -120,7 +123,7 @@ final class PlaylistRenderService {
             return (track, url)
         }
         guard !resolved.isEmpty else {
-            return fallback(for: input, reason: .noTracks)
+            return fallback(for: input, reason: .noTracks, reportEvents: reportEvents)
         }
 
         let signature = signature(
@@ -175,11 +178,24 @@ final class PlaylistRenderService {
             )
         } catch let error as PlaylistRenderError {
             try? FileManager.default.removeItem(at: tempURL)
-            return fallback(for: input, reason: PlaylistRenderFailureReason(error))
+            return fallback(for: input, reason: PlaylistRenderFailureReason(error), reportEvents: reportEvents)
         } catch {
             try? FileManager.default.removeItem(at: tempURL)
-            return fallback(for: input, reason: .renderFailed)
+            return fallback(for: input, reason: .renderFailed, reportEvents: reportEvents)
         }
+    }
+
+    /// 書き出し済みのファイル名を返す（描画しない・#163）。
+    /// バックグラウンド起動時の署名計算で、新しい順番の書き出しを避けるために使う。
+    func cachedSoundFileName(for input: PlaylistRenderInput) -> String? {
+        guard input.usesPlaylistFeatures else {
+            return input.fallbackFileName
+        }
+        let key = "primary:\(input.entryID.uuidString)"
+        guard let cached = cache[key], fileExists(cached.fileName) else {
+            return nil
+        }
+        return cached.fileName
     }
 
     /// 使われなくなったスロット／削除されたアラームのファイルを削除する。
@@ -301,7 +317,8 @@ final class PlaylistRenderService {
 
     private func fallback(
         for input: PlaylistRenderInput,
-        reason: PlaylistRenderFailureReason
+        reason: PlaylistRenderFailureReason,
+        reportEvents: Bool = true
     ) -> PlaylistSoundResolution {
         let playlist = PlaylistStore.shared.playlist(id: input.playlistID)
         let fileName = PlaylistFallbackLogic.fileName(
@@ -310,8 +327,10 @@ final class PlaylistRenderService {
             isAvailable: { sourceURL(for: $0) != nil },
             defaultFileName: defaultFallbackFileName
         )
-        onRenderFailed?(reason)
-        onFallback?()
+        if reportEvents {
+            onRenderFailed?(reason)
+            onFallback?()
+        }
         return PlaylistSoundResolution(
             fileName: fileName,
             usedFallback: true,
