@@ -13,7 +13,10 @@ enum PlaylistRenderError: String, Error, Equatable, Sendable {
 /// プレイリスト書き出しの入力。
 struct PlaylistRenderRequest: Sendable {
     let trackURLs: [URL]
-    let fade: PlaylistFadeSettings
+    /// アラームの「やさしく鳴り始める」
+    let fadeIn: PlaylistFadeIn
+    /// プレイリストの曲のつなぎ方
+    let transition: PlaylistTransition
     /// バックアップ用は false（最初から大きく鳴らす）
     let applyFadeIn: Bool
     let outputURL: URL
@@ -43,13 +46,13 @@ enum PlaylistRenderer {
         }
         guard PlaylistRenderLogic.isWithinLimit(
             trackDurations: durations,
-            fade: request.fade
+            transition: request.transition
         ) else {
             throw PlaylistRenderError.tooLong
         }
 
-        let crossfadeFrames = request.fade.gapFade == .crossfade
-            ? Int((PlaylistGapFade.crossfade.seconds * PlaylistRenderLogic.sampleRate).rounded())
+        let crossfadeFrames = request.transition == .crossfade
+            ? Int((PlaylistTransition.crossfade.seconds * PlaylistRenderLogic.sampleRate).rounded())
             : 0
         // 実際のストリーミングと同じ順で、書き出されるフレーム数を予測する
         // （エンドフェードの基準を実際の長さに合わせる）。
@@ -70,7 +73,7 @@ enum PlaylistRenderer {
         let writer = try StreamingWriter(
             outputURL: request.outputURL,
             totalOutputFrames: totalOutputFrames,
-            fade: request.fade,
+            fadeIn: request.fadeIn,
             applyFadeIn: request.applyFadeIn
         )
 
@@ -80,7 +83,7 @@ enum PlaylistRenderer {
             let frames = trackFrames[index]
             guard frames > 0 else { continue }
 
-            if request.fade.gapFade == .crossfade {
+            if request.transition == .crossfade {
                 let overlap = index == 0
                     ? 0
                     : min(crossfadeFrames, pendingTail.count, frames)
@@ -134,7 +137,7 @@ enum PlaylistRenderer {
                         trackFrames: frames,
                         trackIndex: index,
                         trackCount: readers.count,
-                        gapFade: request.fade.gapFade
+                        transition: request.transition
                     )
                     try writer.write(samples)
                     trackWritten += chunk.count
@@ -162,12 +165,12 @@ enum PlaylistRenderer {
         trackFrames: Int,
         trackIndex: Int,
         trackCount: Int,
-        gapFade: PlaylistGapFade
+        transition: PlaylistTransition
     ) {
-        guard gapFade != .off, !samples.isEmpty else { return }
+        guard transition != .off, !samples.isEmpty else { return }
         let fadeFrames = min(
             trackFrames,
-            Int((gapFade.seconds * PlaylistRenderLogic.sampleRate).rounded())
+            Int((transition.seconds * PlaylistRenderLogic.sampleRate).rounded())
         )
         guard fadeFrames > 0 else { return }
 
@@ -176,14 +179,14 @@ enum PlaylistRenderer {
             if trackIndex > 0, trackSample < fadeFrames {
                 samples[offset] *= PlaylistRenderLogic.fadeInGain(
                     index: trackSample,
-                    fadeSeconds: gapFade.seconds
+                    fadeSeconds: transition.seconds
                 )
             }
             if trackIndex < trackCount - 1,
                trackSample >= trackFrames - fadeFrames {
                 samples[offset] *= PlaylistRenderLogic.fadeOutGain(
                     indexFromEnd: trackFrames - 1 - trackSample,
-                    fadeSeconds: gapFade.seconds
+                    fadeSeconds: transition.seconds
                 )
             }
         }
@@ -318,7 +321,7 @@ private final class StreamingWriter {
     init(
         outputURL: URL,
         totalOutputFrames: Int,
-        fade: PlaylistFadeSettings,
+        fadeIn: PlaylistFadeIn,
         applyFadeIn: Bool
     ) throws {
         try? FileManager.default.removeItem(at: outputURL)
@@ -341,20 +344,19 @@ private final class StreamingWriter {
         self.file = file
         self.format = file.processingFormat
         self.totalFrames = totalOutputFrames
-        self.applyFadeIn = applyFadeIn && fade.fadeIn != .off
-        self.fadeInSeconds = fade.fadeIn.seconds
+        self.applyFadeIn = applyFadeIn && fadeIn != .off
+        self.fadeInSeconds = fadeIn.seconds
         self.fadeInFrames = applyFadeIn
             ? min(
                 totalOutputFrames,
-                Int((fade.fadeIn.seconds * PlaylistRenderLogic.sampleRate).rounded())
+                Int((fadeIn.seconds * PlaylistRenderLogic.sampleRate).rounded())
             )
             : 0
-        self.endFadeFrames = fade.endFade
-            ? min(
-                totalOutputFrames,
-                Int((0.5 * PlaylistRenderLogic.sampleRate).rounded())
-            )
-            : 0
+        // 終わりをフェードは常に 0.5 秒（#160）
+        self.endFadeFrames = min(
+            totalOutputFrames,
+            Int((PlaylistRenderLogic.endFadeSeconds * PlaylistRenderLogic.sampleRate).rounded())
+        )
         buffer.reserveCapacity(4096)
     }
 

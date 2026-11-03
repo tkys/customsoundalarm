@@ -107,6 +107,15 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: プレイリストを空にする（DEBUGのみ・#160）
+    static var isUITestResetPlaylists: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-reset-playlists")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: DEBUG時のみ有効なfresh onboarding強制フラグ
     static var isUITestFreshOnboarding: Bool {
 #if DEBUG
@@ -150,15 +159,6 @@ enum AppGroup {
 #else
         return false
 #endif
-    }
-
-    /// UIテスト用: プレイリスト管理画面を直接開く（DEBUGのみ・#151）
-    static var isUITestOpenPlaylist: Bool {
-    #if DEBUG
-        CommandLine.arguments.contains("-uitest-open-playlist")
-    #else
-        false
-    #endif
     }
 
     /// UIテスト用: 同梱のプリセット音で波形クロップ画面を直接開く（DEBUGのみ・#149）

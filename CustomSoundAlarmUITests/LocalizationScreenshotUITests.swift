@@ -76,7 +76,11 @@ final class LocalizationScreenshotUITests: XCTestCase {
         snap("\(language)-list")
 
         // 3. 追加（時刻ホイール）
-        launch(language: language, locale: locale, arguments: ["-uitest-open-add-alarm"])
+        launch(
+            language: language,
+            locale: locale,
+            arguments: ["-uitest-open-add-alarm", "-uitest-reset-playlists"]
+        )
         XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
         snap("\(language)-add")
 
@@ -86,8 +90,15 @@ final class LocalizationScreenshotUITests: XCTestCase {
             app.collectionViews["addAlarm.root"].swipeUp()
         }
         XCTAssertTrue(soundRow.waitForExistence(timeout: 5))
+        Thread.sleep(forTimeInterval: 1.0)
         soundRow.tap()
-        XCTAssertTrue(app.buttons["soundPicker.addVideo"].waitForExistence(timeout: 8))
+        XCTAssertTrue(
+            app.collectionViews["alarmSoundChoice.root"].waitForExistence(timeout: 10)
+        )
+        let singleSound = app.buttons["alarmSoundChoice.single"]
+        XCTAssertTrue(singleSound.waitForExistence(timeout: 5))
+        singleSound.tap()
+        XCTAssertTrue(app.buttons["soundPicker.addVideo"].waitForExistence(timeout: 10))
         snap("\(language)-import-sounds")
 
         app.buttons["soundPicker.addVideo"].tap()

@@ -1,16 +1,68 @@
 import Foundation
 import Testing
+@preconcurrency import AVFoundation
 @testable import CustomSoundAlarm
 
 @Suite(.serialized)
 @MainActor
 struct PlaylistRenderServiceTests {
 
-    private func makePlaylist() -> Playlist {
+    private func makePlaylist(
+        playOrder: PlaylistPlayOrder = .inOrder,
+        transition: PlaylistTransition = .off
+    ) -> Playlist {
         PlaylistStore.shared.add(
             name: "test-\(UUID().uuidString)",
-            tracks: [PlaylistTrack(soundFileName: "PresetMarimba.caf")]
+            tracks: [PlaylistTrack(soundFileName: "PresetMarimba.caf")],
+            playOrder: playOrder,
+            transition: transition
         )
+    }
+
+    private func makeCAF(seconds: Double, value: Float, name: String) throws -> URL {
+        let url = AudioConverter.shared.soundsDirectory.appendingPathComponent(name)
+        try? FileManager.default.removeItem(at: url)
+        let settings: [String: Any] = [
+            AVFormatIDKey: kAudioFormatLinearPCM,
+            AVSampleRateKey: 44_100.0,
+            AVNumberOfChannelsKey: 1,
+            AVLinearPCMBitDepthKey: 16,
+            AVLinearPCMIsFloatKey: false,
+            AVLinearPCMIsBigEndianKey: false
+        ]
+        let file = try AVAudioFile(
+            forWriting: url,
+            settings: settings,
+            commonFormat: .pcmFormatFloat32,
+            interleaved: false
+        )
+        let frames = Int(seconds * 44_100)
+        let buffer = AVAudioPCMBuffer(
+            pcmFormat: file.processingFormat,
+            frameCapacity: AVAudioFrameCount(frames)
+        )!
+        buffer.frameLength = AVAudioFrameCount(frames)
+        for index in 0..<frames {
+            buffer.floatChannelData![0][index] = value
+        }
+        try file.write(from: buffer)
+        return url
+    }
+
+    private func loadSamples(_ fileName: String) -> [Float] {
+        let url = AudioConverter.shared.soundsDirectory.appendingPathComponent(fileName)
+        guard let buffer = AudioSampleLoader.loadMono44k(fileURL: url),
+              let channel = buffer.floatChannelData?[0] else {
+            return []
+        }
+        return Array(UnsafeBufferPointer(
+            start: channel,
+            count: Int(buffer.frameLength)
+        ))
+    }
+
+    private func peak(_ samples: [Float]) -> Float {
+        samples.reduce(0) { max($0, abs($1)) }
     }
 
     private func removeGeneratedFiles(entryID: UUID) {
@@ -28,8 +80,8 @@ struct PlaylistRenderServiceTests {
     func singleWithoutFades_returnsOriginalFileName() async {
         let input = PlaylistRenderInput(
             entryID: UUID(),
-            soundMode: .single,
-            fallbackFileName: "PresetMarimba.caf"
+            fallbackFileName: "PresetMarimba.caf",
+            fadeIn: .off
         )
         let result = await PlaylistRenderService.shared.prepareSound(for: input)
 
@@ -53,8 +105,8 @@ struct PlaylistRenderServiceTests {
         let input = PlaylistRenderInput(
             entryID: entryID,
             playlistID: UUID(),
-            soundMode: .playlistOrder,
-            fallbackFileName: "PresetMarimba.caf"
+            fallbackFileName: "PresetMarimba.caf",
+            fadeIn: .off
         )
         let result = await PlaylistRenderService.shared.prepareSound(for: input)
 
@@ -76,9 +128,8 @@ struct PlaylistRenderServiceTests {
         let base = PlaylistRenderInput(
             entryID: entryID,
             playlistID: playlist.id,
-            soundMode: .playlistOrder,
-            fadeSettings: PlaylistFadeSettings(fadeIn: .ten),
-            fallbackFileName: "PresetMarimba.caf"
+            fallbackFileName: "PresetMarimba.caf",
+            fadeIn: .ten
         )
 
         let first = await service.prepareSound(for: base)
@@ -87,9 +138,8 @@ struct PlaylistRenderServiceTests {
         let second = PlaylistRenderInput(
             entryID: entryID,
             playlistID: playlist.id,
-            soundMode: .playlistOrder,
-            fadeSettings: PlaylistFadeSettings(fadeIn: .thirty),
-            fallbackFileName: "PresetMarimba.caf"
+            fallbackFileName: "PresetMarimba.caf",
+            fadeIn: .thirty
         )
         let secondResult = await service.prepareSound(for: second)
         #expect(secondResult.fileName.hasSuffix(".playlist.b.caf"))
@@ -97,9 +147,8 @@ struct PlaylistRenderServiceTests {
         let third = PlaylistRenderInput(
             entryID: entryID,
             playlistID: playlist.id,
-            soundMode: .playlistOrder,
-            fadeSettings: PlaylistFadeSettings(fadeIn: .sixty),
-            fallbackFileName: "PresetMarimba.caf"
+            fallbackFileName: "PresetMarimba.caf",
+            fadeIn: .sixty
         )
         let thirdResult = await service.prepareSound(for: third)
         #expect(thirdResult.fileName.hasSuffix(".playlist.a.caf"))
@@ -123,9 +172,8 @@ struct PlaylistRenderServiceTests {
         let input = PlaylistRenderInput(
             entryID: entryID,
             playlistID: playlist.id,
-            soundMode: .playlistOrder,
-            fadeSettings: PlaylistFadeSettings(fadeIn: .ten),
-            fallbackFileName: "PresetMarimba.caf"
+            fallbackFileName: "PresetMarimba.caf",
+            fadeIn: .ten
         )
         let rendered = await PlaylistRenderService.shared.prepareSound(for: input)
         #expect(!rendered.usedFallback)
@@ -174,7 +222,8 @@ struct PlaylistRenderServiceTests {
             tracks: [
                 PlaylistTrack(soundFileName: "PresetMarimba.caf"),
                 PlaylistTrack(soundFileName: "PresetBell.caf")
-            ]
+            ],
+            playOrder: .shuffle
         )
         defer { PlaylistStore.shared.remove(id: playlist.id) }
         let entryA = UUID()
@@ -186,14 +235,14 @@ struct PlaylistRenderServiceTests {
         let inputA = PlaylistRenderInput(
             entryID: entryA,
             playlistID: playlist.id,
-            soundMode: .playlistShuffle,
-            fallbackFileName: "PresetMarimba.caf"
+            fallbackFileName: "PresetMarimba.caf",
+            fadeIn: .off
         )
         let inputB = PlaylistRenderInput(
             entryID: entryB,
             playlistID: playlist.id,
-            soundMode: .playlistShuffle,
-            fallbackFileName: "PresetMarimba.caf"
+            fallbackFileName: "PresetMarimba.caf",
+            fadeIn: .off
         )
 
         _ = await PlaylistRenderService.shared.prepareSound(for: inputA)
@@ -212,8 +261,8 @@ struct PlaylistRenderServiceTests {
         let entryID = UUID()
         let input = PlaylistRenderInput(
             entryID: entryID,
-            soundMode: .playlistOrder,
-            fallbackFileName: "PresetMarimba.caf"
+            fallbackFileName: "PresetMarimba.caf",
+            fadeIn: .off
         )
         let directory = AudioConverter.shared.soundsDirectory
         let oldBackup = "\(entryID.uuidString).playlist.backup.a.caf"
@@ -243,5 +292,82 @@ struct PlaylistRenderServiceTests {
         #expect(FileManager.default.fileExists(
             atPath: directory.appendingPathComponent(registeredBackup).path
         ))
+    }
+
+    @Test
+    func renderUsesPlaylistTransitionAndAlarmFadeIn() async throws {
+        let nameA = "UITestServiceA.caf"
+        let nameB = "UITestServiceB.caf"
+        defer {
+            for name in [nameA, nameB] {
+                try? FileManager.default.removeItem(
+                    at: AudioConverter.shared.soundsDirectory
+                        .appendingPathComponent(name)
+                )
+            }
+        }
+        try makeCAF(seconds: 5, value: 0.1, name: nameA)
+        try makeCAF(seconds: 5, value: 0.2, name: nameB)
+        let playlist = PlaylistStore.shared.add(
+            name: "transition-\(UUID().uuidString)",
+            tracks: [
+                PlaylistTrack(soundFileName: nameA),
+                PlaylistTrack(soundFileName: nameB)
+            ],
+            transition: .crossfade
+        )
+        defer { PlaylistStore.shared.remove(id: playlist.id) }
+        let entryID = UUID()
+        defer { removeGeneratedFiles(entryID: entryID) }
+
+        let input = PlaylistRenderInput(
+            entryID: entryID,
+            playlistID: playlist.id,
+            fadeIn: .ten
+        )
+        let result = await PlaylistRenderService.shared.prepareSound(for: input)
+        #expect(!result.usedFallback)
+        let samples = loadSamples(result.fileName)
+        #expect(abs(Double(samples.count) / 44_100 - 8) < 0.1)
+        let firstTenth = Array(samples.prefix(Int(0.1 * 44_100)))
+        let lastHalf = Array(samples.suffix(Int(0.5 * 44_100)))
+        #expect(peak(firstTenth) < peak(lastHalf))
+    }
+
+    @Test
+    func renderUsesOneRandomPlayOrder() async throws {
+        let nameA = "UITestRandomA.caf"
+        let nameB = "UITestRandomB.caf"
+        defer {
+            for name in [nameA, nameB] {
+                try? FileManager.default.removeItem(
+                    at: AudioConverter.shared.soundsDirectory
+                        .appendingPathComponent(name)
+                )
+            }
+        }
+        try makeCAF(seconds: 5, value: 0.1, name: nameA)
+        try makeCAF(seconds: 5, value: 0.2, name: nameB)
+        let playlist = PlaylistStore.shared.add(
+            name: "random-\(UUID().uuidString)",
+            tracks: [
+                PlaylistTrack(soundFileName: nameA),
+                PlaylistTrack(soundFileName: nameB)
+            ],
+            playOrder: .oneRandom
+        )
+        defer { PlaylistStore.shared.remove(id: playlist.id) }
+        let entryID = UUID()
+        defer { removeGeneratedFiles(entryID: entryID) }
+
+        let input = PlaylistRenderInput(
+            entryID: entryID,
+            playlistID: playlist.id,
+            fadeIn: .off
+        )
+        let result = await PlaylistRenderService.shared.prepareSound(for: input)
+        #expect(!result.usedFallback)
+        let samples = loadSamples(result.fileName)
+        #expect(abs(Double(samples.count) / 44_100 - 5) < 0.1)
     }
 }

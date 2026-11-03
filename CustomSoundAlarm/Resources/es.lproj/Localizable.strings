@@ -285,3 +285,17 @@
 "playlist_select_track" = "Añadir pistas";
 "edit" = "Editar";
 "ok" = "OK";
+
+/* OOUI playback (#160) */
+"play_order" = "Orden de reproducción";
+"play_order_in_order" = "En orden";
+"play_order_shuffle" = "Aleatorio";
+"play_order_one_random" = "Una aleatoria";
+"transition" = "Transiciones";
+"transition_off" = "Ninguna";
+"transition_short" = "Fundido corto (0,5 s)";
+"transition_long" = "Fundido largo (2 s)";
+"transition_crossfade" = "Fundido cruzado";
+"transition_footer" = "Se aplica al unir las pistas. El final del bucle completo siempre se funde brevemente.";
+"playlist_playback" = "Reproducción";
+"playlist_summary_fmt" = "%@ · %d pistas";

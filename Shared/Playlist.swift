@@ -1,30 +1,24 @@
 import Foundation
 
-/// アラームの音の選び方（#151）。
+/// 計測用の音の選び方（#151 / #160）。アラームとプレイリストから導出する。
 enum PlaylistSoundMode: String, Codable, Sendable, CaseIterable, Equatable, Hashable {
-    /// 従来の1つの音
     case single
-    /// プレイリストを順番に再生
     case playlistOrder = "playlist_order"
-    /// プレイリストをシャッフルして再生
     case playlistShuffle = "playlist_shuffle"
-    /// プレイリストから1曲だけランダム
     case playlistRandom = "playlist_random"
 
     var isPlaylist: Bool {
         self != .single
     }
 
-    /// 停止・起動のたびに次回分を作り直すモード
     var changesOrderOnStop: Bool {
         self == .playlistShuffle || self == .playlistRandom
     }
 
-    /// 計測用の安定識別子（rawValue と同じ）
     var analyticsValue: String { rawValue }
 }
 
-/// やさしく鳴り始める長さ（#151）。
+/// やさしく鳴り始める長さ（#151 / #160）。アラームが持つ。
 enum PlaylistFadeIn: Int, Codable, Sendable, CaseIterable, Equatable, Hashable {
     case off = 0
     case ten = 10
@@ -38,14 +32,35 @@ enum PlaylistFadeIn: Int, Codable, Sendable, CaseIterable, Equatable, Hashable {
     }
 }
 
-/// 曲間のフェード（#151）。
-enum PlaylistGapFade: String, Codable, Sendable, CaseIterable, Equatable, Hashable {
+/// プレイリストの再生順（#160）。プレイリストが持つ。
+enum PlaylistPlayOrder: String, Codable, Sendable, CaseIterable, Equatable, Hashable {
+    case inOrder = "in_order"
+    case shuffle
+    case oneRandom = "one_random"
+
+    /// アラームの計測用 `sound_mode` への変換
+    var soundMode: PlaylistSoundMode {
+        switch self {
+        case .inOrder: .playlistOrder
+        case .shuffle: .playlistShuffle
+        case .oneRandom: .playlistRandom
+        }
+    }
+
+    var changesOrderOnStop: Bool {
+        self == .shuffle || self == .oneRandom
+    }
+
+    var analyticsValue: String { rawValue }
+}
+
+/// プレイリストの曲のつなぎ方（#160）。
+enum PlaylistTransition: String, Codable, Sendable, CaseIterable, Equatable, Hashable {
     case off
     case short
     case long
     case crossfade
 
-    /// フェードに使う秒数（off は 0）
     var seconds: TimeInterval {
         switch self {
         case .off: 0
@@ -58,55 +73,30 @@ enum PlaylistGapFade: String, Codable, Sendable, CaseIterable, Equatable, Hashab
     var analyticsValue: String { rawValue }
 }
 
-/// アラームごとのフェード設定（#151）。
-struct PlaylistFadeSettings: Codable, Sendable, Equatable, Hashable {
-    var fadeIn: PlaylistFadeIn
-    var gapFade: PlaylistGapFade
-    var endFade: Bool
-
-    init(
-        fadeIn: PlaylistFadeIn = .off,
-        gapFade: PlaylistGapFade = .off,
-        endFade: Bool = false
-    ) {
-        self.fadeIn = fadeIn
-        self.gapFade = gapFade
-        self.endFade = endFade
-    }
-
-    static let disabled = PlaylistFadeSettings()
-
-    var isDisabled: Bool {
-        fadeIn == .off && gapFade == .off && !endFade
-    }
-}
-
-/// プレイリストの書き出しに必要な入力（#151）。
-/// `AlarmEntry` への接続は PR-B で行い、ここではモデルとして独立させる。
+/// プレイリストの書き出しに必要な入力（#151 / #160）。
+/// 再生順・つなぎ方は `Playlist` から、やさしく鳴り始めるはアラームから取る。
 struct PlaylistRenderInput: Sendable, Equatable, Hashable {
     let entryID: UUID
     let playlistID: UUID?
-    let soundMode: PlaylistSoundMode
-    let fadeSettings: PlaylistFadeSettings
-    /// プレイリストが無い／単一音のときに使うファイル名
     let fallbackFileName: String
+    let fadeIn: PlaylistFadeIn
 
     init(
         entryID: UUID,
         playlistID: UUID? = nil,
-        soundMode: PlaylistSoundMode,
-        fadeSettings: PlaylistFadeSettings = .disabled,
-        fallbackFileName: String = ""
+        fallbackFileName: String = "",
+        fadeIn: PlaylistFadeIn = .off
     ) {
         self.entryID = entryID
         self.playlistID = playlistID
-        self.soundMode = soundMode
-        self.fadeSettings = fadeSettings
         self.fallbackFileName = fallbackFileName
+        self.fadeIn = fadeIn
     }
 
+    var isPlaylist: Bool { playlistID != nil }
+
     var usesPlaylistFeatures: Bool {
-        soundMode.isPlaylist || !fadeSettings.isDisabled
+        playlistID != nil || fadeIn != .off
     }
 }
 
@@ -121,7 +111,7 @@ struct PlaylistTrack: Identifiable, Codable, Hashable, Sendable {
     }
 }
 
-/// ユーザーが作るプレイリスト（#151）。
+/// ユーザーが作るプレイリスト（#151 / #160）。
 struct Playlist: Identifiable, Codable, Hashable, Sendable {
     /// 1本のファイルにする都合と容量（10分≒50MB）の上限
     static let maxTotalSeconds: TimeInterval = 10 * 60
@@ -129,18 +119,46 @@ struct Playlist: Identifiable, Codable, Hashable, Sendable {
     let id: UUID
     var name: String
     var tracks: [PlaylistTrack]
+    /// 再生順（プレイリストの性質）
+    var playOrder: PlaylistPlayOrder
+    /// 曲のつなぎ方（プレイリストの性質）
+    var transition: PlaylistTransition
     var createdAt: Date
 
     init(
         id: UUID = UUID(),
         name: String,
         tracks: [PlaylistTrack] = [],
+        playOrder: PlaylistPlayOrder = .inOrder,
+        transition: PlaylistTransition = .off,
         createdAt: Date = Date()
     ) {
         self.id = id
         self.name = name
         self.tracks = tracks
+        self.playOrder = playOrder
+        self.transition = transition
         self.createdAt = createdAt
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, tracks, playOrder, transition, createdAt
+    }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        tracks = try container.decode([PlaylistTrack].self, forKey: .tracks)
+        playOrder = try container.decodeIfPresent(
+            PlaylistPlayOrder.self,
+            forKey: .playOrder
+        ) ?? .inOrder
+        transition = try container.decodeIfPresent(
+            PlaylistTransition.self,
+            forKey: .transition
+        ) ?? .off
+        createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
     }
 
     var trackCount: Int { tracks.count }
@@ -148,5 +166,16 @@ struct Playlist: Identifiable, Codable, Hashable, Sendable {
     /// 曲の長さ（fileName → 秒）から合計時間を返す。不明な曲は 0 として扱う。
     func totalSeconds(durations: [String: TimeInterval]) -> TimeInterval {
         tracks.reduce(0) { $0 + (durations[$1.soundFileName] ?? 0) }
+    }
+}
+
+/// アラームの `sound_mode` を、アラームとプレイリストから導出する純ロジック（#160）。
+enum AlarmSoundModeLogic {
+    static func soundMode(
+        playlistID: UUID?,
+        playOrder: PlaylistPlayOrder?
+    ) -> PlaylistSoundMode {
+        guard playlistID != nil else { return .single }
+        return (playOrder ?? .inOrder).soundMode
     }
 }

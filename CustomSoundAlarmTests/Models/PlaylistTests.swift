@@ -72,7 +72,7 @@ struct PlaylistRenderLogicTests {
         let input = tracks(["a", "b", "c"])
         let result = PlaylistRenderLogic.orderedTracks(
             input,
-            mode: .playlistOrder,
+            order: .inOrder,
             seed: 1
         )
         #expect(result == input)
@@ -83,12 +83,12 @@ struct PlaylistRenderLogicTests {
         let input = tracks(["a", "b", "c", "d", "e"])
         let first = PlaylistRenderLogic.orderedTracks(
             input,
-            mode: .playlistShuffle,
+            order: .shuffle,
             seed: 42
         )
         let second = PlaylistRenderLogic.orderedTracks(
             input,
-            mode: .playlistShuffle,
+            order: .shuffle,
             seed: 42
         )
         #expect(first == second)
@@ -100,12 +100,12 @@ struct PlaylistRenderLogicTests {
         let input = tracks(["a", "b", "c", "d", "e", "f"])
         let first = PlaylistRenderLogic.orderedTracks(
             input,
-            mode: .playlistShuffle,
+            order: .shuffle,
             seed: 1
         )
         let second = PlaylistRenderLogic.orderedTracks(
             input,
-            mode: .playlistShuffle,
+            order: .shuffle,
             seed: 2
         )
         #expect(first.map(\.soundFileName) != second.map(\.soundFileName))
@@ -117,7 +117,7 @@ struct PlaylistRenderLogicTests {
         for seed in 0..<20 {
             let result = PlaylistRenderLogic.orderedTracks(
                 input,
-                mode: .playlistRandom,
+                order: .oneRandom,
                 seed: UInt64(seed)
             )
             #expect(result.count == 1)
@@ -127,20 +127,18 @@ struct PlaylistRenderLogicTests {
 
     @Test
     func totalDuration_sumsTracksWithoutCrossfade() {
-        let fade = PlaylistFadeSettings(gapFade: .short)
         #expect(PlaylistRenderLogic.totalDuration(
             trackDurations: [10, 20, 30],
-            fade: fade
+            transition: .short
         ) == 60)
     }
 
     @Test
     func totalDuration_subtractsCrossfadeOverlap() {
-        let fade = PlaylistFadeSettings(gapFade: .crossfade)
         // 2秒のクロスフェードが2か所
         #expect(PlaylistRenderLogic.totalDuration(
             trackDurations: [10, 20, 30],
-            fade: fade
+            transition: .crossfade
         ) == 56)
     }
 
@@ -154,28 +152,26 @@ struct PlaylistRenderLogicTests {
 
     @Test
     func tenMinuteLimit_boundary() {
-        let fade = PlaylistFadeSettings()
         #expect(PlaylistRenderLogic.isWithinLimit(
             trackDurations: [599],
-            fade: fade
+            transition: .off
         ))
         #expect(PlaylistRenderLogic.isWithinLimit(
             trackDurations: [600],
-            fade: fade
+            transition: .off
         ))
         #expect(!PlaylistRenderLogic.isWithinLimit(
             trackDurations: [600.1],
-            fade: fade
+            transition: .off
         ))
     }
 
     @Test
     func tenMinuteLimit_accountsForCrossfade() {
-        let fade = PlaylistFadeSettings(gapFade: .crossfade)
         // 合計 601 秒でも、2秒の重なりで 599 秒になる
         #expect(PlaylistRenderLogic.isWithinLimit(
             trackDurations: [300.5, 300.5],
-            fade: fade
+            transition: .crossfade
         ))
     }
 
@@ -278,5 +274,82 @@ struct PlaylistRenderLogicTests {
             tracks: tracks(["a", "b", "c"])
         )
         #expect(playlist.totalSeconds(durations: ["a": 10, "b": 20]) == 30)
+    }
+
+    // MARK: - #160 data model
+
+    @Test
+    func playlistPlayOrder_mapsToSoundMode() {
+        #expect(PlaylistPlayOrder.inOrder.soundMode == .playlistOrder)
+        #expect(PlaylistPlayOrder.shuffle.soundMode == .playlistShuffle)
+        #expect(PlaylistPlayOrder.oneRandom.soundMode == .playlistRandom)
+        #expect(AlarmSoundModeLogic.soundMode(playlistID: nil, playOrder: .shuffle) == .single)
+        #expect(AlarmSoundModeLogic.soundMode(playlistID: UUID(), playOrder: nil) == .playlistOrder)
+    }
+
+    @Test
+    func playlistWithoutNewKeys_decodesDefaults() throws {
+        let json = """
+        {
+          "id": "11111111-1111-1111-1111-111111111111",
+          "name": "old",
+          "tracks": [],
+          "createdAt": 0
+        }
+        """
+        let playlist = try JSONDecoder().decode(
+            Playlist.self,
+            from: Data(json.utf8)
+        )
+        #expect(playlist.playOrder == .inOrder)
+        #expect(playlist.transition == .off)
+    }
+
+    @Test
+    func playlistRoundTripKeepsPlayOrderAndTransition() throws {
+        let playlist = Playlist(
+            name: "p",
+            playOrder: .shuffle,
+            transition: .crossfade
+        )
+        let decoded = try JSONDecoder().decode(
+            Playlist.self,
+            from: JSONEncoder().encode(playlist)
+        )
+        #expect(decoded.playOrder == .shuffle)
+        #expect(decoded.transition == .crossfade)
+    }
+
+    @Test
+    func playlistDeletion_switchesToFirstExistingTrack() {
+        let playlistID = UUID()
+        let alarms = [
+            AlarmEntry(playlistID: playlistID, fadeIn: .ten),
+            AlarmEntry(playlistID: UUID())
+        ]
+        let updated = PlaylistDeletionLogic.updatedAlarms(
+            playlistID: playlistID,
+            trackFileNames: ["Missing.caf", "Second.caf"],
+            alarms: alarms,
+            isAvailable: { $0 == "Second.caf" },
+            defaultFileName: "PresetMarimba.caf"
+        )
+        #expect(updated[0].playlistID == nil)
+        #expect(updated[0].soundFileName == "Second.caf")
+        #expect(updated[0].fadeIn == .ten)
+        #expect(updated[1].playlistID != nil)
+    }
+
+    @Test
+    func playlistDeletion_fallsBackToDefaultPreset() {
+        let playlistID = UUID()
+        let updated = PlaylistDeletionLogic.updatedAlarms(
+            playlistID: playlistID,
+            trackFileNames: ["Missing.caf"],
+            alarms: [AlarmEntry(playlistID: playlistID)],
+            isAvailable: { _ in false },
+            defaultFileName: "PresetMarimba.caf"
+        )
+        #expect(updated[0].soundFileName == "PresetMarimba.caf")
     }
 }

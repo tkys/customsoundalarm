@@ -1,6 +1,6 @@
 import XCTest
 
-/// #151: プレイリストの作成・曲追加・選択。
+/// #160 PR-1: アラームの音の行からプレイリストを作成・選択する。
 @MainActor
 final class PlaylistUITests: XCTestCase {
 
@@ -13,17 +13,23 @@ final class PlaylistUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = [
             "-uitest-open-add-alarm",
-            "-uitest-open-playlist",
             "-AppleLanguages", "(ja)",
             "-AppleLocale", "ja_JP"
         ]
         app.launch()
 
+        let soundRow = app.buttons["addAlarm.soundRow"]
         XCTAssertTrue(
-            app.buttons["playlist.add"].waitForExistence(timeout: 20),
-            "playlist picker should open: \(app.debugDescription)"
+            soundRow.waitForExistence(timeout: 20),
+            "sound row should exist: \(app.debugDescription)"
         )
-        app.buttons["playlist.add"].tap()
+        soundRow.tap()
+
+        XCTAssertTrue(
+            app.buttons["alarmSoundChoice.addPlaylist"].waitForExistence(timeout: 10),
+            "sound choice should open: \(app.debugDescription)"
+        )
+        app.buttons["alarmSoundChoice.addPlaylist"].tap()
 
         let nameField = app.textFields["playlist.name"]
         XCTAssertTrue(nameField.waitForExistence(timeout: 10))
@@ -40,20 +46,19 @@ final class PlaylistUITests: XCTestCase {
         app.buttons["playlist.closeTrackPicker"].tap()
         app.buttons["playlist.save"].tap()
 
-        let row = app.buttons.matching(
+        let playlistRow = app.buttons.matching(
             NSPredicate(format: "identifier CONTAINS %@", "UITest")
         ).firstMatch
         XCTAssertTrue(
-            row.waitForExistence(timeout: 10),
+            playlistRow.waitForExistence(timeout: 10),
             "created playlist should appear: \(app.debugDescription)"
         )
-        row.tap()
+        playlistRow.tap()
 
-        let playlistRow = app.buttons["addAlarm.playlistRow"]
-        XCTAssertTrue(playlistRow.waitForExistence(timeout: 10))
+        XCTAssertTrue(soundRow.waitForExistence(timeout: 10))
         XCTAssertTrue(
-            playlistRow.label.contains("UITest"),
-            "selected playlist should be shown on the alarm screen: \(playlistRow.label)"
+            soundRow.label.contains("UITest"),
+            "selected playlist should be shown on the alarm screen: \(soundRow.label)"
         )
     }
 }

@@ -72,14 +72,12 @@ struct AlarmSaveLogicTests {
             soundFileName: "",
             snoozeMinutes: 9,
             backupMinutes: nil,
-            soundMode: .playlistShuffle,
             playlistID: playlistID,
-            fadeSettings: PlaylistFadeSettings(fadeIn: .thirty)
+            fadeIn: .thirty
         )
 
-        #expect(entry.soundMode == .playlistShuffle)
         #expect(entry.playlistID == playlistID)
-        #expect(entry.fadeSettings.fadeIn == .thirty)
+        #expect(entry.fadeIn == .thirty)
         #expect(entry.usesPlaylistFeatures)
     }
 
@@ -96,13 +94,11 @@ struct AlarmSaveLogicTests {
             soundFileName: "",
             snoozeMinutes: 9,
             backupMinutes: nil,
-            soundMode: .playlistOrder,
             playlistID: playlistID,
-            fadeSettings: PlaylistFadeSettings(gapFade: .crossfade)
+            fadeIn: .ten
         )
 
-        #expect(updated.soundMode == .playlistOrder)
         #expect(updated.playlistID == playlistID)
-        #expect(updated.fadeSettings.gapFade == .crossfade)
+        #expect(updated.fadeIn == .ten)
     }
 }

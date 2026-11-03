@@ -181,7 +181,7 @@ final class AlarmScheduler {
                     hour: alarm.hour,
                     isRepeating: false,
                     detection: "reconcile",
-                    soundMode: alarm.soundMode
+                    soundMode: AlarmSoundModeResolver.soundMode(for: alarm)
                 ))
                 store.toggleEnabled(alarm)
                 alarmIDMap.removeValue(forKey: alarm.id)
@@ -560,7 +560,7 @@ final class AlarmScheduler {
 
     /// プレイリストのバックアップ用に、存在する最初の曲を返す（#151）。
     func backupSourceFileName(for entry: AlarmEntry) -> String? {
-        if entry.soundMode.isPlaylist {
+        if entry.playlistID != nil {
             let playlist = PlaylistStore.shared.playlist(id: entry.playlistID)
             if let track = playlist?.tracks.first(where: {
                 soundFileExists($0.soundFileName)
@@ -584,7 +584,7 @@ final class AlarmScheduler {
 
     /// 再生する音の表示名（プレイリストならプレイリスト名）
     private func soundDisplayName(for entry: AlarmEntry) -> String {
-        if entry.soundMode.isPlaylist {
+        if entry.playlistID != nil {
             return PlaylistStore.shared.playlist(id: entry.playlistID)?.name
                 ?? String(localized: "playlist")
         }
@@ -597,7 +597,7 @@ final class AlarmScheduler {
     func reschedulePrimaryAfterStop(entry: AlarmEntry, oldAlarmID: UUID) async {
         guard entry.isEnabled,
               !entry.repeatWeekdays.isEmpty,
-              entry.soundMode.changesOrderOnStop else {
+              AlarmSoundModeResolver.changesOrderOnStop(for: entry) else {
             return
         }
         let resolution = await PlaylistRenderService.shared.prepareSound(
@@ -895,7 +895,7 @@ final class AlarmScheduler {
                 hour: alarm.hour,
                 isRepeating: !alarm.repeatWeekdays.isEmpty,
                 detection: "observer",
-                soundMode: alarm.soundMode
+                soundMode: AlarmSoundModeResolver.soundMode(for: alarm)
             ))
         }
 

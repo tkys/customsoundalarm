@@ -20,6 +20,9 @@ struct CustomSoundAlarmApp: App {
                         AlarmStore.shared.resetForUITest()
                         SoundStore.shared.resetForUITest()
                     }
+                    if AppGroup.isUITestResetPlaylists {
+                        PlaylistStore.shared.resetForUITest()
+                    }
                     // UIテスト用: アラーム一覧を時刻順で検証するためのシード
                     if AppGroup.isUITestSeedAlarms {
                         AppGroup.hasCompletedOnboarding = true

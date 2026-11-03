@@ -285,3 +285,17 @@
 "playlist_select_track" = "Add tracks";
 "edit" = "Edit";
 "ok" = "OK";
+
+/* OOUI playback (#160) */
+"play_order" = "Play order";
+"play_order_in_order" = "In order";
+"play_order_shuffle" = "Shuffle";
+"play_order_one_random" = "One random";
+"transition" = "Transitions";
+"transition_off" = "None";
+"transition_short" = "Short fade (0.5s)";
+"transition_long" = "Long fade (2s)";
+"transition_crossfade" = "Crossfade";
+"transition_footer" = "Applies when tracks are joined. The end of the whole loop is always faded out briefly.";
+"playlist_playback" = "Playback";
+"playlist_summary_fmt" = "%@ · %d tracks";

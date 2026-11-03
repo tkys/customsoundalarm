@@ -19,8 +19,18 @@ final class PlaylistStore {
     }
 
     @discardableResult
-    func add(name: String, tracks: [PlaylistTrack] = []) -> Playlist {
-        let playlist = Playlist(name: name, tracks: tracks)
+    func add(
+        name: String,
+        tracks: [PlaylistTrack] = [],
+        playOrder: PlaylistPlayOrder = .inOrder,
+        transition: PlaylistTransition = .off
+    ) -> Playlist {
+        let playlist = Playlist(
+            name: name,
+            tracks: tracks,
+            playOrder: playOrder,
+            transition: transition
+        )
         playlists.append(playlist)
         save()
         return playlist
