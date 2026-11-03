@@ -68,7 +68,13 @@ struct DismissAlarmIntent: LiveActivityIntent {
             )
             let entryID = action.entryID
             let entry = entryID.flatMap { id in entries.first { $0.id == id } }
-            stoppedSoundMode = entry?.soundMode ?? .single
+            let playOrder = await MainActor.run {
+                PlaylistStore.shared.playlist(id: entry?.playlistID)?.playOrder
+            }
+            stoppedSoundMode = AlarmSoundModeLogic.soundMode(
+                playlistID: entry?.playlistID,
+                playOrder: playOrder
+            )
             let primaryID = entryID.flatMap { primary[$0] }
             let primaryState = alarms.first(where: { $0.id == primaryID })?.state
 
@@ -170,7 +176,7 @@ struct DismissAlarmIntent: LiveActivityIntent {
             if case .primary = action.role,
                let entry,
                !entry.repeatWeekdays.isEmpty,
-               entry.soundMode.changesOrderOnStop,
+               playOrder?.changesOrderOnStop == true,
                let oldPrimaryID = primaryID,
                stoppedID == oldPrimaryID {
                 await AlarmScheduler.shared.reschedulePrimaryAfterStop(

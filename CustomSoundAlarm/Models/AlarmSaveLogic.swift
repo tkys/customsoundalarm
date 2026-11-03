@@ -12,9 +12,8 @@ enum AlarmSaveLogic {
         soundFileName: String,
         snoozeMinutes: Int,
         backupMinutes: Int?,
-        soundMode: PlaylistSoundMode = .single,
         playlistID: UUID? = nil,
-        fadeSettings: PlaylistFadeSettings = .disabled
+        fadeIn: PlaylistFadeIn = .off
     ) -> AlarmEntry {
         AlarmEntry(
             hour: hour,
@@ -25,9 +24,8 @@ enum AlarmSaveLogic {
             soundFileName: soundFileName,
             snoozeMinutes: snoozeMinutes,
             backupMinutes: backupMinutes,
-            soundMode: soundMode,
             playlistID: playlistID,
-            fadeSettings: fadeSettings
+            fadeIn: fadeIn
         )
     }
 
@@ -40,9 +38,8 @@ enum AlarmSaveLogic {
         soundFileName: String,
         snoozeMinutes: Int,
         backupMinutes: Int?,
-        soundMode: PlaylistSoundMode = .single,
         playlistID: UUID? = nil,
-        fadeSettings: PlaylistFadeSettings = .disabled
+        fadeIn: PlaylistFadeIn = .off
     ) -> AlarmEntry {
         var updated = existing
         updated.hour = hour
@@ -52,9 +49,8 @@ enum AlarmSaveLogic {
         updated.soundFileName = soundFileName
         updated.snoozeMinutes = snoozeMinutes
         updated.backupMinutes = backupMinutes
-        updated.soundMode = soundMode
         updated.playlistID = playlistID
-        updated.fadeSettings = fadeSettings
+        updated.fadeIn = fadeIn
         // 編集画面にオン/オフは置かない。保存したら必ずオン（#122）
         updated.isEnabled = true
         return updated

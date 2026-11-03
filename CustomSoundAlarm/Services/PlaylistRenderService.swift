@@ -54,7 +54,7 @@ final class PlaylistRenderService {
     private static let renderVersion = 1
     private static let tempLifetime: TimeInterval = 10 * 60
 
-    /// 計測は PR-B で接続する（PR-A では no-op）。
+    /// 書き出し失敗・フォールバックの計測フック。
     var onRenderFailed: ((PlaylistRenderFailureReason) -> Void)?
     var onFallback: (() -> Void)?
 
@@ -91,7 +91,7 @@ final class PlaylistRenderService {
         }
 
         let playlist = PlaylistStore.shared.playlist(id: input.playlistID)
-        if input.soundMode.isPlaylist, playlist == nil {
+        if input.isPlaylist, playlist == nil {
             return fallback(for: input, reason: .missingPlaylist)
         }
 
@@ -104,13 +104,15 @@ final class PlaylistRenderService {
         let cached = cache[key]
         // 起動セッションが変わったとき、または停止後の作り直しだけ順番を変える。
         let needsNewOrder = forceNewOrder
-            || (input.soundMode.changesOrderOnStop && cached?.sessionToken != sessionToken)
+            || ((playlist?.playOrder.changesOrderOnStop ?? false)
+                && cached?.sessionToken != sessionToken)
         let seed = needsNewOrder
             ? Self.newOrderSeed()
             : (cached?.orderSeed ?? Self.newOrderSeed())
+        let playOrder = playlist?.playOrder ?? .inOrder
         let ordered = PlaylistRenderLogic.orderedTracks(
             tracks,
-            mode: input.soundMode.isPlaylist ? input.soundMode : .playlistOrder,
+            order: playOrder,
             seed: seed
         )
         let resolved = ordered.compactMap { track -> (PlaylistTrack, URL)? in
@@ -144,7 +146,8 @@ final class PlaylistRenderService {
         )
         let request = PlaylistRenderRequest(
             trackURLs: resolved.map(\.1),
-            fade: input.fadeSettings,
+            fadeIn: input.fadeIn,
+            transition: playlist?.transition ?? .off,
             applyFadeIn: true,
             outputURL: tempURL
         )
@@ -183,7 +186,7 @@ final class PlaylistRenderService {
     /// - Parameters:
     ///   - inputs: 現在プレイリスト機能を使っているアラーム
     ///   - registeredFileNames: 現在 AlarmKit に登録している音ファイル名。
-    ///     PR-B で渡す。登録中のファイルは、キャッシュが切り替わっていても消さない。
+    ///     登録中のファイルは、キャッシュが切り替わっていても消さない。
     func cleanupUnusedFiles(
         inputs: [PlaylistRenderInput],
         keeping registeredFileNames: Set<String> = []
@@ -253,7 +256,7 @@ final class PlaylistRenderService {
         for input: PlaylistRenderInput,
         playlist: Playlist?
     ) -> [PlaylistTrack] {
-        if input.soundMode.isPlaylist {
+        if input.isPlaylist {
             return playlist?.tracks ?? []
         }
         return [PlaylistTrack(soundFileName: input.fallbackFileName)]
@@ -273,19 +276,17 @@ final class PlaylistRenderService {
         input: PlaylistRenderInput,
         ordered: [PlaylistTrack]
     ) -> String {
-        let fade = input.fadeSettings
+        let playlist = PlaylistStore.shared.playlist(id: input.playlistID)
         let order = ordered.map(\.soundFileName).joined(separator: ",")
-        let mode = input.soundMode.rawValue
-        let fadeIn = fade.fadeIn.analyticsValue
-        let gap = fade.gapFade.analyticsValue
-        let end = fade.endFade ? "1" : "0"
+        let playOrder = playlist?.playOrder.analyticsValue ?? PlaylistPlayOrder.inOrder.analyticsValue
+        let transition = playlist?.transition.analyticsValue ?? PlaylistTransition.off.analyticsValue
+        let fadeIn = input.fadeIn.analyticsValue
         return [
             "v\(Self.renderVersion)",
-            mode,
+            playOrder,
+            transition,
             order,
-            fadeIn,
-            gap,
-            end
+            fadeIn
         ].joined(separator: "|")
     }
 

@@ -102,7 +102,7 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.playlistCreated(
             trackCount: 3, totalSecondsBucket: "5_10min"
         ).name == "playlist_created")
-        #expect(AnalyticsEvent.playlistEdited.name == "playlist_edited")
+        #expect(AnalyticsEvent.playlistEdited().name == "playlist_edited")
         #expect(AnalyticsEvent.playlistRenderFailed(reason: .tooLong).name == "playlist_render_failed")
         #expect(AnalyticsEvent.playlistRenderFallback.name == "playlist_render_fallback")
         #expect(AnalyticsEvent.playlistRescheduleFailed(
@@ -116,15 +116,13 @@ struct AnalyticsEventTests {
     func alarmCreatedProperties_whenCustomAndRepeating() {
         let props = AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: true, snoozeMinutes: 9).properties
 
-        #expect(props.count == 8)
+        #expect(props.count == 6)
         #expect(props["has_custom_sound"] as? Bool == true)
         #expect(props["is_repeating"] as? Bool == true)
         #expect(props["snooze_minutes"] as? Int == 9)
         #expect(props["backup_minutes"] as? Int == 0)
         #expect(props["sound_mode"] as? String == "single")
         #expect(props["fade_in"] as? String == "off")
-        #expect(props["gap_fade"] as? String == "off")
-        #expect(props["end_fade"] as? Bool == false)
     }
 
     @Test
@@ -433,7 +431,7 @@ struct AnalyticsEventTests {
             .soundPickerRecentUsed,
             .adSlotEligible(slot: .bannerSounds, allowed: true, reason: .eligible, region: .standard),
             .playlistCreated(trackCount: 2, totalSecondsBucket: "1_5min"),
-            .playlistEdited,
+            .playlistEdited(),
             .playlistRenderFailed(reason: .renderFailed),
             .playlistRenderFallback,
             .playlistRescheduleFailed(reason: "schedule_failed"),
@@ -460,7 +458,7 @@ struct AnalyticsEventTests {
         let edited = AnalyticsEvent.alarmEdited(hasCustomSound: true, isRepeating: false, snoozeMinutes: 9).properties
         let created = AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: false, snoozeMinutes: 9).properties
 
-        #expect(edited.count == 9)
+        #expect(edited.count == 7)
         #expect(Set(edited.keys).subtracting(["was_enabled"]) == Set(created.keys))
         #expect(edited["has_custom_sound"] as? Bool == true)
         #expect(edited["is_repeating"] as? Bool == false)
@@ -698,11 +696,26 @@ struct AnalyticsEventTests {
     func playlistCreatedProperties() {
         let props = AnalyticsEvent.playlistCreated(
             trackCount: 4,
-            totalSecondsBucket: "5_10min"
+            totalSecondsBucket: "5_10min",
+            playOrder: .shuffle,
+            transition: .crossfade
         ).properties
-        #expect(props.count == 2)
+        #expect(props.count == 4)
         #expect(props["track_count"] as? Int == 4)
         #expect(props["total_seconds_bucket"] as? String == "5_10min")
+        #expect(props["play_order"] as? String == "shuffle")
+        #expect(props["transition"] as? String == "crossfade")
+    }
+
+    @Test
+    func playlistEditedProperties() {
+        let props = AnalyticsEvent.playlistEdited(
+            playOrder: .oneRandom,
+            transition: .long
+        ).properties
+        #expect(props.count == 2)
+        #expect(props["play_order"] as? String == "one_random")
+        #expect(props["transition"] as? String == "long")
     }
 
     @Test
@@ -728,14 +741,10 @@ struct AnalyticsEventTests {
             isRepeating: true,
             snoozeMinutes: 9,
             soundMode: .playlistShuffle,
-            fadeIn: .thirty,
-            gapFade: .crossfade,
-            endFade: true
+            fadeIn: .thirty
         ).properties
         #expect(props["sound_mode"] as? String == "playlist_shuffle")
         #expect(props["fade_in"] as? String == "30")
-        #expect(props["gap_fade"] as? String == "crossfade")
-        #expect(props["end_fade"] as? Bool == true)
     }
 
     // MARK: alarm_snoozed

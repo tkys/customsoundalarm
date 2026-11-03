@@ -258,4 +258,40 @@ struct SyncDiffTests {
         #expect(diff.scheduleEntries.count == 1)
         #expect(diff.scheduleEntries[0].id == newEntry.id)
     }
+
+    // MARK: - Forced reschedule (playlist edit / sound deletion, #160)
+
+    @Test
+    func forcedScheduledEntry_rescheduled() {
+        let entry = AlarmEntry(hour: 7, minute: 0)
+        let alarmID = Alarm.ID()
+
+        let diff = computeSyncDiff(
+            oldMap: [entry.id: alarmID],
+            entries: [entry],
+            activeStates: [alarmID: .scheduled],
+            forceRescheduleEntryIDs: [entry.id]
+        )
+
+        #expect(diff.keptMap.isEmpty)
+        #expect(diff.scheduleEntries.map(\.id) == [entry.id])
+        #expect(diff.rescheduleAlarmIDs[entry.id] == alarmID)
+    }
+
+    @Test
+    func forcedRingingEntry_staysProtected() {
+        let entry = AlarmEntry(hour: 7, minute: 0)
+        let alarmID = Alarm.ID()
+
+        let diff = computeSyncDiff(
+            oldMap: [entry.id: alarmID],
+            entries: [entry],
+            activeStates: [alarmID: .alerting],
+            forceRescheduleEntryIDs: [entry.id]
+        )
+
+        // 鳴動中の音は途切れさせない。次回の同期で新しい書き出しに切り替わる。
+        #expect(diff.keptMap == [entry.id: alarmID])
+        #expect(diff.scheduleEntries.isEmpty)
+    }
 }

@@ -285,3 +285,17 @@
 "playlist_select_track" = "添加曲目";
 "edit" = "编辑";
 "ok" = "好";
+
+/* OOUI playback (#160) */
+"play_order" = "播放顺序";
+"play_order_in_order" = "按顺序";
+"play_order_shuffle" = "随机播放";
+"play_order_one_random" = "随机一首";
+"transition" = "过渡";
+"transition_off" = "无";
+"transition_short" = "短淡入淡出（0.5 秒）";
+"transition_long" = "长淡入淡出（2 秒）";
+"transition_crossfade" = "交叉淡化";
+"transition_footer" = "在连接曲目时应用。整个循环的结尾始终会短暂淡出。";
+"playlist_playback" = "播放方式";
+"playlist_summary_fmt" = "%@ · %d 首";

@@ -285,3 +285,17 @@
 "playlist_select_track" = "曲を選ぶ";
 "edit" = "編集";
 "ok" = "OK";
+
+/* OOUI playback (#160) */
+"play_order" = "再生順";
+"play_order_in_order" = "順番";
+"play_order_shuffle" = "シャッフル";
+"play_order_one_random" = "1曲ランダム";
+"transition" = "つなぎ方";
+"transition_off" = "なし";
+"transition_short" = "短いフェード（0.5秒）";
+"transition_long" = "長いフェード（2秒）";
+"transition_crossfade" = "クロスフェード";
+"transition_footer" = "曲をつなぐときに適用されます。ループ全体の末尾は常に短くフェードアウトします。";
+"playlist_playback" = "再生方法";
+"playlist_summary_fmt" = "%@・%d曲";

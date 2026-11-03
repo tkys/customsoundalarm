@@ -20,6 +20,9 @@ struct CustomSoundAlarmApp: App {
                         AlarmStore.shared.resetForUITest()
                         SoundStore.shared.resetForUITest()
                     }
+                    if AppGroup.isUITestResetPlaylists {
+                        PlaylistStore.shared.resetForUITest()
+                    }
                     // UIテスト用: アラーム一覧を時刻順で検証するためのシード
                     if AppGroup.isUITestSeedAlarms {
                         AppGroup.hasCompletedOnboarding = true
@@ -92,6 +95,11 @@ struct CustomSoundAlarmApp: App {
                     }
                     PlaylistRenderService.shared.onFallback = {
                         AnalyticsService.shared.capture(.playlistRenderFallback)
+                    }
+
+                    // プレイリストの編集・音の削除で、使っているアラームを再登録する（#160）
+                    PlaylistStore.shared.onPlaylistChanged = { playlistID in
+                        AlarmScheduler.shared.resync(entriesUsingPlaylist: playlistID)
                     }
 
                     // #98: オンボの要否は Entitlements のネットワーク待ちより前に

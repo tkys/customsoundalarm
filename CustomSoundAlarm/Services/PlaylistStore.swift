@@ -9,6 +9,9 @@ final class PlaylistStore {
 
     private(set) var playlists: [Playlist] = []
 
+    /// プレイリストの保存・削除時に呼ぶ（#160）。アラームの再登録に使う。
+    var onPlaylistChanged: ((UUID) -> Void)?
+
     private init() {
         load()
     }
@@ -19,8 +22,18 @@ final class PlaylistStore {
     }
 
     @discardableResult
-    func add(name: String, tracks: [PlaylistTrack] = []) -> Playlist {
-        let playlist = Playlist(name: name, tracks: tracks)
+    func add(
+        name: String,
+        tracks: [PlaylistTrack] = [],
+        playOrder: PlaylistPlayOrder = .inOrder,
+        transition: PlaylistTransition = .off
+    ) -> Playlist {
+        let playlist = Playlist(
+            name: name,
+            tracks: tracks,
+            playOrder: playOrder,
+            transition: transition
+        )
         playlists.append(playlist)
         save()
         return playlist
@@ -30,6 +43,7 @@ final class PlaylistStore {
         guard let index = playlists.firstIndex(where: { $0.id == playlist.id }) else { return }
         playlists[index] = playlist
         save()
+        onPlaylistChanged?(playlist.id)
     }
 
     /// 新規・既存を問わず保存する（#151 の編集画面用）。
@@ -40,11 +54,32 @@ final class PlaylistStore {
             playlists.append(playlist)
         }
         save()
+        onPlaylistChanged?(playlist.id)
     }
 
     func remove(id: UUID) {
         playlists.removeAll { $0.id == id }
         save()
+        onPlaylistChanged?(id)
+    }
+
+    /// 削除された音をプレイリストから外し、影響したプレイリストIDを返す（#160）。
+    @discardableResult
+    func removeTrack(fileName: String) -> [UUID] {
+        var affected: [UUID] = []
+        for index in playlists.indices {
+            let oldCount = playlists[index].tracks.count
+            playlists[index].tracks.removeAll { $0.soundFileName == fileName }
+            if playlists[index].tracks.count != oldCount {
+                affected.append(playlists[index].id)
+            }
+        }
+        guard !affected.isEmpty else { return [] }
+        save()
+        for id in affected {
+            onPlaylistChanged?(id)
+        }
+        return affected
     }
 
     /// 曲の長さ（秒）の辞書。SoundStore の記録を使う。

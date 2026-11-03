@@ -11,6 +11,8 @@ struct PlaylistEditorView: View {
     @State private var store = PlaylistStore.shared
     @State private var name: String
     @State private var tracks: [PlaylistTrack]
+    @State private var playOrder: PlaylistPlayOrder
+    @State private var transition: PlaylistTransition
     @State private var showingTrackPicker = false
 
     init(playlist: Playlist?, onSave: @escaping (Playlist) -> Void) {
@@ -21,6 +23,8 @@ struct PlaylistEditorView: View {
                 ?? String(localized: "playlist_new_default_name")
         )
         _tracks = State(initialValue: playlist?.tracks ?? [])
+        _playOrder = State(initialValue: playlist?.playOrder ?? .inOrder)
+        _transition = State(initialValue: playlist?.transition ?? .off)
     }
 
     private var totalSeconds: TimeInterval {
@@ -90,18 +94,26 @@ struct PlaylistEditorView: View {
             }
 
             Section {
-                EarlyAccessBadge()
-                Text("playlist_early_access_note")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            } footer: {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("fade_backup_note")
-                    Text("playlist_backup_note")
+                Picker("play_order", selection: $playOrder) {
+                    Text("play_order_in_order").tag(PlaylistPlayOrder.inOrder)
+                    Text("play_order_shuffle").tag(PlaylistPlayOrder.shuffle)
+                    Text("play_order_one_random").tag(PlaylistPlayOrder.oneRandom)
                 }
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+                .accessibilityIdentifier("playlist.playOrder")
+
+                Picker("transition", selection: $transition) {
+                    Text("transition_off").tag(PlaylistTransition.off)
+                    Text("transition_short").tag(PlaylistTransition.short)
+                    Text("transition_long").tag(PlaylistTransition.long)
+                    Text("transition_crossfade").tag(PlaylistTransition.crossfade)
+                }
+                .accessibilityIdentifier("playlist.transition")
+            } header: {
+                Text("playlist_playback")
+            } footer: {
+                Text("transition_footer")
             }
+
         }
         .navigationTitle(
             playlist == nil
@@ -136,6 +148,8 @@ struct PlaylistEditorView: View {
             id: playlist?.id ?? UUID(),
             name: trimmed,
             tracks: tracks,
+            playOrder: playOrder,
+            transition: transition,
             createdAt: playlist?.createdAt ?? Date()
         )
         store.upsert(saved)
@@ -145,10 +159,15 @@ struct PlaylistEditorView: View {
                 trackCount: tracks.count,
                 totalSecondsBucket: AnalyticsBuckets.playlistSecondsBucket(
                     seconds: totalSeconds
-                )
+                ),
+                playOrder: playOrder,
+                transition: transition
             ))
         } else {
-            AnalyticsService.shared.capture(.playlistEdited)
+            AnalyticsService.shared.capture(.playlistEdited(
+                playOrder: playOrder,
+                transition: transition
+            ))
         }
         onSave(saved)
         dismiss()
@@ -216,7 +235,7 @@ struct PlaylistPickerView: View {
                         }
                         .swipeActions {
                             Button(role: .destructive) {
-                                store.remove(id: playlist.id)
+                                PlaylistDeletionService.delete(playlistID: playlist.id)
                                 if selectedPlaylistID == playlist.id {
                                     selectedPlaylistID = nil
                                 }

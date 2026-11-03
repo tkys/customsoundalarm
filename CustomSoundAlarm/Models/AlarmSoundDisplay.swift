@@ -5,7 +5,7 @@ import Foundation
 @MainActor
 enum AlarmSoundDisplay {
     static func name(for entry: AlarmEntry) -> String {
-        if entry.soundMode.isPlaylist {
+        if entry.playlistID != nil {
             return PlaylistStore.shared.playlist(id: entry.playlistID)?.name
                 ?? String(localized: "playlist")
         }
@@ -13,21 +13,19 @@ enum AlarmSoundDisplay {
     }
 
     static func hasSound(_ entry: AlarmEntry) -> Bool {
-        if entry.soundMode.isPlaylist {
-            return entry.playlistID != nil
-        }
+        if entry.playlistID != nil { return true }
         return !entry.soundFileName.isEmpty
     }
 
     static func isCustom(_ entry: AlarmEntry) -> Bool {
-        if entry.soundMode.isPlaylist { return true }
+        if entry.playlistID != nil { return true }
         return !entry.soundFileName.isEmpty
     }
 
     /// サムネイル表示用の代表音（プレイリストは最初の曲）
     static func representativeSound(for entry: AlarmEntry) -> AlarmSound? {
         let fileName: String?
-        if entry.soundMode.isPlaylist {
+        if entry.playlistID != nil {
             fileName = PlaylistStore.shared
                 .playlist(id: entry.playlistID)?
                 .tracks

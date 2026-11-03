@@ -75,6 +75,8 @@ final class SoundStore {
             AppGroup.dismissedPresetFileNames = dismissed
         }
         save()
+        // プレイリストからも外し、使っているアラームを再登録する（#160）。
+        PlaylistStore.shared.removeTrack(fileName: sound.fileName)
     }
 
     /// ファイル名からサウンドの表示名を返す。

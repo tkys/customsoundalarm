@@ -16,12 +16,10 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
     /// 最終アラーム（締め切り）までの分数（#110）。nil = オフ。
     /// 旧データには存在しないため `decodeIfPresent` で移行する。
     var backupMinutes: Int?
-    /// 音の選び方（#151）。旧データは `.single`。
-    var soundMode: PlaylistSoundMode
-    /// 使用するプレイリスト（#151）。`.single` のときは nil。
+    /// 使用するプレイリスト（#160）。nil = 1つの音（`soundFileName`）。
     var playlistID: UUID?
-    /// フェード設定（#151）。旧データはフェードなし。
-    var fadeSettings: PlaylistFadeSettings
+    /// やさしく鳴り始める（#160）。アラームが持つ。
+    var fadeIn: PlaylistFadeIn
 
     init(
         id: UUID = UUID(),
@@ -33,9 +31,8 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
         soundFileName: String = "",
         snoozeMinutes: Int = 9,
         backupMinutes: Int? = nil,
-        soundMode: PlaylistSoundMode = .single,
         playlistID: UUID? = nil,
-        fadeSettings: PlaylistFadeSettings = .disabled
+        fadeIn: PlaylistFadeIn = .off
     ) {
         self.id = id
         self.hour = hour
@@ -46,14 +43,13 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
         self.soundFileName = soundFileName
         self.snoozeMinutes = snoozeMinutes
         self.backupMinutes = backupMinutes
-        self.soundMode = soundMode
         self.playlistID = playlistID
-        self.fadeSettings = fadeSettings
+        self.fadeIn = fadeIn
     }
 
     enum CodingKeys: String, CodingKey {
         case id, hour, minute, isEnabled, label, repeatWeekdays, soundFileName, snoozeMinutes, backupMinutes
-        case soundMode, playlistID, fadeSettings
+        case playlistID, fadeIn
     }
 
     init(from decoder: any Decoder) throws {
@@ -67,27 +63,22 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
         soundFileName = try container.decode(String.self, forKey: .soundFileName)
         snoozeMinutes = try container.decodeIfPresent(Int.self, forKey: .snoozeMinutes) ?? 9
         backupMinutes = try container.decodeIfPresent(Int.self, forKey: .backupMinutes)
-        soundMode = try container.decodeIfPresent(PlaylistSoundMode.self, forKey: .soundMode) ?? .single
         playlistID = try container.decodeIfPresent(UUID.self, forKey: .playlistID)
-        fadeSettings = try container.decodeIfPresent(
-            PlaylistFadeSettings.self,
-            forKey: .fadeSettings
-        ) ?? .disabled
+        fadeIn = try container.decodeIfPresent(PlaylistFadeIn.self, forKey: .fadeIn) ?? .off
     }
 
-    /// プレイリストかフェード設定を使っているか（先行公開の権利付与判定・#151）
+    /// プレイリストか「やさしく鳴り始める」を使っているか（先行公開の権利付与判定・#160）
     var usesPlaylistFeatures: Bool {
-        soundMode.isPlaylist || !fadeSettings.isDisabled
+        playlistID != nil || fadeIn != .off
     }
 
-    /// プレイリスト書き出しへの入力（#151）
+    /// プレイリスト書き出しへの入力（#160）
     var playlistRenderInput: PlaylistRenderInput {
         PlaylistRenderInput(
             entryID: id,
             playlistID: playlistID,
-            soundMode: soundMode,
-            fadeSettings: fadeSettings,
-            fallbackFileName: soundFileName
+            fallbackFileName: soundFileName,
+            fadeIn: fadeIn
         )
     }
 
@@ -160,9 +151,8 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
             soundFileName: soundFileName,
             snoozeMinutes: snoozeMinutes,
             backupMinutes: backupMinutes,
-            soundMode: soundMode,
             playlistID: playlistID,
-            fadeSettings: fadeSettings
+            fadeIn: fadeIn
         )
     }
 }

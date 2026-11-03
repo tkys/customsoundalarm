@@ -285,3 +285,17 @@
 "playlist_select_track" = "Ajouter des titres";
 "edit" = "Modifier";
 "ok" = "OK";
+
+/* OOUI playback (#160) */
+"play_order" = "Ordre de lecture";
+"play_order_in_order" = "Dans l'ordre";
+"play_order_shuffle" = "Aléatoire";
+"play_order_one_random" = "Un titre au hasard";
+"transition" = "Transitions";
+"transition_off" = "Aucune";
+"transition_short" = "Fondu court (0,5 s)";
+"transition_long" = "Fondu long (2 s)";
+"transition_crossfade" = "Fondu enchaîné";
+"transition_footer" = "S'applique lors de l'assemblage des titres. La fin de la boucle complète est toujours légèrement fondue.";
+"playlist_playback" = "Lecture";
+"playlist_summary_fmt" = "%@ · %d titres";
