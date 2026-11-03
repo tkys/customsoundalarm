@@ -122,6 +122,7 @@ struct PlaylistEditorView: View {
             }
 
         }
+        .warmListBackground()
         .navigationTitle(
             playlist == nil
                 ? String(localized: "playlist_new")

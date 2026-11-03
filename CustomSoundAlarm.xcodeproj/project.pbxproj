@@ -165,6 +165,7 @@
 		C59275DD89DD7183C9E6EC68 /* PlaylistRenderLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A2D25582E5891BFB320CC1 /* PlaylistRenderLogic.swift */; };
 		C67A049F83FC06EB3EDF9B33 /* LoudnessMeter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9314AFCE6847B4B4D8A7AF2 /* LoudnessMeter.swift */; };
 		C6B768B7246257C8EE0725FB /* PendingSoundImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CBACC275B5CC8C65DB386E6 /* PendingSoundImport.swift */; };
+		C92AB2DDB9D338F9195AA238 /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = 7800E7F19FF508932FA02F22 /* Localizable.stringsdict */; };
 		CA0EEECA616D5FD95C77EF8E /* AnalyticsServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9D35522AC999425CF7052E /* AnalyticsServiceTests.swift */; };
 		CAC7C465E44E98E48457E315 /* AlarmSaveLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76AA9981D687CB591C987B1 /* AlarmSaveLogic.swift */; };
 		CB3D0C2572853AEABDA461D2 /* AlarmSoundModeResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D13E2D5235C70F648219CB3 /* AlarmSoundModeResolver.swift */; };
@@ -276,6 +277,7 @@
 		05D997460327EF0788815A8A /* BedsideSessionLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BedsideSessionLogic.swift; sourceTree = "<group>"; };
 		06D75262D4EB4101D764EEED /* AlarmStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmStore.swift; sourceTree = "<group>"; };
 		070B386CACF0CF5F1B4FD824 /* AudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
+		0766BBB0637259803ECBFFB7 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.stringsdict"; sourceTree = "<group>"; };
 		07F1238609D7566D189DDAE1 /* LoudnessMeterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoudnessMeterTests.swift; sourceTree = "<group>"; };
 		088D752732EFE955AF068AB0 /* LoudVariantGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoudVariantGeneratorTests.swift; sourceTree = "<group>"; };
 		08EAAA2A211BCB98598A3FB2 /* CustomAlarmMetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomAlarmMetadataTests.swift; sourceTree = "<group>"; };
@@ -290,6 +292,7 @@
 		127719F16726FF6F9B94B85A /* AdRegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdRegion.swift; sourceTree = "<group>"; };
 		1311C2F0DE9A8D12DD1865D6 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		13164272F44EAF943FDAB6E2 /* PendingAlarmEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingAlarmEvent.swift; sourceTree = "<group>"; };
+		140510A7D4CAD2CA7EF2FB3C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = en; path = en.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		154742952C76B5CA8F92ADEE /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = cs; path = cs.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		171400DBA98E9AB1A2F8A3EF /* SoundUsageHistoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundUsageHistoryTests.swift; sourceTree = "<group>"; };
 		190EF3C9FEF4F542A73F1D4C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -302,6 +305,7 @@
 		1C27A2CC78C9B9184B31B7A2 /* StopActionPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopActionPlanner.swift; sourceTree = "<group>"; };
 		1D22CC2C2078700B89027247 /* TestRingReasonUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestRingReasonUITests.swift; sourceTree = "<group>"; };
 		1D89A44681D6F654589718A8 /* AudioCropView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCropView.swift; sourceTree = "<group>"; };
+		1F12FB998E2B755160BA8B1F /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = nl; path = nl.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		1F5142944F490CB52A70183C /* UpdatePromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePromptView.swift; sourceTree = "<group>"; };
 		1FD7FD210ABD24FE40E75208 /* AlarmListOrdering.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmListOrdering.swift; sourceTree = "<group>"; };
 		225524FA5A69D50318058FBA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -310,6 +314,7 @@
 		2479D3B847DB243890A3160E /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		24E2AD930FA1F4B67D2F024E /* BackupSoundResolverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupSoundResolverTests.swift; sourceTree = "<group>"; };
 		262DAD2B928D3C5EA3AA2CC9 /* BackupAlarmLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupAlarmLogic.swift; sourceTree = "<group>"; };
+		268AA167BB8223780ED4C68C /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = it; path = it.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		2A3184B3675367A0DD9EE9BE /* SoundThumbnailLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundThumbnailLogicTests.swift; sourceTree = "<group>"; };
 		2C816A34083D6731EF32C683 /* PresetBell.caf */ = {isa = PBXFileReference; path = PresetBell.caf; sourceTree = "<group>"; };
 		2C9089DCFC77CD429078E11D /* WaveformCropMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveformCropMathTests.swift; sourceTree = "<group>"; };
@@ -334,6 +339,7 @@
 		3F9D35522AC999425CF7052E /* AnalyticsServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsServiceTests.swift; sourceTree = "<group>"; };
 		430876287ED548429FC87FD8 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		43235842F39385B82B212B62 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		44935AE549DCAA98A6CC631E /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = es; path = es.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		4506353486F1AE80B4A03D35 /* SoundThumbnail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundThumbnail.swift; sourceTree = "<group>"; };
 		450DEB40FC22DF70FD2EEE04 /* CustomSoundAlarmWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSoundAlarmWidgetBundle.swift; sourceTree = "<group>"; };
 		4624431BFD895A8C3EE23EEA /* FirstInstallBuild.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstInstallBuild.swift; sourceTree = "<group>"; };
@@ -354,9 +360,11 @@
 		5390BC4C9FC33C9E4A330A2B /* AnalyticsUserProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsUserProperties.swift; sourceTree = "<group>"; };
 		54FD1BD5F2EF03A3A1C568D3 /* VideoTrimView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTrimView.swift; sourceTree = "<group>"; };
 		562C2A8787A9B46E4B89EDE6 /* UpdateGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateGate.swift; sourceTree = "<group>"; };
+		58287CA5A305AEDAB545A99F /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = fr; path = fr.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		5966298540A406BF53D4845A /* AdPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdPolicy.swift; sourceTree = "<group>"; };
 		5AC91F1DEB3048F65CCE09AD /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = cs; path = cs.lproj/Localizable.strings; sourceTree = "<group>"; };
 		5D0CDAFA515E28C4A911A811 /* Playlist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Playlist.swift; sourceTree = "<group>"; };
+		5E974F69AA594D6B2F2CB69C /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = ar; path = ar.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		5F705709C214B2EB407BC32A /* LookaheadLimiter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LookaheadLimiter.swift; sourceTree = "<group>"; };
 		5F843AFAC4DF891EF53ACCE8 /* LoudnessNormalizerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoudnessNormalizerTests.swift; sourceTree = "<group>"; };
 		60B3C6E7CE7ADCA9E3A20299 /* BackupAlarmFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupAlarmFactory.swift; sourceTree = "<group>"; };
@@ -373,6 +381,7 @@
 		6C8C1415F3825EA19A5F8714 /* AlarmMetadataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmMetadataModel.swift; sourceTree = "<group>"; };
 		7023AEAF15F5D0D792D217E3 /* AlarmIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmIntents.swift; sourceTree = "<group>"; };
 		7070484DAE7EA0EEC071F6AF /* FilmstripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilmstripView.swift; sourceTree = "<group>"; };
+		70D2D6C9D829470848C1EC22 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = de; path = de.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		73006F217DAD8BFF87A77080 /* EntitlementsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementsTests.swift; sourceTree = "<group>"; };
 		748C317406BF7128A8FD08F3 /* AlarmIDMaps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmIDMaps.swift; sourceTree = "<group>"; };
 		74FE4C321BF525BD4D8EF49D /* AnalyticsEventsDocTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsEventsDocTests.swift; sourceTree = "<group>"; };
@@ -385,6 +394,7 @@
 		7B785B0AA836FD95FBE5E416 /* CustomSoundAlarm.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CustomSoundAlarm.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FDFF3E0BB74C0B6C048D867 /* TrimRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrimRange.swift; sourceTree = "<group>"; };
 		81628E68814A83420FFE059D /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		81A5A7EC64C52B8DC48BE004 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = "pt-BR"; path = "pt-BR.lproj/Localizable.stringsdict"; sourceTree = "<group>"; };
 		8267931ECD28007465925431 /* PlaylistResyncLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistResyncLogic.swift; sourceTree = "<group>"; };
 		845AA156BD0327AFDA5CE60B /* VolumeGuideLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeGuideLogicTests.swift; sourceTree = "<group>"; };
 		85A905CD44F94EC80ECDCA40 /* SoundStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundStoreTests.swift; sourceTree = "<group>"; };
@@ -425,6 +435,7 @@
 		AAA02B1AE43B835B2A27D6CF /* PresetMusicBox.caf */ = {isa = PBXFileReference; path = PresetMusicBox.caf; sourceTree = "<group>"; };
 		AB62C201CC3D66F33A1E9ED7 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		AB8F6ECD0741897B6CF0234E /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		AC338ED8471E751D239A8A4E /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = cs; path = cs.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		AD1A801C9CCCD498540109ED /* PresetMarimba.caf */ = {isa = PBXFileReference; path = PresetMarimba.caf; sourceTree = "<group>"; };
 		ADB04AB60EF40DA254175443 /* BackupSoundResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupSoundResolver.swift; sourceTree = "<group>"; };
 		AEEBEBF4DB690A293B406484 /* AddAlarmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAlarmView.swift; sourceTree = "<group>"; };
@@ -438,6 +449,7 @@
 		B61E2495643F1EB1F7D5B676 /* AudioSizeEstimateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSizeEstimateTests.swift; sourceTree = "<group>"; };
 		B68A6B0E32814AD7A4F13201 /* PresetAscending.caf */ = {isa = PBXFileReference; path = PresetAscending.caf; sourceTree = "<group>"; };
 		B9351BFC7ADF3E53A9B56CD1 /* SoundNameFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundNameFormatterTests.swift; sourceTree = "<group>"; };
+		B989E2A803604B6500629B81 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = ko; path = ko.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		BA0DC1BEE7AD4F2604D84B47 /* BedsideClockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BedsideClockView.swift; sourceTree = "<group>"; };
 		BA17D126F33619A4E3697AF3 /* PostSaveFeedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostSaveFeedback.swift; sourceTree = "<group>"; };
 		BC359E963EA8352F684AE02E /* PresetBundleRetentionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetBundleRetentionTests.swift; sourceTree = "<group>"; };
@@ -470,6 +482,7 @@
 		D620CC2A8B9C10399A403D9E /* SoundUsageHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundUsageHistory.swift; sourceTree = "<group>"; };
 		DAD0AD12CEFDEBEAFCAA3BD8 /* TestRingReasonLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestRingReasonLogicTests.swift; sourceTree = "<group>"; };
 		DB07A1233B68A402D5B950F4 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
+		DD791A30D24B6F0CAFDDD2ED /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = ja; path = ja.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		DDEC29ADE0634B68AAFBD5CC /* CustomSoundAlarmWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CustomSoundAlarmWidget.entitlements; sourceTree = "<group>"; };
 		E15FECDD6D248960DF6FAE7B /* ReviewRequestManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewRequestManagerTests.swift; sourceTree = "<group>"; };
 		E385B754D493555537FB767D /* SoundStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundStore.swift; sourceTree = "<group>"; };
@@ -480,6 +493,7 @@
 		EB945E440D779CA36034EF9D /* AudioSizeEstimate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSizeEstimate.swift; sourceTree = "<group>"; };
 		ECFB5D72956BEF5074D1BB4B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		EE105D13EE2FE60FAE50F6C7 /* AlarmScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmScheduler.swift; sourceTree = "<group>"; };
+		EE318506FD295B6BA88B884A /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = pl; path = pl.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		EE9B082F9E27521B1C0E40A7 /* VideoFileImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFileImporter.swift; sourceTree = "<group>"; };
 		F066254996FACA1408F39ECA /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		F35487F34D14483915469499 /* SoundLoudnessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundLoudnessTests.swift; sourceTree = "<group>"; };
@@ -645,6 +659,7 @@
 				F63C69F723DEF9E2780F11B8 /* Assets.xcassets */,
 				AA13D117730C6D5910D58FD4 /* InfoPlist.strings */,
 				38AF579920FBD3A19098540F /* Localizable.strings */,
+				7800E7F19FF508932FA02F22 /* Localizable.stringsdict */,
 				F523831A6349440177E48E14 /* Sounds */,
 			);
 			path = Resources;
@@ -1030,6 +1045,7 @@
 				D9DFA2B45BA2D540D349018A /* Assets.xcassets in Resources */,
 				E17F8A2662BF0D60BC3DBB3E /* InfoPlist.strings in Resources */,
 				A7DA5D96014B46FD3C91A138 /* Localizable.strings in Resources */,
+				C92AB2DDB9D338F9195AA238 /* Localizable.stringsdict in Resources */,
 				648C64C81F89B294320DB7D7 /* PresetAlarm.caf in Resources */,
 				DDAFEDD26C2F181904E3905B /* PresetAscending.caf in Resources */,
 				54FD527D934196FFA4D0A5C6 /* PresetBackupLoud.caf in Resources */,
@@ -1343,6 +1359,26 @@
 				BD1878E5099FBE066AAAE7F3 /* ja */,
 			);
 			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		7800E7F19FF508932FA02F22 /* Localizable.stringsdict */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5E974F69AA594D6B2F2CB69C /* ar */,
+				AC338ED8471E751D239A8A4E /* cs */,
+				70D2D6C9D829470848C1EC22 /* de */,
+				140510A7D4CAD2CA7EF2FB3C /* en */,
+				44935AE549DCAA98A6CC631E /* es */,
+				58287CA5A305AEDAB545A99F /* fr */,
+				268AA167BB8223780ED4C68C /* it */,
+				DD791A30D24B6F0CAFDDD2ED /* ja */,
+				B989E2A803604B6500629B81 /* ko */,
+				1F12FB998E2B755160BA8B1F /* nl */,
+				EE318506FD295B6BA88B884A /* pl */,
+				81A5A7EC64C52B8DC48BE004 /* pt-BR */,
+				0766BBB0637259803ECBFFB7 /* zh-Hans */,
+			);
+			name = Localizable.stringsdict;
 			sourceTree = "<group>";
 		};
 		AA13D117730C6D5910D58FD4 /* InfoPlist.strings */ = {

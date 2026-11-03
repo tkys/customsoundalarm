@@ -296,12 +296,11 @@
 "transition_short" = "짧은 페이드 (0.5초)";
 "transition_long" = "긴 페이드 (2초)";
 "transition_crossfade" = "크로스페이드";
-"transition_footer" = "곡을 이을 때 적용됩니다. 전체 반복의 끝은 항상 짧게 페이드아웃됩니다.";
+"transition_footer" = "곡을 이을 때 적용됩니다.";
 "playlist_playback" = "재생";
 "playlist_summary_fmt" = "%@ · %d곡";
 
 /* Library (#160 PR-2) */
 "library_title" = "라이브러리";
 "playlist_delete_title" = "이 재생목록을 삭제할까요?";
-"playlist_delete_message_count_fmt" = "이 재생목록을 사용하는 알람이 %d개 있습니다. 하나의 소리로 전환됩니다.";
 "playlist_delete_message_unused" = "이 재생목록이 삭제됩니다.";

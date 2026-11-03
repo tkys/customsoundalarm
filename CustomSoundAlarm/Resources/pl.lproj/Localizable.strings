@@ -296,12 +296,11 @@
 "transition_short" = "Krótkie przenikanie (0,5 s)";
 "transition_long" = "Długie przenikanie (2 s)";
 "transition_crossfade" = "Przenikanie";
-"transition_footer" = "Dotyczy łączenia utworów. Koniec całej pętli jest zawsze krótko wyciszany.";
+"transition_footer" = "Dotyczy łączenia utworów.";
 "playlist_playback" = "Odtwarzanie";
 "playlist_summary_fmt" = "%@ · %d utworów";
 
 /* Library (#160 PR-2) */
 "library_title" = "Biblioteka";
 "playlist_delete_title" = "Usunąć tę playlistę?";
-"playlist_delete_message_count_fmt" = "%d budzików używa tej playlisty. Przełączą się na jeden dźwięk.";
 "playlist_delete_message_unused" = "Ta playlista zostanie usunięta.";

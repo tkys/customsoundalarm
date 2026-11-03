@@ -296,12 +296,11 @@
 "transition_short" = "Dissolvenza breve (0,5 s)";
 "transition_long" = "Dissolvenza lunga (2 s)";
 "transition_crossfade" = "Dissolvenza incrociata";
-"transition_footer" = "Si applica quando i brani vengono uniti. La fine dell'intero ciclo viene sempre dissolta brevemente.";
+"transition_footer" = "Si applica quando i brani vengono uniti.";
 "playlist_playback" = "Riproduzione";
 "playlist_summary_fmt" = "%@ · %d brani";
 
 /* Library (#160 PR-2) */
 "library_title" = "Libreria";
 "playlist_delete_title" = "Eliminare questa playlist?";
-"playlist_delete_message_count_fmt" = "%d sveglie usano questa playlist. Passeranno a un singolo suono.";
 "playlist_delete_message_unused" = "Questa playlist verrà eliminata.";

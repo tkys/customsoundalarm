@@ -9,11 +9,15 @@ final class LibraryUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    private func launch(_ arguments: [String]) -> XCUIApplication {
+    private func launch(
+        _ arguments: [String],
+        language: String = "(ja)",
+        locale: String = "ja_JP"
+    ) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = arguments + [
-            "-AppleLanguages", "(ja)",
-            "-AppleLocale", "ja_JP"
+            "-AppleLanguages", language,
+            "-AppleLocale", locale
         ]
         app.launch()
         return app
@@ -134,5 +138,51 @@ final class LibraryUITests: XCTestCase {
         }
 
         XCTAssertFalse(row.waitForExistence(timeout: 5))
+    }
+
+    func testPlaylistDeleteConfirmationUsesSingularInEnglish() {
+        let app = launch(
+            ["-uitest-seed-library", "-uitest-open-library"],
+            language: "(en)",
+            locale: "en_US"
+        )
+
+        let row = app.buttons["library.playlist.朝の支度"]
+        XCTAssertTrue(row.waitForExistence(timeout: 15))
+        row.swipeLeft()
+        let swipeDelete = app.buttons["Delete"]
+        XCTAssertTrue(swipeDelete.waitForExistence(timeout: 5))
+        swipeDelete.tap()
+
+        let message = app.staticTexts.containing(
+            NSPredicate(format: "label CONTAINS %@", "1 alarm uses this playlist")
+        ).firstMatch
+        XCTAssertTrue(
+            message.waitForExistence(timeout: 5),
+            "singular message should be used: \(app.debugDescription)"
+        )
+    }
+
+    func testPlaylistDeleteConfirmationUsesPluralInEnglish() {
+        let app = launch(
+            ["-uitest-seed-library", "-uitest-open-library"],
+            language: "(en)",
+            locale: "en_US"
+        )
+
+        let row = app.buttons["library.playlist.週末のカフェ"]
+        XCTAssertTrue(row.waitForExistence(timeout: 15))
+        row.swipeLeft()
+        let swipeDelete = app.buttons["Delete"]
+        XCTAssertTrue(swipeDelete.waitForExistence(timeout: 5))
+        swipeDelete.tap()
+
+        let message = app.staticTexts.containing(
+            NSPredicate(format: "label CONTAINS %@", "2 alarms use this playlist")
+        ).firstMatch
+        XCTAssertTrue(
+            message.waitForExistence(timeout: 5),
+            "plural message should be used: \(app.debugDescription)"
+        )
     }
 }

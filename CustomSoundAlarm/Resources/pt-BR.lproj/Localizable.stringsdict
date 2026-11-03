@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>playlist_delete_message_count_fmt</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@alarms@</string>
+        <key>alarms</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+        <key>one</key>
+        <string>1 alarme usa esta playlist. Se você apagá-la, ele tocará com o primeiro som da playlist.</string>
+        <key>other</key>
+        <string>%d alarmes usam esta playlist. Se você apagá-la, eles tocarão com o primeiro som da playlist.</string>
+        </dict>
+    </dict>
+</dict>
+</plist>

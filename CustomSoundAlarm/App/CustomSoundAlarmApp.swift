@@ -38,7 +38,7 @@ struct CustomSoundAlarmApp: App {
                             playOrder: .shuffle,
                             transition: .crossfade
                         )
-                        _ = PlaylistStore.shared.add(
+                        let weekend = PlaylistStore.shared.add(
                             name: "週末のカフェ",
                             tracks: [
                                 PlaylistTrack(soundFileName: "PresetCrescendo.caf"),
@@ -53,6 +53,20 @@ struct CustomSoundAlarmApp: App {
                             isEnabled: false,
                             label: String(localized: "alarm_title"),
                             playlistID: morning.id
+                        ))
+                        AlarmStore.shared.add(AlarmEntry(
+                            hour: 8,
+                            minute: 0,
+                            isEnabled: false,
+                            label: String(localized: "alarm_title"),
+                            playlistID: weekend.id
+                        ))
+                        AlarmStore.shared.add(AlarmEntry(
+                            hour: 9,
+                            minute: 0,
+                            isEnabled: false,
+                            label: String(localized: "alarm_title"),
+                            playlistID: weekend.id
                         ))
                     }
                     if AppGroup.isUITestOpenLibrary {

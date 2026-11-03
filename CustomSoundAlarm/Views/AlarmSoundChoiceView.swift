@@ -55,8 +55,6 @@ struct AlarmSoundChoiceView: View {
                 .accessibilityIdentifier("alarmSoundChoice.addPlaylist")
             } header: {
                 PlaylistSectionHeader()
-            } footer: {
-                Text("playlist_limit_note")
             }
 
             SoundLibrarySections(

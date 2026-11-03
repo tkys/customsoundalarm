@@ -296,12 +296,11 @@
 "transition_short" = "短淡入淡出（0.5 秒）";
 "transition_long" = "长淡入淡出（2 秒）";
 "transition_crossfade" = "交叉淡化";
-"transition_footer" = "在连接曲目时应用。整个循环的结尾始终会短暂淡出。";
+"transition_footer" = "在连接曲目时应用。";
 "playlist_playback" = "播放方式";
 "playlist_summary_fmt" = "%@ · %d 首";
 
 /* Library (#160 PR-2) */
 "library_title" = "资料库";
 "playlist_delete_title" = "要删除此播放列表吗？";
-"playlist_delete_message_count_fmt" = "有 %d 个闹钟正在使用此播放列表。它们将切换为单个声音。";
 "playlist_delete_message_unused" = "将删除此播放列表。";

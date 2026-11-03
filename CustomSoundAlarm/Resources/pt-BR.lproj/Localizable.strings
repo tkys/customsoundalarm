@@ -296,12 +296,11 @@
 "transition_short" = "Fade curto (0,5 s)";
 "transition_long" = "Fade longo (2 s)";
 "transition_crossfade" = "Crossfade";
-"transition_footer" = "Aplica-se ao unir as faixas. O fim do loop completo sempre tem um fade curto.";
+"transition_footer" = "Aplica-se ao unir as faixas.";
 "playlist_playback" = "Reprodução";
 "playlist_summary_fmt" = "%@ · %d faixas";
 
 /* Library (#160 PR-2) */
 "library_title" = "Biblioteca";
 "playlist_delete_title" = "Excluir esta playlist?";
-"playlist_delete_message_count_fmt" = "%d alarmes usam esta playlist. Eles passarão a usar um único som.";
 "playlist_delete_message_unused" = "Esta playlist será excluída.";

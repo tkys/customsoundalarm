@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>playlist_delete_message_count_fmt</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@alarms@</string>
+        <key>alarms</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+        <key>zero</key>
+        <string>لا توجد منبهات تستخدم قائمة التشغيل هذه.</string>
+        <key>one</key>
+        <string>منبه واحد يستخدم قائمة التشغيل هذه. عند حذفها، سيرن المنبه بصوت المقطع الأول من قائمة التشغيل.</string>
+        <key>two</key>
+        <string>منبهان يستخدمان قائمة التشغيل هذه. عند حذفها، سيرنان بصوت المقطع الأول من قائمة التشغيل.</string>
+        <key>few</key>
+        <string>%d منبهات تستخدم قائمة التشغيل هذه. عند حذفها، سترن بصوت المقطع الأول من قائمة التشغيل.</string>
+        <key>many</key>
+        <string>%d منبهًا يستخدم قائمة التشغيل هذه. عند حذفها، سترن بصوت المقطع الأول من قائمة التشغيل.</string>
+        <key>other</key>
+        <string>%d منبه يستخدم قائمة التشغيل هذه. عند حذفها، سترن بصوت المقطع الأول من قائمة التشغيل.</string>
+        </dict>
+    </dict>
+</dict>
+</plist>

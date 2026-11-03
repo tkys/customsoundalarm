@@ -296,12 +296,11 @@
 "transition_short" = "短いフェード（0.5秒）";
 "transition_long" = "長いフェード（2秒）";
 "transition_crossfade" = "クロスフェード";
-"transition_footer" = "曲をつなぐときに適用されます。ループ全体の末尾は常に短くフェードアウトします。";
+"transition_footer" = "曲をつなぐときに適用されます。";
 "playlist_playback" = "再生方法";
 "playlist_summary_fmt" = "%@・%d曲";
 
 /* Library (#160 PR-2) */
 "library_title" = "ライブラリ";
 "playlist_delete_title" = "プレイリストを削除しますか？";
-"playlist_delete_message_count_fmt" = "このプレイリストを使っているアラームが%d件あります。削除すると、存在する1曲目の「1つの音」に切り替わります。";
 "playlist_delete_message_unused" = "このプレイリストを削除します。";
