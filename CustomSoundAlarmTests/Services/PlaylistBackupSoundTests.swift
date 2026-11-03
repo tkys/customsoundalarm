@@ -36,10 +36,7 @@ struct PlaylistBackupSoundTests {
         )
         defer { PlaylistStore.shared.remove(id: playlist.id) }
 
-        let entry = AlarmEntry(
-            soundMode: .playlistShuffle,
-            playlistID: playlist.id
-        )
+        let entry = AlarmEntry(playlistID: playlist.id)
         #expect(AlarmScheduler.shared.backupSourceFileName(for: entry) == sourceName)
     }
 

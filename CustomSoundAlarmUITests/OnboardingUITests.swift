@@ -51,6 +51,16 @@ final class OnboardingUITests: XCTestCase {
         XCTAssertTrue(app.buttons["onboarding.source.video"].waitForExistence(timeout: 5))
     }
 
+    func testTabBarHiddenDuringOnboarding() {
+        app.launch()
+        XCTAssertTrue(app.buttons["onboarding.next"].waitForExistence(timeout: 10))
+        XCTAssertEqual(
+            app.tabBars.count,
+            0,
+            "ナイトモードと同じく、オンボ中はタブを隠す"
+        )
+    }
+
     func testOnboardingVideoOpensImportDirectly() {
         app.launch()
         XCTAssertTrue(app.buttons["onboarding.next"].waitForExistence(timeout: 10))

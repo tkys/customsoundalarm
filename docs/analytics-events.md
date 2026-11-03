@@ -11,8 +11,8 @@
 
 | イベント名 | プロパティ（型） | 送るタイミング | 答えたい問い | App closed? | 追加版 |
 | --- | --- | --- | --- | --- | --- |
-| `alarm_created` | `has_custom_sound` bool, `is_repeating` bool, `snooze_minutes` int, `backup_minutes` int（オフは0）, `sound_mode` string（single/playlist_order/playlist_shuffle/playlist_random）, `fade_in` string（off/10/30/60）, `gap_fade` string（off/short/long/crossfade）, `end_fade` bool, `hours_until` int（任意） | アラーム新規作成時 | 作成行動・寝過ごし防止・プレイリストの利用率 | アプリ動作中のみ | 既存（プレイリスト項目は1.8.2） |
-| `alarm_edited` | `has_custom_sound` bool, `is_repeating` bool, `snooze_minutes` int, `backup_minutes` int（オフは0）, `was_enabled` bool, `sound_mode` string, `fade_in` string, `gap_fade` string, `end_fade` bool, `hours_until` int（任意） | アラーム編集保存時 | 編集で自動オンにした割合・プレイリスト設定 | アプリ動作中のみ | 既存（プレイリスト項目は1.8.2） |
+| `alarm_created` | `has_custom_sound` bool, `is_repeating` bool, `snooze_minutes` int, `backup_minutes` int（オフは0）, `sound_mode` string（single/playlist_order/playlist_shuffle/playlist_random）, `fade_in` string（off/10/30/60）, `hours_until` int（任意） | アラーム新規作成時 | 作成行動・寝過ごし防止・プレイリストの利用率 | アプリ動作中のみ | 既存（`sound_mode` は1.8.2） |
+| `alarm_edited` | `has_custom_sound` bool, `is_repeating` bool, `snooze_minutes` int, `backup_minutes` int（オフは0）, `was_enabled` bool, `sound_mode` string, `fade_in` string, `hours_until` int（任意） | アラーム編集保存時 | 編集で自動オンにした割合・プレイリスト設定 | アプリ動作中のみ | 既存（`sound_mode` は1.8.2） |
 | `alarm_deleted` | — | アラーム削除時 | 離脱・整理行動 | アプリ動作中のみ | 既存 |
 | `alarm_duplicated` | — | アラーム複製時 | 複製の利用 | アプリ動作中のみ | 既存 |
 | `alarm_permission` | `status` string（authorized/denied/not_determined/request_failed/unknown） | 権限状態が変わったとき（永続化比較） | 許可率・拒否の影響 | アプリ動作中のみ | 既存 |
@@ -34,8 +34,8 @@
 | `update_prompt_tapped` | `kind` string | 「App Store で更新」タップ | 更新への遷移 | アプリ動作中のみ | 1.8.0 |
 | `update_prompt_dismissed` | `kind` string（recommended） | おすすめを「あとで」/スワイプで閉じた | おすすめの受容 | アプリ動作中のみ | 1.8.0 |
 | `sound_selected` | `kind` string（imported/preset/default）, `rank_bucket` string（1/2-3/4-10/11+） | サウンド選択で音を選んだ | 音の種類・並び順の影響 | アプリ動作中のみ | 1.8.0 |
-| `playlist_created` | `track_count` int, `total_seconds_bucket` string（under_1min/1_5min/5_10min/10min） | プレイリストを新規作成 | プレイリスト作成者の割合・規模 | アプリ動作中のみ | 1.8.2 |
-| `playlist_edited` | — | プレイリストを編集 | 編集の利用 | アプリ動作中のみ | 1.8.2 |
+| `playlist_created` | `track_count` int, `total_seconds_bucket` string（under_1min/1_5min/5_10min/10min）, `play_order` string（in_order/shuffle/one_random）, `transition` string（off/short/long/crossfade） | プレイリストを新規作成 | プレイリスト作成者の割合・規模・再生設定 | アプリ動作中のみ | 1.8.2（`play_order`/`transition` は1.8.1） |
+| `playlist_edited` | `play_order` string, `transition` string | プレイリストを編集 | 編集の利用・再生設定 | アプリ動作中のみ | 1.8.2（`play_order`/`transition` は1.8.1） |
 | `playlist_render_failed` | `reason` string（no_tracks/too_long/render_failed/write_failed/missing_playlist） | プレイリストの書き出し失敗 | 失敗原因 | アプリ動作中のみ | 1.8.2 |
 | `playlist_render_fallback` | — | 書き出し失敗時に1曲目／既定音で鳴らした | フォールバックの頻度 | アプリ動作中のみ | 1.8.2 |
 | `playlist_reschedule_failed` | `reason` string（schedule_failed） | 次回分の再登録に失敗し、前のアラームを残した | 差し替え失敗の頻度 | アプリ動作中のみ | 1.8.2 |
@@ -78,6 +78,13 @@
 | `first_install_build` | int（取れなければ送らない） | 最初にインストールしたビルド番号（`CFBundleVersion`） | 1.8.0 |
 | `is_internal` | bool | DEBUG opt-in の内部利用（PostHog 側で除外） | 既存 |
 | `build_type` | string（debug） | DEBUG ビルドの super property | 既存 |
+
+## OOUI 再設計（#160 / 1.8.1）
+
+- `alarm_created` / `alarm_edited` の `sound_mode` は、アラームの `playlistID` とプレイリストの `playOrder` から導出します（`single` / `playlist_order` / `playlist_shuffle` / `playlist_random`）。
+- `fade_in` はアラームの「やさしく鳴り始める」です。
+- `gap_fade` / `end_fade` は削除しました。曲のつなぎ方はプレイリストの `transition`、末尾フェードは書き出し時に常に 0.5 秒です。
+- `playlist_created` / `playlist_edited` の `play_order` / `transition` で、プレイリスト側の再生設定を測ります。
 
 ## プレイリスト先行公開（#151 / 1.8.2）
 

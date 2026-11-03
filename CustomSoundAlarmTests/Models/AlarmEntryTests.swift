@@ -368,22 +368,14 @@ struct AlarmEntryTests {
     func playlistFields_roundTrip() throws {
         let playlistID = UUID()
         let original = AlarmEntry(
-            soundMode: .playlistShuffle,
             playlistID: playlistID,
-            fadeSettings: PlaylistFadeSettings(
-                fadeIn: .thirty,
-                gapFade: .crossfade,
-                endFade: true
-            )
+            fadeIn: .thirty
         )
         let data = try JSONEncoder().encode(original)
         let decoded = try JSONDecoder().decode(AlarmEntry.self, from: data)
 
-        #expect(decoded.soundMode == .playlistShuffle)
         #expect(decoded.playlistID == playlistID)
-        #expect(decoded.fadeSettings.fadeIn == .thirty)
-        #expect(decoded.fadeSettings.gapFade == .crossfade)
-        #expect(decoded.fadeSettings.endFade)
+        #expect(decoded.fadeIn == .thirty)
         #expect(decoded.usesPlaylistFeatures)
     }
 
@@ -405,9 +397,8 @@ struct AlarmEntryTests {
             AlarmEntry.self,
             from: Data(json.utf8)
         )
-        #expect(entry.soundMode == .single)
         #expect(entry.playlistID == nil)
-        #expect(entry.fadeSettings == .disabled)
+        #expect(entry.fadeIn == .off)
         #expect(!entry.usesPlaylistFeatures)
     }
 
@@ -415,20 +406,16 @@ struct AlarmEntryTests {
     func duplicated_copiesPlaylistFields() {
         let playlistID = UUID()
         let copy = AlarmEntry(
-            soundMode: .playlistRandom,
             playlistID: playlistID,
-            fadeSettings: PlaylistFadeSettings(fadeIn: .ten)
+            fadeIn: .ten
         ).duplicated()
 
-        #expect(copy.soundMode == .playlistRandom)
         #expect(copy.playlistID == playlistID)
-        #expect(copy.fadeSettings.fadeIn == .ten)
+        #expect(copy.fadeIn == .ten)
     }
 
     @Test
     func fadeOnlyEntry_usesPlaylistFeatures() {
-        #expect(AlarmEntry(
-            fadeSettings: PlaylistFadeSettings(fadeIn: .ten)
-        ).usesPlaylistFeatures)
+        #expect(AlarmEntry(fadeIn: .ten).usesPlaylistFeatures)
     }
 }

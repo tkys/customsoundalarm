@@ -39,11 +39,9 @@ struct AlarmDetailView: View {
     @State private var repeatWeekdays: Set<Int>
     @State private var snoozeMinutes: Int
     @State private var backupMinutes: Int?
-    @State private var soundMode: PlaylistSoundMode
     @State private var playlistID: UUID?
-    @State private var fadeSettings: PlaylistFadeSettings
+    @State private var fadeIn: PlaylistFadeIn
     @State private var playlistStore = PlaylistStore.shared
-    @State private var showingPlaylistPicker = false
     @State private var showingPlaylistRequired = false
 
     /// オンボ指定の初期動作を1回だけ適用したか
@@ -79,9 +77,8 @@ struct AlarmDetailView: View {
             )
             _snoozeMinutes = State(initialValue: entry.snoozeMinutes)
             _backupMinutes = State(initialValue: entry.backupMinutes)
-            _soundMode = State(initialValue: entry.soundMode)
             _playlistID = State(initialValue: entry.playlistID)
-            _fadeSettings = State(initialValue: entry.fadeSettings)
+            _fadeIn = State(initialValue: entry.fadeIn)
         } else {
             _selectedTime = State(initialValue: Date())
             _label = State(initialValue: String(localized: "alarm_placeholder"))
@@ -93,9 +90,8 @@ struct AlarmDetailView: View {
             _repeatWeekdays = State(initialValue: [])
             _snoozeMinutes = State(initialValue: 9)
             _backupMinutes = State(initialValue: nil)
-            _soundMode = State(initialValue: .single)
             _playlistID = State(initialValue: nil)
-            _fadeSettings = State(initialValue: .disabled)
+            _fadeIn = State(initialValue: .off)
         }
     }
 
@@ -107,17 +103,22 @@ struct AlarmDetailView: View {
                 Section {
                     repeatSection
                     labelSection
-                    soundModeRow
-                    if soundMode.isPlaylist {
-                        playlistRow
-                    } else {
-                        soundSection
+                    soundRow
+                }
+                Section {
+                    fadeInRow
+                } footer: {
+                    if fadeIn != .off {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("fade_in_footer")
+                            Text("playlist_early_access_note")
+                        }
                     }
-                    fadeSettingsRow
+                }
+                Section {
                     testRingSection
                     snoozeSection
                 }
-                playlistAccessSection
                 backupAlarmSection
                 if case .edit = mode {
                     deleteSection
@@ -165,12 +166,6 @@ struct AlarmDetailView: View {
                 // 追加画面のシート提示完了後に取り込みを開く（約0.35秒待つ）
                 try? await Task.sleep(for: .milliseconds(500))
                 applyInitialImportOnce()
-                #if DEBUG
-                if AppGroup.isUITestOpenPlaylist {
-                    soundMode = .playlistOrder
-                    showingPlaylistPicker = true
-                }
-                #endif
             }
             .onAppear {
                 scheduler.refreshTestRingPermission()
@@ -182,11 +177,6 @@ struct AlarmDetailView: View {
             .sheet(isPresented: $showingBackupInfo) {
                 BackupAlarmInfoView()
                     .presentationDetents([.medium])
-            }
-            .sheet(isPresented: $showingPlaylistPicker) {
-                NavigationStack {
-                    PlaylistPickerView(selectedPlaylistID: $playlistID)
-                }
             }
             .alert("playlist_required_title", isPresented: $showingPlaylistRequired) {
                 Button("ok", role: .cancel) {}
@@ -263,106 +253,87 @@ struct AlarmDetailView: View {
         }
     }
 
-    // MARK: - Sound mode / Playlist (#151)
+    // MARK: - Sound / Fade (#160)
 
-    private var soundModeRow: some View {
-        Picker("sound_mode", selection: $soundMode) {
-            Text("sound_mode_single").tag(PlaylistSoundMode.single)
-            Text("sound_mode_playlist_order").tag(PlaylistSoundMode.playlistOrder)
-            Text("sound_mode_playlist_shuffle").tag(PlaylistSoundMode.playlistShuffle)
-            Text("sound_mode_playlist_random").tag(PlaylistSoundMode.playlistRandom)
-        }
-        .accessibilityIdentifier("addAlarm.soundMode")
-        .onChange(of: soundMode) { _, newValue in
-            if newValue.isPlaylist, playlistID == nil {
-                playlistID = playlistStore.playlists.first?.id
-            }
-        }
-    }
-
-    private var playlistRow: some View {
-        Button {
-            showingPlaylistPicker = true
-        } label: {
-            HStack {
-                Text("playlist")
-                Spacer()
-                Text(playlistName)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-            }
-        }
-        .accessibilityIdentifier("addAlarm.playlistRow")
-    }
-
-    private var playlistName: String {
-        guard let playlist = playlistStore.playlist(id: playlistID) else {
-            return String(localized: "playlist_select")
-        }
-        return playlist.name
-    }
-
-    private var fadeSettingsRow: some View {
+    private var soundRow: some View {
         NavigationLink {
-            FadeSettingsView(
-                fadeSettings: $fadeSettings,
-                isPlaylist: soundMode.isPlaylist
+            AlarmSoundChoiceView(
+                playlistID: $playlistID,
+                selectedSound: $selectedSound
             )
         } label: {
             HStack {
-                Text("fade_settings")
-                Spacer()
-                Text(fadeSettings.summary)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-            }
-        }
-        .accessibilityIdentifier("addAlarm.fadeSettingsRow")
-    }
-
-    private var playlistAccessSection: some View {
-        Section {
-            EarlyAccessBadge()
-            Text("playlist_early_access_note")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-        } footer: {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("fade_backup_note")
-                Text("playlist_backup_note")
-            }
-            .font(.footnote)
-            .foregroundStyle(.secondary)
-        }
-    }
-
-    // MARK: - Sound (OOUI: アラームのプロパティとしてアクセス)
-
-    private var soundSection: some View {
-        Group {
-            NavigationLink {
-                SoundSelectionView(selectedSound: $selectedSound)
-            } label: {
-                HStack {
+                VStack(alignment: .leading, spacing: 2) {
                     Text("sound")
-                    Spacer()
-                    HStack(spacing: 4) {
-                        SoundIndicator(
-                            isCustom: selectedSound != nil && !(selectedSound?.isPreset ?? true),
-                            size: 12
-                        )
-                        Text(selectedSound?.name ?? String(localized: "none"))
+                    if let playlist = playlistStore.playlist(id: playlistID) {
+                        Text(playlistSummary(for: playlist))
+                            .font(.caption)
                             .foregroundStyle(.secondary)
-                            .accessibilityIdentifier("addAlarm.soundName")
-                            // 1行・末尾省略（#93-2b: 生のファイル名が3行に伸びないようにする）
-                            .lineLimit(1)
-                            .truncationMode(.tail)
+                    } else if playlistID != nil {
+                        Text("playlist_missing")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
+                Spacer()
+                HStack(spacing: 4) {
+                    if playlistID == nil {
+                        SoundIndicator(
+                            isCustom: selectedSound != nil
+                                && !(selectedSound?.isPreset ?? true),
+                            size: 12
+                        )
+                    }
+                    Text(soundRowValue)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .accessibilityIdentifier("addAlarm.soundName")
+                }
             }
-            .accessibilityIdentifier("addAlarm.soundRow")
+        }
+        .accessibilityIdentifier("addAlarm.soundRow")
+    }
+
+    private var soundRowValue: String {
+        if playlistID != nil {
+            return playlistStore.playlist(id: playlistID)?.name
+                ?? String(localized: "playlist_missing")
+        }
+        return selectedSound?.name ?? String(localized: "none")
+    }
+
+    private func playlistSummary(for playlist: Playlist) -> String {
+        String(
+            format: String(localized: "playlist_summary_fmt"),
+            playOrderTitle(playlist.playOrder),
+            playlist.trackCount
+        )
+    }
+
+    private func playOrderTitle(_ order: PlaylistPlayOrder) -> String {
+        switch order {
+        case .inOrder: String(localized: "play_order_in_order")
+        case .shuffle: String(localized: "play_order_shuffle")
+        case .oneRandom: String(localized: "play_order_one_random")
+        }
+    }
+
+    private var fadeInRow: some View {
+        HStack(spacing: 8) {
+            Text("fade_in")
+            if fadeIn != .off {
+                EarlyAccessBadge()
+            }
+            Spacer()
+            Picker("", selection: $fadeIn) {
+                Text("fade_off").tag(PlaylistFadeIn.off)
+                Text("fade_in_10").tag(PlaylistFadeIn.ten)
+                Text("fade_in_30").tag(PlaylistFadeIn.thirty)
+                Text("fade_in_60").tag(PlaylistFadeIn.sixty)
+            }
+            .labelsHidden()
+            .accessibilityIdentifier("addAlarm.fadeIn")
         }
     }
 
@@ -455,6 +426,14 @@ struct AlarmDetailView: View {
                     if minutes <= snoozeMinutes {
                         Text("backup_alarm_before_snooze")
                             .foregroundStyle(.orange)
+                    }
+                    if playlistID != nil {
+                        Text("playlist_backup_note")
+                            .foregroundStyle(.secondary)
+                    }
+                    if fadeIn != .off {
+                        Text("fade_backup_note")
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -760,7 +739,7 @@ struct AlarmDetailView: View {
         let resolvedHour = components.hour ?? 7
         let resolvedMinute = components.minute ?? 0
 
-        if soundMode.isPlaylist {
+        if playlistID != nil {
             guard let playlistID,
                   let playlist = playlistStore.playlist(id: playlistID),
                   !playlist.tracks.isEmpty else {
@@ -769,13 +748,13 @@ struct AlarmDetailView: View {
             }
         }
 
-        let soundFileName = soundMode.isPlaylist ? "" : (selectedSound?.fileName ?? "")
-        let hasCustomSound = !soundMode.isPlaylist
+        let soundFileName = playlistID == nil ? (selectedSound?.fileName ?? "") : ""
+        let hasCustomSound = playlistID == nil
             && (selectedSound.map { !$0.isPreset } ?? false)
         let isRepeating = !repeatWeekdays.isEmpty
 
         // サウンド使用履歴を記録（新規作成時のデフォルト選択 + ピッカーの「最近使った」表示用）
-        if !soundMode.isPlaylist {
+        if playlistID == nil {
             SoundUsageHistory.recordUsage(soundFileName)
         }
 
@@ -791,9 +770,9 @@ struct AlarmDetailView: View {
                 soundFileName: soundFileName,
                 snoozeMinutes: snoozeMinutes,
                 backupMinutes: backupMinutes,
-                soundMode: soundMode,
-                playlistID: soundMode.isPlaylist ? playlistID : nil,
-                fadeSettings: fadeSettings
+                playlistID: playlistID,
+                fadeIn: fadeIn,
+                isEnabled: !AppGroup.isUITestDisableNewAlarm
             )
             alarmStore.add(entry)
             AnalyticsService.shared.capture(
@@ -802,10 +781,8 @@ struct AlarmDetailView: View {
                     isRepeating: isRepeating,
                     snoozeMinutes: snoozeMinutes,
                     backupMinutes: backupMinutes ?? 0,
-                    soundMode: soundMode,
-                    fadeIn: fadeSettings.fadeIn,
-                    gapFade: fadeSettings.gapFade,
-                    endFade: fadeSettings.endFade
+                    soundMode: AlarmSoundModeResolver.soundMode(for: entry),
+                    fadeIn: fadeIn
                 ),
                 properties: hoursUntilProperties(for: entry)
             )
@@ -823,9 +800,8 @@ struct AlarmDetailView: View {
                 soundFileName: soundFileName,
                 snoozeMinutes: snoozeMinutes,
                 backupMinutes: backupMinutes,
-                soundMode: soundMode,
-                playlistID: soundMode.isPlaylist ? playlistID : nil,
-                fadeSettings: fadeSettings
+                playlistID: playlistID,
+                fadeIn: fadeIn
             )
             alarmStore.update(updated)
             AnalyticsService.shared.capture(
@@ -835,10 +811,8 @@ struct AlarmDetailView: View {
                     snoozeMinutes: snoozeMinutes,
                     backupMinutes: backupMinutes ?? 0,
                     wasEnabled: existing.isEnabled,
-                    soundMode: soundMode,
-                    fadeIn: fadeSettings.fadeIn,
-                    gapFade: fadeSettings.gapFade,
-                    endFade: fadeSettings.endFade
+                    soundMode: AlarmSoundModeResolver.soundMode(for: updated),
+                    fadeIn: fadeIn
                 ),
                 properties: hoursUntilProperties(for: updated)
             )
@@ -862,7 +836,7 @@ struct AlarmDetailView: View {
         }
 
         if backupMinutes != nil,
-           !soundMode.isPlaylist,
+           playlistID == nil,
            let sourceFileName = selectedSound?.fileName,
            !sourceFileName.isEmpty {
             // 大きくした版の生成が終わってから最終アラームを登録する（#119）

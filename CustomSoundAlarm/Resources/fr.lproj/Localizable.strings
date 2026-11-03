@@ -285,3 +285,22 @@
 "playlist_select_track" = "Ajouter des titres";
 "edit" = "Modifier";
 "ok" = "OK";
+
+/* OOUI playback (#160) */
+"play_order" = "Ordre de lecture";
+"play_order_in_order" = "Dans l'ordre";
+"play_order_shuffle" = "Aléatoire";
+"play_order_one_random" = "Un titre au hasard";
+"transition" = "Transitions";
+"transition_off" = "Aucune";
+"transition_short" = "Fondu court (0,5 s)";
+"transition_long" = "Fondu long (2 s)";
+"transition_crossfade" = "Fondu enchaîné";
+"transition_footer" = "S'applique lors de l'assemblage des titres.";
+"playlist_playback" = "Lecture";
+"playlist_summary_fmt" = "%@ · %d titres";
+
+/* Library (#160 PR-2) */
+"library_title" = "Bibliothèque";
+"playlist_delete_title" = "Supprimer cette playlist ?";
+"playlist_delete_message_unused" = "Cette playlist sera supprimée.";

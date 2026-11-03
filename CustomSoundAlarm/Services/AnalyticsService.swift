@@ -20,9 +20,7 @@ enum AnalyticsEvent: Sendable {
         snoozeMinutes: Int,
         backupMinutes: Int = 0,
         soundMode: PlaylistSoundMode = .single,
-        fadeIn: PlaylistFadeIn = .off,
-        gapFade: PlaylistGapFade = .off,
-        endFade: Bool = false
+        fadeIn: PlaylistFadeIn = .off
     )
 
     /// カスタムサウンドのインポート成功
@@ -49,9 +47,7 @@ enum AnalyticsEvent: Sendable {
         backupMinutes: Int = 0,
         wasEnabled: Bool = true,
         soundMode: PlaylistSoundMode = .single,
-        fadeIn: PlaylistFadeIn = .off,
-        gapFade: PlaylistGapFade = .off,
-        endFade: Bool = false
+        fadeIn: PlaylistFadeIn = .off
     )
 
     /// アラーム削除
@@ -136,10 +132,18 @@ enum AnalyticsEvent: Sendable {
     // MARK: プレイリスト・#151
 
     /// プレイリストを作成した
-    case playlistCreated(trackCount: Int, totalSecondsBucket: String)
+    case playlistCreated(
+        trackCount: Int,
+        totalSecondsBucket: String,
+        playOrder: PlaylistPlayOrder = .inOrder,
+        transition: PlaylistTransition = .off
+    )
 
     /// プレイリストを編集した
-    case playlistEdited
+    case playlistEdited(
+        playOrder: PlaylistPlayOrder = .inOrder,
+        transition: PlaylistTransition = .off
+    )
 
     /// プレイリストの書き出しに失敗した（フォールバックした）
     case playlistRenderFailed(reason: PlaylistRenderFailureReason)
@@ -289,9 +293,7 @@ enum AnalyticsEvent: Sendable {
             snoozeMinutes,
             backupMinutes,
             soundMode,
-            fadeIn,
-            gapFade,
-            endFade
+            fadeIn
         ):
             return [
                 "has_custom_sound": hasCustomSound,
@@ -299,9 +301,7 @@ enum AnalyticsEvent: Sendable {
                 "snooze_minutes": snoozeMinutes,
                 "backup_minutes": backupMinutes,
                 "sound_mode": soundMode.analyticsValue,
-                "fade_in": fadeIn.analyticsValue,
-                "gap_fade": gapFade.analyticsValue,
-                "end_fade": endFade
+                "fade_in": fadeIn.analyticsValue
             ]
         case let .customSoundImported(source, peakDbBucket, gainDbBucket, lufsBucket):
             var d: [String: Any] = ["source": source.rawValue]
@@ -318,9 +318,7 @@ enum AnalyticsEvent: Sendable {
             backupMinutes,
             wasEnabled,
             soundMode,
-            fadeIn,
-            gapFade,
-            endFade
+            fadeIn
         ):
             return [
                 "has_custom_sound": hasCustomSound,
@@ -329,9 +327,7 @@ enum AnalyticsEvent: Sendable {
                 "backup_minutes": backupMinutes,
                 "was_enabled": wasEnabled,
                 "sound_mode": soundMode.analyticsValue,
-                "fade_in": fadeIn.analyticsValue,
-                "gap_fade": gapFade.analyticsValue,
-                "end_fade": endFade
+                "fade_in": fadeIn.analyticsValue
             ]
         case .alarmDeleted:
             return [:]
@@ -397,13 +393,18 @@ enum AnalyticsEvent: Sendable {
                 "kind": kind.rawValue,
                 "rank_bucket": rankBucket
             ]
-        case let .playlistCreated(trackCount, totalSecondsBucket):
+        case let .playlistCreated(trackCount, totalSecondsBucket, playOrder, transition):
             return [
                 "track_count": trackCount,
-                "total_seconds_bucket": totalSecondsBucket
+                "total_seconds_bucket": totalSecondsBucket,
+                "play_order": playOrder.analyticsValue,
+                "transition": transition.analyticsValue
             ]
-        case .playlistEdited:
-            return [:]
+        case let .playlistEdited(playOrder, transition):
+            return [
+                "play_order": playOrder.analyticsValue,
+                "transition": transition.analyticsValue
+            ]
         case let .playlistRenderFailed(reason):
             return ["reason": reason.rawValue]
         case .playlistRenderFallback:

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>playlist_delete_message_count_fmt</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@alarms@</string>
+        <key>alarms</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+        <key>other</key>
+        <string>이 재생목록을 사용하는 알람이 %d개 있습니다. 삭제하면 해당 알람은 재생목록의 첫 번째 곡 소리로 울립니다.</string>
+        </dict>
+    </dict>
+</dict>
+</plist>

@@ -47,6 +47,7 @@ final class UICleanupUITests: XCTestCase {
     func testSoundPickerHasNoRecentSectionOrPlusMenu() {
         app.launchArguments = [
             "-uitest-open-add-alarm",
+            "-uitest-reset-playlists",
             "-AppleLanguages", "(ja)",
             "-AppleLocale", "ja_JP"
         ]
@@ -55,8 +56,14 @@ final class UICleanupUITests: XCTestCase {
 
         let soundRow = app.buttons["addAlarm.soundRow"]
         XCTAssertTrue(soundRow.waitForExistence(timeout: 5))
+        Thread.sleep(forTimeInterval: 1.0)
         soundRow.tap()
 
+        let choiceRoot = app.collectionViews["alarmSoundChoice.root"]
+        XCTAssertTrue(
+            choiceRoot.waitForExistence(timeout: 10),
+            "sound choice should open: \(app.debugDescription)"
+        )
         let navBar = app.navigationBars["サウンド"]
         XCTAssertTrue(navBar.waitForExistence(timeout: 5), "sound picker should open")
 

@@ -47,7 +47,7 @@
 "rename" = "名前を変更";
 "sound_name_placeholder" = "サウンド名";
 "presets" = "すぐ使える音";
-"imported_sounds" = "追加した音";
+"imported_sounds" = "自分の音";
 "converting" = "変換中...";
 "add_from_video" = "動画から音声を追加";
 "add_from_audio" = "音声ファイルから追加";
@@ -285,3 +285,22 @@
 "playlist_select_track" = "曲を選ぶ";
 "edit" = "編集";
 "ok" = "OK";
+
+/* OOUI playback (#160) */
+"play_order" = "再生順";
+"play_order_in_order" = "順番";
+"play_order_shuffle" = "シャッフル";
+"play_order_one_random" = "1曲ランダム";
+"transition" = "つなぎ方";
+"transition_off" = "なし";
+"transition_short" = "短いフェード（0.5秒）";
+"transition_long" = "長いフェード（2秒）";
+"transition_crossfade" = "クロスフェード";
+"transition_footer" = "曲をつなぐときに適用されます。";
+"playlist_playback" = "再生方法";
+"playlist_summary_fmt" = "%@・%d曲";
+
+/* Library (#160 PR-2) */
+"library_title" = "ライブラリ";
+"playlist_delete_title" = "プレイリストを削除しますか？";
+"playlist_delete_message_unused" = "このプレイリストを削除します。";

@@ -285,3 +285,22 @@
 "playlist_select_track" = "Přidat skladby";
 "edit" = "Upravit";
 "ok" = "OK";
+
+/* OOUI playback (#160) */
+"play_order" = "Pořadí přehrávání";
+"play_order_in_order" = "V pořadí";
+"play_order_shuffle" = "Náhodně";
+"play_order_one_random" = "Jeden náhodný";
+"transition" = "Přechody";
+"transition_off" = "Žádné";
+"transition_short" = "Krátké prolnutí (0,5 s)";
+"transition_long" = "Dlouhé prolnutí (2 s)";
+"transition_crossfade" = "Crossfade";
+"transition_footer" = "Použije se při spojování skladeb.";
+"playlist_playback" = "Přehrávání";
+"playlist_summary_fmt" = "%@ · %d skladeb";
+
+/* Library (#160 PR-2) */
+"library_title" = "Knihovna";
+"playlist_delete_title" = "Smazat tento playlist?";
+"playlist_delete_message_unused" = "Tento playlist bude smazán.";

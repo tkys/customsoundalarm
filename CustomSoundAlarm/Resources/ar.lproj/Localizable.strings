@@ -285,3 +285,22 @@
 "playlist_select_track" = "إضافة مقاطع";
 "edit" = "تحرير";
 "ok" = "حسنًا";
+
+/* OOUI playback (#160) */
+"play_order" = "ترتيب التشغيل";
+"play_order_in_order" = "بالترتيب";
+"play_order_shuffle" = "عشوائي";
+"play_order_one_random" = "مقطع عشوائي";
+"transition" = "الانتقالات";
+"transition_off" = "بدون";
+"transition_short" = "تلاشٍ قصير (0.5 ث)";
+"transition_long" = "تلاشٍ طويل (2 ث)";
+"transition_crossfade" = "تلاشي متقاطع";
+"transition_footer" = "يُطبَّق عند وصل المقاطع.";
+"playlist_playback" = "التشغيل";
+"playlist_summary_fmt" = "%@ · %d مقاطع";
+
+/* Library (#160 PR-2) */
+"library_title" = "المكتبة";
+"playlist_delete_title" = "حذف قائمة التشغيل هذه؟";
+"playlist_delete_message_unused" = "سيتم حذف قائمة التشغيل هذه.";

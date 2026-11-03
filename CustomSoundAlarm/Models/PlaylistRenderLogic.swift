@@ -4,25 +4,27 @@ import Foundation
 /// 実ファイルの読み書きは `PlaylistRenderer` が行う。
 enum PlaylistRenderLogic {
     static let sampleRate: Double = 44_100
+    /// ループのつなぎ目を常に短くフェードアウトする（#160）
+    static let endFadeSeconds: TimeInterval = 0.5
 
     // MARK: - Order
 
-    /// モードに応じた曲順を返す。
-    /// - `.playlistShuffle` は固定シードで再現可能
-    /// - `.playlistRandom` は候補から1曲
+    /// 再生順に応じた曲順を返す。
+    /// - `.shuffle` は固定シードで再現可能
+    /// - `.oneRandom` は候補から1曲
     static func orderedTracks(
         _ tracks: [PlaylistTrack],
-        mode: PlaylistSoundMode,
+        order: PlaylistPlayOrder,
         seed: UInt64
     ) -> [PlaylistTrack] {
-        switch mode {
-        case .single, .playlistOrder:
+        switch order {
+        case .inOrder:
             return tracks
-        case .playlistShuffle:
+        case .shuffle:
             guard tracks.count > 1 else { return tracks }
             var generator = SplitMix64(seed: seed)
             return tracks.shuffled(using: &generator)
-        case .playlistRandom:
+        case .oneRandom:
             guard !tracks.isEmpty else { return [] }
             let index = Int(seed % UInt64(tracks.count))
             return [tracks[index]]
@@ -48,22 +50,22 @@ enum PlaylistRenderLogic {
     /// 書き出し後の合計時間。クロスフェードの重なり分を差し引く。
     static func totalDuration(
         trackDurations: [TimeInterval],
-        fade: PlaylistFadeSettings
+        transition: PlaylistTransition
     ) -> TimeInterval {
         let sum = trackDurations.reduce(0) { $0 + max(0, $1) }
-        guard fade.gapFade == .crossfade else { return sum }
+        guard transition == .crossfade else { return sum }
         return max(0, sum - crossfadeOverlap(
             trackDurations: trackDurations,
-            seconds: PlaylistGapFade.crossfade.seconds
+            seconds: PlaylistTransition.crossfade.seconds
         ))
     }
 
     /// 10分以内か（浮動小数の誤差を許容）
     static func isWithinLimit(
         trackDurations: [TimeInterval],
-        fade: PlaylistFadeSettings
+        transition: PlaylistTransition
     ) -> Bool {
-        totalDuration(trackDurations: trackDurations, fade: fade)
+        totalDuration(trackDurations: trackDurations, transition: transition)
             <= Playlist.maxTotalSeconds + 0.001
     }
 

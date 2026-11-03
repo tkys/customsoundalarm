@@ -6,21 +6,32 @@ import SwiftUI
 struct PlaylistEditorView: View {
     let playlist: Playlist?
     let onSave: (Playlist) -> Void
+    /// ライブラリから push するときは戻るボタンがあるのでキャンセルを出さない
+    let showsCancel: Bool
 
     @Environment(\.dismiss) private var dismiss
     @State private var store = PlaylistStore.shared
     @State private var name: String
     @State private var tracks: [PlaylistTrack]
+    @State private var playOrder: PlaylistPlayOrder
+    @State private var transition: PlaylistTransition
     @State private var showingTrackPicker = false
 
-    init(playlist: Playlist?, onSave: @escaping (Playlist) -> Void) {
+    init(
+        playlist: Playlist?,
+        showsCancel: Bool = true,
+        onSave: @escaping (Playlist) -> Void
+    ) {
         self.playlist = playlist
+        self.showsCancel = showsCancel
         self.onSave = onSave
         _name = State(
             initialValue: playlist?.name
                 ?? String(localized: "playlist_new_default_name")
         )
         _tracks = State(initialValue: playlist?.tracks ?? [])
+        _playOrder = State(initialValue: playlist?.playOrder ?? .inOrder)
+        _transition = State(initialValue: playlist?.transition ?? .off)
     }
 
     private var totalSeconds: TimeInterval {
@@ -90,19 +101,28 @@ struct PlaylistEditorView: View {
             }
 
             Section {
-                EarlyAccessBadge()
-                Text("playlist_early_access_note")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            } footer: {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("fade_backup_note")
-                    Text("playlist_backup_note")
+                Picker("play_order", selection: $playOrder) {
+                    Text("play_order_in_order").tag(PlaylistPlayOrder.inOrder)
+                    Text("play_order_shuffle").tag(PlaylistPlayOrder.shuffle)
+                    Text("play_order_one_random").tag(PlaylistPlayOrder.oneRandom)
                 }
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+                .accessibilityIdentifier("playlist.playOrder")
+
+                Picker("transition", selection: $transition) {
+                    Text("transition_off").tag(PlaylistTransition.off)
+                    Text("transition_short").tag(PlaylistTransition.short)
+                    Text("transition_long").tag(PlaylistTransition.long)
+                    Text("transition_crossfade").tag(PlaylistTransition.crossfade)
+                }
+                .accessibilityIdentifier("playlist.transition")
+            } header: {
+                Text("playlist_playback")
+            } footer: {
+                Text("transition_footer")
             }
+
         }
+        .warmListBackground()
         .navigationTitle(
             playlist == nil
                 ? String(localized: "playlist_new")
@@ -113,8 +133,10 @@ struct PlaylistEditorView: View {
             ToolbarItem(placement: .topBarLeading) {
                 EditButton()
             }
-            ToolbarItem(placement: .cancellationAction) {
-                Button("cancel") { dismiss() }
+            if showsCancel {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("cancel") { dismiss() }
+                }
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button("save") { save() }
@@ -136,6 +158,8 @@ struct PlaylistEditorView: View {
             id: playlist?.id ?? UUID(),
             name: trimmed,
             tracks: tracks,
+            playOrder: playOrder,
+            transition: transition,
             createdAt: playlist?.createdAt ?? Date()
         )
         store.upsert(saved)
@@ -145,10 +169,15 @@ struct PlaylistEditorView: View {
                 trackCount: tracks.count,
                 totalSecondsBucket: AnalyticsBuckets.playlistSecondsBucket(
                     seconds: totalSeconds
-                )
+                ),
+                playOrder: playOrder,
+                transition: transition
             ))
         } else {
-            AnalyticsService.shared.capture(.playlistEdited)
+            AnalyticsService.shared.capture(.playlistEdited(
+                playOrder: playOrder,
+                transition: transition
+            ))
         }
         onSave(saved)
         dismiss()
@@ -157,103 +186,6 @@ struct PlaylistEditorView: View {
     static func durationText(_ seconds: TimeInterval) -> String {
         let total = max(0, Int(seconds.rounded()))
         return String(format: "%d:%02d", total / 60, total % 60)
-    }
-}
-
-// MARK: - PlaylistPickerView
-
-/// プレイリストの選択・管理（#151）。
-struct PlaylistPickerView: View {
-    @Binding var selectedPlaylistID: UUID?
-
-    @Environment(\.dismiss) private var dismiss
-    @State private var store = PlaylistStore.shared
-    @State private var editingPlaylist: Playlist?
-    @State private var showingNewPlaylist = false
-
-    var body: some View {
-        List {
-            if store.playlists.isEmpty {
-                Section {
-                    Text("playlist_empty")
-                        .foregroundStyle(.secondary)
-                }
-            } else {
-                Section {
-                    ForEach(store.playlists) { playlist in
-                        HStack(spacing: 12) {
-                            Button {
-                                selectedPlaylistID = playlist.id
-                                dismiss()
-                            } label: {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(playlist.name)
-                                        Text(String(
-                                            format: String(localized: "playlist_track_count_fmt"),
-                                            playlist.trackCount
-                                        ))
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                    }
-                                    Spacer()
-                                    if selectedPlaylistID == playlist.id {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundStyle(Color.accentColor)
-                                    }
-                                }
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityIdentifier("playlist.select.\(playlist.name)")
-
-                            Button {
-                                editingPlaylist = playlist
-                            } label: {
-                                Image(systemName: "pencil")
-                            }
-                            .buttonStyle(.borderless)
-                            .accessibilityLabel(Text("edit"))
-                        }
-                        .swipeActions {
-                            Button(role: .destructive) {
-                                store.remove(id: playlist.id)
-                                if selectedPlaylistID == playlist.id {
-                                    selectedPlaylistID = nil
-                                }
-                            } label: {
-                                Label("delete", systemImage: "trash")
-                            }
-                        }
-                    }
-                } footer: {
-                    Text("playlist_limit_note")
-                }
-            }
-        }
-        .navigationTitle(String(localized: "playlist_title"))
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showingNewPlaylist = true
-                } label: {
-                    Image(systemName: "plus")
-                }
-                .accessibilityIdentifier("playlist.add")
-            }
-        }
-        .sheet(isPresented: $showingNewPlaylist) {
-            NavigationStack {
-                PlaylistEditorView(playlist: nil) { playlist in
-                    selectedPlaylistID = playlist.id
-                }
-            }
-        }
-        .sheet(item: $editingPlaylist) { playlist in
-            NavigationStack {
-                PlaylistEditorView(playlist: playlist) { _ in }
-            }
-        }
     }
 }
 
@@ -295,8 +227,12 @@ struct PlaylistTrackPickerView: View {
                             }) {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundStyle(Color.accentColor)
+                                    .accessibilityIdentifier(
+                                        "playlist.trackSelected.\(sound.fileName)"
+                                    )
                             }
                         }
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .accessibilityIdentifier("playlist.track.\(sound.fileName)")

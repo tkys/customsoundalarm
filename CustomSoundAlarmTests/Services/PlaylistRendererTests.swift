@@ -73,7 +73,8 @@ struct PlaylistRendererTests {
 
         let result = try PlaylistRenderer.generate(PlaylistRenderRequest(
             trackURLs: [a, b],
-            fade: .disabled,
+            fadeIn: .off,
+            transition: .off,
             applyFadeIn: true,
             outputURL: output
         ))
@@ -95,7 +96,8 @@ struct PlaylistRendererTests {
 
         let result = try PlaylistRenderer.generate(PlaylistRenderRequest(
             trackURLs: [a, b],
-            fade: PlaylistFadeSettings(gapFade: .crossfade),
+            fadeIn: .off,
+            transition: .crossfade,
             applyFadeIn: true,
             outputURL: output
         ))
@@ -114,7 +116,8 @@ struct PlaylistRendererTests {
 
         _ = try PlaylistRenderer.generate(PlaylistRenderRequest(
             trackURLs: [a],
-            fade: PlaylistFadeSettings(fadeIn: .ten),
+            fadeIn: .ten,
+            transition: .off,
             applyFadeIn: true,
             outputURL: output
         ))
@@ -136,7 +139,8 @@ struct PlaylistRendererTests {
 
         _ = try PlaylistRenderer.generate(PlaylistRenderRequest(
             trackURLs: [a],
-            fade: PlaylistFadeSettings(fadeIn: .ten),
+            fadeIn: .ten,
+            transition: .off,
             applyFadeIn: false,
             outputURL: output
         ))
@@ -160,7 +164,8 @@ struct PlaylistRendererTests {
 
         _ = try PlaylistRenderer.generate(PlaylistRenderRequest(
             trackURLs: [a, b],
-            fade: PlaylistFadeSettings(gapFade: .crossfade),
+            fadeIn: .off,
+            transition: .crossfade,
             applyFadeIn: true,
             outputURL: output
         ))
@@ -179,7 +184,8 @@ struct PlaylistRendererTests {
 
         _ = try PlaylistRenderer.generate(PlaylistRenderRequest(
             trackURLs: [a],
-            fade: PlaylistFadeSettings(endFade: true),
+            fadeIn: .off,
+            transition: .off,
             applyFadeIn: true,
             outputURL: output
         ))
@@ -201,7 +207,8 @@ struct PlaylistRendererTests {
 
         let result = try PlaylistRenderer.generate(PlaylistRenderRequest(
             trackURLs: [missing, a],
-            fade: .disabled,
+            fadeIn: .off,
+            transition: .off,
             applyFadeIn: true,
             outputURL: output
         ))
@@ -221,7 +228,8 @@ struct PlaylistRendererTests {
 
         _ = try PlaylistRenderer.generate(PlaylistRenderRequest(
             trackURLs: [a],
-            fade: .disabled,
+            fadeIn: .off,
+            transition: .off,
             applyFadeIn: true,
             outputURL: output
         ))
@@ -238,7 +246,8 @@ struct PlaylistRendererTests {
         #expect(throws: PlaylistRenderError.noTracks) {
             _ = try PlaylistRenderer.generate(PlaylistRenderRequest(
                 trackURLs: [],
-                fade: .disabled,
+                fadeIn: .off,
+            transition: .off,
                 applyFadeIn: true,
                 outputURL: output
             ))
@@ -260,7 +269,8 @@ struct PlaylistRendererTests {
 
         let result = try PlaylistRenderer.generate(PlaylistRenderRequest(
             trackURLs: [a, b, c],
-            fade: PlaylistFadeSettings(gapFade: .crossfade),
+            fadeIn: .off,
+            transition: .crossfade,
             applyFadeIn: true,
             outputURL: output
         ))

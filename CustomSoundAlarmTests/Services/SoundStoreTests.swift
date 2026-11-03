@@ -42,4 +42,13 @@ struct SoundStoreDisplayNameTests {
     func emptyFileName_returnsEmptyString() {
         #expect(store.displayName(for: "") == "")
     }
+
+    @Test
+    func bundledPresetDurationIsMeasured() {
+        let seconds = AudioConverter.shared.measureDurationSeconds(
+            fileName: "PresetMarimba.caf"
+        )
+        #expect(seconds != nil)
+        #expect((seconds ?? 0) > 0)
+    }
 }

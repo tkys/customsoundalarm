@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>playlist_delete_message_count_fmt</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@alarms@</string>
+        <key>alarms</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+        <key>other</key>
+        <string>有 %d 个闹钟正在使用此播放列表。删除后，这些闹钟将用播放列表第一首曲目的声音响起。</string>
+        </dict>
+    </dict>
+</dict>
+</plist>
