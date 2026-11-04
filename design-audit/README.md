@@ -12,7 +12,7 @@ UI 見直し（読みやすさ・配色・操作の簡単さ）用のスクリ�
 ## 再撮影
 
 ```bash
-xcodebuild test \
+TEST_RUNNER_DESIGN_AUDIT=1 xcodebuild test \
   -project CustomSoundAlarm.xcodeproj \
   -scheme CustomSoundAlarm \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
@@ -29,3 +29,5 @@ PNG はリポジトリにコミットしません（`design-audit-output/` は .
 テストは `-uitest-seed-design-audit` の固定シード（アラーム3件・プレイリスト2件・
 自分の音1件）を使い、外観は DEBUG の `-uitest-force-light` / `-uitest-force-dark`、
 文字サイズは `-UIPreferredContentSizeCategoryName` で固定しています。
+
+通常の `xcodebuild test` ではこのテストはスキップされます（撮影に時間がかかるため）。撮るときは上のとおり `TEST_RUNNER_DESIGN_AUDIT=1` を付けてください。

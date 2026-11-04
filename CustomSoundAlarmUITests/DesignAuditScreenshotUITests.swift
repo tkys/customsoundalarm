@@ -23,8 +23,14 @@ final class DesignAuditScreenshotUITests: XCTestCase {
         }
     }
 
-    override func setUp() {
-        super.setUp()
+    /// 撮影に時間がかかるため、通常のテスト実行では動かさない。
+    /// 撮るときだけ `TEST_RUNNER_DESIGN_AUDIT=1 xcodebuild test ...` で有効にする
+    /// （xcodebuild は TEST_RUNNER_ 接頭辞の環境変数をテストに渡す）。
+    override func setUpWithError() throws {
+        try XCTSkipUnless(
+            ProcessInfo.processInfo.environment["DESIGN_AUDIT"] == "1",
+            "Design audit screenshots run only with TEST_RUNNER_DESIGN_AUDIT=1"
+        )
         continueAfterFailure = true
     }
 
