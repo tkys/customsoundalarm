@@ -30,9 +30,9 @@ struct SoundThumbnail: View {
                     .background(Brand.purpleLight.opacity(0.12))
             } else {
                 // 素の音声: 波形（最後の手段）
-                MiniWaveformBars(color: .accentColor, barWidth: max(size / 12, 2), height: size * 0.45)
+                MiniWaveformBars(color: Brand.purpleLight, barWidth: max(size / 12, 2), height: size * 0.45)
                     .frame(width: size, height: size)
-                    .background(Color.accentColor.opacity(0.12))
+                    .background(Brand.purpleLight.opacity(0.12))
             }
         }
         .frame(width: size, height: size)

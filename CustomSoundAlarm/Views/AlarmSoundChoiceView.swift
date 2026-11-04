@@ -16,7 +16,7 @@ struct AlarmSoundChoiceView: View {
             Section {
                 if store.playlists.isEmpty {
                     Text("playlist_empty")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.textSecondary)
                 } else {
                     ForEach(store.playlists) { playlist in
                         HStack(spacing: 12) {
@@ -69,6 +69,7 @@ struct AlarmSoundChoiceView: View {
             )
         }
         .accessibilityIdentifier("alarmSoundChoice.root")
+        .warmListBackground()
         .navigationTitle(String(localized: "sound"))
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: selectedSound?.id) { _, newValue in

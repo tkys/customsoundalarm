@@ -151,17 +151,17 @@ struct VideoImportFlow: View {
             if isProcessing {
                 ProgressView()
                 Text("loading")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.textSecondary)
             } else if let errorMessage {
                 Image(systemName: "exclamationmark.triangle")
                     .font(.largeTitle)
                     .foregroundStyle(.orange)
                 Text(errorMessage)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.textSecondary)
                     .multilineTextAlignment(.center)
             } else {
                 Text("select_video")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.textSecondary)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -196,7 +196,7 @@ struct VideoImportFlow: View {
                             ProgressView()
                             Text("waveform_loading")
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color.textSecondary)
                         }
                         .frame(maxWidth: .infinity)
                         .frame(height: 120)
@@ -217,9 +217,9 @@ struct VideoImportFlow: View {
                             .font(.system(size: 16, weight: .semibold))
                             .frame(width: 40, height: 40)
                             .background(
-                                Circle().fill(Color.accentColor.opacity(0.14))
+                                Circle().fill(Color.actionText.opacity(0.14))
                             )
-                            .foregroundStyle(previewer.isPlaying ? Color.red : Color.accentColor)
+                            .foregroundStyle(previewer.isPlaying ? Color.red : Color.actionText)
                     }
                     .buttonStyle(.plain)
                     .disabled(extractedAudioURL == nil)
@@ -230,8 +230,8 @@ struct VideoImportFlow: View {
                         .padding(.horizontal, 20)
 
                     Text("crop_hint_footer")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        .font(.footnote)
+                        .foregroundStyle(Color.textSecondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
                 }
@@ -252,7 +252,7 @@ struct VideoImportFlow: View {
 
                 HStack(spacing: 8) {
                     Image(systemName: "waveform")
-                        .foregroundStyle(Color.accentColor)
+                        .foregroundStyle(Brand.orange)
                     TextField("sound_name_placeholder", text: $soundName)
                         .textFieldStyle(.plain)
                         .submitLabel(.done)
@@ -476,8 +476,8 @@ struct VideoImportFlow: View {
                 bytes: AudioSizeEstimate.estimatedFileSize(seconds: selectionSeconds)
             )
             Text(String(format: String(localized: "size_warning"), size))
-                .font(.caption2)
-                .foregroundStyle(.orange)
+                .font(.footnote)
+                .foregroundStyle(Color.actionText)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
         }

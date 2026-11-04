@@ -29,7 +29,7 @@ struct LibraryView: View {
                     }
                     .accessibilityIdentifier("library.syncLog")
                 } header: {
-                    Text("開発者向け")
+                    WarmSectionHeader(title: String(localized: "開発者向け"))
                 }
                 #endif
             }
@@ -41,7 +41,7 @@ struct LibraryView: View {
                     PlaylistEditorView(playlist: playlist, showsCancel: false) { _ in }
                 } else {
                     Text("playlist_empty")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.textSecondary)
                 }
             }
             .sheet(isPresented: $showingNewPlaylist) {
@@ -87,7 +87,7 @@ struct LibraryView: View {
         Section {
             if store.playlists.isEmpty {
                 Text("playlist_empty")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.textSecondary)
             } else {
                 ForEach(store.playlists) { playlist in
                     NavigationLink(value: playlist.id) {
@@ -121,6 +121,8 @@ struct LibraryView: View {
             PlaylistSectionHeader()
         } footer: {
             Text("playlist_early_access_note")
+                .font(.footnote)
+                .foregroundStyle(Color.textSecondary)
         }
     }
 

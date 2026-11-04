@@ -198,6 +198,7 @@ struct ContentView: View {
                 Text("add_alarm")
             }
             .buttonStyle(.borderedProminent)
+            .tint(Color.actionFillEnd)
         }
         .accessibilityIdentifier("empty.title")
     }
@@ -263,11 +264,9 @@ struct AlarmRow: View {
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(alarm.timeString)
-                        .font(.system(size: 44, weight: .light, design: .rounded))
+                        .font(.system(size: 44, weight: .regular, design: .rounded))
                         .foregroundStyle(
-                            alarm.isEnabled
-                                ? AnyShapeStyle(Brand.warmGoldGradient)
-                                : AnyShapeStyle(.tertiary)
+                            alarm.isEnabled ? Color.primary : Color.textSecondary
                         )
                         // 長い音名のキャプションが幅を奪っても時刻は必ず自然サイズで描画されるよう優先
                         .layoutPriority(1)
@@ -285,7 +284,7 @@ struct AlarmRow: View {
                             .truncationMode(.tail)
                     }
                     .font(.caption)
-                    .foregroundStyle(alarm.isEnabled ? .secondary : .tertiary)
+                    .foregroundStyle(Color.textSecondary)
                     .lineLimit(1)
                     .truncationMode(.tail)
 
@@ -310,7 +309,7 @@ struct AlarmRow: View {
                             }
                         }
                         .font(.caption)
-                        .foregroundStyle(alarm.isEnabled ? .secondary : .tertiary)
+                        .foregroundStyle(Color.textSecondary)
                         .lineLimit(1)
                         .truncationMode(.tail)
                     }
@@ -323,6 +322,7 @@ struct AlarmRow: View {
                     set: { _ in onToggle() }
                 ))
                 .labelsHidden()
+                .tint(Brand.orange)
                 .accessibilityLabel(Text(AlarmRowAccessibility.toggleLabel(
                     time: alarm.timeString,
                     label: alarm.label

@@ -6,6 +6,12 @@ struct CustomSoundAlarmApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @State private var hasLaunched = false
 
+    init() {
+        // タブの選択中だけはブランドのオレンジ（図形・装飾・#174）。
+        // 文字・押せるアイコンは RootTabView の .tint(Color.actionText) を使う。
+        UITabBar.appearance().tintColor = UIColor(named: "AccentColor") ?? .systemOrange
+    }
+
     var body: some Scene {
         WindowGroup {
             RootTabView()

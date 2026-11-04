@@ -5,9 +5,16 @@ import SwiftUI
 /// Warm Glow デザインテーマ
 /// アプリアイコン（紫グラデ＋白ベル＋オレンジアクセント）の世界観を反映
 enum Brand {
+    /// ブランドのオレンジ（AccentColor）。**図形専用**。
+    /// 波形・選択中の印・アイコン・タブの選択中・トグルの tint には使うが、
+    /// 文字や押せる文字には使わない（#174）。文字は `Color.actionText`。
+    static let orange = Color("AccentColor")
+
     // Deep purple from icon
     static let purple = Color(red: 0.29, green: 0.10, blue: 0.42) // #4A1A6B
     static let purpleLight = Color(red: 0.42, green: 0.25, blue: 0.63) // #6B3FA0
+    /// 見出し・ブランドの声（押せない文字）。ライトは #4A1A6B、ダークは読みやすい紫。
+    static let heading = Color("BrandHeading")
 
     // Gradients
     static let purpleGradient = LinearGradient(
@@ -16,14 +23,16 @@ enum Brand {
         endPoint: .bottomTrailing
     )
 
+    /// 装飾用（図形・アイコン）。文字には使わない。
     static let warmGoldGradient = LinearGradient(
-        colors: [Color.accentColor, Color(red: 1.0, green: 0.65, blue: 0.3)],
+        colors: [orange, Color(red: 1.0, green: 0.65, blue: 0.3)],
         startPoint: .leading,
         endPoint: .trailing
     )
 
+    /// 白文字ボタンの地。開始色・終了色とも白文字と 3:1 以上（#174）。
     static let saveButtonGradient = LinearGradient(
-        colors: [Color.accentColor, Color(red: 0.95, green: 0.45, blue: 0.2)],
+        colors: [Color.actionFillStart, Color.actionFillEnd],
         startPoint: .leading,
         endPoint: .trailing
     )
@@ -49,23 +58,19 @@ extension Brand {
 // MARK: - Adaptive Brand Colors (Light/Dark)
 
 extension Color {
+    /// 押せる文字・押せるアイコン（#174）。ライト 4.5:1 以上、ダーク 6.9:1 以上。
+    static let actionText = Color("ActionText")
+    /// 押せない補足・オフ状態の文字。小さくても 4.5:1 以上（#174）。
+    static let textSecondary = Color("TextSecondary")
+    /// 白文字ボタンの地（開始色・終了色とも白文字と 3:1 以上・#174）。
+    static let actionFillStart = Color("ActionFillStart")
+    static let actionFillEnd = Color("ActionFillEnd")
+
     /// Warm-tinted background for list/form screens
-    static let warmListBackground = Color(
-        uiColor: UIColor { traits in
-            traits.userInterfaceStyle == .dark
-                ? UIColor(red: 0.12, green: 0.08, blue: 0.18, alpha: 1)
-                : UIColor(red: 0.98, green: 0.96, blue: 0.94, alpha: 1)
-        }
-    )
+    static let warmListBackground = Color("WarmListBackground")
 
     /// Card background for alarm rows
-    static let warmCardBackground = Color(
-        uiColor: UIColor { traits in
-            traits.userInterfaceStyle == .dark
-                ? UIColor(red: 0.18, green: 0.13, blue: 0.24, alpha: 1)
-                : UIColor(red: 1.0, green: 0.98, blue: 0.96, alpha: 1)
-        }
-    )
+    static let warmCardBackground = Color("WarmCardBackground")
 }
 
 // MARK: - View Modifiers
@@ -119,7 +124,7 @@ struct SoundIndicator: View {
 
     var body: some View {
         if isCustom {
-            MiniWaveformBars(color: .accentColor, barWidth: max(size / 7, 1.5), height: size)
+            MiniWaveformBars(color: Brand.orange, barWidth: max(size / 7, 1.5), height: size)
         } else {
             Image(systemName: "music.note")
                 .font(.system(size: size, weight: .semibold))
@@ -130,7 +135,7 @@ struct SoundIndicator: View {
 
 /// ミニ波形バー（4本）— カスタムサウンドの視覚的インジケーター
 struct MiniWaveformBars: View {
-    var color: Color = .accentColor
+    var color: Color = Brand.orange
     var barWidth: CGFloat = 2
     var height: CGFloat = 14
     var animated: Bool = false
@@ -160,7 +165,7 @@ struct SoundWaveDecoration: View {
                 RoundedRectangle(cornerRadius: 4, style: .continuous)
                     .fill(
                         LinearGradient(
-                            colors: [Color.accentColor, Brand.purpleLight],
+                            colors: [Brand.orange, Brand.purpleLight],
                             startPoint: .top,
                             endPoint: .bottom
                         )
@@ -180,6 +185,6 @@ struct WarmSectionHeader: View {
     var body: some View {
         Text(title)
             .font(.subheadline.weight(.semibold))
-            .foregroundStyle(Brand.purpleLight)
+            .foregroundStyle(Brand.heading)
     }
 }

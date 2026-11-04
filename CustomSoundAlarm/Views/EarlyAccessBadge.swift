@@ -9,9 +9,9 @@ struct EarlyAccessBadge: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 3)
             .background(
-                Capsule().fill(Color.orange.opacity(0.16))
+                Capsule().fill(Color.actionFillEnd)
             )
-            .foregroundStyle(Color.orange)
+            .foregroundStyle(.white)
             .accessibilityIdentifier("playlist.earlyAccessBadge")
     }
 }
