@@ -11,12 +11,12 @@ struct PlaylistRowLabel: View {
                 Text(playlist.name)
                 Text(summary)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.textSecondary)
             }
             Spacer()
             if isSelected {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(Color.accentColor)
+                    .foregroundStyle(Brand.orange)
             }
         }
         .contentShape(Rectangle())
@@ -36,6 +36,8 @@ struct PlaylistSectionHeader: View {
     var body: some View {
         HStack(spacing: 8) {
             Text("playlist_title")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Brand.heading)
             EarlyAccessBadge()
         }
     }

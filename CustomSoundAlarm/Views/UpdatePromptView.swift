@@ -17,7 +17,7 @@ struct UpdatePromptView: View {
 
             Image(systemName: isRequired ? "exclamationmark.triangle.fill" : "arrow.down.circle.fill")
                 .font(.system(size: 44))
-                .foregroundStyle(isRequired ? AnyShapeStyle(.orange) : AnyShapeStyle(Color.accentColor))
+                .foregroundStyle(isRequired ? AnyShapeStyle(.orange) : AnyShapeStyle(Brand.orange))
 
             Text(isRequired ? "update_required_title" : "update_recommended_title")
                 .font(.title2.weight(.semibold))
@@ -27,7 +27,7 @@ struct UpdatePromptView: View {
             if isRequired {
                 Text("update_required_message")
                     .font(.body)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.textSecondary)
                     .multilineTextAlignment(.center)
             }
 
@@ -40,6 +40,7 @@ struct UpdatePromptView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
+            .tint(Color.actionFillEnd)
             .controlSize(.large)
             .accessibilityIdentifier("updatePrompt.updateButton")
 

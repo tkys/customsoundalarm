@@ -52,7 +52,7 @@ struct AudioCropView: View {
                             ProgressView()
                             Text("waveform_loading")
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color.textSecondary)
                         }
                         .frame(maxWidth: .infinity)
                         .frame(height: 120)
@@ -70,9 +70,9 @@ struct AudioCropView: View {
                             .font(.system(size: 16, weight: .semibold))
                             .frame(width: 40, height: 40)
                             .background(
-                                Circle().fill(Color.accentColor.opacity(0.14))
+                                Circle().fill(Color.actionText.opacity(0.14))
                             )
-                            .foregroundStyle(previewer.isPlaying ? Color.red : Color.accentColor)
+                            .foregroundStyle(previewer.isPlaying ? Color.red : Color.actionText)
                     }
                     .buttonStyle(.plain)
                     .disabled(duration <= 0)
@@ -83,8 +83,8 @@ struct AudioCropView: View {
                         .padding(.horizontal, 20)
 
                     Text("crop_hint_footer")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        .font(.footnote)
+                        .foregroundStyle(Color.textSecondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
                 }
@@ -105,7 +105,7 @@ struct AudioCropView: View {
 
                 HStack(spacing: 8) {
                     Image(systemName: "waveform")
-                        .foregroundStyle(Color.accentColor)
+                        .foregroundStyle(Brand.orange)
                     TextField("sound_name_placeholder", text: $soundName)
                         .textFieldStyle(.plain)
                         .submitLabel(.done)
@@ -153,7 +153,7 @@ struct AudioCropView: View {
                         .font(.footnote)
                 }
                 .buttonStyle(.borderless)
-                .tint(.secondary)
+                .tint(Color.actionText)
                 .disabled(isProcessing || !canSave)
             }
             .padding(.horizontal, 20)
@@ -220,8 +220,8 @@ struct AudioCropView: View {
                 bytes: AudioSizeEstimate.estimatedFileSize(seconds: selectionSeconds)
             )
             Text(String(format: String(localized: "size_warning"), size))
-                .font(.caption2)
-                .foregroundStyle(.orange)
+                .font(.footnote)
+                .foregroundStyle(Color.actionText)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
         }

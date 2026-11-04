@@ -211,6 +211,7 @@
 		EAFA2885CF8B11EEA706EBB9 /* FilmstripLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 332B16A2DA74A770013302DA /* FilmstripLogicTests.swift */; };
 		EC8E115717C972D224027030 /* PlaylistTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF480CAF8CB3085A8C64FC4A /* PlaylistTests.swift */; };
 		ECE8042290AEA21C987955E4 /* BackupStopAnalyticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3DBC304EE97CA1784412B68 /* BackupStopAnalyticsTests.swift */; };
+		A174C0DE0000000000000001 /* ColorContrastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A174C0DE0000000000000002 /* ColorContrastTests.swift */; };
 		ED3E30974CF59BD1941A3FF2 /* BedsideClockLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9E617D0CFABFD4B4805B65B /* BedsideClockLogic.swift */; };
 		EE1EBA8566089966A6EEA640 /* AlarmListOrderingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0793075E7DA891FDE7634D /* AlarmListOrderingTests.swift */; };
 		EEE3C812C4D1F92E389B707C /* SoundUsageHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D620CC2A8B9C10399A403D9E /* SoundUsageHistory.swift */; };
@@ -460,6 +461,7 @@
 		B310D26A852FF2128CE87241 /* AudioConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioConverter.swift; sourceTree = "<group>"; };
 		B3C5F122CB36A012C496D3F1 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		B3DBC304EE97CA1784412B68 /* BackupStopAnalyticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupStopAnalyticsTests.swift; sourceTree = "<group>"; };
+		A174C0DE0000000000000002 /* ColorContrastTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorContrastTests.swift; sourceTree = "<group>"; };
 		B49D42436A6E454C5C63EA28 /* TestRingSoundLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestRingSoundLogic.swift; sourceTree = "<group>"; };
 		B61E2495643F1EB1F7D5B676 /* AudioSizeEstimateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSizeEstimateTests.swift; sourceTree = "<group>"; };
 		B68A6B0E32814AD7A4F13201 /* PresetAscending.caf */ = {isa = PBXFileReference; path = PresetAscending.caf; sourceTree = "<group>"; };
@@ -565,6 +567,7 @@
 				1C0C11CF28102F4B31F7C745 /* BackupInfoCopyTests.swift */,
 				24E2AD930FA1F4B67D2F024E /* BackupSoundResolverTests.swift */,
 				B3DBC304EE97CA1784412B68 /* BackupStopAnalyticsTests.swift */,
+				A174C0DE0000000000000002 /* ColorContrastTests.swift */,
 				8B0D5FB2BAFE575463DA794F /* BedsideClockLogicTests.swift */,
 				CF6178AF1CDD5BAE8BDB8213 /* BedsideSessionLogicTests.swift */,
 				08EAAA2A211BCB98598A3FB2 /* CustomAlarmMetadataTests.swift */,
@@ -1278,6 +1281,7 @@
 				CC71E409E3F7BE3AE95C9C3F /* BackupLoudVariantServiceTests.swift in Sources */,
 				07A52D1D923BC31083E2AD6C /* BackupSoundResolverTests.swift in Sources */,
 				ECE8042290AEA21C987955E4 /* BackupStopAnalyticsTests.swift in Sources */,
+				A174C0DE0000000000000001 /* ColorContrastTests.swift in Sources */,
 				A4DB2776034D4F9AD948ADE1 /* BedsideClockLogicTests.swift in Sources */,
 				043932BFD53396C1BC14D7E2 /* BedsideSessionLogicTests.swift in Sources */,
 				E30958483AC7255DECF60F65 /* CustomAlarmMetadataTests.swift in Sources */,

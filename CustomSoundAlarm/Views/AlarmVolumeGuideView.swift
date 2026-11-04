@@ -53,7 +53,7 @@ struct AlarmVolumeGuideView: View {
                 // 白はアクセント色の上で 2.4:1 と読みにくいため黒（8.6:1）
                 .foregroundStyle(.black)
                 .frame(width: 26, height: 26)
-                .background(Circle().fill(Color.accentColor))
+                .background(Circle().fill(Brand.orange))
                 .accessibilityHidden(true)
 
             Text(String(localized: text))

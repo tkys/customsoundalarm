@@ -80,11 +80,11 @@ struct SoundLibrarySections: View {
                     Text("add_from_video")
                 } icon: {
                     Image(systemName: "video.badge.waveform")
-                        .foregroundStyle(Brand.purpleLight)
+                        .foregroundStyle(Color.actionText)
                         .padding(4)
                         .background(
                             Circle()
-                                .fill(Brand.purpleLight.opacity(0.12))
+                                .fill(Color.actionText.opacity(0.12))
                         )
                 }
             }
@@ -97,11 +97,11 @@ struct SoundLibrarySections: View {
                     Text("add_from_audio")
                 } icon: {
                     Image(systemName: "doc.badge.plus")
-                        .foregroundStyle(Color.accentColor)
+                        .foregroundStyle(Color.actionText)
                         .padding(4)
                         .background(
                             Circle()
-                                .fill(Color.accentColor.opacity(0.12))
+                                .fill(Color.actionText.opacity(0.12))
                         )
                 }
             }
@@ -115,8 +115,8 @@ struct SoundLibrarySections: View {
                     Text("my_sounds_empty_title")
                         .font(.subheadline.weight(.medium))
                     Text("my_sounds_empty_description")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .font(.footnote)
+                        .foregroundStyle(Color.textSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .frame(maxWidth: .infinity)
@@ -216,7 +216,7 @@ struct SoundLibrarySections: View {
             ZStack {
                 if isPlaying {
                     Circle()
-                        .fill(Color.accentColor.opacity(0.25))
+                        .fill(Brand.orange.opacity(0.25))
                         .frame(width: 38, height: 38)
                         .blur(radius: 4)
                 }
@@ -225,7 +225,7 @@ struct SoundLibrarySections: View {
 
                 if isPlaying {
                     RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .strokeBorder(Color.accentColor, lineWidth: 1.5)
+                        .strokeBorder(Brand.orange, lineWidth: 1.5)
                         .frame(width: 34, height: 34)
                 }
             }
@@ -251,7 +251,7 @@ struct SoundLibrarySections: View {
                     Spacer()
                     if isSelected {
                         Image(systemName: "checkmark")
-                            .foregroundStyle(Color.accentColor)
+                            .foregroundStyle(Brand.orange)
                             .fontWeight(.semibold)
                     }
                 }
@@ -274,11 +274,7 @@ struct SoundLibrarySections: View {
                 } label: {
                     Image(systemName: isPlaying ? "stop.circle.fill" : "play.circle")
                         .font(.title3)
-                        .foregroundStyle(
-                            isPlaying
-                                ? AnyShapeStyle(Brand.warmGoldGradient)
-                                : AnyShapeStyle(Color.accentColor)
-                        )
+                        .foregroundStyle(Color.actionText)
                         .symbolEffect(.variableColor.iterative, isActive: isPlaying)
                 }
                 .buttonStyle(.plain)
