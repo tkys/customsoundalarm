@@ -98,6 +98,32 @@ struct PlaylistRenderServiceTests {
     }
 
     @Test
+    func testRingSound_usesFixedFileAndIsDeleted() async {
+        let playlist = makePlaylist()
+        defer { PlaylistStore.shared.remove(id: playlist.id) }
+        let input = PlaylistRenderInput(
+            entryID: UUID(),
+            playlistID: playlist.id,
+            fallbackFileName: "PresetMarimba.caf",
+            fadeIn: .ten
+        )
+        PlaylistRenderService.shared.deleteTestRingSound()
+        defer { PlaylistRenderService.shared.deleteTestRingSound() }
+
+        let result = await PlaylistRenderService.shared.prepareTestRingSound(for: input)
+        #expect(result.fileName == PlaylistRenderService.testRingSoundFileName)
+        #expect(!result.usedFallback)
+
+        let url = AudioConverter.shared.soundsDirectory.appendingPathComponent(
+            PlaylistRenderService.testRingSoundFileName
+        )
+        #expect(FileManager.default.fileExists(atPath: url.path))
+
+        PlaylistRenderService.shared.deleteTestRingSound()
+        #expect(!FileManager.default.fileExists(atPath: url.path))
+    }
+
+    @Test
     func cachedSoundFileName_withoutCache_returnsNil() {
         let input = PlaylistRenderInput(
             entryID: UUID(),

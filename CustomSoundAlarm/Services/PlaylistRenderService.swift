@@ -32,6 +32,8 @@ private struct PlaylistRenderCacheEntry: Codable, Equatable {
     let fileName: String
     let slot: String
     let order: [String]
+    /// 曲 ID の順番（#169 シャッフルで前回と同じ並びを避ける）
+    let orderTrackIDs: [UUID]?
     /// シャッフル/1曲ランダムの順番を決めた値（アラームごと）
     let orderSeed: UInt64?
     /// この順番を作ったアプリ起動セッション
@@ -113,11 +115,37 @@ final class PlaylistRenderService {
             ? Self.newOrderSeed()
             : (cached?.orderSeed ?? Self.newOrderSeed())
         let playOrder = playlist?.playOrder ?? .inOrder
-        let ordered = PlaylistRenderLogic.orderedTracks(
+        let baseOrdered = PlaylistRenderLogic.orderedTracks(
             tracks,
             order: playOrder,
             seed: seed
         )
+
+        let ordered: [PlaylistTrack]
+        if needsNewOrder {
+            // 新しい順番を作るときだけ、前回と同じ並びを避ける（#169）。
+            if playOrder == .shuffle,
+               let previousOrder = previousOrderTrackIDs(cached: cached, tracks: tracks),
+               !previousOrder.isEmpty {
+                ordered = PlaylistRenderLogic.orderedTracks(
+                    tracks,
+                    order: playOrder,
+                    seed: seed,
+                    avoidingPreviousOrder: previousOrder
+                )
+            } else {
+                ordered = baseOrdered
+            }
+        } else if playOrder == .shuffle,
+                  let cachedOrder = cached?.orderTrackIDs,
+                  !cachedOrder.isEmpty {
+            // キャッシュ済みのシャッフル順をそのまま再現する。
+            // 追加された曲は末尾に足す。
+            ordered = tracksInOrder(tracks, trackIDs: cachedOrder)
+        } else {
+            ordered = baseOrdered
+        }
+
         let resolved = ordered.compactMap { track -> (PlaylistTrack, URL)? in
             guard let url = sourceURL(for: track.soundFileName) else { return nil }
             return (track, url)
@@ -165,6 +193,7 @@ final class PlaylistRenderService {
                 fileName: outputFileName,
                 slot: slot,
                 order: resolved.map(\.0.soundFileName),
+                orderTrackIDs: resolved.map(\.0.id),
                 orderSeed: seed,
                 sessionToken: sessionToken,
                 renderVersion: Self.renderVersion,
@@ -233,6 +262,7 @@ final class PlaylistRenderService {
                 continue
             }
 
+            if name == Self.testRingSoundFileName { continue }
             guard name.hasSuffix(".caf"), name.contains(".playlist.") else { continue }
 
             // 旧方式のプレイリスト・バックアップは、登録中でなければ削除する（#151）
@@ -286,6 +316,131 @@ final class PlaylistRenderService {
         }
         let url = soundsDirectory.appendingPathComponent(fileName)
         return FileManager.default.fileExists(atPath: url.path) ? url : nil
+    }
+
+    // MARK: - Test ring (#169)
+
+    /// 試し鳴らし専用の書き出しファイル名。停止・60秒経過・次回起動で削除する。
+    static let testRingSoundFileName = "test.playlist.caf"
+
+    /// 試し鳴らしのシャッフルで前回と同じ並びを避けるための曲 ID 順。
+    private var lastTestRingOrderTrackIDs: [UUID] = []
+
+    /// 編集中の内容で試し鳴らし用の音を書き出す（#169）。
+    /// 通常のアラーム用キャッシュには触れず、`test.playlist.caf` だけを更新する。
+    func prepareTestRingSound(
+        for input: PlaylistRenderInput
+    ) async -> PlaylistSoundResolution {
+        guard input.usesPlaylistFeatures else {
+            return PlaylistSoundResolution(
+                fileName: input.fallbackFileName,
+                usedFallback: false,
+                isProcessed: false
+            )
+        }
+
+        let playlist = PlaylistStore.shared.playlist(id: input.playlistID)
+        if input.isPlaylist, playlist == nil {
+            return fallback(for: input, reason: .missingPlaylist)
+        }
+
+        let tracks = sourceTracks(for: input, playlist: playlist)
+        guard !tracks.isEmpty else {
+            return fallback(for: input, reason: .noTracks)
+        }
+
+        let playOrder = playlist?.playOrder ?? .inOrder
+        let ordered = PlaylistRenderLogic.orderedTracks(
+            tracks,
+            order: playOrder,
+            seed: Self.newOrderSeed(),
+            avoidingPreviousOrder: playOrder == .shuffle
+                ? lastTestRingOrderTrackIDs
+                : []
+        )
+        let resolved = ordered.compactMap { track -> (PlaylistTrack, URL)? in
+            guard let url = sourceURL(for: track.soundFileName) else { return nil }
+            return (track, url)
+        }
+        guard !resolved.isEmpty else {
+            return fallback(for: input, reason: .noTracks)
+        }
+
+        let outputURL = soundsDirectory.appendingPathComponent(
+            Self.testRingSoundFileName
+        )
+        let tempURL = soundsDirectory.appendingPathComponent(
+            "\(Self.testRingSoundFileName).\(UUID().uuidString).tmp.caf"
+        )
+        let request = PlaylistRenderRequest(
+            trackURLs: resolved.map(\.1),
+            fadeIn: input.fadeIn,
+            transition: playlist?.transition ?? .off,
+            applyFadeIn: true,
+            outputURL: tempURL
+        )
+
+        do {
+            _ = try await Task.detached(priority: .userInitiated) {
+                try PlaylistRenderer.generate(request)
+            }.value
+            try atomicInstall(tempURL, at: outputURL)
+            lastTestRingOrderTrackIDs = resolved.map(\.0.id)
+            return PlaylistSoundResolution(
+                fileName: Self.testRingSoundFileName,
+                usedFallback: false,
+                isProcessed: true
+            )
+        } catch let error as PlaylistRenderError {
+            try? FileManager.default.removeItem(at: tempURL)
+            return fallback(for: input, reason: PlaylistRenderFailureReason(error))
+        } catch {
+            try? FileManager.default.removeItem(at: tempURL)
+            return fallback(for: input, reason: .renderFailed)
+        }
+    }
+
+    /// 試し鳴らし用ファイルを削除する（停止・タイムアウト・起動時）。
+    func deleteTestRingSound() {
+        let url = soundsDirectory.appendingPathComponent(
+            Self.testRingSoundFileName
+        )
+        try? FileManager.default.removeItem(at: url)
+        lastTestRingOrderTrackIDs = []
+    }
+
+    /// 旧キャッシュ（orderTrackIDs が無い）からも前回の曲 ID 順を復元する。
+    private func previousOrderTrackIDs(
+        cached: PlaylistRenderCacheEntry?,
+        tracks: [PlaylistTrack]
+    ) -> [UUID]? {
+        if let ids = cached?.orderTrackIDs {
+            return ids
+        }
+        guard let fileNames = cached?.order, !fileNames.isEmpty else {
+            return nil
+        }
+        var remaining = tracks
+        var ids: [UUID] = []
+        for name in fileNames {
+            guard let index = remaining.firstIndex(where: {
+                $0.soundFileName == name
+            }) else { continue }
+            ids.append(remaining.remove(at: index).id)
+        }
+        return ids.isEmpty ? nil : ids
+    }
+
+    /// 保存済みの曲 ID 順で現在のトラックを並べ、追加された曲は末尾に足す。
+    private func tracksInOrder(
+        _ tracks: [PlaylistTrack],
+        trackIDs: [UUID]
+    ) -> [PlaylistTrack] {
+        let byID = Dictionary(uniqueKeysWithValues: tracks.map { ($0.id, $0) })
+        var ordered = trackIDs.compactMap { byID[$0] }
+        let included = Set(ordered.map(\.id))
+        ordered.append(contentsOf: tracks.filter { !included.contains($0.id) })
+        return ordered
     }
 
     private func signature(

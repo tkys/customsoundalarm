@@ -145,6 +145,59 @@ struct PlaylistRenderLogicTests {
     }
 
     @Test
+    func shuffle_avoidsSameOrderAsPrevious() {
+        let input = tracks(["a", "b", "c", "d"])
+        let first = PlaylistRenderLogic.orderedTracks(
+            input,
+            order: .shuffle,
+            seed: 42
+        )
+        let second = PlaylistRenderLogic.orderedTracks(
+            input,
+            order: .shuffle,
+            seed: 42,
+            avoidingPreviousOrder: first.map(\.id)
+        )
+        #expect(second.map(\.id) != first.map(\.id))
+        #expect(Set(second.map(\.id)) == Set(input.map(\.id)))
+    }
+
+    @Test
+    func shuffle_avoidsSameOrderForTwoTracks() {
+        let input = tracks(["a", "b"])
+        let first = PlaylistRenderLogic.orderedTracks(
+            input,
+            order: .shuffle,
+            seed: 7
+        )
+        let second = PlaylistRenderLogic.orderedTracks(
+            input,
+            order: .shuffle,
+            seed: 7,
+            avoidingPreviousOrder: first.map(\.id)
+        )
+        #expect(second.map(\.id) != first.map(\.id))
+        #expect(Set(second.map(\.id)) == Set(input.map(\.id)))
+    }
+
+    @Test
+    func inOrder_ignoresPreviousOrder() {
+        let input = tracks(["a", "b", "c"])
+        let first = PlaylistRenderLogic.orderedTracks(
+            input,
+            order: .inOrder,
+            seed: 1
+        )
+        let second = PlaylistRenderLogic.orderedTracks(
+            input,
+            order: .inOrder,
+            seed: 2,
+            avoidingPreviousOrder: first.map(\.id)
+        )
+        #expect(first.map(\.id) == second.map(\.id))
+    }
+
+    @Test
     func random_returnsOneCandidate() {
         let input = tracks(["a", "b", "c"])
         for seed in 0..<20 {

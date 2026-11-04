@@ -12,10 +12,13 @@ enum PlaylistRenderLogic {
     /// 再生順に応じた曲順を返す。
     /// - `.shuffle` は固定シードで再現可能
     /// - `.oneRandom` は候補から1曲
+    /// - Parameter avoidingPreviousOrder: シャッフルで前回と同じ並びを避ける
+    ///   （曲が2曲以上のとき・#169）。前回の曲 ID 順を渡す。
     static func orderedTracks(
         _ tracks: [PlaylistTrack],
         order: PlaylistPlayOrder,
-        seed: UInt64
+        seed: UInt64,
+        avoidingPreviousOrder previousOrder: [UUID] = []
     ) -> [PlaylistTrack] {
         switch order {
         case .inOrder:
@@ -23,7 +26,13 @@ enum PlaylistRenderLogic {
         case .shuffle:
             guard tracks.count > 1 else { return tracks }
             var generator = SplitMix64(seed: seed)
-            return tracks.shuffled(using: &generator)
+            let shuffled = tracks.shuffled(using: &generator)
+            guard !previousOrder.isEmpty,
+                  shuffled.map(\.id) == previousOrder else {
+                return shuffled
+            }
+            // 偶然同じ順になったら1つ回して必ず変える（2曲でも保証）。
+            return Array(shuffled.dropFirst()) + [shuffled[0]]
         case .oneRandom:
             guard !tracks.isEmpty else { return [] }
             let index = Int(seed % UInt64(tracks.count))
