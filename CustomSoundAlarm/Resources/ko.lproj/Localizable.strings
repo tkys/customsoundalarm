@@ -304,3 +304,7 @@
 "library_title" = "라이브러리";
 "playlist_delete_title" = "이 재생목록을 삭제할까요?";
 "playlist_delete_message_unused" = "이 재생목록이 삭제됩니다.";
+
+/* Playlist polish (#169) */
+"playlist_preview" = "재생목록 미리 듣기";
+"play_order_footer" = "알람은 중지할 때까지 반복됩니다. 셔플은 중지할 때마다 다음 순서를 바꿉니다. 한 곡 랜덤은 매번 같은 한 곡을 반복합니다.";

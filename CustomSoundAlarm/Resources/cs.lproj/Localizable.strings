@@ -304,3 +304,7 @@
 "library_title" = "Knihovna";
 "playlist_delete_title" = "Smazat tento playlist?";
 "playlist_delete_message_unused" = "Tento playlist bude smazán.";
+
+/* Playlist polish (#169) */
+"playlist_preview" = "Přehrát playlist";
+"play_order_footer" = "Budíky se opakují, dokud je nezastavíte. Náhodné pořadí změní další pořadí při každém zastavení. Jeden náhodný opakuje stejnou skladbu.";

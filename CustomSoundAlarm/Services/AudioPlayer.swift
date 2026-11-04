@@ -58,6 +58,47 @@ final class AudioPlayer {
         }
     }
 
+    /// 書き出したファイル（プレイリスト試聴）を最後まで再生する（#169）。
+    /// 既存のサウンド試聴（5秒で停止）とは別に、停止ボタンで止める。
+    func playFile(fileName: String) {
+        stop()
+
+        let importedURL = AudioConverter.shared.soundsDirectory
+            .appendingPathComponent(fileName)
+        let url: URL?
+        if FileManager.default.fileExists(atPath: importedURL.path) {
+            url = importedURL
+        } else {
+            let base = fileName.replacingOccurrences(of: ".caf", with: "")
+            url = Bundle.main.url(forResource: base, withExtension: "caf")
+        }
+
+        guard let url else {
+            logger.warning("Preview file not found: \(fileName)")
+            return
+        }
+
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback)
+            try AVAudioSession.sharedInstance().setActive(true)
+            player = try AVAudioPlayer(contentsOf: url)
+            player?.numberOfLoops = 0
+            player?.play()
+            isPlaying = true
+            playingFileName = fileName
+
+            let duration = player?.duration ?? 0
+            Task {
+                try? await Task.sleep(for: .seconds(duration + 0.2))
+                if playingFileName == fileName {
+                    stop()
+                }
+            }
+        } catch {
+            logger.error("Failed to play preview file: \(error.localizedDescription)")
+        }
+    }
+
     func stop() {
         player?.stop()
         player = nil

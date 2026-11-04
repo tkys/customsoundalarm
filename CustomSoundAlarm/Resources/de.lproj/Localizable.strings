@@ -304,3 +304,7 @@
 "library_title" = "Bibliothek";
 "playlist_delete_title" = "Diese Playlist löschen?";
 "playlist_delete_message_unused" = "Diese Playlist wird gelöscht.";
+
+/* Playlist polish (#169) */
+"playlist_preview" = "Playlist anhören";
+"play_order_footer" = "Wecker wiederholen sich, bis du sie stoppst. Zufällig ändert bei jedem Stoppen die nächste Reihenfolge. Ein zufälliger Titel wiederholt denselben Titel.";

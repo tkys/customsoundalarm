@@ -388,6 +388,7 @@
 		67B419A7C166A0C68EA15ECC /* PostSaveFeedbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostSaveFeedbackTests.swift; sourceTree = "<group>"; };
 		680A6054B3E702FD00B5AFB1 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		6829F73FFAAD54C10C494B10 /* PlaylistRowLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistRowLabel.swift; sourceTree = "<group>"; };
+		68720AB320EE49A8723257B8 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		698201FC99D4305F48937BED /* UpdatePromptCopyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePromptCopyTests.swift; sourceTree = "<group>"; };
 		69D39B5C896786FC70AE0C56 /* LoudVariantMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoudVariantMetadata.swift; sourceTree = "<group>"; };
 		6C8C1415F3825EA19A5F8714 /* AlarmMetadataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmMetadataModel.swift; sourceTree = "<group>"; };
@@ -525,7 +526,6 @@
 		FB65D02618898ACF54202398 /* Entitlements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entitlements.swift; sourceTree = "<group>"; };
 		FD1E788DE59D639CD662D601 /* PlaylistRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistRendererTests.swift; sourceTree = "<group>"; };
 		FDF83A50CB608D370A449CB1 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
-		FEE7920D12E0FC913F0BFEAD /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -641,6 +641,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		42A0572CD29466E48F74861B /* csa-issue169-pr2 */ = {
+			isa = PBXGroup;
+			children = (
+				68720AB320EE49A8723257B8 /* Secrets.xcconfig */,
+			);
+			name = "csa-issue169-pr2";
+			path = .;
+			sourceTree = "<group>";
+		};
 		48BD05F70D893BD47B7DEA10 /* CustomSoundAlarmUITests */ = {
 			isa = PBXGroup;
 			children = (
@@ -661,7 +670,7 @@
 		4EA1E92D7338F6EDA96ED5FB = {
 			isa = PBXGroup;
 			children = (
-				DF82A5E59218F4DE837C0D67 /* csa-issue169 */,
+				42A0572CD29466E48F74861B /* csa-issue169-pr2 */,
 				A3C533A61126660D3EEFBD5E /* CustomSoundAlarm */,
 				0D084D462AC55950BA713396 /* CustomSoundAlarmTests */,
 				48BD05F70D893BD47B7DEA10 /* CustomSoundAlarmUITests */,
@@ -855,15 +864,6 @@
 				69B7A661B212236384ECBE05 /* Localizable.strings */,
 			);
 			path = ShareExtension;
-			sourceTree = "<group>";
-		};
-		DF82A5E59218F4DE837C0D67 /* csa-issue169 */ = {
-			isa = PBXGroup;
-			children = (
-				FEE7920D12E0FC913F0BFEAD /* Secrets.xcconfig */,
-			);
-			name = "csa-issue169";
-			path = .;
 			sourceTree = "<group>";
 		};
 		E9EB6BD8AA28D577540D29B7 /* CustomSoundAlarmWidget */ = {
@@ -1532,7 +1532,7 @@
 		};
 		77ECEE071B9B56F3B1690269 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = FEE7920D12E0FC913F0BFEAD /* Secrets.xcconfig */;
+			baseConfigurationReference = 68720AB320EE49A8723257B8 /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
@@ -1656,7 +1656,7 @@
 		};
 		D89907F4FAAA42AE6A67D447 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = FEE7920D12E0FC913F0BFEAD /* Secrets.xcconfig */;
+			baseConfigurationReference = 68720AB320EE49A8723257B8 /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;

@@ -304,3 +304,7 @@
 "library_title" = "Biblioteka";
 "playlist_delete_title" = "Usunąć tę playlistę?";
 "playlist_delete_message_unused" = "Ta playlista zostanie usunięta.";
+
+/* Playlist polish (#169) */
+"playlist_preview" = "Odsłuchaj playlistę";
+"play_order_footer" = "Budziki powtarzają się, dopóki ich nie zatrzymasz. Losowa kolejność zmienia następną kolejność po każdym zatrzymaniu. Jeden losowy powtarza ten sam utwór.";

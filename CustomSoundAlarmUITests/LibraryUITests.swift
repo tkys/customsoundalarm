@@ -140,6 +140,90 @@ final class LibraryUITests: XCTestCase {
         XCTAssertFalse(row.waitForExistence(timeout: 5))
     }
 
+    func testPlaylistDetailHasPreviewAndNativeDelete() {
+        let app = launch(["-uitest-seed-library", "-uitest-open-library"])
+        let playlistRow = app.buttons["library.playlist.朝の支度"]
+        XCTAssertTrue(playlistRow.waitForExistence(timeout: 15))
+        playlistRow.tap()
+
+        XCTAssertTrue(app.textFields["playlist.name"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["playlist.preview"].waitForExistence(timeout: 5))
+        XCTAssertTrue(
+            app.buttons["playlist.trackPlay.PresetMarimba.caf"]
+                .waitForExistence(timeout: 5)
+        )
+        let reorderHandles = app.buttons.matching(
+            NSPredicate(format: "label CONTAINS %@", "並べ替え")
+        )
+        XCTAssertGreaterThan(
+            reorderHandles.count,
+            0,
+            "always-visible reorder handle should exist: \(app.debugDescription)"
+        )
+
+        let trackCell = app.cells.containing(
+            .staticText,
+            identifier: "マリンバ"
+        ).firstMatch
+        XCTAssertTrue(trackCell.waitForExistence(timeout: 5))
+
+        // 常時 editMode なので、行頭の赤い − ボタンで削除する。
+        let minus = app.descendants(matching: .any)
+            .matching(identifier: "minus.circle.fill")
+            .firstMatch
+        XCTAssertTrue(
+            minus.waitForExistence(timeout: 5),
+            "minus button should exist: \(app.debugDescription)"
+        )
+        minus.tap()
+
+        let confirm = app.buttons["削除"].firstMatch
+        if confirm.waitForExistence(timeout: 3) {
+            confirm.tap()
+        } else {
+            let deleteElements = app.descendants(matching: .any).matching(
+                NSPredicate(format: "label == %@", "削除")
+            )
+            XCTAssertGreaterThan(
+                deleteElements.count,
+                0,
+                "delete confirmation should exist: \(app.debugDescription)"
+            )
+            deleteElements.element(boundBy: deleteElements.count - 1).tap()
+        }
+        XCTAssertFalse(app.staticTexts["マリンバ"].waitForExistence(timeout: 3))
+    }
+
+    func testPlaylistTrackCanBeReorderedByDragHandle() {
+        let app = launch(["-uitest-seed-library", "-uitest-open-library"])
+        let playlistRow = app.buttons["library.playlist.朝の支度"]
+        XCTAssertTrue(playlistRow.waitForExistence(timeout: 15))
+        playlistRow.tap()
+
+        let handles = app.buttons.matching(
+            NSPredicate(format: "label CONTAINS %@", "並べ替え")
+        )
+        XCTAssertGreaterThanOrEqual(
+            handles.count,
+            3,
+            "reorder handles should exist: \(app.debugDescription)"
+        )
+        let source = handles.element(boundBy: 0)
+        let target = handles.element(boundBy: 2)
+        source.press(forDuration: 0.8, thenDragTo: target)
+        Thread.sleep(forTimeInterval: 1.0)
+
+        let marimba = app.staticTexts["マリンバ"]
+        let musicBox = app.staticTexts["オルゴール"]
+        XCTAssertTrue(marimba.waitForExistence(timeout: 5))
+        XCTAssertTrue(musicBox.waitForExistence(timeout: 5))
+        XCTAssertGreaterThan(
+            marimba.frame.origin.y,
+            musicBox.frame.origin.y,
+            "Marimba should move below Music Box after drag"
+        )
+    }
+
     func testDebugSyncLogOpens() {
         let app = launch(["-uitest-open-library", "-uitest-seed-library"])
         XCTAssertTrue(app.collectionViews["library.root"].waitForExistence(timeout: 15))
