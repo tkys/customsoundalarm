@@ -304,3 +304,7 @@
 "library_title" = "ライブラリ";
 "playlist_delete_title" = "プレイリストを削除しますか？";
 "playlist_delete_message_unused" = "このプレイリストを削除します。";
+
+/* Playlist polish (#169) */
+"playlist_preview" = "プレイリストを試聴";
+"play_order_footer" = "アラームは止めるまで繰り返します。シャッフルは止めるたびに次の順番を変えます。1曲だけランダムは、毎回選んだ1曲を繰り返します。";

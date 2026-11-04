@@ -16,6 +16,9 @@ struct PlaylistEditorView: View {
     @State private var playOrder: PlaylistPlayOrder
     @State private var transition: PlaylistTransition
     @State private var showingTrackPicker = false
+    @State private var audioPlayer = AudioPlayer.shared
+    @State private var isRenderingPreview = false
+    @State private var previewTask: Task<Void, Never>?
 
     init(
         playlist: Playlist?,
@@ -58,7 +61,7 @@ struct PlaylistEditorView: View {
 
             Section {
                 ForEach(tracks) { track in
-                    HStack {
+                    HStack(spacing: 10) {
                         Image(systemName: "music.note")
                             .foregroundStyle(.secondary)
                         Text(store.trackDisplayName(for: track.soundFileName))
@@ -68,10 +71,26 @@ struct PlaylistEditorView: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
+                        Button {
+                            previewTrack(track)
+                        } label: {
+                            Image(systemName: isTrackPlaying(track)
+                                ? "stop.circle.fill" : "play.circle")
+                                .foregroundStyle(Color.accentColor)
+                        }
+                        .buttonStyle(.borderless)
+                        .accessibilityLabel(Text("preview"))
+                        .accessibilityIdentifier(
+                            "playlist.trackPlay.\(track.soundFileName)"
+                        )
                     }
                 }
                 .onDelete { offsets in
+                    let removed = offsets.map { tracks[$0] }
                     tracks.remove(atOffsets: offsets)
+                    if removed.contains(where: isTrackPlaying) {
+                        audioPlayer.stop()
+                    }
                 }
                 .onMove { source, destination in
                     tracks.move(fromOffsets: source, toOffset: destination)
@@ -101,10 +120,34 @@ struct PlaylistEditorView: View {
             }
 
             Section {
+                Button {
+                    togglePlaylistPreview()
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: isPreviewPlaying
+                            ? "stop.fill" : "play.circle")
+                            .foregroundStyle(
+                                isPreviewPlaying ? Color.red : Color.accentColor
+                            )
+                        Text(isPreviewPlaying ? "stop" : "playlist_preview")
+                        Spacer()
+                        if isRenderingPreview {
+                            ProgressView()
+                        }
+                    }
+                }
+                .disabled(tracks.isEmpty || isOverLimit || isRenderingPreview)
+                .accessibilityIdentifier("playlist.preview")
+            }
+
+            Section {
                 Picker("play_order", selection: $playOrder) {
-                    Text("play_order_in_order").tag(PlaylistPlayOrder.inOrder)
-                    Text("play_order_shuffle").tag(PlaylistPlayOrder.shuffle)
-                    Text("play_order_one_random").tag(PlaylistPlayOrder.oneRandom)
+                    Label("play_order_in_order", systemImage: "repeat")
+                        .tag(PlaylistPlayOrder.inOrder)
+                    Label("play_order_shuffle", systemImage: "shuffle")
+                        .tag(PlaylistPlayOrder.shuffle)
+                    Label("play_order_one_random", systemImage: "repeat.1")
+                        .tag(PlaylistPlayOrder.oneRandom)
                 }
                 .accessibilityIdentifier("playlist.playOrder")
 
@@ -118,11 +161,16 @@ struct PlaylistEditorView: View {
             } header: {
                 Text("playlist_playback")
             } footer: {
-                Text("transition_footer")
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("play_order_footer")
+                    Text("transition_footer")
+                }
             }
 
         }
         .warmListBackground()
+        // 常にドラッグハンドルを出す（削除は標準の − ボタン・#169）。
+        .environment(\.editMode, .constant(.active))
         .navigationTitle(
             playlist == nil
                 ? String(localized: "playlist_new")
@@ -130,9 +178,6 @@ struct PlaylistEditorView: View {
         )
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                EditButton()
-            }
             if showsCancel {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("cancel") { dismiss() }
@@ -148,6 +193,71 @@ struct PlaylistEditorView: View {
             NavigationStack {
                 PlaylistTrackPickerView(selected: $tracks)
             }
+        }
+        .onDisappear {
+            previewTask?.cancel()
+            isRenderingPreview = false
+            audioPlayer.stop()
+            PlaylistRenderService.shared.deletePreviewSound()
+        }
+    }
+
+    // MARK: - Preview / reorder
+
+    private var isPreviewPlaying: Bool {
+        audioPlayer.isPlaying
+            && audioPlayer.playingFileName == PlaylistRenderService.previewSoundFileName
+    }
+
+    private func isTrackPlaying(_ track: PlaylistTrack) -> Bool {
+        audioPlayer.isPlaying && audioPlayer.playingFileName == track.soundFileName
+    }
+
+    private func previewTrack(_ track: PlaylistTrack) {
+        previewTask?.cancel()
+        isRenderingPreview = false
+        if isPreviewPlaying {
+            audioPlayer.stop()
+        }
+        PlaylistRenderService.shared.deletePreviewSound()
+
+        guard let sound = SoundStore.shared.sounds.first(where: {
+            $0.fileName == track.soundFileName
+        }) else { return }
+
+        if isTrackPlaying(track) {
+            audioPlayer.stop()
+        } else {
+            audioPlayer.play(sound)
+        }
+    }
+
+    private func togglePlaylistPreview() {
+        if isPreviewPlaying {
+            audioPlayer.stop()
+            PlaylistRenderService.shared.deletePreviewSound()
+            return
+        }
+        guard !tracks.isEmpty, !isOverLimit, !isRenderingPreview else { return }
+
+        audioPlayer.stop()
+        isRenderingPreview = true
+        previewTask?.cancel()
+        let previewTracks = tracks
+        let previewOrder = playOrder
+        let previewTransition = transition
+        previewTask = Task {
+            let resolution = await PlaylistRenderService.shared.preparePreviewSound(
+                tracks: previewTracks,
+                playOrder: previewOrder,
+                transition: previewTransition
+            )
+            guard !Task.isCancelled else {
+                PlaylistRenderService.shared.deletePreviewSound()
+                return
+            }
+            isRenderingPreview = false
+            audioPlayer.playFile(fileName: resolution.fileName)
         }
     }
 

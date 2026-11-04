@@ -304,3 +304,7 @@
 "library_title" = "Libreria";
 "playlist_delete_title" = "Eliminare questa playlist?";
 "playlist_delete_message_unused" = "Questa playlist verrà eliminata.";
+
+/* Playlist polish (#169) */
+"playlist_preview" = "Ascolta playlist";
+"play_order_footer" = "Le sveglie si ripetono finché non le fermi. L'ordine casuale cambia l'ordine successivo a ogni arresto. Un brano casuale ripete lo stesso brano.";
