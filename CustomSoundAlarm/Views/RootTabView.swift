@@ -28,5 +28,15 @@ struct RootTabView: View {
                 }
                 .tag(RootTab.library)
         }
+        // スクリーンショット撮影用の外観固定（DEBUGのみ・#173）。
+        .preferredColorScheme(uiTestColorScheme)
+    }
+
+    private var uiTestColorScheme: ColorScheme? {
+        #if DEBUG
+        if CommandLine.arguments.contains("-uitest-force-dark") { return .dark }
+        if CommandLine.arguments.contains("-uitest-force-light") { return .light }
+        #endif
+        return nil
     }
 }
