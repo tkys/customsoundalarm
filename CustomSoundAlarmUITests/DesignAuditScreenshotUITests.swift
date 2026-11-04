@@ -7,7 +7,7 @@ import XCTest
 /// - アラーム一覧と追加・編集は ja ライトの AX5 も
 ///
 /// 画像は XCTest attachment として保存し、`scripts/export-design-audit-screenshots.sh`
-/// で `docs/design-audit/<日付>/` に書き出す。
+/// で `design-audit-output/<日付>/` に書き出す。
 @MainActor
 final class DesignAuditScreenshotUITests: XCTestCase {
 

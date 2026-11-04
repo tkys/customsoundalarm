@@ -7,7 +7,7 @@ if [ $# -lt 1 ]; then
 fi
 
 RESULT="$1"
-DEST="${2:-docs/design-audit/$(date +%F)}"
+DEST="${2:-design-audit-output/$(date +%F)}"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
