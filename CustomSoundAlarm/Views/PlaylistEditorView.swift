@@ -181,13 +181,20 @@ struct PlaylistEditorView: View {
         .toolbar {
             if showsCancel {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("cancel") { dismiss() }
+                    Button { dismiss() } label: {
+                        Text("cancel")
+                    }
+                    .tint(Color.primary)
                 }
             }
             ToolbarItem(placement: .confirmationAction) {
-                Button("save") { save() }
-                    .disabled(!canSave)
-                    .accessibilityIdentifier("playlist.save")
+                Button { save() } label: {
+                    Text("save")
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Color.actionFillEnd)
+                .disabled(!canSave)
+                .accessibilityIdentifier("playlist.save")
             }
         }
         .sheet(isPresented: $showingTrackPicker) {

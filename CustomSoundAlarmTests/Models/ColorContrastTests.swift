@@ -90,6 +90,24 @@ struct ColorContrastTests {
     }
 
     @Test
+    func mutedTextMeetsFourPointFiveAndIsAStepLighterThanSecondary() {
+        for dark in [false, true] {
+            for background in backgrounds {
+                let muted = contrast("TextMuted", background, dark: dark)
+                let secondary = contrast("TextSecondary", background, dark: dark)
+                #expect(
+                    muted >= 4.5,
+                    "TextMuted on \(background) (dark: \(dark)) is \(muted):1"
+                )
+                #expect(
+                    muted < secondary,
+                    "TextMuted should be lighter than TextSecondary on \(background) (dark: \(dark)): \(muted) vs \(secondary)"
+                )
+            }
+        }
+    }
+
+    @Test
     func headingsMeetFourPointFiveOnWarmBackgrounds() {
         for dark in [false, true] {
             for background in backgrounds {

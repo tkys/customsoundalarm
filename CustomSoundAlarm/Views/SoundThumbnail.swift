@@ -12,6 +12,8 @@ import SwiftUI
 struct SoundThumbnail: View {
     let sound: AlarmSound?
     var size: CGFloat = 36
+    /// オフのアラーム行などで、時刻・補足と同じ一段薄い扱いにする（#174）。
+    var isDimmed: Bool = false
 
     @State private var image: UIImage?
 
@@ -37,6 +39,8 @@ struct SoundThumbnail: View {
         }
         .frame(width: size, height: size)
         .clipShape(RoundedRectangle(cornerRadius: size * 0.22, style: .continuous))
+        .opacity(isDimmed ? 0.55 : 1)
+        .saturation(isDimmed ? 0.55 : 1)
         .task(id: sound?.thumbnailFileName) {
             guard let name = sound?.thumbnailFileName, !name.isEmpty else {
                 image = nil

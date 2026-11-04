@@ -141,11 +141,18 @@ struct AlarmDetailView: View {
                         .accessibilityAddTraits(.isHeader)
                 }
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("cancel") { dismiss() }
+                    Button { dismiss() } label: {
+                        Text("cancel")
+                    }
+                    .tint(Color.primary)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("save") { save() }
-                        .disabled(saveConfirmation != nil)
+                    Button { save() } label: {
+                        Text("save")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color.actionFillEnd)
+                    .disabled(saveConfirmation != nil)
                 }
             }
             .overlay(alignment: .top) {

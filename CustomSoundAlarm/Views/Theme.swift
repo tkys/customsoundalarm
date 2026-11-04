@@ -60,8 +60,10 @@ extension Brand {
 extension Color {
     /// 押せる文字・押せるアイコン（#174）。ライト 4.5:1 以上、ダーク 6.9:1 以上。
     static let actionText = Color("ActionText")
-    /// 押せない補足・オフ状態の文字。小さくても 4.5:1 以上（#174）。
+    /// 押せない補足の文字。小さくても 4.5:1 以上（#174）。
     static let textSecondary = Color("TextSecondary")
+    /// オフ状態の文字。`textSecondary` より一段薄いが 4.5:1 以上（#174 レビュー）。
+    static let textMuted = Color("TextMuted")
     /// 白文字ボタンの地（開始色・終了色とも白文字と 3:1 以上・#174）。
     static let actionFillStart = Color("ActionFillStart")
     static let actionFillEnd = Color("ActionFillEnd")

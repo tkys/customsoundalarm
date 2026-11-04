@@ -259,14 +259,14 @@ struct AlarmRow: View {
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 12) {
-                // 音源サムネイル（#86）
-                SoundThumbnail(sound: sound, size: 40)
+                // 音源サムネイル（#86）。オフは時刻・補足と同じく一段薄くする（#174）。
+                SoundThumbnail(sound: sound, size: 40, isDimmed: !alarm.isEnabled)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(alarm.timeString)
                         .font(.system(size: 44, weight: .regular, design: .rounded))
                         .foregroundStyle(
-                            alarm.isEnabled ? Color.primary : Color.textSecondary
+                            alarm.isEnabled ? Color.primary : Color.textMuted
                         )
                         // 長い音名のキャプションが幅を奪っても時刻は必ず自然サイズで描画されるよう優先
                         .layoutPriority(1)
@@ -284,7 +284,9 @@ struct AlarmRow: View {
                             .truncationMode(.tail)
                     }
                     .font(.caption)
-                    .foregroundStyle(Color.textSecondary)
+                    .foregroundStyle(
+                        alarm.isEnabled ? Color.textSecondary : Color.textMuted
+                    )
                     .lineLimit(1)
                     .truncationMode(.tail)
 
@@ -309,7 +311,9 @@ struct AlarmRow: View {
                             }
                         }
                         .font(.caption)
-                        .foregroundStyle(Color.textSecondary)
+                        .foregroundStyle(
+                            alarm.isEnabled ? Color.textSecondary : Color.textMuted
+                        )
                         .lineLimit(1)
                         .truncationMode(.tail)
                     }
