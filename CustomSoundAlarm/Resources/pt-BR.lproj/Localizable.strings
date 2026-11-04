@@ -304,3 +304,7 @@
 "library_title" = "Biblioteca";
 "playlist_delete_title" = "Excluir esta playlist?";
 "playlist_delete_message_unused" = "Esta playlist será excluída.";
+
+/* Playlist polish (#169) */
+"playlist_preview" = "Ouvir playlist";
+"play_order_footer" = "Os alarmes se repetem até você pará-los. A ordem aleatória muda a próxima ordem a cada parada. Uma aleatória repete a mesma faixa.";

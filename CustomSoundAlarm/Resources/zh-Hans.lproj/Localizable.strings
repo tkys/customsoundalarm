@@ -304,3 +304,7 @@
 "library_title" = "资料库";
 "playlist_delete_title" = "要删除此播放列表吗？";
 "playlist_delete_message_unused" = "将删除此播放列表。";
+
+/* Playlist polish (#169) */
+"playlist_preview" = "试听播放列表";
+"play_order_footer" = "闹钟会一直重复，直到你停止。每次停止后，随机播放会改变下一次的顺序。随机一首会重复同一首曲目。";

@@ -263,6 +263,7 @@ final class PlaylistRenderService {
             }
 
             if name == Self.testRingSoundFileName { continue }
+            if name == Self.previewSoundFileName { continue }
             guard name.hasSuffix(".caf"), name.contains(".playlist.") else { continue }
 
             // 旧方式のプレイリスト・バックアップは、登録中でなければ削除する（#151）
@@ -407,6 +408,96 @@ final class PlaylistRenderService {
         )
         try? FileManager.default.removeItem(at: url)
         lastTestRingOrderTrackIDs = []
+    }
+
+    // MARK: - Playlist preview (#169)
+
+    /// プレイリスト試聴用の書き出しファイル名。画面を離れたら削除する。
+    static let previewSoundFileName = "playlist.preview.caf"
+
+    /// 試聴のシャッフルで前回と同じ並びを避けるための曲 ID 順。
+    private var lastPreviewOrderTrackIDs: [UUID] = []
+
+    /// 編集中の曲・再生順・つなぎ方でプレビュー用の音を書き出す（#169）。
+    func preparePreviewSound(
+        tracks: [PlaylistTrack],
+        playOrder: PlaylistPlayOrder,
+        transition: PlaylistTransition
+    ) async -> PlaylistSoundResolution {
+        guard !tracks.isEmpty else {
+            return previewFallback(tracks: tracks)
+        }
+
+        let ordered = PlaylistRenderLogic.orderedTracks(
+            tracks,
+            order: playOrder,
+            seed: Self.newOrderSeed(),
+            avoidingPreviousOrder: playOrder == .shuffle
+                ? lastPreviewOrderTrackIDs
+                : []
+        )
+        let resolved = ordered.compactMap { track -> (PlaylistTrack, URL)? in
+            guard let url = sourceURL(for: track.soundFileName) else { return nil }
+            return (track, url)
+        }
+        guard !resolved.isEmpty else {
+            return previewFallback(tracks: tracks)
+        }
+
+        let outputURL = soundsDirectory.appendingPathComponent(
+            Self.previewSoundFileName
+        )
+        let tempURL = soundsDirectory.appendingPathComponent(
+            "\(Self.previewSoundFileName).\(UUID().uuidString).tmp.caf"
+        )
+        let request = PlaylistRenderRequest(
+            trackURLs: resolved.map(\.1),
+            fadeIn: .off,
+            transition: transition,
+            applyFadeIn: false,
+            outputURL: tempURL
+        )
+
+        do {
+            _ = try await Task.detached(priority: .userInitiated) {
+                try PlaylistRenderer.generate(request)
+            }.value
+            try atomicInstall(tempURL, at: outputURL)
+            lastPreviewOrderTrackIDs = resolved.map(\.0.id)
+            return PlaylistSoundResolution(
+                fileName: Self.previewSoundFileName,
+                usedFallback: false,
+                isProcessed: true
+            )
+        } catch {
+            try? FileManager.default.removeItem(at: tempURL)
+            return previewFallback(tracks: tracks)
+        }
+    }
+
+    /// プレビュー用ファイルを削除する（停止・画面を離れたとき）。
+    func deletePreviewSound() {
+        let url = soundsDirectory.appendingPathComponent(
+            Self.previewSoundFileName
+        )
+        try? FileManager.default.removeItem(at: url)
+        lastPreviewOrderTrackIDs = []
+    }
+
+    private func previewFallback(
+        tracks: [PlaylistTrack]
+    ) -> PlaylistSoundResolution {
+        let fileName = PlaylistFallbackLogic.fileName(
+            tracks: tracks,
+            fallbackFileName: "",
+            isAvailable: { sourceURL(for: $0) != nil },
+            defaultFileName: defaultFallbackFileName
+        )
+        return PlaylistSoundResolution(
+            fileName: fileName,
+            usedFallback: true,
+            isProcessed: false
+        )
     }
 
     /// 旧キャッシュ（orderTrackIDs が無い）からも前回の曲 ID 順を復元する。

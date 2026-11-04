@@ -77,6 +77,47 @@ struct PlaylistRenderServiceTests {
     }
 
     @Test
+    func previewSound_usesCurrentTracksTransitionAndIsDeleted() async throws {
+        let nameA = "UITestPreviewA.caf"
+        let nameB = "UITestPreviewB.caf"
+        defer {
+            for name in [nameA, nameB] {
+                try? FileManager.default.removeItem(
+                    at: AudioConverter.shared.soundsDirectory
+                        .appendingPathComponent(name)
+                )
+            }
+        }
+        try makeCAF(seconds: 1, value: 0.1, name: nameA)
+        try makeCAF(seconds: 1, value: 0.2, name: nameB)
+        let tracks = [
+            PlaylistTrack(soundFileName: nameA),
+            PlaylistTrack(soundFileName: nameB)
+        ]
+
+        PlaylistRenderService.shared.deletePreviewSound()
+        defer { PlaylistRenderService.shared.deletePreviewSound() }
+
+        let result = await PlaylistRenderService.shared.preparePreviewSound(
+            tracks: tracks,
+            playOrder: .inOrder,
+            transition: .crossfade
+        )
+        #expect(result.fileName == PlaylistRenderService.previewSoundFileName)
+        #expect(!result.usedFallback)
+
+        let samples = loadSamples(result.fileName)
+        // 1秒 + 1秒 - 1秒のクロスフェード = 1秒
+        #expect(abs(Double(samples.count) / 44_100 - 1.0) < 0.1)
+
+        PlaylistRenderService.shared.deletePreviewSound()
+        let url = AudioConverter.shared.soundsDirectory.appendingPathComponent(
+            PlaylistRenderService.previewSoundFileName
+        )
+        #expect(!FileManager.default.fileExists(atPath: url.path))
+    }
+
+    @Test
     func cachedSoundFileName_returnsRenderedFileWithoutRendering() async {
         let playlist = makePlaylist()
         defer { PlaylistStore.shared.remove(id: playlist.id) }

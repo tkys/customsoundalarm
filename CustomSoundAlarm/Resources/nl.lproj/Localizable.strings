@@ -304,3 +304,7 @@
 "library_title" = "Bibliotheek";
 "playlist_delete_title" = "Deze afspeellijst verwijderen?";
 "playlist_delete_message_unused" = "Deze afspeellijst wordt verwijderd.";
+
+/* Playlist polish (#169) */
+"playlist_preview" = "Afspeellijst beluisteren";
+"play_order_footer" = "Wekkers herhalen zich tot je ze stopt. Shuffle wijzigt bij elke stop de volgende volgorde. Eén willekeurig herhaalt steeds hetzelfde nummer.";
