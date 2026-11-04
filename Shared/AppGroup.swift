@@ -125,6 +125,15 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト・スクリーンショット用: デザイン監査の固定シード（DEBUGのみ・#173）
+    static var isUITestSeedDesignAudit: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-design-audit")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: 起動直後にライブラリタブを開く（DEBUGのみ・#160）
     static var isUITestOpenLibrary: Bool {
     #if DEBUG

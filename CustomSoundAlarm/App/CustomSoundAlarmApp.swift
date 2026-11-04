@@ -27,6 +27,8 @@ struct CustomSoundAlarmApp: App {
                         AppGroup.hasCompletedOnboarding = true
                         AlarmStore.shared.resetForUITest()
                         PlaylistStore.shared.resetForUITest()
+                        AppGroup.dismissedPresetFileNames = []
+                        SoundStore.shared.resetPresetNamesForUITest()
                         SoundStore.shared.backfillMissingDurations()
                         let morning = PlaylistStore.shared.add(
                             name: "朝の支度",
@@ -67,6 +69,79 @@ struct CustomSoundAlarmApp: App {
                             isEnabled: false,
                             label: String(localized: "alarm_title"),
                             playlistID: weekend.id
+                        ))
+                    }
+                    if AppGroup.isUITestSeedDesignAudit {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        PlaylistStore.shared.resetForUITest()
+                        AppGroup.dismissedPresetFileNames = []
+                        SoundStore.shared.resetForUITest()
+                        SoundStore.shared.resetPresetNamesForUITest()
+
+                        let japanese = Locale.current.language.languageCode?.identifier == "ja"
+                        let customFileName = "DesignAuditFavorite.caf"
+                        let customName = japanese ? "お気に入り" : "Favorite"
+                        let customURL = AudioConverter.shared.soundsDirectory
+                            .appendingPathComponent(customFileName)
+                        try? FileManager.default.removeItem(at: customURL)
+                        if let source = Bundle.main.url(
+                            forResource: "PresetBell",
+                            withExtension: "caf"
+                        ) {
+                            try? FileManager.default.copyItem(at: source, to: customURL)
+                            SoundStore.shared.add(AlarmSound(
+                                name: customName,
+                                fileName: customFileName,
+                                isPreset: false
+                            ))
+                        }
+
+                        let morning = PlaylistStore.shared.add(
+                            name: japanese ? "モーニング" : "Morning mix",
+                            tracks: [
+                                PlaylistTrack(soundFileName: "PresetMarimba.caf"),
+                                PlaylistTrack(soundFileName: "PresetBell.caf"),
+                                PlaylistTrack(soundFileName: "PresetMusicBox.caf")
+                            ],
+                            playOrder: .shuffle,
+                            transition: .crossfade
+                        )
+                        _ = PlaylistStore.shared.add(
+                            name: japanese ? "週末カフェ" : "Weekend cafe",
+                            tracks: [
+                                PlaylistTrack(soundFileName: "PresetCrescendo.caf"),
+                                PlaylistTrack(soundFileName: "PresetBeep.caf")
+                            ],
+                            playOrder: .inOrder,
+                            transition: .short
+                        )
+
+                        // 撮影中に鳴らないよう、今日以外の曜日で「オン」を表現する。
+                        let today = Calendar.current.component(.weekday, from: Date())
+                        let safeWeekday = today == 1 ? 2 : 1
+                        AlarmStore.shared.add(AlarmEntry(
+                            hour: 7,
+                            minute: 0,
+                            isEnabled: true,
+                            label: japanese ? "朝" : "Morning",
+                            repeatWeekdays: [safeWeekday],
+                            soundFileName: "PresetBell.caf"
+                        ))
+                        AlarmStore.shared.add(AlarmEntry(
+                            hour: 8,
+                            minute: 30,
+                            isEnabled: false,
+                            label: japanese ? "ジョギング" : "Jogging",
+                            repeatWeekdays: [2, 4, 6],
+                            playlistID: morning.id
+                        ))
+                        AlarmStore.shared.add(AlarmEntry(
+                            hour: 22,
+                            minute: 15,
+                            isEnabled: false,
+                            label: japanese ? "読書" : "Reading",
+                            soundFileName: customFileName
                         ))
                     }
                     if AppGroup.isUITestOpenLibrary {
