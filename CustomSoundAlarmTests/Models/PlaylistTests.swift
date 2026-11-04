@@ -100,6 +100,14 @@ struct PlaylistRenderLogicTests {
         names.map { PlaylistTrack(soundFileName: $0) }
     }
 
+    /// ループ再生では開始位置が違うだけの並びは同じとみなす。
+    private func cyclicRotations(_ ids: [UUID]) -> [[UUID]] {
+        guard !ids.isEmpty else { return [] }
+        return (0..<ids.count).map { offset in
+            Array(ids[offset...] + ids[..<offset])
+        }
+    }
+
     @Test
     func orderMode_keepsOriginalOrder() {
         let input = tracks(["a", "b", "c"])
@@ -142,6 +150,65 @@ struct PlaylistRenderLogicTests {
             seed: 2
         )
         #expect(first.map(\.soundFileName) != second.map(\.soundFileName))
+    }
+
+    @Test
+    func shuffle_avoidsSameOrderAsPrevious() {
+        let input = tracks(["a", "b", "c", "d"])
+        let first = PlaylistRenderLogic.orderedTracks(
+            input,
+            order: .shuffle,
+            seed: 42
+        )
+        let second = PlaylistRenderLogic.orderedTracks(
+            input,
+            order: .shuffle,
+            seed: 42,
+            avoidingPreviousOrder: first.map(\.id)
+        )
+        let previous = first.map(\.id)
+        let next = second.map(\.id)
+        #expect(next != previous)
+        #expect(!cyclicRotations(previous).contains(next))
+        #expect(Set(next) == Set(input.map(\.id)))
+    }
+
+    @Test
+    func shuffle_avoidsSameOrderForTwoTracks() {
+        let input = tracks(["a", "b"])
+        let first = PlaylistRenderLogic.orderedTracks(
+            input,
+            order: .shuffle,
+            seed: 7
+        )
+        let second = PlaylistRenderLogic.orderedTracks(
+            input,
+            order: .shuffle,
+            seed: 7,
+            avoidingPreviousOrder: first.map(\.id)
+        )
+        let previous = first.map(\.id)
+        let next = second.map(\.id)
+        // 2曲はA-BとB-Aのループが同じなので、直接の並びだけ変える。
+        #expect(next != previous)
+        #expect(Set(next) == Set(input.map(\.id)))
+    }
+
+    @Test
+    func inOrder_ignoresPreviousOrder() {
+        let input = tracks(["a", "b", "c"])
+        let first = PlaylistRenderLogic.orderedTracks(
+            input,
+            order: .inOrder,
+            seed: 1
+        )
+        let second = PlaylistRenderLogic.orderedTracks(
+            input,
+            order: .inOrder,
+            seed: 2,
+            avoidingPreviousOrder: first.map(\.id)
+        )
+        #expect(first.map(\.id) == second.map(\.id))
     }
 
     @Test

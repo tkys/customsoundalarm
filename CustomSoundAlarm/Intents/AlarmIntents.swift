@@ -47,6 +47,9 @@ struct DismissAlarmIntent: LiveActivityIntent {
                 try? AlarmManager.shared.cancel(id: record.id)
             }
             AppGroup.testAlarmRecords = []
+            await MainActor.run {
+                PlaylistRenderService.shared.deleteTestRingSound()
+            }
             AlarmEventBuffer.enqueue(PendingAlarmEvent(
                 name: AnalyticsEvent.testRingStopped(hour: hour).name,
                 properties: [:],
