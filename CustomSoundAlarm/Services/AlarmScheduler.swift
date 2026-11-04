@@ -762,16 +762,13 @@ final class AlarmScheduler {
 
     /// プレイリストのバックアップ用に、存在する最初の曲を返す（#151）。
     func backupSourceFileName(for entry: AlarmEntry) -> String? {
-        if entry.playlistID != nil {
-            let playlist = PlaylistStore.shared.playlist(id: entry.playlistID)
-            if let track = playlist?.tracks.first(where: {
-                soundFileExists($0.soundFileName)
-            }) {
-                return track.soundFileName
-            }
-            return soundFileExists(entry.soundFileName) ? entry.soundFileName : nil
-        }
-        return soundFileExists(entry.soundFileName) ? entry.soundFileName : nil
+        TestRingSoundLogic.backupSourceFileName(
+            playlist: entry.playlistID != nil
+                ? PlaylistStore.shared.playlist(id: entry.playlistID)
+                : nil,
+            fallbackFileName: entry.soundFileName,
+            isAvailable: soundFileExists
+        )
     }
 
     private func soundFileExists(_ fileName: String) -> Bool {
@@ -947,6 +944,7 @@ final class AlarmScheduler {
                 testRingPermission == .denied ? .denied : .notAuthorized
             logger.warning("Test ring skipped: AlarmKit not authorized (\(reason.rawValue))")
             AnalyticsService.shared.capture(.testRingFailed(reason: reason, kind: kind))
+            deleteTestRingSoundIfIdle()
             return .failed(reason)
         }
 
@@ -955,6 +953,7 @@ final class AlarmScheduler {
         // 鳴動確認は実機で行う（#109）。
         logger.warning("Test ring is disabled on the simulator")
         AnalyticsService.shared.capture(.testRingFailed(reason: .simulator, kind: kind))
+        deleteTestRingSoundIfIdle()
         return .failed(.simulator)
         #else
         let plan = TestRingLogic.makePlan(now: now, soundFileName: soundFileName, kind: kind)
@@ -973,6 +972,7 @@ final class AlarmScheduler {
         } catch {
             logger.error("Failed to schedule test ring: \(error.localizedDescription)")
             AnalyticsService.shared.capture(.testRingFailed(reason: .scheduleError, kind: kind))
+            deleteTestRingSoundIfIdle()
             return .failed(.scheduleError)
         }
         #endif
@@ -1024,17 +1024,29 @@ final class AlarmScheduler {
             AppGroup.testAlarmRecords = result.remaining
             logger.info("Cleaned up \(result.expiredIDs.count) test ring alarm(s)")
         }
+        if result.remaining.isEmpty {
+            deleteTestRingSoundIfIdle()
+        }
     }
 
     /// 起動時に残っている試しアラームをすべてキャンセルする。
     private func cancelAllTestAlarms() {
         let records = AppGroup.testAlarmRecords
-        guard !records.isEmpty else { return }
         for record in records {
             try? manager.cancel(id: record.id)
         }
         AppGroup.testAlarmRecords = []
-        logger.info("Cancelled \(records.count) leftover test ring alarm(s)")
+        // 記録が無くても、前回クラッシュ等で残った試し鳴らし用ファイルを掃除する。
+        PlaylistRenderService.shared.deleteTestRingSound()
+        if !records.isEmpty {
+            logger.info("Cancelled \(records.count) leftover test ring alarm(s)")
+        }
+    }
+
+    /// 試し鳴らしが残っていないときだけ、試し鳴らし用ファイルを削除する。
+    private func deleteTestRingSoundIfIdle() {
+        guard AppGroup.testAlarmRecords.isEmpty else { return }
+        PlaylistRenderService.shared.deleteTestRingSound()
     }
 
     /// 鳴らした試しアラームを 60 秒後に掃除する（放置対策）。

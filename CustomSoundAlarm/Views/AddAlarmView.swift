@@ -580,14 +580,28 @@ struct AlarmDetailView: View {
         }
 
         Task {
+            let draft = testRingDraftEntry()
             let fileName: String
             if kind == .backup {
-                // 選択中の音を大きくした版で試す。無ければその場で生成（#119）
+                // プレイリストなら存在する1曲目の大きくした版で試す（本番と同じ・#169）
+                let source = scheduler.backupSourceFileName(for: draft)
                 fileName = await BackupLoudVariantService.ensureVariant(
-                    for: selectedSound?.fileName ?? ""
+                    for: source ?? ""
                 ) ?? BackupAlarmSound.fileName
             } else {
-                fileName = selectedSound?.fileName ?? ""
+                switch TestRingSoundLogic.primaryPlan(
+                    playlistID: draft.playlistID,
+                    selectedSoundFileName: draft.soundFileName,
+                    fadeIn: draft.fadeIn,
+                    entryID: draft.id
+                ) {
+                case .direct(let directFileName):
+                    fileName = directFileName
+                case .render(let input):
+                    let resolution = await PlaylistRenderService.shared
+                        .prepareTestRingSound(for: input)
+                    fileName = resolution.fileName
+                }
             }
 
             let result = await scheduler.scheduleTestRing(
@@ -628,6 +642,25 @@ struct AlarmDetailView: View {
                 testRingMessage = nil
             }
         }
+    }
+
+    /// 編集中（未保存）の内容を試し鳴らし用のエントリに写す（#169）。
+    private func testRingDraftEntry() -> AlarmEntry {
+        let components = Calendar.current.dateComponents(
+            [.hour, .minute],
+            from: selectedTime
+        )
+        return AlarmEntry(
+            hour: components.hour ?? 7,
+            minute: components.minute ?? 0,
+            label: label,
+            repeatWeekdays: Array(repeatWeekdays).sorted(),
+            soundFileName: playlistID == nil ? (selectedSound?.fileName ?? "") : "",
+            snoozeMinutes: snoozeMinutes,
+            backupMinutes: backupMinutes,
+            playlistID: playlistID,
+            fadeIn: fadeIn
+        )
     }
 
     // MARK: - Repeat
