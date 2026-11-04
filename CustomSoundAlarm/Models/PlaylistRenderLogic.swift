@@ -31,8 +31,11 @@ enum PlaylistRenderLogic {
                   shuffled.map(\.id) == previousOrder else {
                 return shuffled
             }
-            // 偶然同じ順になったら1つ回して必ず変える（2曲でも保証）。
-            return Array(shuffled.dropFirst()) + [shuffled[0]]
+            // 偶然同じ順になったら末尾2曲を入れ替える（2曲でも保証）。
+            // 先頭を末尾へ回すだけだと、ループ再生では同じ並びに聞こえるため。
+            var adjusted = shuffled
+            adjusted.swapAt(adjusted.count - 1, adjusted.count - 2)
+            return adjusted
         case .oneRandom:
             guard !tracks.isEmpty else { return [] }
             let index = Int(seed % UInt64(tracks.count))

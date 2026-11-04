@@ -100,6 +100,14 @@ struct PlaylistRenderLogicTests {
         names.map { PlaylistTrack(soundFileName: $0) }
     }
 
+    /// ループ再生では開始位置が違うだけの並びは同じとみなす。
+    private func cyclicRotations(_ ids: [UUID]) -> [[UUID]] {
+        guard !ids.isEmpty else { return [] }
+        return (0..<ids.count).map { offset in
+            Array(ids[offset...] + ids[..<offset])
+        }
+    }
+
     @Test
     func orderMode_keepsOriginalOrder() {
         let input = tracks(["a", "b", "c"])
@@ -158,8 +166,11 @@ struct PlaylistRenderLogicTests {
             seed: 42,
             avoidingPreviousOrder: first.map(\.id)
         )
-        #expect(second.map(\.id) != first.map(\.id))
-        #expect(Set(second.map(\.id)) == Set(input.map(\.id)))
+        let previous = first.map(\.id)
+        let next = second.map(\.id)
+        #expect(next != previous)
+        #expect(!cyclicRotations(previous).contains(next))
+        #expect(Set(next) == Set(input.map(\.id)))
     }
 
     @Test
@@ -176,8 +187,11 @@ struct PlaylistRenderLogicTests {
             seed: 7,
             avoidingPreviousOrder: first.map(\.id)
         )
-        #expect(second.map(\.id) != first.map(\.id))
-        #expect(Set(second.map(\.id)) == Set(input.map(\.id)))
+        let previous = first.map(\.id)
+        let next = second.map(\.id)
+        // 2曲はA-BとB-Aのループが同じなので、直接の並びだけ変える。
+        #expect(next != previous)
+        #expect(Set(next) == Set(input.map(\.id)))
     }
 
     @Test
