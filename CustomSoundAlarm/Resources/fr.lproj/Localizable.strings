@@ -255,9 +255,9 @@
 "fade_summary_off" = "Désactivé";
 "fade_in" = "Démarrage en douceur";
 "fade_off" = "Désactivé";
-"fade_in_10" = "10 secondes";
+"fade_in_5" = "5 secondes";
+"fade_in_15" = "15 secondes";
 "fade_in_30" = "30 secondes";
-"fade_in_60" = "60 secondes";
 "fade_in_seconds_fmt" = "%d secondes";
 "fade_in_footer" = "Chaque fois qu'il joue jusqu'à la fin et revient au début, il redémarre doucement.";
 "gap_fade" = "Entre les titres";

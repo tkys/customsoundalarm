@@ -81,6 +81,31 @@ enum PlaylistRenderLogic {
             <= Playlist.maxTotalSeconds + 0.001
     }
 
+    // MARK: - Fade-in repeat (#181)
+
+    /// 繰り返し対象にする1周の最大長。これを超える音源は1周で十分に大きくなる。
+    static let maxRepeatedCycleDuration: TimeInterval = 60
+
+    /// やさしく鳴り始める用の繰り返し回数（#181）。
+    ///
+    /// 1周の長さ `L` が 60 秒以下なら、設定秒数をかけて最大音量に届き、
+    /// 最大音量で最低1周分鳴るように `ceil(fadeSeconds / L) + 1` 周にする。
+    /// 60 秒超は1周のまま（30 秒で最大に届き、最大音量で30秒以上鳴る）。
+    /// オフ・寝過ごし防止用（`applyFadeIn == false`）は繰り返さない。
+    static func fadeInCycleCount(
+        cycleDuration: TimeInterval,
+        fadeIn: PlaylistFadeIn,
+        applyFadeIn: Bool
+    ) -> Int {
+        guard applyFadeIn,
+              fadeIn != .off,
+              cycleDuration > 0,
+              cycleDuration <= maxRepeatedCycleDuration else {
+            return 1
+        }
+        return Int(ceil(fadeIn.seconds / cycleDuration)) + 1
+    }
+
     // MARK: - Fade curves
 
     /// 先頭から `fadeSeconds` の間で 0 → 1 に上がる係数。

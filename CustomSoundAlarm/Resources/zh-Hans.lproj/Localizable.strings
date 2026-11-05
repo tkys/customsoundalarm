@@ -255,9 +255,9 @@
 "fade_summary_off" = "关闭";
 "fade_in" = "轻柔开始";
 "fade_off" = "关闭";
-"fade_in_10" = "10 秒";
+"fade_in_5" = "5 秒";
+"fade_in_15" = "15 秒";
 "fade_in_30" = "30 秒";
-"fade_in_60" = "60 秒";
 "fade_in_seconds_fmt" = "%d 秒";
 "fade_in_footer" = "每次播放到结尾并回到开头时，都会再次轻声开始。";
 "gap_fade" = "曲目之间";

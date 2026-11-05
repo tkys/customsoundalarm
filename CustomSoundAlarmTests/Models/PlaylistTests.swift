@@ -275,6 +275,79 @@ struct PlaylistRenderLogicTests {
         ))
     }
 
+    // MARK: - Fade-in repeat (#181)
+
+    @Test
+    func fadeInCycleCount_shortCycleRepeatsToFillFade() {
+        // 5秒 + 30秒 → ceil(30/5)+1 = 7周 = 35秒
+        #expect(PlaylistRenderLogic.fadeInCycleCount(
+            cycleDuration: 5,
+            fadeIn: .thirty,
+            applyFadeIn: true
+        ) == 7)
+        // 20秒 + 15秒 → ceil(15/20)+1 = 2周 = 40秒
+        #expect(PlaylistRenderLogic.fadeInCycleCount(
+            cycleDuration: 20,
+            fadeIn: .fifteen,
+            applyFadeIn: true
+        ) == 2)
+        // 8秒（5秒+5秒-2秒クロスフェード） + 15秒 → 3周 = 24秒
+        #expect(PlaylistRenderLogic.fadeInCycleCount(
+            cycleDuration: 8,
+            fadeIn: .fifteen,
+            applyFadeIn: true
+        ) == 3)
+    }
+
+    @Test
+    func fadeInCycleCount_longCycleDoesNotRepeat() {
+        // 61秒 + 30秒 → 1周のまま
+        #expect(PlaylistRenderLogic.fadeInCycleCount(
+            cycleDuration: 61,
+            fadeIn: .thirty,
+            applyFadeIn: true
+        ) == 1)
+        // 境界: 60秒ちょうどは繰り返し対象
+        #expect(PlaylistRenderLogic.fadeInCycleCount(
+            cycleDuration: 60,
+            fadeIn: .thirty,
+            applyFadeIn: true
+        ) == 2)
+    }
+
+    @Test
+    func tenMinuteLimit_stillUsesOneCycleWithFadeIn() {
+        // 繰り返し分は上限判定に数えない（1周の長さのまま）。
+        #expect(!PlaylistRenderLogic.isWithinLimit(
+            trackDurations: [601],
+            transition: .off
+        ))
+        #expect(PlaylistRenderLogic.fadeInCycleCount(
+            cycleDuration: 601,
+            fadeIn: .thirty,
+            applyFadeIn: true
+        ) == 1)
+    }
+
+    @Test
+    func fadeInCycleCount_offBackupAndInvalidDoNotRepeat() {
+        #expect(PlaylistRenderLogic.fadeInCycleCount(
+            cycleDuration: 5,
+            fadeIn: .off,
+            applyFadeIn: true
+        ) == 1)
+        #expect(PlaylistRenderLogic.fadeInCycleCount(
+            cycleDuration: 5,
+            fadeIn: .thirty,
+            applyFadeIn: false
+        ) == 1)
+        #expect(PlaylistRenderLogic.fadeInCycleCount(
+            cycleDuration: 0,
+            fadeIn: .thirty,
+            applyFadeIn: true
+        ) == 1)
+    }
+
     @Test
     func fadeIn_startsAtZeroAndReachesOne() {
         let sampleRate = 100.0
@@ -424,7 +497,7 @@ struct PlaylistRenderLogicTests {
     func playlistDeletion_switchesToFirstExistingTrack() {
         let playlistID = UUID()
         let alarms = [
-            AlarmEntry(playlistID: playlistID, fadeIn: .ten),
+            AlarmEntry(playlistID: playlistID, fadeIn: .fifteen),
             AlarmEntry(playlistID: UUID())
         ]
         let updated = PlaylistDeletionLogic.updatedAlarms(
@@ -436,7 +509,7 @@ struct PlaylistRenderLogicTests {
         )
         #expect(updated[0].playlistID == nil)
         #expect(updated[0].soundFileName == "Second.caf")
-        #expect(updated[0].fadeIn == .ten)
+        #expect(updated[0].fadeIn == .fifteen)
         #expect(updated[1].playlistID != nil)
     }
 

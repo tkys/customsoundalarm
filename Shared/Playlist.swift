@@ -18,17 +18,42 @@ enum PlaylistSoundMode: String, Codable, Sendable, CaseIterable, Equatable, Hash
     var analyticsValue: String { rawValue }
 }
 
-/// やさしく鳴り始める長さ（#151 / #160）。アラームが持つ。
+/// やさしく鳴り始める長さ（#151 / #160 / #181）。アラームが持つ。
 enum PlaylistFadeIn: Int, Codable, Sendable, CaseIterable, Equatable, Hashable {
     case off = 0
-    case ten = 10
+    case five = 5
+    case fifteen = 15
     case thirty = 30
-    case sixty = 60
 
     var seconds: TimeInterval { TimeInterval(rawValue) }
 
     var analyticsValue: String {
         self == .off ? "off" : String(rawValue)
+    }
+
+    /// 旧バージョンの値も読み込めるようにする（#181）。
+    /// - 10秒 → 15秒
+    /// - 60秒 → 30秒
+    /// - それ以外の未知の値 → オフ
+    ///
+    /// enum の自動 Codable は未知の raw value で throw するため、
+    /// 保存済みアラーム全体の読み込みを止めないよう独自に decode する。
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let raw = try container.decode(Int.self)
+        switch raw {
+        case 5: self = .five
+        case 15: self = .fifteen
+        case 30: self = .thirty
+        case 10: self = .fifteen
+        case 60: self = .thirty
+        default: self = .off
+        }
+    }
+
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
     }
 }
 

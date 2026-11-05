@@ -116,7 +116,7 @@ struct PlaylistRendererTests {
 
         _ = try PlaylistRenderer.generate(PlaylistRenderRequest(
             trackURLs: [a],
-            fadeIn: .ten,
+            fadeIn: .five,
             transition: .off,
             applyFadeIn: true,
             outputURL: output
@@ -129,6 +129,35 @@ struct PlaylistRendererTests {
     }
 
     @Test
+    func shortSourceWithFadeIn_repeatsAndReachesFullVolume() throws {
+        let a = try makeCAF(seconds: 5, value: 1.0)
+        let output = outputURL()
+        defer {
+            try? FileManager.default.removeItem(at: a)
+            try? FileManager.default.removeItem(at: output)
+        }
+
+        // 5秒の音源 + 30秒フェード = ceil(30/5)+1 = 7周 = 35秒。
+        let result = try PlaylistRenderer.generate(PlaylistRenderRequest(
+            trackURLs: [a],
+            fadeIn: .thirty,
+            transition: .off,
+            applyFadeIn: true,
+            outputURL: output
+        ))
+
+        #expect(abs(result.durationSeconds - 35) < 0.1)
+
+        let samples = loadOutput(output)
+        #expect(peak(samples) > 0.99, "最大音量に届いていない")
+
+        // 30秒時点でフェードインが完了し、末尾0.5秒のフェード前まで最大音量が続く。
+        let afterFadeIn = Array(samples.dropFirst(Int(30 * sampleRate)))
+        let beforeEndFade = Array(afterFadeIn.prefix(Int(4.5 * sampleRate)))
+        #expect(peak(beforeEndFade) > 0.99)
+    }
+
+    @Test
     func backupRender_doesNotApplyFadeIn() throws {
         let a = try makeCAF(seconds: 2)
         let output = outputURL()
@@ -137,13 +166,16 @@ struct PlaylistRendererTests {
             try? FileManager.default.removeItem(at: output)
         }
 
-        _ = try PlaylistRenderer.generate(PlaylistRenderRequest(
+        let result = try PlaylistRenderer.generate(PlaylistRenderRequest(
             trackURLs: [a],
-            fadeIn: .ten,
+            fadeIn: .thirty,
             transition: .off,
             applyFadeIn: false,
             outputURL: output
         ))
+
+        // 寝過ごし防止用は繰り返さない。
+        #expect(abs(result.durationSeconds - 2) < 0.05)
 
         let samples = loadOutput(output)
         let firstTenth = Array(samples.prefix(Int(0.1 * sampleRate)))

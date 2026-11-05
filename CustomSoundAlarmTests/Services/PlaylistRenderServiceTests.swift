@@ -146,7 +146,7 @@ struct PlaylistRenderServiceTests {
             entryID: UUID(),
             playlistID: playlist.id,
             fallbackFileName: "PresetMarimba.caf",
-            fadeIn: .ten
+            fadeIn: .fifteen
         )
         PlaylistRenderService.shared.deleteTestRingSound()
         defer { PlaylistRenderService.shared.deleteTestRingSound() }
@@ -165,12 +165,62 @@ struct PlaylistRenderServiceTests {
     }
 
     @Test
+    func testRingSound_repeatsShortSourceForFadeIn() async throws {
+        let name = "UITestTestRingShort.caf"
+        let url = AudioConverter.shared.soundsDirectory.appendingPathComponent(name)
+        defer { try? FileManager.default.removeItem(at: url) }
+        _ = try makeCAF(seconds: 5, value: 1.0, name: name)
+        let playlist = PlaylistStore.shared.add(
+            name: "ring-\(UUID().uuidString)",
+            tracks: [PlaylistTrack(soundFileName: name)]
+        )
+        defer { PlaylistStore.shared.remove(id: playlist.id) }
+        let input = PlaylistRenderInput(
+            entryID: UUID(),
+            playlistID: playlist.id,
+            fadeIn: .thirty
+        )
+        PlaylistRenderService.shared.deleteTestRingSound()
+        defer { PlaylistRenderService.shared.deleteTestRingSound() }
+
+        let result = await PlaylistRenderService.shared.prepareTestRingSound(for: input)
+        #expect(!result.usedFallback)
+
+        let samples = loadSamples(result.fileName)
+        // 5秒 + 30秒 → 7周 = 35秒。「今すぐ鳴らす」も同じ書き出し。
+        #expect(abs(Double(samples.count) / 44_100 - 35) < 0.2)
+        #expect(peak(samples) > 0.99)
+    }
+
+    @Test
+    func renderSignatureIncludesVersion() {
+        let playlist = makePlaylist()
+        defer { PlaylistStore.shared.remove(id: playlist.id) }
+        let input = PlaylistRenderInput(
+            entryID: UUID(),
+            playlistID: playlist.id,
+            fadeIn: .five
+        )
+        let ordered = [PlaylistTrack(soundFileName: "PresetMarimba.caf")]
+        let signature = PlaylistRenderService.shared.signature(
+            input: input,
+            ordered: ordered
+        )
+
+        #expect(
+            signature.hasPrefix("v\(PlaylistRenderService.renderVersion)|"),
+            "signature should start with the render version: \(signature)"
+        )
+        #expect(PlaylistRenderService.renderVersion >= 2)
+    }
+
+    @Test
     func cachedSoundFileName_withoutCache_returnsNil() {
         let input = PlaylistRenderInput(
             entryID: UUID(),
             playlistID: UUID(),
             fallbackFileName: "PresetMarimba.caf",
-            fadeIn: .ten
+            fadeIn: .fifteen
         )
         #expect(PlaylistRenderService.shared.cachedSoundFileName(for: input) == nil)
     }
@@ -228,7 +278,7 @@ struct PlaylistRenderServiceTests {
             entryID: entryID,
             playlistID: playlist.id,
             fallbackFileName: "PresetMarimba.caf",
-            fadeIn: .ten
+            fadeIn: .five
         )
 
         let first = await service.prepareSound(for: base)
@@ -238,7 +288,7 @@ struct PlaylistRenderServiceTests {
             entryID: entryID,
             playlistID: playlist.id,
             fallbackFileName: "PresetMarimba.caf",
-            fadeIn: .thirty
+            fadeIn: .fifteen
         )
         let secondResult = await service.prepareSound(for: second)
         #expect(secondResult.fileName.hasSuffix(".playlist.b.caf"))
@@ -247,7 +297,7 @@ struct PlaylistRenderServiceTests {
             entryID: entryID,
             playlistID: playlist.id,
             fallbackFileName: "PresetMarimba.caf",
-            fadeIn: .sixty
+            fadeIn: .thirty
         )
         let thirdResult = await service.prepareSound(for: third)
         #expect(thirdResult.fileName.hasSuffix(".playlist.a.caf"))
@@ -272,7 +322,7 @@ struct PlaylistRenderServiceTests {
             entryID: entryID,
             playlistID: playlist.id,
             fallbackFileName: "PresetMarimba.caf",
-            fadeIn: .ten
+            fadeIn: .fifteen
         )
         let rendered = await PlaylistRenderService.shared.prepareSound(for: input)
         #expect(!rendered.usedFallback)
@@ -422,12 +472,14 @@ struct PlaylistRenderServiceTests {
         let input = PlaylistRenderInput(
             entryID: entryID,
             playlistID: playlist.id,
-            fadeIn: .ten
+            fadeIn: .fifteen
         )
         let result = await PlaylistRenderService.shared.prepareSound(for: input)
         #expect(!result.usedFallback)
         let samples = loadSamples(result.fileName)
-        #expect(abs(Double(samples.count) / 44_100 - 8) < 0.1)
+        // 5秒 + 5秒 - 2秒 = 8秒/周。15秒フェードなので ceil(15/8)+1 = 3周。
+        // 周の境目もクロスフェードするため、6曲 - 5回の重なり = 20秒。
+        #expect(abs(Double(samples.count) / 44_100 - 20) < 0.2)
         let firstTenth = Array(samples.prefix(Int(0.1 * 44_100)))
         let lastHalf = Array(samples.suffix(Int(0.5 * 44_100)))
         #expect(peak(firstTenth) < peak(lastHalf))

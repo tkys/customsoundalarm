@@ -255,9 +255,9 @@
 "fade_summary_off" = "オフ";
 "fade_in" = "やさしく鳴り始める";
 "fade_off" = "オフ";
-"fade_in_10" = "10秒";
+"fade_in_5" = "5秒";
+"fade_in_15" = "15秒";
 "fade_in_30" = "30秒";
-"fade_in_60" = "60秒";
 "fade_in_seconds_fmt" = "%d秒";
 "fade_in_footer" = "最後まで鳴って最初に戻るたびに、また小さい音から始まります。";
 "gap_fade" = "曲間";

@@ -403,19 +403,49 @@ struct AlarmEntryTests {
     }
 
     @Test
+    func oldFadeInValues_decodeWithoutThrowing() throws {
+        func decodedFadeIn(_ raw: Int) throws -> PlaylistFadeIn {
+            let json = """
+            {
+              "id": "11111111-1111-1111-1111-111111111111",
+              "hour": 7,
+              "minute": 0,
+              "isEnabled": true,
+              "label": "alarm",
+              "repeatWeekdays": [],
+              "soundFileName": "PresetMarimba.caf",
+              "snoozeMinutes": 9,
+              "fadeIn": \(raw)
+            }
+            """
+            return try JSONDecoder().decode(
+                AlarmEntry.self,
+                from: Data(json.utf8)
+            ).fadeIn
+        }
+
+        #expect(try decodedFadeIn(10) == .fifteen)
+        #expect(try decodedFadeIn(60) == .thirty)
+        #expect(try decodedFadeIn(99) == .off)
+        #expect(try decodedFadeIn(5) == .five)
+        #expect(try decodedFadeIn(15) == .fifteen)
+        #expect(try decodedFadeIn(30) == .thirty)
+    }
+
+    @Test
     func duplicated_copiesPlaylistFields() {
         let playlistID = UUID()
         let copy = AlarmEntry(
             playlistID: playlistID,
-            fadeIn: .ten
+            fadeIn: .fifteen
         ).duplicated()
 
         #expect(copy.playlistID == playlistID)
-        #expect(copy.fadeIn == .ten)
+        #expect(copy.fadeIn == .fifteen)
     }
 
     @Test
     func fadeOnlyEntry_usesPlaylistFeatures() {
-        #expect(AlarmEntry(fadeIn: .ten).usesPlaylistFeatures)
+        #expect(AlarmEntry(fadeIn: .fifteen).usesPlaylistFeatures)
     }
 }
