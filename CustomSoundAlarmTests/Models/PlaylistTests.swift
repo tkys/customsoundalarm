@@ -100,6 +100,43 @@ struct PlaylistRenderLogicTests {
         names.map { PlaylistTrack(soundFileName: $0) }
     }
 
+    private func frames(_ seconds: TimeInterval) -> Int {
+        Int((seconds * PlaylistRenderLogic.sampleRate).rounded())
+    }
+
+    private func expectFadeInCycles(
+        baseTrackFrames: [Int],
+        crossfadeFrames: Int,
+        fadeIn: PlaylistFadeIn,
+        expected: Int
+    ) {
+        let cycles = PlaylistRenderLogic.fadeInCycleCount(
+            baseTrackFrames: baseTrackFrames,
+            crossfadeFrames: crossfadeFrames,
+            fadeIn: fadeIn,
+            applyFadeIn: true
+        )
+        #expect(cycles == expected)
+
+        let repeated = Array(
+            repeating: baseTrackFrames,
+            count: cycles
+        ).flatMap { $0 }
+        let total = PlaylistRenderLogic.renderedFrameCount(
+            trackFrames: repeated,
+            crossfadeFrames: crossfadeFrames
+        )
+        let cycle = PlaylistRenderLogic.renderedFrameCount(
+            trackFrames: baseTrackFrames,
+            crossfadeFrames: crossfadeFrames
+        )
+        let fade = Int((fadeIn.seconds * PlaylistRenderLogic.sampleRate).rounded())
+        #expect(
+            total >= fade + cycle,
+            "output \(total) is shorter than fade + cycle (\(fade + cycle))"
+        )
+    }
+
     /// ループ再生では開始位置が違うだけの並びは同じとみなす。
     private func cyclicRotations(_ ids: [UUID]) -> [[UUID]] {
         guard !ids.isEmpty else { return [] }
@@ -278,38 +315,88 @@ struct PlaylistRenderLogicTests {
     // MARK: - Fade-in repeat (#181)
 
     @Test
-    func fadeInCycleCount_shortCycleRepeatsToFillFade() {
-        // 5秒 + 30秒 → ceil(30/5)+1 = 7周 = 35秒
-        #expect(PlaylistRenderLogic.fadeInCycleCount(
-            cycleDuration: 5,
+    func renderedFrameCount_matchesCrossfadeOverlap() {
+        let cf = frames(2)
+        // レビューの実測（コードを写した計算）と同じ値
+        #expect(PlaylistRenderLogic.renderedFrameCount(
+            trackFrames: Array(repeating: frames(3), count: 11),
+            crossfadeFrames: cf
+        ) == frames(18))
+        #expect(PlaylistRenderLogic.renderedFrameCount(
+            trackFrames: Array(repeating: frames(3), count: 18),
+            crossfadeFrames: cf
+        ) == frames(28))
+        #expect(PlaylistRenderLogic.renderedFrameCount(
+            trackFrames: Array(repeating: frames(5), count: 10),
+            crossfadeFrames: cf
+        ) == frames(32))
+    }
+
+    @Test
+    func fadeInCycleCount_singleTrackUsesFadePlusOneCycle() {
+        // 5秒 + 30秒 → 7周 = 35秒
+        expectFadeInCycles(
+            baseTrackFrames: [frames(5)],
+            crossfadeFrames: 0,
             fadeIn: .thirty,
-            applyFadeIn: true
-        ) == 7)
-        // 20秒 + 15秒 → ceil(15/20)+1 = 2周 = 40秒
-        #expect(PlaylistRenderLogic.fadeInCycleCount(
-            cycleDuration: 20,
+            expected: 7
+        )
+        // 20秒 + 15秒 → 2周 = 40秒
+        expectFadeInCycles(
+            baseTrackFrames: [frames(20)],
+            crossfadeFrames: 0,
             fadeIn: .fifteen,
-            applyFadeIn: true
-        ) == 2)
-        // 8秒（5秒+5秒-2秒クロスフェード） + 15秒 → 3周 = 24秒
-        #expect(PlaylistRenderLogic.fadeInCycleCount(
-            cycleDuration: 8,
-            fadeIn: .fifteen,
-            applyFadeIn: true
-        ) == 3)
+            expected: 2
+        )
+    }
+
+    @Test
+    func fadeInCycleCount_crossfadeUsesActualRenderedLength() {
+        let cf = frames(2)
+
+        // 3秒×1曲 + 30秒: 21周 = 33秒
+        expectFadeInCycles(
+            baseTrackFrames: [frames(3)],
+            crossfadeFrames: cf,
+            fadeIn: .thirty,
+            expected: 21
+        )
+        // 3秒×2曲 + 30秒: 11周 = 34秒
+        expectFadeInCycles(
+            baseTrackFrames: [frames(3), frames(3)],
+            crossfadeFrames: cf,
+            fadeIn: .thirty,
+            expected: 11
+        )
+        // 5秒×2曲 + 30秒: 6周 = 38秒
+        expectFadeInCycles(
+            baseTrackFrames: [frames(5), frames(5)],
+            crossfadeFrames: cf,
+            fadeIn: .thirty,
+            expected: 6
+        )
+        // 1秒×1曲 + 30秒: 61周 = 31秒
+        expectFadeInCycles(
+            baseTrackFrames: [frames(1)],
+            crossfadeFrames: cf,
+            fadeIn: .thirty,
+            expected: 61
+        )
     }
 
     @Test
     func fadeInCycleCount_longCycleDoesNotRepeat() {
         // 61秒 + 30秒 → 1周のまま
         #expect(PlaylistRenderLogic.fadeInCycleCount(
-            cycleDuration: 61,
+            baseTrackFrames: [frames(61)],
+            crossfadeFrames: 0,
             fadeIn: .thirty,
             applyFadeIn: true
         ) == 1)
         // 境界: 60秒ちょうどは繰り返し対象
         #expect(PlaylistRenderLogic.fadeInCycleCount(
-            cycleDuration: 60,
+            baseTrackFrames: [frames(60)],
+            crossfadeFrames: 0,
             fadeIn: .thirty,
             applyFadeIn: true
         ) == 2)
@@ -323,7 +410,8 @@ struct PlaylistRenderLogicTests {
             transition: .off
         ))
         #expect(PlaylistRenderLogic.fadeInCycleCount(
-            cycleDuration: 601,
+            baseTrackFrames: [frames(601)],
+            crossfadeFrames: 0,
             fadeIn: .thirty,
             applyFadeIn: true
         ) == 1)
@@ -332,17 +420,20 @@ struct PlaylistRenderLogicTests {
     @Test
     func fadeInCycleCount_offBackupAndInvalidDoNotRepeat() {
         #expect(PlaylistRenderLogic.fadeInCycleCount(
-            cycleDuration: 5,
+            baseTrackFrames: [frames(5)],
+            crossfadeFrames: 0,
             fadeIn: .off,
             applyFadeIn: true
         ) == 1)
         #expect(PlaylistRenderLogic.fadeInCycleCount(
-            cycleDuration: 5,
+            baseTrackFrames: [frames(5)],
+            crossfadeFrames: 0,
             fadeIn: .thirty,
             applyFadeIn: false
         ) == 1)
         #expect(PlaylistRenderLogic.fadeInCycleCount(
-            cycleDuration: 0,
+            baseTrackFrames: [],
+            crossfadeFrames: 0,
             fadeIn: .thirty,
             applyFadeIn: true
         ) == 1)

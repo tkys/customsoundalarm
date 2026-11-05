@@ -56,13 +56,14 @@ enum PlaylistRenderer {
             throw PlaylistRenderError.tooLong
         }
 
-        // やさしく鳴り始めるが短い音源で終わらないよう、1周の長さに応じて繰り返す（#181）。
-        let cycleDuration = PlaylistRenderLogic.totalDuration(
-            trackDurations: baseDurations,
-            transition: request.transition
-        )
+        // やさしく鳴り始めるが短い音源で終わらないよう、実際の書き出し長に
+        // 基づいて周回数を決める（#181）。
+        let crossfadeFrames = request.transition == .crossfade
+            ? Int((PlaylistTransition.crossfade.seconds * PlaylistRenderLogic.sampleRate).rounded())
+            : 0
         let cycles = PlaylistRenderLogic.fadeInCycleCount(
-            cycleDuration: cycleDuration,
+            baseTrackFrames: baseFrames,
+            crossfadeFrames: crossfadeFrames,
             fadeIn: request.fadeIn,
             applyFadeIn: request.applyFadeIn
         )
@@ -76,24 +77,12 @@ enum PlaylistRenderer {
         var firstCycleReaders: [TrackReader]? = baseReaders
         baseReaders.removeAll()
 
-        let crossfadeFrames = request.transition == .crossfade
-            ? Int((PlaylistTransition.crossfade.seconds * PlaylistRenderLogic.sampleRate).rounded())
-            : 0
-        // 実際のストリーミングと同じ順で、書き出されるフレーム数を予測する
-        // （エンドフェードの基準を実際の長さに合わせる）。
-        var totalOutputFrames = 0
-        var predictedTailFrames = 0
-        for (index, frames) in trackFrames.enumerated() {
-            let isLast = index == trackFrames.count - 1
-            let headFrames = index == 0
-                ? 0
-                : min(crossfadeFrames, predictedTailFrames, frames)
-            let tailFrames = isLast
-                ? 0
-                : min(crossfadeFrames, max(0, frames - headFrames))
-            totalOutputFrames += frames - tailFrames
-            predictedTailFrames = tailFrames
-        }
+        // 実際のストリーミングと同じ重なり方で、書き出されるフレーム数を
+        // 予測する（エンドフェードの基準を実際の長さに合わせる）。
+        let totalOutputFrames = PlaylistRenderLogic.renderedFrameCount(
+            trackFrames: trackFrames,
+            crossfadeFrames: crossfadeFrames
+        )
 
         let writer = try StreamingWriter(
             outputURL: request.outputURL,

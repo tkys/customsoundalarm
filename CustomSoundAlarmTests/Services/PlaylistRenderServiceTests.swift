@@ -477,9 +477,9 @@ struct PlaylistRenderServiceTests {
         let result = await PlaylistRenderService.shared.prepareSound(for: input)
         #expect(!result.usedFallback)
         let samples = loadSamples(result.fileName)
-        // 5秒 + 5秒 - 2秒 = 8秒/周。15秒フェードなので ceil(15/8)+1 = 3周。
-        // 周の境目もクロスフェードするため、6曲 - 5回の重なり = 20秒。
-        #expect(abs(Double(samples.count) / 44_100 - 20) < 0.2)
+        // 1周 L = 5 + 5 - 2 = 8秒。15秒 + L = 23秒以上になる最小の周回数は4周。
+        // 周の境目もクロスフェードするため、8曲 - 7回の重なり = 26秒。
+        #expect(abs(Double(samples.count) / 44_100 - 26) < 0.2)
         let firstTenth = Array(samples.prefix(Int(0.1 * 44_100)))
         let lastHalf = Array(samples.suffix(Int(0.5 * 44_100)))
         #expect(peak(firstTenth) < peak(lastHalf))

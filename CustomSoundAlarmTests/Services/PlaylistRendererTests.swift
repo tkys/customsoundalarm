@@ -128,6 +128,60 @@ struct PlaylistRendererTests {
         #expect(peak(firstTenth) < peak(lastHalf))
     }
 
+    private func assertCrossfadeRepeat(
+        trackSeconds: [Double],
+        minimumDuration: Double
+    ) throws {
+        let urls = try trackSeconds.map {
+            try makeCAF(seconds: $0, value: 1.0)
+        }
+        let output = outputURL()
+        defer {
+            for url in urls {
+                try? FileManager.default.removeItem(at: url)
+            }
+            try? FileManager.default.removeItem(at: output)
+        }
+
+        let result = try PlaylistRenderer.generate(PlaylistRenderRequest(
+            trackURLs: urls,
+            fadeIn: .thirty,
+            transition: .crossfade,
+            applyFadeIn: true,
+            outputURL: output
+        ))
+
+        #expect(
+            result.durationSeconds >= minimumDuration - 0.1,
+            "expected >= \(minimumDuration)s, got \(result.durationSeconds)s"
+        )
+        #expect(
+            peak(loadOutput(output)) > 0.99,
+            "maximum volume was not reached for \(trackSeconds)"
+        )
+    }
+
+    @Test
+    func crossfadePlaylistsReachFullVolume() throws {
+        // 1周の実際の長さ L に対して、設定30秒 + L 以上の長さになること。
+        try assertCrossfadeRepeat(
+            trackSeconds: [3],
+            minimumDuration: 33
+        )
+        try assertCrossfadeRepeat(
+            trackSeconds: [3, 3],
+            minimumDuration: 34
+        )
+        try assertCrossfadeRepeat(
+            trackSeconds: [5, 5],
+            minimumDuration: 38
+        )
+        try assertCrossfadeRepeat(
+            trackSeconds: [1],
+            minimumDuration: 31
+        )
+    }
+
     @Test
     func shortSourceWithFadeIn_repeatsAndReachesFullVolume() throws {
         let a = try makeCAF(seconds: 5, value: 1.0)
