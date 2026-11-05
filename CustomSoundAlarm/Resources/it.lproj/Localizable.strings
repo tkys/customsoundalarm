@@ -255,9 +255,9 @@
 "fade_summary_off" = "Disattivato";
 "fade_in" = "Avvio delicato";
 "fade_off" = "Disattivato";
-"fade_in_10" = "10 secondi";
+"fade_in_5" = "5 secondi";
+"fade_in_15" = "15 secondi";
 "fade_in_30" = "30 secondi";
-"fade_in_60" = "60 secondi";
 "fade_in_seconds_fmt" = "%d secondi";
 "fade_in_footer" = "Ogni volta che arriva alla fine e ricomincia, riparte piano.";
 "gap_fade" = "Tra i brani";

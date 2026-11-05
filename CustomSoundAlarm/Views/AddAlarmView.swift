@@ -344,9 +344,9 @@ struct AlarmDetailView: View {
         } content: {
             Picker("", selection: $fadeIn) {
                 Text("fade_off").tag(PlaylistFadeIn.off)
-                Text("fade_in_10").tag(PlaylistFadeIn.ten)
+                Text("fade_in_5").tag(PlaylistFadeIn.five)
+                Text("fade_in_15").tag(PlaylistFadeIn.fifteen)
                 Text("fade_in_30").tag(PlaylistFadeIn.thirty)
-                Text("fade_in_60").tag(PlaylistFadeIn.sixty)
             }
             .labelsHidden()
             .accessibilityIdentifier("addAlarm.fadeIn")

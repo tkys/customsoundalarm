@@ -11,7 +11,7 @@
 
 | イベント名 | プロパティ（型） | 送るタイミング | 答えたい問い | App closed? | 追加版 |
 | --- | --- | --- | --- | --- | --- |
-| `alarm_created` | `has_custom_sound` bool, `is_repeating` bool, `snooze_minutes` int, `backup_minutes` int（オフは0）, `sound_mode` string（single/playlist_order/playlist_shuffle/playlist_random）, `fade_in` string（off/10/30/60）, `hours_until` int（任意） | アラーム新規作成時 | 作成行動・寝過ごし防止・プレイリストの利用率 | アプリ動作中のみ | 既存（`sound_mode` は1.8.2） |
+| `alarm_created` | `has_custom_sound` bool, `is_repeating` bool, `snooze_minutes` int, `backup_minutes` int（オフは0）, `sound_mode` string（single/playlist_order/playlist_shuffle/playlist_random）, `fade_in` string（off/5/15/30）, `hours_until` int（任意） | アラーム新規作成時 | 作成行動・寝過ごし防止・プレイリストの利用率 | アプリ動作中のみ | 既存（`sound_mode` は1.8.2） |
 | `alarm_edited` | `has_custom_sound` bool, `is_repeating` bool, `snooze_minutes` int, `backup_minutes` int（オフは0）, `was_enabled` bool, `sound_mode` string, `fade_in` string, `hours_until` int（任意） | アラーム編集保存時 | 編集で自動オンにした割合・プレイリスト設定 | アプリ動作中のみ | 既存（`sound_mode` は1.8.2） |
 | `alarm_deleted` | — | アラーム削除時 | 離脱・整理行動 | アプリ動作中のみ | 既存 |
 | `alarm_duplicated` | — | アラーム複製時 | 複製の利用 | アプリ動作中のみ | 既存 |
@@ -84,7 +84,7 @@
 ## OOUI 再設計（#160 / 1.8.1）
 
 - `alarm_created` / `alarm_edited` の `sound_mode` は、アラームの `playlistID` とプレイリストの `playOrder` から導出します（`single` / `playlist_order` / `playlist_shuffle` / `playlist_random`）。
-- `fade_in` はアラームの「やさしく鳴り始める」です。
+- `fade_in` はアラームの「やさしく鳴り始める」です（off/5/15/30）。旧バージョンの 10/60 は読み込み時に 15/30 へ移行し、未知の値は off になります（#181）。
 - `gap_fade` / `end_fade` は削除しました。曲のつなぎ方はプレイリストの `transition`、末尾フェードは書き出し時に常に 0.5 秒です。
 - `playlist_created` / `playlist_edited` の `play_order` / `transition` で、プレイリスト側の再生設定を測ります。
 

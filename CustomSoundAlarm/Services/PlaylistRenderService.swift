@@ -53,7 +53,8 @@ final class PlaylistRenderService {
     static let shared = PlaylistRenderService()
 
     /// 生成方式の版。古いファイルは作り直す。
-    private static let renderVersion = 1
+    /// #181 でフェードインの繰り返し・秒数の変更を入れたため 2 に更新。
+    static let renderVersion = 2
     private static let tempLifetime: TimeInterval = 10 * 60
 
     /// 書き出し失敗・フォールバックの計測フック。
@@ -534,7 +535,8 @@ final class PlaylistRenderService {
         return ordered
     }
 
-    private func signature(
+    /// キャッシュの同一性判定に使う署名。版を先頭に入れる（#181）。
+    func signature(
         input: PlaylistRenderInput,
         ordered: [PlaylistTrack]
     ) -> String {

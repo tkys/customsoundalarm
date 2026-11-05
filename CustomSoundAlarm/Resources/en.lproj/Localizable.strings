@@ -255,9 +255,9 @@
 "fade_summary_off" = "Off";
 "fade_in" = "Gentle start";
 "fade_off" = "Off";
-"fade_in_10" = "10 seconds";
+"fade_in_5" = "5 seconds";
+"fade_in_15" = "15 seconds";
 "fade_in_30" = "30 seconds";
-"fade_in_60" = "60 seconds";
 "fade_in_seconds_fmt" = "%d seconds";
 "fade_in_footer" = "Each time it plays to the end and loops back, it starts quietly again.";
 "gap_fade" = "Between tracks";

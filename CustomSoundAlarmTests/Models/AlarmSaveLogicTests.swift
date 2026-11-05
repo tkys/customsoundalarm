@@ -95,10 +95,10 @@ struct AlarmSaveLogicTests {
             snoozeMinutes: 9,
             backupMinutes: nil,
             playlistID: playlistID,
-            fadeIn: .ten
+            fadeIn: .fifteen
         )
 
         #expect(updated.playlistID == playlistID)
-        #expect(updated.fadeIn == .ten)
+        #expect(updated.fadeIn == .fifteen)
     }
 }
