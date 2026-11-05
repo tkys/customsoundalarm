@@ -159,6 +159,33 @@ struct PlaylistRendererTests {
             peak(loadOutput(output)) > 0.99,
             "maximum volume was not reached for \(trackSeconds)"
         )
+
+        // 実際のファイル長と、書き出しループと同じ計算の予測が一致すること。
+        let trackFrames = trackSeconds.map {
+            Int(($0 * sampleRate).rounded())
+        }
+        let crossfadeFrames = Int(
+            (PlaylistTransition.crossfade.seconds * sampleRate).rounded()
+        )
+        let cycles = PlaylistRenderLogic.fadeInCycleCount(
+            baseTrackFrames: trackFrames,
+            crossfadeFrames: crossfadeFrames,
+            fadeIn: .thirty,
+            applyFadeIn: true
+        )
+        let repeated = Array(
+            repeating: trackFrames,
+            count: cycles
+        ).flatMap { $0 }
+        let predictedFrames = PlaylistRenderLogic.renderedFrameCount(
+            trackFrames: repeated,
+            crossfadeFrames: crossfadeFrames
+        )
+        let actualFrames = loadOutput(output).count
+        #expect(
+            actualFrames == predictedFrames,
+            "actual \(actualFrames) frames != predicted \(predictedFrames)"
+        )
     }
 
     @Test
