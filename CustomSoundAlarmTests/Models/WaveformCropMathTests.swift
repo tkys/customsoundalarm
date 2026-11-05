@@ -1,5 +1,7 @@
 import Testing
 import Foundation
+import UIKit
+import DSWaveformImage
 @testable import CustomSoundAlarm
 
 /// 波形クロップUI（#77）の純粋関数群のテスト。
@@ -685,5 +687,42 @@ struct WaveformCropMathTests {
     func rulerStepWithLabelWidth_invalidInput() {
         #expect(WaveformCropMath.rulerStep(forSpan: 0, barWidth: 390, labelWidth: 34) == 3600)
         #expect(WaveformCropMath.rulerStep(forSpan: 30, barWidth: -1, labelWidth: 34) == 3600)
+    }
+}
+
+// MARK: - 上段の波形が枠内に収まること（#178）
+
+/// DSWaveformImage のレンダラーが、アプリ本体と同じ縦スケール定数で
+/// 最大音量のサンプルを枠内に描くことを確認する。
+struct WaveformOverviewScalingTests {
+
+    @Test
+    func loudestSamplesStayInsideTheOverviewFrame() {
+        let width: CGFloat = 300
+        let height: CGFloat = 64
+        let configuration = Waveform.Configuration(
+            size: CGSize(width: width, height: height),
+            style: .striped(.init(
+                color: UIColor.black,
+                width: 2,
+                spacing: 2,
+                lineCap: .round
+            )),
+            scale: 1,
+            verticalScalingFactor: WaveformCropView.overviewVerticalScalingFactor
+        )
+
+        // DSWaveformImage の正規化: 0 = 最大音量、1 = 無音。
+        // 最大音量のサンプルでも上下の枠を超えないことを確認する。
+        let samples = Array(repeating: Float(0), count: Int(width))
+        let path = LinearWaveformRenderer().path(
+            samples: samples,
+            with: configuration,
+            lastOffset: 0
+        )
+        let bounds = path.boundingBoxOfPath
+
+        #expect(bounds.minY >= 0, "minY \(bounds.minY) is above the frame")
+        #expect(bounds.maxY <= height, "maxY \(bounds.maxY) is below the frame")
     }
 }
