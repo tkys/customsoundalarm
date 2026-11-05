@@ -54,6 +54,14 @@ struct WaveformCropView: View {
     /// 下段のサンプル解像度（600秒ファイルで窓8秒時に約100バケット）
     private let sampleCount = 8000
 
+    /// 上段（全体波形）の縦スケール（#178）。
+    ///
+    /// DSWaveformImage の `LinearWaveformRenderer` は中心から**上下それぞれ**に
+    /// `sample × 高さ × factor` を描く。つまり全高は最大で `2 × factor` 倍になる。
+    /// 既定の 0.95 では最大 1.9 倍まで描かれ、音量の大きい音源で枠をはみ出す。
+    /// 0.46 なら最大 0.92 倍に収まり、下段の `zoomWaveformCanvas`（0.92）とも揃う。
+    static let overviewVerticalScalingFactor: CGFloat = 0.46
+
     /// 上段（WaveformView）用のストライプ設定（#80-2）。スケールはビュー側既定。
     /// 色は AccentColor アセットを直接解決（#81-2: UIColor(Color.accentColor) は
     /// 環境依存のためビュー階層の外で青にフォールバックする）
@@ -64,7 +72,8 @@ struct WaveformCropView: View {
                 width: 2,
                 spacing: 2,
                 lineCap: .round
-            ))
+            )),
+            verticalScalingFactor: Self.overviewVerticalScalingFactor
         )
     }
 
@@ -200,7 +209,7 @@ struct WaveformCropView: View {
 
                 // 3. 選択範囲の枠線
                 Rectangle()
-                    .strokeBorder(Color.accentColor.opacity(0.7), lineWidth: 1.5)
+                    .strokeBorder(Brand.orange.opacity(0.7), lineWidth: 1.5)
                     .frame(width: max(selectedWidth, 0), height: overviewHeight)
                     .offset(x: leading)
                     .allowsHitTesting(false)
@@ -342,7 +351,7 @@ struct WaveformCropView: View {
 
                 // 3. 選択範囲の枠線
                 Rectangle()
-                    .strokeBorder(Color.accentColor.opacity(0.7), lineWidth: 1.5)
+                    .strokeBorder(Brand.orange.opacity(0.7), lineWidth: 1.5)
                     .frame(width: max(selectedWidth, 0), height: zoomHeight)
                     .offset(x: leading)
                     .allowsHitTesting(false)
@@ -387,7 +396,7 @@ struct WaveformCropView: View {
             let barWidth: CGFloat = 2
             let pitch: CGFloat = 4  // barWidth + spacing（zoomBucketCount の barPitch と同じ）
             let midY = size.height / 2
-            let color = Color.accentColor
+            let color = Brand.orange
 
             for (i, level) in slice.enumerated() {
                 let x = CGFloat(i) * pitch
@@ -440,9 +449,9 @@ struct WaveformCropView: View {
                         .offset(x: tickX)
                     // ラベル: ティックの下・中心合わせ（両端でクランプ済み）
                     Text(WaveformCropMath.formatTime(t))
-                        .font(.caption2)
+                        .font(.caption)
                         .monospacedDigit()
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.textSecondary)
                         .fixedSize()
                         .frame(width: labelWidth, alignment: .center)
                         .offset(x: labelCenter - labelWidth / 2, y: 6)
@@ -532,14 +541,14 @@ struct WaveformCropView: View {
             Circle()
                 .frame(width: 9, height: 9)
             Rectangle()
-                .fill(Color.accentColor)
+                .fill(Brand.orange)
                 .frame(width: 2)
             Circle()
                 .frame(width: 9, height: 9)
         }
         .frame(width: 10)
-        .foregroundStyle(Color.accentColor)
-        .shadow(color: Color.accentColor.opacity(0.35), radius: 3)
+        .foregroundStyle(Brand.orange)
+        .shadow(color: Brand.orange.opacity(0.35), radius: 3)
         .allowsHitTesting(false)
     }
 
@@ -559,8 +568,8 @@ struct WaveformCropView: View {
     private func labeledTime(_ key: LocalizedStringKey, value: Double) -> some View {
         VStack(spacing: 2) {
             Text(key)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+                .font(.footnote)
+                .foregroundStyle(Color.textSecondary)
             Text(WaveformCropMath.formatTime(value))
                 .font(.caption.weight(.medium))
                 .monospacedDigit()
@@ -569,7 +578,7 @@ struct WaveformCropView: View {
 
     private func handleShape(isActive: Bool) -> some View {
         RoundedRectangle(cornerRadius: 2)
-            .fill(isActive ? Color.accentColor : Color.accentColor.opacity(0.85))
+            .fill(isActive ? Brand.orange : Brand.orange.opacity(0.85))
             .frame(width: handleWidth, height: nil)
             .frame(maxHeight: .infinity)
             .shadow(color: .black.opacity(0.3), radius: isActive ? 4 : 2)

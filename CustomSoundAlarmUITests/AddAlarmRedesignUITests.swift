@@ -36,7 +36,14 @@ final class AddAlarmRedesignUITests: XCTestCase {
         toggle.tap()
 
         XCTAssertTrue(findElement("addAlarm.backupMinutes").waitForExistence(timeout: 3))
-        XCTAssertTrue(findElement("addAlarm.backupTestRing").waitForExistence(timeout: 3))
+
+        let backupTestRing = findElement("addAlarm.backupTestRing")
+        var swipes = 0
+        while (!backupTestRing.exists || !backupTestRing.isHittable) && swipes < 6 {
+            app.collectionViews["addAlarm.root"].swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(backupTestRing.waitForExistence(timeout: 3))
     }
 
     func testOnlyOneTestRingButton() {
@@ -68,6 +75,62 @@ final class AddAlarmRedesignUITests: XCTestCase {
         }
     }
 
+    func testAccessibilitySizeKeepsAllRows() {
+        app.launchArguments = [
+            "-uitest-open-add-alarm",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryAccessibilityXXXL"
+        ]
+        app.launch()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
+
+        let identifiers = [
+            "addAlarm.repeatRow",
+            "addAlarm.labelRow",
+            "addAlarm.soundRow",
+            "addAlarm.fadeIn",
+            "addAlarm.snoozeRow",
+            "addAlarm.testRing",
+            "addAlarm.backupToggle"
+        ]
+
+        // 上から下まで少しずつスクロールし、見つかった識別子を記録する。
+        // 1回のスクロールを画面の半分に抑え、LazyVStack のセルを
+        // 通り過ぎて消してしまわないようにする（#174 PR-2 レビュー）。
+        let start = app.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.5, dy: 0.8)
+        )
+        let end = app.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.5, dy: 0.3)
+        )
+
+        var found = Set<String>()
+        for _ in 0..<20 {
+            for identifier in identifiers where findElement(identifier).exists {
+                found.insert(identifier)
+            }
+            if found.count == identifiers.count { break }
+
+            start.press(
+                forDuration: 0.1,
+                thenDragTo: end,
+                withVelocity: .slow,
+                thenHoldForDuration: 0.1
+            )
+            Thread.sleep(forTimeInterval: 0.3)
+        }
+
+        for identifier in identifiers where findElement(identifier).exists {
+            found.insert(identifier)
+        }
+        for identifier in identifiers {
+            XCTAssertTrue(
+                found.contains(identifier),
+                "AX5: missing \(identifier)"
+            )
+        }
+    }
+
     func testSectionOrder() {
         launchAdd()
         app.swipeUp()
@@ -76,8 +139,9 @@ final class AddAlarmRedesignUITests: XCTestCase {
             "addAlarm.repeatRow",
             "addAlarm.labelRow",
             "addAlarm.soundRow",
-            "addAlarm.testRing",
+            "addAlarm.fadeIn",
             "addAlarm.snoozeRow",
+            "addAlarm.testRing",
             "addAlarm.backupToggle"
         ]
 

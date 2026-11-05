@@ -16,7 +16,7 @@ struct SyncLogView: View {
         List {
             if entries.isEmpty {
                 Text("同期の記録はまだありません")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.textSecondary)
             } else {
                 ForEach(entries.reversed()) { entry in
                     Section {
@@ -54,7 +54,7 @@ struct SyncLogView: View {
     private func row(_ title: String, _ value: String) -> some View {
         HStack {
             Text(title)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.textSecondary)
             Spacer()
             Text(value)
                 .monospacedDigit()

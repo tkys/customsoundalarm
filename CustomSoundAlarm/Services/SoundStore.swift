@@ -181,6 +181,13 @@ final class SoundStore {
         sounds = sounds.filter(\.isPreset)
         save()
     }
+
+    /// UIテスト用: プリセット名を現在の言語で登録し直す（DEBUGのみ・#173）。
+    func resetPresetNamesForUITest() {
+        sounds.removeAll { $0.isPreset }
+        registerPresets()
+        save()
+    }
 #endif
 
     // MARK: - Persistence

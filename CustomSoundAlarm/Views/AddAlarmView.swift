@@ -23,6 +23,7 @@ struct AlarmDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     @Environment(\.layoutDirection) private var layoutDirection
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var alarmStore = AlarmStore.shared
     @State private var soundStore = SoundStore.shared
     @State private var scheduler = AlarmScheduler.shared
@@ -98,28 +99,24 @@ struct AlarmDetailView: View {
     var body: some View {
         NavigationStack {
             Form {
+                // 3つのまとまり（#174 PR-2）:
+                // 1. 時刻
+                // 2. 繰り返し・ラベル・サウンド・やさしく鳴り始める・スヌーズ
+                // 3. 今すぐ鳴らす（＋音が小さいときは）・寝過ごし防止
                 timeSection
-                // 繰り返し〜スヌーズは1つのまとまり（時計アプリと同じく行の並び・#122）
                 Section {
                     repeatSection
                     labelSection
                     soundRow
-                }
-                Section {
                     fadeInRow
-                } footer: {
-                    if fadeIn != .off {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("fade_in_footer")
-                            Text("playlist_early_access_note")
-                        }
-                    }
+                    snoozeSection
                 }
                 Section {
                     testRingSection
-                    snoozeSection
+                    backupAlarmRows
+                } footer: {
+                    backupAlarmFooter
                 }
-                backupAlarmSection
                 if case .edit = mode {
                     deleteSection
                 }
@@ -139,11 +136,18 @@ struct AlarmDetailView: View {
                         .accessibilityAddTraits(.isHeader)
                 }
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("cancel") { dismiss() }
+                    Button { dismiss() } label: {
+                        Text("cancel")
+                    }
+                    .tint(Color.primary)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("save") { save() }
-                        .disabled(saveConfirmation != nil)
+                    Button { save() } label: {
+                        Text("save")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color.actionFillEnd)
+                    .disabled(saveConfirmation != nil)
                 }
             }
             .overlay(alignment: .top) {
@@ -262,20 +266,20 @@ struct AlarmDetailView: View {
                 selectedSound: $selectedSound
             )
         } label: {
-            HStack {
+            AdaptiveDetailRow {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("sound")
                     if let playlist = playlistStore.playlist(id: playlistID) {
                         Text(playlistSummary(for: playlist))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .font(.footnote)
+                            .foregroundStyle(Color.textSecondary)
                     } else if playlistID != nil {
                         Text("playlist_missing")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .font(.footnote)
+                            .foregroundStyle(Color.textSecondary)
                     }
                 }
-                Spacer()
+            } content: {
                 HStack(spacing: 4) {
                     if playlistID == nil {
                         SoundIndicator(
@@ -285,9 +289,10 @@ struct AlarmDetailView: View {
                         )
                     }
                     Text(soundRowValue)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                        .foregroundStyle(Color.textSecondary)
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
                         .truncationMode(.tail)
+                        .multilineTextAlignment(.leading)
                         .accessibilityIdentifier("addAlarm.soundName")
                 }
             }
@@ -320,12 +325,23 @@ struct AlarmDetailView: View {
     }
 
     private var fadeInRow: some View {
-        HStack(spacing: 8) {
-            Text("fade_in")
-            if fadeIn != .off {
-                EarlyAccessBadge()
+        AdaptiveDetailRow {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("fade_in")
+                    if fadeIn != .off {
+                        EarlyAccessBadge()
+                    }
+                }
+            } else {
+                HStack(spacing: 8) {
+                    Text("fade_in")
+                    if fadeIn != .off {
+                        EarlyAccessBadge()
+                    }
+                }
             }
-            Spacer()
+        } content: {
             Picker("", selection: $fadeIn) {
                 Text("fade_off").tag(PlaylistFadeIn.off)
                 Text("fade_in_10").tag(PlaylistFadeIn.ten)
@@ -362,24 +378,28 @@ struct AlarmDetailView: View {
         )
     }
 
-    private var backupAlarmSection: some View {
-        Section {
-            HStack(spacing: 8) {
-                Text("backup_alarm_toggle")
-                badge("PRO")
-                Button {
-                    showingBackupInfo = true
-                } label: {
-                    Image(systemName: "info.circle")
+    private var backupAlarmRows: some View {
+        Group {
+            AdaptiveDetailRow {
+                if dynamicTypeSize.isAccessibilitySize {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("backup_alarm_toggle")
+                        HStack(spacing: 8) {
+                            badge("PRO")
+                            backupInfoButton
+                        }
+                    }
+                } else {
+                    HStack(spacing: 8) {
+                        Text("backup_alarm_toggle")
+                        badge("PRO")
+                        backupInfoButton
+                    }
                 }
-                .buttonStyle(.borderless)
-                .accessibilityLabel(Text("backup_alarm_info_accessibility"))
-                .accessibilityIdentifier("addAlarm.backupInfo")
-
-                Spacer()
-
+            } content: {
                 Toggle("", isOn: backupToggle)
                     .labelsHidden()
+                    .tint(Brand.orange)
                     .accessibilityLabel(Text("backup_alarm_toggle"))
                     .accessibilityIdentifier("addAlarm.backupToggle")
                     // 使えない環境でも、既にオンならオフにはできる
@@ -387,16 +407,22 @@ struct AlarmDetailView: View {
             }
 
             if backupMinutes != nil {
-                Picker("backup_alarm_minutes", selection: Binding(
-                    get: { backupMinutes ?? BackupAlarmLogic.defaultMinutes },
-                    set: { backupMinutes = $0 }
-                )) {
-                    ForEach(BackupAlarmLogic.minuteOptions, id: \.self) { option in
-                        Text(String(format: String(localized: "backup_alarm_minutes_fmt"), option))
-                            .tag(option)
+                AdaptiveDetailRow {
+                    Text("backup_alarm_minutes")
+                } content: {
+                    Picker("", selection: Binding(
+                        get: { backupMinutes ?? BackupAlarmLogic.defaultMinutes },
+                        set: { backupMinutes = $0 }
+                    )) {
+                        ForEach(BackupAlarmLogic.minuteOptions, id: \.self) { option in
+                            Text(String(format: String(localized: "backup_alarm_minutes_fmt"), option))
+                                .tag(option)
+                        }
                     }
+                    .labelsHidden()
+                    .accessibilityLabel(Text("backup_alarm_minutes"))
+                    .accessibilityIdentifier("addAlarm.backupMinutes")
                 }
-                .accessibilityIdentifier("addAlarm.backupMinutes")
 
                 Button {
                     scheduleTestRing(kind: .backup)
@@ -404,6 +430,7 @@ struct AlarmDetailView: View {
                     HStack(spacing: 10) {
                         Image(systemName: "speaker.wave.3.fill")
                         Text("test_ring_backup_title")
+                            .fixedSize(horizontal: false, vertical: true)
                         Spacer()
                         if isSchedulingTestRing {
                             ProgressView()
@@ -416,27 +443,32 @@ struct AlarmDetailView: View {
                 if let backupTestRingMessage {
                     Text(backupTestRingMessage)
                         .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.textSecondary)
                 }
             }
-        } footer: {
-            if let minutes = backupMinutes {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(backupDescriptionText)
-                    if minutes <= snoozeMinutes {
-                        Text("backup_alarm_before_snooze")
-                            .foregroundStyle(.orange)
-                    }
-                    if playlistID != nil {
-                        Text("playlist_backup_note")
-                            .foregroundStyle(.secondary)
-                    }
-                    if fadeIn != .off {
-                        Text("fade_backup_note")
-                            .foregroundStyle(.secondary)
-                    }
+        }
+    }
+
+    @ViewBuilder
+    private var backupAlarmFooter: some View {
+        if let minutes = backupMinutes {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(backupDescriptionText)
+                if minutes <= snoozeMinutes {
+                    Text("backup_alarm_before_snooze")
+                        .foregroundStyle(Color.actionText)
+                }
+                if playlistID != nil {
+                    Text("playlist_backup_note")
+                        .foregroundStyle(Color.textSecondary)
+                }
+                if fadeIn != .off {
+                    Text("fade_backup_note")
+                        .foregroundStyle(Color.textSecondary)
                 }
             }
+            .font(.footnote)
+            .foregroundStyle(Color.textSecondary)
         }
     }
 
@@ -476,8 +508,19 @@ struct AlarmDetailView: View {
             .font(.caption2.weight(.bold))
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
-            .background(Capsule().fill(Color.accentColor.opacity(0.15)))
-            .foregroundStyle(Color.accentColor)
+            .background(Capsule().fill(Color.actionFillEnd))
+            .foregroundStyle(.white)
+    }
+
+    private var backupInfoButton: some View {
+        Button {
+            showingBackupInfo = true
+        } label: {
+            Image(systemName: "info.circle")
+        }
+        .buttonStyle(.borderless)
+        .accessibilityLabel(Text("backup_alarm_info_accessibility"))
+        .accessibilityIdentifier("addAlarm.backupInfo")
     }
 
     // MARK: - Trial Ring (#109 / #122 / #150)
@@ -500,6 +543,7 @@ struct AlarmDetailView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "bell.badge.waveform.fill")
                     Text("test_ring_title")
+                        .fixedSize(horizontal: false, vertical: true)
                     if isSchedulingTestRing {
                         ProgressView()
                     }
@@ -515,7 +559,7 @@ struct AlarmDetailView: View {
             } else if let testRingMessage {
                 Text(testRingMessage)
                     .font(.footnote)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.textSecondary)
             }
 
             // 「音が小さいときは」は押し間違い防止のため行の下の小さなリンク（#150）
@@ -530,7 +574,7 @@ struct AlarmDetailView: View {
                 .font(.footnote)
             }
             .buttonStyle(.borderless)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(Color.actionText)
             .accessibilityIdentifier("addAlarm.volumeGuide")
         }
     }
@@ -543,7 +587,7 @@ struct AlarmDetailView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(String(localized: String.LocalizationValue(display.messageKey)))
                 .font(.footnote)
-                .foregroundStyle(.orange)
+                .foregroundStyle(Color.actionText)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityIdentifier(messageIdentifier)
             if display.requestsPermission {
@@ -670,11 +714,12 @@ struct AlarmDetailView: View {
             NavigationLink {
                 RepeatSelectionView(selectedDays: $repeatWeekdays)
             } label: {
-                HStack {
+                AdaptiveDetailRow {
                     Text("repeat")
-                    Spacer()
+                } content: {
                     Text(repeatSummary)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.textSecondary)
+                        .multilineTextAlignment(.leading)
                 }
             }
             .accessibilityIdentifier("addAlarm.repeatRow")
@@ -694,9 +739,9 @@ struct AlarmDetailView: View {
 
     private var snoozeSection: some View {
         Group {
-            HStack {
+            AdaptiveDetailRow {
                 Text("snooze")
-                Spacer()
+            } content: {
                 Menu {
                     ForEach(snoozeOptions, id: \.self) { minutes in
                         Button(SnoozeDisplay.text(for: minutes)) {
@@ -708,9 +753,9 @@ struct AlarmDetailView: View {
                         Text(snoozeSummaryText)
                         Image(systemName: "chevron.up.chevron.down")
                             .font(.caption2)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.textSecondary)
                     }
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.textSecondary)
                 }
                 .accessibilityIdentifier("addAlarm.snoozeMenu")
             }
@@ -726,11 +771,21 @@ struct AlarmDetailView: View {
 
     private var labelSection: some View {
         Group {
-            HStack {
-                Text("label")
-                TextField("alarm_placeholder", text: $label)
-                    .multilineTextAlignment(.trailing)
-                    .accessibilityIdentifier("addAlarm.labelRow")
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("label")
+                    TextField("alarm_placeholder", text: $label)
+                        .multilineTextAlignment(.leading)
+                        .accessibilityIdentifier("addAlarm.labelRow")
+                }
+                .padding(.vertical, 2)
+            } else {
+                HStack {
+                    Text("label")
+                    TextField("alarm_placeholder", text: $label)
+                        .multilineTextAlignment(.trailing)
+                        .accessibilityIdentifier("addAlarm.labelRow")
+                }
             }
         }
     }
@@ -945,10 +1000,10 @@ struct BackupAlarmInfoView: View {
                         .font(.body)
                     Text("backup_alarm_info_volume")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.textSecondary)
                     Text("backup_alarm_early_access_note")
                         .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.textSecondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(20)
@@ -991,7 +1046,7 @@ struct RepeatSelectionView: View {
                         Spacer()
                         if selectedDays.contains(day.id) {
                             Image(systemName: "checkmark")
-                                .foregroundStyle(Color.accentColor)
+                                .foregroundStyle(Brand.orange)
                         }
                     }
                 }
@@ -1036,5 +1091,41 @@ struct SaveConfirmationToast: View {
                 .fill(.regularMaterial)
                 .shadow(color: .black.opacity(0.12), radius: 8, y: 2)
         )
+    }
+}
+
+// MARK: - AdaptiveDetailRow (#174 PR-2)
+
+/// 追加・編集画面の「項目名＋値」行。
+/// AX サイズでは項目名の下に値を置き、単語途中の改行を避ける。
+struct AdaptiveDetailRow<Title: View, Content: View>: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    private let title: Title
+    private let content: Content
+
+    init(
+        @ViewBuilder title: () -> Title,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.title = title()
+        self.content = content()
+    }
+
+    var body: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(alignment: .leading, spacing: 6) {
+                title
+                content
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(.vertical, 2)
+        } else {
+            HStack(alignment: .center, spacing: 12) {
+                title
+                Spacer(minLength: 12)
+                content
+            }
+        }
     }
 }

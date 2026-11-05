@@ -12,6 +12,8 @@ import SwiftUI
 struct SoundThumbnail: View {
     let sound: AlarmSound?
     var size: CGFloat = 36
+    /// オフのアラーム行などで、時刻・補足と同じ一段薄い扱いにする（#174）。
+    var isDimmed: Bool = false
 
     @State private var image: UIImage?
 
@@ -30,13 +32,15 @@ struct SoundThumbnail: View {
                     .background(Brand.purpleLight.opacity(0.12))
             } else {
                 // 素の音声: 波形（最後の手段）
-                MiniWaveformBars(color: .accentColor, barWidth: max(size / 12, 2), height: size * 0.45)
+                MiniWaveformBars(color: Brand.purpleLight, barWidth: max(size / 12, 2), height: size * 0.45)
                     .frame(width: size, height: size)
-                    .background(Color.accentColor.opacity(0.12))
+                    .background(Brand.purpleLight.opacity(0.12))
             }
         }
         .frame(width: size, height: size)
         .clipShape(RoundedRectangle(cornerRadius: size * 0.22, style: .continuous))
+        .opacity(isDimmed ? 0.55 : 1)
+        .saturation(isDimmed ? 0.55 : 1)
         .task(id: sound?.thumbnailFileName) {
             guard let name = sound?.thumbnailFileName, !name.isEmpty else {
                 image = nil

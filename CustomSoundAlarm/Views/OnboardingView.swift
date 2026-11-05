@@ -104,7 +104,7 @@ struct OnboardingView: View {
             HStack(spacing: 14) {
                 Image(systemName: icon)
                     .font(.title2)
-                    .foregroundStyle(Color.accentColor)
+                    .foregroundStyle(Brand.orange)
                     .frame(width: 34)
                 Text(label)
                     .font(.body.weight(.medium))
@@ -112,7 +112,7 @@ struct OnboardingView: View {
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.footnote)
-                    .foregroundStyle(Color(white: 0.75))
+                    .foregroundStyle(Color.textSecondary)
             }
             .padding(16)
             .background(
@@ -131,7 +131,7 @@ struct OnboardingView: View {
         } label: {
             Text("onb.later")
                 .font(.subheadline)
-                .foregroundStyle(Color(white: 0.55))
+                .foregroundStyle(Color.actionText)
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("onboarding.later")

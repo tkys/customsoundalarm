@@ -63,20 +63,20 @@ struct PlaylistEditorView: View {
                 ForEach(tracks) { track in
                     HStack(spacing: 10) {
                         Image(systemName: "music.note")
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.textSecondary)
                         Text(store.trackDisplayName(for: track.soundFileName))
                         Spacer()
                         if let duration = store.durationsByFileName[track.soundFileName] {
                             Text(Self.durationText(duration))
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color.textSecondary)
                         }
                         Button {
                             previewTrack(track)
                         } label: {
                             Image(systemName: isTrackPlaying(track)
                                 ? "stop.circle.fill" : "play.circle")
-                                .foregroundStyle(Color.accentColor)
+                                .foregroundStyle(Color.actionText)
                         }
                         .buttonStyle(.borderless)
                         .accessibilityLabel(Text("preview"))
@@ -103,7 +103,7 @@ struct PlaylistEditorView: View {
                 }
                 .accessibilityIdentifier("playlist.addTrack")
             } header: {
-                Text("playlist_tracks")
+                WarmSectionHeader(title: String(localized: "playlist_tracks"))
             } footer: {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(String(
@@ -117,6 +117,7 @@ struct PlaylistEditorView: View {
                         Text("playlist_limit_note")
                     }
                 }
+                .foregroundStyle(Color.textSecondary)
             }
 
             Section {
@@ -127,7 +128,7 @@ struct PlaylistEditorView: View {
                         Image(systemName: isPreviewPlaying
                             ? "stop.fill" : "play.circle")
                             .foregroundStyle(
-                                isPreviewPlaying ? Color.red : Color.accentColor
+                                isPreviewPlaying ? Color.red : Color.actionText
                             )
                         Text(isPreviewPlaying ? "stop" : "playlist_preview")
                         Spacer()
@@ -159,7 +160,7 @@ struct PlaylistEditorView: View {
                 }
                 .accessibilityIdentifier("playlist.transition")
             } header: {
-                Text("playlist_playback")
+                WarmSectionHeader(title: String(localized: "playlist_playback"))
             } footer: {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("play_order_footer")
@@ -180,13 +181,20 @@ struct PlaylistEditorView: View {
         .toolbar {
             if showsCancel {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("cancel") { dismiss() }
+                    Button { dismiss() } label: {
+                        Text("cancel")
+                    }
+                    .tint(Color.primary)
                 }
             }
             ToolbarItem(placement: .confirmationAction) {
-                Button("save") { save() }
-                    .disabled(!canSave)
-                    .accessibilityIdentifier("playlist.save")
+                Button { save() } label: {
+                    Text("save")
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Color.actionFillEnd)
+                .disabled(!canSave)
+                .accessibilityIdentifier("playlist.save")
             }
         }
         .sheet(isPresented: $showingTrackPicker) {
@@ -328,7 +336,7 @@ struct PlaylistTrackPickerView: View {
                                 if let duration = sound.durationSeconds {
                                     Text(PlaylistEditorView.durationText(duration))
                                         .font(.caption)
-                                        .foregroundStyle(.secondary)
+                                        .foregroundStyle(Color.textSecondary)
                                 }
                             }
                             Spacer()
@@ -336,7 +344,7 @@ struct PlaylistTrackPickerView: View {
                                 $0.soundFileName == sound.fileName
                             }) {
                                 Image(systemName: "checkmark.circle.fill")
-                                    .foregroundStyle(Color.accentColor)
+                                    .foregroundStyle(Brand.orange)
                                     .accessibilityIdentifier(
                                         "playlist.trackSelected.\(sound.fileName)"
                                     )
@@ -355,6 +363,7 @@ struct PlaylistTrackPickerView: View {
                     ))
                     Text("playlist_limit_note")
                 }
+                .foregroundStyle(Color.textSecondary)
             }
         }
         .navigationTitle(String(localized: "playlist_select_track"))
