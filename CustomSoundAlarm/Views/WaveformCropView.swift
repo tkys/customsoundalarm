@@ -54,6 +54,14 @@ struct WaveformCropView: View {
     /// 下段のサンプル解像度（600秒ファイルで窓8秒時に約100バケット）
     private let sampleCount = 8000
 
+    /// 上段（全体波形）の縦スケール（#178）。
+    ///
+    /// DSWaveformImage の `LinearWaveformRenderer` は中心から**上下それぞれ**に
+    /// `sample × 高さ × factor` を描く。つまり全高は最大で `2 × factor` 倍になる。
+    /// 既定の 0.95 では最大 1.9 倍まで描かれ、音量の大きい音源で枠をはみ出す。
+    /// 0.46 なら最大 0.92 倍に収まり、下段の `zoomWaveformCanvas`（0.92）とも揃う。
+    static let overviewVerticalScalingFactor: CGFloat = 0.46
+
     /// 上段（WaveformView）用のストライプ設定（#80-2）。スケールはビュー側既定。
     /// 色は AccentColor アセットを直接解決（#81-2: UIColor(Color.accentColor) は
     /// 環境依存のためビュー階層の外で青にフォールバックする）
@@ -64,7 +72,8 @@ struct WaveformCropView: View {
                 width: 2,
                 spacing: 2,
                 lineCap: .round
-            ))
+            )),
+            verticalScalingFactor: Self.overviewVerticalScalingFactor
         )
     }
 
