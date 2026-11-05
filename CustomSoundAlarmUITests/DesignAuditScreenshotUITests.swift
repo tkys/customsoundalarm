@@ -99,6 +99,23 @@ final class DesignAuditScreenshotUITests: XCTestCase {
         )
         captureMain(context, includeLibraryAndBedside: false, captureSoundChoice: false)
         captureAddDenied(context)
+        captureAddLowerAX5(context)
+    }
+
+    /// AX5 の追加画面は1画面に収まらないため、下のまとまりも撮る（#174 PR-2）。
+    private func captureAddLowerAX5(_ context: Context) {
+        let app = launch(
+            context,
+            arguments: seedArguments + ["-uitest-open-add-alarm"]
+        )
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 25)
+        )
+        for _ in 0..<3 {
+            app.collectionViews["addAlarm.root"].swipeUp()
+        }
+        settle()
+        capture(app, screen: "alarm-add-lower", context: context)
     }
 
     // MARK: - Main session
