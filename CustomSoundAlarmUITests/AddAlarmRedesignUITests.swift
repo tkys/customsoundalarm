@@ -94,15 +94,38 @@ final class AddAlarmRedesignUITests: XCTestCase {
             "addAlarm.backupToggle"
         ]
 
-        for identifier in identifiers {
-            let element = findElement(identifier)
-            var swipes = 0
-            while !element.isHittable && swipes < 12 {
-                app.collectionViews["addAlarm.root"].swipeUp()
-                swipes += 1
+        // 上から下まで少しずつスクロールし、見つかった識別子を記録する。
+        // 1回のスクロールを画面の半分に抑え、LazyVStack のセルを
+        // 通り過ぎて消してしまわないようにする（#174 PR-2 レビュー）。
+        let start = app.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.5, dy: 0.8)
+        )
+        let end = app.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.5, dy: 0.3)
+        )
+
+        var found = Set<String>()
+        for _ in 0..<20 {
+            for identifier in identifiers where findElement(identifier).exists {
+                found.insert(identifier)
             }
+            if found.count == identifiers.count { break }
+
+            start.press(
+                forDuration: 0.1,
+                thenDragTo: end,
+                withVelocity: .slow,
+                thenHoldForDuration: 0.1
+            )
+            Thread.sleep(forTimeInterval: 0.3)
+        }
+
+        for identifier in identifiers where findElement(identifier).exists {
+            found.insert(identifier)
+        }
+        for identifier in identifiers {
             XCTAssertTrue(
-                element.waitForExistence(timeout: 5),
+                found.contains(identifier),
                 "AX5: missing \(identifier)"
             )
         }
