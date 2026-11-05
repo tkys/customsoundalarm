@@ -255,9 +255,9 @@
 "fade_summary_off" = "Vypnuto";
 "fade_in" = "Jemný start";
 "fade_off" = "Vypnuto";
-"fade_in_10" = "10 sekund";
+"fade_in_5" = "5 sekund";
+"fade_in_15" = "15 sekund";
 "fade_in_30" = "30 sekund";
-"fade_in_60" = "60 sekund";
 "fade_in_seconds_fmt" = "%d sekund";
 "fade_in_footer" = "Pokaždé, když dohraje do konce a vrátí se na začátek, začne znovu tiše.";
 "gap_fade" = "Mezi skladbami";

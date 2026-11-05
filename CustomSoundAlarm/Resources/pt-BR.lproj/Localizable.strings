@@ -255,9 +255,9 @@
 "fade_summary_off" = "Desativado";
 "fade_in" = "Início suave";
 "fade_off" = "Desativado";
-"fade_in_10" = "10 segundos";
+"fade_in_5" = "5 segundos";
+"fade_in_15" = "15 segundos";
 "fade_in_30" = "30 segundos";
-"fade_in_60" = "60 segundos";
 "fade_in_seconds_fmt" = "%d segundos";
 "fade_in_footer" = "Sempre que toca até o fim e volta ao início, começa baixo de novo.";
 "gap_fade" = "Entre faixas";

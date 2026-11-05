@@ -36,39 +36,53 @@ struct PlaylistRenderResult: Sendable, Equatable {
 enum PlaylistRenderer {
 
     static func generate(_ request: PlaylistRenderRequest) throws -> PlaylistRenderResult {
-        // 読み込む前にファイルの長さで10分上限を判定する。
-        let readers = request.trackURLs.compactMap { TrackReader(url: $0) }
-        guard !readers.isEmpty else { throw PlaylistRenderError.noTracks }
+        // 1周分のリーダーで長さを測り、10分上限は1周の長さで判定する（#181）。
+        let basePairs = request.trackURLs.compactMap { url -> (URL, TrackReader)? in
+            guard let reader = TrackReader(url: url) else { return nil }
+            return (url, reader)
+        }
+        guard !basePairs.isEmpty else { throw PlaylistRenderError.noTracks }
 
-        let trackFrames = readers.map(\.totalOutputFrames)
-        let durations = trackFrames.map {
+        var baseReaders = basePairs.map(\.1)
+        let baseURLs = basePairs.map(\.0)
+        let baseFrames = baseReaders.map(\.totalOutputFrames)
+        let baseDurations = baseFrames.map {
             Double($0) / PlaylistRenderLogic.sampleRate
         }
         guard PlaylistRenderLogic.isWithinLimit(
-            trackDurations: durations,
+            trackDurations: baseDurations,
             transition: request.transition
         ) else {
             throw PlaylistRenderError.tooLong
         }
 
+        // やさしく鳴り始めるが短い音源で終わらないよう、実際の書き出し長に
+        // 基づいて周回数を決める（#181）。
         let crossfadeFrames = request.transition == .crossfade
             ? Int((PlaylistTransition.crossfade.seconds * PlaylistRenderLogic.sampleRate).rounded())
             : 0
-        // 実際のストリーミングと同じ順で、書き出されるフレーム数を予測する
-        // （エンドフェードの基準を実際の長さに合わせる）。
-        var totalOutputFrames = 0
-        var predictedTailFrames = 0
-        for (index, frames) in trackFrames.enumerated() {
-            let isLast = index == trackFrames.count - 1
-            let headFrames = index == 0
-                ? 0
-                : min(crossfadeFrames, predictedTailFrames, frames)
-            let tailFrames = isLast
-                ? 0
-                : min(crossfadeFrames, max(0, frames - headFrames))
-            totalOutputFrames += frames - tailFrames
-            predictedTailFrames = tailFrames
-        }
+        let cycles = PlaylistRenderLogic.fadeInCycleCount(
+            baseTrackFrames: baseFrames,
+            crossfadeFrames: crossfadeFrames,
+            fadeIn: request.fadeIn,
+            applyFadeIn: request.applyFadeIn
+        )
+
+        let sourceTrackCount = baseReaders.count
+        let trackFrames = Array(repeating: baseFrames, count: cycles).flatMap { $0 }
+
+        // 1周目は計測に使ったリーダーをそのまま使い、2周目以降は1周ずつ
+        // 新しいリーダーを作る（AVAudioConverter の状態を持ち越さず、
+        // 短い音源で周回数が多くてもファイルを開きっぱなしにしない）。
+        var firstCycleReaders: [TrackReader]? = baseReaders
+        baseReaders.removeAll()
+
+        // 実際のストリーミングと同じ重なり方で、書き出されるフレーム数を
+        // 予測する（エンドフェードの基準を実際の長さに合わせる）。
+        let totalOutputFrames = PlaylistRenderLogic.renderedFrameCount(
+            trackFrames: trackFrames,
+            crossfadeFrames: crossfadeFrames
+        )
 
         let writer = try StreamingWriter(
             outputURL: request.outputURL,
@@ -78,70 +92,90 @@ enum PlaylistRenderer {
         )
 
         var pendingTail: [Float] = []
+        let totalTrackCount = trackFrames.count
+        var globalIndex = 0
 
-        for (index, reader) in readers.enumerated() {
-            let frames = trackFrames[index]
-            guard frames > 0 else { continue }
-
-            if request.transition == .crossfade {
-                let overlap = index == 0
-                    ? 0
-                    : min(crossfadeFrames, pendingTail.count, frames)
-                var head: [Float] = []
-                if overlap > 0 {
-                    head = reader.readFrames(overlap)
-                    let previous = pendingTail.suffix(overlap)
-                    var mixed = [Float](repeating: 0, count: overlap)
-                    let previousStart = previous.startIndex
-                    for sampleIndex in 0..<overlap {
-                        let mix = Float(sampleIndex) / Float(overlap)
-                        mixed[sampleIndex] = PlaylistRenderLogic.crossfadeMix(
-                            a: previous[previousStart + sampleIndex],
-                            b: head[sampleIndex],
-                            mix: mix
-                        )
-                    }
-                    try writer.write(mixed)
-                }
-
-                // 先頭をミックスした残りの部分から、末尾だけを次の曲のために保持する。
-                // 先頭（head）はすでに書き出し済みなので pendingTail に含めない。
-                let isLast = index == readers.count - 1
-                let tailFrames = isLast
-                    ? 0
-                    : min(crossfadeFrames, max(0, frames - head.count))
-                var restTail: [Float] = []
-                var readFromRest = 0
-                while readFromRest < frames - head.count {
-                    let remaining = frames - head.count - readFromRest
-                    let chunk = reader.readFrames(min(4096, remaining))
-                    if chunk.isEmpty { break }
-                    readFromRest += chunk.count
-                    restTail.append(contentsOf: chunk)
-                    if restTail.count > tailFrames {
-                        let writeCount = restTail.count - tailFrames
-                        try writer.write(Array(restTail.prefix(writeCount)))
-                        restTail.removeFirst(writeCount)
-                    }
-                }
-                pendingTail = isLast ? [] : restTail
+        for _ in 0..<cycles {
+            let cycleReaders: [TrackReader]
+            if let first = firstCycleReaders {
+                cycleReaders = first
+                firstCycleReaders = nil
             } else {
-                var trackWritten = 0
-                while trackWritten < frames {
-                    let chunk = reader.readFrames(min(4096, frames - trackWritten))
-                    if chunk.isEmpty { break }
-                    var samples = chunk
-                    applyGapFade(
-                        &samples,
-                        startIndex: trackWritten,
-                        trackFrames: frames,
-                        trackIndex: index,
-                        trackCount: readers.count,
-                        transition: request.transition
-                    )
-                    try writer.write(samples)
-                    trackWritten += chunk.count
+                cycleReaders = baseURLs.compactMap { TrackReader(url: $0) }
+                guard cycleReaders.count == baseURLs.count else {
+                    throw PlaylistRenderError.unreadableSource
                 }
+            }
+
+            for (index, reader) in cycleReaders.enumerated() {
+                let frames = baseFrames[index]
+                guard frames > 0 else {
+                    globalIndex += 1
+                    continue
+                }
+
+                if request.transition == .crossfade {
+                    let overlap = globalIndex == 0
+                        ? 0
+                        : min(crossfadeFrames, pendingTail.count, frames)
+                    var head: [Float] = []
+                    if overlap > 0 {
+                        head = reader.readFrames(overlap)
+                        let previous = pendingTail.suffix(overlap)
+                        var mixed = [Float](repeating: 0, count: overlap)
+                        let previousStart = previous.startIndex
+                        for sampleIndex in 0..<overlap {
+                            let mix = Float(sampleIndex) / Float(overlap)
+                            mixed[sampleIndex] = PlaylistRenderLogic.crossfadeMix(
+                                a: previous[previousStart + sampleIndex],
+                                b: head[sampleIndex],
+                                mix: mix
+                            )
+                        }
+                        try writer.write(mixed)
+                    }
+
+                    // 先頭をミックスした残りの部分から、末尾だけを次の曲のために保持する。
+                    // 先頭（head）はすでに書き出し済みなので pendingTail に含めない。
+                    let isLast = globalIndex == totalTrackCount - 1
+                    let tailFrames = isLast
+                        ? 0
+                        : min(crossfadeFrames, max(0, frames - head.count))
+                    var restTail: [Float] = []
+                    var readFromRest = 0
+                    while readFromRest < frames - head.count {
+                        let remaining = frames - head.count - readFromRest
+                        let chunk = reader.readFrames(min(4096, remaining))
+                        if chunk.isEmpty { break }
+                        readFromRest += chunk.count
+                        restTail.append(contentsOf: chunk)
+                        if restTail.count > tailFrames {
+                            let writeCount = restTail.count - tailFrames
+                            try writer.write(Array(restTail.prefix(writeCount)))
+                            restTail.removeFirst(writeCount)
+                        }
+                    }
+                    pendingTail = isLast ? [] : restTail
+                } else {
+                    var trackWritten = 0
+                    while trackWritten < frames {
+                        let chunk = reader.readFrames(min(4096, frames - trackWritten))
+                        if chunk.isEmpty { break }
+                        var samples = chunk
+                        applyGapFade(
+                            &samples,
+                            startIndex: trackWritten,
+                            trackFrames: frames,
+                            trackIndex: globalIndex,
+                            trackCount: totalTrackCount,
+                            transition: request.transition
+                        )
+                        try writer.write(samples)
+                        trackWritten += chunk.count
+                    }
+                }
+
+                globalIndex += 1
             }
         }
 
@@ -153,7 +187,7 @@ enum PlaylistRenderer {
         return PlaylistRenderResult(
             fileName: request.outputURL.lastPathComponent,
             durationSeconds: Double(writer.writtenFrames) / PlaylistRenderLogic.sampleRate,
-            trackCount: readers.count
+            trackCount: sourceTrackCount
         )
     }
 

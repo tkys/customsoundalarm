@@ -255,9 +255,9 @@
 "fade_summary_off" = "Uit";
 "fade_in" = "Zachte start";
 "fade_off" = "Uit";
-"fade_in_10" = "10 seconden";
+"fade_in_5" = "5 seconden";
+"fade_in_15" = "15 seconden";
 "fade_in_30" = "30 seconden";
-"fade_in_60" = "60 seconden";
 "fade_in_seconds_fmt" = "%d seconden";
 "fade_in_footer" = "Elke keer dat het tot het einde speelt en opnieuw begint, start het weer zacht.";
 "gap_fade" = "Tussen nummers";

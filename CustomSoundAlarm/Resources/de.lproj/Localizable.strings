@@ -255,9 +255,9 @@
 "fade_summary_off" = "Aus";
 "fade_in" = "Sanfter Start";
 "fade_off" = "Aus";
-"fade_in_10" = "10 Sekunden";
+"fade_in_5" = "5 Sekunden";
+"fade_in_15" = "15 Sekunden";
 "fade_in_30" = "30 Sekunden";
-"fade_in_60" = "60 Sekunden";
 "fade_in_seconds_fmt" = "%d Sekunden";
 "fade_in_footer" = "Jedes Mal, wenn es bis zum Ende läuft und wieder von vorne beginnt, startet es erneut leise.";
 "gap_fade" = "Zwischen Titeln";

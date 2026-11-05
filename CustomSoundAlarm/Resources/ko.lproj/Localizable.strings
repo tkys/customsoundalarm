@@ -255,9 +255,9 @@
 "fade_summary_off" = "끔";
 "fade_in" = "부드럽게 시작";
 "fade_off" = "끔";
-"fade_in_10" = "10초";
+"fade_in_5" = "5초";
+"fade_in_15" = "15초";
 "fade_in_30" = "30초";
-"fade_in_60" = "60초";
 "fade_in_seconds_fmt" = "%d초";
 "fade_in_footer" = "끝까지 재생된 뒤 처음으로 돌아갈 때마다 다시 작게 시작합니다.";
 "gap_fade" = "곡 사이";

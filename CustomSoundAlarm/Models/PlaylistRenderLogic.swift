@@ -81,6 +81,82 @@ enum PlaylistRenderLogic {
             <= Playlist.maxTotalSeconds + 0.001
     }
 
+    // MARK: - Fade-in repeat (#181)
+
+    /// 繰り返し対象にする1周の最大長。これを超える音源は1周で十分に大きくなる。
+    static let maxRepeatedCycleDuration: TimeInterval = 60
+
+    /// 実際の書き出しループと同じ重なり方で、出力フレーム数を返す（#181）。
+    /// クロスフェードでは前の曲の末尾と次の曲の先頭が重なるため、
+    /// `frames` の単純な合計より短くなる。周回数の決定と
+    /// `StreamingWriter` の末尾フェード基準を同じ計算に揃える。
+    static func renderedFrameCount(
+        trackFrames: [Int],
+        crossfadeFrames: Int
+    ) -> Int {
+        guard !trackFrames.isEmpty else { return 0 }
+        var total = 0
+        var predictedTailFrames = 0
+        for (index, frames) in trackFrames.enumerated() {
+            let isLast = index == trackFrames.count - 1
+            let headFrames = index == 0
+                ? 0
+                : min(crossfadeFrames, predictedTailFrames, frames)
+            let tailFrames = isLast
+                ? 0
+                : min(crossfadeFrames, max(0, frames - headFrames))
+            total += frames - tailFrames
+            predictedTailFrames = tailFrames
+        }
+        return total
+    }
+
+    /// やさしく鳴り始める用の繰り返し回数（#181）。
+    ///
+    /// 1周の長さ `L` が 60 秒以下なら、設定秒数をかけて最大音量に届き、
+    /// 最大音量で最低1周分鳴るようにする。周の境目でもクロスフェードするため、
+    /// 単純な `ceil(設定秒数 / L) + 1` では足りないことがある。
+    /// 実際の出力フレーム数を計算し、`設定秒数 + L` 以上になる最小の周回数を選ぶ。
+    /// 60 秒超は1周のまま（30 秒で最大に届き、最大音量で30秒以上鳴る）。
+    /// オフ・寝過ごし防止用（`applyFadeIn == false`）は繰り返さない。
+    static func fadeInCycleCount(
+        baseTrackFrames: [Int],
+        crossfadeFrames: Int,
+        fadeIn: PlaylistFadeIn,
+        applyFadeIn: Bool
+    ) -> Int {
+        let cycleFrames = renderedFrameCount(
+            trackFrames: baseTrackFrames,
+            crossfadeFrames: crossfadeFrames
+        )
+        guard applyFadeIn,
+              fadeIn != .off,
+              cycleFrames > 0 else {
+            return 1
+        }
+        let cycleDuration = Double(cycleFrames) / sampleRate
+        guard cycleDuration <= maxRepeatedCycleDuration else { return 1 }
+
+        let fadeFrames = Int((fadeIn.seconds * sampleRate).rounded())
+        let targetFrames = fadeFrames + cycleFrames
+        let lowerBound = Int(ceil(fadeIn.seconds / cycleDuration)) + 1
+        var cycles = max(1, lowerBound)
+        var repeatedFrames = Array(
+            repeating: baseTrackFrames,
+            count: cycles
+        ).flatMap { $0 }
+
+        while renderedFrameCount(
+            trackFrames: repeatedFrames,
+            crossfadeFrames: crossfadeFrames
+        ) < targetFrames {
+            cycles += 1
+            repeatedFrames.append(contentsOf: baseTrackFrames)
+            if cycles > 10_000 { break }
+        }
+        return cycles
+    }
+
     // MARK: - Fade curves
 
     /// 先頭から `fadeSeconds` の間で 0 → 1 に上がる係数。
