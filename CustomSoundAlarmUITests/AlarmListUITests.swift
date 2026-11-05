@@ -29,6 +29,24 @@ final class AlarmListUITests: XCTestCase {
         XCTAssertTrue(y2 < y3, "18:00 should be above 23:44 (y2=\(y2) y3=\(y3))")
     }
 
+    func testAccessibilitySizeKeepsLabelsAndSoundNames() {
+        app.launchArguments = [
+            "-uitest-seed-design-audit",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryAccessibilityXXXL"
+        ]
+        app.launch()
+        XCTAssertTrue(app.buttons["alarmList.add"].waitForExistence(timeout: 15))
+
+        for text in ["朝", "ジョギング", "読書", "やわらかベル", "モーニング", "お気に入り"] {
+            let element = app.staticTexts[text].firstMatch
+            XCTAssertTrue(
+                element.waitForExistence(timeout: 5),
+                "AX5: missing \(text): \(app.debugDescription)"
+            )
+        }
+    }
+
     func testSwipeDeleteRemovesTappedRow() {
         app.launch()
         let time1 = app.staticTexts["06:24"]

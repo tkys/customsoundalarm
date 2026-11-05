@@ -256,85 +256,149 @@ struct AlarmRow: View {
     let onToggle: () -> Void
     let onTap: () -> Void
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: 12) {
-                // 音源サムネイル（#86）。オフは時刻・補足と同じく一段薄くする（#174）。
-                SoundThumbnail(sound: sound, size: 40, isDimmed: !alarm.isEnabled)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(alarm.timeString)
-                        .font(.system(size: 44, weight: .regular, design: .rounded))
-                        .foregroundStyle(
-                            alarm.isEnabled ? Color.primary : Color.textMuted
-                        )
-                        // 長い音名のキャプションが幅を奪っても時刻は必ず自然サイズで描画されるよう優先
-                        .layoutPriority(1)
-
-                    // 1行目: ラベル ・ 音源名（識別に必要な情報を優先・#93-1）
-                    HStack(spacing: 6) {
-                        if !alarm.label.isEmpty {
-                            Text(alarm.label)
-                            Text("・")
-                        }
-                        SoundIndicator(isCustom: AlarmSoundDisplay.isCustom(alarm), size: 10)
-                        Text(soundName.isEmpty ? String(localized: "default_sound") : soundName)
-                            // 音名が最も長くなりがちなので、まず音名自体を1行・末尾省略にしておく
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                    }
-                    .font(.caption)
-                    .foregroundStyle(
-                        alarm.isEnabled ? Color.textSecondary : Color.textMuted
-                    )
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-
-                    // 2行目: 繰り返し ・ カウントダウン ・ 最終アラーム（#110）
-                    if !alarm.repeatWeekdays.isEmpty || nextAlarmCountdown != nil || alarm.backupMinutes != nil {
-                        HStack(spacing: 6) {
-                            if !alarm.repeatWeekdays.isEmpty {
-                                Text(repeatSummary)
-                            }
-                            if let countdown = nextAlarmCountdown {
-                                if !alarm.repeatWeekdays.isEmpty {
-                                    Text("・")
-                                }
-                                Text(countdown)
-                            }
-                            if alarm.backupMinutes != nil {
-                                if !alarm.repeatWeekdays.isEmpty || nextAlarmCountdown != nil {
-                                    Text("・")
-                                }
-                                Image(systemName: "bell.badge.fill")
-                                    .accessibilityLabel(Text("backup_alarm_row_badge"))
-                            }
-                        }
-                        .font(.caption)
-                        .foregroundStyle(
-                            alarm.isEnabled ? Color.textSecondary : Color.textMuted
-                        )
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                    }
+            Group {
+                if dynamicTypeSize.isAccessibilitySize {
+                    accessibilityLayout
+                } else {
+                    regularLayout
                 }
-
-                Spacer()
-
-                Toggle("", isOn: Binding(
-                    get: { alarm.isEnabled },
-                    set: { _ in onToggle() }
-                ))
-                .labelsHidden()
-                .tint(Brand.orange)
-                .accessibilityLabel(Text(AlarmRowAccessibility.toggleLabel(
-                    time: alarm.timeString,
-                    label: alarm.label
-                )))
             }
-            .padding(.vertical, 4)
+            .padding(.vertical, dynamicTypeSize.isAccessibilitySize ? 8 : 4)
         }
         .foregroundStyle(.primary)
+    }
+
+    // MARK: - Layouts
+
+    /// 通常サイズ: サムネイル＋時刻＋補足＋トグルを横に並べる。
+    private var regularLayout: some View {
+        HStack(spacing: 12) {
+            SoundThumbnail(sound: sound, size: 40, isDimmed: !alarm.isEnabled)
+
+            VStack(alignment: .leading, spacing: 3) {
+                timeText
+                if !alarm.label.isEmpty {
+                    Text(alarm.label)
+                        .font(.subheadline)
+                        .foregroundStyle(labelColor)
+                        .lineLimit(1)
+                }
+                metadataLine(vertical: false)
+            }
+
+            Spacer(minLength: 8)
+            toggle
+        }
+    }
+
+    /// AX サイズ: 時刻を Dynamic Type に追従させ、ラベル・音名は切らずに縦へ。
+    private var accessibilityLayout: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .center, spacing: 10) {
+                SoundThumbnail(sound: sound, size: 28, isDimmed: !alarm.isEnabled)
+                timeText
+                Spacer(minLength: 8)
+                toggle
+            }
+
+            if !alarm.label.isEmpty {
+                Text(alarm.label)
+                    .font(.body)
+                    .foregroundStyle(labelColor)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            metadataLine(vertical: true)
+        }
+    }
+
+    private var timeText: some View {
+        Text(alarm.timeString)
+            .font(
+                dynamicTypeSize.isAccessibilitySize
+                    ? .system(.largeTitle, design: .rounded).weight(.regular)
+                    : .system(size: 44, weight: .regular, design: .rounded)
+            )
+            .foregroundStyle(timeColor)
+            .lineLimit(1)
+            .minimumScaleFactor(dynamicTypeSize.isAccessibilitySize ? 0.7 : 1)
+            // 長い音名のキャプションが幅を奪っても時刻は必ず自然サイズで描画されるよう優先
+            .layoutPriority(1)
+    }
+
+    /// 1行目＝ラベル、2行目＝「曜日・音」（#174 PR-2）。
+    /// AX では折り返して「…」で切らない。
+    @ViewBuilder
+    private func metadataLine(vertical: Bool) -> some View {
+        if vertical {
+            VStack(alignment: .leading, spacing: 2) {
+                if !alarm.repeatWeekdays.isEmpty {
+                    Text(repeatSummary)
+                }
+                HStack(spacing: 6) {
+                    SoundIndicator(isCustom: AlarmSoundDisplay.isCustom(alarm), size: 10)
+                    Text(soundDisplayName)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if alarm.backupMinutes != nil {
+                        Image(systemName: "bell.badge.fill")
+                            .accessibilityLabel(Text("backup_alarm_row_badge"))
+                    }
+                }
+            }
+            .font(.body)
+            .foregroundStyle(metaColor)
+        } else {
+            HStack(spacing: 6) {
+                if !alarm.repeatWeekdays.isEmpty {
+                    Text(repeatSummary)
+                    Text("・")
+                }
+                SoundIndicator(isCustom: AlarmSoundDisplay.isCustom(alarm), size: 10)
+                Text(soundDisplayName)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                if alarm.backupMinutes != nil {
+                    Image(systemName: "bell.badge.fill")
+                        .accessibilityLabel(Text("backup_alarm_row_badge"))
+                }
+            }
+            .font(.footnote)
+            .foregroundStyle(metaColor)
+            .lineLimit(1)
+        }
+    }
+
+    private var toggle: some View {
+        Toggle("", isOn: Binding(
+            get: { alarm.isEnabled },
+            set: { _ in onToggle() }
+        ))
+        .labelsHidden()
+        .tint(Brand.orange)
+        .accessibilityLabel(Text(AlarmRowAccessibility.toggleLabel(
+            time: alarm.timeString,
+            label: alarm.label
+        )))
+    }
+
+    private var timeColor: Color {
+        alarm.isEnabled ? .primary : .textMuted
+    }
+
+    private var labelColor: Color {
+        alarm.isEnabled ? .primary : .textMuted
+    }
+
+    private var metaColor: Color {
+        alarm.isEnabled ? .textSecondary : .textMuted
+    }
+
+    private var soundDisplayName: String {
+        soundName.isEmpty ? String(localized: "default_sound") : soundName
     }
 
     private var repeatSummary: String {
@@ -351,13 +415,5 @@ struct AlarmRow: View {
         return days.compactMap { d in
             (1...7).contains(d) ? labels[d - 1] : nil
         }.joined(separator: " ")
-    }
-
-    /// 有効なアラームの「あと◯時間◯分」表示。無効・計算不能時は nil（表示しない）。
-    /// 表示の瞬間に基準日時 `Date()` で算出する（フォアグラウンド描画時に更新される）。
-    private var nextAlarmCountdown: String? {
-        guard alarm.isEnabled else { return nil }
-        guard let fireDate = alarm.nextFireDate(from: Date()) else { return nil }
-        return AlarmCountdown.untilString(from: Date(), to: fireDate)
     }
 }

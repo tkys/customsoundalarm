@@ -36,7 +36,14 @@ final class AddAlarmRedesignUITests: XCTestCase {
         toggle.tap()
 
         XCTAssertTrue(findElement("addAlarm.backupMinutes").waitForExistence(timeout: 3))
-        XCTAssertTrue(findElement("addAlarm.backupTestRing").waitForExistence(timeout: 3))
+
+        let backupTestRing = findElement("addAlarm.backupTestRing")
+        var swipes = 0
+        while (!backupTestRing.exists || !backupTestRing.isHittable) && swipes < 6 {
+            app.collectionViews["addAlarm.root"].swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(backupTestRing.waitForExistence(timeout: 3))
     }
 
     func testOnlyOneTestRingButton() {
@@ -68,6 +75,39 @@ final class AddAlarmRedesignUITests: XCTestCase {
         }
     }
 
+    func testAccessibilitySizeKeepsAllRows() {
+        app.launchArguments = [
+            "-uitest-open-add-alarm",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryAccessibilityXXXL"
+        ]
+        app.launch()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
+
+        let identifiers = [
+            "addAlarm.repeatRow",
+            "addAlarm.labelRow",
+            "addAlarm.soundRow",
+            "addAlarm.fadeIn",
+            "addAlarm.snoozeRow",
+            "addAlarm.testRing",
+            "addAlarm.backupToggle"
+        ]
+
+        for identifier in identifiers {
+            let element = findElement(identifier)
+            var swipes = 0
+            while !element.isHittable && swipes < 12 {
+                app.collectionViews["addAlarm.root"].swipeUp()
+                swipes += 1
+            }
+            XCTAssertTrue(
+                element.waitForExistence(timeout: 5),
+                "AX5: missing \(identifier)"
+            )
+        }
+    }
+
     func testSectionOrder() {
         launchAdd()
         app.swipeUp()
@@ -76,8 +116,9 @@ final class AddAlarmRedesignUITests: XCTestCase {
             "addAlarm.repeatRow",
             "addAlarm.labelRow",
             "addAlarm.soundRow",
-            "addAlarm.testRing",
+            "addAlarm.fadeIn",
             "addAlarm.snoozeRow",
+            "addAlarm.testRing",
             "addAlarm.backupToggle"
         ]
 
