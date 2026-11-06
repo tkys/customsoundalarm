@@ -9,16 +9,13 @@ Nessun limite di durata
 Le suonerie personalizzate dell’iPhone si fermano a circa 40 secondi. My Sound Alarm accetta fino a 10 minuti da un video, e i file audio lunghi si possono importare così come sono.
 
 L’audio di un video
-Scegli un video dalla libreria foto o dall’app File e tieni solo l’audio.
+Scegli un video dalla libreria foto o dall’app File e tieni solo l’audio. Un video di viaggio o la voce della tua famiglia o del tuo animale può diventare il suono della sveglia.
 
 Importa file audio
 MP3, AAC, WAV e M4A. Aggiungili dall’app File o inviali da un’altra app con il pulsante Condividi.
 
 Suona in modalità silenziosa
 My Sound Alarm programma le sue sveglie con AlarmKit, il sistema di sveglie introdotto da Apple in iOS 26. Compaiono sulla schermata di blocco come quelle dell’app Orologio integrata e suonano in modalità silenziosa e con una modalità Full Immersion attiva, anche con My Sound Alarm chiusa.
-
-“Suona ora”
-Ascolta subito il suono scelto, allo stesso volume di una vera sveglia.
 
 Anti-sonno (Pro, accesso anticipato)
 Se non hai fermato una sveglia entro l’orario scelto, suona di nuovo con lo stesso suono, più forte.

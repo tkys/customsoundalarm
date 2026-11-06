@@ -9,16 +9,13 @@ Sin límite de duración
 Los tonos personalizados del iPhone se cortan a los 40 segundos aproximadamente. My Sound Alarm admite hasta 10 minutos de un video, y los archivos de audio largos se pueden importar tal cual.
 
 El sonido de un video
-Elige un video de tu fototeca o de la app Archivos y quédate solo con el sonido.
+Elige un video de tu fototeca o de la app Archivos y quédate solo con el sonido. Un video de un viaje o la voz de tu familia o tu mascota pueden ser el sonido de tu alarma.
 
 Importa archivos de audio
 MP3, AAC, WAV y M4A. Añádelos desde la app Archivos o envíalos desde otra app con el botón Compartir.
 
 Suena en modo silencio
 My Sound Alarm programa sus alarmas con AlarmKit, el sistema de alarmas que Apple añadió en iOS 26. Aparecen en la pantalla bloqueada como las de la app Reloj integrada y suenan en modo silencio y con un modo de concentración activado, incluso con My Sound Alarm cerrada.
-
-«Hacer sonar ahora»
-Escucha al momento el sonido que elegiste, con el mismo volumen que una alarma de verdad.
 
 Protección para no quedarte dormido (Pro, acceso anticipado)
 Si no has detenido una alarma a la hora que elijas, vuelve a sonar con el mismo sonido, más fuerte.

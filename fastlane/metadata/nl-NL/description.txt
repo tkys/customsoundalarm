@@ -9,16 +9,13 @@ Geen lengtelimiet
 Eigen iPhone-beltonen stoppen na ongeveer 40 seconden. My Sound Alarm neemt tot 10 minuten uit een video, en lange audiobestanden kun je importeren zoals ze zijn.
 
 Het geluid van een video
-Kies een video uit je fotobibliotheek of de Bestanden-app en houd alleen het geluid over.
+Kies een video uit je fotobibliotheek of de Bestanden-app en houd alleen het geluid over. Een vakantievideo of de stem van je familie of huisdier kan je wekgeluid worden.
 
 Audiobestanden importeren
 MP3, AAC, WAV en M4A. Voeg ze toe vanuit de Bestanden-app of stuur ze vanuit een andere app met de deelknop.
 
 Gaat af in de stille modus
 My Sound Alarm plant zijn wekkers in met AlarmKit, het wekkersysteem dat Apple in iOS 26 heeft toegevoegd. Ze verschijnen op het toegangsscherm zoals wekkers van de ingebouwde Klok-app en gaan af in de stille modus en als een focus aan staat, ook als My Sound Alarm gesloten is.
-
-‘Laat nu afgaan’
-Hoor het gekozen geluid meteen, op hetzelfde volume als een echte wekker.
 
 Verslaapbeveiliging (Pro, vroege toegang)
 Als je een wekker niet hebt uitgezet vóór de tijd die je kiest, speelt hij hetzelfde geluid nog een keer, harder.

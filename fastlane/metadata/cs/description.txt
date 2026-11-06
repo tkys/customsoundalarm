@@ -9,16 +9,13 @@ Bez omezení délky
 Vlastní vyzváněcí tóny v iPhonu končí asi po 40 sekundách. My Sound Alarm vezme z videa až 10 minut a dlouhé zvukové soubory se dají importovat celé.
 
 Zvuk z videa
-Vyber video z knihovny fotek nebo z aplikace Soubory a nech si jen zvuk.
+Vyber video z knihovny fotek nebo z aplikace Soubory a nech si jen zvuk. Video z cesty nebo hlas rodiny či mazlíčka se může stát zvukem budíku.
 
 Import zvukových souborů
 MP3, AAC, WAV a M4A. Přidej je z aplikace Soubory, nebo je pošli z jiné aplikace tlačítkem Sdílet.
 
 Zvoní v tichém režimu
 My Sound Alarm plánuje své budíky přes AlarmKit, systém budíků, který Apple přidal v iOS 26. Zobrazují se na zamčené obrazovce jako budíky z vestavěné aplikace Hodiny a zvoní v tichém režimu i při zapnutém režimu soustředění, i když je My Sound Alarm zavřená.
-
-„Zazvonit teď“
-Poslechni si vybraný zvuk hned, ve stejné hlasitosti jako skutečný budík.
 
 Ochrana proti zaspání (Pro, předběžný přístup)
 Pokud budík do zvolené doby nevypneš, přehraje stejný zvuk znovu a hlasitěji.

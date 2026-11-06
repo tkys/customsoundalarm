@@ -9,16 +9,13 @@ Bez limitu długości
 Własne dzwonki w iPhonie kończą się po około 40 sekundach. My Sound Alarm przyjmuje do 10 minut z wideo, a długie pliki audio można zaimportować w całości.
 
 Dźwięk z wideo
-Wybierz wideo z biblioteki zdjęć lub z aplikacji Pliki i zostaw sam dźwięk.
+Wybierz wideo z biblioteki zdjęć lub z aplikacji Pliki i zostaw sam dźwięk. Film z podróży albo głos rodziny czy zwierzaka może stać się dźwiękiem budzika.
 
 Import plików audio
 MP3, AAC, WAV i M4A. Dodaj je z aplikacji Pliki albo wyślij z innej aplikacji przyciskiem Udostępnij.
 
 Dzwoni w trybie cichym
 My Sound Alarm planuje swoje budziki przez AlarmKit, system budzików dodany przez Apple w iOS 26. Pojawiają się na ekranie blokady jak budziki z wbudowanej aplikacji Zegar i dzwonią w trybie cichym i przy włączonym trybie skupienia, nawet gdy My Sound Alarm jest zamknięta.
-
-„Zadzwoń teraz”
-Posłuchaj wybranego dźwięku od razu, z tą samą głośnością co prawdziwy budzik.
 
 Ochrona przed zaspaniem (Pro, wczesny dostęp)
 Jeśli nie wyłączysz budzika do wybranej godziny, odtworzy ten sam dźwięk ponownie, głośniej.

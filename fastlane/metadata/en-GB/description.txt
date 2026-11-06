@@ -9,16 +9,13 @@ No Length Limit
 Custom iPhone ringtones stop at about 40 seconds. My Sound Alarm takes up to 10 minutes from a video, and long audio files can be imported as they are.
 
 Take the Audio From a Video
-Choose a video from your photo library or the Files app and keep only the sound.
+Choose a video from your photo library or the Files app and keep only the sound. A trip video, or the voices of your family or pet, can become your alarm sound.
 
 Import Audio Files
 MP3, AAC, WAV and M4A all work. Add them from the Files app, or send them from another app with the Share button.
 
 Rings in Silent Mode
 My Sound Alarm schedules its alarms with AlarmKit, the alarm framework Apple added in iOS 26. They appear on the Lock Screen like alarms from the built-in Clock app and ring in Silent mode and when a Focus is on, even when My Sound Alarm is closed.
-
-Ring Now
-Hear the sound you chose right away, at the same volume as a real alarm.
 
 Oversleep Guard (Pro, early access)
 If you haven't stopped an alarm by the time you choose, it plays the same sound again, louder.
