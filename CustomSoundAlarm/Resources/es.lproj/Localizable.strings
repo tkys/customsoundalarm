@@ -278,6 +278,8 @@
 "playlist_tracks" = "Pistas";
 "playlist_add_track" = "Añadir pista";
 "playlist_empty" = "Aún no hay listas";
+"playlist_empty_explanation" = "Combina varios sonidos y reprodúcelos en orden o aleatoriamente. Ideal para despertarte con un sonido distinto cada mañana.";
+"playlist_empty_import_hint" = "Importa un sonido para crear una lista con tus canciones favoritas.";
 "playlist_total_fmt" = "Total: %@";
 "playlist_limit_note" = "Hasta 10 minutos en total.";
 "playlist_limit_exceeded" = "El total supera los 10 minutos.";

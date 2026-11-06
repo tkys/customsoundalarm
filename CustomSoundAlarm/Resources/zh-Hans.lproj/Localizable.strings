@@ -278,6 +278,8 @@
 "playlist_tracks" = "曲目";
 "playlist_add_track" = "添加曲目";
 "playlist_empty" = "还没有播放列表";
+"playlist_empty_explanation" = "把多个声音组合起来，按顺序或随机播放。适合每天早上用不同的声音醒来。";
+"playlist_empty_import_hint" = "导入声音后，就可以用喜欢的歌曲创建播放列表。";
 "playlist_total_fmt" = "合计：%@";
 "playlist_limit_note" = "总计最多 10 分钟。";
 "playlist_limit_exceeded" = "总计超过 10 分钟。";

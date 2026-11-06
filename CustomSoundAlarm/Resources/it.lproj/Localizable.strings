@@ -278,6 +278,8 @@
 "playlist_tracks" = "Brani";
 "playlist_add_track" = "Aggiungi brano";
 "playlist_empty" = "Nessuna playlist";
+"playlist_empty_explanation" = "Combina più suoni e riproducili in ordine o in modo casuale. Ideale per svegliarti con un suono diverso ogni mattina.";
+"playlist_empty_import_hint" = "Importa un suono per creare una playlist con i tuoi brani preferiti.";
 "playlist_total_fmt" = "Totale: %@";
 "playlist_limit_note" = "Fino a 10 minuti in totale.";
 "playlist_limit_exceeded" = "Il totale supera 10 minuti.";

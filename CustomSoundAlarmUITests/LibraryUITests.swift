@@ -23,6 +23,77 @@ final class LibraryUITests: XCTestCase {
         return app
     }
 
+    func testPlaylistEmptyStateExplainsAndOffersCreate() {
+        let app = launch([
+            "-uitest-open-library",
+            "-uitest-reset-playlists",
+            "-uitest-reset-sounds"
+        ])
+
+        XCTAssertTrue(
+            app.collectionViews["library.root"].waitForExistence(timeout: 15),
+            "library should open: \(app.debugDescription)"
+        )
+        let explanation = app.staticTexts["playlist.empty.explanation"]
+        XCTAssertTrue(
+            explanation.waitForExistence(timeout: 10),
+            "empty explanation should appear: \(app.debugDescription)"
+        )
+        XCTAssertTrue(
+            app.staticTexts["playlist.empty.importHint"].exists,
+            "import hint should appear when there are no own sounds"
+        )
+
+        let create = app.buttons["library.addPlaylist"]
+        XCTAssertTrue(create.exists, "create button should be in the empty state")
+        XCTAssertLessThan(
+            explanation.frame.minY,
+            create.frame.minY,
+            "explanation should be read before the create button"
+        )
+
+        create.tap()
+        XCTAssertTrue(
+            app.textFields["playlist.name"].waitForExistence(timeout: 10),
+            "create button should open the playlist editor"
+        )
+    }
+
+    func testPlaylistEmptyStateHiddenWhenPlaylistsExist() {
+        let app = launch(["-uitest-seed-library", "-uitest-open-library"])
+        XCTAssertTrue(
+            app.collectionViews["library.root"].waitForExistence(timeout: 15),
+            "library should open: \(app.debugDescription)"
+        )
+        XCTAssertFalse(
+            app.staticTexts["playlist.empty.explanation"]
+                .waitForExistence(timeout: 2),
+            "empty explanation should not appear when playlists exist"
+        )
+        XCTAssertTrue(app.buttons["library.addPlaylist"].exists)
+    }
+
+    func testPlaylistEmptyStateAtAccessibilitySize() {
+        let app = launch([
+            "-uitest-open-library",
+            "-uitest-reset-playlists",
+            "-uitest-reset-sounds",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryAccessibilityXXXL"
+        ])
+        XCTAssertTrue(
+            app.collectionViews["library.root"].waitForExistence(timeout: 15),
+            "library should open: \(app.debugDescription)"
+        )
+        let explanation = app.staticTexts["playlist.empty.explanation"]
+        XCTAssertTrue(explanation.waitForExistence(timeout: 10))
+        XCTAssertFalse(
+            explanation.label.hasSuffix("…"),
+            "AX5 explanation should not be truncated: \(explanation.label)"
+        )
+        XCTAssertTrue(app.buttons["library.addPlaylist"].exists)
+    }
+
     func testCreatePlaylistInLibraryAndSelectItForAlarm() {
         let app = launch([
             "-uitest-open-library",

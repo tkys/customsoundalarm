@@ -80,6 +80,101 @@ final class DesignAuditScreenshotUITests: XCTestCase {
         ))
     }
 
+    /// プレイリスト空状態（#183）。ja ライト／ダークと AX5。
+    func testPlaylistEmptyStates() {
+        let contexts = [
+            Context(
+                language: "ja",
+                locale: "ja_JP",
+                appearance: .light,
+                size: "default",
+                contentSize: nil
+            ),
+            Context(
+                language: "ja",
+                locale: "ja_JP",
+                appearance: .dark,
+                size: "default",
+                contentSize: nil
+            ),
+            Context(
+                language: "ja",
+                locale: "ja_JP",
+                appearance: .light,
+                size: "ax5",
+                contentSize: "UICTContentSizeCategoryAccessibilityXXXL"
+            )
+        ]
+        for context in contexts {
+            capturePlaylistEmptyStates(context)
+        }
+    }
+
+    private func capturePlaylistEmptyStates(_ context: Context) {
+        let emptyArguments = [
+            "-uitest-reset-playlists",
+            "-uitest-reset-sounds"
+        ]
+
+        let libraryApp = launch(
+            context,
+            arguments: emptyArguments + ["-uitest-open-library"],
+            allowAlarmPermission: false
+        )
+        XCTAssertTrue(
+            libraryApp.collectionViews["library.root"].waitForExistence(timeout: 25),
+            "library did not appear: \(libraryApp.debugDescription)"
+        )
+        XCTAssertTrue(
+            libraryApp.staticTexts["playlist.empty.explanation"]
+                .waitForExistence(timeout: 10)
+        )
+        settle()
+        capture(
+            libraryApp,
+            screen: "playlist-empty-library",
+            context: context
+        )
+        if context.size == "ax5" {
+            libraryApp.collectionViews["library.root"].swipeUp()
+            settle()
+            capture(
+                libraryApp,
+                screen: "playlist-empty-library-lower",
+                context: context
+            )
+        }
+
+        let soundApp = launch(
+            context,
+            arguments: emptyArguments + ["-uitest-open-add-alarm"],
+            allowAlarmPermission: false
+        )
+        XCTAssertTrue(
+            soundApp.collectionViews["addAlarm.root"].waitForExistence(timeout: 25)
+        )
+        _ = openSoundChoice(soundApp)
+        XCTAssertTrue(
+            soundApp.staticTexts["playlist.empty.explanation"]
+                .waitForExistence(timeout: 10)
+        )
+        settle()
+        capture(
+            soundApp,
+            screen: "playlist-empty-sound-choice",
+            context: context
+        )
+        if context.size == "ax5" {
+            soundApp.collectionViews["alarmSoundChoice.root"].swipeUp()
+            settle()
+            capture(
+                soundApp,
+                screen: "playlist-empty-sound-choice-lower",
+                context: context
+            )
+        }
+    }
+
     // MARK: - Conditions
 
     private func captureCampaign(_ context: Context) {

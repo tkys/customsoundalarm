@@ -278,6 +278,8 @@
 "playlist_tracks" = "Skladby";
 "playlist_add_track" = "Přidat skladbu";
 "playlist_empty" = "Zatím žádné playlisty";
+"playlist_empty_explanation" = "Zkombinuj několik zvuků a přehrávej je v pořadí nebo náhodně. Ideální pro probouzení s jiným zvukem každé ráno.";
+"playlist_empty_import_hint" = "Importuj zvuk a vytvoř si playlist z oblíbených skladeb.";
 "playlist_total_fmt" = "Celkem: %@";
 "playlist_limit_note" = "Celkem až 10 minut.";
 "playlist_limit_exceeded" = "Celkový čas přesahuje 10 minut.";

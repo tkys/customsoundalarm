@@ -8,6 +8,8 @@ struct PlaylistEditorView: View {
     let onSave: (Playlist) -> Void
     /// ライブラリから push するときは戻るボタンがあるのでキャンセルを出さない
     let showsCancel: Bool
+    /// 新規作成時の計測用（#183）
+    let creationSource: PlaylistSource
 
     @Environment(\.dismiss) private var dismiss
     @State private var store = PlaylistStore.shared
@@ -23,10 +25,12 @@ struct PlaylistEditorView: View {
     init(
         playlist: Playlist?,
         showsCancel: Bool = true,
+        creationSource: PlaylistSource = .library,
         onSave: @escaping (Playlist) -> Void
     ) {
         self.playlist = playlist
         self.showsCancel = showsCancel
+        self.creationSource = creationSource
         self.onSave = onSave
         _name = State(
             initialValue: playlist?.name
@@ -289,7 +293,8 @@ struct PlaylistEditorView: View {
                     seconds: totalSeconds
                 ),
                 playOrder: playOrder,
-                transition: transition
+                transition: transition,
+                source: creationSource
             ))
         } else {
             AnalyticsService.shared.capture(.playlistEdited(

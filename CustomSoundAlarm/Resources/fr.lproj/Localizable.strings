@@ -278,6 +278,8 @@
 "playlist_tracks" = "Titres";
 "playlist_add_track" = "Ajouter un titre";
 "playlist_empty" = "Aucune playlist pour l'instant";
+"playlist_empty_explanation" = "Combinez plusieurs sons et lisez-les dans l'ordre ou en lecture aléatoire. Idéal pour vous réveiller avec un son différent chaque matin.";
+"playlist_empty_import_hint" = "Importez un son pour créer une playlist avec vos morceaux préférés.";
 "playlist_total_fmt" = "Total : %@";
 "playlist_limit_note" = "Jusqu'à 10 minutes au total.";
 "playlist_limit_exceeded" = "Le total dépasse 10 minutes.";

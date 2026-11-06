@@ -34,7 +34,8 @@
 | `update_prompt_tapped` | `kind` string | 「App Store で更新」タップ | 更新への遷移 | アプリ動作中のみ | 1.8.0 |
 | `update_prompt_dismissed` | `kind` string（recommended） | おすすめを「あとで」/スワイプで閉じた | おすすめの受容 | アプリ動作中のみ | 1.8.0 |
 | `sound_selected` | `kind` string（imported/preset/default）, `rank_bucket` string（1/2-3/4-10/11+） | サウンド選択で音を選んだ | 音の種類・並び順の影響 | アプリ動作中のみ | 1.8.0 |
-| `playlist_created` | `track_count` int, `total_seconds_bucket` string（under_1min/1_5min/5_10min/10min）, `play_order` string（in_order/shuffle/one_random）, `transition` string（off/short/long/crossfade） | プレイリストを新規作成 | プレイリスト作成者の割合・規模・再生設定 | アプリ動作中のみ | 1.8.2（`play_order`/`transition` は1.8.1） |
+| `playlist_created` | `track_count` int, `total_seconds_bucket` string（under_1min/1_5min/5_10min/10min）, `play_order` string（in_order/shuffle/one_random）, `transition` string（off/short/long/crossfade）, `source` string（library/sound_choice） | プレイリストを新規作成 | プレイリスト作成者の割合・規模・再生設定・作成導線 | アプリ動作中のみ | 1.8.2（`play_order`/`transition` は1.8.1、`source` は1.8.1） |
+| `playlist_empty_viewed` | `source` string（library/sound_choice）, `has_own_sounds` bool | 空のプレイリスト状態が表示されたとき（起動ごと・source ごと1回） | 空状態の到達と作成転換 | アプリ動作中のみ | 1.8.1 |
 | `playlist_edited` | `play_order` string, `transition` string | プレイリストを編集 | 編集の利用・再生設定 | アプリ動作中のみ | 1.8.2（`play_order`/`transition` は1.8.1） |
 | `playlist_render_failed` | `reason` string（no_tracks/too_long/render_failed/write_failed/missing_playlist） | プレイリストの書き出し失敗 | 失敗原因 | アプリ動作中のみ | 1.8.2 |
 | `playlist_render_fallback` | — | 書き出し失敗時に1曲目／既定音で鳴らした | フォールバックの頻度 | アプリ動作中のみ | 1.8.2 |
@@ -87,6 +88,13 @@
 - `fade_in` はアラームの「やさしく鳴り始める」です（off/5/15/30）。旧バージョンの 10/60 は読み込み時に 15/30 へ移行し、未知の値は off になります（#181）。
 - `gap_fade` / `end_fade` は削除しました。曲のつなぎ方はプレイリストの `transition`、末尾フェードは書き出し時に常に 0.5 秒です。
 - `playlist_created` / `playlist_edited` の `play_order` / `transition` で、プレイリスト側の再生設定を測ります。
+
+## プレイリスト空状態（#183 / 1.8.1）
+
+- `playlist_empty_viewed` は、プレイリストが0件のときに説明・作成ボタン・（自分の音が0件なら）取り込み案内を表示した時点で送ります。再描画やタブ切り替えでは増やさず、**起動ごと・source ごとに1回**です。
+- 「空の状態を見た人のうち作った人の割合」は、`playlist_empty_viewed.source` と `playlist_created.source` を同じ source で絞り、**ユニークユーザー（またはセッション）**で割ります。
+  - 1回の起動で複数のプレイリストを作ると `playlist_created` は複数回送られるため、イベント数の単純な割り算ではなく、ユニーク数で見ます。
+  - `has_own_sounds` で「自分の音がある人／ない人」に層別できます。
 
 ## プレイリスト先行公開（#151 / 1.8.2）
 

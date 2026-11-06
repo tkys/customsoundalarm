@@ -4,6 +4,7 @@ import SwiftUI
 /// プレイリスト・自分の音・プリセットを、アラームから独立した「置き場所」としてまとめる。
 struct LibraryView: View {
     @State private var store = PlaylistStore.shared
+    @State private var soundStore = SoundStore.shared
     @State private var alarmStore = AlarmStore.shared
     @State private var path: [UUID] = []
     @State private var showingNewPlaylist = false
@@ -46,7 +47,10 @@ struct LibraryView: View {
             }
             .sheet(isPresented: $showingNewPlaylist) {
                 NavigationStack {
-                    PlaylistEditorView(playlist: nil) { _ in }
+                    PlaylistEditorView(
+                        playlist: nil,
+                        creationSource: .library
+                    ) { _ in }
                 }
             }
             .confirmationDialog(
@@ -83,11 +87,20 @@ struct LibraryView: View {
 
     // MARK: - Playlists
 
+    private var hasOwnSounds: Bool {
+        soundStore.sounds.contains { !$0.isPreset }
+    }
+
     private var playlistSection: some View {
         Section {
             if store.playlists.isEmpty {
-                Text("playlist_empty")
-                    .foregroundStyle(Color.textSecondary)
+                PlaylistEmptyStateView(
+                    source: .library,
+                    hasOwnSounds: hasOwnSounds,
+                    createButtonIdentifier: "library.addPlaylist"
+                ) {
+                    showingNewPlaylist = true
+                }
             } else {
                 ForEach(store.playlists) { playlist in
                     NavigationLink(value: playlist.id) {
@@ -109,14 +122,14 @@ struct LibraryView: View {
                         }
                     }
                 }
-            }
 
-            Button {
-                showingNewPlaylist = true
-            } label: {
-                Label("playlist_new", systemImage: "plus")
+                Button {
+                    showingNewPlaylist = true
+                } label: {
+                    Label("playlist_new", systemImage: "plus")
+                }
+                .accessibilityIdentifier("library.addPlaylist")
             }
-            .accessibilityIdentifier("library.addPlaylist")
         } header: {
             PlaylistSectionHeader()
         } footer: {
