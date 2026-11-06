@@ -80,6 +80,76 @@ final class DesignAuditScreenshotUITests: XCTestCase {
         ))
     }
 
+    /// プレイリストの「曲を選ぶ」（#185）。自分の音あり、ja ライト／ダークと AX5。
+    func testPlaylistTrackPicker() {
+        let contexts = [
+            Context(
+                language: "ja",
+                locale: "ja_JP",
+                appearance: .light,
+                size: "default",
+                contentSize: nil
+            ),
+            Context(
+                language: "ja",
+                locale: "ja_JP",
+                appearance: .dark,
+                size: "default",
+                contentSize: nil
+            ),
+            Context(
+                language: "ja",
+                locale: "ja_JP",
+                appearance: .light,
+                size: "ax5",
+                contentSize: "UICTContentSizeCategoryAccessibilityXXXL"
+            )
+        ]
+        for context in contexts {
+            capturePlaylistTrackPicker(context)
+        }
+    }
+
+    private func capturePlaylistTrackPicker(_ context: Context) {
+        let app = launch(
+            context,
+            arguments: ["-uitest-seed-design-audit", "-uitest-open-library"]
+        )
+        XCTAssertTrue(
+            app.collectionViews["library.root"].waitForExistence(timeout: 25),
+            "library did not appear: \(app.debugDescription)"
+        )
+
+        let playlist = app.buttons["library.playlist.モーニング"]
+        var swipes = 0
+        while (!playlist.exists || !playlist.isHittable) && swipes < 8 {
+            app.collectionViews["library.root"].swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(playlist.waitForExistence(timeout: 10))
+        playlist.tap()
+        XCTAssertTrue(app.textFields["playlist.name"].waitForExistence(timeout: 15))
+
+        let addTrack = app.buttons["playlist.addTrack"]
+        swipes = 0
+        while (!addTrack.exists || !addTrack.isHittable) && swipes < 8 {
+            app.swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(addTrack.waitForExistence(timeout: 10))
+        addTrack.tap()
+
+        let custom = app.buttons["playlist.track.DesignAuditFavorite.caf"]
+        XCTAssertTrue(custom.waitForExistence(timeout: 15))
+        custom.tap()
+        settle()
+        capture(
+            app,
+            screen: "playlist-track-picker",
+            context: context
+        )
+    }
+
     /// プレイリスト空状態（#183）。ja ライト／ダークと AX5。
     func testPlaylistEmptyStates() {
         let contexts = [
