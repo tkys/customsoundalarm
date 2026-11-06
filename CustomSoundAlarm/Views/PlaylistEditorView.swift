@@ -328,38 +328,41 @@ struct PlaylistTrackPickerView: View {
             .totalSeconds(durations: store.durationsByFileName)
     }
 
+    /// ライブラリ・音の選択と同じ並び（最近使った順→新しい順）。
+    private var importedSounds: [AlarmSound] {
+        let existing = Set(soundStore.sounds.map(\.fileName))
+        let recentNames = SoundUsageHistory.recentFileNames(
+            limit: soundStore.sounds.count,
+            existingFileNames: existing
+        )
+        return SoundPickerLogic.mySoundsByRecentUse(
+            in: soundStore.sounds,
+            recentFileNames: recentNames
+        )
+    }
+
+    private var presets: [AlarmSound] {
+        SoundPickerLogic.presetSounds(in: soundStore.sounds)
+    }
+
     var body: some View {
         List {
-            Section {
-                ForEach(soundStore.sounds) { sound in
-                    Button {
-                        toggle(sound)
-                    } label: {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(sound.name)
-                                if let duration = sound.durationSeconds {
-                                    Text(PlaylistEditorView.durationText(duration))
-                                        .font(.caption)
-                                        .foregroundStyle(Color.textSecondary)
-                                }
-                            }
-                            Spacer()
-                            if selected.contains(where: {
-                                $0.soundFileName == sound.fileName
-                            }) {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundStyle(Brand.orange)
-                                    .accessibilityIdentifier(
-                                        "playlist.trackSelected.\(sound.fileName)"
-                                    )
-                            }
-                        }
-                        .contentShape(Rectangle())
+            if !importedSounds.isEmpty {
+                Section {
+                    ForEach(importedSounds) { sound in
+                        row(for: sound)
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("playlist.track.\(sound.fileName)")
+                } header: {
+                    WarmSectionHeader(title: String(localized: "imported_sounds"))
                 }
+            }
+
+            Section {
+                ForEach(presets) { sound in
+                    row(for: sound)
+                }
+            } header: {
+                WarmSectionHeader(title: String(localized: "presets"))
             } footer: {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(String(
@@ -371,6 +374,7 @@ struct PlaylistTrackPickerView: View {
                 .foregroundStyle(Color.textSecondary)
             }
         }
+        .warmListBackground()
         .navigationTitle(String(localized: "playlist_select_track"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -379,6 +383,45 @@ struct PlaylistTrackPickerView: View {
                     .accessibilityIdentifier("playlist.closeTrackPicker")
             }
         }
+    }
+
+    /// 自分の音・同梱の音で共通の行。サムネイルと長さは既存の表示を使う。
+    private func row(for sound: AlarmSound) -> some View {
+        let isSelected = selected.contains {
+            $0.soundFileName == sound.fileName
+        }
+
+        return Button {
+            toggle(sound)
+        } label: {
+            HStack(spacing: 12) {
+                SoundThumbnail(sound: sound, size: 40)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(sound.name)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if let duration = sound.durationSeconds {
+                        Text(PlaylistEditorView.durationText(duration))
+                            .font(.caption)
+                            .foregroundStyle(Color.textSecondary)
+                    }
+                }
+
+                Spacer(minLength: 8)
+
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(Brand.orange)
+                        .accessibilityIdentifier(
+                            "playlist.trackSelected.\(sound.fileName)"
+                        )
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("playlist.track.\(sound.fileName)")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     private func toggle(_ sound: AlarmSound) {
