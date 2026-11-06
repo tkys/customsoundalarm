@@ -23,6 +23,91 @@ final class LibraryUITests: XCTestCase {
         return app
     }
 
+    /// 「曲を選ぶ」で自分の音が同梱の音より上に出る（#185）。
+    func testTrackPickerShowsOwnSoundsAbovePresets() {
+        let app = launch(["-uitest-seed-design-audit", "-uitest-open-library"])
+        XCTAssertTrue(
+            app.collectionViews["library.root"].waitForExistence(timeout: 15),
+            "library should open: \(app.debugDescription)"
+        )
+
+        let playlist = app.buttons["library.playlist.モーニング"]
+        XCTAssertTrue(
+            playlist.waitForExistence(timeout: 10),
+            "seeded playlist should exist: \(app.debugDescription)"
+        )
+        playlist.tap()
+        XCTAssertTrue(app.textFields["playlist.name"].waitForExistence(timeout: 10))
+
+        let addTrack = app.buttons["playlist.addTrack"]
+        var swipes = 0
+        while !addTrack.isHittable && swipes < 8 {
+            app.swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(addTrack.waitForExistence(timeout: 5))
+        addTrack.tap()
+
+        let custom = app.buttons["playlist.track.DesignAuditFavorite.caf"]
+        let preset = app.buttons["playlist.track.PresetMarimba.caf"]
+        XCTAssertTrue(
+            custom.waitForExistence(timeout: 10),
+            "own sound should exist: \(app.debugDescription)"
+        )
+        XCTAssertTrue(preset.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["自分の音"].exists)
+        XCTAssertTrue(app.staticTexts["すぐ使える音"].exists)
+        XCTAssertLessThan(
+            custom.frame.minY,
+            preset.frame.minY,
+            "own sound should be above the bundled sounds"
+        )
+        XCTAssertTrue(
+            app.staticTexts["0:28"].firstMatch.exists,
+            "duration should remain visible"
+        )
+
+        custom.tap()
+        XCTAssertTrue(
+            custom.isSelected,
+            "selected state should be exposed to VoiceOver"
+        )
+        XCTAssertTrue(
+            app.images["playlist.trackSelected.DesignAuditFavorite.caf"].exists
+        )
+        custom.tap()
+        XCTAssertFalse(custom.isSelected)
+    }
+
+    /// 自分の音が0件なら〔自分の音〕欄を出さない（#185）。
+    func testTrackPickerHidesOwnSoundsSectionWhenEmpty() {
+        let app = launch(["-uitest-seed-library", "-uitest-open-library"])
+        XCTAssertTrue(app.collectionViews["library.root"].waitForExistence(timeout: 15))
+
+        let playlist = app.buttons["library.playlist.朝の支度"]
+        XCTAssertTrue(playlist.waitForExistence(timeout: 10))
+        playlist.tap()
+        XCTAssertTrue(app.textFields["playlist.name"].waitForExistence(timeout: 10))
+
+        let addTrack = app.buttons["playlist.addTrack"]
+        var swipes = 0
+        while !addTrack.isHittable && swipes < 8 {
+            app.swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(addTrack.waitForExistence(timeout: 5))
+        addTrack.tap()
+
+        XCTAssertTrue(
+            app.buttons["playlist.track.PresetMarimba.caf"]
+                .waitForExistence(timeout: 10)
+        )
+        XCTAssertFalse(
+            app.staticTexts["自分の音"].waitForExistence(timeout: 2),
+            "own-sounds section should be hidden when there are none"
+        )
+    }
+
     func testPlaylistEmptyStateExplainsAndOffersCreate() {
         let app = launch([
             "-uitest-open-library",
