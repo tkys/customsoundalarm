@@ -8,15 +8,25 @@ struct AlarmSoundChoiceView: View {
 
     @Environment(\.dismiss) private var dismiss
     @State private var store = PlaylistStore.shared
+    @State private var soundStore = SoundStore.shared
     @State private var editingPlaylist: Playlist?
     @State private var showingNewPlaylist = false
+
+    private var hasOwnSounds: Bool {
+        soundStore.sounds.contains { !$0.isPreset }
+    }
 
     var body: some View {
         List {
             Section {
                 if store.playlists.isEmpty {
-                    Text("playlist_empty")
-                        .foregroundStyle(Color.textSecondary)
+                    PlaylistEmptyStateView(
+                        source: .soundChoice,
+                        hasOwnSounds: hasOwnSounds,
+                        createButtonIdentifier: "alarmSoundChoice.addPlaylist"
+                    ) {
+                        showingNewPlaylist = true
+                    }
                 } else {
                     ForEach(store.playlists) { playlist in
                         HStack(spacing: 12) {
@@ -45,14 +55,14 @@ struct AlarmSoundChoiceView: View {
                             )
                         }
                     }
-                }
 
-                Button {
-                    showingNewPlaylist = true
-                } label: {
-                    Label("playlist_new", systemImage: "plus")
+                    Button {
+                        showingNewPlaylist = true
+                    } label: {
+                        Label("playlist_new", systemImage: "plus")
+                    }
+                    .accessibilityIdentifier("alarmSoundChoice.addPlaylist")
                 }
-                .accessibilityIdentifier("alarmSoundChoice.addPlaylist")
             } header: {
                 PlaylistSectionHeader()
             }
@@ -78,7 +88,10 @@ struct AlarmSoundChoiceView: View {
         }
         .sheet(isPresented: $showingNewPlaylist) {
             NavigationStack {
-                PlaylistEditorView(playlist: nil) { playlist in
+                PlaylistEditorView(
+                    playlist: nil,
+                    creationSource: .soundChoice
+                ) { playlist in
                     playlistID = playlist.id
                     selectedSound = nil
                 }

@@ -278,6 +278,8 @@
 "playlist_tracks" = "곡";
 "playlist_add_track" = "곡 추가";
 "playlist_empty" = "재생목록이 없습니다";
+"playlist_empty_explanation" = "여러 소리를 모아 순서대로 또는 섞어서 재생할 수 있습니다. 매일 아침 다른 소리로 일어나고 싶을 때 좋아요.";
+"playlist_empty_import_hint" = "소리를 가져오면 좋아하는 곡으로 재생목록을 만들 수 있습니다.";
 "playlist_total_fmt" = "합계: %@";
 "playlist_limit_note" = "총 10분까지.";
 "playlist_limit_exceeded" = "합계가 10분을 초과합니다.";

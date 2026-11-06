@@ -278,6 +278,8 @@
 "playlist_tracks" = "Titel";
 "playlist_add_track" = "Titel hinzufügen";
 "playlist_empty" = "Noch keine Playlists";
+"playlist_empty_explanation" = "Kombiniere mehrere Töne und spiele sie der Reihe nach oder gemischt ab. Ideal, um jeden Morgen mit einem anderen Ton aufzuwachen.";
+"playlist_empty_import_hint" = "Importiere einen Ton, um eine Playlist aus deinen Lieblingsstücken zu erstellen.";
 "playlist_total_fmt" = "Gesamt: %@";
 "playlist_limit_note" = "Insgesamt bis zu 10 Minuten.";
 "playlist_limit_exceeded" = "Die Gesamtzeit überschreitet 10 Minuten.";

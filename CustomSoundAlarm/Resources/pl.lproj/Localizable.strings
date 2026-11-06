@@ -278,6 +278,8 @@
 "playlist_tracks" = "Utwory";
 "playlist_add_track" = "Dodaj utwór";
 "playlist_empty" = "Brak playlist";
+"playlist_empty_explanation" = "Połącz kilka dźwięków i odtwarzaj je po kolei lub losowo. Idealne, aby budzić się każdego ranka przy innym dźwięku.";
+"playlist_empty_import_hint" = "Zaimportuj dźwięk, aby utworzyć playlistę ze swoimi ulubionymi utworami.";
 "playlist_total_fmt" = "Razem: %@";
 "playlist_limit_note" = "Łącznie do 10 minut.";
 "playlist_limit_exceeded" = "Łączny czas przekracza 10 minut.";

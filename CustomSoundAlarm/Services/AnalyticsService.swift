@@ -2,6 +2,14 @@ import Foundation
 import os
 import PostHog
 
+// MARK: - PlaylistSource
+
+/// プレイリストの画面・導線（#183）。
+enum PlaylistSource: String, Sendable, CaseIterable, Hashable {
+    case library
+    case soundChoice = "sound_choice"
+}
+
 // MARK: - AnalyticsEvent
 
 /// 型安全なアナリティクスイベント定義。
@@ -136,8 +144,13 @@ enum AnalyticsEvent: Sendable {
         trackCount: Int,
         totalSecondsBucket: String,
         playOrder: PlaylistPlayOrder = .inOrder,
-        transition: PlaylistTransition = .off
+        transition: PlaylistTransition = .off,
+        source: PlaylistSource = .library
     )
+
+    /// プレイリストが空の状態を見た（#183）
+    /// 起動ごと・source ごとに1回だけ送る（PlaylistEmptyViewTracker が制御）。
+    case playlistEmptyViewed(source: PlaylistSource, hasOwnSounds: Bool)
 
     /// プレイリストを編集した
     case playlistEdited(
@@ -274,6 +287,7 @@ enum AnalyticsEvent: Sendable {
         case .backupAlarmStopped: return "backup_alarm_stopped"
         case .soundSelected: return "sound_selected"
         case .playlistCreated: return "playlist_created"
+        case .playlistEmptyViewed: return "playlist_empty_viewed"
         case .playlistEdited: return "playlist_edited"
         case .playlistRenderFailed: return "playlist_render_failed"
         case .playlistRenderFallback: return "playlist_render_fallback"
@@ -408,12 +422,24 @@ enum AnalyticsEvent: Sendable {
                 "kind": kind.rawValue,
                 "rank_bucket": rankBucket
             ]
-        case let .playlistCreated(trackCount, totalSecondsBucket, playOrder, transition):
+        case let .playlistCreated(
+            trackCount,
+            totalSecondsBucket,
+            playOrder,
+            transition,
+            source
+        ):
             return [
                 "track_count": trackCount,
                 "total_seconds_bucket": totalSecondsBucket,
                 "play_order": playOrder.analyticsValue,
-                "transition": transition.analyticsValue
+                "transition": transition.analyticsValue,
+                "source": source.rawValue
+            ]
+        case let .playlistEmptyViewed(source, hasOwnSounds):
+            return [
+                "source": source.rawValue,
+                "has_own_sounds": hasOwnSounds
             ]
         case let .playlistEdited(playOrder, transition):
             return [
@@ -739,6 +765,35 @@ final class PostHogAnalyticsBackend: AnalyticsBackend {
 
     func setUserProperties(_ properties: [String: Any]) {
         PostHogSDK.shared.identify(PostHogSDK.shared.getDistinctId(), userProperties: properties)
+    }
+}
+
+// MARK: - PlaylistEmptyViewTracker
+
+/// 空のプレイリスト画面の表示を、起動ごと・source ごとに1回だけ記録する（#183）。
+/// この型はプロセス内で1つだけ持ち、アプリ起動で自然にリセットされる。
+@MainActor
+final class PlaylistEmptyViewTracker {
+    static let shared = PlaylistEmptyViewTracker(analytics: .shared)
+
+    private let analytics: AnalyticsService
+    private var sentSources: Set<PlaylistSource> = []
+
+    init(analytics: AnalyticsService) {
+        self.analytics = analytics
+    }
+
+    func recordViewed(source: PlaylistSource, hasOwnSounds: Bool) {
+        guard sentSources.insert(source).inserted else { return }
+        analytics.capture(.playlistEmptyViewed(
+            source: source,
+            hasOwnSounds: hasOwnSounds
+        ))
+    }
+
+    /// テスト用。本番コードからは呼ばない。
+    func resetForTesting() {
+        sentSources.removeAll()
     }
 }
 

@@ -102,6 +102,10 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.playlistCreated(
             trackCount: 3, totalSecondsBucket: "5_10min"
         ).name == "playlist_created")
+        #expect(AnalyticsEvent.playlistEmptyViewed(
+            source: .library,
+            hasOwnSounds: false
+        ).name == "playlist_empty_viewed")
         #expect(AnalyticsEvent.playlistEdited().name == "playlist_edited")
         #expect(AnalyticsEvent.playlistRenderFailed(reason: .tooLong).name == "playlist_render_failed")
         #expect(AnalyticsEvent.playlistRenderFallback.name == "playlist_render_fallback")
@@ -438,6 +442,7 @@ struct AnalyticsEventTests {
             .soundPickerRecentUsed,
             .adSlotEligible(slot: .bannerSounds, allowed: true, reason: .eligible, region: .standard),
             .playlistCreated(trackCount: 2, totalSecondsBucket: "1_5min"),
+            .playlistEmptyViewed(source: .library, hasOwnSounds: false),
             .playlistEdited(),
             .playlistRenderFailed(reason: .renderFailed),
             .playlistRenderFallback,
@@ -707,13 +712,26 @@ struct AnalyticsEventTests {
             trackCount: 4,
             totalSecondsBucket: "5_10min",
             playOrder: .shuffle,
-            transition: .crossfade
+            transition: .crossfade,
+            source: .soundChoice
         ).properties
-        #expect(props.count == 4)
+        #expect(props.count == 5)
         #expect(props["track_count"] as? Int == 4)
         #expect(props["total_seconds_bucket"] as? String == "5_10min")
         #expect(props["play_order"] as? String == "shuffle")
         #expect(props["transition"] as? String == "crossfade")
+        #expect(props["source"] as? String == "sound_choice")
+    }
+
+    @Test
+    func playlistEmptyViewedProperties() {
+        let props = AnalyticsEvent.playlistEmptyViewed(
+            source: .library,
+            hasOwnSounds: false
+        ).properties
+        #expect(props.count == 2)
+        #expect(props["source"] as? String == "library")
+        #expect(props["has_own_sounds"] as? Bool == false)
     }
 
     @Test
@@ -1249,5 +1267,33 @@ struct AnalyticsThrottleTests {
         #expect(AnalyticsThrottle.shouldSendPermissionStatus(current: .denied, lastSent: .authorized) == true)
         #expect(AnalyticsThrottle.shouldSendPermissionStatus(current: .authorized, lastSent: .notDetermined) == true)
         #expect(AnalyticsThrottle.shouldSendPermissionStatus(current: nil, lastSent: .authorized) == true)
+    }
+}
+
+
+// MARK: - Playlist empty state (#183)
+
+@Suite(.serialized)
+@MainActor
+struct PlaylistEmptyAnalyticsTests {
+    @Test
+    func emptyViewed_sendsOncePerSourcePerLaunch() {
+        let mock = MockBackend()
+        let analytics = AnalyticsService(backend: mock)
+        let tracker = PlaylistEmptyViewTracker(analytics: analytics)
+
+        tracker.recordViewed(source: .library, hasOwnSounds: true)
+        tracker.recordViewed(source: .library, hasOwnSounds: false)
+        tracker.recordViewed(source: .soundChoice, hasOwnSounds: false)
+        tracker.recordViewed(source: .soundChoice, hasOwnSounds: true)
+
+        let events = mock.captures.filter {
+            $0.event == "playlist_empty_viewed"
+        }
+        #expect(events.count == 2)
+        #expect(events[0].properties?["source"] as? String == "library")
+        #expect(events[0].properties?["has_own_sounds"] as? Bool == true)
+        #expect(events[1].properties?["source"] as? String == "sound_choice")
+        #expect(events[1].properties?["has_own_sounds"] as? Bool == false)
     }
 }
