@@ -1,12 +1,24 @@
 ■ Playlists (PRO · Vorabzugang)
-Fasse deine Sounds in einer Playlist zusammen und lass dich davon wecken – der Reihe nach, zufällig oder mit einem zufälligen Titel. Dazu gibt es „Sanfter Start“ und „Crossfade“ zwischen den Titeln. Wer es im Vorabzugang nutzt, kann es auch nach der finalen Version weiter nutzen.
+Fasse deine Töne in einer Playlist zusammen und lass dich davon wecken – der Reihe nach, zufällig oder mit einem zufälligen Titel. Du kannst auch wählen, wie die Titel ineinander übergehen: mit Blende oder Crossfade.
+
+■ Sanfter Start (PRO · Vorabzugang)
+Der Wecker beginnt leise und wird über 5, 15 oder 30 Sekunden lauter.
+
+Wer diese Funktionen im Vorabzugang nutzt, kann sie auch nach der finalen Version weiter nutzen.
+
+■ Bibliothek
+Der neue Tab „Bibliothek“ bündelt deine Töne und Playlists an einem Ort.
 
 ■ Jetzt auf Deutsch
 My Sound Alarm ist jetzt auf Deutsch und in 12 weiteren Sprachen verfügbar. Die App folgt der Sprache deines Geräts.
 
-■ „Jetzt klingeln“ verständlicher
-Wenn „Jetzt klingeln“ nicht klingeln kann – zum Beispiel, weil Alarme noch nicht erlaubt sind –, zeigt der Bildschirm jetzt den Grund an. Mit „Alarme erlauben“ behebst du es direkt.
+■ Fehlerbehebung
+Ein Wiederholungswecker konnte nach dem Stoppen in derselben Minute erneut klingeln. Das ist behoben.
 
-■ Kleine Verbesserungen und Feinschliff
+■ Besser lesbar
+Textfarben und Kontrast wurden überarbeitet, und die Bildschirme bleiben auch mit großen Textgrößen lesbar.
+
+■ „Jetzt klingeln“
+„Jetzt klingeln“ spielt jetzt den Ton, den du gerade bearbeitest. Kann es nicht klingeln, zeigt der Bildschirm den Grund an, und du kannst Alarme direkt erlauben.
 
 Danke, dass du My Sound Alarm nutzt.

@@ -1,5 +1,7 @@
 My Sound Alarm to aplikacja-budzik na iPhone’a, która budzi cię ulubionym fragmentem piosenki albo dźwiękiem z wideo. Budziki ustawiasz w tej aplikacji, a wybrany fragment powtarza się, dopóki go nie wyłączysz.
 
+Dźwięki importujesz z własnych plików audio i filmów. Utworów z serwisów streamingowych, takich jak Apple Music czy Spotify, nie da się użyć.
+
 FUNKCJE
 
 Budź się przy ulubionym fragmencie
@@ -21,7 +23,15 @@ My Sound Alarm planuje swoje budziki przez AlarmKit, system budzików dodany prz
 Posłuchaj wybranego dźwięku od razu, z tą samą głośnością co prawdziwy budzik.
 
 Ochrona przed zaspaniem (Pro, wczesny dostęp)
-Jeśli nie wyłączysz budzika do wybranej godziny, odtworzy ten sam dźwięk ponownie, głośniej. Jeśli zaczniesz z niej korzystać we wczesnym dostępie, zachowasz ją po oficjalnym wydaniu.
+Jeśli nie wyłączysz budzika do wybranej godziny, odtworzy ten sam dźwięk ponownie, głośniej.
+
+Playlisty (Pro, wczesny dostęp)
+Zbierz swoje dźwięki i odtwarzaj je po kolei, losowo lub jako jeden losowy utwór. Wybierz też, jak utwory przechodzą jeden w drugi: z wyciszeniem lub z przenikaniem.
+
+Łagodny start (Pro, wczesny dostęp)
+Budzik zaczyna cicho i zgłaśnia się przez 5, 15 lub 30 sekund.
+
+Jeśli zaczniesz korzystać z tych funkcji Pro we wczesnym dostępie, zachowasz je po oficjalnym wydaniu.
 
 Powtarzanie i drzemka
 Wybierz dni dla każdego budzika. Drzemka może być wyłączona albo trwać 1, 2, 5, 9 lub 10 minut.
@@ -38,4 +48,3 @@ MP3 / AAC / WAV / M4A / Dźwięk z wideo (MOV, MP4)
 UWAGI
 - Wymaga iOS 26 lub nowszego (AlarmKit)
 - Dłuższe dźwięki zajmują więcej miejsca. Dźwięk 10-minutowy to około 50 MB.
-- Utworów z serwisów streamingowych, takich jak Apple Music czy Spotify, nie da się zaimportować.

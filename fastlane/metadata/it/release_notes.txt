@@ -1,12 +1,24 @@
 ■ Playlist (PRO · Accesso anticipato)
-Raccogli i tuoi suoni in una playlist e svegliati con quella: in ordine, in modo casuale o con un brano a caso. Puoi anche impostare “Avvio delicato” e la “Dissolvenza incrociata” tra i brani. Se inizi a usarla durante l’accesso anticipato, potrai continuare a usarla anche dopo la versione definitiva.
+Raccogli i tuoi suoni in una playlist e svegliati con quella: in ordine, in modo casuale o con un brano a caso. Puoi anche scegliere come si collegano i brani, con una dissolvenza o una dissolvenza incrociata.
+
+■ Avvio delicato (PRO · Accesso anticipato)
+La sveglia parte piano e aumenta di volume in 5, 15 o 30 secondi.
+
+Se inizi a usarle durante l’accesso anticipato, potrai continuare a usarle anche dopo la versione definitiva.
+
+■ Libreria
+La nuova scheda Libreria raccoglie i tuoi suoni e le tue playlist in un unico posto.
 
 ■ Ora in italiano
 My Sound Alarm è ora disponibile in italiano e in altre 12 lingue. L’app segue la lingua del tuo dispositivo.
 
-■ “Suona ora” più chiaro
-Se “Suona ora” non può suonare (ad esempio perché le sveglie non sono ancora consentite), la schermata ora ne indica il motivo. Tocca “Consenti sveglie” per risolvere subito.
+■ Correzione
+Una sveglia ripetuta poteva suonare di nuovo nello stesso minuto dopo averla fermata. Ora è corretto.
 
-■ Piccoli miglioramenti e rifiniture
+■ Più leggibile
+Colori e contrasto del testo sono stati rivisti, e le schermate restano leggibili anche con le dimensioni del testo più grandi.
+
+■ “Suona ora”
+“Suona ora” riproduce il suono che stai modificando. Se non può suonare, la schermata ne indica il motivo e ti permette di consentire le sveglie subito.
 
 Grazie per usare My Sound Alarm.

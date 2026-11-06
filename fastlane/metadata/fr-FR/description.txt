@@ -1,5 +1,7 @@
 My Sound Alarm est une app de réveil pour iPhone qui te réveille avec ton passage préféré d’une chanson ou le son d’une vidéo. Tu règles tes alarmes dans cette app, et le passage choisi se répète jusqu’à ce que tu l’arrêtes.
 
+Tu importes tes sons depuis tes propres fichiers audio et vidéos. Les morceaux des services de streaming comme Apple Music ou Spotify ne sont pas utilisables.
+
 FONCTIONS
 
 Réveille-toi sur ton passage préféré
@@ -21,7 +23,15 @@ My Sound Alarm programme ses alarmes avec AlarmKit, le système d’alarmes ajou
 Écoute tout de suite le son choisi, au même volume qu’une vraie alarme.
 
 Anti-grasse matinée (Pro, accès anticipé)
-Si tu n’as pas arrêté une alarme à l’heure choisie, elle rejoue le même son, plus fort. Si tu commences à l’utiliser pendant l’accès anticipé, tu la gardes après la sortie officielle.
+Si tu n’as pas arrêté une alarme à l’heure choisie, elle rejoue le même son, plus fort.
+
+Playlists (Pro, accès anticipé)
+Regroupe tes sons et fais-les sonner dans l’ordre, en aléatoire ou un titre au hasard. Choisis aussi l’enchaînement entre les titres : un fondu ou un fondu enchaîné.
+
+Démarrage en douceur (Pro, accès anticipé)
+L’alarme commence doucement et monte en volume sur 5, 15 ou 30 secondes.
+
+Si tu commences à utiliser ces fonctions Pro pendant l’accès anticipé, tu les gardes après la sortie officielle.
 
 Répétition et rappel d’alarme
 Choisis les jours de chaque alarme. Le rappel d’alarme peut être désactivé ou réglé sur 1, 2, 5, 9 ou 10 minutes.
@@ -38,4 +48,3 @@ MP3 / AAC / WAV / M4A / Son de vidéo (MOV, MP4)
 À SAVOIR
 - Nécessite iOS 26 ou version ultérieure (AlarmKit)
 - Un son long prend plus de place. Un son de 10 minutes fait environ 50 Mo.
-- Les morceaux des services de streaming comme Apple Music ou Spotify ne peuvent pas être importés.

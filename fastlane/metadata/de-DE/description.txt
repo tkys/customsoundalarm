@@ -1,5 +1,7 @@
 My Sound Alarm ist eine Wecker-App fürs iPhone, die dich mit deinem Lieblingsteil eines Songs oder dem Ton aus einem Video weckt. Du stellst deine Wecker in dieser App, und der gewählte Teil wiederholt sich, bis du ihn ausschaltest.
 
+Du importierst Töne aus deinen eigenen Audiodateien und Videos. Songs aus Streamingdiensten wie Apple Music oder Spotify lassen sich nicht verwenden.
+
 FUNKTIONEN
 
 Wach auf mit deinem Lieblingsteil
@@ -21,7 +23,15 @@ My Sound Alarm plant seine Wecker mit AlarmKit, dem Wecker-Framework, das Apple 
 Hör den gewählten Ton sofort, in derselben Lautstärke wie ein echter Wecker.
 
 Verschlafschutz (Pro, frühe Version)
-Wenn du einen Wecker bis zur gewählten Zeit nicht ausgeschaltet hast, spielt er denselben Ton noch einmal lauter. Wenn du ihn in dieser Zeit zu nutzen beginnst, behältst du ihn auch nach der offiziellen Veröffentlichung.
+Wenn du einen Wecker bis zur gewählten Zeit nicht ausgeschaltet hast, spielt er denselben Ton noch einmal lauter.
+
+Playlists (Pro, frühe Version)
+Fasse deine Töne zusammen und lass sie der Reihe nach, zufällig oder als einen zufälligen Titel spielen. Wähle auch, wie die Titel ineinander übergehen: mit Blende oder Crossfade.
+
+Sanfter Start (Pro, frühe Version)
+Der Wecker beginnt leise und wird über 5, 15 oder 30 Sekunden lauter.
+
+Wenn du diese Pro-Funktionen jetzt zu nutzen beginnst, behältst du sie auch nach der offiziellen Veröffentlichung.
 
 Wiederholen und Schlummern
 Wähl die Tage für jeden Wecker. Schlummern ist aus oder 1, 2, 5, 9 oder 10 Minuten.
@@ -38,4 +48,3 @@ MP3 / AAC / WAV / M4A / Ton aus Videos (MOV, MP4)
 HINWEISE
 - Erfordert iOS 26 oder neuer (AlarmKit)
 - Längere Töne belegen mehr Speicher. Ein 10-minütiger Ton hat etwa 50 MB.
-- Songs aus Streamingdiensten wie Apple Music oder Spotify lassen sich nicht importieren.

@@ -1,5 +1,7 @@
 My Sound Alarm es una app de despertador para iPhone que te despierta con tu parte favorita de una canción o el sonido de un vídeo. Configuras tus alarmas en esta app, y la parte que elijas se repite hasta que la detengas.
 
+Importas sonidos desde tus propios archivos de audio y vídeos. Las canciones de servicios de streaming como Apple Music o Spotify no se pueden usar.
+
 FUNCIONES
 
 Despierta con tu parte favorita
@@ -21,7 +23,15 @@ My Sound Alarm programa sus alarmas con AlarmKit, el sistema de alarmas que Appl
 Escucha al momento el sonido que elegiste, con el mismo volumen que una alarma de verdad.
 
 Protección contra quedarse dormido (Pro, acceso anticipado)
-Si no has detenido una alarma a la hora que elijas, vuelve a sonar con el mismo sonido, más fuerte. Si empiezas a usarla durante el acceso anticipado, la conservas después del lanzamiento oficial.
+Si no has detenido una alarma a la hora que elijas, vuelve a sonar con el mismo sonido, más fuerte.
+
+Listas (Pro, acceso anticipado)
+Agrupa tus sonidos y hazlos sonar en orden, en aleatorio o con una canción al azar. Elige también cómo se unen las canciones: con un fundido o un fundido cruzado.
+
+Inicio suave (Pro, acceso anticipado)
+La alarma empieza bajo y sube de volumen durante 5, 15 o 30 segundos.
+
+Si empiezas a usar estas funciones Pro durante el acceso anticipado, las conservas después del lanzamiento oficial.
 
 Repetición y posponer
 Elige los días de cada alarma. Posponer puede estar desactivado o en 1, 2, 5, 9 o 10 minutos.
@@ -38,4 +48,3 @@ MP3 / AAC / WAV / M4A / Sonido de vídeo (MOV, MP4)
 NOTAS
 - Requiere iOS 26 o posterior (AlarmKit)
 - Los sonidos largos ocupan más espacio. Un sonido de 10 minutos ocupa unos 50 MB.
-- Las canciones de servicios de streaming como Apple Music o Spotify no se pueden importar.

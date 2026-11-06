@@ -1,12 +1,24 @@
 ■ Playlists (PRO · Early access)
-Group your sounds into a playlist and wake up to it — in order, shuffled, or one random track. You can also set a Gentle start and a Crossfade between tracks. If you start using it during early access, you can keep using it after the full release.
+Group your sounds into a playlist and wake up to it: in order, shuffled, or one random track. You can also choose how tracks blend into each other, with a fade or a crossfade.
+
+■ Gentle start (PRO · Early access)
+The alarm starts quiet and gets louder over 5, 15 or 30 seconds.
+
+If you start using these during early access, you can keep using them after the full release.
+
+■ Library
+A new Library tab keeps your sounds and playlists in one place.
 
 ■ Now in 13 languages
 My Sound Alarm is now available in French, German, Spanish, Portuguese, Italian, Dutch, Korean, Simplified Chinese, Polish, Czech and Arabic, following your device language.
 
-■ Clearer “Ring now”
-If “Ring now” can’t ring — for example, because alarms aren’t allowed yet — the screen now tells you why. Tap “Allow Alarms” to fix it right there.
+■ Bug fix
+Fixed an issue where a repeating alarm could ring again within the same minute after you stopped it.
 
-■ Small improvements and polish
+■ Easier to read
+Text colors and contrast have been revised, and screens stay readable with larger text sizes.
+
+■ “Ring now”
+“Ring now” now plays the sound you’re editing. If it can’t ring, the screen tells you why and lets you allow alarms right there.
 
 Thank you for using My Sound Alarm.

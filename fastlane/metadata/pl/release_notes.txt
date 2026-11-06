@@ -1,12 +1,24 @@
 ■ Playlisty (PRO · Wczesny dostęp)
-Zbierz swoje dźwięki w playlistę i budź się przy niej: po kolei, losowo lub przy jednym losowym utworze. Możesz też ustawić „Łagodny start” i „Przenikanie” między utworami. Jeśli zaczniesz korzystać w okresie wczesnego dostępu, zachowasz tę funkcję także po wydaniu pełnej wersji.
+Zbierz swoje dźwięki w playlistę i budź się przy niej: po kolei, losowo lub przy jednym losowym utworze. Możesz też wybrać, jak utwory przechodzą jeden w drugi: z wyciszeniem lub z przenikaniem.
+
+■ Łagodny start (PRO · Wczesny dostęp)
+Budzik zaczyna cicho i zgłaśnia się przez 5, 15 lub 30 sekund.
+
+Jeśli zaczniesz z nich korzystać w okresie wczesnego dostępu, zachowasz je także po wydaniu pełnej wersji.
+
+■ Biblioteka
+Nowa karta Biblioteka zbiera Twoje dźwięki i playlisty w jednym miejscu.
 
 ■ Teraz po polsku
 My Sound Alarm jest już dostępny po polsku i w 12 innych językach. Aplikacja korzysta z języka urządzenia.
 
-■ Czytelniejsze „Zadzwoń teraz”
-Jeśli „Zadzwoń teraz” nie może zadzwonić (np. dlatego, że budziki nie są jeszcze dozwolone), ekran pokazuje teraz przyczynę. Stuknij „Zezwól na budziki”, aby od razu to naprawić.
+■ Poprawka
+Powtarzany budzik mógł zadzwonić ponownie w tej samej minucie po wyłączeniu. To zostało naprawione.
 
-■ Drobne usprawnienia i poprawki
+■ Czytelniej
+Poprawiliśmy kolory i kontrast tekstu, a ekrany pozostają czytelne przy dużych rozmiarach tekstu.
+
+■ „Zadzwoń teraz”
+„Zadzwoń teraz” odtwarza teraz edytowany dźwięk. Jeśli nie może zadzwonić, ekran pokazuje przyczynę i pozwala od razu zezwolić na budziki.
 
 Dziękujemy za korzystanie z My Sound Alarm.

@@ -1,12 +1,24 @@
 ■ Afspeellijsten (PRO · Vroege toegang)
-Zet je geluiden in een afspeellijst en word ermee wakker: op volgorde, in shuffle of met één willekeurig nummer. Je kunt ook een ‘Zachte start’ en een ‘Crossfade’ tussen nummers instellen. Begin je ermee tijdens de vroege toegang, dan kun je het na de definitieve versie blijven gebruiken.
+Zet je geluiden in een afspeellijst en word ermee wakker: op volgorde, in shuffle of met één willekeurig nummer. Je kiest ook hoe de nummers in elkaar overlopen: met een fade of een crossfade.
+
+■ Zachte start (PRO · Vroege toegang)
+De wekker begint zacht en wordt in 5, 15 of 30 seconden luider.
+
+Begin je ermee tijdens de vroege toegang, dan kun je ze na de definitieve versie blijven gebruiken.
+
+■ Bibliotheek
+Het nieuwe tabblad Bibliotheek bundelt je geluiden en afspeellijsten op één plek.
 
 ■ Nu in het Nederlands
 My Sound Alarm is nu beschikbaar in het Nederlands en in 12 andere talen. De app volgt de taal van je apparaat.
 
-■ Duidelijker ‘Laat nu afgaan’
-Als ‘Laat nu afgaan’ niet kan afgaan (bijvoorbeeld omdat wekkers nog niet zijn toegestaan), toont het scherm nu de reden. Tik op ‘Wekkers toestaan’ om het meteen op te lossen.
+■ Oplossing
+Een herhalende wekker kon binnen dezelfde minuut opnieuw afgaan nadat je hem had gestopt. Dat is opgelost.
 
-■ Kleine verbeteringen en afwerking
+■ Beter leesbaar
+Tekstkleuren en contrast zijn herzien, en schermen blijven leesbaar met grote tekstgroottes.
+
+■ ‘Laat nu afgaan’
+‘Laat nu afgaan’ speelt nu het geluid dat je aan het bewerken bent. Kan het niet afgaan, dan toont het scherm de reden en kun je wekkers meteen toestaan.
 
 Bedankt dat je My Sound Alarm gebruikt.

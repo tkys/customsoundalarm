@@ -1,5 +1,7 @@
 My Sound Alarm is een wekker-app voor iPhone die je wekt met je favoriete stuk van een nummer of het geluid van een video. Je stelt je wekkers in deze app in, en het gekozen stuk herhaalt tot je het uitzet.
 
+Je importeert geluiden uit je eigen audiobestanden en video’s. Nummers uit streamingdiensten zoals Apple Music of Spotify kun je niet gebruiken.
+
 FUNCTIES
 
 Word wakker met je favoriete stuk
@@ -21,7 +23,15 @@ My Sound Alarm plant zijn wekkers in met AlarmKit, het wekkersysteem dat Apple i
 Hoor het gekozen geluid meteen, op hetzelfde volume als een echte wekker.
 
 Verslaapbeveiliging (Pro, vroege toegang)
-Als je een wekker niet hebt uitgezet vóór de tijd die je kiest, speelt hij hetzelfde geluid nog een keer, harder. Als je hem tijdens de vroege toegang gaat gebruiken, houd je hem na de officiële release.
+Als je een wekker niet hebt uitgezet vóór de tijd die je kiest, speelt hij hetzelfde geluid nog een keer, harder.
+
+Afspeellijsten (Pro, vroege toegang)
+Bundel je geluiden en laat ze op volgorde, in shuffle of als één willekeurig nummer afspelen. Kies ook hoe de nummers in elkaar overlopen: met een fade of een crossfade.
+
+Zachte start (Pro, vroege toegang)
+De wekker begint zacht en wordt in 5, 15 of 30 seconden luider.
+
+Als je deze Pro-functies tijdens de vroege toegang gaat gebruiken, houd je ze na de officiële release.
 
 Herhalen en sluimeren
 Kies de dagen voor elke wekker. Sluimeren kan uit staan of 1, 2, 5, 9 of 10 minuten zijn.
@@ -38,4 +48,3 @@ MP3 / AAC / WAV / M4A / Geluid uit video (MOV, MP4)
 OPMERKINGEN
 - Vereist iOS 26 of nieuwer (AlarmKit)
 - Langere geluiden nemen meer ruimte in. Een geluid van 10 minuten is ongeveer 50 MB.
-- Nummers uit streamingdiensten zoals Apple Music of Spotify kunnen niet worden geïmporteerd.
