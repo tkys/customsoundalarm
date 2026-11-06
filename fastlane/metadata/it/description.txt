@@ -1,7 +1,5 @@
 My Sound Alarm è un’app sveglia per iPhone che ti sveglia con la tua parte preferita di una canzone o con l’audio di un video. Imposti le sveglie in questa app, e la parte che scegli si ripete finché non la fermi.
 
-Importi i suoni dai tuoi file audio e video. I brani dei servizi di streaming come Apple Music o Spotify non si possono usare.
-
 FUNZIONI
 
 Svegliati con la tua parte preferita
@@ -33,18 +31,13 @@ La sveglia parte piano e aumenta di volume in 5, 15 o 30 secondi.
 
 Se inizi a usare queste funzioni Pro durante l’accesso anticipato, le mantieni dopo il rilascio ufficiale.
 
-Ripetizione e posticipa
-Scegli i giorni di ogni sveglia. Posticipa può essere disattivato o di 1, 2, 5, 9 o 10 minuti.
-
 I tuoi suoni a colpo d’occhio
 Ogni sveglia mostra un’immagine del tuo video o la copertina del tuo file audio.
 
 Modalità notte
 Il tuo iPhone diventa un orologio da comodino, con numeri grandi e morbidi da leggere al buio.
 
-FORMATI
-MP3 / AAC / WAV / M4A / Audio da video (MOV, MP4)
-
 NOTE
 - Richiede iOS 26 o versioni successive (AlarmKit)
 - I suoni lunghi occupano più spazio. Un suono di 10 minuti pesa circa 50 MB.
+- I brani dei servizi di streaming come Apple Music o Spotify non si possono importare.

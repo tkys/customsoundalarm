@@ -1,7 +1,5 @@
 O My Sound Alarm é um app de despertador para iPhone que acorda você com o seu trecho favorito de uma música ou o som de um vídeo. Você configura os alarmes neste app, e o trecho escolhido repete até você desligar.
 
-Você importa sons dos seus próprios arquivos de áudio e vídeos. Músicas de serviços de streaming como Apple Music ou Spotify não podem ser usadas.
-
 RECURSOS
 
 Acorde com o seu trecho favorito
@@ -33,18 +31,13 @@ O alarme começa baixo e aumenta ao longo de 5, 15 ou 30 segundos.
 
 Se começar a usar esses recursos Pro durante o acesso antecipado, continua com eles depois do lançamento oficial.
 
-Repetição e soneca
-Escolha os dias de cada alarme. A soneca pode ficar desativada ou em 1, 2, 5, 9 ou 10 minutos.
-
 Seus sons de relance
 Cada alarme mostra uma imagem do seu vídeo ou a capa do seu arquivo de áudio.
 
 Modo noturno
 Seu iPhone vira um relógio de cabeceira, com números grandes e suaves para ler no escuro.
 
-FORMATOS
-MP3 / AAC / WAV / M4A / Som de vídeo (MOV, MP4)
-
 OBSERVAÇÕES
 - Requer iOS 26 ou posterior (AlarmKit)
 - Sons mais longos ocupam mais espaço. Um som de 10 minutos tem cerca de 50 MB.
+- Músicas de serviços de streaming como Apple Music ou Spotify não podem ser importadas.

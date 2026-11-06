@@ -1,7 +1,5 @@
 My Sound Alarm is an iPhone alarm clock app that wakes you up to your favorite part of a song, or to the sound from a video. You set your alarms in this app, and the part you choose plays on repeat until you stop it.
 
-You import sounds from your own audio files and videos. Songs from streaming services such as Apple Music or Spotify can't be used.
-
 KEY FEATURES
 
 Wake Up to the Part You Love
@@ -33,18 +31,13 @@ The alarm starts quiet and gets louder over 5, 15 or 30 seconds.
 
 If you start using these Pro features during early access, you keep them after the full release.
 
-Repeat Days and Snooze
-Choose the days for each alarm. Snooze can be off or 1, 2, 5, 9 or 10 minutes.
-
 See Your Sounds
 Each alarm shows a frame from your video or the artwork from your audio file.
 
 Night Mode
 Your iPhone becomes a bedside clock, with large, soft numbers you can read in a dark room.
 
-SUPPORTED FORMATS
-MP3 / AAC / WAV / M4A / Audio from video (MOV, MP4)
-
 NOTES
 - Requires iOS 26 or later (AlarmKit)
 - Longer sounds use more storage. A 10-minute sound is about 50 MB.
+- Songs from streaming services such as Apple Music or Spotify can't be imported.

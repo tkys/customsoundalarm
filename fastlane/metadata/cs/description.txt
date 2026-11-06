@@ -1,7 +1,5 @@
 My Sound Alarm je aplikace budíku pro iPhone, která tě probudí oblíbenou částí písničky nebo zvukem z videa. Budíky nastavuješ v této aplikaci a vybraná část se opakuje, dokud ji nevypneš.
 
-Zvuky importuješ z vlastních zvukových souborů a videí. Skladby ze streamovacích služeb, jako je Apple Music nebo Spotify, použít nejdou.
-
 FUNKCE
 
 Probuď se u oblíbené části
@@ -33,18 +31,13 @@ Budík začne potichu a během 5, 15 nebo 30 sekund zesílí.
 
 Pokud začneš tyto funkce Pro používat během předběžného přístupu, zůstanou ti i po oficiálním vydání.
 
-Opakování a odložení
-Vyber dny pro každý budík. Odložení může být vypnuté, nebo 1, 2, 5, 9 či 10 minut.
-
 Tvoje zvuky na první pohled
 Každý budík ukazuje záběr z videa nebo obal zvukového souboru.
 
 Noční režim
 Z iPhonu se stanou hodiny u postele, s velkými jemnými číslicemi čitelnými ve tmě.
 
-FORMÁTY
-MP3 / AAC / WAV / M4A / Zvuk z videa (MOV, MP4)
-
 POZNÁMKY
 - Vyžaduje iOS 26 nebo novější (AlarmKit)
 - Delší zvuky zabírají víc místa. 10minutový zvuk má asi 50 MB.
+- Skladby ze streamovacích služeb, jako je Apple Music nebo Spotify, se nedají importovat.

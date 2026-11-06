@@ -45,8 +45,6 @@ DESC = {}
 DESC["ja"] = ("好きな曲のサビや動画の音で起きられる目覚ましアプリ。選んだ部分が、止めるまでくり返し鳴ります。マナーモードでも鳴ります。",
 """My Sound Alarm は、好きな曲のいちばん好きな部分や、動画の音で起きられる iPhone の目覚ましアプリです。アラームはこのアプリで設定し、選んだ部分が止めるまでくり返し鳴ります。
 
-Apple Music や Spotify などの配信サービスの曲は使えません。手元の音声ファイルや動画から取り込みます。
-
 ■ 主な機能
 
 【好きな部分で目覚める】
@@ -78,27 +76,20 @@ My Sound Alarm のアラームは、Apple が iOS 26 で用意した仕組み（
 
 PRO・先行公開中の機能は、先行公開中に使い始めた方なら正式版以降もそのまま使えます。
 
-【繰り返しとスヌーズ】
-曜日ごとの繰り返しに対応。スヌーズは「なし・1・2・5・9・10分」から選べます。
-
 【音源が一目で分かる】
 アラームごとに、動画の一場面や音声ファイルのアートワークを表示します。
 
 【ナイトモード】
 iPhone を枕元の時計にできます。暗い部屋でも読みやすい、落ち着いた表示です。
 
-■ 対応形式
-MP3 / AAC / WAV / M4A / 動画（MOV・MP4）からの音声
-
 ■ 注意事項
 ・iOS 26 以降が必要です（AlarmKit）
 ・長い音ほど容量を使います。10分の音でおよそ50MBです
+・Apple Music や Spotify などの配信サービスの曲は取り込めません
 """)
 
 EN_PROMO = "An alarm clock app that wakes you up to the chorus of a song or the sound from a video. The part you choose plays on repeat until you stop it, even in Silent mode."
 EN_BODY = """My Sound Alarm is an iPhone alarm clock app that wakes you up to your {fav} part of a song, or to the sound from a video. You set your alarms in this app, and the part you choose plays on repeat until you stop it.
-
-You import sounds from your own audio files and videos. Songs from streaming services such as Apple Music or Spotify can't be used.
 
 KEY FEATURES
 
@@ -131,29 +122,22 @@ The alarm starts quiet and gets louder over 5, 15 or 30 seconds.
 
 If you start using these Pro features during early access, you keep them after the full release.
 
-Repeat Days and Snooze
-Choose the days for each alarm. Snooze can be off or 1, 2, 5, 9 or 10 minutes.
-
 See Your Sounds
 Each alarm shows a frame from your video or the artwork from your audio file.
 
 Night Mode
 Your iPhone becomes a bedside clock, with large, soft numbers you can read in a dark room.
 
-SUPPORTED FORMATS
-MP3 / AAC / WAV / M4A / Audio from video (MOV, MP4)
-
 NOTES
 - Requires iOS 26 or later (AlarmKit)
 - Longer sounds use more storage. A 10-minute sound is about 50 MB.
+- Songs from streaming services such as Apple Music or Spotify can't be imported.
 """
 DESC["en-US"] = (EN_PROMO, EN_BODY.format(fav="favorite"))
 DESC["en-GB"] = (EN_PROMO.replace("favorite", "favourite"), EN_BODY.format(fav="favourite"))
 
 DESC["fr-FR"] = ("Une app de réveil qui te réveille avec le refrain d’une chanson ou le son d’une vidéo. Le passage choisi se répète jusqu’à ce que tu l’arrêtes, même en mode silencieux.",
 """My Sound Alarm est une app de réveil pour iPhone qui te réveille avec ton passage préféré d’une chanson ou le son d’une vidéo. Tu règles tes alarmes dans cette app, et le passage choisi se répète jusqu’à ce que tu l’arrêtes.
-
-Tu importes tes sons depuis tes propres fichiers audio et vidéos. Les morceaux des services de streaming comme Apple Music ou Spotify ne sont pas utilisables.
 
 FONCTIONS
 
@@ -186,27 +170,20 @@ L’alarme commence doucement et monte en volume sur 5, 15 ou 30 secondes.
 
 Si tu commences à utiliser ces fonctions Pro pendant l’accès anticipé, tu les gardes après la sortie officielle.
 
-Répétition et rappel d’alarme
-Choisis les jours de chaque alarme. Le rappel d’alarme peut être désactivé ou réglé sur 1, 2, 5, 9 ou 10 minutes.
-
 Tes sons en un coup d’œil
 Chaque alarme affiche une image de ta vidéo ou l’illustration de ton fichier audio.
 
 Mode nuit
 Ton iPhone devient un réveil de chevet, avec de grands chiffres doux lisibles dans le noir.
 
-FORMATS
-MP3 / AAC / WAV / M4A / Son de vidéo (MOV, MP4)
-
 À SAVOIR
 - Nécessite iOS 26 ou version ultérieure (AlarmKit)
 - Un son long prend plus de place. Un son de 10 minutes fait environ 50 Mo.
+- Les morceaux des services de streaming comme Apple Music ou Spotify ne peuvent pas être importés.
 """)
 
 DESC["de-DE"] = ("Eine Wecker-App, die dich mit dem Refrain eines Songs oder dem Ton aus einem Video weckt. Der gewählte Teil wiederholt sich, bis du ihn ausschaltest – auch im Stummmodus.",
 """My Sound Alarm ist eine Wecker-App fürs iPhone, die dich mit deinem Lieblingsteil eines Songs oder dem Ton aus einem Video weckt. Du stellst deine Wecker in dieser App, und der gewählte Teil wiederholt sich, bis du ihn ausschaltest.
-
-Du importierst Töne aus deinen eigenen Audiodateien und Videos. Songs aus Streamingdiensten wie Apple Music oder Spotify lassen sich nicht verwenden.
 
 FUNKTIONEN
 
@@ -239,26 +216,19 @@ Der Wecker beginnt leise und wird über 5, 15 oder 30 Sekunden lauter.
 
 Wenn du diese Pro-Funktionen jetzt zu nutzen beginnst, behältst du sie auch nach der offiziellen Veröffentlichung.
 
-Wiederholen und Schlummern
-Wähl die Tage für jeden Wecker. Schlummern ist aus oder 1, 2, 5, 9 oder 10 Minuten.
-
 Deine Töne auf einen Blick
 Jeder Wecker zeigt ein Bild aus deinem Video oder das Cover deiner Audiodatei.
 
 Nachtmodus
 Dein iPhone wird zur Nachttischuhr, mit großen, sanften Ziffern, die du im Dunkeln lesen kannst.
 
-FORMATE
-MP3 / AAC / WAV / M4A / Ton aus Videos (MOV, MP4)
-
 HINWEISE
 - Erfordert iOS 26 oder neuer (AlarmKit)
 - Längere Töne belegen mehr Speicher. Ein 10-minütiger Ton hat etwa 50 MB.
+- Songs aus Streamingdiensten wie Apple Music oder Spotify lassen sich nicht importieren.
 """)
 
 ES_BODY = """My Sound Alarm es una app de despertador para iPhone que te despierta con tu parte favorita de una canción o el sonido de un {video}. Configuras tus alarmas en esta app, y la parte que elijas se repite hasta que la detengas.
-
-Importas sonidos desde tus propios archivos de audio y {video}s. Las canciones de servicios de streaming como Apple Music o Spotify no se pueden usar.
 
 FUNCIONES
 
@@ -291,21 +261,16 @@ La alarma empieza bajo y sube de volumen durante 5, 15 o 30 segundos.
 
 Si empiezas a usar estas funciones Pro durante el acceso anticipado, las conservas después del lanzamiento oficial.
 
-Repetición y posponer
-Elige los días de cada alarma. Posponer puede estar desactivado o en 1, 2, 5, 9 o 10 minutos.
-
 Tus sonidos de un vistazo
 Cada alarma muestra una imagen de tu {video} o la portada de tu archivo de audio.
 
 Modo noche
 Tu iPhone se convierte en un reloj de mesilla, con números grandes y suaves que puedes leer a oscuras.
 
-FORMATOS
-MP3 / AAC / WAV / M4A / Sonido de {video} (MOV, MP4)
-
 NOTAS
 - Requiere iOS 26 o posterior (AlarmKit)
 - Los sonidos largos ocupan más espacio. Un sonido de 10 minutos ocupa unos 50 MB.
+- Las canciones de servicios de streaming como Apple Music o Spotify no se pueden importar.
 """
 DESC["es-ES"] = ("Una app de despertador que te despierta con el estribillo de una canción o el sonido de un vídeo. Lo que elijas se repite hasta que lo detengas, también en modo silencio.",
                  ES_BODY.format(video="vídeo", guard="Protección contra quedarse dormido"))
@@ -314,8 +279,6 @@ DESC["es-MX"] = ("Una app de despertador que te despierta con el estribillo de u
 
 DESC["pt-BR"] = ("Um app de despertador que acorda você com o refrão de uma música ou o som de um vídeo. O trecho escolhido repete até você desligar, mesmo no modo silencioso.",
 """O My Sound Alarm é um app de despertador para iPhone que acorda você com o seu trecho favorito de uma música ou o som de um vídeo. Você configura os alarmes neste app, e o trecho escolhido repete até você desligar.
-
-Você importa sons dos seus próprios arquivos de áudio e vídeos. Músicas de serviços de streaming como Apple Music ou Spotify não podem ser usadas.
 
 RECURSOS
 
@@ -348,27 +311,20 @@ O alarme começa baixo e aumenta ao longo de 5, 15 ou 30 segundos.
 
 Se começar a usar esses recursos Pro durante o acesso antecipado, continua com eles depois do lançamento oficial.
 
-Repetição e soneca
-Escolha os dias de cada alarme. A soneca pode ficar desativada ou em 1, 2, 5, 9 ou 10 minutos.
-
 Seus sons de relance
 Cada alarme mostra uma imagem do seu vídeo ou a capa do seu arquivo de áudio.
 
 Modo noturno
 Seu iPhone vira um relógio de cabeceira, com números grandes e suaves para ler no escuro.
 
-FORMATOS
-MP3 / AAC / WAV / M4A / Som de vídeo (MOV, MP4)
-
 OBSERVAÇÕES
 - Requer iOS 26 ou posterior (AlarmKit)
 - Sons mais longos ocupam mais espaço. Um som de 10 minutos tem cerca de 50 MB.
+- Músicas de serviços de streaming como Apple Music ou Spotify não podem ser importadas.
 """)
 
 DESC["it"] = ("Un’app sveglia che ti sveglia con il ritornello di una canzone o con l’audio di un video. La parte che scegli si ripete finché non la fermi, anche in modalità silenziosa.",
 """My Sound Alarm è un’app sveglia per iPhone che ti sveglia con la tua parte preferita di una canzone o con l’audio di un video. Imposti le sveglie in questa app, e la parte che scegli si ripete finché non la fermi.
-
-Importi i suoni dai tuoi file audio e video. I brani dei servizi di streaming come Apple Music o Spotify non si possono usare.
 
 FUNZIONI
 
@@ -401,27 +357,20 @@ La sveglia parte piano e aumenta di volume in 5, 15 o 30 secondi.
 
 Se inizi a usare queste funzioni Pro durante l’accesso anticipato, le mantieni dopo il rilascio ufficiale.
 
-Ripetizione e posticipa
-Scegli i giorni di ogni sveglia. Posticipa può essere disattivato o di 1, 2, 5, 9 o 10 minuti.
-
 I tuoi suoni a colpo d’occhio
 Ogni sveglia mostra un’immagine del tuo video o la copertina del tuo file audio.
 
 Modalità notte
 Il tuo iPhone diventa un orologio da comodino, con numeri grandi e morbidi da leggere al buio.
 
-FORMATI
-MP3 / AAC / WAV / M4A / Audio da video (MOV, MP4)
-
 NOTE
 - Richiede iOS 26 o versioni successive (AlarmKit)
 - I suoni lunghi occupano più spazio. Un suono di 10 minuti pesa circa 50 MB.
+- I brani dei servizi di streaming come Apple Music o Spotify non si possono importare.
 """)
 
 DESC["nl-NL"] = ("Een wekker-app die je wekt met het refrein van een nummer of het geluid van een video. Het gekozen stuk herhaalt tot je het uitzet, ook in de stille modus.",
 """My Sound Alarm is een wekker-app voor iPhone die je wekt met je favoriete stuk van een nummer of het geluid van een video. Je stelt je wekkers in deze app in, en het gekozen stuk herhaalt tot je het uitzet.
-
-Je importeert geluiden uit je eigen audiobestanden en video’s. Nummers uit streamingdiensten zoals Apple Music of Spotify kun je niet gebruiken.
 
 FUNCTIES
 
@@ -454,27 +403,20 @@ De wekker begint zacht en wordt in 5, 15 of 30 seconden luider.
 
 Als je deze Pro-functies tijdens de vroege toegang gaat gebruiken, houd je ze na de officiële release.
 
-Herhalen en sluimeren
-Kies de dagen voor elke wekker. Sluimeren kan uit staan of 1, 2, 5, 9 of 10 minuten zijn.
-
 Je geluiden in één oogopslag
 Elke wekker toont een beeld uit je video of de illustratie van je audiobestand.
 
 Nachtmodus
 Je iPhone wordt een nachtkastjesklok, met grote, zachte cijfers die je in het donker kunt lezen.
 
-FORMATEN
-MP3 / AAC / WAV / M4A / Geluid uit video (MOV, MP4)
-
 OPMERKINGEN
 - Vereist iOS 26 of nieuwer (AlarmKit)
 - Langere geluiden nemen meer ruimte in. Een geluid van 10 minuten is ongeveer 50 MB.
+- Nummers uit streamingdiensten zoals Apple Music of Spotify kunnen niet worden geïmporteerd.
 """)
 
 DESC["ko"] = ("좋아하는 노래의 후렴이나 동영상 소리로 깨워 주는 알람 앱. 고른 부분이 끌 때까지 반복해서 울리고, 무음 모드에서도 울립니다.",
 """My Sound Alarm은 좋아하는 노래의 원하는 부분이나 동영상 소리로 깨워 주는 iPhone 알람 앱입니다. 알람은 이 앱에서 설정하고, 고른 부분이 끌 때까지 반복해서 울립니다.
-
-소리는 내 오디오 파일과 동영상에서 가져옵니다. Apple Music, Spotify 같은 스트리밍 서비스의 노래는 쓸 수 없습니다.
 
 ■ 주요 기능
 
@@ -507,27 +449,20 @@ My Sound Alarm의 알람은 Apple이 iOS 26에 추가한 AlarmKit으로 등록�
 
 사전 공개 기간에 Pro 기능을 쓰기 시작한 분은 정식 출시 후에도 그대로 쓸 수 있습니다.
 
-[반복과 다시 알림]
-요일별 반복을 지원합니다. 다시 알림은 끔 또는 1·2·5·9·10분 중에서 고를 수 있습니다.
-
 [소리를 한눈에]
 알람마다 동영상의 한 장면이나 오디오 파일의 아트워크를 보여 줍니다.
 
 [나이트 모드]
 iPhone을 머리맡 시계로 쓸 수 있습니다. 어두운 방에서도 읽기 쉬운 차분한 화면입니다.
 
-■ 지원 형식
-MP3 / AAC / WAV / M4A / 동영상(MOV, MP4)의 소리
-
 ■ 참고
 · iOS 26 이상이 필요합니다(AlarmKit)
 · 긴 소리일수록 용량을 더 씁니다. 10분짜리 소리는 약 50MB입니다
+· Apple Music, Spotify 같은 스트리밍 서비스의 노래는 가져올 수 없습니다
 """)
 
 DESC["zh-Hans"] = ("用歌曲副歌或视频声音叫醒你的闹钟 App。选好的片段会一直循环，直到你停止；静音模式下也会响。",
 """My Sound Alarm 是一款 iPhone 闹钟 App，可以用你最爱的歌曲片段或视频里的声音叫醒你。闹钟在这个 App 里设定，选好的片段会一直循环，直到你停止。
-
-声音来自你自己的音频文件和视频。无法使用 Apple Music、Spotify 等流媒体服务的歌曲。
 
 ■ 主要功能
 
@@ -560,27 +495,20 @@ My Sound Alarm 的闹钟通过 Apple 在 iOS 26 中加入的 AlarmKit 设定。�
 
 在抢先体验期间开始使用这些 Pro 功能的用户，正式发布后也可以继续使用。
 
-【重复与稍后提醒】
-可按星期设定重复。稍后提醒可关闭，或设为 1、2、5、9、10 分钟。
-
 【一眼认出你的声音】
 每个闹钟会显示视频中的画面或音频文件的封面。
 
 【夜间模式】
 把 iPhone 变成床头时钟，大而柔和的数字在暗处也易于阅读。
 
-■ 支持格式
-MP3 / AAC / WAV / M4A / 视频（MOV、MP4）中的声音
-
 ■ 注意事项
 · 需要 iOS 26 或更高版本（AlarmKit）
 · 声音越长，占用空间越多。10 分钟的声音约 50 MB
+· 无法导入 Apple Music、Spotify 等流媒体服务的歌曲
 """)
 
 DESC["pl"] = ("Aplikacja-budzik, która budzi cię refrenem piosenki albo dźwiękiem z wideo. Wybrany fragment powtarza się, dopóki go nie wyłączysz – także w trybie cichym.",
 """My Sound Alarm to aplikacja-budzik na iPhone’a, która budzi cię ulubionym fragmentem piosenki albo dźwiękiem z wideo. Budziki ustawiasz w tej aplikacji, a wybrany fragment powtarza się, dopóki go nie wyłączysz.
-
-Dźwięki importujesz z własnych plików audio i filmów. Utworów z serwisów streamingowych, takich jak Apple Music czy Spotify, nie da się użyć.
 
 FUNKCJE
 
@@ -613,27 +541,20 @@ Budzik zaczyna cicho i zgłaśnia się przez 5, 15 lub 30 sekund.
 
 Jeśli zaczniesz korzystać z tych funkcji Pro we wczesnym dostępie, zachowasz je po oficjalnym wydaniu.
 
-Powtarzanie i drzemka
-Wybierz dni dla każdego budzika. Drzemka może być wyłączona albo trwać 1, 2, 5, 9 lub 10 minut.
-
 Twoje dźwięki na pierwszy rzut oka
 Każdy budzik pokazuje kadr z wideo albo okładkę pliku audio.
 
 Tryb nocny
 Twój iPhone staje się zegarem przy łóżku, z dużymi, łagodnymi cyframi czytelnymi w ciemności.
 
-FORMATY
-MP3 / AAC / WAV / M4A / Dźwięk z wideo (MOV, MP4)
-
 UWAGI
 - Wymaga iOS 26 lub nowszego (AlarmKit)
 - Dłuższe dźwięki zajmują więcej miejsca. Dźwięk 10-minutowy to około 50 MB.
+- Utworów z serwisów streamingowych, takich jak Apple Music czy Spotify, nie da się zaimportować.
 """)
 
 DESC["cs"] = ("Aplikace budíku, která tě probudí refrénem písničky nebo zvukem z videa. Vybraná část se opakuje, dokud ji nevypneš – i v tichém režimu.",
 """My Sound Alarm je aplikace budíku pro iPhone, která tě probudí oblíbenou částí písničky nebo zvukem z videa. Budíky nastavuješ v této aplikaci a vybraná část se opakuje, dokud ji nevypneš.
-
-Zvuky importuješ z vlastních zvukových souborů a videí. Skladby ze streamovacích služeb, jako je Apple Music nebo Spotify, použít nejdou.
 
 FUNKCE
 
@@ -666,27 +587,20 @@ Budík začne potichu a během 5, 15 nebo 30 sekund zesílí.
 
 Pokud začneš tyto funkce Pro používat během předběžného přístupu, zůstanou ti i po oficiálním vydání.
 
-Opakování a odložení
-Vyber dny pro každý budík. Odložení může být vypnuté, nebo 1, 2, 5, 9 či 10 minut.
-
 Tvoje zvuky na první pohled
 Každý budík ukazuje záběr z videa nebo obal zvukového souboru.
 
 Noční režim
 Z iPhonu se stanou hodiny u postele, s velkými jemnými číslicemi čitelnými ve tmě.
 
-FORMÁTY
-MP3 / AAC / WAV / M4A / Zvuk z videa (MOV, MP4)
-
 POZNÁMKY
 - Vyžaduje iOS 26 nebo novější (AlarmKit)
 - Delší zvuky zabírají víc místa. 10minutový zvuk má asi 50 MB.
+- Skladby ze streamovacích služeb, jako je Apple Music nebo Spotify, se nedají importovat.
 """)
 
 DESC["ar-SA"] = ("تطبيق منبه يوقظك على لازمة أغنية أو صوت من فيديو. يتكرر الجزء الذي تختاره حتى توقفه، حتى في الوضع الصامت.",
 """My Sound Alarm تطبيق منبه لجهاز iPhone يوقظك على جزئك المفضل من أغنية أو على الصوت من فيديو. تضبط منبهاتك في هذا التطبيق، ويتكرر الجزء الذي تختاره حتى توقفه.
-
-تستورد الأصوات من ملفاتك الصوتية ومقاطع الفيديو الخاصة بك. لا يمكن استخدام أغاني خدمات البث مثل Apple Music وSpotify.
 
 الميزات
 
@@ -719,19 +633,14 @@ DESC["ar-SA"] = ("تطبيق منبه يوقظك على لازمة أغنية أ
 
 إذا بدأت استخدام ميزات Pro هذه خلال الوصول المبكر، تحتفظ بها بعد الإصدار الرسمي.
 
-التكرار والغفوة
-اختر أيام كل منبه. يمكن إيقاف الغفوة أو ضبطها على 1 أو 2 أو 5 أو 9 أو 10 دقائق.
-
 أصواتك في لمحة
 يعرض كل منبه لقطة من الفيديو أو صورة غلاف الملف الصوتي.
 
 الوضع الليلي
 يصبح iPhone ساعة بجانب السرير، بأرقام كبيرة وهادئة يسهل قراءتها في الظلام.
 
-الصيغ المدعومة
-MP3 / AAC / WAV / M4A / الصوت من الفيديو (MOV وMP4)
-
 ملاحظات
 - يتطلب iOS 26 أو أحدث (AlarmKit)
 - الأصوات الأطول تشغل مساحة أكبر. الصوت بطول 10 دقائق يبلغ نحو 50 ميغابايت.
+- لا يمكن استيراد أغاني خدمات البث مثل Apple Music وSpotify.
 """)
