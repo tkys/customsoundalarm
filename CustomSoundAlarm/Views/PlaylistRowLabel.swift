@@ -99,6 +99,9 @@ struct PlaylistEmptyStateView: View {
                 Label("playlist_new", systemImage: "plus")
                     .foregroundStyle(Color.actionText)
             }
+            // List の行全体ではなく、ボタンの部分だけが反応するようにする
+            // （説明文のタップで作成画面が開かないように）。
+            .buttonStyle(.borderless)
             .accessibilityIdentifier(createButtonIdentifier)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
