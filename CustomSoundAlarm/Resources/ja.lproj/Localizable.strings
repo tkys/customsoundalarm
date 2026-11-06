@@ -278,6 +278,8 @@
 "playlist_tracks" = "曲";
 "playlist_add_track" = "曲を追加";
 "playlist_empty" = "プレイリストがありません";
+"playlist_empty_explanation" = "いくつかの音をまとめて、順番やシャッフルで鳴らせます。毎朝ちがう音で起きたいときに。";
+"playlist_empty_import_hint" = "音を取り込むと、好きな曲をまとめられます";
 "playlist_total_fmt" = "合計: %@";
 "playlist_limit_note" = "合計10分まで。";
 "playlist_limit_exceeded" = "合計が10分を超えています。";

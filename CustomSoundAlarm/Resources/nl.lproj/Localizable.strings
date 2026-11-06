@@ -278,6 +278,8 @@
 "playlist_tracks" = "Nummers";
 "playlist_add_track" = "Nummer toevoegen";
 "playlist_empty" = "Nog geen afspeellijsten";
+"playlist_empty_explanation" = "Combineer meerdere geluiden en speel ze in volgorde of shuffle. Ideaal om elke ochtend met een ander geluid wakker te worden.";
+"playlist_empty_import_hint" = "Importeer een geluid om een afspeellijst met je favoriete nummers te maken.";
 "playlist_total_fmt" = "Totaal: %@";
 "playlist_limit_note" = "Maximaal 10 minuten in totaal.";
 "playlist_limit_exceeded" = "Het totaal is meer dan 10 minuten.";

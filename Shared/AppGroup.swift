@@ -116,6 +116,15 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト・スクリーンショット用: 自分の音（取り込み音）を空にする（DEBUGのみ・#183）
+    static var isUITestResetSounds: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-reset-sounds")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト・スクリーンショット用: ライブラリのサンプルを入れる（DEBUGのみ・#160）
     static var isUITestSeedLibrary: Bool {
     #if DEBUG

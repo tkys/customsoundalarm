@@ -278,6 +278,8 @@
 "playlist_tracks" = "المقاطع";
 "playlist_add_track" = "إضافة مقطع";
 "playlist_empty" = "لا توجد قوائم تشغيل بعد";
+"playlist_empty_explanation" = "اجمع عدة أصوات وشغّلها بالترتيب أو عشوائيًا. مناسب للاستيقاظ بصوت مختلف كل صباح.";
+"playlist_empty_import_hint" = "استورد صوتًا لإنشاء قائمة تشغيل من أغانيك المفضلة.";
 "playlist_total_fmt" = "الإجمالي: %@";
 "playlist_limit_note" = "حتى 10 دقائق إجمالاً.";
 "playlist_limit_exceeded" = "الإجمالي يتجاوز 10 دقائق.";

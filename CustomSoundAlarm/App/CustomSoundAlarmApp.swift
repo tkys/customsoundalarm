@@ -29,6 +29,12 @@ struct CustomSoundAlarmApp: App {
                     if AppGroup.isUITestResetPlaylists {
                         PlaylistStore.shared.resetForUITest()
                     }
+                    if AppGroup.isUITestResetSounds {
+                        // 空のプレイリスト画面で「自分の音0件」の案内を出すため。
+                        // オンボーディングは出さずに画面を直接開けるようにする。
+                        AppGroup.hasCompletedOnboarding = true
+                        SoundStore.shared.resetForUITest()
+                    }
                     if AppGroup.isUITestSeedLibrary {
                         AppGroup.hasCompletedOnboarding = true
                         AlarmStore.shared.resetForUITest()

@@ -24,6 +24,93 @@ final class AddAlarmRedesignUITests: XCTestCase {
         )
     }
 
+    private func openSoundChoice() -> XCUIElement {
+        let soundRow = findElement("addAlarm.soundRow")
+        var swipes = 0
+        while (!soundRow.exists || !soundRow.isHittable) && swipes < 16 {
+            app.collectionViews["addAlarm.root"].swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(
+            soundRow.waitForExistence(timeout: 5),
+            "sound row should exist: \(app.debugDescription)"
+        )
+        soundRow.tap()
+
+        let choice = app.collectionViews["alarmSoundChoice.root"]
+        XCTAssertTrue(
+            choice.waitForExistence(timeout: 15),
+            "sound choice should open: \(app.debugDescription)"
+        )
+        return choice
+    }
+
+    func testSoundChoicePlaylistEmptyStateExplainsAndOffersCreate() {
+        app.launchArguments = [
+            "-uitest-open-add-alarm",
+            "-uitest-reset-playlists",
+            "-uitest-reset-sounds"
+        ]
+        app.launch()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
+
+        _ = openSoundChoice()
+        let explanation = app.staticTexts["playlist.empty.explanation"]
+        XCTAssertTrue(
+            explanation.waitForExistence(timeout: 10),
+            "empty explanation should appear: \(app.debugDescription)"
+        )
+        XCTAssertTrue(
+            app.staticTexts["playlist.empty.importHint"].exists,
+            "import hint should appear when there are no own sounds"
+        )
+        let create = app.buttons["alarmSoundChoice.addPlaylist"]
+        XCTAssertTrue(create.exists)
+        XCTAssertLessThan(
+            explanation.frame.minY,
+            create.frame.minY,
+            "explanation should be read before the create button"
+        )
+    }
+
+    func testSoundChoicePlaylistEmptyStateHiddenWhenPlaylistsExist() {
+        app.launchArguments = [
+            "-uitest-open-add-alarm",
+            "-uitest-seed-design-audit"
+        ]
+        app.launch()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
+
+        _ = openSoundChoice()
+        XCTAssertFalse(
+            app.staticTexts["playlist.empty.explanation"]
+                .waitForExistence(timeout: 2),
+            "empty explanation should not appear when playlists exist"
+        )
+        XCTAssertTrue(app.buttons["alarmSoundChoice.addPlaylist"].exists)
+    }
+
+    func testSoundChoicePlaylistEmptyStateAtAccessibilitySize() {
+        app.launchArguments = [
+            "-uitest-open-add-alarm",
+            "-uitest-reset-playlists",
+            "-uitest-reset-sounds",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryAccessibilityXXXL"
+        ]
+        app.launch()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
+
+        _ = openSoundChoice()
+        let explanation = app.staticTexts["playlist.empty.explanation"]
+        XCTAssertTrue(explanation.waitForExistence(timeout: 10))
+        XCTAssertFalse(
+            explanation.label.hasSuffix("…"),
+            "AX5 explanation should not be truncated: \(explanation.label)"
+        )
+        XCTAssertTrue(app.buttons["alarmSoundChoice.addPlaylist"].exists)
+    }
+
     func testOversleepDetailsAppearOnlyWhenOn() {
         launchAdd()
 

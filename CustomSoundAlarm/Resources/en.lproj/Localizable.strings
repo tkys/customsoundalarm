@@ -278,6 +278,8 @@
 "playlist_tracks" = "Tracks";
 "playlist_add_track" = "Add track";
 "playlist_empty" = "No playlists yet";
+"playlist_empty_explanation" = "Combine several sounds and play them in order or shuffled. Great for waking up to a different sound each morning.";
+"playlist_empty_import_hint" = "Import a sound to build a playlist from your favorite tracks.";
 "playlist_total_fmt" = "Total: %@";
 "playlist_limit_note" = "Up to 10 minutes total.";
 "playlist_limit_exceeded" = "The total exceeds 10 minutes.";
