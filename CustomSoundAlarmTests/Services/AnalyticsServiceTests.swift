@@ -449,6 +449,7 @@ struct AnalyticsEventTests {
             .playlistRescheduleFailed(reason: "schedule_failed"),
             .alarmSyncRescheduled(trigger: .foreground, changed: 1, missing: 0, forced: 0),
             .alarmSyncDeferred(trigger: .foreground, count: 1),
+            .alarmOrphanCancelled(trigger: .launch, count: 1),
             .alarmFired(wasAppForeground: true, hour: 8, isRepeating: false, detection: "observer"),
             .alarmStopped(hour: 8),
             .alarmSnoozed(from: "observer"),
@@ -776,6 +777,15 @@ struct AnalyticsEventTests {
         #expect(props.count == 2)
         #expect(props["trigger"] as? String == "intent")
         #expect(props["count"] as? Int == 2)
+    }
+
+    @Test
+    func alarmOrphanCancelled_nameAndProperties() {
+        let event = AnalyticsEvent.alarmOrphanCancelled(trigger: .launch, count: 3)
+        #expect(event.name == "alarm_orphan_cancelled")
+        #expect(event.properties.count == 2)
+        #expect(event.properties["trigger"] as? String == "launch")
+        #expect(event.properties["count"] as? Int == 3)
     }
 
     @Test

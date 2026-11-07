@@ -115,7 +115,7 @@ platform :ios do
         export_compliance_is_exempt: false
       },
       app_version: "1.8.1",
-      build_number: "11",
+      build_number: "12",
       languages: ["en-US", "en-GB", "ja", "fr-FR", "de-DE", "es-ES", "es-MX", "pt-BR", "it", "nl-NL", "ko", "zh-Hans", "ar-SA", "pl", "cs"]
     )
   end
