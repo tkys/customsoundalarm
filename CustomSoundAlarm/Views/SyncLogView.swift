@@ -5,6 +5,7 @@ import SwiftUI
 /// 「なぜ作り直したか」を確認するための開発者向け画面。
 struct SyncLogView: View {
     @State private var entries: [AlarmSyncLogEntry] = AppGroup.alarmSyncLog
+    @State private var counts = AlarmScheduler.shared.debugAlarmCounts()
 
     private static let timestampFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -14,6 +15,13 @@ struct SyncLogView: View {
 
     var body: some View {
         List {
+            // 取り残し（アプリに出ないのに AlarmKit に残っているアラーム）の確認用
+            Section("AlarmKit") {
+                row("登録", "\(counts.registered)件")
+                row("対応表", "\(counts.mapped)件")
+                row("取り残し", "\(counts.unmapped)件")
+                    .accessibilityIdentifier("syncLog.unmapped")
+            }
             if entries.isEmpty {
                 Text("同期の記録はまだありません")
                     .foregroundStyle(Color.textSecondary)
@@ -48,6 +56,11 @@ struct SyncLogView: View {
         }
         .onAppear {
             entries = AppGroup.alarmSyncLog
+            counts = AlarmScheduler.shared.debugAlarmCounts()
+        }
+        .refreshable {
+            entries = AppGroup.alarmSyncLog
+            counts = AlarmScheduler.shared.debugAlarmCounts()
         }
     }
 
