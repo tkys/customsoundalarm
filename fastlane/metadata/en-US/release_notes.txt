@@ -12,8 +12,9 @@ A new Library tab keeps your sounds and playlists in one place.
 ■ Now in 13 languages
 My Sound Alarm is now available in French, German, Spanish, Portuguese, Italian, Dutch, Korean, Simplified Chinese, Polish, Czech and Arabic, following your device language.
 
-■ Bug fix
+■ Bug fixes
 Fixed an issue where a repeating alarm could ring again within the same minute after you stopped it.
+Fixed an issue where an alarm that no longer appeared in the app could ring at a time you did not set. After updating, open the app to remove any such alarms.
 
 ■ Easier to read
 Text colors and contrast have been revised, and screens stay readable with larger text sizes.

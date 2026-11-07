@@ -12,8 +12,9 @@ Nowa karta Biblioteka zbiera Twoje dźwięki i playlisty w jednym miejscu.
 ■ Teraz po polsku
 My Sound Alarm jest już dostępny po polsku i w 12 innych językach. Aplikacja korzysta z języka urządzenia.
 
-■ Poprawka
+■ Poprawki
 Powtarzany budzik mógł zadzwonić ponownie w tej samej minucie po wyłączeniu. To zostało naprawione.
+Budzik, którego nie było już widać w aplikacji, mógł dzwonić o godzinie, której nie ustawiono. To zostało naprawione: po aktualizacji otwórz aplikację, aby usunąć takie budziki.
 
 ■ Czytelniej
 Poprawiliśmy kolory i kontrast tekstu, a ekrany pozostają czytelne przy dużych rozmiarach tekstu.

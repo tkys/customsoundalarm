@@ -14,6 +14,7 @@ My Sound Alarm ist jetzt auf Deutsch und in 12 weiteren Sprachen verfügbar. Die
 
 ■ Fehlerbehebung
 Ein Wiederholungswecker konnte nach dem Stoppen in derselben Minute erneut klingeln. Das ist behoben.
+Ein Wecker, der nicht mehr in der App angezeigt wurde, konnte zu einer Uhrzeit klingeln, die du nicht eingestellt hast. Das ist behoben: Öffne nach dem Update die App, um solche Wecker zu entfernen.
 
 ■ Besser lesbar
 Textfarben und Kontrast wurden überarbeitet, und die Bildschirme bleiben auch mit großen Textgrößen lesbar.

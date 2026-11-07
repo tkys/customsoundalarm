@@ -12,8 +12,9 @@ Le nouvel onglet Bibliothèque réunit vos sons et vos playlists.
 ■ Désormais en français
 My Sound Alarm est maintenant disponible en français, ainsi qu’en 12 autres langues. L’app suit la langue de votre appareil.
 
-■ Correction
+■ Corrections
 Une alarme répétée pouvait sonner de nouveau dans la même minute après avoir été arrêtée. C’est corrigé.
+Une alarme qui n’apparaissait plus dans l’app pouvait sonner à une heure que vous n’aviez pas réglée. C’est corrigé : après la mise à jour, ouvrez l’app pour supprimer ces alarmes.
 
 ■ Plus lisible
 Les couleurs et le contraste du texte ont été revus, et les écrans restent lisibles avec les grandes tailles de texte.

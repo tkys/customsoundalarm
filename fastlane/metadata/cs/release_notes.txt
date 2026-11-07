@@ -12,8 +12,9 @@ Nová karta Knihovna shromažďuje vaše zvuky a playlisty na jednom místě.
 ■ Nově v češtině
 My Sound Alarm je nyní k dispozici v češtině a v 12 dalších jazycích. Aplikace se řídí jazykem zařízení.
 
-■ Oprava
+■ Opravy
 Opakovaný budík mohl po vypnutí zazvonit znovu ve stejné minutě. To je opraveno.
+Budík, který se už v aplikaci nezobrazoval, mohl zvonit v čase, který jste nenastavili. To je opraveno: po aktualizaci otevřete aplikaci a takové budíky se odstraní.
 
 ■ Lépe čitelné
 Upravili jsme barvy a kontrast textu a obrazovky zůstávají čitelné i při velkém písmu.

@@ -12,8 +12,9 @@ Het nieuwe tabblad Bibliotheek bundelt je geluiden en afspeellijsten op één pl
 ■ Nu in het Nederlands
 My Sound Alarm is nu beschikbaar in het Nederlands en in 12 andere talen. De app volgt de taal van je apparaat.
 
-■ Oplossing
+■ Oplossingen
 Een herhalende wekker kon binnen dezelfde minuut opnieuw afgaan nadat je hem had gestopt. Dat is opgelost.
+Een wekker die niet meer in de app stond, kon afgaan op een tijd die je niet had ingesteld. Dat is opgelost: open na de update de app om zulke wekkers te verwijderen.
 
 ■ Beter leesbaar
 Tekstkleuren en contrast zijn herzien, en schermen blijven leesbaar met grote tekstgroottes.

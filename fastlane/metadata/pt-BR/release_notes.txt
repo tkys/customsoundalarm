@@ -12,8 +12,9 @@ A nova aba Biblioteca reúne seus sons e playlists em um só lugar.
 ■ Agora em português
 O My Sound Alarm agora está disponível em português e em mais 12 idiomas. O app segue o idioma do seu aparelho.
 
-■ Correção
+■ Correções
 Um alarme repetido podia tocar de novo no mesmo minuto depois de ser parado. Isso foi corrigido.
+Um alarme que não aparecia mais no app podia tocar em um horário que você não configurou. Isso foi corrigido: depois de atualizar, abra o app para remover esses alarmes.
 
 ■ Mais fácil de ler
 As cores e o contraste do texto foram revistos, e as telas continuam legíveis com tamanhos de texto grandes.

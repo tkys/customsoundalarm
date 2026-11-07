@@ -12,8 +12,9 @@ La nueva pestaña Biblioteca reúne tus sonidos y tus listas en un solo lugar.
 ■ Ahora en español
 My Sound Alarm ya está disponible en español y en otros 12 idiomas. La app sigue el idioma de tu dispositivo.
 
-■ Corrección
+■ Correcciones
 Una alarma repetida podía volver a sonar en el mismo minuto después de detenerla. Ya está corregido.
+Una alarma que ya no aparecía en la app podía sonar a una hora que no habías configurado. Ya está corregido: después de actualizar, abre la app para eliminar esas alarmas.
 
 ■ Más fácil de leer
 Revisamos los colores y el contraste del texto, y las pantallas se leen bien con tamaños de texto grandes.

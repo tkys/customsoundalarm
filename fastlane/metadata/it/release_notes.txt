@@ -12,8 +12,9 @@ La nuova scheda Libreria raccoglie i tuoi suoni e le tue playlist in un unico po
 ■ Ora in italiano
 My Sound Alarm è ora disponibile in italiano e in altre 12 lingue. L’app segue la lingua del tuo dispositivo.
 
-■ Correzione
+■ Correzioni
 Una sveglia ripetuta poteva suonare di nuovo nello stesso minuto dopo averla fermata. Ora è corretto.
+Una sveglia che non compariva più nell’app poteva suonare a un orario che non avevi impostato. Ora è corretto: dopo l’aggiornamento, apri l’app per rimuovere queste sveglie.
 
 ■ Più leggibile
 Colori e contrasto del testo sono stati rivisti, e le schermate restano leggibili anche con le dimensioni del testo più grandi.
