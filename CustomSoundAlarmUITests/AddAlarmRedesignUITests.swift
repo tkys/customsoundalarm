@@ -45,6 +45,27 @@ final class AddAlarmRedesignUITests: XCTestCase {
         return choice
     }
 
+    /// 追加画面 → サウンド → 動画から音声を追加 で、取り込み画面が開いたまま残ること。
+    /// 1.8.1 では取り込みのシートが各セクションに複製され、開いた直後に
+    /// アラームの追加画面ごと閉じて一覧に戻っていた（実機で再現）。
+    func testAddVideoFromSoundChoiceKeepsImportOpen() {
+        launchAdd()
+        _ = openSoundChoice()
+
+        let addVideo = app.buttons["soundPicker.addVideo"]
+        XCTAssertTrue(addVideo.waitForExistence(timeout: 10))
+        addVideo.tap()
+
+        let importRoot = findElement("videoImport.root")
+        XCTAssertTrue(
+            importRoot.waitForExistence(timeout: 10),
+            "video import should open: \(app.debugDescription)"
+        )
+        // 開いた直後に閉じないこと（不具合は1秒以内に起きていた）
+        Thread.sleep(forTimeInterval: 3.0)
+        XCTAssertTrue(importRoot.exists, "video import should stay open: \(app.debugDescription)")
+    }
+
     func testSoundChoicePlaylistEmptyStateExplainsAndOffersCreate() {
         app.launchArguments = [
             "-uitest-open-add-alarm",

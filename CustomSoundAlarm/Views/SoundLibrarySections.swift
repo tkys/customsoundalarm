@@ -37,34 +37,12 @@ struct SoundLibrarySections: View {
     }
 
     var body: some View {
-        Group {
-            importedSection
-            presetSection
-            errorSection
-        }
-        .soundImport(
-            selectedSound: $selectedSound,
-            isImporting: $isImporting,
-            pendingAudio: $pendingAudio,
-            showingVideoImport: $showingVideoImport,
-            errorMessage: $errorMessage
-        )
-        .alert(String(localized: "rename"), isPresented: Binding(
-            get: { renamingSound != nil },
-            set: { if !$0 { renamingSound = nil } }
-        )) {
-            TextField("sound_name_placeholder", text: $renameText)
-            Button("save") {
-                if let sound = renamingSound, !renameText.isEmpty {
-                    soundStore.rename(sound, to: renameText)
-                    if selectedSound?.id == sound.id {
-                        selectedSound = soundStore.sounds.first { $0.id == sound.id }
-                    }
-                }
-                renamingSound = nil
-            }
-            Button("cancel", role: .cancel) { renamingSound = nil }
-        }
+        // 取り込み・名前変更の提示は「動画から音声を追加」の行1つだけに付ける（下の addVideo）。
+        // Group や Section に付けると、List の中では各セクション・各行に複製され、
+        // 同じシートを何度も開こうとして失敗し、アラームの追加画面ごと閉じてしまう（1.8.1・実機で再現）。
+        importedSection
+        presetSection
+        errorSection
     }
 
     // MARK: - My Sounds
@@ -89,6 +67,29 @@ struct SoundLibrarySections: View {
                 }
             }
             .accessibilityIdentifier("soundPicker.addVideo")
+            .soundImport(
+                selectedSound: $selectedSound,
+                isImporting: $isImporting,
+                pendingAudio: $pendingAudio,
+                showingVideoImport: $showingVideoImport,
+                errorMessage: $errorMessage
+            )
+            .alert(String(localized: "rename"), isPresented: Binding(
+                get: { renamingSound != nil },
+                set: { if !$0 { renamingSound = nil } }
+            )) {
+                TextField("sound_name_placeholder", text: $renameText)
+                Button("save") {
+                    if let sound = renamingSound, !renameText.isEmpty {
+                        soundStore.rename(sound, to: renameText)
+                        if selectedSound?.id == sound.id {
+                            selectedSound = soundStore.sounds.first { $0.id == sound.id }
+                        }
+                    }
+                    renamingSound = nil
+                }
+                Button("cancel", role: .cancel) { renamingSound = nil }
+            }
 
             Button {
                 isImporting = true
