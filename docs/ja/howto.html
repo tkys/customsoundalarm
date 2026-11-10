@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>iPhone で曲の好きな部分をアラームにする方法（サビ・GarageBand なし） – My Sound Alarm</title>
-<meta name="description" content="時計アプリ・GarageBand・My Sound Alarm を比べながら、iPhone で曲の好きな部分（サビ）をアラームにする方法を説明します。GarageBand なしで音声ファイルや動画の音を使う方法も。">
+<meta name="description" content="iPhone の時計アプリは、アラームの曲を頭から鳴らします。サビなど途中から鳴らすには、GarageBand で30秒以内の着信音を作るか、切り取りのできるアプリを使います。それぞれの手順と制限です。">
 <link rel="canonical" href="https://tkys.github.io/customsoundalarm/ja/howto.html">
 <link rel="alternate" hreflang="en" href="https://tkys.github.io/customsoundalarm/howto.html">
 <link rel="alternate" hreflang="ja" href="https://tkys.github.io/customsoundalarm/ja/howto.html">
@@ -14,7 +14,7 @@
 <link rel="alternate" hreflang="es" href="https://tkys.github.io/customsoundalarm/es/howto.html">
 <link rel="alternate" hreflang="x-default" href="https://tkys.github.io/customsoundalarm/howto.html">
 <meta property="og:title" content="iPhone で曲の好きな部分をアラームにする方法（サビ・GarageBand なし）">
-<meta property="og:description" content="時計アプリ・GarageBand・My Sound Alarm を比べながら、iPhone で曲の好きな部分（サビ）をアラームにする方法を説明します。GarageBand なしで音声ファイルや動画の音を使う方法も。">
+<meta property="og:description" content="iPhone の時計アプリは、アラームの曲を頭から鳴らします。サビなど途中から鳴らすには、GarageBand で30秒以内の着信音を作るか、切り取りのできるアプリを使います。それぞれの手順と制限です。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://tkys.github.io/customsoundalarm/ja/howto.html">
 <meta property="og:site_name" content="My Sound Alarm">
@@ -85,20 +85,22 @@ h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
 footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wrap}
 .made{color:var(--muted);flex-basis:100%}
 
-.howto .method{margin:26px 0;padding:20px;border:1px solid var(--line);border-radius:14px}
-.howto .method h2{margin:0 0 6px;font-size:22px;line-height:1.35}
-.howto .method-summary{margin:0 0 10px;color:var(--muted)}
-.howto .steps{margin:8px 0 0;padding-left:1.2em}
-.howto .steps li{margin:4px 0}
-.howto .video{margin:26px 0;padding:18px 20px;border-left:4px solid var(--accent);background:#FFF8F2;border-radius:0 12px 12px 0}
-.howto .video h2{margin:0 0 8px;font-size:22px}
-.howto .compare{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px;line-height:1.5;table-layout:fixed}
-.howto .compare th:first-child,.howto .compare td:first-child{width:27%}
-.howto .compare th,.howto .compare td{border-top:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
-.howto .compare thead th{font-size:13px;color:var(--muted);font-weight:600}
-.howto .compare tbody th{font-weight:500}
-@media(max-width:560px){.howto .compare{font-size:12px}.howto .compare thead th{font-size:11px}.howto .compare th,.howto .compare td{padding:7px 4px}.howto .method{padding:16px}}
-@media(max-width:380px){.howto .compare thead th{font-size:10px}.howto .compare th:first-child,.howto .compare td:first-child{width:22%}}
+.howto .intro p{margin:0 0 14px}
+.howto h2{font-size:22px;margin:48px 0 10px}
+.howto section p{margin:0 0 12px}
+.howto .steps{margin:12px 0 0;padding-inline-start:1.4em}
+.howto .steps li{margin:6px 0;padding-inline-start:.2em}
+.howto .steps li::marker{color:var(--muted);font-variant-numeric:tabular-nums}
+.howto .notes{margin:14px 0 0;padding-inline-start:1.2em;font-size:16px;color:var(--muted)}
+.howto .notes li{margin:4px 0}
+.howto .shot{margin:16px 0 4px}
+.howto .cta{margin:24px 0 0}
+.howto .tablewrap{overflow-x:auto;margin-top:12px}
+.howto .compare{width:100%;table-layout:fixed;border-collapse:collapse;font-size:15px;line-height:1.5}
+.howto .compare th,.howto .compare td{border-bottom:1px solid var(--line);padding:9px 10px 9px 0;text-align:start;vertical-align:top;word-break:auto-phrase;overflow-wrap:anywhere}
+.howto .compare thead th{font-weight:600;border-bottom-color:var(--text)}
+.howto .compare tbody th{font-weight:400;color:var(--muted);width:22%}
+@media(max-width:560px){.howto .compare{font-size:13px}.howto .compare th,.howto .compare td{padding-inline-end:6px}}
 </style>
 </head>
 <body>
@@ -107,13 +109,11 @@ footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wr
 <a href="#languages">日本語 ▾</a></header>
 <main class="doc howto">
 <h1>iPhone で曲の好きな部分をアラームにする方法</h1>
-<div style="margin:18px 0 8px"><a class="badge" href="https://apps.apple.com/app/apple-store/id6760616800?pt=128010919&ct=website&mt=8" data-pos="howto_top" rel="noopener"><img src="../assets/img/badges/ja-jp.svg" alt="App Store からダウンロード" width="142" height="52"></a></div>
-<p class="lead">iPhone で曲の好きな部分（サビなど）をアラームにする方法は、大きく3つあります。できることと手間を、事実だけで比べます。</p>
-<section class="method"><h2>時計アプリ</h2><p class="method-summary">ライブラリの曲（ダウンロード済みの Apple Music の曲など）を選べます。アラームは曲の頭から鳴ります。</p><ol class="steps"><li>時計アプリで「アラーム」→「＋」を開く。</li><li>「サウンド」でライブラリの曲を選ぶ。</li><li>アラームを保存する。曲は頭から鳴ります。</li></ol></section><section class="method"><h2>GarageBand</h2><p class="method-summary">曲の好きな部分を切り出せます。着信音は30秒までで、書き出しの手順が必要です。</p><ol class="steps"><li>GarageBand でプロジェクトを作り、使いたい音声を読み込む。</li><li>好きな部分を切り出す。着信音は30秒まで。</li><li>着信音として書き出し、時計アプリのアラーム音に設定する。</li></ol></section><section class="method"><h2>My Sound Alarm</h2><p class="method-summary">波形で好きな部分を選べます。音声ファイルは長さそのまま、動画は最長10分まで使えます。</p><ol class="steps"><li>音声ファイルか動画を開く。</li><li>波形で鳴らしたい部分を選ぶ。</li><li>アラーム音として保存する。iOS 26 以降が必要です（AlarmKit で登録）。</li></ol></section>
-<section class="video"><h2>動画の音をアラームにする方法</h2><p>写真ライブラリやファイルアプリから動画を選ぶと、音声を取り出して波形で部分を選べます。動画は最長10分。旅行の動画や家族・ペットの声もアラームの音にできます。</p></section>
-<section class="choose"><h2>どれを選ぶか</h2>
-<table class="compare"><thead><tr><th></th><th>時計アプリ</th><th>GarageBand</th><th>My Sound Alarm</th></tr></thead><tbody><tr><th>曲の途中から鳴らす</th><td>頭からのみ</td><td>できる</td><td>できる</td></tr><tr><th>長さ</th><td>切り出しなし</td><td>30秒まで</td><td>音声はそのまま、動画は10分まで</td></tr><tr><th>書き出しの手間</th><td>不要</td><td>必要</td><td>不要</td></tr><tr><th>動画の音</th><td>対象外</td><td>音声ファイルが必要</td><td>使える</td></tr><tr><th>Apple Music の曲</th><td>ダウンロード済みなら使える</td><td>使えない</td><td>使えない（保護された曲）</td></tr></tbody></table></section>
-<div style="margin:36px 0 8px"><a class="badge" href="https://apps.apple.com/app/apple-store/id6760616800?pt=128010919&ct=website&mt=8" data-pos="howto_bottom" rel="noopener"><img src="../assets/img/badges/ja-jp.svg" alt="App Store からダウンロード" width="142" height="52"></a></div>
+<div class="intro"><p>時計アプリでも曲をアラームにできますが、鳴るのは曲の頭からです。途中から鳴らす設定はありません。</p><p>サビから鳴らしたいときは、GarageBand で30秒以内の着信音を作るか、音を切り取れるアラームアプリを使います。</p><p>このページは、そうしたアプリの一つ My Sound Alarm の開発者が書いています。時計アプリと GarageBand の手順は Apple のサポート情報に沿っています。</p></div>
+<section><h2>頭から鳴ればいいなら：時計アプリ</h2><ol class="steps"><li>時計アプリの「アラーム」で「＋」をタップ。</li><li>「サウンド」→「曲を選択」をタップ。</li><li>曲を選んで「保存」。</li></ol><ul class=notes><li>Apple Music の曲は、iPhone にダウンロードしてあれば選べます。</li></ul></section><section><h2>30秒以内でいいなら：GarageBand</h2><p>Apple の作曲アプリ GarageBand で、曲の一部を着信音として書き出します。書き出した着信音は、時計アプリのアラームでも選べます。タップする回数は多めです。</p><ol class="steps"><li>ホーム画面で GarageBand のアイコンを長押しし、「新規オーディオレコーディングを作成」をタップ。</li><li>上のトラックボタン、ループブラウザボタンの順にタップ。</li><li>「ファイル」→「“ファイル” から項目をブラウズ」で音声ファイルを選び、長押ししてトラックの左端までドラッグ。</li><li>音声の両端をドラッグして30秒以内にし、左端まで寄せる。</li><li>「My Songs」で曲を選び、共有ボタン →「着信音」→「書き出し」。</li><li>時計アプリでアラームの「サウンド」を開き、「着信音」の一覧から選ぶ。</li></ol><ul class=notes><li>30秒を超えていると、書き出すときに自動で短くなります。</li><li>ミュージックアプリの曲は、保護されていないものだけ使えます。保護された曲はグレーで表示され、選べません。</li></ul></section><section><h2>30秒を超えたい、動画の音を使いたいなら：My Sound Alarm</h2><p>音声ファイルか動画を開き、波形の上で鳴らす部分を選ぶアラームアプリです。書き出しの手順はありません。</p><img class="shot" src="../assets/img/crop-ja.jpg" alt="My Sound Alarm で、波形の上で鳴らす部分を選ぶ画面" width="340" height="383"><ol class="steps"><li>アラームを追加するときに「サウンド」をタップ。</li><li>「音声ファイルから追加」（MP3・AAC・WAV・M4A）か「動画から音声を追加」（写真ライブラリ・ファイル）をタップ。</li><li>波形の上で範囲の両端を動かし、「この範囲を追加」をタップ。</li></ol><ul class=notes><li>音声ファイルは長さの制限がありません。動画は10分までです。</li><li>選んだ部分は、止めるまでくり返し鳴ります。</li><li>ミュージックアプリの曲（Apple Music を含む）は読み込めません。</li><li>Apple の AlarmKit でアラームを登録するため、iOS 26 以降が必要です。</li></ul><div class="cta"><a class="badge" href="https://apps.apple.com/app/apple-store/id6760616800?pt=128010919&ct=website&mt=8" data-pos="howto_top" rel="noopener"><img src="../assets/img/badges/ja-jp.svg" alt="App Store からダウンロード" width="142" height="52"></a></div></section>
+<section><h2>並べると</h2>
+<div class="tablewrap"><table class="compare"><thead><tr><th></th><th>時計</th><th>GarageBand</th><th>My Sound Alarm</th></tr></thead><tbody><tr><th>途中から鳴らす</th><td>できない</td><td>できる</td><td>できる</td></tr><tr><th>長さ</th><td>曲まるごと</td><td>30秒まで</td><td>制限なし（動画は10分まで）</td></tr><tr><th>書き出し</th><td>不要</td><td>必要</td><td>不要</td></tr><tr><th>動画の音</th><td>使えない</td><td>使えない</td><td>使える</td></tr><tr><th>Apple Music の曲</th><td>ダウンロード済みなら使える</td><td>保護されていない曲だけ</td><td>使えない</td></tr></tbody></table></div></section>
+<div class="cta"><a class="badge" href="https://apps.apple.com/app/apple-store/id6760616800?pt=128010919&ct=website&mt=8" data-pos="howto_bottom" rel="noopener"><img src="../assets/img/badges/ja-jp.svg" alt="App Store からダウンロード" width="142" height="52"></a></div>
 </main>
 <nav id="languages" class="langs" aria-label="Language"><a href="https://tkys.github.io/customsoundalarm/howto.html?lang=en" hreflang="en" lang="en">English</a> <a href="https://tkys.github.io/customsoundalarm/ja/howto.html" hreflang="ja" lang="ja" aria-current=page>日本語</a> <a href="https://tkys.github.io/customsoundalarm/fr/howto.html" hreflang="fr" lang="fr">Français</a> <a href="https://tkys.github.io/customsoundalarm/de/howto.html" hreflang="de" lang="de">Deutsch</a> <a href="https://tkys.github.io/customsoundalarm/es/howto.html" hreflang="es" lang="es">Español</a></nav>
 <footer><span class="made">日本の個人開発者 tkys がつくっています。</span><a href="https://tkys.github.io/customsoundalarm/ja/">My Sound Alarm</a><a href="support.html">サポート</a><a href="privacy.html">プライバシーポリシー</a></footer>

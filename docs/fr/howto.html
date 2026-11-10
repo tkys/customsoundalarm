@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>Comment utiliser une partie d’une chanson comme alarme sur iPhone – My Sound Alarm</title>
-<meta name="description" content="Compare l’app Horloge, GarageBand et My Sound Alarm. Utilise une partie d’une chanson ou le son d’une vidéo comme alarme sur iPhone, sans exporter de sonnerie.">
+<meta name="description" content="L’app Horloge joue la chanson de l’alarme depuis le début. Pour partir du refrain, crée une sonnerie de 30 secondes maximum dans GarageBand ou utilise une app d’alarme qui permet de découper. Étapes et limites de chaque option.">
 <link rel="canonical" href="https://tkys.github.io/customsoundalarm/fr/howto.html">
 <link rel="alternate" hreflang="en" href="https://tkys.github.io/customsoundalarm/howto.html">
 <link rel="alternate" hreflang="ja" href="https://tkys.github.io/customsoundalarm/ja/howto.html">
@@ -14,7 +14,7 @@
 <link rel="alternate" hreflang="es" href="https://tkys.github.io/customsoundalarm/es/howto.html">
 <link rel="alternate" hreflang="x-default" href="https://tkys.github.io/customsoundalarm/howto.html">
 <meta property="og:title" content="Comment utiliser une partie d’une chanson comme alarme sur iPhone">
-<meta property="og:description" content="Compare l’app Horloge, GarageBand et My Sound Alarm. Utilise une partie d’une chanson ou le son d’une vidéo comme alarme sur iPhone, sans exporter de sonnerie.">
+<meta property="og:description" content="L’app Horloge joue la chanson de l’alarme depuis le début. Pour partir du refrain, crée une sonnerie de 30 secondes maximum dans GarageBand ou utilise une app d’alarme qui permet de découper. Étapes et limites de chaque option.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://tkys.github.io/customsoundalarm/fr/howto.html">
 <meta property="og:site_name" content="My Sound Alarm">
@@ -85,20 +85,22 @@ h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
 footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wrap}
 .made{color:var(--muted);flex-basis:100%}
 
-.howto .method{margin:26px 0;padding:20px;border:1px solid var(--line);border-radius:14px}
-.howto .method h2{margin:0 0 6px;font-size:22px;line-height:1.35}
-.howto .method-summary{margin:0 0 10px;color:var(--muted)}
-.howto .steps{margin:8px 0 0;padding-left:1.2em}
-.howto .steps li{margin:4px 0}
-.howto .video{margin:26px 0;padding:18px 20px;border-left:4px solid var(--accent);background:#FFF8F2;border-radius:0 12px 12px 0}
-.howto .video h2{margin:0 0 8px;font-size:22px}
-.howto .compare{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px;line-height:1.5;table-layout:fixed}
-.howto .compare th:first-child,.howto .compare td:first-child{width:27%}
-.howto .compare th,.howto .compare td{border-top:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
-.howto .compare thead th{font-size:13px;color:var(--muted);font-weight:600}
-.howto .compare tbody th{font-weight:500}
-@media(max-width:560px){.howto .compare{font-size:12px}.howto .compare thead th{font-size:11px}.howto .compare th,.howto .compare td{padding:7px 4px}.howto .method{padding:16px}}
-@media(max-width:380px){.howto .compare thead th{font-size:10px}.howto .compare th:first-child,.howto .compare td:first-child{width:22%}}
+.howto .intro p{margin:0 0 14px}
+.howto h2{font-size:22px;margin:48px 0 10px}
+.howto section p{margin:0 0 12px}
+.howto .steps{margin:12px 0 0;padding-inline-start:1.4em}
+.howto .steps li{margin:6px 0;padding-inline-start:.2em}
+.howto .steps li::marker{color:var(--muted);font-variant-numeric:tabular-nums}
+.howto .notes{margin:14px 0 0;padding-inline-start:1.2em;font-size:16px;color:var(--muted)}
+.howto .notes li{margin:4px 0}
+.howto .shot{margin:16px 0 4px}
+.howto .cta{margin:24px 0 0}
+.howto .tablewrap{overflow-x:auto;margin-top:12px}
+.howto .compare{width:100%;table-layout:fixed;border-collapse:collapse;font-size:15px;line-height:1.5}
+.howto .compare th,.howto .compare td{border-bottom:1px solid var(--line);padding:9px 10px 9px 0;text-align:start;vertical-align:top;word-break:auto-phrase;overflow-wrap:anywhere}
+.howto .compare thead th{font-weight:600;border-bottom-color:var(--text)}
+.howto .compare tbody th{font-weight:400;color:var(--muted);width:22%}
+@media(max-width:560px){.howto .compare{font-size:13px}.howto .compare th,.howto .compare td{padding-inline-end:6px}}
 </style>
 </head>
 <body>
@@ -107,13 +109,11 @@ footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wr
 <a href="#languages">Français ▾</a></header>
 <main class="doc howto">
 <h1>Comment utiliser une partie d’une chanson comme alarme sur iPhone</h1>
-<div style="margin:18px 0 8px"><a class="badge" href="https://apps.apple.com/app/apple-store/id6760616800?pt=128010919&ct=website&mt=8" data-pos="howto_top" rel="noopener"><img src="../assets/img/badges/fr-fr.svg" alt="Télécharger dans l’App Store" width="164" height="52"></a></div>
-<p class="lead">Il existe trois façons courantes de se réveiller avec une partie d’une chanson sur iPhone. Voici ce que chacune permet et les étapes nécessaires.</p>
-<section class="method"><h2>App Horloge</h2><p class="method-summary">Choisis une chanson téléchargée de ta bibliothèque, par exemple un morceau Apple Music. L’alarme démarre au début de la chanson.</p><ol class="steps"><li>Ouvre Horloge, touche Alarme puis le bouton +.</li><li>Choisis Sonnerie et sélectionne une chanson de ta bibliothèque.</li><li>Enregistre l’alarme. Elle joue depuis le début de la chanson.</li></ol></section><section class="method"><h2>GarageBand</h2><p class="method-summary">Découpe une partie et exporte-la comme sonnerie. Les sonneries personnalisées peuvent durer jusqu’à 30 secondes et l’export demande quelques étapes.</p><ol class="steps"><li>Crée un projet GarageBand et importe l’audio à utiliser.</li><li>Découpe la partie voulue. Une sonnerie personnalisée peut durer jusqu’à 30 secondes.</li><li>Exporte-la comme sonnerie, puis choisis-la comme son d’alarme dans Horloge.</li></ol></section><section class="method"><h2>My Sound Alarm</h2><p class="method-summary">Choisis la partie voulue sur la forme d’onde. Les fichiers audio peuvent être utilisés en entier et les vidéos jusqu’à 10 minutes.</p><ol class="steps"><li>Ouvre un fichier audio ou une vidéo dans l’app.</li><li>Choisis la partie voulue sur la forme d’onde.</li><li>Enregistre-la comme son d’alarme. Nécessite iOS 26 ou version ultérieure (enregistrée avec AlarmKit).</li></ol></section>
-<section class="video"><h2>Comment utiliser le son d’une vidéo</h2><p>Choisis une vidéo dans ta photothèque ou l’app Fichiers. My Sound Alarm en extrait l’audio et tu choisis la partie sur la forme d’onde. Les vidéos peuvent durer jusqu’à 10 minutes. Une vidéo de voyage, un moment en famille ou la voix de ton animal peuvent devenir un son d’alarme.</p></section>
-<section class="choose"><h2>Laquelle choisir ?</h2>
-<table class="compare"><thead><tr><th></th><th>Horloge</th><th>GarageBand</th><th>My Sound Alarm</th></tr></thead><tbody><tr><th>Commencer au milieu d’une chanson</th><td>Seulement depuis le début</td><td>Oui</td><td>Oui</td></tr><tr><th>Durée</th><td>Sans découpe</td><td>Jusqu’à 30 secondes</td><td>Audio entier ; vidéos jusqu’à 10 minutes</td></tr><tr><th>Exporter une sonnerie</th><td>Non</td><td>Oui</td><td>Non</td></tr><tr><th>Son d’une vidéo</th><td>Non disponible</td><td>Nécessite un fichier audio</td><td>Oui</td></tr><tr><th>Morceaux Apple Music</th><td>Les morceaux téléchargés, oui</td><td>Non disponible</td><td>Non disponible (protégés)</td></tr></tbody></table></section>
-<div style="margin:36px 0 8px"><a class="badge" href="https://apps.apple.com/app/apple-store/id6760616800?pt=128010919&ct=website&mt=8" data-pos="howto_bottom" rel="noopener"><img src="../assets/img/badges/fr-fr.svg" alt="Télécharger dans l’App Store" width="164" height="52"></a></div>
+<div class="intro"><p>L’app Horloge peut utiliser une chanson comme alarme, mais elle la joue toujours depuis le début. Aucun réglage ne permet de commencer au milieu.</p><p>Pour te réveiller avec le refrain, tu peux créer une sonnerie de 30 secondes maximum dans GarageBand, ou utiliser une app d’alarme qui découpe le son.</p><p>Cette page est écrite par le développeur de l’une de ces apps, My Sound Alarm. Les étapes pour Horloge et GarageBand suivent l’article d’assistance d’Apple.</p></div>
+<section><h2>Si le début de la chanson te va : l’app Horloge</h2><ol class="steps"><li>Dans Horloge, ouvre Alarmes et touche +.</li><li>Touche Sonnerie, puis choisis une chanson de ta bibliothèque.</li><li>Touche Enregistrer.</li></ol><ul class=notes><li>Les morceaux Apple Music fonctionnent s’ils sont téléchargés sur l’iPhone.</li></ul></section><section><h2>Si 30 secondes suffisent : GarageBand</h2><p>GarageBand est l’app musicale d’Apple. Tu exportes une partie de la chanson comme sonnerie, et elle apparaît ensuite dans les sons d’alarme d’Horloge. Il faut un peu plus d’étapes.</p><ol class="steps"><li>Maintiens l’icône de GarageBand et crée un nouvel enregistrement audio.</li><li>Ouvre la vue des pistes, puis le navigateur de boucles.</li><li>Dans Fichiers, trouve le fichier audio et fais-le glisser au bord gauche de la piste.</li><li>Fais glisser les bords de la région pour qu’elle dure 30 secondes ou moins, puis colle-la complètement à gauche.</li><li>Dans Mes morceaux, sélectionne le morceau, touche Partager et exporte-le comme sonnerie.</li><li>Dans Horloge, ouvre l’alarme, touche Sonnerie et choisis-la parmi les sonneries.</li></ol><ul class=notes><li>Si la sonnerie dépasse 30 secondes, GarageBand la raccourcit à l’export.</li><li>Les morceaux de l’app Musique ne marchent que s’ils ne sont pas protégés. Les morceaux protégés sont grisés.</li></ul></section><section><h2>Pour plus de 30 secondes, ou le son d’une vidéo : My Sound Alarm</h2><p>Tu ouvres un fichier audio ou une vidéo, et tu choisis sur la forme d’onde la partie à jouer. Pas d’export.</p><img class="shot" src="../assets/img/crop-en.jpg" alt="Écran de My Sound Alarm pour choisir la partie à jouer sur la forme d’onde" width="340" height="383"><ol class="steps"><li>Quand tu ajoutes une alarme, touche Son.</li><li>Touche Ajouter un fichier audio (MP3, AAC, WAV, M4A) ou Ajouter depuis une vidéo (photothèque ou Fichiers).</li><li>Déplace les bords de la sélection sur la forme d’onde, puis touche Ajouter la sélection.</li></ol><ul class=notes><li>Les fichiers audio n’ont pas de limite de durée. Les vidéos, jusqu’à 10 minutes.</li><li>La partie choisie se répète jusqu’à ce que tu arrêtes l’alarme.</li><li>L’app ne lit pas les morceaux de l’app Musique, y compris Apple Music.</li><li>Il faut iOS 26 ou version ultérieure, car les alarmes sont enregistrées avec AlarmKit d’Apple.</li></ul><div class="cta"><a class="badge" href="https://apps.apple.com/app/apple-store/id6760616800?pt=128010919&ct=website&mt=8" data-pos="howto_top" rel="noopener"><img src="../assets/img/badges/fr-fr.svg" alt="Télécharger dans l’App Store" width="164" height="52"></a></div></section>
+<section><h2>Côte à côte</h2>
+<div class="tablewrap"><table class="compare"><thead><tr><th></th><th>Horloge</th><th>GarageBand</th><th>My Sound Alarm</th></tr></thead><tbody><tr><th>Partir du milieu</th><td>Non</td><td>Oui</td><td>Oui</td></tr><tr><th>Durée</th><td>Chanson entière</td><td>30 secondes max.</td><td>Sans limite (vidéos 10 min max.)</td></tr><tr><th>Export</th><td>Non</td><td>Oui</td><td>Non</td></tr><tr><th>Son d’une vidéo</th><td>Non</td><td>Non</td><td>Oui</td></tr><tr><th>Apple Music</th><td>Si téléchargé</td><td>Non protégé uniquement</td><td>Non</td></tr></tbody></table></div></section>
+<div class="cta"><a class="badge" href="https://apps.apple.com/app/apple-store/id6760616800?pt=128010919&ct=website&mt=8" data-pos="howto_bottom" rel="noopener"><img src="../assets/img/badges/fr-fr.svg" alt="Télécharger dans l’App Store" width="164" height="52"></a></div>
 </main>
 <nav id="languages" class="langs" aria-label="Language"><a href="https://tkys.github.io/customsoundalarm/howto.html?lang=en" hreflang="en" lang="en">English</a> <a href="https://tkys.github.io/customsoundalarm/ja/howto.html" hreflang="ja" lang="ja">日本語</a> <a href="https://tkys.github.io/customsoundalarm/fr/howto.html" hreflang="fr" lang="fr" aria-current=page>Français</a> <a href="https://tkys.github.io/customsoundalarm/de/howto.html" hreflang="de" lang="de">Deutsch</a> <a href="https://tkys.github.io/customsoundalarm/es/howto.html" hreflang="es" lang="es">Español</a></nav>
 <footer><span class="made">Créée par tkys, développeur indépendant au Japon.</span><a href="https://tkys.github.io/customsoundalarm/fr/">My Sound Alarm</a><a href="support.html">Assistance</a><a href="privacy.html">Confidentialité</a></footer>
