@@ -312,20 +312,22 @@ footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wr
 
 
 HOWTO_CSS = """
-.howto .method{margin:26px 0;padding:20px;border:1px solid var(--line);border-radius:14px}
-.howto .method h2{margin:0 0 6px;font-size:22px;line-height:1.35}
-.howto .method-summary{margin:0 0 10px;color:var(--muted)}
-.howto .steps{margin:8px 0 0;padding-left:1.2em}
-.howto .steps li{margin:4px 0}
-.howto .video{margin:26px 0;padding:18px 20px;border-left:4px solid var(--accent);background:#FFF8F2;border-radius:0 12px 12px 0}
-.howto .video h2{margin:0 0 8px;font-size:22px}
-.howto .compare{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px;line-height:1.5;table-layout:fixed}
-.howto .compare th:first-child,.howto .compare td:first-child{width:27%}
-.howto .compare th,.howto .compare td{border-top:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
-.howto .compare thead th{font-size:13px;color:var(--muted);font-weight:600}
-.howto .compare tbody th{font-weight:500}
-@media(max-width:560px){.howto .compare{font-size:12px}.howto .compare thead th{font-size:11px}.howto .compare th,.howto .compare td{padding:7px 4px}.howto .method{padding:16px}}
-@media(max-width:380px){.howto .compare thead th{font-size:10px}.howto .compare th:first-child,.howto .compare td:first-child{width:22%}}
+.howto .intro p{margin:0 0 14px}
+.howto h2{font-size:22px;margin:48px 0 10px}
+.howto section p{margin:0 0 12px}
+.howto .steps{margin:12px 0 0;padding-inline-start:1.4em}
+.howto .steps li{margin:6px 0;padding-inline-start:.2em}
+.howto .steps li::marker{color:var(--muted);font-variant-numeric:tabular-nums}
+.howto .notes{margin:14px 0 0;padding-inline-start:1.2em;font-size:16px;color:var(--muted)}
+.howto .notes li{margin:4px 0}
+.howto .shot{margin:16px 0 4px}
+.howto .cta{margin:24px 0 0}
+.howto .tablewrap{overflow-x:auto;margin-top:12px}
+.howto .compare{width:100%;table-layout:fixed;border-collapse:collapse;font-size:15px;line-height:1.5}
+.howto .compare th,.howto .compare td{border-bottom:1px solid var(--line);padding:9px 10px 9px 0;text-align:start;vertical-align:top;word-break:auto-phrase;overflow-wrap:anywhere}
+.howto .compare thead th{font-weight:600;border-bottom-color:var(--text)}
+.howto .compare tbody th{font-weight:400;color:var(--muted);width:22%}
+@media(max-width:560px){.howto .compare{font-size:13px}.howto .compare th,.howto .compare td{padding-inline-end:6px}}
 """
 
 
@@ -626,13 +628,23 @@ def howto_page(lang, c):
     d = HOWTO[lang]
     prefix = "../" if c["path"] else ""
     img = f"{prefix}assets/img/"
-    methods = "".join(
-        f'<section class="method"><h2>{esc(m["name"])}</h2>'
-        f'<p class="method-summary">{esc(m["summary"])}</p>'
-        f'<ol class="steps">{"".join(f"<li>{esc(step)}</li>" for step in m["steps"])}</ol>'
-        f'</section>'
-        for m in d["methods"]
-    )
+    def section(s):
+        paras = "".join(f"<p>{esc(p)}</p>" for p in s.get("paras", []))
+        shot = (
+            f'<img class="shot" src="{img}{d["shot"]}" alt="{esc(d["shot_alt"])}" width="340" height="383">'
+            if s.get("app") else ""
+        )
+        steps = "".join(f"<li>{esc(step)}</li>" for step in s["steps"])
+        notes = "".join(f"<li>{esc(n)}</li>" for n in s.get("notes", []))
+        cta = f'<div class="cta">{badge(c, img, "howto_top")}</div>' if s.get("app") else ""
+        return (
+            f'<section><h2>{esc(s["h2"])}</h2>{paras}{shot}'
+            f'<ol class="steps">{steps}</ol>'
+            f'{f"<ul class=notes>{notes}</ul>" if notes else ""}{cta}</section>'
+        )
+
+    intro = "".join(f"<p>{esc(p)}</p>" for p in d["intro"])
+    sections = "".join(section(s) for s in d["sections"])
     head = "".join(f"<th>{esc(h)}</th>" for h in d["table_head"])
     rows = "".join(
         "<tr>"
@@ -679,13 +691,11 @@ def howto_page(lang, c):
 <a href="#languages">{esc(c["lang_name"])} ▾</a></header>
 <main class="doc howto">
 <h1>{esc(d["h1"])}</h1>
-<div style="margin:18px 0 8px">{badge(c, img, "howto_top")}</div>
-<p class="lead">{esc(d["lead"])}</p>
-{methods}
-<section class="video"><h2>{esc(d["video_title"])}</h2><p>{esc(d["video_body"])}</p></section>
-<section class="choose"><h2>{esc(d["choose_title"])}</h2>
-<table class="compare"><thead><tr>{head}</tr></thead><tbody>{rows}</tbody></table></section>
-<div style="margin:36px 0 8px">{badge(c, img, "howto_bottom")}</div>
+<div class="intro">{intro}</div>
+{sections}
+<section><h2>{esc(d["table_title"])}</h2>
+<div class="tablewrap"><table class="compare"><thead><tr>{head}</tr></thead><tbody>{rows}</tbody></table></div></section>
+<div class="cta">{badge(c, img, "howto_bottom")}</div>
 </main>
 <nav id="languages" class="langs" aria-label="Language">{langs}</nav>
 <footer><span class="made">{esc(c["made_by"])}</span><a href="{BASE + c["path"]}">My Sound Alarm</a><a href="support.html">{esc(c["footer_support"])}</a><a href="privacy.html">{esc(c["footer_privacy"])}</a></footer>

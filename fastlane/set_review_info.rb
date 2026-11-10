@@ -59,7 +59,7 @@ result = call(http, "Post", "/v1/appStoreReviewDetails", token, {
       contactFirstName: "Takuya",
       contactLastName: "S",
       contactPhone: "+81 90 0000 0000",
-      contactEmail: "tkysdev@gmail.com",
+      contactEmail: "tkysyskw.dev@gmail.com",
       demoAccountRequired: false,
       notes: "No login required. The app allows users to set custom alarm sounds from imported audio files and videos."
     },

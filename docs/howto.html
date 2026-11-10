@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>How to set part of a song as your iPhone alarm – My Sound Alarm</title>
-<meta name="description" content="Compare the Clock app, GarageBand and My Sound Alarm. Set part of a song or a video&#x27;s sound as your iPhone alarm, without exporting a ringtone.">
+<meta name="description" content="The Clock app plays an alarm song from the beginning. To start from the chorus, make a ringtone of up to 30 seconds in GarageBand, or use an alarm app that can trim. Steps and limits for each.">
 <link rel="canonical" href="https://tkys.github.io/customsoundalarm/howto.html">
 <link rel="alternate" hreflang="en" href="https://tkys.github.io/customsoundalarm/howto.html">
 <link rel="alternate" hreflang="ja" href="https://tkys.github.io/customsoundalarm/ja/howto.html">
@@ -14,7 +14,7 @@
 <link rel="alternate" hreflang="es" href="https://tkys.github.io/customsoundalarm/es/howto.html">
 <link rel="alternate" hreflang="x-default" href="https://tkys.github.io/customsoundalarm/howto.html">
 <meta property="og:title" content="How to set part of a song as your iPhone alarm">
-<meta property="og:description" content="Compare the Clock app, GarageBand and My Sound Alarm. Set part of a song or a video&#x27;s sound as your iPhone alarm, without exporting a ringtone.">
+<meta property="og:description" content="The Clock app plays an alarm song from the beginning. To start from the chorus, make a ringtone of up to 30 seconds in GarageBand, or use an alarm app that can trim. Steps and limits for each.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://tkys.github.io/customsoundalarm/howto.html">
 <meta property="og:site_name" content="My Sound Alarm">
@@ -95,20 +95,22 @@ h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
 footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wrap}
 .made{color:var(--muted);flex-basis:100%}
 
-.howto .method{margin:26px 0;padding:20px;border:1px solid var(--line);border-radius:14px}
-.howto .method h2{margin:0 0 6px;font-size:22px;line-height:1.35}
-.howto .method-summary{margin:0 0 10px;color:var(--muted)}
-.howto .steps{margin:8px 0 0;padding-left:1.2em}
-.howto .steps li{margin:4px 0}
-.howto .video{margin:26px 0;padding:18px 20px;border-left:4px solid var(--accent);background:#FFF8F2;border-radius:0 12px 12px 0}
-.howto .video h2{margin:0 0 8px;font-size:22px}
-.howto .compare{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px;line-height:1.5;table-layout:fixed}
-.howto .compare th:first-child,.howto .compare td:first-child{width:27%}
-.howto .compare th,.howto .compare td{border-top:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
-.howto .compare thead th{font-size:13px;color:var(--muted);font-weight:600}
-.howto .compare tbody th{font-weight:500}
-@media(max-width:560px){.howto .compare{font-size:12px}.howto .compare thead th{font-size:11px}.howto .compare th,.howto .compare td{padding:7px 4px}.howto .method{padding:16px}}
-@media(max-width:380px){.howto .compare thead th{font-size:10px}.howto .compare th:first-child,.howto .compare td:first-child{width:22%}}
+.howto .intro p{margin:0 0 14px}
+.howto h2{font-size:22px;margin:48px 0 10px}
+.howto section p{margin:0 0 12px}
+.howto .steps{margin:12px 0 0;padding-inline-start:1.4em}
+.howto .steps li{margin:6px 0;padding-inline-start:.2em}
+.howto .steps li::marker{color:var(--muted);font-variant-numeric:tabular-nums}
+.howto .notes{margin:14px 0 0;padding-inline-start:1.2em;font-size:16px;color:var(--muted)}
+.howto .notes li{margin:4px 0}
+.howto .shot{margin:16px 0 4px}
+.howto .cta{margin:24px 0 0}
+.howto .tablewrap{overflow-x:auto;margin-top:12px}
+.howto .compare{width:100%;table-layout:fixed;border-collapse:collapse;font-size:15px;line-height:1.5}
+.howto .compare th,.howto .compare td{border-bottom:1px solid var(--line);padding:9px 10px 9px 0;text-align:start;vertical-align:top;word-break:auto-phrase;overflow-wrap:anywhere}
+.howto .compare thead th{font-weight:600;border-bottom-color:var(--text)}
+.howto .compare tbody th{font-weight:400;color:var(--muted);width:22%}
+@media(max-width:560px){.howto .compare{font-size:13px}.howto .compare th,.howto .compare td{padding-inline-end:6px}}
 </style>
 </head>
 <body>
@@ -117,13 +119,11 @@ footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wr
 <a href="#languages">English ▾</a></header>
 <main class="doc howto">
 <h1>How to set part of a song as your iPhone alarm</h1>
-<div style="margin:18px 0 8px"><a class="badge" href="https://apps.apple.com/app/apple-store/id6760616800?pt=128010919&ct=website&mt=8" data-pos="howto_top" rel="noopener"><img src="assets/img/badges/en-us.svg" alt="Download on the App Store" width="156" height="52"></a></div>
-<p class="lead">There are three common ways to wake up to part of a song on iPhone. Here is what each one can do, and the steps it takes.</p>
-<section class="method"><h2>Clock app</h2><p class="method-summary">Choose a downloaded song from your library, such as an Apple Music song. The alarm starts at the beginning of the song.</p><ol class="steps"><li>Open Clock, tap Alarm, then the + button.</li><li>Choose Sound and pick a song from your library.</li><li>Save the alarm. It plays from the start of the song.</li></ol></section><section class="method"><h2>GarageBand</h2><p class="method-summary">Trim a section and export it as a ringtone. Custom ringtones are up to 30 seconds, and the export takes a few steps.</p><ol class="steps"><li>Create a GarageBand project and import the audio you want to use.</li><li>Trim the section you want. A custom ringtone can be up to 30 seconds.</li><li>Export it as a ringtone, then choose it as the alarm sound in Clock.</li></ol></section><section class="method"><h2>My Sound Alarm</h2><p class="method-summary">Pick the part you want on a waveform. Audio files can be used at their full length, and videos can be up to 10 minutes.</p><ol class="steps"><li>Open an audio file or a video in the app.</li><li>Choose the part you want on the waveform.</li><li>Save it as the alarm sound. Requires iOS 26 or later (registered with AlarmKit).</li></ol></section>
-<section class="video"><h2>How to use the sound from a video</h2><p>Choose a video from your photo library or the Files app. My Sound Alarm extracts the audio, and you choose the part on the waveform. Videos can be up to 10 minutes. Travel videos, family moments and your pet&#x27;s voice can become an alarm sound.</p></section>
-<section class="choose"><h2>Which one should you use?</h2>
-<table class="compare"><thead><tr><th></th><th>Clock app</th><th>GarageBand</th><th>My Sound Alarm</th></tr></thead><tbody><tr><th>Start in the middle of a song</th><td>Only from the start</td><td>Yes</td><td>Yes</td></tr><tr><th>Length</th><td>No trim</td><td>Up to 30 seconds</td><td>Full audio; videos up to 10 minutes</td></tr><tr><th>Export a ringtone</th><td>No</td><td>Yes</td><td>No</td></tr><tr><th>Sound from a video</th><td>Not available</td><td>Needs an audio file</td><td>Yes</td></tr><tr><th>Apple Music songs</th><td>Downloaded songs work</td><td>Not available</td><td>Not available (protected)</td></tr></tbody></table></section>
-<div style="margin:36px 0 8px"><a class="badge" href="https://apps.apple.com/app/apple-store/id6760616800?pt=128010919&ct=website&mt=8" data-pos="howto_bottom" rel="noopener"><img src="assets/img/badges/en-us.svg" alt="Download on the App Store" width="156" height="52"></a></div>
+<div class="intro"><p>The Clock app can use a song as an alarm, but it always plays from the beginning. There is no setting to start in the middle.</p><p>To wake up to the chorus, you either make a ringtone of up to 30 seconds in GarageBand, or use an alarm app that can trim the sound.</p><p>This page is written by the developer of one of those apps, My Sound Alarm. The Clock and GarageBand steps follow Apple&#x27;s support article.</p></div>
+<section><h2>If the start of the song is fine: the Clock app</h2><ol class="steps"><li>In Clock, open Alarms and tap +.</li><li>Tap Sound, then Pick a song.</li><li>Choose the song and tap Save.</li></ol><ul class=notes><li>Apple Music songs work if they are downloaded to your iPhone.</li></ul></section><section><h2>If 30 seconds is enough: GarageBand</h2><p>GarageBand is Apple&#x27;s music app. You export part of a song as a ringtone, and the ringtone then shows up in the Clock app&#x27;s alarm sounds. It takes a few more taps.</p><ol class="steps"><li>Touch and hold the GarageBand icon and tap Create New Audio Recording.</li><li>Tap the Tracks button, then the Loop Browser button.</li><li>Tap Files, then Browse items from the Files app. Touch and hold the file and drag it to the left edge of the track.</li><li>Drag the edges of the region until it is 30 seconds or shorter, then move it all the way to the left.</li><li>Go to My Songs, select the song, tap Share, then Ringtone, then Export.</li><li>In Clock, open the alarm, tap Sound and pick it from Ringtones.</li></ol><ul class=notes><li>If the ringtone is longer than 30 seconds, GarageBand shortens it when you export.</li><li>Songs from the Music app work only if they are not protected. Protected songs are grayed out.</li></ul></section><section><h2>For more than 30 seconds, or the sound of a video: My Sound Alarm</h2><p>You open an audio file or a video, and choose the part to play on its waveform. There is no export step.</p><img class="shot" src="assets/img/crop-en.jpg" alt="My Sound Alarm screen for choosing the part to play on a waveform" width="340" height="383"><ol class="steps"><li>When you add an alarm, tap Sound.</li><li>Tap Add Audio File (MP3, AAC, WAV, M4A) or Add from Video (photo library or Files).</li><li>Drag the ends of the selection on the waveform, then tap Add Selection.</li></ol><ul class=notes><li>Audio files can be any length. Videos can be up to 10 minutes.</li><li>The selected part repeats until you stop the alarm.</li><li>It cannot read songs from the Music app, including Apple Music.</li><li>It needs iOS 26 or later, because alarms are registered with Apple&#x27;s AlarmKit.</li></ul><div class="cta"><a class="badge" href="https://apps.apple.com/app/apple-store/id6760616800?pt=128010919&ct=website&mt=8" data-pos="howto_top" rel="noopener"><img src="assets/img/badges/en-us.svg" alt="Download on the App Store" width="156" height="52"></a></div></section>
+<section><h2>Side by side</h2>
+<div class="tablewrap"><table class="compare"><thead><tr><th></th><th>Clock</th><th>GarageBand</th><th>My Sound Alarm</th></tr></thead><tbody><tr><th>Start mid-song</th><td>No</td><td>Yes</td><td>Yes</td></tr><tr><th>Length</th><td>Whole song</td><td>Up to 30 seconds</td><td>Any length (videos up to 10 min)</td></tr><tr><th>Export step</th><td>No</td><td>Yes</td><td>No</td></tr><tr><th>Sound of a video</th><td>No</td><td>No</td><td>Yes</td></tr><tr><th>Apple Music songs</th><td>Downloaded songs</td><td>Unprotected songs only</td><td>No</td></tr></tbody></table></div></section>
+<div class="cta"><a class="badge" href="https://apps.apple.com/app/apple-store/id6760616800?pt=128010919&ct=website&mt=8" data-pos="howto_bottom" rel="noopener"><img src="assets/img/badges/en-us.svg" alt="Download on the App Store" width="156" height="52"></a></div>
 </main>
 <nav id="languages" class="langs" aria-label="Language"><a href="https://tkys.github.io/customsoundalarm/howto.html?lang=en" hreflang="en" lang="en" aria-current=page>English</a> <a href="https://tkys.github.io/customsoundalarm/ja/howto.html" hreflang="ja" lang="ja">日本語</a> <a href="https://tkys.github.io/customsoundalarm/fr/howto.html" hreflang="fr" lang="fr">Français</a> <a href="https://tkys.github.io/customsoundalarm/de/howto.html" hreflang="de" lang="de">Deutsch</a> <a href="https://tkys.github.io/customsoundalarm/es/howto.html" hreflang="es" lang="es">Español</a></nav>
 <footer><span class="made">Made by tkys, an independent developer in Japan.</span><a href="https://tkys.github.io/customsoundalarm/">My Sound Alarm</a><a href="support.html">Support</a><a href="privacy.html">Privacy Policy</a></footer>
