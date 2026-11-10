@@ -524,9 +524,18 @@ def doc_page(lang, c, kind):
     if kind == "support":
         d = SUPPORT[key]
         title = d["title"]
-        body = (f'<p class="lead">{esc(d["intro"]).replace("{email}", mail)}</p>'
-                + "".join(f"<h3>{esc(q)}</h3><p>{esc(a)}</p>" for q, a in d["faq"])
-                + f'<p class="req">{esc(d["req"])}</p>')
+        faqs = "".join(
+            f"<h3>{esc(q)}</h3><p>{esc(a)}</p>"
+            for q, a in d["faq"]
+        )
+        body = (
+            f'<div style="margin:18px 0 8px">{badge(c, img, "support_top")}</div>'
+            f'<p class="lead">{esc(d["intro"]).replace("{email}", mail)}</p>'
+            + faqs
+            + f'<div style="margin:36px 0 8px">'
+              f'{badge(c, img, "support_bottom")}</div>'
+            + f'<p class="req">{esc(d["req"])}</p>'
+        )
     else:
         d = PRIVACY[key]
         title = d["title"]
@@ -590,7 +599,7 @@ def sitemap():
             'xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' + "\n".join(urls) + "\n</urlset>\n")
 
 
-BANNED = ["free", "無料", "必ず", "絶対", "guarantee",
+BANNED = ["free", "無料", "必ず", "絶対", "確実", "guarantee",
           "gratuit", "kostenlos", "gratis", "gratuito", "gratuita", "gratuitamente",
           "무료", "免费", "darmow", "za darmo", "zdarma", "bezplat", "مجان",
           "toujours garanti", "garantiert", "garantizado", "garantido", "garantito", "gegarandeerd",
