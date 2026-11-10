@@ -16,7 +16,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from i18n_pages import LOCALES  # noqa: E402
-from i18n_docs import EMAIL, PRIVACY, SUPPORT, UPDATED  # noqa: E402
+from i18n_docs import EMAIL, HOWTO, PRIVACY, SUPPORT, UPDATED  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..", "..", "docs")
 BASE = "https://tkys.github.io/customsoundalarm/"
@@ -74,15 +74,15 @@ PAGES = {
     "ja": {
         "path": "ja/",
         "html_lang": "ja", "og_locale": "ja_JP", "lang_name": "日本語", "as_of_fmt": "{y}年{m}月{d}日時点",
-        "title": "My Sound Alarm｜好きな曲・動画の音を iPhone のアラームに",
-        "meta": "My Sound Alarm は、好きな曲の好きな部分や動画の音で起きられる iPhone の目覚ましアプリです。波形で選んだ部分が、止めるまでくり返し鳴ります。アラームは iOS 26 の AlarmKit で登録するので、マナーモードや集中モードでも鳴ります。",
+        "title": "My Sound Alarm｜好きな曲のサビを iPhone のアラームに｜動画の音も",
+        "meta": "好きな曲のサビや動画の音を iPhone のアラームにできるアラーム アプリ。波形で選んだ部分が、止めるまでくり返し鳴ります。GarageBand なしで音声ファイルや動画から作れます。iOS 26 の AlarmKit で登録するので、マナーモードや集中モードでも鳴ります。",
         "badge_alt": "App Store からダウンロード",
-        "hero_title": "好きな曲の、好きなところで起きる",
-        "hero_body": "曲のいちばん好きな部分や動画の音で起きられる、iPhone の目覚ましアプリです。選んだ部分が、止めるまでくり返し鳴ります。",
+        "hero_title": "好きな曲のサビで起きる",
+        "hero_body": "曲のサビなど、いちばん好きな部分や動画の音を iPhone のアラームに。止めるまで、くり返し鳴ります。GarageBand なしで、音声ファイルや動画から作れます。",
         "req": "マナーモードや集中モードでも鳴ります。iOS\u00a026 以降の iPhone 向け。",
         "wave_label": "サビ 0:42–1:12",
         "wave_caption": "止めるまで、この部分だけがくり返し鳴ります。",
-        "s1_title": "鳴らす部分を選ぶ",
+        "s1_title": "サビなど、鳴らす部分を選ぶ",
         "s1_body": "音声ファイル、自分で録音した声、保存した動画を開いて、波形の上で範囲を選ぶだけ。サビだけを切り出しても、1曲まるごとでもかまいません（動画は最長10分）。最後まで鳴ったら、また最初から鳴ります。",
         "s1_img_alt": "切り出し画面：波形の中で33秒ぶんを選んだところ",
         "s2_title": "マナーモードでも鳴る",
@@ -311,6 +311,24 @@ footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wr
 """
 
 
+HOWTO_CSS = """
+.howto .method{margin:26px 0;padding:20px;border:1px solid var(--line);border-radius:14px}
+.howto .method h2{margin:0 0 6px;font-size:22px;line-height:1.35}
+.howto .method-summary{margin:0 0 10px;color:var(--muted)}
+.howto .steps{margin:8px 0 0;padding-left:1.2em}
+.howto .steps li{margin:4px 0}
+.howto .video{margin:26px 0;padding:18px 20px;border-left:4px solid var(--accent);background:#FFF8F2;border-radius:0 12px 12px 0}
+.howto .video h2{margin:0 0 8px;font-size:22px}
+.howto .compare{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px;line-height:1.5;table-layout:fixed}
+.howto .compare th:first-child,.howto .compare td:first-child{width:27%}
+.howto .compare th,.howto .compare td{border-top:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
+.howto .compare thead th{font-size:13px;color:var(--muted);font-weight:600}
+.howto .compare tbody th{font-weight:500}
+@media(max-width:560px){.howto .compare{font-size:12px}.howto .compare thead th{font-size:11px}.howto .compare th,.howto .compare td{padding:7px 4px}.howto .method{padding:16px}}
+@media(max-width:380px){.howto .compare thead th{font-size:10px}.howto .compare th:first-child,.howto .compare td:first-child{width:22%}}
+"""
+
+
 def esc(s):
     return html.escape(s, quote=True)
 
@@ -416,18 +434,25 @@ document.addEventListener("click",function(e){{var a=e.target.closest("a.badge")
 </script>"""
 
 
-def redirect_script(suffix=""):
+def redirect_script(suffix="", langs=None):
     """On the English root only: send first-time visitors to their browser language.
 
     - Only when someone lands on the root directly. A ?lang=… link from our own language
       list, or arriving from another page of this site, keeps them where they chose.
     - Nothing is stored on the device. Crawlers read each language page directly (hreflang).
     - Relative paths, so local previews stay local; query/hash are kept (?internal=1 etc.).
+    - langs: restrict targets to languages that have this page (e.g. howto.html).
     """
+    allowed = set(langs) if langs is not None else None
     targets = {
         o["html_lang"].split("-")[0].lower(): o["path"]
-        for o in PAGES.values() if o["path"] and o["html_lang"] != "zh-Hans"
+        for l, o in PAGES.items()
+        if o["path"] and o["html_lang"] != "zh-Hans" and (allowed is None or l in allowed)
     }
+    zh_branch = "" if allowed is not None else (
+        'if(t.indexOf("zh")===0){if(t==="zh-cn"||t==="zh-sg"'
+        '||t.indexOf("zh-hans")===0){location.replace("zh-hans/"+sfx+location.search+location.hash);}return;}'
+    )
     return """<script>
 (function(){try{
 var q=new URLSearchParams(location.search);if(q.has("lang"))return;
@@ -435,14 +460,19 @@ if(document.referrer&&new URL(document.referrer).pathname.indexOf(location.pathn
 var map=%s,sfx=%s,ls=navigator.languages||[navigator.language];
 for(var i=0;i<ls.length;i++){var t=(ls[i]||"").toLowerCase();
 if(t.indexOf("en")===0)return;
-if(t.indexOf("zh")===0){if(t==="zh-cn"||t==="zh-sg"||t.indexOf("zh-hans")===0){location.replace("zh-hans/"+sfx+location.search+location.hash);}return;}
+%s
 var k=t.split("-")[0];if(map[k]){location.replace(map[k]+sfx+location.search+location.hash);return;}}
 }catch(e){}})();
-</script>""" % (json.dumps(targets), json.dumps(suffix))
+</script>""" % (json.dumps(targets), json.dumps(suffix), zh_branch)
 
 
 def page(lang, c, ratings):
     prefix = "../" if c["path"] else ""
+    howto_link = (
+        f'<p style="margin:12px 0 0"><a href="howto.html">'
+        f'{esc(HOWTO[lang]["top_link"])} →</a></p>'
+        if lang in HOWTO else ""
+    )
     # Language list in the footer; the root link carries ?lang so the redirect below leaves it alone
     langs = " ".join(
         f'<a href="{BASE + o["path"]}{"?lang=en" if not o["path"] else ""}" hreflang="{o["html_lang"]}" lang="{o["html_lang"]}"'
@@ -491,7 +521,7 @@ def page(lang, c, ratings):
 <h1>{phrases(c["hero_title"])}</h1>
 <p class="lead">{esc(c["hero_body"])}</p>
 {badge(c, img, "hero")}
-<p class="req">{esc(c["req"])}</p>
+<p class="req">{esc(c["req"])}</p>{howto_link}
 <figure>{waveform_svg(c)}<figcaption>{esc(c["wave_caption"])}</figcaption></figure>
 {featured_html(lang, c)}
 <h2>{esc(c["s1_title"])}</h2>
@@ -528,9 +558,15 @@ def doc_page(lang, c, kind):
             f"<h3>{esc(q)}</h3><p>{esc(a)}</p>"
             for q, a in d["faq"]
         )
+        howto_link = (
+            f'<p style="margin:12px 0 0"><a href="howto.html">'
+            f'{esc(HOWTO[lang]["support_link"])} →</a></p>'
+            if lang in HOWTO else ""
+        )
         body = (
             f'<div style="margin:18px 0 8px">{badge(c, img, "support_top")}</div>'
             f'<p class="lead">{esc(d["intro"]).replace("{email}", mail)}</p>'
+            + howto_link
             + faqs
             + f'<div style="margin:36px 0 8px">'
               f'{badge(c, img, "support_bottom")}</div>'
@@ -585,6 +621,81 @@ def doc_page(lang, c, kind):
 """
 
 
+def howto_page(lang, c):
+    """Comparison page: Clock app vs GarageBand vs My Sound Alarm (#190)."""
+    d = HOWTO[lang]
+    prefix = "../" if c["path"] else ""
+    img = f"{prefix}assets/img/"
+    methods = "".join(
+        f'<section class="method"><h2>{esc(m["name"])}</h2>'
+        f'<p class="method-summary">{esc(m["summary"])}</p>'
+        f'<ol class="steps">{"".join(f"<li>{esc(step)}</li>" for step in m["steps"])}</ol>'
+        f'</section>'
+        for m in d["methods"]
+    )
+    head = "".join(f"<th>{esc(h)}</th>" for h in d["table_head"])
+    rows = "".join(
+        "<tr>"
+        + "".join(
+            f"<th>{esc(cell)}</th>" if index == 0 else f"<td>{esc(cell)}</td>"
+            for index, cell in enumerate(row)
+        )
+        + "</tr>"
+        for row in d["table_rows"]
+    )
+    howto_langs = [l for l in PAGES if l in HOWTO]
+    langs = " ".join(
+        f'<a href="{BASE + PAGES[o]["path"]}howto.html{"?lang=en" if not PAGES[o]["path"] else ""}"'
+        f' hreflang="{PAGES[o]["html_lang"]}" lang="{PAGES[o]["html_lang"]}"'
+        f'{" aria-current=page" if o == lang else ""}>{esc(PAGES[o]["lang_name"])}</a>'
+        for o in howto_langs
+    )
+    alts = "\n".join(
+        f'<link rel="alternate" hreflang="{PAGES[o]["html_lang"]}" href="{BASE + PAGES[o]["path"]}howto.html">'
+        for o in howto_langs
+    ) + f'\n<link rel="alternate" hreflang="x-default" href="{BASE}howto.html">'
+    return f"""<!doctype html>
+<html lang="{c["html_lang"]}" dir="{c["dir"]}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>{esc(d["title"])} – My Sound Alarm</title>
+<meta name="description" content="{esc(d["meta"])}">
+<link rel="canonical" href="{BASE + c["path"]}howto.html">
+{alts}
+<meta property="og:title" content="{esc(d["title"])}">
+<meta property="og:description" content="{esc(d["meta"])}">
+<meta property="og:type" content="article">
+<meta property="og:url" content="{BASE + c["path"]}howto.html">
+<meta property="og:site_name" content="My Sound Alarm">
+{redirect_script("howto.html", HOWTO.keys()) if lang == "en" else ""}
+<link rel="icon" href="{img}icon.png">
+<style>{CSS}{HOWTO_CSS}</style>
+</head>
+<body>
+<div class="wrap">
+<header><a class="brand" href="{BASE + c["path"]}"><img src="{img}icon.png" alt="">My Sound Alarm</a>
+<a href="#languages">{esc(c["lang_name"])} ▾</a></header>
+<main class="doc howto">
+<h1>{esc(d["h1"])}</h1>
+<div style="margin:18px 0 8px">{badge(c, img, "howto_top")}</div>
+<p class="lead">{esc(d["lead"])}</p>
+{methods}
+<section class="video"><h2>{esc(d["video_title"])}</h2><p>{esc(d["video_body"])}</p></section>
+<section class="choose"><h2>{esc(d["choose_title"])}</h2>
+<table class="compare"><thead><tr>{head}</tr></thead><tbody>{rows}</tbody></table></section>
+<div style="margin:36px 0 8px">{badge(c, img, "howto_bottom")}</div>
+</main>
+<nav id="languages" class="langs" aria-label="Language">{langs}</nav>
+<footer><span class="made">{esc(c["made_by"])}</span><a href="{BASE + c["path"]}">My Sound Alarm</a><a href="support.html">{esc(c["footer_support"])}</a><a href="privacy.html">{esc(c["footer_privacy"])}</a></footer>
+</div>
+{analytics(lang)}
+</body>
+</html>
+"""
+
+
 def sitemap():
     urls = []
     for page_file in ("", "support.html", "privacy.html"):
@@ -594,6 +705,14 @@ def sitemap():
                 for o in PAGES
             )
             urls.append(f"<url><loc>{BASE + c['path'] + page_file}</loc>{alts}</url>")
+    howto_langs = [l for l in PAGES if l in HOWTO]
+    for l in howto_langs:
+        c = PAGES[l]
+        alts = "".join(
+            f'<xhtml:link rel="alternate" hreflang="{PAGES[o]["html_lang"]}" href="{BASE + PAGES[o]["path"]}howto.html"/>'
+            for o in howto_langs
+        ) + f'<xhtml:link rel="alternate" hreflang="x-default" href="{BASE}howto.html"/>'
+        urls.append(f"<url><loc>{BASE + c['path']}howto.html</loc>{alts}</url>")
     return ('<?xml version="1.0" encoding="UTF-8"?>\n'
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
             'xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' + "\n".join(urls) + "\n</urlset>\n")
@@ -611,7 +730,7 @@ def main():
     print("ratings:", ratings)
     quoted = json.dumps([[v["title"], v["body"], v["tr"]] for v in REVIEWS], ensure_ascii=False).lower()
     assert not [w for w in BANNED if w in quoted], "banned word in quoted reviews"
-    docs = json.dumps([SUPPORT, PRIVACY], ensure_ascii=False).lower()
+    docs = json.dumps([SUPPORT, PRIVACY, HOWTO], ensure_ascii=False).lower()
     assert not [w for w in BANNED if w in docs], [w for w in BANNED if w in docs]
     for lang, c in PAGES.items():
         text = json.dumps(c, ensure_ascii=False).lower()
@@ -624,6 +743,9 @@ def main():
         for kind in ("support", "privacy"):
             with open(os.path.join(ROOT, c["path"], f"{kind}.html"), "w", encoding="utf-8") as f:
                 f.write(doc_page(lang, c, kind))
+        if lang in HOWTO:
+            with open(os.path.join(ROOT, c["path"], "howto.html"), "w", encoding="utf-8") as f:
+                f.write(howto_page(lang, c))
         print("wrote", os.path.relpath(out, ROOT))
     with open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write(sitemap())

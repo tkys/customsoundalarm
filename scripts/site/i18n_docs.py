@@ -652,3 +652,243 @@ PRIVACY = {
         "contact": "لأي أسئلة، راسلنا على {email}.",
     },
 }
+
+# Comparison/how-to page (#190). Languages are added gradually; only these get
+# howto.html plus links from the landing and support pages.
+HOWTO = {
+    "en": {
+        "title": "How to set part of a song as your iPhone alarm",
+        "meta": "Compare the Clock app, GarageBand and My Sound Alarm. Set part of a song or a video's sound as your iPhone alarm, without exporting a ringtone.",
+        "h1": "How to set part of a song as your iPhone alarm",
+        "lead": "There are three common ways to wake up to part of a song on iPhone. Here is what each one can do, and the steps it takes.",
+        "methods": [
+            {
+                "name": "Clock app",
+                "summary": "Choose a song from your library. The alarm starts at the beginning of the song.",
+                "steps": [
+                    "Open Clock, tap Alarm, then the + button.",
+                    "Choose Sound and pick a song from your library.",
+                    "Save the alarm. It plays from the start of the song.",
+                ],
+            },
+            {
+                "name": "GarageBand",
+                "summary": "Trim a section and export it as a ringtone. Custom ringtones are up to 30 seconds, and the export takes a few steps.",
+                "steps": [
+                    "Create a GarageBand project and import the audio you want to use.",
+                    "Trim the section you want. A custom ringtone can be up to 30 seconds.",
+                    "Export it as a ringtone, then choose it as the alarm sound in Clock.",
+                ],
+            },
+            {
+                "name": "My Sound Alarm",
+                "summary": "Pick the part you want on a waveform. Audio files can be used at their full length, and videos can be up to 10 minutes.",
+                "steps": [
+                    "Open an audio file or a video in the app.",
+                    "Choose the part you want on the waveform.",
+                    "Save it as the alarm sound. Alarms use AlarmKit on iOS 26.",
+                ],
+            },
+        ],
+        "video_title": "How to use the sound from a video",
+        "video_body": "Choose a video from your photo library or the Files app. My Sound Alarm extracts the audio, and you choose the part on the waveform. Videos can be up to 10 minutes. Travel videos, family moments and your pet's voice can become an alarm sound.",
+        "choose_title": "Which one should you use?",
+        "table_head": ["", "Clock app", "GarageBand", "My Sound Alarm"],
+        "table_rows": [
+            ["Start in the middle of a song", "Only from the start", "Yes", "Yes"],
+            ["Length", "No trim", "Up to 30 seconds", "Full audio; videos up to 10 minutes"],
+            ["Export a ringtone", "No", "Yes", "No"],
+            ["Sound from a video", "Not available", "Needs an audio file", "Yes"],
+        ],
+        "top_link": "How to set part of a song as your iPhone alarm",
+        "support_link": "Compare the Clock app, GarageBand and My Sound Alarm",
+    },
+    "ja": {
+        "title": "iPhone で曲の好きな部分をアラームにする方法（サビ・GarageBand なし）",
+        "meta": "時計アプリ・GarageBand・My Sound Alarm を比べながら、iPhone で曲の好きな部分（サビ）をアラームにする方法を説明します。GarageBand なしで音声ファイルや動画の音を使う方法も。",
+        "h1": "iPhone で曲の好きな部分をアラームにする方法",
+        "lead": "iPhone で曲の好きな部分（サビなど）をアラームにする方法は、大きく3つあります。できることと手間を、事実だけで比べます。",
+        "methods": [
+            {
+                "name": "時計アプリ",
+                "summary": "ライブラリの曲を選べます。アラームは曲の頭から鳴ります。",
+                "steps": [
+                    "時計アプリで「アラーム」→「＋」を開く。",
+                    "「サウンド」でライブラリの曲を選ぶ。",
+                    "アラームを保存する。曲は頭から鳴ります。",
+                ],
+            },
+            {
+                "name": "GarageBand",
+                "summary": "曲の好きな部分を切り出せます。着信音は30秒までで、書き出しの手順が必要です。",
+                "steps": [
+                    "GarageBand でプロジェクトを作り、使いたい音声を読み込む。",
+                    "好きな部分を切り出す。着信音は30秒まで。",
+                    "着信音として書き出し、時計アプリのアラーム音に設定する。",
+                ],
+            },
+            {
+                "name": "My Sound Alarm",
+                "summary": "波形で好きな部分を選べます。音声ファイルは長さそのまま、動画は最長10分まで使えます。",
+                "steps": [
+                    "音声ファイルか動画を開く。",
+                    "波形で鳴らしたい部分を選ぶ。",
+                    "アラーム音として保存する。iOS 26 では AlarmKit で登録します。",
+                ],
+            },
+        ],
+        "video_title": "動画の音をアラームにする方法",
+        "video_body": "写真ライブラリやファイルアプリから動画を選ぶと、音声を取り出して波形で部分を選べます。動画は最長10分。旅行の動画や家族・ペットの声もアラームの音にできます。",
+        "choose_title": "どれを選ぶか",
+        "table_head": ["", "時計アプリ", "GarageBand", "My Sound Alarm"],
+        "table_rows": [
+            ["曲の途中から鳴らす", "頭からのみ", "できる", "できる"],
+            ["長さ", "切り出しなし", "30秒まで", "音声はそのまま、動画は10分まで"],
+            ["書き出しの手間", "不要", "必要", "不要"],
+            ["動画の音", "対象外", "音声ファイルが必要", "使える"],
+        ],
+        "top_link": "曲の好きな部分（サビ）をアラームにする方法",
+        "support_link": "時計アプリ・GarageBand・My Sound Alarm のやり方を比べる",
+    },
+    "es": {
+        "title": "Cómo usar parte de una canción como alarma del iPhone",
+        "meta": "Compara la app Reloj, GarageBand y My Sound Alarm. Usa parte de una canción o el sonido de un vídeo como alarma del iPhone, sin exportar un tono de llamada.",
+        "h1": "Cómo usar parte de una canción como alarma del iPhone",
+        "lead": "Hay tres formas habituales de despertarte con parte de una canción en el iPhone. Esto es lo que puede hacer cada una y los pasos que requiere.",
+        "methods": [
+            {
+                "name": "App Reloj",
+                "summary": "Elige una canción de tu biblioteca. La alarma empieza desde el principio de la canción.",
+                "steps": [
+                    "Abre Reloj, toca Alarma y luego el botón +.",
+                    "Elige Sonido y selecciona una canción de tu biblioteca.",
+                    "Guarda la alarma. Suena desde el principio de la canción.",
+                ],
+            },
+            {
+                "name": "GarageBand",
+                "summary": "Recorta una parte y expórtala como tono de llamada. Los tonos personalizados pueden durar hasta 30 segundos y la exportación requiere unos pasos.",
+                "steps": [
+                    "Crea un proyecto de GarageBand e importa el audio que quieras usar.",
+                    "Recorta la parte que quieras. Un tono personalizado puede durar hasta 30 segundos.",
+                    "Expórtalo como tono de llamada y elígelo como sonido de alarma en Reloj.",
+                ],
+            },
+            {
+                "name": "My Sound Alarm",
+                "summary": "Elige la parte que quieras en la forma de onda. Los archivos de audio se pueden usar completos y los vídeos hasta 10 minutos.",
+                "steps": [
+                    "Abre un archivo de audio o un vídeo en la app.",
+                    "Elige la parte que quieras en la forma de onda.",
+                    "Guárdala como sonido de alarma. Las alarmas usan AlarmKit en iOS 26.",
+                ],
+            },
+        ],
+        "video_title": "Cómo usar el sonido de un vídeo",
+        "video_body": "Elige un vídeo de tu fototeca o de la app Archivos. My Sound Alarm extrae el audio y tú eliges la parte en la forma de onda. Los vídeos pueden durar hasta 10 minutos. Un vídeo de viaje, un momento en familia o la voz de tu mascota pueden convertirse en sonido de alarma.",
+        "choose_title": "¿Cuál usar?",
+        "table_head": ["", "Reloj", "GarageBand", "My Sound Alarm"],
+        "table_rows": [
+            ["Empezar por la mitad de una canción", "Solo desde el principio", "Sí", "Sí"],
+            ["Duración", "Sin recorte", "Hasta 30 segundos", "Audio completo; vídeos hasta 10 minutos"],
+            ["Exportar un tono", "No", "Sí", "No"],
+            ["Sonido de un vídeo", "No disponible", "Requiere un archivo de audio", "Sí"],
+        ],
+        "top_link": "Cómo usar parte de una canción como alarma del iPhone",
+        "support_link": "Compara la app Reloj, GarageBand y My Sound Alarm",
+    },
+    "fr": {
+        "title": "Comment utiliser une partie d’une chanson comme alarme sur iPhone",
+        "meta": "Compare l’app Horloge, GarageBand et My Sound Alarm. Utilise une partie d’une chanson ou le son d’une vidéo comme alarme sur iPhone, sans exporter de sonnerie.",
+        "h1": "Comment utiliser une partie d’une chanson comme alarme sur iPhone",
+        "lead": "Il existe trois façons courantes de se réveiller avec une partie d’une chanson sur iPhone. Voici ce que chacune permet et les étapes nécessaires.",
+        "methods": [
+            {
+                "name": "App Horloge",
+                "summary": "Choisis une chanson de ta bibliothèque. L’alarme démarre au début de la chanson.",
+                "steps": [
+                    "Ouvre Horloge, touche Alarme puis le bouton +.",
+                    "Choisis Sonnerie et sélectionne une chanson de ta bibliothèque.",
+                    "Enregistre l’alarme. Elle joue depuis le début de la chanson.",
+                ],
+            },
+            {
+                "name": "GarageBand",
+                "summary": "Découpe une partie et exporte-la comme sonnerie. Les sonneries personnalisées peuvent durer jusqu’à 30 secondes et l’export demande quelques étapes.",
+                "steps": [
+                    "Crée un projet GarageBand et importe l’audio à utiliser.",
+                    "Découpe la partie voulue. Une sonnerie personnalisée peut durer jusqu’à 30 secondes.",
+                    "Exporte-la comme sonnerie, puis choisis-la comme son d’alarme dans Horloge.",
+                ],
+            },
+            {
+                "name": "My Sound Alarm",
+                "summary": "Choisis la partie voulue sur la forme d’onde. Les fichiers audio peuvent être utilisés en entier et les vidéos jusqu’à 10 minutes.",
+                "steps": [
+                    "Ouvre un fichier audio ou une vidéo dans l’app.",
+                    "Choisis la partie voulue sur la forme d’onde.",
+                    "Enregistre-la comme son d’alarme. Les alarmes utilisent AlarmKit sur iOS 26.",
+                ],
+            },
+        ],
+        "video_title": "Comment utiliser le son d’une vidéo",
+        "video_body": "Choisis une vidéo dans ta photothèque ou l’app Fichiers. My Sound Alarm en extrait l’audio et tu choisis la partie sur la forme d’onde. Les vidéos peuvent durer jusqu’à 10 minutes. Une vidéo de voyage, un moment en famille ou la voix de ton animal peuvent devenir un son d’alarme.",
+        "choose_title": "Laquelle choisir ?",
+        "table_head": ["", "Horloge", "GarageBand", "My Sound Alarm"],
+        "table_rows": [
+            ["Commencer au milieu d’une chanson", "Seulement depuis le début", "Oui", "Oui"],
+            ["Durée", "Sans découpe", "Jusqu’à 30 secondes", "Audio entier ; vidéos jusqu’à 10 minutes"],
+            ["Exporter une sonnerie", "Non", "Oui", "Non"],
+            ["Son d’une vidéo", "Non disponible", "Nécessite un fichier audio", "Oui"],
+        ],
+        "top_link": "Comment utiliser une partie d’une chanson comme alarme sur iPhone",
+        "support_link": "Compare l’app Horloge, GarageBand et My Sound Alarm",
+    },
+    "de": {
+        "title": "Teil eines Songs als iPhone-Wecker verwenden",
+        "meta": "Vergleiche Uhr-App, GarageBand und My Sound Alarm. Verwende einen Teil eines Songs oder den Ton eines Videos als iPhone-Wecker, ohne einen Klingelton zu exportieren.",
+        "h1": "Teil eines Songs als iPhone-Wecker verwenden",
+        "lead": "Es gibt drei übliche Wege, mit einem Teil eines Songs auf dem iPhone aufzuwachen. Das kann jeder, und diese Schritte braucht er.",
+        "methods": [
+            {
+                "name": "Uhr-App",
+                "summary": "Wähle einen Song aus deiner Mediathek. Der Wecker startet am Anfang des Songs.",
+                "steps": [
+                    "Öffne die Uhr-App, tippe auf Wecker und dann auf +.",
+                    "Wähle Ton und dann einen Song aus deiner Mediathek.",
+                    "Sichere den Wecker. Er spielt ab dem Anfang des Songs.",
+                ],
+            },
+            {
+                "name": "GarageBand",
+                "summary": "Schneide einen Teil aus und exportiere ihn als Klingelton. Eigene Klingeltöne können bis zu 30 Sekunden lang sein, und der Export braucht einige Schritte.",
+                "steps": [
+                    "Erstelle ein GarageBand-Projekt und importiere die gewünschte Audiodatei.",
+                    "Schneide den gewünschten Teil aus. Ein eigener Klingelton kann bis zu 30 Sekunden lang sein.",
+                    "Exportiere ihn als Klingelton und wähle ihn in der Uhr-App als Weckerton.",
+                ],
+            },
+            {
+                "name": "My Sound Alarm",
+                "summary": "Wähle den gewünschten Teil auf der Wellenform. Audiodateien lassen sich in voller Länge verwenden, Videos bis zu 10 Minuten.",
+                "steps": [
+                    "Öffne eine Audiodatei oder ein Video in der App.",
+                    "Wähle den gewünschten Teil auf der Wellenform.",
+                    "Speichere ihn als Weckerton. Wecker werden unter iOS 26 mit AlarmKit registriert.",
+                ],
+            },
+        ],
+        "video_title": "Den Ton eines Videos verwenden",
+        "video_body": "Wähle ein Video aus deiner Fotomediathek oder der Dateien-App. My Sound Alarm extrahiert die Tonspur, und du wählst den Teil auf der Wellenform. Videos können bis zu 10 Minuten lang sein. Reisevideos, Familienmomente oder die Stimme deines Haustiers können zu einem Weckerton werden.",
+        "choose_title": "Welchen Weg wählen?",
+        "table_head": ["", "Uhr-App", "GarageBand", "My Sound Alarm"],
+        "table_rows": [
+            ["Mitten in einem Song starten", "Nur ab Anfang", "Ja", "Ja"],
+            ["Länge", "Kein Zuschnitt", "Bis zu 30 Sekunden", "Audio vollständig; Videos bis zu 10 Minuten"],
+            ["Klingelton exportieren", "Nein", "Ja", "Nein"],
+            ["Ton eines Videos", "Nicht verfügbar", "Audiodatei nötig", "Ja"],
+        ],
+        "top_link": "Teil eines Songs als iPhone-Wecker verwenden",
+        "support_link": "Uhr-App, GarageBand und My Sound Alarm vergleichen",
+    },
+}

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>How to set part of a song as your iPhone alarm – My Sound Alarm</title>
+<meta name="description" content="Compare the Clock app, GarageBand and My Sound Alarm. Set part of a song or a video&#x27;s sound as your iPhone alarm, without exporting a ringtone.">
+<link rel="canonical" href="https://tkys.github.io/customsoundalarm/howto.html">
+<link rel="alternate" hreflang="en" href="https://tkys.github.io/customsoundalarm/howto.html">
+<link rel="alternate" hreflang="ja" href="https://tkys.github.io/customsoundalarm/ja/howto.html">
+<link rel="alternate" hreflang="fr" href="https://tkys.github.io/customsoundalarm/fr/howto.html">
+<link rel="alternate" hreflang="de" href="https://tkys.github.io/customsoundalarm/de/howto.html">
+<link rel="alternate" hreflang="es" href="https://tkys.github.io/customsoundalarm/es/howto.html">
+<link rel="alternate" hreflang="x-default" href="https://tkys.github.io/customsoundalarm/howto.html">
+<meta property="og:title" content="How to set part of a song as your iPhone alarm">
+<meta property="og:description" content="Compare the Clock app, GarageBand and My Sound Alarm. Set part of a song or a video&#x27;s sound as your iPhone alarm, without exporting a ringtone.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://tkys.github.io/customsoundalarm/howto.html">
+<meta property="og:site_name" content="My Sound Alarm">
+<script>
+(function(){try{
+var q=new URLSearchParams(location.search);if(q.has("lang"))return;
+if(document.referrer&&new URL(document.referrer).pathname.indexOf(location.pathname)===0&&new URL(document.referrer).host===location.host)return;
+var map={"ja": "ja/", "fr": "fr/", "de": "de/", "es": "es/"},sfx="howto.html",ls=navigator.languages||[navigator.language];
+for(var i=0;i<ls.length;i++){var t=(ls[i]||"").toLowerCase();
+if(t.indexOf("en")===0)return;
+
+var k=t.split("-")[0];if(map[k]){location.replace(map[k]+sfx+location.search+location.hash);return;}}
+}catch(e){}})();
+</script>
+<link rel="icon" href="assets/img/icon.png">
+<style>
+:root{color-scheme:light;--text:#1C1714;--muted:#5E5650;--line:#E7E2DD;--accent:#FF843B;--ink:#4A1A6B;--wave:#D6D1CC}
+/* App colors: orange (AccentColor) is for graphics only — 2.4:1 on white is too low for text; text accents use the icon's purple. */
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#fff;color:var(--text);font:18px/1.7 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif}
+a{color:var(--ink);text-underline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 0 8px;font-size:16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;text-decoration:none;color:var(--text)}
+.brand img{width:32px;height:32px;border-radius:8px}
+h1,h2,h3{word-break:auto-phrase;text-wrap:balance}
+.ph{display:inline-block}
+p,li{word-break:auto-phrase}
+:lang(ko) h1,:lang(ko) h2,:lang(ko) h3,:lang(ko) p{word-break:keep-all}
+h1{font-size:clamp(32px,6.4vw,48px);line-height:1.2;letter-spacing:-.015em;margin:36px 0 14px}
+.lead{font-size:20px;color:var(--muted);margin:0 0 24px;max-width:34em}
+.badge img{height:52px;width:auto;display:block}
+.req{font-size:15px;color:var(--muted);margin:10px 0 0}
+figure{margin:44px 0 8px}
+.wavebox{position:relative;padding-bottom:26px;direction:ltr}
+.wave{display:block;width:100%;height:auto}
+.wavelabel{position:absolute;bottom:0;transform:translateX(-50%);white-space:nowrap;font-size:14px;font-weight:600;color:var(--ink)}
+figcaption{font-size:16px;color:var(--muted);margin-top:8px}
+h2{font-size:26px;line-height:1.35;margin:56px 0 10px}
+.shot{display:block;width:100%;max-width:340px;height:auto;border:1px solid var(--line);border-radius:22px;margin:18px 0 0}
+.side{float:inline-end;width:132px;height:auto;margin-block:0 12px;margin-inline:20px 0}
+.clear{clear:both}
+h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
+.faq p{margin:0;color:var(--muted)}
+.end{margin:64px 0 0;padding-top:32px;border-top:1px solid var(--line);display:flex;gap:28px;align-items:center}
+.end h2{margin:0 0 18px}
+.end-art{width:180px;height:auto;flex:none}
+@media (max-width:560px){.end{flex-direction:column;align-items:flex-start}.end-art{width:220px}}
+.voices ul{list-style:none;margin:18px 0 0;padding:0}
+.voices li{padding:16px 0;border-top:1px solid var(--line)}
+.stars{color:var(--accent);letter-spacing:.08em;margin-right:10px}
+.rmeta{font-size:15px;color:var(--muted)}
+.voices p{margin:6px 0 0}
+.voices .tr{color:var(--muted);font-size:16px}
+.rsum{margin:8px 0 0;color:var(--muted);font-size:15px}
+.rating{display:flex;gap:28px;align-items:center;margin:16px 0 0}
+.score{text-align:center;flex:none}
+.big{font-size:56px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.bigstars{color:var(--accent);letter-spacing:.1em;margin-top:6px}
+.bars{flex:1;max-width:360px}
+.bar{display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.6}
+.bl{width:5.5em;text-align:end;color:var(--muted);letter-spacing:.02em;font-size:11px}
+.bt{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bf{display:block;height:100%;background:var(--accent);border-radius:3px}
+.bn{width:2em;color:var(--muted);text-align:end}
+.note{font-size:14px;color:var(--muted);margin-top:12px}
+.langs{margin:40px 0 0;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 16px;font-size:15px}
+.langs a[aria-current]{color:var(--text);text-decoration:none;font-weight:600}
+.doc h1{font-size:34px;margin-top:28px}
+.perms{padding-inline-start:1.2em}
+.perms li{margin:6px 0}
+.featured{margin:44px 0 0;padding:20px 22px;border-inline-start:4px solid var(--accent);background:#FFF8F2;border-radius:0 12px 12px 0}
+[dir=rtl] .featured{border-radius:12px 0 0 12px}
+.featured blockquote{margin:0}
+.featured .orig{font-size:17px;line-height:1.7;margin:0}
+.featured .tr{color:var(--muted);font-size:16px;margin:10px 0 0}
+.featured figcaption{margin-top:12px}
+footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wrap}
+.made{color:var(--muted);flex-basis:100%}
+
+.howto .method{margin:26px 0;padding:20px;border:1px solid var(--line);border-radius:14px}
+.howto .method h2{margin:0 0 6px;font-size:22px;line-height:1.35}
+.howto .method-summary{margin:0 0 10px;color:var(--muted)}
+.howto .steps{margin:8px 0 0;padding-left:1.2em}
+.howto .steps li{margin:4px 0}
+.howto .video{margin:26px 0;padding:18px 20px;border-left:4px solid var(--accent);background:#FFF8F2;border-radius:0 12px 12px 0}
+.howto .video h2{margin:0 0 8px;font-size:22px}
+.howto .compare{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px;line-height:1.5;table-layout:fixed}
+.howto .compare th:first-child,.howto .compare td:first-child{width:27%}
+.howto .compare th,.howto .compare td{border-top:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
+.howto .compare thead th{font-size:13px;color:var(--muted);font-weight:600}
+.howto .compare tbody th{font-weight:500}
+@media(max-width:560px){.howto .compare{font-size:12px}.howto .compare thead th{font-size:11px}.howto .compare th,.howto .compare td{padding:7px 4px}.howto .method{padding:16px}}
+@media(max-width:380px){.howto .compare thead th{font-size:10px}.howto .compare th:first-child,.howto .compare td:first-child{width:22%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><a class="brand" href="https://tkys.github.io/customsoundalarm/"><img src="assets/img/icon.png" alt="">My Sound Alarm</a>
+<a href="#languages">English ▾</a></header>
+<main class="doc howto">
+<h1>How to set part of a song as your iPhone alarm</h1>
+<div style="margin:18px 0 8px"><a class="badge" href="https://apps.apple.com/app/apple-store/id6760616800?pt=128010919&ct=website&mt=8" data-pos="howto_top" rel="noopener"><img src="assets/img/badges/en-us.svg" alt="Download on the App Store" width="156" height="52"></a></div>
+<p class="lead">There are three common ways to wake up to part of a song on iPhone. Here is what each one can do, and the steps it takes.</p>
+<section class="method"><h2>Clock app</h2><p class="method-summary">Choose a song from your library. The alarm starts at the beginning of the song.</p><ol class="steps"><li>Open Clock, tap Alarm, then the + button.</li><li>Choose Sound and pick a song from your library.</li><li>Save the alarm. It plays from the start of the song.</li></ol></section><section class="method"><h2>GarageBand</h2><p class="method-summary">Trim a section and export it as a ringtone. Custom ringtones are up to 30 seconds, and the export takes a few steps.</p><ol class="steps"><li>Create a GarageBand project and import the audio you want to use.</li><li>Trim the section you want. A custom ringtone can be up to 30 seconds.</li><li>Export it as a ringtone, then choose it as the alarm sound in Clock.</li></ol></section><section class="method"><h2>My Sound Alarm</h2><p class="method-summary">Pick the part you want on a waveform. Audio files can be used at their full length, and videos can be up to 10 minutes.</p><ol class="steps"><li>Open an audio file or a video in the app.</li><li>Choose the part you want on the waveform.</li><li>Save it as the alarm sound. Alarms use AlarmKit on iOS 26.</li></ol></section>
+<section class="video"><h2>How to use the sound from a video</h2><p>Choose a video from your photo library or the Files app. My Sound Alarm extracts the audio, and you choose the part on the waveform. Videos can be up to 10 minutes. Travel videos, family moments and your pet&#x27;s voice can become an alarm sound.</p></section>
+<section class="choose"><h2>Which one should you use?</h2>
+<table class="compare"><thead><tr><th></th><th>Clock app</th><th>GarageBand</th><th>My Sound Alarm</th></tr></thead><tbody><tr><th>Start in the middle of a song</th><td>Only from the start</td><td>Yes</td><td>Yes</td></tr><tr><th>Length</th><td>No trim</td><td>Up to 30 seconds</td><td>Full audio; videos up to 10 minutes</td></tr><tr><th>Export a ringtone</th><td>No</td><td>Yes</td><td>No</td></tr><tr><th>Sound from a video</th><td>Not available</td><td>Needs an audio file</td><td>Yes</td></tr></tbody></table></section>
+<div style="margin:36px 0 8px"><a class="badge" href="https://apps.apple.com/app/apple-store/id6760616800?pt=128010919&ct=website&mt=8" data-pos="howto_bottom" rel="noopener"><img src="assets/img/badges/en-us.svg" alt="Download on the App Store" width="156" height="52"></a></div>
+</main>
+<nav id="languages" class="langs" aria-label="Language"><a href="https://tkys.github.io/customsoundalarm/howto.html?lang=en" hreflang="en" lang="en" aria-current=page>English</a> <a href="https://tkys.github.io/customsoundalarm/ja/howto.html" hreflang="ja" lang="ja">日本語</a> <a href="https://tkys.github.io/customsoundalarm/fr/howto.html" hreflang="fr" lang="fr">Français</a> <a href="https://tkys.github.io/customsoundalarm/de/howto.html" hreflang="de" lang="de">Deutsch</a> <a href="https://tkys.github.io/customsoundalarm/es/howto.html" hreflang="es" lang="es">Español</a></nav>
+<footer><span class="made">Made by tkys, an independent developer in Japan.</span><a href="https://tkys.github.io/customsoundalarm/">My Sound Alarm</a><a href="support.html">Support</a><a href="privacy.html">Privacy Policy</a></footer>
+</div>
+<script>
+// Owner opt-out: open the page once with ?internal=1 on each of your devices (?internal=0 to undo).
+var csaInternal=false;try{var q=new URLSearchParams(location.search).get("internal");if(q==="1")localStorage.setItem("csa_internal","1");if(q==="0")localStorage.removeItem("csa_internal");csaInternal=localStorage.getItem("csa_internal")==="1";}catch(e){}
+if(location.hostname==="tkys.github.io"&&!csaInternal){
+!function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+posthog.init("phc_uuFAFy25bfEjsVPtVzRBdAiy8yyPLi7NB75MGSQeGXEo",{api_host:"https://us.i.posthog.com",persistence:"memory",person_profiles:"identified_only",disable_session_recording:true,capture_pageview:true});
+posthog.register({site_lang:"en"});
+document.addEventListener("click",function(e){var a=e.target.closest("a.badge");if(a)posthog.capture("app_store_link_clicked",{position:a.dataset.pos||""});});
+}
+</script>
+</body>
+</html>
