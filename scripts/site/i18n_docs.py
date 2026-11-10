@@ -664,7 +664,7 @@ HOWTO = {
         "methods": [
             {
                 "name": "Clock app",
-                "summary": "Choose a song from your library. The alarm starts at the beginning of the song.",
+                "summary": "Choose a downloaded song from your library, such as an Apple Music song. The alarm starts at the beginning of the song.",
                 "steps": [
                     "Open Clock, tap Alarm, then the + button.",
                     "Choose Sound and pick a song from your library.",
@@ -686,7 +686,7 @@ HOWTO = {
                 "steps": [
                     "Open an audio file or a video in the app.",
                     "Choose the part you want on the waveform.",
-                    "Save it as the alarm sound. Alarms use AlarmKit on iOS 26.",
+                    "Save it as the alarm sound. Requires iOS 26 or later (registered with AlarmKit).",
                 ],
             },
         ],
@@ -699,6 +699,7 @@ HOWTO = {
             ["Length", "No trim", "Up to 30 seconds", "Full audio; videos up to 10 minutes"],
             ["Export a ringtone", "No", "Yes", "No"],
             ["Sound from a video", "Not available", "Needs an audio file", "Yes"],
+            ["Apple Music songs", "Downloaded songs work", "Not available", "Not available (protected)"],
         ],
         "top_link": "How to set part of a song as your iPhone alarm",
         "support_link": "Compare the Clock app, GarageBand and My Sound Alarm",
@@ -711,7 +712,7 @@ HOWTO = {
         "methods": [
             {
                 "name": "時計アプリ",
-                "summary": "ライブラリの曲を選べます。アラームは曲の頭から鳴ります。",
+                "summary": "ライブラリの曲（ダウンロード済みの Apple Music の曲など）を選べます。アラームは曲の頭から鳴ります。",
                 "steps": [
                     "時計アプリで「アラーム」→「＋」を開く。",
                     "「サウンド」でライブラリの曲を選ぶ。",
@@ -733,7 +734,7 @@ HOWTO = {
                 "steps": [
                     "音声ファイルか動画を開く。",
                     "波形で鳴らしたい部分を選ぶ。",
-                    "アラーム音として保存する。iOS 26 では AlarmKit で登録します。",
+                    "アラーム音として保存する。iOS 26 以降が必要です（AlarmKit で登録）。",
                 ],
             },
         ],
@@ -746,6 +747,7 @@ HOWTO = {
             ["長さ", "切り出しなし", "30秒まで", "音声はそのまま、動画は10分まで"],
             ["書き出しの手間", "不要", "必要", "不要"],
             ["動画の音", "対象外", "音声ファイルが必要", "使える"],
+            ["Apple Music の曲", "ダウンロード済みなら使える", "使えない", "使えない（保護された曲）"],
         ],
         "top_link": "曲の好きな部分（サビ）をアラームにする方法",
         "support_link": "時計アプリ・GarageBand・My Sound Alarm のやり方を比べる",
@@ -758,7 +760,7 @@ HOWTO = {
         "methods": [
             {
                 "name": "App Reloj",
-                "summary": "Elige una canción de tu biblioteca. La alarma empieza desde el principio de la canción.",
+                "summary": "Elige una canción descargada de tu biblioteca, por ejemplo de Apple Music. La alarma empieza desde el principio de la canción.",
                 "steps": [
                     "Abre Reloj, toca Alarma y luego el botón +.",
                     "Elige Sonido y selecciona una canción de tu biblioteca.",
@@ -780,7 +782,7 @@ HOWTO = {
                 "steps": [
                     "Abre un archivo de audio o un vídeo en la app.",
                     "Elige la parte que quieras en la forma de onda.",
-                    "Guárdala como sonido de alarma. Las alarmas usan AlarmKit en iOS 26.",
+                    "Guárdala como sonido de alarma. Requiere iOS 26 o posterior (se registra con AlarmKit).",
                 ],
             },
         ],
@@ -793,6 +795,7 @@ HOWTO = {
             ["Duración", "Sin recorte", "Hasta 30 segundos", "Audio completo; vídeos hasta 10 minutos"],
             ["Exportar un tono", "No", "Sí", "No"],
             ["Sonido de un vídeo", "No disponible", "Requiere un archivo de audio", "Sí"],
+            ["Canciones de Apple Music", "Las descargadas sí", "No disponible", "No disponible (protegidas)"],
         ],
         "top_link": "Cómo usar parte de una canción como alarma del iPhone",
         "support_link": "Compara la app Reloj, GarageBand y My Sound Alarm",
@@ -805,7 +808,7 @@ HOWTO = {
         "methods": [
             {
                 "name": "App Horloge",
-                "summary": "Choisis une chanson de ta bibliothèque. L’alarme démarre au début de la chanson.",
+                "summary": "Choisis une chanson téléchargée de ta bibliothèque, par exemple un morceau Apple Music. L’alarme démarre au début de la chanson.",
                 "steps": [
                     "Ouvre Horloge, touche Alarme puis le bouton +.",
                     "Choisis Sonnerie et sélectionne une chanson de ta bibliothèque.",
@@ -827,7 +830,7 @@ HOWTO = {
                 "steps": [
                     "Ouvre un fichier audio ou une vidéo dans l’app.",
                     "Choisis la partie voulue sur la forme d’onde.",
-                    "Enregistre-la comme son d’alarme. Les alarmes utilisent AlarmKit sur iOS 26.",
+                    "Enregistre-la comme son d’alarme. Nécessite iOS 26 ou version ultérieure (enregistrée avec AlarmKit).",
                 ],
             },
         ],
@@ -840,6 +843,7 @@ HOWTO = {
             ["Durée", "Sans découpe", "Jusqu’à 30 secondes", "Audio entier ; vidéos jusqu’à 10 minutes"],
             ["Exporter une sonnerie", "Non", "Oui", "Non"],
             ["Son d’une vidéo", "Non disponible", "Nécessite un fichier audio", "Oui"],
+            ["Morceaux Apple Music", "Les morceaux téléchargés, oui", "Non disponible", "Non disponible (protégés)"],
         ],
         "top_link": "Comment utiliser une partie d’une chanson comme alarme sur iPhone",
         "support_link": "Compare l’app Horloge, GarageBand et My Sound Alarm",
@@ -852,7 +856,7 @@ HOWTO = {
         "methods": [
             {
                 "name": "Uhr-App",
-                "summary": "Wähle einen Song aus deiner Mediathek. Der Wecker startet am Anfang des Songs.",
+                "summary": "Wähle einen heruntergeladenen Song aus deiner Mediathek, etwa von Apple Music. Der Wecker startet am Anfang des Songs.",
                 "steps": [
                     "Öffne die Uhr-App, tippe auf Wecker und dann auf +.",
                     "Wähle Ton und dann einen Song aus deiner Mediathek.",
@@ -874,7 +878,7 @@ HOWTO = {
                 "steps": [
                     "Öffne eine Audiodatei oder ein Video in der App.",
                     "Wähle den gewünschten Teil auf der Wellenform.",
-                    "Speichere ihn als Weckerton. Wecker werden unter iOS 26 mit AlarmKit registriert.",
+                    "Speichere ihn als Weckerton. Erfordert iOS 26 oder neuer (registriert mit AlarmKit).",
                 ],
             },
         ],
@@ -887,6 +891,7 @@ HOWTO = {
             ["Länge", "Kein Zuschnitt", "Bis zu 30 Sekunden", "Audio vollständig; Videos bis zu 10 Minuten"],
             ["Klingelton exportieren", "Nein", "Ja", "Nein"],
             ["Ton eines Videos", "Nicht verfügbar", "Audiodatei nötig", "Ja"],
+            ["Songs von Apple Music", "Geladene ja", "Nicht verfügbar", "Nicht verfügbar (geschützt)"],
         ],
         "top_link": "Teil eines Songs als iPhone-Wecker verwenden",
         "support_link": "Uhr-App, GarageBand und My Sound Alarm vergleichen",
