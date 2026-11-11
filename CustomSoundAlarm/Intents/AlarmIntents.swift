@@ -9,6 +9,11 @@ import AlarmKit
 struct DismissAlarmIntent: LiveActivityIntent {
     static let title: LocalizedStringResource = "dismiss_alarm_intent"
 
+    /// ショートカット App の動作一覧には出さない（#195）。
+    /// アラーム ID を手で入れる作りで、単体では使えない。
+    /// ライブアクティビティの停止ボタンからは今までどおり呼べる。
+    static let isDiscoverable = false
+
     @Parameter(title: "Alarm ID")
     var alarmID: String
 
