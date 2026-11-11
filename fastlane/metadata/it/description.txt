@@ -6,7 +6,7 @@ Svegliati con la tua parte preferita
 Apri un video o un file audio, guarda la forma d’onda e seleziona un intervallo. Tieni solo il ritornello o la canzone intera. Puoi ascoltare mentre regoli. Quando arriva alla fine, ricomincia.
 
 Nessun limite di durata
-Le suonerie personalizzate dell’iPhone si fermano a circa 40 secondi. My Sound Alarm accetta fino a 10 minuti da un video, e i file audio lunghi si possono importare così come sono.
+Le suonerie create in GarageBand durano fino a 30 secondi. My Sound Alarm accetta fino a 10 minuti da un video, e i file audio lunghi si possono importare così come sono.
 
 L’audio di un video
 Scegli un video dalla libreria foto o dall’app File e tieni solo l’audio.

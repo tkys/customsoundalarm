@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ko" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>iPhone 알람을 노래의 원하는 부분으로 설정하는 방법 – My Sound Alarm</title>
+<meta name="description" content="시계 앱은 알람 노래를 항상 처음부터 재생합니다. 후렴부터 듣고 싶다면 GarageBand에서 30초 이내 벨소리를 만들거나, 소리를 잘라 쓸 수 있는 알람 앱을 사용합니다. 방법마다의 단계와 제한입니다.">
+<link rel="canonical" href="https://tkys.github.io/customsoundalarm/ko/howto.html">
+<link rel="alternate" hreflang="en" href="https://tkys.github.io/customsoundalarm/howto.html">
+<link rel="alternate" hreflang="ja" href="https://tkys.github.io/customsoundalarm/ja/howto.html">
+<link rel="alternate" hreflang="fr" href="https://tkys.github.io/customsoundalarm/fr/howto.html">
+<link rel="alternate" hreflang="de" href="https://tkys.github.io/customsoundalarm/de/howto.html">
+<link rel="alternate" hreflang="es" href="https://tkys.github.io/customsoundalarm/es/howto.html">
+<link rel="alternate" hreflang="pt-BR" href="https://tkys.github.io/customsoundalarm/pt-br/howto.html">
+<link rel="alternate" hreflang="it" href="https://tkys.github.io/customsoundalarm/it/howto.html">
+<link rel="alternate" hreflang="nl" href="https://tkys.github.io/customsoundalarm/nl/howto.html">
+<link rel="alternate" hreflang="ko" href="https://tkys.github.io/customsoundalarm/ko/howto.html">
+<link rel="alternate" hreflang="zh-Hans" href="https://tkys.github.io/customsoundalarm/zh-hans/howto.html">
+<link rel="alternate" hreflang="pl" href="https://tkys.github.io/customsoundalarm/pl/howto.html">
+<link rel="alternate" hreflang="cs" href="https://tkys.github.io/customsoundalarm/cs/howto.html">
+<link rel="alternate" hreflang="ar" href="https://tkys.github.io/customsoundalarm/ar/howto.html">
+<link rel="alternate" hreflang="x-default" href="https://tkys.github.io/customsoundalarm/howto.html">
+<meta property="og:title" content="iPhone 알람을 노래의 원하는 부분으로 설정하는 방법">
+<meta property="og:description" content="시계 앱은 알람 노래를 항상 처음부터 재생합니다. 후렴부터 듣고 싶다면 GarageBand에서 30초 이내 벨소리를 만들거나, 소리를 잘라 쓸 수 있는 알람 앱을 사용합니다. 방법마다의 단계와 제한입니다.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://tkys.github.io/customsoundalarm/ko/howto.html">
+<meta property="og:site_name" content="My Sound Alarm">
+
+<link rel="icon" href="../assets/img/icon.png">
+<style>
+:root{color-scheme:light;--text:#1C1714;--muted:#5E5650;--line:#E7E2DD;--accent:#FF843B;--ink:#4A1A6B;--wave:#D6D1CC}
+/* App colors: orange (AccentColor) is for graphics only — 2.4:1 on white is too low for text; text accents use the icon's purple. */
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#fff;color:var(--text);font:18px/1.7 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif}
+a{color:var(--ink);text-underline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 0 8px;font-size:16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;text-decoration:none;color:var(--text)}
+.brand img{width:32px;height:32px;border-radius:8px}
+h1,h2,h3{word-break:auto-phrase;text-wrap:balance}
+.ph{display:inline-block}
+p,li{word-break:auto-phrase}
+:lang(ko) h1,:lang(ko) h2,:lang(ko) h3,:lang(ko) p{word-break:keep-all}
+h1{font-size:clamp(32px,6.4vw,48px);line-height:1.2;letter-spacing:-.015em;margin:36px 0 14px}
+.lead{font-size:20px;color:var(--muted);margin:0 0 24px;max-width:34em}
+.badge img{height:52px;width:auto;display:block}
+.req{font-size:15px;color:var(--muted);margin:10px 0 0}
+figure{margin:44px 0 8px}
+.wavebox{position:relative;padding-bottom:26px;direction:ltr}
+.wave{display:block;width:100%;height:auto}
+.wavelabel{position:absolute;bottom:0;transform:translateX(-50%);white-space:nowrap;font-size:14px;font-weight:600;color:var(--ink)}
+figcaption{font-size:16px;color:var(--muted);margin-top:8px}
+h2{font-size:26px;line-height:1.35;margin:56px 0 10px}
+.shot{display:block;width:100%;max-width:340px;height:auto;border:1px solid var(--line);border-radius:22px;margin:18px 0 0}
+.side{float:inline-end;width:132px;height:auto;margin-block:0 12px;margin-inline:20px 0}
+.clear{clear:both}
+h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
+.faq p{margin:0;color:var(--muted)}
+.end{margin:64px 0 0;padding-top:32px;border-top:1px solid var(--line);display:flex;gap:28px;align-items:center}
+.end h2{margin:0 0 18px}
+.end-art{width:180px;height:auto;flex:none}
+@media (max-width:560px){.end{flex-direction:column;align-items:flex-start}.end-art{width:220px}}
+.voices ul{list-style:none;margin:18px 0 0;padding:0}
+.voices li{padding:16px 0;border-top:1px solid var(--line)}
+.stars{color:var(--accent);letter-spacing:.08em;margin-right:10px}
+.rmeta{font-size:15px;color:var(--muted)}
+.voices p{margin:6px 0 0}
+.voices .tr{color:var(--muted);font-size:16px}
+.rsum{margin:8px 0 0;color:var(--muted);font-size:15px}
+.rating{display:flex;gap:28px;align-items:center;margin:16px 0 0}
+.score{text-align:center;flex:none}
+.big{font-size:56px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.bigstars{color:var(--accent);letter-spacing:.1em;margin-top:6px}
+.bars{flex:1;max-width:360px}
+.bar{display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.6}
+.bl{width:5.5em;text-align:end;color:var(--muted);letter-spacing:.02em;font-size:11px}
+.bt{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bf{display:block;height:100%;background:var(--accent);border-radius:3px}
+.bn{width:2em;color:var(--muted);text-align:end}
+.note{font-size:14px;color:var(--muted);margin-top:12px}
+.langs{margin:40px 0 0;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 16px;font-size:15px}
+.langs a[aria-current]{color:var(--text);text-decoration:none;font-weight:600}
+.doc h1{font-size:34px;margin-top:28px}
+.perms{padding-inline-start:1.2em}
+.perms li{margin:6px 0}
+.featured{margin:44px 0 0;padding:20px 22px;border-inline-start:4px solid var(--accent);background:#FFF8F2;border-radius:0 12px 12px 0}
+[dir=rtl] .featured{border-radius:12px 0 0 12px}
+.featured blockquote{margin:0}
+.featured .orig{font-size:17px;line-height:1.7;margin:0}
+.featured .tr{color:var(--muted);font-size:16px;margin:10px 0 0}
+.featured figcaption{margin-top:12px}
+footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wrap}
+.made{color:var(--muted);flex-basis:100%}
+
+.howto .intro p{margin:0 0 14px}
+.howto h2{font-size:22px;margin:48px 0 10px}
+.howto section p{margin:0 0 12px}
+.howto .steps{margin:12px 0 0;padding-inline-start:1.4em}
+.howto .steps li{margin:6px 0;padding-inline-start:.2em}
+.howto .steps li::marker{color:var(--muted);font-variant-numeric:tabular-nums}
+.howto .notes{margin:14px 0 0;padding-inline-start:1.2em;font-size:16px;color:var(--muted)}
+.howto .notes li{margin:4px 0}
+.howto .shot{margin:16px 0 4px}
+.howto .cta{margin:24px 0 0}
+.howto .tablewrap{overflow-x:auto;margin-top:12px}
+.howto .compare{width:100%;table-layout:fixed;border-collapse:collapse;font-size:15px;line-height:1.5}
+.howto .compare th,.howto .compare td{border-bottom:1px solid var(--line);padding:9px 10px 9px 0;text-align:start;vertical-align:top;word-break:auto-phrase;overflow-wrap:anywhere}
+.howto .compare thead th{font-weight:600;border-bottom-color:var(--text)}
+.howto .compare tbody th{font-weight:400;color:var(--muted);width:22%}
+@media(max-width:560px){.howto .compare{font-size:13px}.howto .compare th,.howto .compare td{padding-inline-end:6px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><a class="brand" href="https://tkys.github.io/customsoundalarm/ko/"><img src="../assets/img/icon.png" alt="">My Sound Alarm</a>
+<a href="#languages">한국어 ▾</a></header>
+<main class="doc howto">
+<h1>iPhone 알람을 노래의 원하는 부분으로 설정하는 방법</h1>
+<div class="intro"><p>시계 앱에서도 노래를 알람으로 쓸 수 있지만, 항상 곡의 처음부터 재생합니다. 중간부터 재생하는 설정은 없습니다.</p><p>후렴부터 듣고 싶다면 GarageBand에서 30초 이내 벨소리를 만들거나, 소리를 잘라 쓸 수 있는 알람 앱을 사용합니다.</p><p>이 페이지는 그런 앱 중 하나인 My Sound Alarm의 개발자가 썼습니다. 시계 앱과 GarageBand 단계는 Apple 지원 문서를 따랐습니다.</p></div>
+<section><h2>곡의 처음부터 들어도 된다면: 시계 앱</h2><ol class="steps"><li>시계 앱에서 ‘알람’을 열고 ‘+’를 탭합니다.</li><li>‘사운드’를 탭하고 보관함에서 노래를 고릅니다.</li><li>‘저장’을 탭합니다.</li></ol><ul class=notes><li>Apple Music 노래는 iPhone에 다운로드되어 있으면 고를 수 있습니다.</li></ul></section><section><h2>30초면 충분하다면: GarageBand</h2><p>GarageBand는 Apple의 음악 앱입니다. 노래의 일부를 벨소리로 내보내면, 그 벨소리가 시계 앱의 알람 소리 목록에 나타납니다. 탭할 단계가 조금 더 많습니다.</p><ol class="steps"><li>홈 화면에서 GarageBand 아이콘을 길게 눌러 새 오디오 녹음을 만듭니다.</li><li>트랙 보기를 연 다음 루프 브라우저를 엽니다.</li><li>파일에서 오디오 파일을 찾아 트랙의 왼쪽 끝으로 끌어다 놓습니다.</li><li>영역의 양쪽 끝을 끌어 30초 이내로 만든 다음 왼쪽 끝까지 옮깁니다.</li><li>노래를 고른 다음 공유 버튼을 눌러 벨소리로 내보냅니다.</li><li>시계 앱에서 알람의 사운드를 열고 벨소리 목록에서 고릅니다.</li></ol><ul class=notes><li>벨소리가 30초를 넘으면 내보낼 때 GarageBand가 줄입니다.</li><li>음악 앱의 노래는 보호되지 않은 것만 쓸 수 있습니다. 보호된 노래는 회색으로 표시됩니다.</li></ul></section><section><h2>30초를 넘기거나 동영상 소리를 쓰려면: My Sound Alarm</h2><p>오디오 파일이나 동영상을 열고 파형에서 재생할 부분을 고르는 알람 앱입니다. 내보내는 단계가 없습니다.</p><img class="shot" src="../assets/img/crop-en.jpg" alt="My Sound Alarm에서 파형으로 재생할 부분을 고르는 화면" width="340" height="383"><ol class="steps"><li>알람을 추가할 때 ‘사운드’를 탭합니다.</li><li>‘오디오 파일 추가’(MP3, AAC, WAV, M4A) 또는 ‘동영상에서 추가’(사진 보관함, 파일)를 탭합니다.</li><li>파형에서 선택 범위의 양쪽 끝을 옮기고 ‘선택 부분 추가’를 탭합니다.</li></ol><ul class=notes><li>오디오 파일은 길이 제한이 없습니다. 동영상은 10분까지입니다.</li><li>고른 부분은 알람을 끌 때까지 반복해서 울립니다.</li><li>음악 앱의 노래(Apple Music 포함)는 읽을 수 없습니다.</li><li>Apple의 AlarmKit으로 알람을 등록하므로 iOS 26 이상이 필요합니다.</li></ul><div class="cta"><a class="badge" href="https://apps.apple.com/app/apple-store/id6760616800?pt=128010919&ct=website&mt=8" data-pos="howto_top" rel="noopener"><img src="../assets/img/badges/ko-kr.svg" alt="App Store에서 다운로드" width="169" height="52"></a></div></section>
+<section><h2>나란히 비교</h2>
+<div class="tablewrap"><table class="compare"><thead><tr><th></th><th>시계</th><th>GarageBand</th><th>My Sound Alarm</th></tr></thead><tbody><tr><th>중간부터 재생</th><td>안 됨</td><td>됨</td><td>됨</td></tr><tr><th>길이</th><td>곡 전체</td><td>30초까지</td><td>제한 없음(동영상은 10분까지)</td></tr><tr><th>내보내기</th><td>필요 없음</td><td>필요</td><td>필요 없음</td></tr><tr><th>동영상 소리</th><td>안 됨</td><td>안 됨</td><td>됨</td></tr><tr><th>Apple Music 노래</th><td>다운로드한 곡만</td><td>보호되지 않은 곡만</td><td>안 됨</td></tr></tbody></table></div></section>
+<div class="cta"><a class="badge" href="https://apps.apple.com/app/apple-store/id6760616800?pt=128010919&ct=website&mt=8" data-pos="howto_bottom" rel="noopener"><img src="../assets/img/badges/ko-kr.svg" alt="App Store에서 다운로드" width="169" height="52"></a></div>
+</main>
+<nav id="languages" class="langs" aria-label="Language"><a href="https://tkys.github.io/customsoundalarm/howto.html?lang=en" hreflang="en" lang="en">English</a> <a href="https://tkys.github.io/customsoundalarm/ja/howto.html" hreflang="ja" lang="ja">日本語</a> <a href="https://tkys.github.io/customsoundalarm/fr/howto.html" hreflang="fr" lang="fr">Français</a> <a href="https://tkys.github.io/customsoundalarm/de/howto.html" hreflang="de" lang="de">Deutsch</a> <a href="https://tkys.github.io/customsoundalarm/es/howto.html" hreflang="es" lang="es">Español</a> <a href="https://tkys.github.io/customsoundalarm/pt-br/howto.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a> <a href="https://tkys.github.io/customsoundalarm/it/howto.html" hreflang="it" lang="it">Italiano</a> <a href="https://tkys.github.io/customsoundalarm/nl/howto.html" hreflang="nl" lang="nl">Nederlands</a> <a href="https://tkys.github.io/customsoundalarm/ko/howto.html" hreflang="ko" lang="ko" aria-current=page>한국어</a> <a href="https://tkys.github.io/customsoundalarm/zh-hans/howto.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a> <a href="https://tkys.github.io/customsoundalarm/pl/howto.html" hreflang="pl" lang="pl">Polski</a> <a href="https://tkys.github.io/customsoundalarm/cs/howto.html" hreflang="cs" lang="cs">Čeština</a> <a href="https://tkys.github.io/customsoundalarm/ar/howto.html" hreflang="ar" lang="ar">العربية</a></nav>
+<footer><span class="made">일본의 개인 개발자 tkys가 만들었습니다.</span><a href="https://tkys.github.io/customsoundalarm/ko/">My Sound Alarm</a><a href="support.html">지원</a><a href="privacy.html">개인정보 처리방침</a></footer>
+</div>
+<script>
+// Owner opt-out: open the page once with ?internal=1 on each of your devices (?internal=0 to undo).
+var csaInternal=false;try{var q=new URLSearchParams(location.search).get("internal");if(q==="1")localStorage.setItem("csa_internal","1");if(q==="0")localStorage.removeItem("csa_internal");csaInternal=localStorage.getItem("csa_internal")==="1";}catch(e){}
+if(location.hostname==="tkys.github.io"&&!csaInternal){
+!function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+posthog.init("phc_uuFAFy25bfEjsVPtVzRBdAiy8yyPLi7NB75MGSQeGXEo",{api_host:"https://us.i.posthog.com",persistence:"memory",person_profiles:"identified_only",disable_session_recording:true,capture_pageview:true});
+posthog.register({site_lang:"ko"});
+document.addEventListener("click",function(e){var a=e.target.closest("a.badge");if(a)posthog.capture("app_store_link_clicked",{position:a.dataset.pos||""});});
+}
+</script>
+</body>
+</html>

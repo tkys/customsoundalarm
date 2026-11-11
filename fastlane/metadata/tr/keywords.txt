@@ -1,0 +1,1 @@
+alarm,melodi,şarkı,mp3,zil,kesme,sabah,ses,tekrar,uyanma,çalar,müzik,uyandırma

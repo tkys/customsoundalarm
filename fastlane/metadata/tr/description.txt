@@ -1,0 +1,41 @@
+My Sound Alarm, iPhone için bir alarm uygulaması. Sizi sevdiğiniz şarkının bir bölümüyle veya bir videodaki sesle uyandırır. Alarmları bu uygulamada kurarsınız ve seçtiğiniz bölüm siz durdurana kadar tekrar eder.
+
+ÖZELLİKLER
+
+Sevdiğiniz bölümle uyanın
+Bir video veya ses dosyası açın, dalga formuna bakın ve bir aralık seçin. Yalnızca nakaratı tutabilir ya da şarkının tamamını kullanabilirsiniz. Ayar yaparken dinleyebilirsiniz. Sonuna gelince baştan başlar.
+
+Uzunluk sınırı yok
+GarageBand'de yapılan zil sesleri 30 saniyeye kadar sürer. My Sound Alarm videodan 10 dakikaya kadar alır, uzun ses dosyaları olduğu gibi aktarılabilir.
+
+Videodan ses
+Fotoğraf arşivinizden veya Dosyalar uygulamasından bir video seçin, yalnızca sesi tutun.
+
+Ses dosyalarını aktarın
+MP3, AAC, WAV ve M4A desteklenir. Dosyalar uygulamasından ekleyin veya başka bir uygulamadan Paylaş düğmesiyle gönderin.
+
+Sessiz modda çalar
+My Sound Alarm alarmlarını AlarmKit ile kurar; bu, Apple'ın iOS 26'da eklediği alarm altyapısıdır. Saatin yerleşik alarmları gibi kilit ekranında görünür ve sessiz modda ve bir Odak açıkken, My Sound Alarm kapalıyken bile çalar.
+
+«Şimdi çal»
+Seçtiğiniz sesi hemen, gerçek bir alarmın ses seviyesinde dinleyin.
+
+Fazla uyuma koruması (Pro, erken erişim)
+Seçtiğiniz saate kadar bir alarmı durdurmadıysanız aynı sesi daha yüksek sesle yeniden çalar. Erken erişim sırasında kullanmaya başlarsanız, resmi sürümden sonra da kullanmaya devam edersiniz.
+
+Tekrar günleri ve erteleme
+Her alarm için günleri seçin. Erteleme kapalı olabilir veya 1, 2, 5, 9 ya da 10 dakika olarak ayarlanabilir.
+
+Sesleriniz bir bakışta
+Her alarm, videonuzdan bir kareyi veya ses dosyanızın kapağını gösterir.
+
+Gece modu
+iPhone'unuz başucu saati olur: karanlık odada okunabilen büyük, yumuşak rakamlar.
+
+DESTEKLENEN FORMATLAR
+MP3 / AAC / WAV / M4A / videodan ses (MOV, MP4)
+
+NOTLAR
+- iOS 26 veya üstü gerekir (AlarmKit)
+- Uzun sesler daha fazla yer kaplar. 10 dakikalık bir ses yaklaşık 50 MB'tır.
+- Apple Music veya Spotify gibi akış hizmetlerindeki şarkılar aktarılamaz.

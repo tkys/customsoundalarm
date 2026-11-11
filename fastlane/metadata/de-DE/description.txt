@@ -6,7 +6,7 @@ Wach auf mit deinem Lieblingsteil
 Öffne ein Video oder eine Audiodatei, schau auf die Wellenform und wähl einen Bereich aus. Nimm nur den Refrain oder den ganzen Song. Du kannst beim Anpassen reinhören. Am Ende fängt er wieder von vorn an.
 
 Keine Längenbegrenzung
-Eigene iPhone-Klingeltöne enden nach etwa 40 Sekunden. My Sound Alarm übernimmt bis zu 10 Minuten aus einem Video, und lange Audiodateien lassen sich so importieren, wie sie sind.
+Klingeltöne aus GarageBand sind bis zu 30 Sekunden lang. My Sound Alarm übernimmt bis zu 10 Minuten aus einem Video, und lange Audiodateien lassen sich so importieren, wie sie sind.
 
 Ton aus Videos
 Wähl ein Video aus deiner Fotomediathek oder der Dateien-App und behalte nur den Ton.
