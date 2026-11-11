@@ -52,15 +52,19 @@ enum AlarmIDMaps {
     static func counterpart(
         of alarmID: UUID,
         primary: [UUID: UUID],
-        backup: [UUID: UUID]
+        backup: [UUID: UUID],
+        coverage: [UUID: [UUID: String]] = [:]
     ) -> UUID? {
-        stopAction(of: alarmID, primary: primary, backup: backup).counterpartAlarmID
+        stopAction(of: alarmID, primary: primary, backup: backup, coverage: coverage)
+            .counterpartAlarmID
     }
 
-    /// 停止されたアラームが本体か最終アラームか。
+    /// 停止されたアラームが本体か最終アラームか、休みの補完か。
     enum Role: Equatable, Sendable {
         case primary(entryID: UUID)
         case backup(entryID: UUID)
+        /// 休みで外した曜日を補う `.fixed`（#197）
+        case coverage(entryID: UUID)
         case unknown
     }
 
@@ -76,9 +80,10 @@ enum AlarmIDMaps {
     static func stopAction(
         of alarmID: UUID,
         primary: [UUID: UUID],
-        backup: [UUID: UUID]
+        backup: [UUID: UUID],
+        coverage: [UUID: [UUID: String]] = [:]
     ) -> StopAction {
-        switch role(of: alarmID, primary: primary, backup: backup) {
+        switch role(of: alarmID, primary: primary, backup: backup, coverage: coverage) {
         case .primary(let entryID):
             return StopAction(
                 role: .primary(entryID: entryID),
@@ -91,6 +96,13 @@ enum AlarmIDMaps {
                 entryID: entryID,
                 counterpartAlarmID: primary[entryID]
             )
+        case .coverage(let entryID):
+            // 補完の回も「本体の1回」として扱う。その回の最終アラームを取り消す（#197 レビュー）。
+            return StopAction(
+                role: .coverage(entryID: entryID),
+                entryID: entryID,
+                counterpartAlarmID: backup[entryID]
+            )
         case .unknown:
             return StopAction(role: .unknown, entryID: nil, counterpartAlarmID: nil)
         }
@@ -99,13 +111,17 @@ enum AlarmIDMaps {
     static func role(
         of alarmID: UUID,
         primary: [UUID: UUID],
-        backup: [UUID: UUID]
+        backup: [UUID: UUID],
+        coverage: [UUID: [UUID: String]] = [:]
     ) -> Role {
         if let entryID = primary.first(where: { $0.value == alarmID })?.key {
             return .primary(entryID: entryID)
         }
         if let entryID = backup.first(where: { $0.value == alarmID })?.key {
             return .backup(entryID: entryID)
+        }
+        if let entryID = skipCoverageEntryID(of: alarmID, map: coverage) {
+            return .coverage(entryID: entryID)
         }
         return .unknown
     }

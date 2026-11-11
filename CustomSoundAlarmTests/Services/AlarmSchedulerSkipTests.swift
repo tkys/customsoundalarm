@@ -205,7 +205,7 @@ struct AlarmSchedulerSkipTests {
     }
 
     @Test
-    func allWeekdaysSkipped_registersOneFixedPrimary() async throws {
+    func allWeekdaysSkipped_registersTheWholeHorizon() async throws {
         try await withCleanState {
             let fake = RecordingAlarmManager()
             let scheduler = AlarmScheduler(manager: fake)
@@ -225,9 +225,81 @@ struct AlarmSchedulerSkipTests {
             await scheduler.waitForPendingSync()
 
             #expect(fake.configurations.values.allSatisfy { schedule(of: $0).map(isFixed) == true })
-            #expect(fake.configurations.count == 1)
-            #expect(AlarmIDMaps.loadSkipCoverage().isEmpty)
+            // 本体（.fixed）1件 + 休み明けの70日分の補完
+            #expect(fake.configurations.count >= 60)
+            #expect(scheduler.primaryAlarmIDMap.count == 1)
+            let coverageIDs = Set((AlarmIDMaps.loadSkipCoverage()[entry.id] ?? [:]).keys)
+            #expect(coverageIDs.count >= 60)
+            let mapped = Set(scheduler.primaryAlarmIDMap.values).union(coverageIDs)
+            #expect(mapped == fake.registeredIDs)
         }
+    }
+
+    @Test
+    func disabledOneTimeAlarm_isNotRegistered() async throws {
+        try await withCleanState {
+            let fake = RecordingAlarmManager()
+            let scheduler = AlarmScheduler(manager: fake)
+            var entry = AlarmEntry(
+                hour: 7,
+                minute: 0,
+                label: "one-time-off",
+                repeatWeekdays: []
+            )
+            entry.isEnabled = false
+            entry.skipDisabledDate = AlarmSkipLogic.dateKey(Date())
+
+            scheduler.syncAlarms([entry], trigger: .launch)
+            await scheduler.waitForPendingSync()
+
+            // 休みで止めた1回だけは、翌日になっても登録されない
+            #expect(fake.registeredIDs.isEmpty)
+        }
+    }
+
+    /// AlarmKit の登録上限の確認（レビュー用・シミュレータのみ）。
+    /// 認可されていない環境ではスキップする。
+    @Test
+    func register200FixedAlarmsOnSimulator() async {
+        #if targetEnvironment(simulator)
+        let manager = AlarmManager.shared
+        if manager.authorizationState != .authorized {
+            _ = try? await manager.requestAuthorization()
+        }
+        guard manager.authorizationState == .authorized else {
+            let message = "skipped (authorization=\(manager.authorizationState))"
+            AppGroup.userDefaults.set(message, forKey: "capacity_test_result")
+        AppGroup.userDefaults.synchronize()
+            AppGroup.userDefaults.synchronize()
+            print("CAPACITY: \(message)")
+            return
+        }
+        let entry = AlarmEntry(hour: 7, minute: 0, label: "capacity")
+        let base = Date().addingTimeInterval(60 * 60 * 24 * 30)
+        var registered: [Alarm.ID] = []
+        var failure: String?
+        for index in 0..<200 {
+            let id = Alarm.ID()
+            let config = BackupAlarmFactory.configuration(
+                for: entry,
+                fireDate: base.addingTimeInterval(Double(index) * 60),
+                alarmID: id,
+                displayName: "capacity"
+            )
+            do {
+                _ = try await manager.schedule(id: id, configuration: config)
+                registered.append(id)
+            } catch {
+                failure = "at \(index): \(error)"
+                break
+            }
+        }
+        for id in registered {
+            try? manager.cancel(id: id)
+        }
+        print("CAPACITY: registered=\(registered.count) failure=\(failure ?? "none")")
+        #expect(failure == nil, "AlarmKit registration failed: \(failure ?? "")")
+        #endif
     }
 
     @Test

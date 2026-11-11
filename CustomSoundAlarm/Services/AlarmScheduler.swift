@@ -923,7 +923,6 @@ final class AlarmScheduler {
         let existing = AlarmIDMaps.loadSkipCoverage()
         let byID = Dictionary(uniqueKeysWithValues: entries.map { ($0.id, $0) })
         let now = Date()
-        var result: [UUID: [UUID: String]] = [:]
 
         func cancelAll(_ ids: [UUID: String]) {
             for id in ids.keys {
@@ -959,12 +958,41 @@ final class AlarmScheduler {
             }
         }
 
-        for (entryID, ids) in existing {
+        // アプリ全体で近い日付から上限まで。超えた分は次の同期に回す（#197 レビュー）。
+        var allDesired: [AlarmSkipLogic.CoverageItem] = []
+        for entry in entries where entry.isEnabled && signatures[entry.id] != nil {
+            for coverage in AlarmSkipLogic.coverageOccurrences(for: entry, after: now) {
+                allDesired.append(AlarmSkipLogic.CoverageItem(
+                    entryID: entry.id,
+                    coverage: coverage
+                ))
+            }
+        }
+        let limited = AlarmSkipLogic.limitedCoverage(allDesired)
+        if limited.deferred > 0 {
+            logger.warning(
+                "Deferred \(limited.deferred) skip coverage alarm(s) to the next sync"
+            )
+        }
+        var desiredByEntry: [UUID: [AlarmSkipLogic.Coverage]] = [:]
+        for item in limited.selected {
+            desiredByEntry[item.entryID, default: []].append(item.coverage)
+        }
+
+        var result: [UUID: [UUID: String]] = [:]
+        let entryIDs = Set(existing.keys).union(desiredByEntry.keys)
+        for entryID in entryIDs {
+            let ids = existing[entryID] ?? [:]
             guard let entry = byID[entryID], entry.isEnabled else {
                 cancelAll(ids)
                 continue
             }
-            let desired = AlarmSkipLogic.coverageOccurrences(for: entry, after: now)
+            // バックグラウンド起動などで音の情報が無いときは、既存の補完を消さない。
+            guard let sound = signatures[entryID]?.soundFileName else {
+                if !ids.isEmpty { result[entryID] = ids }
+                continue
+            }
+            let desired = desiredByEntry[entryID] ?? []
             let desiredKeys = Set(desired.map(\.dateKey))
             var kept: [UUID: String] = [:]
             for (id, key) in ids {
@@ -975,24 +1003,6 @@ final class AlarmScheduler {
                 }
             }
             var covered = Set(kept.values)
-            if let sound = signatures[entryID]?.soundFileName {
-                await schedule(
-                    desired: desired,
-                    sound: sound,
-                    entry: entry,
-                    kept: &kept,
-                    covered: &covered
-                )
-            }
-            if !kept.isEmpty { result[entryID] = kept }
-        }
-
-        for entry in entries where entry.isEnabled && existing[entry.id] == nil {
-            guard let sound = signatures[entry.id]?.soundFileName else { continue }
-            let desired = AlarmSkipLogic.coverageOccurrences(for: entry, after: now)
-            guard !desired.isEmpty else { continue }
-            var kept: [UUID: String] = [:]
-            var covered = Set<String>()
             await schedule(
                 desired: desired,
                 sound: sound,
@@ -1000,7 +1010,7 @@ final class AlarmScheduler {
                 kept: &kept,
                 covered: &covered
             )
-            if !kept.isEmpty { result[entry.id] = kept }
+            if !kept.isEmpty { result[entryID] = kept }
         }
 
         AlarmIDMaps.saveSkipCoverage(result)

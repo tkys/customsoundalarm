@@ -27,6 +27,9 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
     var skipsHolidays: Bool
     /// 祝日でも鳴らす日（`yyyy-MM-dd`・#197）。
     var holidayRingOverrides: [String]
+    /// 休みで止めた1回だけのアラームの日付（`yyyy-MM-dd`）。
+    /// 休みの翌日に鳴らないよう、`isEnabled` を false にした印（#197 レビュー）。
+    var skipDisabledDate: String?
 
     init(
         id: UUID = UUID(),
@@ -42,7 +45,8 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
         fadeIn: PlaylistFadeIn = .off,
         skipDates: [String] = [],
         skipsHolidays: Bool = false,
-        holidayRingOverrides: [String] = []
+        holidayRingOverrides: [String] = [],
+        skipDisabledDate: String? = nil
     ) {
         self.id = id
         self.hour = hour
@@ -58,11 +62,12 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
         self.skipDates = skipDates
         self.skipsHolidays = skipsHolidays
         self.holidayRingOverrides = holidayRingOverrides
+        self.skipDisabledDate = skipDisabledDate
     }
 
     enum CodingKeys: String, CodingKey {
         case id, hour, minute, isEnabled, label, repeatWeekdays, soundFileName, snoozeMinutes, backupMinutes
-        case playlistID, fadeIn, skipDates, skipsHolidays, holidayRingOverrides
+        case playlistID, fadeIn, skipDates, skipsHolidays, holidayRingOverrides, skipDisabledDate
     }
 
     init(from decoder: any Decoder) throws {
@@ -81,6 +86,7 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
         skipDates = try container.decodeIfPresent([String].self, forKey: .skipDates) ?? []
         skipsHolidays = try container.decodeIfPresent(Bool.self, forKey: .skipsHolidays) ?? false
         holidayRingOverrides = try container.decodeIfPresent([String].self, forKey: .holidayRingOverrides) ?? []
+        skipDisabledDate = try container.decodeIfPresent(String.self, forKey: .skipDisabledDate)
     }
 
     /// プレイリストか「やさしく鳴り始める」を使っているか（先行公開の権利付与判定・#160）

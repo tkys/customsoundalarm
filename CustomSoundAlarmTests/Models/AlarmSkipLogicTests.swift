@@ -118,16 +118,18 @@ struct AlarmSkipLogicTests {
     }
 
     @Test
-    func coverage_emptyForSingleWeekdayEntry() {
-        // 曜日が1つだけなら、その曜日を外すと本体を .fixed にする（補完は不要）
+    func coverage_singleWeekdayAllSkipped_coversAfterThePrimary() {
+        // 曜日が1つだけでも、休みのあとの70日分を補完する（#197 レビュー）
         var entry = repeating([4])
         entry.skipDates = ["2026-11-11"]
-        #expect(AlarmSkipLogic.coverageOccurrences(
-            for: entry, after: date(2026, 11, 10, 12), calendar: calendar
-        ).isEmpty)
-        #expect(AlarmSkipLogic.primaryUsesFixed(
-            for: entry, after: date(2026, 11, 10, 12), calendar: calendar
-        ))
+        let now = date(2026, 11, 10, 12)
+        #expect(AlarmSkipLogic.primaryUsesFixed(for: entry, after: now, calendar: calendar))
+        let coverage = AlarmSkipLogic.coverageOccurrences(
+            for: entry, after: now, calendar: calendar
+        )
+        // 11/18 は本体（.fixed）が受け持ち、11/25 から補完
+        #expect(coverage.first?.dateKey == "2026-11-25")
+        #expect(!coverage.contains { $0.dateKey == "2026-11-11" })
     }
 
     @Test
@@ -290,6 +292,145 @@ struct AlarmSkipServiceTests {
 
         AlarmSkipService.undo(dateKey: key)
         #expect(AlarmStore.shared.alarms.first?.skipDates == [])
+
+        await AlarmScheduler.shared.waitForPendingSync()
+    }
+}
+
+/// レビュー対応の追加テスト（#197）。
+extension AlarmSkipLogicTests {
+
+    @Test
+    func pruning_keepsTheSkipDisabledMarker() {
+        var entry = repeating([4])
+        entry.isEnabled = false
+        entry.skipDisabledDate = "2026-11-10"
+        let pruned = AlarmSkipLogic.pruning(
+            entry, now: date(2026, 11, 12, 12), calendar: calendar
+        )
+        #expect(!pruned.isEnabled)
+        #expect(pruned.skipDisabledDate == "2026-11-10")
+        #expect(pruned.skipDates.isEmpty)
+    }
+
+    @Test
+    func allWeekdaysRemoved_coversTheHorizonAfterTheBreak() {
+        var entry = repeating([2, 3, 4, 5, 6]) // 月〜金
+        entry.skipDates = (27...31).map { "2026-12-\(String(format: "%02d", $0))" }
+            + (1...4).map { "2027-01-\(String(format: "%02d", $0))" }
+        let now = date(2026, 12, 26, 12)
+
+        #expect(AlarmSkipLogic.primaryUsesFixed(
+            for: entry, after: now, calendar: calendar
+        ))
+        let coverage = AlarmSkipLogic.coverageOccurrences(
+            for: entry, after: now, calendar: calendar
+        )
+        #expect(!coverage.isEmpty)
+        let primary = try? #require(AlarmSkipLogic.nextFireDate(
+            for: entry, after: now, calendar: calendar
+        ))
+        let all = Set(coverage.map(\.dateKey))
+            .union(primary.map { [AlarmSkipLogic.dateKey($0, calendar: calendar)] } ?? [])
+        // 休み明けの 1/5 から、70日分の平日が登録される
+        for key in ["2027-01-05", "2027-01-06", "2027-01-07", "2027-01-08", "2027-01-12"] {
+            #expect(all.contains(key), "missing \(key)")
+        }
+        // 休みの日は入らない
+        #expect(!all.contains("2027-01-01"))
+    }
+
+    @Test
+    func limitedCoverage_keepsTheEarliestAndDefersTheRest() {
+        let base = date(2026, 11, 20)
+        let items = (0..<100).map { index in
+            AlarmSkipLogic.CoverageItem(
+                entryID: UUID(),
+                coverage: AlarmSkipLogic.Coverage(
+                    dateKey: "2026-11-\(String(format: "%02d", 20 + index % 10))",
+                    date: base.addingTimeInterval(Double(index) * 86400)
+                )
+            )
+        }
+        let limited = AlarmSkipLogic.limitedCoverage(items, limit: 80)
+        #expect(limited.selected.count == 80)
+        #expect(limited.deferred == 20)
+        #expect(limited.selected.first?.coverage.date == items.first?.coverage.date)
+        #expect(limited.selected.last!.coverage.date < items[80].coverage.date)
+    }
+
+    @Test
+    func reconcileOnStop_oncePerDayForHolidayOrSkipSettings() {
+        var holiday = repeating([2])
+        holiday.skipsHolidays = true
+        let today = date(2026, 11, 12, 8)
+        #expect(AlarmSkipLogic.shouldReconcileOnStop(
+            entry: holiday, lastDay: nil, today: today, calendar: calendar
+        ))
+        #expect(!AlarmSkipLogic.shouldReconcileOnStop(
+            entry: holiday, lastDay: "2026-11-12", today: today, calendar: calendar
+        ))
+
+        var plain = repeating([2])
+        #expect(!AlarmSkipLogic.shouldReconcileOnStop(
+            entry: plain, lastDay: nil, today: today, calendar: calendar
+        ))
+    }
+
+    /// 平日（月〜金）＋祝日スキップのアラーム1本で、70日に登録される最大件数。
+    /// 2026〜2028 の全日を開始日として計算する（レビューで数字を報告するため）。
+    @Test
+    func maxCoverageForWeekdayAlarmWithHolidays() {
+        var maxCount = 0
+        var maxDay: Date?
+        var day = date(2026, 1, 1)
+        let end = date(2028, 12, 31)
+        while day <= end {
+            var entry = repeating([2, 3, 4, 5, 6])
+            entry.skipsHolidays = true
+            let count = 1 + AlarmSkipLogic.coverageOccurrences(
+                for: entry, after: day, calendar: calendar
+            ).count
+            if count > maxCount {
+                maxCount = count
+                maxDay = day
+            }
+            day = calendar.date(byAdding: .day, value: 1, to: day)!
+        }
+        #expect(maxCount == 38, "measured max: \(maxCount) on \(String(describing: maxDay))")
+        #expect(maxCount <= AlarmSkipLogic.maxTotalCoverage)
+    }
+}
+
+/// 1回だけのアラームを休ませたときの保存と取り消し（#197 レビュー）。
+@MainActor
+extension AlarmSkipServiceTests {
+
+    @Test
+    func skipOneTime_disablesItAndUndoRestores() async {
+        let original = AlarmStore.shared.alarms
+        defer { AlarmStore.shared.replaceAll(original) }
+
+        let entry = AlarmEntry(hour: 7, minute: 0, label: "one-time")
+        AlarmStore.shared.replaceAll([entry])
+        let occurrence = try? #require(AlarmSkipLogic.oneTimeOccurrenceKey(
+            for: entry,
+            after: Date()
+        ))
+        guard let occurrence, let date = AlarmSkipLogic.date(fromKey: occurrence) else {
+            Issue.record("one-time occurrence should exist")
+            return
+        }
+
+        AlarmSkipService.skipDay(date, entries: [entry])
+        let saved = AlarmStore.shared.alarms.first
+        #expect(saved?.isEnabled == false)
+        #expect(saved?.skipDates == [])
+        #expect(saved?.skipDisabledDate == occurrence)
+
+        AlarmSkipService.undo(dateKey: occurrence)
+        #expect(AlarmStore.shared.alarms.first?.isEnabled == true)
+        #expect(AlarmStore.shared.alarms.first?.skipDisabledDate == nil)
 
         await AlarmScheduler.shared.waitForPendingSync()
     }

@@ -48,6 +48,18 @@ enum StopActionPlanner {
             }
             return actions
 
+        case .coverage(let entryID):
+            // 休みで外した曜日の補完も「本体の1回」として扱う（#197 レビュー）。
+            // その回の最終アラームを取り消し、次回分を登録する。
+            var actions: [StopAction] = []
+            if let backupID = backup[entryID] {
+                actions.append(.cancel(alarmID: backupID))
+            }
+            if hasNextBackup {
+                actions.append(.scheduleNextBackup(entryID: entryID))
+            }
+            return actions
+
         case .unknown:
             return []
         }

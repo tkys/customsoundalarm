@@ -55,6 +55,10 @@ final class AlarmStore {
     func toggleEnabled(_ alarm: AlarmEntry) {
         guard let index = alarms.firstIndex(where: { $0.id == alarm.id }) else { return }
         alarms[index].isEnabled.toggle()
+        if alarms[index].isEnabled {
+            // 休みで止めた1回だけのアラームを、手動でオンに戻した（#197 レビュー）
+            alarms[index].skipDisabledDate = nil
+        }
         save()
     }
 

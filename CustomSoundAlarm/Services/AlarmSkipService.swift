@@ -18,6 +18,10 @@ enum AlarmSkipScope: String, Sendable, CaseIterable {
 enum AlarmSkipService {
 
     /// 指定したアラームを、指定した日付だけ休む。
+    ///
+    /// くり返しのアラームは `skipDates` に日付を足す。
+    /// 1回だけのアラームは休みの翌日に鳴らないよう、その場でオフにする
+    /// （`skipDisabledDate` に日付を残し、「取り消す」で戻せる）。
     /// - Returns: 実際に変わったアラーム数
     @discardableResult
     static func skip(
@@ -33,6 +37,20 @@ enum AlarmSkipService {
         var affected: Set<UUID> = []
         for index in alarms.indices {
             guard entryIDs.contains(alarms[index].id) else { continue }
+
+            if alarms[index].repeatWeekdays.isEmpty {
+                guard let occurrence = AlarmSkipLogic.oneTimeOccurrenceKey(
+                    for: alarms[index],
+                    after: Date()
+                ), dateKeys.contains(occurrence) else { continue }
+                guard alarms[index].isEnabled
+                    || alarms[index].skipDisabledDate != occurrence else { continue }
+                alarms[index].isEnabled = false
+                alarms[index].skipDisabledDate = occurrence
+                affected.insert(alarms[index].id)
+                continue
+            }
+
             let merged = Set(alarms[index].skipDates).union(dateKeys)
             guard merged.count != alarms[index].skipDates.count else { continue }
             alarms[index].skipDates = merged.sorted()
@@ -95,6 +113,17 @@ enum AlarmSkipService {
         var affected: Set<UUID> = []
         for index in alarms.indices {
             guard let keys = byEntry[alarms[index].id], !keys.isEmpty else { continue }
+
+            if alarms[index].repeatWeekdays.isEmpty {
+                guard let key = keys.sorted().first else { continue }
+                guard alarms[index].isEnabled
+                    || alarms[index].skipDisabledDate != key else { continue }
+                alarms[index].isEnabled = false
+                alarms[index].skipDisabledDate = key
+                affected.insert(alarms[index].id)
+                continue
+            }
+
             let merged = Set(alarms[index].skipDates).union(keys)
             if merged.count != alarms[index].skipDates.count {
                 affected.insert(alarms[index].id)
@@ -115,13 +144,24 @@ enum AlarmSkipService {
         ))
     }
 
-    /// 休みを取り消す。
+    /// 休みを取り消す。1回だけのアラームはオンに戻す。
     static func undo(dateKey: String) {
         var alarms = AlarmStore.shared.alarms
         var affected: Set<UUID> = []
-        for index in alarms.indices where alarms[index].skipDates.contains(dateKey) {
-            alarms[index].skipDates.removeAll { $0 == dateKey }
-            affected.insert(alarms[index].id)
+        for index in alarms.indices {
+            var changed = false
+            if alarms[index].skipDates.contains(dateKey) {
+                alarms[index].skipDates.removeAll { $0 == dateKey }
+                changed = true
+            }
+            if alarms[index].skipDisabledDate == dateKey {
+                alarms[index].isEnabled = true
+                alarms[index].skipDisabledDate = nil
+                changed = true
+            }
+            if changed {
+                affected.insert(alarms[index].id)
+            }
         }
         guard !affected.isEmpty else { return }
         AlarmStore.shared.replaceAll(alarms)

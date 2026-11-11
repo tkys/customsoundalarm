@@ -13,6 +13,10 @@ enum AlarmSkipLogic {
     /// 1曜日あたりに `.fixed` で用意する回数の上限。
     static let maxCoveragePerWeekday = 12
 
+    /// アプリ全体で同時に登録する補完の上限（#197 レビュー）。
+    /// 超えた分は近い日付から残し、次の同期に回す。
+    static let maxTotalCoverage = 80
+
     // MARK: - 日付キー
 
     /// ローカル日付の `yyyy-MM-dd`。
@@ -188,6 +192,17 @@ enum AlarmSkipLogic {
         return earliest
     }
 
+    /// 1回だけのアラームの次の発火日のキー。休みで止める対象かどうかの判定に使う。
+    static func oneTimeOccurrenceKey(
+        for entry: AlarmEntry,
+        after now: Date,
+        calendar: Calendar = .current
+    ) -> String? {
+        guard entry.repeatWeekdays.isEmpty else { return nil }
+        return rawNextFireDate(for: entry, after: now, calendar: calendar)
+            .map { dateKey($0, calendar: calendar) }
+    }
+
     /// `date` に（休みを考えなければ）鳴る予定か。休みを付ける対象を決めるのに使う。
     static func fires(
         on date: Date,
@@ -238,13 +253,6 @@ enum AlarmSkipLogic {
         calendar: Calendar = .current
     ) -> [Coverage] {
         guard entry.isEnabled, !entry.repeatWeekdays.isEmpty else { return [] }
-        // すべての曜日を外す場合は、本体を1回だけ `.fixed` にする（下の primaryUsesFixed）。
-        guard !effectiveWeekdays(
-            for: entry,
-            after: referenceDate,
-            horizonDays: horizonDays,
-            calendar: calendar
-        ).isEmpty else { return [] }
 
         let start = calendar.startOfDay(for: referenceDate)
         let skipKeys = Set(upcomingSkipKeys(
@@ -253,13 +261,29 @@ enum AlarmSkipLogic {
             days: horizonDays,
             calendar: calendar
         ))
+        let effective = effectiveWeekdays(
+            for: entry,
+            after: referenceDate,
+            horizonDays: horizonDays,
+            calendar: calendar
+        )
         let removed = skippedWeekdays(
             for: entry,
             after: referenceDate,
             horizonDays: horizonDays,
             calendar: calendar
         )
-        guard !removed.isEmpty else { return [] }
+
+        // 全曜日を外す場合（年末年始など）は、本体を最初の1回だけ `.fixed` にし、
+        // 残りの70日分をここで補完する。1回だけ登録して終わりにしない（#197 レビュー）。
+        let allWeekdaysRemoved = effective.isEmpty
+        let weekdaysToCover: Set<Int>
+        if allWeekdaysRemoved {
+            weekdaysToCover = Set(entry.repeatWeekdays)
+        } else {
+            guard !removed.isEmpty else { return [] }
+            weekdaysToCover = removed
+        }
 
         var result: [Coverage] = []
         var perWeekday: [Int: Int] = [:]
@@ -268,7 +292,7 @@ enum AlarmSkipLogic {
             guard let day = calendar.date(byAdding: .day, value: offset, to: start) else { break }
             offset += 1
             let weekday = calendar.component(.weekday, from: day)
-            guard removed.contains(weekday) else { continue }
+            guard weekdaysToCover.contains(weekday) else { continue }
             let key = dateKey(day, calendar: calendar)
             guard !skipKeys.contains(key) else { continue }
             guard let candidate = calendar.date(
@@ -282,7 +306,38 @@ enum AlarmSkipLogic {
             perWeekday[weekday] = count + 1
             result.append(Coverage(dateKey: key, date: candidate))
         }
+        if allWeekdaysRemoved, !result.isEmpty {
+            // 最初の1回は本体（.fixed）が受け持つ
+            result.removeFirst()
+        }
         return result
+    }
+
+    /// 補完の1件（アプリ全体の上限を決めるために entryID と組にする）。
+    struct CoverageItem: Equatable, Sendable {
+        let entryID: UUID
+        let coverage: Coverage
+    }
+
+    /// 近い日付から `limit` 件だけ残す。超えた分は次の同期に回す（#197 レビュー）。
+    static func limitedCoverage(
+        _ items: [CoverageItem],
+        limit: Int = maxTotalCoverage
+    ) -> (selected: [CoverageItem], deferred: Int) {
+        let sorted = items.sorted { $0.coverage.date < $1.coverage.date }
+        return (Array(sorted.prefix(limit)), max(0, sorted.count - limit))
+    }
+
+    /// 祝日・休みの設定があるアラームを止めたとき、日付が変わった最初の停止で
+    /// 軽く同期する（#197 レビュー）。
+    static func shouldReconcileOnStop(
+        entry: AlarmEntry,
+        lastDay: String?,
+        today: Date,
+        calendar: Calendar = .current
+    ) -> Bool {
+        guard entry.skipsHolidays || !entry.skipDates.isEmpty else { return false }
+        return lastDay != dateKey(today, calendar: calendar)
     }
 
     /// 全曜日を外すほど休みが続くとき、本体を次の1回だけ `.fixed` で登録する。
@@ -357,7 +412,11 @@ enum AlarmSkipLogic {
         let todayKey = dateKey(calendar.startOfDay(for: now), calendar: calendar)
         var skipped: [String: [AlarmEntry]] = [:]
         for entry in entries {
-            for key in entry.skipDates where key >= todayKey {
+            var keys = entry.skipDates
+            if let disabled = entry.skipDisabledDate {
+                keys.append(disabled)
+            }
+            for key in keys where key >= todayKey {
                 skipped[key, default: []].append(entry)
             }
         }

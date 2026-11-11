@@ -67,14 +67,17 @@ struct DismissAlarmIntent: LiveActivityIntent {
         // 2) 本体 / 最終アラーム
         let primary = AlarmIDMaps.loadPrimary()
         let backup = AlarmIDMaps.loadBackup()
+        let coverage = AlarmIDMaps.loadSkipCoverage()
         var stoppedSoundMode: PlaylistSoundMode = .single
+        var needsSkipResync = false
 
         if let stoppedID {
             let entries = AppGroup.savedAlarmEntries
             let action = AlarmIDMaps.stopAction(
                 of: stoppedID,
                 primary: primary,
-                backup: backup
+                backup: backup,
+                coverage: coverage
             )
             let entryID = action.entryID
             let entry = entryID.flatMap { id in entries.first { $0.id == id } }
@@ -172,6 +175,40 @@ struct DismissAlarmIntent: LiveActivityIntent {
                         timestamp: now
                     ))
                 }
+
+                // 全曜日を外したときの本体（.fixed）は、止めたら補完と同じように
+                // 過ぎた休みを落として次の回を登録する（#197 レビュー）。
+                if let entry, !entry.repeatWeekdays.isEmpty,
+                   AlarmSkipLogic.primaryUsesFixed(for: entry, after: now) {
+                    needsSkipResync = true
+                }
+
+                // 祝日・休みの設定があるアラームは、日付が変わった最初の停止で
+                // 軽く同期する。補完が無い期間でも新しい祝日を反映する（#197 レビュー）。
+                if let entry,
+                   entry.skipsHolidays || !entry.skipDates.isEmpty,
+                   AlarmSkipLogic.shouldReconcileOnStop(
+                       entry: entry,
+                       lastDay: AppGroup.lastSkipReconcileDay,
+                       today: now
+                   ) {
+                    AppGroup.lastSkipReconcileDay = AlarmSkipLogic.dateKey(now)
+                    needsSkipResync = true
+                }
+            case .coverage(let entryID):
+                // 補完の回も本体の1回として扱う。最終アラームの取り消しは
+                // StopActionPlanner の .cancel が行う（#197 レビュー）。
+                var canceled = AppGroup.backupCanceledAt
+                canceled[entryID] = now
+                AppGroup.backupCanceledAt = canceled
+                if action.counterpartAlarmID != nil {
+                    AlarmEventBuffer.enqueue(PendingAlarmEvent(
+                        name: AnalyticsEvent.backupAlarmCancelledByStop.name,
+                        properties: [:],
+                        timestamp: now
+                    ))
+                }
+                needsSkipResync = true
             case .backup(let entryID):
                 var canceled = AppGroup.backupCanceledAt
                 canceled.removeValue(forKey: entryID)
@@ -204,16 +241,20 @@ struct DismissAlarmIntent: LiveActivityIntent {
                     oldAlarmID: oldPrimaryID
                 )
             }
-        }
 
-        // 休みで外した曜日を補うために登録した .fixed を止めたら、
-        // 休みが過ぎていれば元のくり返しに戻す（#197）。
-        if let stoppedID,
-           let coverageEntryID = AlarmIDMaps.skipCoverageEntryID(
-               of: stoppedID,
-               map: AlarmIDMaps.loadSkipCoverage()
-           ) {
-            await restoreSkipSchedule(entryID: coverageEntryID, stoppedAlarmID: stoppedID)
+            // 補完の .fixed、全曜日を外した本体、祝日・休みの設定があるアラームを
+            // 止めたときは、その場で過ぎた休みを落として同期する（#197）。
+            if let coverageEntryID = AlarmIDMaps.skipCoverageEntryID(
+                of: stoppedID,
+                map: coverage
+            ) {
+                await resyncSkipSchedule(
+                    entryID: coverageEntryID,
+                    stoppedAlarmID: stoppedID
+                )
+            } else if needsSkipResync, let entryID = action.entryID {
+                await resyncSkipSchedule(entryID: entryID)
+            }
         }
 
         AlarmEventBuffer.enqueue(PendingAlarmEvent(
@@ -230,13 +271,18 @@ struct DismissAlarmIntent: LiveActivityIntent {
     }
 
     /// 休みの補完を止めたあと、過ぎた休みを落として元の予定に戻す（#197）。
-    private func restoreSkipSchedule(entryID: UUID, stoppedAlarmID: UUID) async {
-        var map = AlarmIDMaps.loadSkipCoverage()
-        map[entryID]?.removeValue(forKey: stoppedAlarmID)
-        if map[entryID]?.isEmpty == true {
-            map.removeValue(forKey: entryID)
+    private func resyncSkipSchedule(
+        entryID: UUID,
+        stoppedAlarmID: UUID? = nil
+    ) async {
+        if let stoppedAlarmID {
+            var map = AlarmIDMaps.loadSkipCoverage()
+            map[entryID]?.removeValue(forKey: stoppedAlarmID)
+            if map[entryID]?.isEmpty == true {
+                map.removeValue(forKey: entryID)
+            }
+            AlarmIDMaps.saveSkipCoverage(map)
         }
-        AlarmIDMaps.saveSkipCoverage(map)
 
         await MainActor.run {
             AlarmStore.shared.reload()

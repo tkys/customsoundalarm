@@ -381,6 +381,12 @@ enum AppGroup {
 
     /// 最後に停止 Intent が動いた時刻（#163）。
     /// バックグラウンド起動直後の同期を `intent` きっかけとして記録するために使う。
+    /// 祝日・休みの設定があるアラームを止めたときの、最後に軽く同期した日（#197）。
+    static var lastSkipReconcileDay: String? {
+        get { userDefaults.string(forKey: "last_skip_reconcile_day") }
+        set { userDefaults.set(newValue, forKey: "last_skip_reconcile_day") }
+    }
+
     static var lastStopIntentAt: Date? {
         get {
             guard userDefaults.object(forKey: "last_stop_intent_at") != nil else { return nil }
