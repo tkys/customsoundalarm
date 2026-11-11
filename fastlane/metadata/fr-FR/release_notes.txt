@@ -1,15 +1,25 @@
-■ Anti-grasse matinée (Pro, accès anticipé)
-Si vous n’avez pas arrêté votre alarme à l’heure choisie, elle rejoue le même son, plus fort. Si vous l’activez pendant l’accès anticipé, vous pourrez continuer à l’utiliser après la sortie officielle.
+■ Playlists (PRO · Accès anticipé)
+Regroupez vos sons dans une playlist et réveillez-vous avec : dans l’ordre, en aléatoire ou un titre au hasard. Vous pouvez aussi choisir l’enchaînement entre les titres, avec un fondu ou un fondu enchaîné.
 
-■ Sonner maintenant
-Touchez « Ring now » dans l’écran de l’alarme pour l’entendre tout de suite, à son vrai volume.
+■ Démarrage en douceur (PRO · Accès anticipé)
+L’alarme commence doucement et monte en volume sur 5, 15 ou 30 secondes.
 
-■ Aide quand le son est trop faible
-Le volume des alarmes suit « Sonnerie et alertes » dans Réglages. « Too quiet? » vous montre où le modifier.
+Si vous commencez à les utiliser pendant l’accès anticipé, vous pourrez continuer après la version finale.
 
-■ Un écran d’alarme plus simple
-Les réglages sont organisés davantage comme dans l’app Horloge, et une alarme modifiée est activée à l’enregistrement.
+■ Bibliothèque
+Le nouvel onglet Bibliothèque réunit vos sons et vos playlists.
 
-■ Meilleures étiquettes VoiceOver
+■ Désormais en français
+My Sound Alarm est maintenant disponible en français, ainsi qu’en 12 autres langues. L’app suit la langue de votre appareil.
 
-Merci d’utiliser My Sound Alarm !
+■ Corrections
+Une alarme répétée pouvait sonner de nouveau dans la même minute après avoir été arrêtée. C’est corrigé.
+Une alarme qui n’apparaissait plus dans l’app pouvait sonner à une heure que vous n’aviez pas réglée. C’est corrigé : après la mise à jour, ouvrez l’app pour supprimer ces alarmes.
+
+■ Plus lisible
+Les couleurs et le contraste du texte ont été revus, et les écrans restent lisibles avec les grandes tailles de texte.
+
+■ « Faire sonner »
+« Faire sonner » joue maintenant le son en cours de modification. S’il ne peut pas sonner, l’écran en indique la raison et vous permet d’autoriser les alarmes sur place.
+
+Merci d’utiliser My Sound Alarm.

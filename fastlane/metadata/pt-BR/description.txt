@@ -9,7 +9,7 @@ Sem limite de duração
 Os toques criados no GarageBand duram até 30 segundos. O My Sound Alarm aceita até 10 minutos de um vídeo, e arquivos de áudio longos podem ser importados como estão.
 
 O som de um vídeo
-Escolha um vídeo da fototeca ou do app Arquivos e fique só com o som.
+Escolha um vídeo da fototeca ou do app Arquivos e fique só com o som. Um vídeo de viagem ou a voz da sua família ou do seu pet pode virar o som do seu alarme.
 
 Importar arquivos de áudio
 MP3, AAC, WAV e M4A. Adicione pelo app Arquivos ou envie de outro app pelo botão Compartilhar.
@@ -17,23 +17,22 @@ MP3, AAC, WAV e M4A. Adicione pelo app Arquivos ou envie de outro app pelo botã
 Toca no modo silencioso
 O My Sound Alarm agenda os alarmes com o AlarmKit, o sistema de alarmes que a Apple incluiu no iOS 26. Eles aparecem na Tela Bloqueada como os do app Relógio nativo e tocam no modo silencioso e com um Foco ativado, mesmo com o My Sound Alarm fechado.
 
-“Tocar agora”
-Ouça na hora o som escolhido, no mesmo volume de um alarme de verdade.
-
 Proteção contra perder a hora (Pro, acesso antecipado)
-Se você não desligar um alarme até o horário escolhido, ele toca o mesmo som de novo, mais alto. Se começar a usar durante o acesso antecipado, continua com ele depois do lançamento oficial.
+Se você não desligar um alarme até o horário escolhido, ele toca o mesmo som de novo, mais alto.
 
-Repetição e soneca
-Escolha os dias de cada alarme. A soneca pode ficar desativada ou em 1, 2, 5, 9 ou 10 minutos.
+Playlists (Pro, acesso antecipado)
+Junte seus sons e toque em ordem, aleatório ou com uma faixa sorteada. Escolha também como as faixas se emendam: com fade ou crossfade.
+
+Início suave (Pro, acesso antecipado)
+O alarme começa baixo e aumenta ao longo de 5, 15 ou 30 segundos.
+
+Se começar a usar esses recursos Pro durante o acesso antecipado, continua com eles depois do lançamento oficial.
 
 Seus sons de relance
 Cada alarme mostra uma imagem do seu vídeo ou a capa do seu arquivo de áudio.
 
 Modo noturno
 Seu iPhone vira um relógio de cabeceira, com números grandes e suaves para ler no escuro.
-
-FORMATOS
-MP3 / AAC / WAV / M4A / Som de vídeo (MOV, MP4)
 
 OBSERVAÇÕES
 - Requer iOS 26 ou posterior (AlarmKit)

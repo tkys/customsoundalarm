@@ -9,7 +9,7 @@ Bez limitu długości
 Dzwonki tworzone w GarageBand mogą trwać do 30 sekund. My Sound Alarm przyjmuje do 10 minut z wideo, a długie pliki audio można zaimportować w całości.
 
 Dźwięk z wideo
-Wybierz wideo z biblioteki zdjęć lub z aplikacji Pliki i zostaw sam dźwięk.
+Wybierz wideo z biblioteki zdjęć lub z aplikacji Pliki i zostaw sam dźwięk. Film z podróży albo głos rodziny czy zwierzaka może stać się dźwiękiem budzika.
 
 Import plików audio
 MP3, AAC, WAV i M4A. Dodaj je z aplikacji Pliki albo wyślij z innej aplikacji przyciskiem Udostępnij.
@@ -17,23 +17,22 @@ MP3, AAC, WAV i M4A. Dodaj je z aplikacji Pliki albo wyślij z innej aplikacji p
 Dzwoni w trybie cichym
 My Sound Alarm planuje swoje budziki przez AlarmKit, system budzików dodany przez Apple w iOS 26. Pojawiają się na ekranie blokady jak budziki z wbudowanej aplikacji Zegar i dzwonią w trybie cichym i przy włączonym trybie skupienia, nawet gdy My Sound Alarm jest zamknięta.
 
-„Zadzwoń teraz”
-Posłuchaj wybranego dźwięku od razu, z tą samą głośnością co prawdziwy budzik.
-
 Ochrona przed zaspaniem (Pro, wczesny dostęp)
-Jeśli nie wyłączysz budzika do wybranej godziny, odtworzy ten sam dźwięk ponownie, głośniej. Jeśli zaczniesz z niej korzystać we wczesnym dostępie, zachowasz ją po oficjalnym wydaniu.
+Jeśli nie wyłączysz budzika do wybranej godziny, odtworzy ten sam dźwięk ponownie, głośniej.
 
-Powtarzanie i drzemka
-Wybierz dni dla każdego budzika. Drzemka może być wyłączona albo trwać 1, 2, 5, 9 lub 10 minut.
+Playlisty (Pro, wczesny dostęp)
+Zbierz swoje dźwięki i odtwarzaj je po kolei, losowo lub jako jeden losowy utwór. Wybierz też, jak utwory przechodzą jeden w drugi: z wyciszeniem lub z przenikaniem.
+
+Łagodny start (Pro, wczesny dostęp)
+Budzik zaczyna cicho i zgłaśnia się przez 5, 15 lub 30 sekund.
+
+Jeśli zaczniesz korzystać z tych funkcji Pro we wczesnym dostępie, zachowasz je po oficjalnym wydaniu.
 
 Twoje dźwięki na pierwszy rzut oka
 Każdy budzik pokazuje kadr z wideo albo okładkę pliku audio.
 
 Tryb nocny
 Twój iPhone staje się zegarem przy łóżku, z dużymi, łagodnymi cyframi czytelnymi w ciemności.
-
-FORMATY
-MP3 / AAC / WAV / M4A / Dźwięk z wideo (MOV, MP4)
 
 UWAGI
 - Wymaga iOS 26 lub nowszego (AlarmKit)

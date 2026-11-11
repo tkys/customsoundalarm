@@ -9,7 +9,7 @@ Bez omezení délky
 Vyzvánění vytvořená v GarageBand mají až 30 sekund. My Sound Alarm vezme z videa až 10 minut a dlouhé zvukové soubory se dají importovat celé.
 
 Zvuk z videa
-Vyber video z knihovny fotek nebo z aplikace Soubory a nech si jen zvuk.
+Vyber video z knihovny fotek nebo z aplikace Soubory a nech si jen zvuk. Video z cesty nebo hlas rodiny či mazlíčka se může stát zvukem budíku.
 
 Import zvukových souborů
 MP3, AAC, WAV a M4A. Přidej je z aplikace Soubory, nebo je pošli z jiné aplikace tlačítkem Sdílet.
@@ -17,23 +17,22 @@ MP3, AAC, WAV a M4A. Přidej je z aplikace Soubory, nebo je pošli z jiné aplik
 Zvoní v tichém režimu
 My Sound Alarm plánuje své budíky přes AlarmKit, systém budíků, který Apple přidal v iOS 26. Zobrazují se na zamčené obrazovce jako budíky z vestavěné aplikace Hodiny a zvoní v tichém režimu i při zapnutém režimu soustředění, i když je My Sound Alarm zavřená.
 
-„Zazvonit teď“
-Poslechni si vybraný zvuk hned, ve stejné hlasitosti jako skutečný budík.
-
 Ochrana proti zaspání (Pro, předběžný přístup)
-Pokud budík do zvolené doby nevypneš, přehraje stejný zvuk znovu a hlasitěji. Pokud ji začneš používat během předběžného přístupu, zůstane ti i po oficiálním vydání.
+Pokud budík do zvolené doby nevypneš, přehraje stejný zvuk znovu a hlasitěji.
 
-Opakování a odložení
-Vyber dny pro každý budík. Odložení může být vypnuté, nebo 1, 2, 5, 9 či 10 minut.
+Playlisty (Pro, předběžný přístup)
+Seskup své zvuky a pouštěj je popořadě, náhodně nebo jako jednu náhodnou skladbu. Zvol také, jak na sebe skladby navazují: se ztlumením nebo s crossfadem.
+
+Jemný start (Pro, předběžný přístup)
+Budík začne potichu a během 5, 15 nebo 30 sekund zesílí.
+
+Pokud začneš tyto funkce Pro používat během předběžného přístupu, zůstanou ti i po oficiálním vydání.
 
 Tvoje zvuky na první pohled
 Každý budík ukazuje záběr z videa nebo obal zvukového souboru.
 
 Noční režim
 Z iPhonu se stanou hodiny u postele, s velkými jemnými číslicemi čitelnými ve tmě.
-
-FORMÁTY
-MP3 / AAC / WAV / M4A / Zvuk z videa (MOV, MP4)
 
 POZNÁMKY
 - Vyžaduje iOS 26 nebo novější (AlarmKit)

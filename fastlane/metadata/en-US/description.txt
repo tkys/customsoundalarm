@@ -9,7 +9,7 @@ No Length Limit
 Ringtones made in GarageBand can be up to 30 seconds. My Sound Alarm takes up to 10 minutes from a video, and long audio files can be imported as they are.
 
 Take the Audio From a Video
-Choose a video from your photo library or the Files app and keep only the sound.
+Choose a video from your photo library or the Files app and keep only the sound. A trip video, or the voices of your family or pet, can become your alarm sound.
 
 Import Audio Files
 MP3, AAC, WAV and M4A all work. Add them from the Files app, or send them from another app with the Share button.
@@ -17,23 +17,22 @@ MP3, AAC, WAV and M4A all work. Add them from the Files app, or send them from a
 Rings in Silent Mode
 My Sound Alarm schedules its alarms with AlarmKit, the alarm framework Apple added in iOS 26. They appear on the Lock Screen like alarms from the built-in Clock app and ring in Silent mode and when a Focus is on, even when My Sound Alarm is closed.
 
-Ring Now
-Hear the sound you chose right away, at the same volume as a real alarm.
-
 Oversleep Guard (Pro, early access)
-If you haven't stopped an alarm by the time you choose, it plays the same sound again, louder. If you start using it during early access, you keep it after the full release.
+If you haven't stopped an alarm by the time you choose, it plays the same sound again, louder.
 
-Repeat Days and Snooze
-Choose the days for each alarm. Snooze can be off or 1, 2, 5, 9 or 10 minutes.
+Playlists (Pro, early access)
+Group your sounds and play them in order, shuffled, or one random track. Choose how tracks blend into each other: a fade or a crossfade.
+
+Gentle Start (Pro, early access)
+The alarm starts quiet and gets louder over 5, 15 or 30 seconds.
+
+If you start using these Pro features during early access, you keep them after the full release.
 
 See Your Sounds
 Each alarm shows a frame from your video or the artwork from your audio file.
 
 Night Mode
 Your iPhone becomes a bedside clock, with large, soft numbers you can read in a dark room.
-
-SUPPORTED FORMATS
-MP3 / AAC / WAV / M4A / Audio from video (MOV, MP4)
 
 NOTES
 - Requires iOS 26 or later (AlarmKit)

@@ -1,15 +1,25 @@
-■ Anti-sonno (Pro, accesso anticipato)
-Se non hai fermato la sveglia entro l’orario scelto, riproduce lo stesso suono più forte. Se la attivi durante l’accesso anticipato, potrai continuare a usarla dopo il rilascio ufficiale.
+■ Playlist (PRO · Accesso anticipato)
+Raccogli i tuoi suoni in una playlist e svegliati con quella: in ordine, in modo casuale o con un brano a caso. Puoi anche scegliere come si collegano i brani, con una dissolvenza o una dissolvenza incrociata.
 
-■ Suona ora
-Tocca “Ring now” nella schermata della sveglia per sentirla subito, al volume reale.
+■ Avvio delicato (PRO · Accesso anticipato)
+La sveglia parte piano e aumenta di volume in 5, 15 o 30 secondi.
 
-■ Aiuto quando è troppo bassa
-Il volume delle sveglie segue “Suoneria e avvisi” in Impostazioni. “Too quiet?” ti mostra dove modificarlo.
+Se inizi a usarle durante l’accesso anticipato, potrai continuare a usarle anche dopo la versione definitiva.
 
-■ Schermata della sveglia più semplice
-Le impostazioni sono ordinate in modo più simile all’app Orologio e una sveglia modificata viene attivata quando la salvi.
+■ Libreria
+La nuova scheda Libreria raccoglie i tuoi suoni e le tue playlist in un unico posto.
 
-■ Etichette VoiceOver migliorate
+■ Ora in italiano
+My Sound Alarm è ora disponibile in italiano e in altre 12 lingue. L’app segue la lingua del tuo dispositivo.
 
-Grazie per usare My Sound Alarm!
+■ Correzioni
+Una sveglia ripetuta poteva suonare di nuovo nello stesso minuto dopo averla fermata. Ora è corretto.
+Una sveglia che non compariva più nell’app poteva suonare a un orario che non avevi impostato. Ora è corretto: dopo l’aggiornamento, apri l’app per rimuovere queste sveglie.
+
+■ Più leggibile
+Colori e contrasto del testo sono stati rivisti, e le schermate restano leggibili anche con le dimensioni del testo più grandi.
+
+■ “Suona ora”
+“Suona ora” riproduce il suono che stai modificando. Se non può suonare, la schermata ne indica il motivo e ti permette di consentire le sveglie subito.
+
+Grazie per usare My Sound Alarm.

@@ -1,15 +1,25 @@
-■ Verschlafschutz (Pro, frühe Version)
-Wenn du deinen Wecker bis zur gewählten Zeit nicht ausgeschaltet hast, spielt er denselben Ton noch einmal lauter ab. Wenn du ihn während der frühen Version einschaltest, kannst du ihn auch nach der offiziellen Veröffentlichung weiter nutzen.
+■ Playlists (PRO · Vorabzugang)
+Fasse deine Töne in einer Playlist zusammen und lass dich davon wecken – der Reihe nach, zufällig oder mit einem zufälligen Titel. Du kannst auch wählen, wie die Titel ineinander übergehen: mit Blende oder Crossfade.
 
-■ Jetzt klingeln
-Tippe im Weckerbildschirm auf „Ring now“, um deinen Wecker sofort in echter Lautstärke zu hören.
+■ Sanfter Start (PRO · Vorabzugang)
+Der Wecker beginnt leise und wird über 5, 15 oder 30 Sekunden lauter.
 
-■ Hilfe, wenn es zu leise ist
-Die Weckerlautstärke richtet sich nach „Klingel- und Hinweistöne“ in den Einstellungen. „Too quiet?“ zeigt dir, wo du sie änderst.
+Wer diese Funktionen im Vorabzugang nutzt, kann sie auch nach der finalen Version weiter nutzen.
 
-■ Übersichtlicherer Weckerbildschirm
-Die Einstellungen sind jetzt ähnlich wie in der Uhr-App angeordnet, und ein bearbeiteter Wecker wird beim Sichern eingeschaltet.
+■ Bibliothek
+Der neue Tab „Bibliothek“ bündelt deine Töne und Playlists an einem Ort.
 
-■ Bessere VoiceOver-Beschriftungen
+■ Jetzt auf Deutsch
+My Sound Alarm ist jetzt auf Deutsch und in 12 weiteren Sprachen verfügbar. Die App folgt der Sprache deines Geräts.
 
-Danke, dass du My Sound Alarm nutzt!
+■ Fehlerbehebung
+Ein Wiederholungswecker konnte nach dem Stoppen in derselben Minute erneut klingeln. Das ist behoben.
+Ein Wecker, der nicht mehr in der App angezeigt wurde, konnte zu einer Uhrzeit klingeln, die du nicht eingestellt hast. Das ist behoben: Öffne nach dem Update die App, um solche Wecker zu entfernen.
+
+■ Besser lesbar
+Textfarben und Kontrast wurden überarbeitet, und die Bildschirme bleiben auch mit großen Textgrößen lesbar.
+
+■ „Jetzt klingeln“
+„Jetzt klingeln“ spielt jetzt den Ton, den du gerade bearbeitest. Kann es nicht klingeln, zeigt der Bildschirm den Grund an, und du kannst Alarme direkt erlauben.
+
+Danke, dass du My Sound Alarm nutzt.

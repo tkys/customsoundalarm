@@ -41,6 +41,7 @@
 | `playlist_render_fallback` | — | 書き出し失敗時に1曲目／既定音で鳴らした | フォールバックの頻度 | アプリ動作中のみ | 1.8.2 |
 | `playlist_reschedule_failed` | `reason` string（schedule_failed） | 次回分の再登録に失敗し、前のアラームを残した | 差し替え失敗の頻度 | アプリ動作中のみ | 1.8.2 |
 | `alarm_sync_rescheduled` | `trigger` string（launch/foreground/edit/playlist/intent/deferred_retry）, `changed_count` int, `missing_count` int, `forced_count` int | 同期でアラームを作り直したとき（1回の同期につき1イベント） | 鳴り直しの原因（変更・未登録・強制）の切り分け | アプリ動作中／起動時にも送る | 1.8.1 |
+| `alarm_orphan_cancelled` | `trigger` string, `count` int | 対応表に無いのに AlarmKit に残っていたアラーム（アプリに出ない・削除できない）を取り消したとき。停止直後と `intent` の同期では行わない | 「設定していないのに鳴る」不具合の影響と、修正の効果の確認 | アプリ動作中／起動時にも送る | 1.8.1 |
 | `alarm_sync_deferred` | `trigger` string, `count` int | 発火した分の中なので次の同期まで延期したとき | 安全柵が効いた回数の確認 | アプリ動作中／起動時にも送る | 1.8.1 |
 | `ad_slot_eligible` | `slot` string（banner_sounds/banner_import/banner_alarm_list/interstitial_import_saved）, `allowed` bool, `reason` string（eligible/existing_user/version_unavailable/pro/first_week/quiet_hours/frequency_cap/forbidden_context/wrong_context）, `region` string（standard/limited） | 広告枠の判定時（`AdsConfig.isEnabled = false` でも送る） | 1.9.0 前に実際の表示機会を測る | アプリ動作中のみ | 1.9.0 |
 | `sound_preview_played` | — | サウンドの試聴 | 試聴行動 | アプリ動作中のみ | 既存 |

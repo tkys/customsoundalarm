@@ -1,15 +1,25 @@
-■ Protección contra quedarse dormido (Pro, acceso anticipado)
-Si no has detenido la alarma a la hora que elijas, vuelve a sonar con el mismo sonido, más fuerte. Si la activas durante el acceso anticipado, podrás seguir usándola después del lanzamiento oficial.
+■ Listas (PRO · Acceso anticipado)
+Agrupa tus sonidos en una lista y despiértate con ella: en orden, en aleatorio o con una canción al azar. También puedes elegir cómo se unen las canciones, con un fundido o un fundido cruzado.
 
-■ Sonar ahora
-Toca «Ring now» en la pantalla de la alarma para escucharla al momento, con su volumen real.
+■ Inicio suave (PRO · Acceso anticipado)
+La alarma empieza bajo y sube de volumen durante 5, 15 o 30 segundos.
 
-■ Ayuda cuando suena bajo
-El volumen de las alarmas depende de «Tonos y avisos» en Ajustes. «Too quiet?» te muestra dónde cambiarlo.
+Si empiezas a usarlas durante el acceso anticipado, podrás seguir usándolas después de la versión final.
 
-■ Pantalla de alarma más sencilla
-Los ajustes se ordenan de forma más parecida a la app Reloj, y una alarma editada se activa al guardarla.
+■ Biblioteca
+La nueva pestaña Biblioteca reúne tus sonidos y tus listas en un solo lugar.
 
-■ Mejores etiquetas de VoiceOver
+■ Ahora en español
+My Sound Alarm ya está disponible en español y en otros 12 idiomas. La app sigue el idioma de tu dispositivo.
 
-¡Gracias por usar My Sound Alarm!
+■ Correcciones
+Una alarma repetida podía volver a sonar en el mismo minuto después de detenerla. Ya está corregido.
+Una alarma que ya no aparecía en la app podía sonar a una hora que no habías configurado. Ya está corregido: después de actualizar, abre la app para eliminar esas alarmas.
+
+■ Más fácil de leer
+Revisamos los colores y el contraste del texto, y las pantallas se leen bien con tamaños de texto grandes.
+
+■ «Hacer sonar ahora»
+«Hacer sonar ahora» reproduce el sonido que estás editando. Si no puede sonar, la pantalla te explica el motivo y te permite autorizar las alarmas ahí mismo.
+
+Gracias por usar My Sound Alarm.

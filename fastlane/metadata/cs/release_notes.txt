@@ -1,15 +1,25 @@
-■ Ochrana proti zaspání (Pro, předběžný přístup)
-Pokud budík do zvolené doby nevypnete, přehraje stejný zvuk znovu a hlasitěji. Pokud ji zapnete během předběžného přístupu, budete ji moci používat i po oficiálním vydání.
+■ Playlisty (PRO · Předběžný přístup)
+Seskupte své zvuky do playlistu a nechte se jím budit: popořadě, náhodně nebo s jednou náhodnou skladbou. Můžete také zvolit, jak skladby navazují: se ztlumením nebo s crossfadem.
 
-■ Zazvonit hned
-Klepnutím na „Ring now“ na obrazovce budíku si ho hned poslechnete ve skutečné hlasitosti.
+■ Jemný start (PRO · Předběžný přístup)
+Budík začne potichu a během 5, 15 nebo 30 sekund zesílí.
 
-■ Pomoc, když je budík potichu
-Hlasitost budíku se řídí položkou „Vyzvánění a upozornění“ v Nastavení. „Too quiet?“ ukáže, kde ji změnit.
+Pokud je začnete používat během předběžného přístupu, budete je moci používat i po vydání finální verze.
 
-■ Jednodušší obrazovka budíku
-Nastavení jsou seřazena podobně jako v aplikaci Hodiny a upravený budík se po uložení zapne.
+■ Knihovna
+Nová karta Knihovna shromažďuje vaše zvuky a playlisty na jednom místě.
 
-■ Lepší popisky pro VoiceOver
+■ Nově v češtině
+My Sound Alarm je nyní k dispozici v češtině a v 12 dalších jazycích. Aplikace se řídí jazykem zařízení.
 
-Děkujeme, že používáte My Sound Alarm!
+■ Opravy
+Opakovaný budík mohl po vypnutí zazvonit znovu ve stejné minutě. To je opraveno.
+Budík, který se už v aplikaci nezobrazoval, mohl zvonit v čase, který jste nenastavili. To je opraveno: po aktualizaci otevřete aplikaci a takové budíky se odstraní.
+
+■ Lépe čitelné
+Upravili jsme barvy a kontrast textu a obrazovky zůstávají čitelné i při velkém písmu.
+
+■ „Zazvonit teď“
+„Zazvonit teď“ teď přehraje zvuk, který právě upravujete. Pokud zazvonit nemůže, obrazovka ukáže důvod a budíky můžete hned povolit.
+
+Děkujeme, že používáte My Sound Alarm.

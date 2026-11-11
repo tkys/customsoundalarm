@@ -9,7 +9,7 @@ Geen lengtelimiet
 Beltonen die je in GarageBand maakt, duren tot 30 seconden. My Sound Alarm neemt tot 10 minuten uit een video, en lange audiobestanden kun je importeren zoals ze zijn.
 
 Het geluid van een video
-Kies een video uit je fotobibliotheek of de Bestanden-app en houd alleen het geluid over.
+Kies een video uit je fotobibliotheek of de Bestanden-app en houd alleen het geluid over. Een vakantievideo of de stem van je familie of huisdier kan je wekgeluid worden.
 
 Audiobestanden importeren
 MP3, AAC, WAV en M4A. Voeg ze toe vanuit de Bestanden-app of stuur ze vanuit een andere app met de deelknop.
@@ -17,23 +17,22 @@ MP3, AAC, WAV en M4A. Voeg ze toe vanuit de Bestanden-app of stuur ze vanuit een
 Gaat af in de stille modus
 My Sound Alarm plant zijn wekkers in met AlarmKit, het wekkersysteem dat Apple in iOS 26 heeft toegevoegd. Ze verschijnen op het toegangsscherm zoals wekkers van de ingebouwde Klok-app en gaan af in de stille modus en als een focus aan staat, ook als My Sound Alarm gesloten is.
 
-‘Laat nu afgaan’
-Hoor het gekozen geluid meteen, op hetzelfde volume als een echte wekker.
-
 Verslaapbeveiliging (Pro, vroege toegang)
-Als je een wekker niet hebt uitgezet vóór de tijd die je kiest, speelt hij hetzelfde geluid nog een keer, harder. Als je hem tijdens de vroege toegang gaat gebruiken, houd je hem na de officiële release.
+Als je een wekker niet hebt uitgezet vóór de tijd die je kiest, speelt hij hetzelfde geluid nog een keer, harder.
 
-Herhalen en sluimeren
-Kies de dagen voor elke wekker. Sluimeren kan uit staan of 1, 2, 5, 9 of 10 minuten zijn.
+Afspeellijsten (Pro, vroege toegang)
+Bundel je geluiden en laat ze op volgorde, in shuffle of als één willekeurig nummer afspelen. Kies ook hoe de nummers in elkaar overlopen: met een fade of een crossfade.
+
+Zachte start (Pro, vroege toegang)
+De wekker begint zacht en wordt in 5, 15 of 30 seconden luider.
+
+Als je deze Pro-functies tijdens de vroege toegang gaat gebruiken, houd je ze na de officiële release.
 
 Je geluiden in één oogopslag
 Elke wekker toont een beeld uit je video of de illustratie van je audiobestand.
 
 Nachtmodus
 Je iPhone wordt een nachtkastjesklok, met grote, zachte cijfers die je in het donker kunt lezen.
-
-FORMATEN
-MP3 / AAC / WAV / M4A / Geluid uit video (MOV, MP4)
 
 OPMERKINGEN
 - Vereist iOS 26 of nieuwer (AlarmKit)

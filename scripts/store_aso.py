@@ -60,7 +60,7 @@ DESC["ja"] = ("好きな曲のサビや動画の音で起きられる目覚ま�
 GarageBand で作る着信音は30秒までですが、My Sound Alarm では動画から最長10分、長い音声ファイルもそのまま取り込めます。
 
 【動画から音声だけを取り出す】
-写真ライブラリやファイルアプリの動画から、音声だけを取り出せます。
+写真ライブラリやファイルアプリの動画から、音声だけを取り出せます。旅行の動画や、家族・ペットの声も、アラームの音にできます。
 
 【音声ファイルの取り込み】
 MP3・AAC・WAV・M4A に対応。ファイルアプリや、ほかのアプリの共有ボタンから追加できます。
@@ -68,23 +68,22 @@ MP3・AAC・WAV・M4A に対応。ファイルアプリや、ほかのアプリ�
 【マナーモードでも鳴る】
 My Sound Alarm のアラームは、Apple が iOS 26 で用意した仕組み（AlarmKit）で登録します。iPhone 標準の時計アプリのアラームと同じようにロック画面に表示され、マナーモードや集中モードでも、このアプリを閉じていても鳴ります。
 
-【今すぐ鳴らす】
-選んだ音を、本番のアラームと同じ音量ですぐに鳴らして確かめられます。
-
 【寝過ごし防止（PRO・先行公開中）】
-設定した時間までにアラームを止めなかったら、同じ音を大きくしてもう一度鳴らします。先行公開中に使い始めた方は、正式版以降もそのまま使えます。
+設定した時間までにアラームを止めなかったら、同じ音を大きくしてもう一度鳴らします。
 
-【繰り返しとスヌーズ】
-曜日ごとの繰り返しに対応。スヌーズは「なし・1・2・5・9・10分」から選べます。
+【プレイリスト（PRO・先行公開中）】
+自分の音をまとめて、順番・シャッフル・1曲ランダムで鳴らせます。曲のつなぎ方（フェード・クロスフェード）も選べます。
+
+【やさしく鳴り始める（PRO・先行公開中）】
+小さな音から始まり、5秒・15秒・30秒かけて大きくなります。
+
+PRO・先行公開中の機能は、先行公開中に使い始めた方なら正式版以降もそのまま使えます。
 
 【音源が一目で分かる】
 アラームごとに、動画の一場面や音声ファイルのアートワークを表示します。
 
 【ナイトモード】
 iPhone を枕元の時計にできます。暗い部屋でも読みやすい、落ち着いた表示です。
-
-■ 対応形式
-MP3 / AAC / WAV / M4A / 動画（MOV・MP4）からの音声
 
 ■ 注意事項
 ・iOS 26 以降が必要です（AlarmKit）
@@ -104,7 +103,7 @@ No Length Limit
 Ringtones made in GarageBand can be up to 30 seconds. My Sound Alarm takes up to 10 minutes from a video, and long audio files can be imported as they are.
 
 Take the Audio From a Video
-Choose a video from your photo library or the Files app and keep only the sound.
+Choose a video from your photo library or the Files app and keep only the sound. A trip video, or the voices of your family or pet, can become your alarm sound.
 
 Import Audio Files
 MP3, AAC, WAV and M4A all work. Add them from the Files app, or send them from another app with the Share button.
@@ -112,23 +111,22 @@ MP3, AAC, WAV and M4A all work. Add them from the Files app, or send them from a
 Rings in Silent Mode
 My Sound Alarm schedules its alarms with AlarmKit, the alarm framework Apple added in iOS 26. They appear on the Lock Screen like alarms from the built-in Clock app and ring in Silent mode and when a Focus is on, even when My Sound Alarm is closed.
 
-Ring Now
-Hear the sound you chose right away, at the same volume as a real alarm.
-
 Oversleep Guard (Pro, early access)
-If you haven't stopped an alarm by the time you choose, it plays the same sound again, louder. If you start using it during early access, you keep it after the full release.
+If you haven't stopped an alarm by the time you choose, it plays the same sound again, louder.
 
-Repeat Days and Snooze
-Choose the days for each alarm. Snooze can be off or 1, 2, 5, 9 or 10 minutes.
+Playlists (Pro, early access)
+Group your sounds and play them in order, shuffled, or one random track. Choose how tracks blend into each other: a fade or a crossfade.
+
+Gentle Start (Pro, early access)
+The alarm starts quiet and gets louder over 5, 15 or 30 seconds.
+
+If you start using these Pro features during early access, you keep them after the full release.
 
 See Your Sounds
 Each alarm shows a frame from your video or the artwork from your audio file.
 
 Night Mode
 Your iPhone becomes a bedside clock, with large, soft numbers you can read in a dark room.
-
-SUPPORTED FORMATS
-MP3 / AAC / WAV / M4A / Audio from video (MOV, MP4)
 
 NOTES
 - Requires iOS 26 or later (AlarmKit)
@@ -150,7 +148,7 @@ Pas de limite de durée
 Les sonneries créées dans GarageBand durent jusqu’à 30 secondes. My Sound Alarm prend jusqu’à 10 minutes d’une vidéo, et les longs fichiers audio peuvent être importés tels quels.
 
 Le son d’une vidéo
-Choisis une vidéo de ta photothèque ou de l’app Fichiers et garde seulement le son.
+Choisis une vidéo de ta photothèque ou de l’app Fichiers et garde seulement le son. Une vidéo de voyage, la voix de tes proches ou de ton animal peut devenir ton son d’alarme.
 
 Import de fichiers audio
 MP3, AAC, WAV et M4A. Ajoute-les depuis l’app Fichiers, ou envoie-les depuis une autre app avec le bouton Partager.
@@ -158,23 +156,22 @@ MP3, AAC, WAV et M4A. Ajoute-les depuis l’app Fichiers, ou envoie-les depuis u
 Sonne en mode silencieux
 My Sound Alarm programme ses alarmes avec AlarmKit, le système d’alarmes ajouté par Apple dans iOS 26. Elles s’affichent sur l’écran verrouillé comme celles de l’app Horloge intégrée et sonnent en mode silencieux et quand un mode de concentration est activé, même quand My Sound Alarm est fermée.
 
-« Faire sonner »
-Écoute tout de suite le son choisi, au même volume qu’une vraie alarme.
-
 Anti-grasse matinée (Pro, accès anticipé)
-Si tu n’as pas arrêté une alarme à l’heure choisie, elle rejoue le même son, plus fort. Si tu commences à l’utiliser pendant l’accès anticipé, tu la gardes après la sortie officielle.
+Si tu n’as pas arrêté une alarme à l’heure choisie, elle rejoue le même son, plus fort.
 
-Répétition et rappel d’alarme
-Choisis les jours de chaque alarme. Le rappel d’alarme peut être désactivé ou réglé sur 1, 2, 5, 9 ou 10 minutes.
+Playlists (Pro, accès anticipé)
+Regroupe tes sons et fais-les sonner dans l’ordre, en aléatoire ou un titre au hasard. Choisis aussi l’enchaînement entre les titres : un fondu ou un fondu enchaîné.
+
+Démarrage en douceur (Pro, accès anticipé)
+L’alarme commence doucement et monte en volume sur 5, 15 ou 30 secondes.
+
+Si tu commences à utiliser ces fonctions Pro pendant l’accès anticipé, tu les gardes après la sortie officielle.
 
 Tes sons en un coup d’œil
 Chaque alarme affiche une image de ta vidéo ou l’illustration de ton fichier audio.
 
 Mode nuit
 Ton iPhone devient un réveil de chevet, avec de grands chiffres doux lisibles dans le noir.
-
-FORMATS
-MP3 / AAC / WAV / M4A / Son de vidéo (MOV, MP4)
 
 À SAVOIR
 - Nécessite iOS 26 ou version ultérieure (AlarmKit)
@@ -194,7 +191,7 @@ Keine Längenbegrenzung
 Klingeltöne aus GarageBand sind bis zu 30 Sekunden lang. My Sound Alarm übernimmt bis zu 10 Minuten aus einem Video, und lange Audiodateien lassen sich so importieren, wie sie sind.
 
 Ton aus Videos
-Wähl ein Video aus deiner Fotomediathek oder der Dateien-App und behalte nur den Ton.
+Wähl ein Video aus deiner Fotomediathek oder der Dateien-App und behalte nur den Ton. Ein Urlaubsvideo oder die Stimmen deiner Familie oder deines Haustiers können dein Weckton werden.
 
 Audiodateien importieren
 MP3, AAC, WAV und M4A. Füge sie aus der Dateien-App hinzu oder schick sie aus einer anderen App über die Teilen-Taste.
@@ -202,23 +199,22 @@ MP3, AAC, WAV und M4A. Füge sie aus der Dateien-App hinzu oder schick sie aus e
 Klingelt im Stummmodus
 My Sound Alarm plant seine Wecker mit AlarmKit, dem Wecker-Framework, das Apple mit iOS 26 eingeführt hat. Sie erscheinen wie Wecker der integrierten Uhr-App auf dem Sperrbildschirm und klingeln im Stummmodus und wenn ein Fokus aktiv ist – auch wenn My Sound Alarm geschlossen ist.
 
-„Jetzt klingeln“
-Hör den gewählten Ton sofort, in derselben Lautstärke wie ein echter Wecker.
-
 Verschlafschutz (Pro, frühe Version)
-Wenn du einen Wecker bis zur gewählten Zeit nicht ausgeschaltet hast, spielt er denselben Ton noch einmal lauter. Wenn du ihn in dieser Zeit zu nutzen beginnst, behältst du ihn auch nach der offiziellen Veröffentlichung.
+Wenn du einen Wecker bis zur gewählten Zeit nicht ausgeschaltet hast, spielt er denselben Ton noch einmal lauter.
 
-Wiederholen und Schlummern
-Wähl die Tage für jeden Wecker. Schlummern ist aus oder 1, 2, 5, 9 oder 10 Minuten.
+Playlists (Pro, frühe Version)
+Fasse deine Töne zusammen und lass sie der Reihe nach, zufällig oder als einen zufälligen Titel spielen. Wähle auch, wie die Titel ineinander übergehen: mit Blende oder Crossfade.
+
+Sanfter Start (Pro, frühe Version)
+Der Wecker beginnt leise und wird über 5, 15 oder 30 Sekunden lauter.
+
+Wenn du diese Pro-Funktionen jetzt zu nutzen beginnst, behältst du sie auch nach der offiziellen Veröffentlichung.
 
 Deine Töne auf einen Blick
 Jeder Wecker zeigt ein Bild aus deinem Video oder das Cover deiner Audiodatei.
 
 Nachtmodus
 Dein iPhone wird zur Nachttischuhr, mit großen, sanften Ziffern, die du im Dunkeln lesen kannst.
-
-FORMATE
-MP3 / AAC / WAV / M4A / Ton aus Videos (MOV, MP4)
 
 HINWEISE
 - Erfordert iOS 26 oder neuer (AlarmKit)
@@ -237,7 +233,7 @@ Sin límite de duración
 Los tonos creados en GarageBand duran hasta 30 segundos. My Sound Alarm admite hasta 10 minutos de un {video}, y los archivos de audio largos se pueden importar tal cual.
 
 El sonido de un {video}
-Elige un {video} de tu fototeca o de la app Archivos y quédate solo con el sonido.
+Elige un {video} de tu fototeca o de la app Archivos y quédate solo con el sonido. Un {video} de un viaje o la voz de tu familia o tu mascota pueden ser el sonido de tu alarma.
 
 Importa archivos de audio
 MP3, AAC, WAV y M4A. Añádelos desde la app Archivos o envíalos desde otra app con el botón Compartir.
@@ -245,23 +241,22 @@ MP3, AAC, WAV y M4A. Añádelos desde la app Archivos o envíalos desde otra app
 Suena en modo silencio
 My Sound Alarm programa sus alarmas con AlarmKit, el sistema de alarmas que Apple añadió en iOS 26. Aparecen en la pantalla bloqueada como las de la app Reloj integrada y suenan en modo silencio y con un modo de concentración activado, incluso con My Sound Alarm cerrada.
 
-«Hacer sonar ahora»
-Escucha al momento el sonido que elegiste, con el mismo volumen que una alarma de verdad.
-
 {guard} (Pro, acceso anticipado)
-Si no has detenido una alarma a la hora que elijas, vuelve a sonar con el mismo sonido, más fuerte. Si empiezas a usarla durante el acceso anticipado, la conservas después del lanzamiento oficial.
+Si no has detenido una alarma a la hora que elijas, vuelve a sonar con el mismo sonido, más fuerte.
 
-Repetición y posponer
-Elige los días de cada alarma. Posponer puede estar desactivado o en 1, 2, 5, 9 o 10 minutos.
+Listas (Pro, acceso anticipado)
+Agrupa tus sonidos y hazlos sonar en orden, en aleatorio o con una canción al azar. Elige también cómo se unen las canciones: con un fundido o un fundido cruzado.
+
+Inicio suave (Pro, acceso anticipado)
+La alarma empieza bajo y sube de volumen durante 5, 15 o 30 segundos.
+
+Si empiezas a usar estas funciones Pro durante el acceso anticipado, las conservas después del lanzamiento oficial.
 
 Tus sonidos de un vistazo
 Cada alarma muestra una imagen de tu {video} o la portada de tu archivo de audio.
 
 Modo noche
 Tu iPhone se convierte en un reloj de mesilla, con números grandes y suaves que puedes leer a oscuras.
-
-FORMATOS
-MP3 / AAC / WAV / M4A / Sonido de {video} (MOV, MP4)
 
 NOTAS
 - Requiere iOS 26 o posterior (AlarmKit)
@@ -285,7 +280,7 @@ Sem limite de duração
 Os toques criados no GarageBand duram até 30 segundos. O My Sound Alarm aceita até 10 minutos de um vídeo, e arquivos de áudio longos podem ser importados como estão.
 
 O som de um vídeo
-Escolha um vídeo da fototeca ou do app Arquivos e fique só com o som.
+Escolha um vídeo da fototeca ou do app Arquivos e fique só com o som. Um vídeo de viagem ou a voz da sua família ou do seu pet pode virar o som do seu alarme.
 
 Importar arquivos de áudio
 MP3, AAC, WAV e M4A. Adicione pelo app Arquivos ou envie de outro app pelo botão Compartilhar.
@@ -293,23 +288,22 @@ MP3, AAC, WAV e M4A. Adicione pelo app Arquivos ou envie de outro app pelo botã
 Toca no modo silencioso
 O My Sound Alarm agenda os alarmes com o AlarmKit, o sistema de alarmes que a Apple incluiu no iOS 26. Eles aparecem na Tela Bloqueada como os do app Relógio nativo e tocam no modo silencioso e com um Foco ativado, mesmo com o My Sound Alarm fechado.
 
-“Tocar agora”
-Ouça na hora o som escolhido, no mesmo volume de um alarme de verdade.
-
 Proteção contra perder a hora (Pro, acesso antecipado)
-Se você não desligar um alarme até o horário escolhido, ele toca o mesmo som de novo, mais alto. Se começar a usar durante o acesso antecipado, continua com ele depois do lançamento oficial.
+Se você não desligar um alarme até o horário escolhido, ele toca o mesmo som de novo, mais alto.
 
-Repetição e soneca
-Escolha os dias de cada alarme. A soneca pode ficar desativada ou em 1, 2, 5, 9 ou 10 minutos.
+Playlists (Pro, acesso antecipado)
+Junte seus sons e toque em ordem, aleatório ou com uma faixa sorteada. Escolha também como as faixas se emendam: com fade ou crossfade.
+
+Início suave (Pro, acesso antecipado)
+O alarme começa baixo e aumenta ao longo de 5, 15 ou 30 segundos.
+
+Se começar a usar esses recursos Pro durante o acesso antecipado, continua com eles depois do lançamento oficial.
 
 Seus sons de relance
 Cada alarme mostra uma imagem do seu vídeo ou a capa do seu arquivo de áudio.
 
 Modo noturno
 Seu iPhone vira um relógio de cabeceira, com números grandes e suaves para ler no escuro.
-
-FORMATOS
-MP3 / AAC / WAV / M4A / Som de vídeo (MOV, MP4)
 
 OBSERVAÇÕES
 - Requer iOS 26 ou posterior (AlarmKit)
@@ -329,7 +323,7 @@ Nessun limite di durata
 Le suonerie create in GarageBand durano fino a 30 secondi. My Sound Alarm accetta fino a 10 minuti da un video, e i file audio lunghi si possono importare così come sono.
 
 L’audio di un video
-Scegli un video dalla libreria foto o dall’app File e tieni solo l’audio.
+Scegli un video dalla libreria foto o dall’app File e tieni solo l’audio. Un video di viaggio o la voce della tua famiglia o del tuo animale può diventare il suono della sveglia.
 
 Importa file audio
 MP3, AAC, WAV e M4A. Aggiungili dall’app File o inviali da un’altra app con il pulsante Condividi.
@@ -337,23 +331,22 @@ MP3, AAC, WAV e M4A. Aggiungili dall’app File o inviali da un’altra app con 
 Suona in modalità silenziosa
 My Sound Alarm programma le sue sveglie con AlarmKit, il sistema di sveglie introdotto da Apple in iOS 26. Compaiono sulla schermata di blocco come quelle dell’app Orologio integrata e suonano in modalità silenziosa e con una modalità Full Immersion attiva, anche con My Sound Alarm chiusa.
 
-“Suona ora”
-Ascolta subito il suono scelto, allo stesso volume di una vera sveglia.
-
 Anti-sonno (Pro, accesso anticipato)
-Se non hai fermato una sveglia entro l’orario scelto, suona di nuovo con lo stesso suono, più forte. Se inizi a usarla durante l’accesso anticipato, la mantieni dopo il rilascio ufficiale.
+Se non hai fermato una sveglia entro l’orario scelto, suona di nuovo con lo stesso suono, più forte.
 
-Ripetizione e posticipa
-Scegli i giorni di ogni sveglia. Posticipa può essere disattivato o di 1, 2, 5, 9 o 10 minuti.
+Playlist (Pro, accesso anticipato)
+Raccogli i tuoi suoni e falli suonare in ordine, in modo casuale o con un brano a caso. Scegli anche come si collegano i brani: con una dissolvenza o una dissolvenza incrociata.
+
+Avvio delicato (Pro, accesso anticipato)
+La sveglia parte piano e aumenta di volume in 5, 15 o 30 secondi.
+
+Se inizi a usare queste funzioni Pro durante l’accesso anticipato, le mantieni dopo il rilascio ufficiale.
 
 I tuoi suoni a colpo d’occhio
 Ogni sveglia mostra un’immagine del tuo video o la copertina del tuo file audio.
 
 Modalità notte
 Il tuo iPhone diventa un orologio da comodino, con numeri grandi e morbidi da leggere al buio.
-
-FORMATI
-MP3 / AAC / WAV / M4A / Audio da video (MOV, MP4)
 
 NOTE
 - Richiede iOS 26 o versioni successive (AlarmKit)
@@ -373,7 +366,7 @@ Geen lengtelimiet
 Beltonen die je in GarageBand maakt, duren tot 30 seconden. My Sound Alarm neemt tot 10 minuten uit een video, en lange audiobestanden kun je importeren zoals ze zijn.
 
 Het geluid van een video
-Kies een video uit je fotobibliotheek of de Bestanden-app en houd alleen het geluid over.
+Kies een video uit je fotobibliotheek of de Bestanden-app en houd alleen het geluid over. Een vakantievideo of de stem van je familie of huisdier kan je wekgeluid worden.
 
 Audiobestanden importeren
 MP3, AAC, WAV en M4A. Voeg ze toe vanuit de Bestanden-app of stuur ze vanuit een andere app met de deelknop.
@@ -381,23 +374,22 @@ MP3, AAC, WAV en M4A. Voeg ze toe vanuit de Bestanden-app of stuur ze vanuit een
 Gaat af in de stille modus
 My Sound Alarm plant zijn wekkers in met AlarmKit, het wekkersysteem dat Apple in iOS 26 heeft toegevoegd. Ze verschijnen op het toegangsscherm zoals wekkers van de ingebouwde Klok-app en gaan af in de stille modus en als een focus aan staat, ook als My Sound Alarm gesloten is.
 
-‘Laat nu afgaan’
-Hoor het gekozen geluid meteen, op hetzelfde volume als een echte wekker.
-
 Verslaapbeveiliging (Pro, vroege toegang)
-Als je een wekker niet hebt uitgezet vóór de tijd die je kiest, speelt hij hetzelfde geluid nog een keer, harder. Als je hem tijdens de vroege toegang gaat gebruiken, houd je hem na de officiële release.
+Als je een wekker niet hebt uitgezet vóór de tijd die je kiest, speelt hij hetzelfde geluid nog een keer, harder.
 
-Herhalen en sluimeren
-Kies de dagen voor elke wekker. Sluimeren kan uit staan of 1, 2, 5, 9 of 10 minuten zijn.
+Afspeellijsten (Pro, vroege toegang)
+Bundel je geluiden en laat ze op volgorde, in shuffle of als één willekeurig nummer afspelen. Kies ook hoe de nummers in elkaar overlopen: met een fade of een crossfade.
+
+Zachte start (Pro, vroege toegang)
+De wekker begint zacht en wordt in 5, 15 of 30 seconden luider.
+
+Als je deze Pro-functies tijdens de vroege toegang gaat gebruiken, houd je ze na de officiële release.
 
 Je geluiden in één oogopslag
 Elke wekker toont een beeld uit je video of de illustratie van je audiobestand.
 
 Nachtmodus
 Je iPhone wordt een nachtkastjesklok, met grote, zachte cijfers die je in het donker kunt lezen.
-
-FORMATEN
-MP3 / AAC / WAV / M4A / Geluid uit video (MOV, MP4)
 
 OPMERKINGEN
 - Vereist iOS 26 of nieuwer (AlarmKit)
@@ -417,7 +409,7 @@ DESC["ko"] = ("좋아하는 노래의 후렴이나 동영상 소리로 깨워 �
 GarageBand에서 만든 벨소리는 30초까지지만, My Sound Alarm은 동영상에서 최대 10분, 긴 오디오 파일도 그대로 가져올 수 있습니다.
 
 [동영상에서 소리만 꺼내기]
-사진 보관함이나 파일 앱의 동영상에서 소리만 꺼낼 수 있습니다.
+사진 보관함이나 파일 앱의 동영상에서 소리만 꺼낼 수 있습니다. 여행 동영상이나 가족, 반려동물의 목소리도 알람 소리로 쓸 수 있습니다.
 
 [오디오 파일 가져오기]
 MP3, AAC, WAV, M4A를 지원합니다. 파일 앱이나 다른 앱의 공유 버튼으로 추가할 수 있습니다.
@@ -425,23 +417,22 @@ MP3, AAC, WAV, M4A를 지원합니다. 파일 앱이나 다른 앱의 공유 버
 [무음 모드에서도 울림]
 My Sound Alarm의 알람은 Apple이 iOS 26에 추가한 AlarmKit으로 등록됩니다. iPhone 기본 시계 앱의 알람처럼 잠금 화면에 표시되고, 무음 모드나 집중 모드가 켜져 있어도, 이 앱을 닫아도 울립니다.
 
-["지금 울리기"]
-고른 소리를 실제 알람과 같은 음량으로 바로 들어볼 수 있습니다.
-
 [늦잠 방지 (Pro, 사전 공개)]
-설정한 시간까지 알람을 끄지 않으면 같은 소리를 더 크게 다시 울립니다. 사전 공개 기간에 쓰기 시작한 분은 정식 출시 후에도 그대로 쓸 수 있습니다.
+설정한 시간까지 알람을 끄지 않으면 같은 소리를 더 크게 다시 울립니다.
 
-[반복과 다시 알림]
-요일별 반복을 지원합니다. 다시 알림은 끔 또는 1·2·5·9·10분 중에서 고를 수 있습니다.
+[재생목록 (Pro, 사전 공개)]
+내 사운드를 묶어 순서대로, 셔플, 한 곡 랜덤으로 울릴 수 있습니다. 곡 사이를 페이드나 크로스페이드로 이을 수도 있습니다.
+
+[부드럽게 시작 (Pro, 사전 공개)]
+작은 소리로 시작해 5초, 15초, 30초에 걸쳐 커집니다.
+
+사전 공개 기간에 Pro 기능을 쓰기 시작한 분은 정식 출시 후에도 그대로 쓸 수 있습니다.
 
 [소리를 한눈에]
 알람마다 동영상의 한 장면이나 오디오 파일의 아트워크를 보여 줍니다.
 
 [나이트 모드]
 iPhone을 머리맡 시계로 쓸 수 있습니다. 어두운 방에서도 읽기 쉬운 차분한 화면입니다.
-
-■ 지원 형식
-MP3 / AAC / WAV / M4A / 동영상(MOV, MP4)의 소리
 
 ■ 참고
 · iOS 26 이상이 필요합니다(AlarmKit)
@@ -461,7 +452,7 @@ DESC["zh-Hans"] = ("用歌曲副歌或视频声音叫醒你的闹钟 App。选�
 GarageBand 制作的铃声最长 30 秒，而 My Sound Alarm 可以从视频中截取最长 10 分钟，较长的音频文件也能直接导入。
 
 【只取视频里的声音】
-从照片图库或“文件”App 中选一个视频，只保留声音。
+从照片图库或“文件”App 中选一个视频，只保留声音。旅行视频、家人或宠物的声音，也能成为闹钟铃声。
 
 【导入音频文件】
 支持 MP3、AAC、WAV、M4A。可从“文件”App 添加，也可以在其他 App 中用“共享”按钮发送过来。
@@ -469,23 +460,22 @@ GarageBand 制作的铃声最长 30 秒，而 My Sound Alarm 可以从视频中�
 【静音模式下也会响】
 My Sound Alarm 的闹钟通过 Apple 在 iOS 26 中加入的 AlarmKit 设定。它会像 iPhone 自带“时钟”App 的闹钟一样显示在锁定屏幕上，静音模式下、专注模式打开时，甚至关闭 My Sound Alarm 后也会响。
 
-【“立即响铃”】
-用和真正闹钟相同的音量，马上试听你选的声音。
-
 【防睡过头（Pro，抢先体验）】
-如果到你设定的时间还没有停止闹钟，它会把同一个声音调大后再响一次。在抢先体验期间开始使用的用户，正式发布后也可以继续使用。
+如果到你设定的时间还没有停止闹钟，它会把同一个声音调大后再响一次。
 
-【重复与稍后提醒】
-可按星期设定重复。稍后提醒可关闭，或设为 1、2、5、9、10 分钟。
+【播放列表（Pro，抢先体验）】
+把你的声音整理在一起，按顺序、随机播放或随机一首来响。还可以选择曲目之间的衔接：淡入淡出或交叉淡化。
+
+【轻柔开始（Pro，抢先体验）】
+闹钟从小音量开始，在 5 秒、15 秒或 30 秒内逐渐变大。
+
+在抢先体验期间开始使用这些 Pro 功能的用户，正式发布后也可以继续使用。
 
 【一眼认出你的声音】
 每个闹钟会显示视频中的画面或音频文件的封面。
 
 【夜间模式】
 把 iPhone 变成床头时钟，大而柔和的数字在暗处也易于阅读。
-
-■ 支持格式
-MP3 / AAC / WAV / M4A / 视频（MOV、MP4）中的声音
 
 ■ 注意事项
 · 需要 iOS 26 或更高版本（AlarmKit）
@@ -505,7 +495,7 @@ Bez limitu długości
 Dzwonki tworzone w GarageBand mogą trwać do 30 sekund. My Sound Alarm przyjmuje do 10 minut z wideo, a długie pliki audio można zaimportować w całości.
 
 Dźwięk z wideo
-Wybierz wideo z biblioteki zdjęć lub z aplikacji Pliki i zostaw sam dźwięk.
+Wybierz wideo z biblioteki zdjęć lub z aplikacji Pliki i zostaw sam dźwięk. Film z podróży albo głos rodziny czy zwierzaka może stać się dźwiękiem budzika.
 
 Import plików audio
 MP3, AAC, WAV i M4A. Dodaj je z aplikacji Pliki albo wyślij z innej aplikacji przyciskiem Udostępnij.
@@ -513,23 +503,22 @@ MP3, AAC, WAV i M4A. Dodaj je z aplikacji Pliki albo wyślij z innej aplikacji p
 Dzwoni w trybie cichym
 My Sound Alarm planuje swoje budziki przez AlarmKit, system budzików dodany przez Apple w iOS 26. Pojawiają się na ekranie blokady jak budziki z wbudowanej aplikacji Zegar i dzwonią w trybie cichym i przy włączonym trybie skupienia, nawet gdy My Sound Alarm jest zamknięta.
 
-„Zadzwoń teraz”
-Posłuchaj wybranego dźwięku od razu, z tą samą głośnością co prawdziwy budzik.
-
 Ochrona przed zaspaniem (Pro, wczesny dostęp)
-Jeśli nie wyłączysz budzika do wybranej godziny, odtworzy ten sam dźwięk ponownie, głośniej. Jeśli zaczniesz z niej korzystać we wczesnym dostępie, zachowasz ją po oficjalnym wydaniu.
+Jeśli nie wyłączysz budzika do wybranej godziny, odtworzy ten sam dźwięk ponownie, głośniej.
 
-Powtarzanie i drzemka
-Wybierz dni dla każdego budzika. Drzemka może być wyłączona albo trwać 1, 2, 5, 9 lub 10 minut.
+Playlisty (Pro, wczesny dostęp)
+Zbierz swoje dźwięki i odtwarzaj je po kolei, losowo lub jako jeden losowy utwór. Wybierz też, jak utwory przechodzą jeden w drugi: z wyciszeniem lub z przenikaniem.
+
+Łagodny start (Pro, wczesny dostęp)
+Budzik zaczyna cicho i zgłaśnia się przez 5, 15 lub 30 sekund.
+
+Jeśli zaczniesz korzystać z tych funkcji Pro we wczesnym dostępie, zachowasz je po oficjalnym wydaniu.
 
 Twoje dźwięki na pierwszy rzut oka
 Każdy budzik pokazuje kadr z wideo albo okładkę pliku audio.
 
 Tryb nocny
 Twój iPhone staje się zegarem przy łóżku, z dużymi, łagodnymi cyframi czytelnymi w ciemności.
-
-FORMATY
-MP3 / AAC / WAV / M4A / Dźwięk z wideo (MOV, MP4)
 
 UWAGI
 - Wymaga iOS 26 lub nowszego (AlarmKit)
@@ -549,7 +538,7 @@ Bez omezení délky
 Vyzvánění vytvořená v GarageBand mají až 30 sekund. My Sound Alarm vezme z videa až 10 minut a dlouhé zvukové soubory se dají importovat celé.
 
 Zvuk z videa
-Vyber video z knihovny fotek nebo z aplikace Soubory a nech si jen zvuk.
+Vyber video z knihovny fotek nebo z aplikace Soubory a nech si jen zvuk. Video z cesty nebo hlas rodiny či mazlíčka se může stát zvukem budíku.
 
 Import zvukových souborů
 MP3, AAC, WAV a M4A. Přidej je z aplikace Soubory, nebo je pošli z jiné aplikace tlačítkem Sdílet.
@@ -557,23 +546,22 @@ MP3, AAC, WAV a M4A. Přidej je z aplikace Soubory, nebo je pošli z jiné aplik
 Zvoní v tichém režimu
 My Sound Alarm plánuje své budíky přes AlarmKit, systém budíků, který Apple přidal v iOS 26. Zobrazují se na zamčené obrazovce jako budíky z vestavěné aplikace Hodiny a zvoní v tichém režimu i při zapnutém režimu soustředění, i když je My Sound Alarm zavřená.
 
-„Zazvonit teď“
-Poslechni si vybraný zvuk hned, ve stejné hlasitosti jako skutečný budík.
-
 Ochrana proti zaspání (Pro, předběžný přístup)
-Pokud budík do zvolené doby nevypneš, přehraje stejný zvuk znovu a hlasitěji. Pokud ji začneš používat během předběžného přístupu, zůstane ti i po oficiálním vydání.
+Pokud budík do zvolené doby nevypneš, přehraje stejný zvuk znovu a hlasitěji.
 
-Opakování a odložení
-Vyber dny pro každý budík. Odložení může být vypnuté, nebo 1, 2, 5, 9 či 10 minut.
+Playlisty (Pro, předběžný přístup)
+Seskup své zvuky a pouštěj je popořadě, náhodně nebo jako jednu náhodnou skladbu. Zvol také, jak na sebe skladby navazují: se ztlumením nebo s crossfadem.
+
+Jemný start (Pro, předběžný přístup)
+Budík začne potichu a během 5, 15 nebo 30 sekund zesílí.
+
+Pokud začneš tyto funkce Pro používat během předběžného přístupu, zůstanou ti i po oficiálním vydání.
 
 Tvoje zvuky na první pohled
 Každý budík ukazuje záběr z videa nebo obal zvukového souboru.
 
 Noční režim
 Z iPhonu se stanou hodiny u postele, s velkými jemnými číslicemi čitelnými ve tmě.
-
-FORMÁTY
-MP3 / AAC / WAV / M4A / Zvuk z videa (MOV, MP4)
 
 POZNÁMKY
 - Vyžaduje iOS 26 nebo novější (AlarmKit)
@@ -593,7 +581,7 @@ DESC["ar-SA"] = ("تطبيق منبه يوقظك على لازمة أغنية أ
 تستمر النغمات التي تُنشأ في GarageBand حتى 30 ثانية. يقبل My Sound Alarm حتى 10 دقائق من الفيديو، ويمكن استيراد الملفات الصوتية الطويلة كما هي.
 
 الصوت من فيديو
-اختر فيديو من مكتبة الصور أو تطبيق الملفات واحتفظ بالصوت فقط.
+اختر فيديو من مكتبة الصور أو تطبيق الملفات واحتفظ بالصوت فقط. يمكن أن يصبح فيديو من رحلة، أو صوت عائلتك أو حيوانك الأليف، صوت منبهك.
 
 استيراد الملفات الصوتية
 يدعم MP3 وAAC وWAV وM4A. أضفها من تطبيق الملفات أو أرسلها من تطبيق آخر بزر المشاركة.
@@ -601,23 +589,22 @@ DESC["ar-SA"] = ("تطبيق منبه يوقظك على لازمة أغنية أ
 يرن في الوضع الصامت
 يجدول My Sound Alarm منبهاته باستخدام AlarmKit، وهو نظام المنبهات الذي أضافته Apple في iOS 26. تظهر على شاشة القفل مثل منبهات تطبيق الساعة المدمج، وترن في الوضع الصامت وعند تشغيل وضع التركيز، حتى عندما يكون My Sound Alarm مغلقًا.
 
-«رنّ الآن»
-استمع فورًا إلى الصوت الذي اخترته، بمستوى صوت المنبه الحقيقي نفسه.
-
 الحماية من النوم الزائد (Pro، وصول مبكر)
-إذا لم توقف المنبه بحلول الوقت الذي تختاره، فسيعيد تشغيل الصوت نفسه بصوت أعلى. إذا بدأت استخدامها خلال الوصول المبكر، تحتفظ بها بعد الإصدار الرسمي.
+إذا لم توقف المنبه بحلول الوقت الذي تختاره، فسيعيد تشغيل الصوت نفسه بصوت أعلى.
 
-التكرار والغفوة
-اختر أيام كل منبه. يمكن إيقاف الغفوة أو ضبطها على 1 أو 2 أو 5 أو 9 أو 10 دقائق.
+قوائم التشغيل (Pro، وصول مبكر)
+اجمع أصواتك وشغّلها بالترتيب أو عشوائيًا أو بمقطع واحد عشوائي. واختر أيضًا طريقة الانتقال بين المقاطع: تلاشٍ أو تلاشٍ متقاطع.
+
+بداية هادئة (Pro، وصول مبكر)
+يبدأ المنبه بصوت منخفض ثم يرتفع خلال 5 أو 15 أو 30 ثانية.
+
+إذا بدأت استخدام ميزات Pro هذه خلال الوصول المبكر، تحتفظ بها بعد الإصدار الرسمي.
 
 أصواتك في لمحة
 يعرض كل منبه لقطة من الفيديو أو صورة غلاف الملف الصوتي.
 
 الوضع الليلي
 يصبح iPhone ساعة بجانب السرير، بأرقام كبيرة وهادئة يسهل قراءتها في الظلام.
-
-الصيغ المدعومة
-MP3 / AAC / WAV / M4A / الصوت من الفيديو (MOV وMP4)
 
 ملاحظات
 - يتطلب iOS 26 أو أحدث (AlarmKit)

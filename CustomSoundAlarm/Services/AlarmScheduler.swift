@@ -27,7 +27,7 @@ final class AlarmScheduler {
     static let shared = AlarmScheduler()
 
     private let logger = Logger(subsystem: "com.tkysdev.customsoundalarm", category: "AlarmScheduler")
-    private nonisolated(unsafe) let manager = AlarmManager.shared
+    private nonisolated(unsafe) let manager: any AlarmManaging
 
     private(set) var scheduledAlarmCount: Int = 0
 
@@ -75,7 +75,9 @@ final class AlarmScheduler {
     @ObservationIgnored
     private var backupFiredReportedThisSession: Set<Alarm.ID> = []
 
-    private init() {
+    /// 本番は `shared` を使う。テストでは偽の `AlarmManaging` を渡す。
+    init(manager: any AlarmManaging = SystemAlarmManager()) {
+        self.manager = manager
         loadIDMap()
         loadBackupIDMap()
         refreshTestRingPermission()
@@ -165,7 +167,7 @@ final class AlarmScheduler {
 
         let activeAlarmIDs: Set<Alarm.ID>
         do {
-            let alarms = try manager.alarms
+            let alarms = try manager.alarmSnapshots()
             activeAlarmIDs = Set(alarms.map(\.id))
             isAlarmRinging = alarms.contains { $0.state == .alerting }
         } catch {
@@ -216,7 +218,7 @@ final class AlarmScheduler {
 
         // スヌーズ待機中（.countdown）のアラームを遡及記録（App Group 永続化で二重計上防止）
         var snoozedIDs = AppGroup.snoozedAlarmEntryIDs
-        for alarm in (try? manager.alarms) ?? [] where alarm.state == .countdown {
+        for alarm in (try? manager.alarmSnapshots()) ?? [] where alarm.state == .countdown {
             guard let entryID = alarmIDMap.first(where: { $0.value == alarm.id })?.key,
                   !snoozedIDs.contains(entryID)
             else { continue }
@@ -228,7 +230,7 @@ final class AlarmScheduler {
             logger.info("Reconcile: detected snoozing alarm: \(alarm.id)")
         }
         // .countdown でなくなったアラームをクリーンアップ
-        let currentCountdownEntryIDs = Set(((try? manager.alarms) ?? []).compactMap { alarm in
+        let currentCountdownEntryIDs = Set(((try? manager.alarmSnapshots()) ?? []).compactMap { alarm in
             alarm.state == .countdown
                 ? alarmIDMap.first(where: { $0.value == alarm.id })?.key
                 : nil
@@ -246,8 +248,12 @@ final class AlarmScheduler {
         editedEntryIDs: Set<UUID> = [],
         trigger: AlarmSyncTrigger
     ) {
-        syncTask?.cancel()
+        // 前の同期を止めずに、終わってから次を始める（取り残し防止）。
+        // 途中で止めると、AlarmKit に登録済みなのに対応表に書かれないアラームが残り、
+        // アプリに出ないまま毎日鳴り続ける（App Store レビュー・1.8.0）。
+        let previous = syncTask
         syncTask = Task {
+            await previous?.value
             await performSync(
                 entries,
                 forceRescheduleEntryIDs: forceRescheduleEntryIDs,
@@ -256,6 +262,14 @@ final class AlarmScheduler {
             )
         }
     }
+
+    /// 実行中の同期が終わるまで待つ（テスト用）。
+    func waitForPendingSync() async {
+        await syncTask?.value
+    }
+
+    /// 本体アラームの対応表（テスト・デバッグ表示用）。
+    var primaryAlarmIDMap: [UUID: Alarm.ID] { alarmIDMap }
 
     /// プレイリストの編集・音削除後に、そのプレイリストを使うアラームを再登録する（#160）。
     func resync(entriesUsingPlaylist playlistID: UUID) {
@@ -295,7 +309,7 @@ final class AlarmScheduler {
 
         let activeStates: [Alarm.ID: Alarm.State]
         do {
-            activeStates = Dictionary(uniqueKeysWithValues: try manager.alarms.map { ($0.id, $0.state) })
+            activeStates = Dictionary(uniqueKeysWithValues: try manager.alarmSnapshots().map { ($0.id, $0.state) })
         } catch {
             logger.error("Failed to fetch alarm states: \(error.localizedDescription)")
             return
@@ -404,7 +418,7 @@ final class AlarmScheduler {
         var newMap = diff.keptMap
         var newlyScheduledIDs = Set<UUID>()
         for entry in diff.scheduleEntries {
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled else { break }
             if let alarmID = await scheduleAlarm(for: entry) {
                 newMap[entry.id] = alarmID
                 newlyScheduledIDs.insert(entry.id)
@@ -420,8 +434,10 @@ final class AlarmScheduler {
                 logger.warning("Reschedule failed; keeping previous alarm for entry: \(entry.id)")
             }
         }
-
-        guard !Task.isCancelled else { return }
+        // 差し替えずに終わったプレイリストの古いアラームは対応表に残す（取り残し防止）
+        for (entryID, oldAlarmID) in deferredOldAlarmIDs where newMap[entryID] == nil {
+            newMap[entryID] = oldAlarmID
+        }
 
         // 署名の保存（#163）。延期・鳴動中のエントリは古い署名を残す。
         var primarySignatures = AppGroup.primaryAlarmSignatures
@@ -502,15 +518,14 @@ final class AlarmScheduler {
         var newBackupMap = backupDiff.keptMap
         var newlyScheduledBackupIDs = Set<UUID>()
         for entry in backupDiff.scheduleEntries {
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled else { break }
             if let backupID = await scheduleBackupAlarm(for: entry) {
                 newBackupMap[entry.id] = backupID
                 newlyScheduledBackupIDs.insert(entry.id)
             }
         }
 
-        guard !Task.isCancelled else { return }
-
+        // 登録した分は打ち切られても必ず対応表に保存する（取り残し防止）
         // 最終アラームの署名保存（#163）
         var backupSignatures = AppGroup.backupAlarmSignatures
         backupSignatures = backupSignatures.filter { backupIDs.contains($0.key) }
@@ -529,6 +544,9 @@ final class AlarmScheduler {
         scheduledAlarmCount = newMap.count
         saveIDMap()
         saveBackupIDMap()
+
+        // 取り残し（対応表に無いのに AlarmKit に残っているアラーム）を取り消す
+        cancelUnmappedAlarms(trigger: trigger)
 
         // 同期の記録（#163）。原因切り分け用に最新50件を残す。
         // 実際に登録できたものだけを「作り直した」として数える。
@@ -610,7 +628,7 @@ final class AlarmScheduler {
         )
 
         do {
-            _ = try await manager.schedule(id: alarmID, configuration: config)
+            try await manager.schedule(id: alarmID, configuration: config)
             var names = AppGroup.primarySoundNames
             names[entry.id] = resolution.fileName
             AppGroup.primarySoundNames = names
@@ -794,6 +812,18 @@ final class AlarmScheduler {
     /// 新しいアラームを登録できてから古い方を消す（登録失敗で鳴らなくならないように）。
     @MainActor
     func reschedulePrimaryAfterStop(entry: AlarmEntry, oldAlarmID: UUID) async {
+        // 同期と同じ列に並べる。同期の途中で対応表を書き換えると、
+        // 同期の最後の保存で上書きされ、新しいアラームが取り残される。
+        let previous = syncTask
+        let task = Task {
+            await previous?.value
+            await performReschedulePrimaryAfterStop(entry: entry, oldAlarmID: oldAlarmID)
+        }
+        syncTask = task
+        await task.value
+    }
+
+    private func performReschedulePrimaryAfterStop(entry: AlarmEntry, oldAlarmID: UUID) async {
         guard entry.isEnabled,
               !entry.repeatWeekdays.isEmpty,
               AlarmSoundModeResolver.changesOrderOnStop(for: entry) else {
@@ -820,7 +850,7 @@ final class AlarmScheduler {
             alarmID: alarmID
         )
         do {
-            _ = try await manager.schedule(id: alarmID, configuration: config)
+            try await manager.schedule(id: alarmID, configuration: config)
             try? manager.cancel(id: oldAlarmID)
             alarmIDMap[entry.id] = alarmID
             saveIDMap()
@@ -840,6 +870,57 @@ final class AlarmScheduler {
             logger.error("Failed to reschedule playlist alarm \(entry.label): \(error.localizedDescription)")
         }
     }
+
+    // MARK: - Unmapped alarms (取り残し)
+
+    /// 試し鳴らしなど、登録処理中でまだ記録に載っていない ID（掃除で消さない）
+    @ObservationIgnored
+    private var inFlightAlarmIDs: Set<Alarm.ID> = []
+
+    /// アプリが把握しているアラーム ID（掃除で消さないもの）
+    private var knownAlarmIDs: Set<Alarm.ID> {
+        Set(alarmIDMap.values)
+            .union(backupAlarmIDMap.values)
+            // 停止 Intent が保存した最新の対応表も含める
+            .union(AlarmIDMaps.loadPrimary().values)
+            .union(AlarmIDMaps.loadBackup().values)
+            .union(AppGroup.testAlarmRecords.map(\.id))
+            .union(inFlightAlarmIDs)
+    }
+
+    /// 対応表に無いのに AlarmKit に残っているアラームを取り消す。
+    /// アプリに出ず削除もできないまま毎日鳴るのを止める（App Store レビュー・1.8.0）。
+    private func cancelUnmappedAlarms(trigger: AlarmSyncTrigger) {
+        guard UnmappedAlarmSweep.shouldSweep(
+            trigger: trigger,
+            now: Date(),
+            lastStopIntentAt: AppGroup.lastStopIntentAt
+        ) else { return }
+        guard let snapshots = try? manager.alarmSnapshots() else { return }
+        let orphanIDs = UnmappedAlarmSweep.orphanIDs(
+            snapshots: snapshots,
+            knownIDs: knownAlarmIDs
+        )
+        guard !orphanIDs.isEmpty else { return }
+        for id in orphanIDs {
+            try? manager.cancel(id: id)
+        }
+        AnalyticsService.shared.capture(.alarmOrphanCancelled(
+            trigger: trigger,
+            count: orphanIDs.count
+        ))
+        logger.warning("Cancelled \(orphanIDs.count) unmapped alarm(s) (trigger: \(trigger.rawValue))")
+    }
+
+    #if DEBUG
+    /// 同期ログ画面の表示用: AlarmKit の登録数・対応表の数・取り残しの数
+    func debugAlarmCounts() -> (registered: Int, mapped: Int, unmapped: Int) {
+        let snapshots = (try? manager.alarmSnapshots()) ?? []
+        let known = knownAlarmIDs
+        let unmapped = snapshots.filter { !known.contains($0.id) }.count
+        return (snapshots.count, alarmIDMap.count + backupAlarmIDMap.count, unmapped)
+    }
+    #endif
 
     /// 最終アラームを登録（停止のみ・スヌーズなし・次の1回だけ）（#110）
     private func scheduleBackupAlarm(for entry: AlarmEntry) async -> Alarm.ID? {
@@ -883,7 +964,7 @@ final class AlarmScheduler {
         )
 
         do {
-            _ = try await manager.schedule(id: alarmID, configuration: config)
+            try await manager.schedule(id: alarmID, configuration: config)
             // 発火前の同期で作り直さないよう、登録した内容の署名を保存する（#163）
             var signatures = AppGroup.backupAlarmSignatures
             signatures[entry.id] = BackupAlarmScheduleSignature(
@@ -960,8 +1041,11 @@ final class AlarmScheduler {
         let alarmID = UUID()
         let config = makeTestRingConfiguration(for: plan, alarmID: alarmID)
 
+        // 記録に載るまでの間に取り残しの掃除で消されないようにする
+        inFlightAlarmIDs.insert(alarmID)
+        defer { inFlightAlarmIDs.remove(alarmID) }
         do {
-            _ = try await manager.schedule(id: alarmID, configuration: config)
+            try await manager.schedule(id: alarmID, configuration: config)
             var records = AppGroup.testAlarmRecords
             records.append(TestAlarmRecord(id: alarmID, scheduledAt: now, kind: kind))
             AppGroup.testAlarmRecords = records
@@ -1066,7 +1150,7 @@ final class AlarmScheduler {
     func startObservingAlarmStates() {
         observationTask?.cancel()
         observationTask = Task {
-            for await alarms in manager.alarmUpdates {
+            for await alarms in AlarmManager.shared.alarmUpdates {
                 guard !Task.isCancelled else { break }
                 isAlarmRinging = alarms.contains { $0.state == .alerting }
                 for alarm in alarms {

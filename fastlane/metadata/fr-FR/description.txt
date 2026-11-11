@@ -9,7 +9,7 @@ Pas de limite de durée
 Les sonneries créées dans GarageBand durent jusqu’à 30 secondes. My Sound Alarm prend jusqu’à 10 minutes d’une vidéo, et les longs fichiers audio peuvent être importés tels quels.
 
 Le son d’une vidéo
-Choisis une vidéo de ta photothèque ou de l’app Fichiers et garde seulement le son.
+Choisis une vidéo de ta photothèque ou de l’app Fichiers et garde seulement le son. Une vidéo de voyage, la voix de tes proches ou de ton animal peut devenir ton son d’alarme.
 
 Import de fichiers audio
 MP3, AAC, WAV et M4A. Ajoute-les depuis l’app Fichiers, ou envoie-les depuis une autre app avec le bouton Partager.
@@ -17,23 +17,22 @@ MP3, AAC, WAV et M4A. Ajoute-les depuis l’app Fichiers, ou envoie-les depuis u
 Sonne en mode silencieux
 My Sound Alarm programme ses alarmes avec AlarmKit, le système d’alarmes ajouté par Apple dans iOS 26. Elles s’affichent sur l’écran verrouillé comme celles de l’app Horloge intégrée et sonnent en mode silencieux et quand un mode de concentration est activé, même quand My Sound Alarm est fermée.
 
-« Faire sonner »
-Écoute tout de suite le son choisi, au même volume qu’une vraie alarme.
-
 Anti-grasse matinée (Pro, accès anticipé)
-Si tu n’as pas arrêté une alarme à l’heure choisie, elle rejoue le même son, plus fort. Si tu commences à l’utiliser pendant l’accès anticipé, tu la gardes après la sortie officielle.
+Si tu n’as pas arrêté une alarme à l’heure choisie, elle rejoue le même son, plus fort.
 
-Répétition et rappel d’alarme
-Choisis les jours de chaque alarme. Le rappel d’alarme peut être désactivé ou réglé sur 1, 2, 5, 9 ou 10 minutes.
+Playlists (Pro, accès anticipé)
+Regroupe tes sons et fais-les sonner dans l’ordre, en aléatoire ou un titre au hasard. Choisis aussi l’enchaînement entre les titres : un fondu ou un fondu enchaîné.
+
+Démarrage en douceur (Pro, accès anticipé)
+L’alarme commence doucement et monte en volume sur 5, 15 ou 30 secondes.
+
+Si tu commences à utiliser ces fonctions Pro pendant l’accès anticipé, tu les gardes après la sortie officielle.
 
 Tes sons en un coup d’œil
 Chaque alarme affiche une image de ta vidéo ou l’illustration de ton fichier audio.
 
 Mode nuit
 Ton iPhone devient un réveil de chevet, avec de grands chiffres doux lisibles dans le noir.
-
-FORMATS
-MP3 / AAC / WAV / M4A / Son de vidéo (MOV, MP4)
 
 À SAVOIR
 - Nécessite iOS 26 ou version ultérieure (AlarmKit)

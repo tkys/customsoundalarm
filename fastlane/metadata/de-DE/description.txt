@@ -9,7 +9,7 @@ Keine Längenbegrenzung
 Klingeltöne aus GarageBand sind bis zu 30 Sekunden lang. My Sound Alarm übernimmt bis zu 10 Minuten aus einem Video, und lange Audiodateien lassen sich so importieren, wie sie sind.
 
 Ton aus Videos
-Wähl ein Video aus deiner Fotomediathek oder der Dateien-App und behalte nur den Ton.
+Wähl ein Video aus deiner Fotomediathek oder der Dateien-App und behalte nur den Ton. Ein Urlaubsvideo oder die Stimmen deiner Familie oder deines Haustiers können dein Weckton werden.
 
 Audiodateien importieren
 MP3, AAC, WAV und M4A. Füge sie aus der Dateien-App hinzu oder schick sie aus einer anderen App über die Teilen-Taste.
@@ -17,23 +17,22 @@ MP3, AAC, WAV und M4A. Füge sie aus der Dateien-App hinzu oder schick sie aus e
 Klingelt im Stummmodus
 My Sound Alarm plant seine Wecker mit AlarmKit, dem Wecker-Framework, das Apple mit iOS 26 eingeführt hat. Sie erscheinen wie Wecker der integrierten Uhr-App auf dem Sperrbildschirm und klingeln im Stummmodus und wenn ein Fokus aktiv ist – auch wenn My Sound Alarm geschlossen ist.
 
-„Jetzt klingeln“
-Hör den gewählten Ton sofort, in derselben Lautstärke wie ein echter Wecker.
-
 Verschlafschutz (Pro, frühe Version)
-Wenn du einen Wecker bis zur gewählten Zeit nicht ausgeschaltet hast, spielt er denselben Ton noch einmal lauter. Wenn du ihn in dieser Zeit zu nutzen beginnst, behältst du ihn auch nach der offiziellen Veröffentlichung.
+Wenn du einen Wecker bis zur gewählten Zeit nicht ausgeschaltet hast, spielt er denselben Ton noch einmal lauter.
 
-Wiederholen und Schlummern
-Wähl die Tage für jeden Wecker. Schlummern ist aus oder 1, 2, 5, 9 oder 10 Minuten.
+Playlists (Pro, frühe Version)
+Fasse deine Töne zusammen und lass sie der Reihe nach, zufällig oder als einen zufälligen Titel spielen. Wähle auch, wie die Titel ineinander übergehen: mit Blende oder Crossfade.
+
+Sanfter Start (Pro, frühe Version)
+Der Wecker beginnt leise und wird über 5, 15 oder 30 Sekunden lauter.
+
+Wenn du diese Pro-Funktionen jetzt zu nutzen beginnst, behältst du sie auch nach der offiziellen Veröffentlichung.
 
 Deine Töne auf einen Blick
 Jeder Wecker zeigt ein Bild aus deinem Video oder das Cover deiner Audiodatei.
 
 Nachtmodus
 Dein iPhone wird zur Nachttischuhr, mit großen, sanften Ziffern, die du im Dunkeln lesen kannst.
-
-FORMATE
-MP3 / AAC / WAV / M4A / Ton aus Videos (MOV, MP4)
 
 HINWEISE
 - Erfordert iOS 26 oder neuer (AlarmKit)

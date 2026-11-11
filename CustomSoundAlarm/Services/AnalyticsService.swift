@@ -180,6 +180,9 @@ enum AnalyticsEvent: Sendable {
     /// 発火した分の中なので、作り直しを次の同期まで延期した（#163）
     case alarmSyncDeferred(trigger: AlarmSyncTrigger, count: Int)
 
+    /// 対応表に無いのに AlarmKit に残っていたアラーム（取り残し）を取り消した
+    case alarmOrphanCancelled(trigger: AlarmSyncTrigger, count: Int)
+
     /// 大きくした版を生成した（#119）
     case backupLoudVariantGenerated(
         gainDbBucket: String,
@@ -294,6 +297,7 @@ enum AnalyticsEvent: Sendable {
         case .playlistRescheduleFailed: return "playlist_reschedule_failed"
         case .alarmSyncRescheduled: return "alarm_sync_rescheduled"
         case .alarmSyncDeferred: return "alarm_sync_deferred"
+        case .alarmOrphanCancelled: return "alarm_orphan_cancelled"
         case .backupLoudVariantGenerated: return "backup_loud_variant_generated"
         case .backupLoudVariantFailed: return "backup_loud_variant_failed"
         case .volumeGuideOpened: return "volume_guide_opened"
@@ -459,7 +463,8 @@ enum AnalyticsEvent: Sendable {
                 "missing_count": missing,
                 "forced_count": forced
             ]
-        case let .alarmSyncDeferred(trigger, count):
+        case let .alarmSyncDeferred(trigger, count),
+             let .alarmOrphanCancelled(trigger, count):
             return [
                 "trigger": trigger.analyticsValue,
                 "count": count
