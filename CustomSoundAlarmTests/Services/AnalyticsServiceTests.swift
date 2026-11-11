@@ -48,7 +48,7 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.soundSelected(kind: .imported, rankBucket: "2-3").name == "sound_selected")
         #expect(AnalyticsEvent.customSoundImported(source: .video).name == "custom_sound_imported")
         #expect(AnalyticsEvent.customSoundImported(source: .audio).name == "custom_sound_imported")
-        #expect(AnalyticsEvent.soundPreviewPlayed.name == "sound_preview_played")
+        #expect(AnalyticsEvent.soundPreviewPlayed(source: .selectTap).name == "sound_preview_played")
         // Phase 2
         #expect(AnalyticsEvent.alarmEdited(hasCustomSound: true, isRepeating: false, snoozeMinutes: 0).name == "alarm_edited")
         #expect(AnalyticsEvent.alarmDeleted.name == "alarm_deleted")
@@ -419,9 +419,11 @@ struct AnalyticsEventTests {
     // MARK: sound_preview_played
 
     @Test
-    func soundPreviewPlayedProperties_areEmpty() {
-        let props = AnalyticsEvent.soundPreviewPlayed.properties
-        #expect(props.isEmpty)
+    func soundPreviewPlayedProperties_includeSource() {
+        for source in SoundPreviewSource.allCases {
+            let props = AnalyticsEvent.soundPreviewPlayed(source: source).properties
+            #expect(props["source"] as? String == source.rawValue)
+        }
     }
 
     // MARK: 全ケース網羅 (コンパイル時の網羅性も兼ねる)
@@ -432,7 +434,7 @@ struct AnalyticsEventTests {
             .alarmCreated(hasCustomSound: true, isRepeating: true, snoozeMinutes: 0),
             .customSoundImported(source: .video),
             .customSoundImported(source: .audio),
-            .soundPreviewPlayed,
+            .soundPreviewPlayed(source: .selectTap),
             .alarmEdited(hasCustomSound: true, isRepeating: true, snoozeMinutes: 0),
             .alarmDeleted,
             .alarmPermission(status: .authorized),
@@ -868,10 +870,10 @@ struct AnalyticsServiceCaptureTests {
         let mock = MockBackend()
         let service = AnalyticsService(backend: mock)
 
-        service.capture(.soundPreviewPlayed)
+        service.capture(.alarmDeleted)
 
         #expect(mock.captureCount == 1)
-        #expect(mock.captures[0].event == "sound_preview_played")
+        #expect(mock.captures[0].event == "alarm_deleted")
         // 空プロパティは nil として送信されるべき（無駄な JSON を送らない）
         #expect(mock.captures[0].properties == nil)
     }
@@ -881,7 +883,7 @@ struct AnalyticsServiceCaptureTests {
         // backend = nil の場合、クラッシュせずドロップされる
         let service = AnalyticsService(backend: nil)
 
-        service.capture(.soundPreviewPlayed)
+        service.capture(.soundPreviewPlayed(source: .playButton))
         service.capture(.alarmCreated(hasCustomSound: true, isRepeating: true, snoozeMinutes: 0))
 
         // クラッシュしないこと自体が検証基準
@@ -895,13 +897,13 @@ struct AnalyticsServiceCaptureTests {
 
         service.capture(.customSoundImported(source: .video))
         service.capture(.customSoundImported(source: .audio))
-        service.capture(.soundPreviewPlayed)
+        service.capture(.soundPreviewPlayed(source: .library))
 
         #expect(mock.captureCount == 3)
         #expect(mock.captures[0].event == "custom_sound_imported")
         #expect(mock.captures[0].properties?["source"] as? String == "video")
         #expect(mock.captures[1].properties?["source"] as? String == "audio")
-        #expect(mock.captures[2].properties == nil)
+        #expect(mock.captures[2].properties?["source"] as? String == "library")
     }
 
     // MARK: Phase 2 events

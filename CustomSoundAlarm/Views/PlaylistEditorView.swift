@@ -240,7 +240,7 @@ struct PlaylistEditorView: View {
         if isTrackPlaying(track) {
             audioPlayer.stop()
         } else {
-            audioPlayer.play(sound)
+            audioPlayer.play(sound, source: .library)
         }
     }
 

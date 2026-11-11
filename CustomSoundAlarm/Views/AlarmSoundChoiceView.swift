@@ -9,6 +9,7 @@ struct AlarmSoundChoiceView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var store = PlaylistStore.shared
     @State private var soundStore = SoundStore.shared
+    @State private var audioPlayer = AudioPlayer.shared
     @State private var editingPlaylist: Playlist?
     @State private var showingNewPlaylist = false
 
@@ -72,9 +73,9 @@ struct AlarmSoundChoiceView: View {
                 selectedSound: $selectedSound,
                 selectionActive: playlistID == nil,
                 onSelect: { sound in
+                    // 選んでも画面は閉じない。タップで鳴らした音を確かめてから戻れる（#196）
                     playlistID = nil
                     selectedSound = sound
-                    dismiss()
                 }
             )
         }
@@ -82,6 +83,12 @@ struct AlarmSoundChoiceView: View {
         .warmListBackground()
         .navigationTitle(String(localized: "sound"))
         .navigationBarTitleDisplayMode(.inline)
+        .onDisappear {
+            // 画面を閉じたら試し聴きを止める（#196）
+            if SoundPreviewLogic.shouldStop(playingFileName: audioPlayer.playingFileName) {
+                audioPlayer.stop()
+            }
+        }
         .onChange(of: selectedSound?.id) { _, newValue in
             // 取り込みで新しい音が選ばれたら、プレイリスト選択を解除する
             if newValue != nil { playlistID = nil }
