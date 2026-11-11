@@ -6,7 +6,7 @@ Budź się przy ulubionym fragmencie
 Otwórz wideo lub plik audio, spójrz na wykres fali i zaznacz zakres. Zostaw sam refren albo całą piosenkę. Możesz słuchać podczas dopasowywania. Gdy dojdzie do końca, zaczyna od nowa.
 
 Bez limitu długości
-Własne dzwonki w iPhonie kończą się po około 40 sekundach. My Sound Alarm przyjmuje do 10 minut z wideo, a długie pliki audio można zaimportować w całości.
+Dzwonki tworzone w GarageBand mogą trwać do 30 sekund. My Sound Alarm przyjmuje do 10 minut z wideo, a długie pliki audio można zaimportować w całości.
 
 Dźwięk z wideo
 Wybierz wideo z biblioteki zdjęć lub z aplikacji Pliki i zostaw sam dźwięk.

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-Hans" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>把歌曲片段设为 iPhone 闹钟的方法 – My Sound Alarm</title>
+<meta name="description" content="“时钟”App 只会从歌曲开头播放。想从副歌开始，可以在 GarageBand 里制作 30 秒以内的铃声，或者使用能裁剪声音的闹钟 App。下面分别列出步骤和限制。">
+<link rel="canonical" href="https://tkys.github.io/customsoundalarm/zh-hans/howto.html">
+<link rel="alternate" hreflang="en" href="https://tkys.github.io/customsoundalarm/howto.html">
+<link rel="alternate" hreflang="ja" href="https://tkys.github.io/customsoundalarm/ja/howto.html">
+<link rel="alternate" hreflang="fr" href="https://tkys.github.io/customsoundalarm/fr/howto.html">
+<link rel="alternate" hreflang="de" href="https://tkys.github.io/customsoundalarm/de/howto.html">
+<link rel="alternate" hreflang="es" href="https://tkys.github.io/customsoundalarm/es/howto.html">
+<link rel="alternate" hreflang="pt-BR" href="https://tkys.github.io/customsoundalarm/pt-br/howto.html">
+<link rel="alternate" hreflang="it" href="https://tkys.github.io/customsoundalarm/it/howto.html">
+<link rel="alternate" hreflang="nl" href="https://tkys.github.io/customsoundalarm/nl/howto.html">
+<link rel="alternate" hreflang="ko" href="https://tkys.github.io/customsoundalarm/ko/howto.html">
+<link rel="alternate" hreflang="zh-Hans" href="https://tkys.github.io/customsoundalarm/zh-hans/howto.html">
+<link rel="alternate" hreflang="pl" href="https://tkys.github.io/customsoundalarm/pl/howto.html">
+<link rel="alternate" hreflang="cs" href="https://tkys.github.io/customsoundalarm/cs/howto.html">
+<link rel="alternate" hreflang="ar" href="https://tkys.github.io/customsoundalarm/ar/howto.html">
+<link rel="alternate" hreflang="x-default" href="https://tkys.github.io/customsoundalarm/howto.html">
+<meta property="og:title" content="把歌曲片段设为 iPhone 闹钟的方法">
+<meta property="og:description" content="“时钟”App 只会从歌曲开头播放。想从副歌开始，可以在 GarageBand 里制作 30 秒以内的铃声，或者使用能裁剪声音的闹钟 App。下面分别列出步骤和限制。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://tkys.github.io/customsoundalarm/zh-hans/howto.html">
+<meta property="og:site_name" content="My Sound Alarm">
+
+<link rel="icon" href="../assets/img/icon.png">
+<style>
+:root{color-scheme:light;--text:#1C1714;--muted:#5E5650;--line:#E7E2DD;--accent:#FF843B;--ink:#4A1A6B;--wave:#D6D1CC}
+/* App colors: orange (AccentColor) is for graphics only — 2.4:1 on white is too low for text; text accents use the icon's purple. */
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#fff;color:var(--text);font:18px/1.7 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif}
+a{color:var(--ink);text-underline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 0 8px;font-size:16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;text-decoration:none;color:var(--text)}
+.brand img{width:32px;height:32px;border-radius:8px}
+h1,h2,h3{word-break:auto-phrase;text-wrap:balance}
+.ph{display:inline-block}
+p,li{word-break:auto-phrase}
+:lang(ko) h1,:lang(ko) h2,:lang(ko) h3,:lang(ko) p{word-break:keep-all}
+h1{font-size:clamp(32px,6.4vw,48px);line-height:1.2;letter-spacing:-.015em;margin:36px 0 14px}
+.lead{font-size:20px;color:var(--muted);margin:0 0 24px;max-width:34em}
+.badge img{height:52px;width:auto;display:block}
+.req{font-size:15px;color:var(--muted);margin:10px 0 0}
+figure{margin:44px 0 8px}
+.wavebox{position:relative;padding-bottom:26px;direction:ltr}
+.wave{display:block;width:100%;height:auto}
+.wavelabel{position:absolute;bottom:0;transform:translateX(-50%);white-space:nowrap;font-size:14px;font-weight:600;color:var(--ink)}
+figcaption{font-size:16px;color:var(--muted);margin-top:8px}
+h2{font-size:26px;line-height:1.35;margin:56px 0 10px}
+.shot{display:block;width:100%;max-width:340px;height:auto;border:1px solid var(--line);border-radius:22px;margin:18px 0 0}
+.side{float:inline-end;width:132px;height:auto;margin-block:0 12px;margin-inline:20px 0}
+.clear{clear:both}
+h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
+.faq p{margin:0;color:var(--muted)}
+.end{margin:64px 0 0;padding-top:32px;border-top:1px solid var(--line);display:flex;gap:28px;align-items:center}
+.end h2{margin:0 0 18px}
+.end-art{width:180px;height:auto;flex:none}
+@media (max-width:560px){.end{flex-direction:column;align-items:flex-start}.end-art{width:220px}}
+.voices ul{list-style:none;margin:18px 0 0;padding:0}
+.voices li{padding:16px 0;border-top:1px solid var(--line)}
+.stars{color:var(--accent);letter-spacing:.08em;margin-right:10px}
+.rmeta{font-size:15px;color:var(--muted)}
+.voices p{margin:6px 0 0}
+.voices .tr{color:var(--muted);font-size:16px}
+.rsum{margin:8px 0 0;color:var(--muted);font-size:15px}
+.rating{display:flex;gap:28px;align-items:center;margin:16px 0 0}
+.score{text-align:center;flex:none}
+.big{font-size:56px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.bigstars{color:var(--accent);letter-spacing:.1em;margin-top:6px}
+.bars{flex:1;max-width:360px}
+.bar{display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.6}
+.bl{width:5.5em;text-align:end;color:var(--muted);letter-spacing:.02em;font-size:11px}
+.bt{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bf{display:block;height:100%;background:var(--accent);border-radius:3px}
+.bn{width:2em;color:var(--muted);text-align:end}
+.note{font-size:14px;color:var(--muted);margin-top:12px}
+.langs{margin:40px 0 0;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 16px;font-size:15px}
+.langs a[aria-current]{color:var(--text);text-decoration:none;font-weight:600}
+.doc h1{font-size:34px;margin-top:28px}
+.perms{padding-inline-start:1.2em}
+.perms li{margin:6px 0}
+.featured{margin:44px 0 0;padding:20px 22px;border-inline-start:4px solid var(--accent);background:#FFF8F2;border-radius:0 12px 12px 0}
+[dir=rtl] .featured{border-radius:12px 0 0 12px}
+.featured blockquote{margin:0}
+.featured .orig{font-size:17px;line-height:1.7;margin:0}
+.featured .tr{color:var(--muted);font-size:16px;margin:10px 0 0}
+.featured figcaption{margin-top:12px}
+footer{padding:28px 0 56px;font-size:15px;display:flex;gap:8px 20px;flex-wrap:wrap}
+.made{color:var(--muted);flex-basis:100%}
+
+.howto .intro p{margin:0 0 14px}
+.howto h2{font-size:22px;margin:48px 0 10px}
+.howto section p{margin:0 0 12px}
+.howto .steps{margin:12px 0 0;padding-inline-start:1.4em}
+.howto .steps li{margin:6px 0;padding-inline-start:.2em}
+.howto .steps li::marker{color:var(--muted);font-variant-numeric:tabular-nums}
+.howto .notes{margin:14px 0 0;padding-inline-start:1.2em;font-size:16px;color:var(--muted)}
+.howto .notes li{margin:4px 0}
+.howto .shot{margin:16px 0 4px}
+.howto .cta{margin:24px 0 0}
+.howto .tablewrap{overflow-x:auto;margin-top:12px}
+.howto .compare{width:100%;table-layout:fixed;border-collapse:collapse;font-size:15px;line-height:1.5}
+.howto .compare th,.howto .compare td{border-bottom:1px solid var(--line);padding:9px 10px 9px 0;text-align:start;vertical-align:top;word-break:auto-phrase;overflow-wrap:anywhere}
+.howto .compare thead th{font-weight:600;border-bottom-color:var(--text)}
+.howto .compare tbody th{font-weight:400;color:var(--muted);width:22%}
+@media(max-width:560px){.howto .compare{font-size:13px}.howto .compare th,.howto .compare td{padding-inline-end:6px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><a class="brand" href="https://tkys.github.io/customsoundalarm/zh-hans/"><img src="../assets/img/icon.png" alt="">My Sound Alarm</a>
+<a href="#languages">简体中文 ▾</a></header>
+<main class="doc howto">
+<h1>把歌曲片段设为 iPhone 闹钟的方法</h1>
+<div class="intro"><p>“时钟”App 也能把歌曲设为闹钟，但总是从开头播放，没有从中间开始的设置。</p><p>想从副歌醒来，可以在 GarageBand 里制作 30 秒以内的铃声，或者使用能裁剪声音的闹钟 App。</p><p>本页由其中一个 App 的开发者 My Sound Alarm 撰写。“时钟”和 GarageBand 的步骤遵循 Apple 的支持文章。</p></div>
+<section><h2>歌曲开头就行：“时钟”App</h2><ol class="steps"><li>在“时钟”里打开“闹钟”，点按 +。</li><li>点按“声音”，再选一首资料库里的歌曲。</li><li>点按“存储”。</li></ol><ul class=notes><li>Apple Music 的歌曲只要已下载到 iPhone 就可以选。</li></ul></section><section><h2>30 秒够用：GarageBand</h2><p>GarageBand 是 Apple 的音乐 App。把歌曲的一部分导出为铃声，铃声就会出现在“时钟”的闹钟声音里。需要多几步操作。</p><ol class="steps"><li>长按 GarageBand 图标，新建一个音频录音。</li><li>打开轨道视图，再打开循环浏览器。</li><li>在“文件”里找到音频文件，拖到轨道的左边缘。</li><li>拖动片段两端，让它不超过 30 秒，然后移到最左边。</li><li>选中这首歌，点按“共享”，导出为铃声。</li><li>在“时钟”里打开闹钟，点按声音，从铃声列表里选它。</li></ol><ul class=notes><li>铃声超过 30 秒时，GarageBand 会在导出时自动缩短。</li><li>“音乐”App 的歌曲只有未受保护的才能用，受保护的会显示为灰色。</li></ul></section><section><h2>需要超过 30 秒，或想用视频里的声音：My Sound Alarm</h2><p>打开音频文件或视频，在波形上选出要播放的部分。没有导出这一步。</p><img class="shot" src="../assets/img/crop-en.jpg" alt="My Sound Alarm 中在波形上选择要播放部分的画面" width="340" height="383"><ol class="steps"><li>添加闹钟时点按“声音”。</li><li>点按“添加音频文件”（MP3、AAC、WAV、M4A）或“从视频添加”（照片图库或“文件”）。</li><li>在波形上拖动选区两端，然后点按“添加所选片段”。</li></ol><ul class=notes><li>音频文件没有长度限制，视频最长 10 分钟。</li><li>选好的部分会一直循环，直到你停止闹钟。</li><li>无法读取“音乐”App 里的歌曲，包括 Apple Music。</li><li>需要用 iOS 26 或更高版本，因为闹钟通过 Apple 的 AlarmKit 设定。</li></ul><div class="cta"><a class="badge" href="https://apps.apple.com/app/apple-store/id6760616800?pt=128010919&ct=website&mt=8" data-pos="howto_top" rel="noopener"><img src="../assets/img/badges/zh-cn.svg" alt="在 App Store 下载" width="142" height="52"></a></div></section>
+<section><h2>并排对比</h2>
+<div class="tablewrap"><table class="compare"><thead><tr><th></th><th>时钟</th><th>GarageBand</th><th>My Sound Alarm</th></tr></thead><tbody><tr><th>从中间开始</th><td>不行</td><td>可以</td><td>可以</td></tr><tr><th>长度</th><td>整首歌</td><td>最长 30 秒</td><td>没有限制（视频最长 10 分钟）</td></tr><tr><th>导出</th><td>不需要</td><td>需要</td><td>不需要</td></tr><tr><th>视频里的声音</th><td>不行</td><td>不行</td><td>可以</td></tr><tr><th>Apple Music 歌曲</th><td>已下载的可以</td><td>仅未受保护</td><td>不行</td></tr></tbody></table></div></section>
+<div class="cta"><a class="badge" href="https://apps.apple.com/app/apple-store/id6760616800?pt=128010919&ct=website&mt=8" data-pos="howto_bottom" rel="noopener"><img src="../assets/img/badges/zh-cn.svg" alt="在 App Store 下载" width="142" height="52"></a></div>
+</main>
+<nav id="languages" class="langs" aria-label="Language"><a href="https://tkys.github.io/customsoundalarm/howto.html?lang=en" hreflang="en" lang="en">English</a> <a href="https://tkys.github.io/customsoundalarm/ja/howto.html" hreflang="ja" lang="ja">日本語</a> <a href="https://tkys.github.io/customsoundalarm/fr/howto.html" hreflang="fr" lang="fr">Français</a> <a href="https://tkys.github.io/customsoundalarm/de/howto.html" hreflang="de" lang="de">Deutsch</a> <a href="https://tkys.github.io/customsoundalarm/es/howto.html" hreflang="es" lang="es">Español</a> <a href="https://tkys.github.io/customsoundalarm/pt-br/howto.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a> <a href="https://tkys.github.io/customsoundalarm/it/howto.html" hreflang="it" lang="it">Italiano</a> <a href="https://tkys.github.io/customsoundalarm/nl/howto.html" hreflang="nl" lang="nl">Nederlands</a> <a href="https://tkys.github.io/customsoundalarm/ko/howto.html" hreflang="ko" lang="ko">한국어</a> <a href="https://tkys.github.io/customsoundalarm/zh-hans/howto.html" hreflang="zh-Hans" lang="zh-Hans" aria-current=page>简体中文</a> <a href="https://tkys.github.io/customsoundalarm/pl/howto.html" hreflang="pl" lang="pl">Polski</a> <a href="https://tkys.github.io/customsoundalarm/cs/howto.html" hreflang="cs" lang="cs">Čeština</a> <a href="https://tkys.github.io/customsoundalarm/ar/howto.html" hreflang="ar" lang="ar">العربية</a></nav>
+<footer><span class="made">由日本独立开发者 tkys 制作。</span><a href="https://tkys.github.io/customsoundalarm/zh-hans/">My Sound Alarm</a><a href="support.html">支持</a><a href="privacy.html">隐私政策</a></footer>
+</div>
+<script>
+// Owner opt-out: open the page once with ?internal=1 on each of your devices (?internal=0 to undo).
+var csaInternal=false;try{var q=new URLSearchParams(location.search).get("internal");if(q==="1")localStorage.setItem("csa_internal","1");if(q==="0")localStorage.removeItem("csa_internal");csaInternal=localStorage.getItem("csa_internal")==="1";}catch(e){}
+if(location.hostname==="tkys.github.io"&&!csaInternal){
+!function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+posthog.init("phc_uuFAFy25bfEjsVPtVzRBdAiy8yyPLi7NB75MGSQeGXEo",{api_host:"https://us.i.posthog.com",persistence:"memory",person_profiles:"identified_only",disable_session_recording:true,capture_pageview:true});
+posthog.register({site_lang:"zh-Hans"});
+document.addEventListener("click",function(e){var a=e.target.closest("a.badge");if(a)posthog.capture("app_store_link_clicked",{position:a.dataset.pos||""});});
+}
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Generate App Store metadata for 12 additional locales (fastlane/metadata/<locale>/).
+"""Generate App Store metadata for the locales in store_aso.py (fastlane/metadata/<locale>/).
 
 Source of truth: fastlane/metadata/en-US. Re-run to regenerate; it overwrites
 name / subtitle / keywords / promotional_text / description / URLs only.
@@ -600,11 +600,13 @@ POZNÁMKY
 from store_aso import ASO, DESC  # noqa: E402  (name/subtitle/keywords + description/promo)
 
 LIMITS = {"name": 30, "subtitle": 30, "keywords": 100, "promo": 170, "description": 4000}
-BANNED = ["必ず", "絶対", "無料", "always", "guarantee", "free", "gratuit", "kostenlos", "gratis", "grátis", "gratuito", "무료", "免费", "darmow", "zdarma", "مجان"]
+BANNED = ["必ず", "絶対", "無料", "always", "guarantee", "free", "gratuit", "kostenlos", "gratis", "grátis", "gratuito", "무료", "免费", "darmow", "zdarma", "مجان",
+          "бесплатн", "гарант", "ücretsiz", "garanti", "免費", "保證"]
 
 
 def main():
     en = os.path.join(ROOT, "en-US")
+    marketing = open(os.path.join(en, "marketing_url.txt"), encoding="utf-8").read()
     privacy = open(os.path.join(en, "privacy_url.txt"), encoding="utf-8").read()
     support = open(os.path.join(en, "support_url.txt"), encoding="utf-8").read()
     errors = []
@@ -627,7 +629,8 @@ def main():
         os.makedirs(out, exist_ok=True)
         files = {"name.txt": d["name"] + "\n", "subtitle.txt": d["subtitle"] + "\n",
                  "keywords.txt": d["keywords"] + "\n", "promotional_text.txt": d["promo"] + "\n",
-                 "description.txt": d["description"], "privacy_url.txt": privacy, "support_url.txt": support}
+                 "description.txt": d["description"], "marketing_url.txt": marketing,
+                 "privacy_url.txt": privacy, "support_url.txt": support}
         for fn, body in files.items():
             with open(os.path.join(out, fn), "w", encoding="utf-8") as f:
                 f.write(body)

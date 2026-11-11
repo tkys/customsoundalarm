@@ -36,6 +36,12 @@ ASO = {
             "vyzvánění,hudba,audio,mp3,stříhat,ráno,hodiny,zvuk,opakování,tón,hlasitý,zaspat"),
  "ar-SA":  ("My Sound Alarm - منبه موسيقي", "أغنية أو صوت فيديو كمنبه",
             "نغمة,موسيقى,mp3,قص,صباح,ساعة,تكرار,استيقاظ,رنين,مقطع,عالي,نوم"),
+ "ru":     ("My Sound Alarm - будильник", "Мелодия на будильник из видео",
+            "будильник,мелодия,звонок,музыка,mp3,утро,часы,звук,сон"),
+ "tr":     ("My Sound Alarm - Müzik Alarmı", "Şarkı veya video sesiyle alarm",
+            "alarm,melodi,şarkı,mp3,zil,kesme,sabah,ses,tekrar,uyanma,çalar,müzik,uyandırma"),
+ "zh-Hant":("My Sound Alarm - 音樂鬧鐘", "把歌曲或影片聲音設為鬧鐘",
+            "鈴聲,音樂,剪輯,起床,mp3,循環,副歌,影片,賴床,大聲,鬧鈴,自訂,計時"),
 }
 
 
@@ -51,7 +57,7 @@ DESC["ja"] = ("好きな曲のサビや動画の音で起きられる目覚ま�
 動画や音声ファイルを開くと波形が表示されるので、範囲を選ぶだけ。サビだけを切り出しても、1曲まるごとでもかまいません。試聴しながら調整できます。最後まで鳴ったら、また最初から鳴ります。
 
 【長さの制限なし】
-iPhone の自作着信音は約40秒までですが、My Sound Alarm では動画から最長10分、長い音声ファイルもそのまま取り込めます。
+GarageBand で作る着信音は30秒までですが、My Sound Alarm では動画から最長10分、長い音声ファイルもそのまま取り込めます。
 
 【動画から音声だけを取り出す】
 写真ライブラリやファイルアプリの動画から、音声だけを取り出せます。
@@ -95,7 +101,7 @@ Wake Up to the Part You Love
 Open a video or an audio file, look at the waveform, and select a range. Keep just the chorus or the whole song. You can listen while you adjust it. When it reaches the end, it starts again.
 
 No Length Limit
-Custom iPhone ringtones stop at about 40 seconds. My Sound Alarm takes up to 10 minutes from a video, and long audio files can be imported as they are.
+Ringtones made in GarageBand can be up to 30 seconds. My Sound Alarm takes up to 10 minutes from a video, and long audio files can be imported as they are.
 
 Take the Audio From a Video
 Choose a video from your photo library or the Files app and keep only the sound.
@@ -141,7 +147,7 @@ Réveille-toi sur ton passage préféré
 Ouvre une vidéo ou un fichier audio, regarde la forme d’onde et sélectionne une plage. Garde juste le refrain ou la chanson entière. Tu peux écouter pendant que tu ajustes. Arrivé à la fin, il recommence.
 
 Pas de limite de durée
-Les sonneries personnalisées de l’iPhone s’arrêtent à environ 40 secondes. My Sound Alarm prend jusqu’à 10 minutes d’une vidéo, et les longs fichiers audio peuvent être importés tels quels.
+Les sonneries créées dans GarageBand durent jusqu’à 30 secondes. My Sound Alarm prend jusqu’à 10 minutes d’une vidéo, et les longs fichiers audio peuvent être importés tels quels.
 
 Le son d’une vidéo
 Choisis une vidéo de ta photothèque ou de l’app Fichiers et garde seulement le son.
@@ -185,7 +191,7 @@ Wach auf mit deinem Lieblingsteil
 Öffne ein Video oder eine Audiodatei, schau auf die Wellenform und wähl einen Bereich aus. Nimm nur den Refrain oder den ganzen Song. Du kannst beim Anpassen reinhören. Am Ende fängt er wieder von vorn an.
 
 Keine Längenbegrenzung
-Eigene iPhone-Klingeltöne enden nach etwa 40 Sekunden. My Sound Alarm übernimmt bis zu 10 Minuten aus einem Video, und lange Audiodateien lassen sich so importieren, wie sie sind.
+Klingeltöne aus GarageBand sind bis zu 30 Sekunden lang. My Sound Alarm übernimmt bis zu 10 Minuten aus einem Video, und lange Audiodateien lassen sich so importieren, wie sie sind.
 
 Ton aus Videos
 Wähl ein Video aus deiner Fotomediathek oder der Dateien-App und behalte nur den Ton.
@@ -228,7 +234,7 @@ Despierta con tu parte favorita
 Abre un {video} o un archivo de audio, mira la forma de onda y selecciona un tramo. Quédate solo con el estribillo o con la canción entera. Puedes escucharlo mientras lo ajustas. Al llegar al final, vuelve a empezar.
 
 Sin límite de duración
-Los tonos personalizados del iPhone se cortan a los 40 segundos aproximadamente. My Sound Alarm admite hasta 10 minutos de un {video}, y los archivos de audio largos se pueden importar tal cual.
+Los tonos creados en GarageBand duran hasta 30 segundos. My Sound Alarm admite hasta 10 minutos de un {video}, y los archivos de audio largos se pueden importar tal cual.
 
 El sonido de un {video}
 Elige un {video} de tu fototeca o de la app Archivos y quédate solo con el sonido.
@@ -276,7 +282,7 @@ Acorde com o seu trecho favorito
 Abra um vídeo ou arquivo de áudio, veja a forma de onda e selecione um intervalo. Use só o refrão ou a música inteira. Dá para ouvir enquanto ajusta. Quando chega ao fim, começa de novo.
 
 Sem limite de duração
-Os toques personalizados do iPhone param em cerca de 40 segundos. O My Sound Alarm aceita até 10 minutos de um vídeo, e arquivos de áudio longos podem ser importados como estão.
+Os toques criados no GarageBand duram até 30 segundos. O My Sound Alarm aceita até 10 minutos de um vídeo, e arquivos de áudio longos podem ser importados como estão.
 
 O som de um vídeo
 Escolha um vídeo da fototeca ou do app Arquivos e fique só com o som.
@@ -320,7 +326,7 @@ Svegliati con la tua parte preferita
 Apri un video o un file audio, guarda la forma d’onda e seleziona un intervallo. Tieni solo il ritornello o la canzone intera. Puoi ascoltare mentre regoli. Quando arriva alla fine, ricomincia.
 
 Nessun limite di durata
-Le suonerie personalizzate dell’iPhone si fermano a circa 40 secondi. My Sound Alarm accetta fino a 10 minuti da un video, e i file audio lunghi si possono importare così come sono.
+Le suonerie create in GarageBand durano fino a 30 secondi. My Sound Alarm accetta fino a 10 minuti da un video, e i file audio lunghi si possono importare così come sono.
 
 L’audio di un video
 Scegli un video dalla libreria foto o dall’app File e tieni solo l’audio.
@@ -364,7 +370,7 @@ Word wakker met je favoriete stuk
 Open een video of audiobestand, bekijk de golfvorm en selecteer een bereik. Neem alleen het refrein of het hele nummer. Je kunt meeluisteren terwijl je het aanpast. Aan het eind begint het opnieuw.
 
 Geen lengtelimiet
-Eigen iPhone-beltonen stoppen na ongeveer 40 seconden. My Sound Alarm neemt tot 10 minuten uit een video, en lange audiobestanden kun je importeren zoals ze zijn.
+Beltonen die je in GarageBand maakt, duren tot 30 seconden. My Sound Alarm neemt tot 10 minuten uit een video, en lange audiobestanden kun je importeren zoals ze zijn.
 
 Het geluid van een video
 Kies een video uit je fotobibliotheek of de Bestanden-app en houd alleen het geluid over.
@@ -408,7 +414,7 @@ DESC["ko"] = ("좋아하는 노래의 후렴이나 동영상 소리로 깨워 �
 동영상이나 오디오 파일을 열면 파형이 나타나니 구간을 고르기만 하면 됩니다. 후렴만 잘라도, 한 곡을 통째로 써도 됩니다. 들으면서 조절할 수 있습니다. 끝까지 울리면 처음부터 다시 울립니다.
 
 [길이 제한 없음]
-직접 만든 iPhone 벨소리는 약 40초까지지만, My Sound Alarm은 동영상에서 최대 10분, 긴 오디오 파일도 그대로 가져올 수 있습니다.
+GarageBand에서 만든 벨소리는 30초까지지만, My Sound Alarm은 동영상에서 최대 10분, 긴 오디오 파일도 그대로 가져올 수 있습니다.
 
 [동영상에서 소리만 꺼내기]
 사진 보관함이나 파일 앱의 동영상에서 소리만 꺼낼 수 있습니다.
@@ -452,7 +458,7 @@ DESC["zh-Hans"] = ("用歌曲副歌或视频声音叫醒你的闹钟 App。选�
 打开视频或音频文件，看着波形选一段就行。可以只留副歌，也可以用整首歌。可以边听边调整。播到结尾会从头再来。
 
 【没有长度限制】
-iPhone 的自制铃声最长约 40 秒，而 My Sound Alarm 可以从视频中截取最长 10 分钟，较长的音频文件也能直接导入。
+GarageBand 制作的铃声最长 30 秒，而 My Sound Alarm 可以从视频中截取最长 10 分钟，较长的音频文件也能直接导入。
 
 【只取视频里的声音】
 从照片图库或“文件”App 中选一个视频，只保留声音。
@@ -496,7 +502,7 @@ Budź się przy ulubionym fragmencie
 Otwórz wideo lub plik audio, spójrz na wykres fali i zaznacz zakres. Zostaw sam refren albo całą piosenkę. Możesz słuchać podczas dopasowywania. Gdy dojdzie do końca, zaczyna od nowa.
 
 Bez limitu długości
-Własne dzwonki w iPhonie kończą się po około 40 sekundach. My Sound Alarm przyjmuje do 10 minut z wideo, a długie pliki audio można zaimportować w całości.
+Dzwonki tworzone w GarageBand mogą trwać do 30 sekund. My Sound Alarm przyjmuje do 10 minut z wideo, a długie pliki audio można zaimportować w całości.
 
 Dźwięk z wideo
 Wybierz wideo z biblioteki zdjęć lub z aplikacji Pliki i zostaw sam dźwięk.
@@ -540,7 +546,7 @@ Probuď se u oblíbené části
 Otevři video nebo zvukový soubor, podívej se na průběh zvuku a vyber úsek. Nech si jen refrén, nebo celou písničku. Při úpravách můžeš poslouchat. Když dohraje do konce, začne znovu.
 
 Bez omezení délky
-Vlastní vyzváněcí tóny v iPhonu končí asi po 40 sekundách. My Sound Alarm vezme z videa až 10 minut a dlouhé zvukové soubory se dají importovat celé.
+Vyzvánění vytvořená v GarageBand mají až 30 sekund. My Sound Alarm vezme z videa až 10 minut a dlouhé zvukové soubory se dají importovat celé.
 
 Zvuk z videa
 Vyber video z knihovny fotek nebo z aplikace Soubory a nech si jen zvuk.
@@ -584,7 +590,7 @@ DESC["ar-SA"] = ("تطبيق منبه يوقظك على لازمة أغنية أ
 افتح فيديو أو ملفًا صوتيًا، وانظر إلى الموجة الصوتية، وحدد نطاقًا. احتفظ باللازمة فقط أو بالأغنية كاملة. يمكنك الاستماع أثناء الضبط. وعندما يصل إلى النهاية يبدأ من جديد.
 
 بلا حد للمدة
-تتوقف نغمات iPhone المخصصة عند نحو 40 ثانية. يقبل My Sound Alarm حتى 10 دقائق من الفيديو، ويمكن استيراد الملفات الصوتية الطويلة كما هي.
+تستمر النغمات التي تُنشأ في GarageBand حتى 30 ثانية. يقبل My Sound Alarm حتى 10 دقائق من الفيديو، ويمكن استيراد الملفات الصوتية الطويلة كما هي.
 
 الصوت من فيديو
 اختر فيديو من مكتبة الصور أو تطبيق الملفات واحتفظ بالصوت فقط.
@@ -617,4 +623,136 @@ MP3 / AAC / WAV / M4A / الصوت من الفيديو (MOV وMP4)
 - يتطلب iOS 26 أو أحدث (AlarmKit)
 - الأصوات الأطول تشغل مساحة أكبر. الصوت بطول 10 دقائق يبلغ نحو 50 ميغابايت.
 - لا يمكن استيراد أغاني خدمات البث مثل Apple Music وSpotify.
+""")
+
+DESC["ru"] = ("Будильник, который будит вас любимым припевом или звуком из видео. Выбранный фрагмент повторяется, пока вы его не остановите, даже в бесшумном режиме.",
+"""My Sound Alarm — будильник для iPhone, который будит вас любимым местом песни или звуком из видео. Вы ставите будильники в этом приложении, а выбранный фрагмент повторяется, пока вы его не остановите.
+
+ВОЗМОЖНОСТИ
+
+Просыпайтесь под любимый фрагмент
+Откройте видео или аудиофайл, посмотрите на волну и выделите нужный участок. Можно оставить только припев или взять песню целиком. Пока настраиваете, можно слушать. Дойдя до конца, фрагмент начинается заново.
+
+Без ограничения длины
+Мелодии, созданные в GarageBand, длятся до 30 секунд. My Sound Alarm берёт до 10 минут из видео, а длинные аудиофайлы можно импортировать как есть.
+
+Звук из видео
+Выберите видео в библиотеке фото или в приложении «Файлы» и оставьте только звук.
+
+Импорт аудиофайлов
+Подходят MP3, AAC, WAV и M4A. Добавляйте их из приложения «Файлы» или отправляйте из другого приложения кнопкой «Поделиться».
+
+Звенит в бесшумном режиме
+My Sound Alarm ставит будильники через AlarmKit — систему будильников, которую Apple добавила в iOS 26. Они появляются на экране блокировки, как будильники встроенных «Часов», и звонят в бесшумном режиме и при включённом фокусе, даже когда My Sound Alarm закрыт.
+
+«Позвонить сейчас»
+Услышьте выбранный звук сразу, на той же громкости, что у настоящего будильника.
+
+Защита от пересыпа (Pro, ранний доступ)
+Если вы не остановили будильник к выбранному времени, он снова играет тот же звук, но громче. Если вы начнёте пользоваться этой функцией в раннем доступе, она останется у вас и после официального выпуска.
+
+Дни повтора и отсрочка
+Выберите дни для каждого будильника. Отсрочку можно отключить или задать 1, 2, 5, 9 или 10 минут.
+
+Свои звуки на виду
+У каждого будильника видно кадр из видео или обложку аудиофайла.
+
+Ночной режим
+iPhone становится часами у кровати: крупные мягкие цифры, которые видно в тёмной комнате.
+
+ПОДДЕРЖИВАЕМЫЕ ФОРМАТЫ
+MP3 / AAC / WAV / M4A / звук из видео (MOV, MP4)
+
+ПРИМЕЧАНИЯ
+- Требуется iOS 26 или новее (AlarmKit)
+- Длинные звуки занимают больше места. Звук на 10 минут — около 50 МБ.
+- Песни из стриминговых сервисов, таких как Apple Music или Spotify, импортировать нельзя.
+""")
+
+DESC["tr"] = ("Sevdiğiniz şarkının bir bölümü veya videodan bir sesle uyandıran alarm. Seçtiğiniz bölüm siz durdurana kadar, sessiz modda bile tekrar eder.",
+"""My Sound Alarm, iPhone için bir alarm uygulaması. Sizi sevdiğiniz şarkının bir bölümüyle veya bir videodaki sesle uyandırır. Alarmları bu uygulamada kurarsınız ve seçtiğiniz bölüm siz durdurana kadar tekrar eder.
+
+ÖZELLİKLER
+
+Sevdiğiniz bölümle uyanın
+Bir video veya ses dosyası açın, dalga formuna bakın ve bir aralık seçin. Yalnızca nakaratı tutabilir ya da şarkının tamamını kullanabilirsiniz. Ayar yaparken dinleyebilirsiniz. Sonuna gelince baştan başlar.
+
+Uzunluk sınırı yok
+GarageBand'de yapılan zil sesleri 30 saniyeye kadar sürer. My Sound Alarm videodan 10 dakikaya kadar alır, uzun ses dosyaları olduğu gibi aktarılabilir.
+
+Videodan ses
+Fotoğraf arşivinizden veya Dosyalar uygulamasından bir video seçin, yalnızca sesi tutun.
+
+Ses dosyalarını aktarın
+MP3, AAC, WAV ve M4A desteklenir. Dosyalar uygulamasından ekleyin veya başka bir uygulamadan Paylaş düğmesiyle gönderin.
+
+Sessiz modda çalar
+My Sound Alarm alarmlarını AlarmKit ile kurar; bu, Apple'ın iOS 26'da eklediği alarm altyapısıdır. Saatin yerleşik alarmları gibi kilit ekranında görünür ve sessiz modda ve bir Odak açıkken, My Sound Alarm kapalıyken bile çalar.
+
+«Şimdi çal»
+Seçtiğiniz sesi hemen, gerçek bir alarmın ses seviyesinde dinleyin.
+
+Fazla uyuma koruması (Pro, erken erişim)
+Seçtiğiniz saate kadar bir alarmı durdurmadıysanız aynı sesi daha yüksek sesle yeniden çalar. Erken erişim sırasında kullanmaya başlarsanız, resmi sürümden sonra da kullanmaya devam edersiniz.
+
+Tekrar günleri ve erteleme
+Her alarm için günleri seçin. Erteleme kapalı olabilir veya 1, 2, 5, 9 ya da 10 dakika olarak ayarlanabilir.
+
+Sesleriniz bir bakışta
+Her alarm, videonuzdan bir kareyi veya ses dosyanızın kapağını gösterir.
+
+Gece modu
+iPhone'unuz başucu saati olur: karanlık odada okunabilen büyük, yumuşak rakamlar.
+
+DESTEKLENEN FORMATLAR
+MP3 / AAC / WAV / M4A / videodan ses (MOV, MP4)
+
+NOTLAR
+- iOS 26 veya üstü gerekir (AlarmKit)
+- Uzun sesler daha fazla yer kaplar. 10 dakikalık bir ses yaklaşık 50 MB'tır.
+- Apple Music veya Spotify gibi akış hizmetlerindeki şarkılar aktarılamaz.
+""")
+
+DESC["zh-Hant"] = ("用歌曲的某個片段或影片裡的聲音叫醒你的鬧鐘 App。選好的片段會一直重複，直到你停止，靜音模式下也會響。",
+"""My Sound Alarm 是一款 iPhone 鬧鐘 App，用你最喜歡的歌曲片段或影片裡的聲音叫醒你。鬧鐘在這個 App 裡設定，選好的片段會重複播放，直到你停止。
+
+功能
+
+用喜歡的片段起床
+打開影片或音訊檔，看著波形選一段範圍。可以只留副歌，也可以用整首歌。調整時可以先聽。播到結尾會從頭再來。
+
+沒有長度限制
+GarageBand 製作的鈴聲最長 30 秒。My Sound Alarm 可以從影片取到 10 分鐘，較長的音訊檔也能直接匯入。
+
+從影片取出聲音
+從照片圖庫或「檔案」App 選一段影片，只留下聲音。
+
+匯入音訊檔
+支援 MP3、AAC、WAV 和 M4A。可以從「檔案」App 加入，或用其他 App 的「分享」按鈕送過來。
+
+靜音模式下也會響
+My Sound Alarm 用 AlarmKit 設定鬧鐘，這是 Apple 在 iOS 26 加入的鬧鐘系統。鬧鐘會像內建「時鐘」App 的鬧鐘一樣顯示在鎖定畫面上，在靜音模式、專注模式開啟時，甚至關閉 My Sound Alarm 之後也會響。
+
+「立即響鈴」
+馬上聽聽你選的聲音，音量跟真正的鬧鐘一樣。
+
+防睡過頭（Pro，搶先體驗）
+如果到了你設定的時間還沒停止鬧鐘，它會用同一個聲音、以更大的音量再響一次。在搶先體驗期間開始使用，正式推出後可以繼續使用。
+
+重複與貪睡
+為每個鬧鐘選擇重複的星期。貪睡可以關閉，或設為 1、2、5、9、10 分鐘。
+
+一眼認出聲音
+每個鬧鐘都會顯示影片畫面或音訊檔的封面。
+
+夜間模式
+iPhone 變成床頭時鐘，字大而柔和，在暗房裡也看得清楚。
+
+支援格式
+MP3 / AAC / WAV / M4A / 影片中的聲音（MOV、MP4）
+
+注意事項
+- 需要 iOS 26 或以上版本（AlarmKit）
+- 聲音越長佔用空間越多。10 分鐘的聲音約 50 MB。
+- Apple Music、Spotify 等串流服務的歌曲無法匯入。
 """)

@@ -6,7 +6,7 @@ Acorde com o seu trecho favorito
 Abra um vídeo ou arquivo de áudio, veja a forma de onda e selecione um intervalo. Use só o refrão ou a música inteira. Dá para ouvir enquanto ajusta. Quando chega ao fim, começa de novo.
 
 Sem limite de duração
-Os toques personalizados do iPhone param em cerca de 40 segundos. O My Sound Alarm aceita até 10 minutos de um vídeo, e arquivos de áudio longos podem ser importados como estão.
+Os toques criados no GarageBand duram até 30 segundos. O My Sound Alarm aceita até 10 minutos de um vídeo, e arquivos de áudio longos podem ser importados como estão.
 
 O som de um vídeo
 Escolha um vídeo da fototeca ou do app Arquivos e fique só com o som.

@@ -6,7 +6,7 @@ Probuď se u oblíbené části
 Otevři video nebo zvukový soubor, podívej se na průběh zvuku a vyber úsek. Nech si jen refrén, nebo celou písničku. Při úpravách můžeš poslouchat. Když dohraje do konce, začne znovu.
 
 Bez omezení délky
-Vlastní vyzváněcí tóny v iPhonu končí asi po 40 sekundách. My Sound Alarm vezme z videa až 10 minut a dlouhé zvukové soubory se dají importovat celé.
+Vyzvánění vytvořená v GarageBand mají až 30 sekund. My Sound Alarm vezme z videa až 10 minut a dlouhé zvukové soubory se dají importovat celé.
 
 Zvuk z videa
 Vyber video z knihovny fotek nebo z aplikace Soubory a nech si jen zvuk.

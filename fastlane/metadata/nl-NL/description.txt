@@ -6,7 +6,7 @@ Word wakker met je favoriete stuk
 Open een video of audiobestand, bekijk de golfvorm en selecteer een bereik. Neem alleen het refrein of het hele nummer. Je kunt meeluisteren terwijl je het aanpast. Aan het eind begint het opnieuw.
 
 Geen lengtelimiet
-Eigen iPhone-beltonen stoppen na ongeveer 40 seconden. My Sound Alarm neemt tot 10 minuten uit een video, en lange audiobestanden kun je importeren zoals ze zijn.
+Beltonen die je in GarageBand maakt, duren tot 30 seconden. My Sound Alarm neemt tot 10 minuten uit een video, en lange audiobestanden kun je importeren zoals ze zijn.
 
 Het geluid van een video
 Kies een video uit je fotobibliotheek of de Bestanden-app en houd alleen het geluid over.
