@@ -89,6 +89,52 @@ final class AddAlarmRedesignUITests: XCTestCase {
         XCTAssertTrue(waitForPreviewLabel(preview, playing: false), "preview should stop")
     }
 
+    /// #196 レビュー: プレイリストを選んだあと、音の行をタップすると音に切り替わる。
+    func testTappingSoundRowSwitchesFromPlaylistToSound() {
+        app.launchArguments = ["-uitest-open-add-alarm", "-uitest-seed-design-audit"]
+        app.launch()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
+
+        let soundRow = findElement("addAlarm.soundRow")
+        _ = openSoundChoice()
+
+        let playlist = app.buttons.matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "alarmSoundChoice.playlist.")
+        ).firstMatch
+        XCTAssertTrue(
+            playlist.waitForExistence(timeout: 10),
+            "playlist should exist: \(app.debugDescription)"
+        )
+        let playlistName = ["モーニング", "Morning mix"].first {
+            playlist.label.contains($0)
+        } ?? playlist.label
+        playlist.tap()
+
+        XCTAssertTrue(soundRow.waitForExistence(timeout: 10), "should return to add screen")
+        XCTAssertTrue(
+            soundRow.label.contains(playlistName),
+            "playlist should be selected: \(soundRow.label)"
+        )
+
+        _ = openSoundChoice()
+        let sound = app.buttons["library.preset.PresetMarimba.caf"]
+        scrollToRow(sound, in: app.collectionViews["alarmSoundChoice.root"])
+        let soundName = sound.label
+        sound.tap()
+
+        // 選んでも閉じない（#196）。戻って追加画面の表示を確認する
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(soundRow.waitForExistence(timeout: 10))
+        XCTAssertTrue(
+            soundRow.label.contains(soundName),
+            "sound should replace the playlist: \(soundRow.label)"
+        )
+        XCTAssertFalse(
+            soundRow.label.contains(playlistName),
+            "playlist name should be gone: \(soundRow.label)"
+        )
+    }
+
     private func scrollToRow(_ row: XCUIElement, in choice: XCUIElement) {
         var swipes = 0
         while (!row.exists || !row.isHittable) && swipes < 12 {

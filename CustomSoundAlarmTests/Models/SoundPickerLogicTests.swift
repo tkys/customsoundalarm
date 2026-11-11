@@ -229,39 +229,89 @@ struct SoundPickerLogicTests {
 
     @Test
     func previewTap_stoppedRow_selectsAndPlays() {
-        let action = SoundPreviewLogic.tap(
-            tapped: marimba,
-            playingFileName: nil
+        let sound = marimba
+        let outcome = SoundPreviewLogic.tap(
+            tapped: sound,
+            selected: sound,
+            playingFileName: nil,
+            isActiveSelection: true
         )
-        #expect(action == .selectAndPlay)
+        #expect(outcome.plays)
+        #expect(outcome.notifiesSelection)
+        #expect(!outcome.stops)
+        #expect(!outcome.selectionChanged)
     }
 
     @Test
     func previewTap_otherRowPlaying_switchesAndPlays() {
-        let action = SoundPreviewLogic.tap(
+        let outcome = SoundPreviewLogic.tap(
             tapped: bell,
-            playingFileName: marimba.fileName
+            selected: marimba,
+            playingFileName: marimba.fileName,
+            isActiveSelection: false
         )
-        #expect(action == .selectAndPlay)
+        #expect(outcome.plays)
+        #expect(outcome.notifiesSelection)
+        #expect(outcome.selectionChanged)
     }
 
     @Test
-    func previewTap_samePlayingRow_stops() {
-        let action = SoundPreviewLogic.tap(
+    func previewTap_samePlayingActiveSelection_stops() {
+        let outcome = SoundPreviewLogic.tap(
             tapped: marimba,
-            playingFileName: marimba.fileName
+            selected: marimba,
+            playingFileName: marimba.fileName,
+            isActiveSelection: true
         )
-        #expect(action == .stop)
+        #expect(outcome.stops)
+        #expect(!outcome.plays)
+        #expect(!outcome.notifiesSelection)
+        #expect(!outcome.selectionChanged)
+    }
+
+    /// プレイリスト選択中は、同じ音が選ばれていても音に切り替える（#196 レビュー）。
+    @Test
+    func previewTap_playlistSelected_sameSoundSwitchesToSound() {
+        let outcome = SoundPreviewLogic.tap(
+            tapped: marimba,
+            selected: marimba,
+            playingFileName: nil,
+            isActiveSelection: false
+        )
+        #expect(outcome.notifiesSelection)
+        #expect(outcome.plays)
+        #expect(!outcome.stops)
+        #expect(outcome.selectionChanged)
+    }
+
+    /// 右端の再生ボタンで鳴らしたあと同じ行をタップ → 止めずに選ぶ（#196 レビュー）。
+    @Test
+    func previewTap_playlistSelectedPlayedByButton_tappingRowSelectsIt() {
+        let outcome = SoundPreviewLogic.tap(
+            tapped: marimba,
+            selected: marimba,
+            playingFileName: marimba.fileName,
+            isActiveSelection: false
+        )
+        #expect(outcome.notifiesSelection)
+        #expect(outcome.plays)
+        #expect(!outcome.stops)
+        #expect(outcome.selectionChanged)
     }
 
     @Test
     func previewTap_defaultRow_selectsOnly() {
-        // 既定の音には鳴らすファイルがない
-        let action = SoundPreviewLogic.tap(
+        // 既定の音には鳴らすファイルがない。鳴っている音は止める
+        let outcome = SoundPreviewLogic.tap(
             tapped: nil,
-            playingFileName: marimba.fileName
+            selected: marimba,
+            playingFileName: marimba.fileName,
+            isActiveSelection: false
         )
-        #expect(action == .selectOnly)
+        #expect(outcome.notifiesSelection)
+        #expect(outcome.stops)
+        #expect(!outcome.plays)
+        #expect(outcome.selectionChanged)
     }
 
     @Test

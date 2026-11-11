@@ -240,7 +240,12 @@ struct SoundLibrarySections: View {
 
             Button {
                 if isSelecting {
-                    handleSelectionTap(sound: sound, isPreset: isPreset, position: position)
+                    handleSelectionTap(
+                        sound: sound,
+                        isPreset: isPreset,
+                        position: position,
+                        isActiveSelection: isSelected
+                    )
                 } else if let sound {
                     togglePreview(sound)
                 }
@@ -288,42 +293,36 @@ struct SoundLibrarySections: View {
     private func handleSelectionTap(
         sound: AlarmSound?,
         isPreset: Bool,
-        position: Int
+        position: Int,
+        isActiveSelection: Bool
     ) {
-        switch SoundPreviewLogic.tap(
+        let outcome = SoundPreviewLogic.tap(
             tapped: sound,
-            playingFileName: audioPlayer.playingFileName
-        ) {
-        case .stop:
-            // 選択はそのまま、鳴っている音だけ止める
+            selected: selectedSound,
+            playingFileName: audioPlayer.playingFileName,
+            isActiveSelection: isActiveSelection
+        )
+
+        if outcome.stops {
             audioPlayer.stop()
-        case .selectOnly:
-            // 既定の音には鳴らすファイルがない。別の音が鳴っていれば止める
-            audioPlayer.stop()
-            select(sound, isPreset: isPreset, position: position)
-        case .selectAndPlay:
-            guard let sound else { return }
-            select(sound, isPreset: isPreset, position: position)
+        }
+        if outcome.notifiesSelection {
+            // プレイリスト選択中でも音に切り替わるよう、選択が同じでも必ず通知する
+            selectedSound = sound
+            onSelect?(sound)
+        }
+        if outcome.selectionChanged {
+            let kind: SoundSelectionKind = sound == nil
+                ? .default
+                : (isPreset ? .preset : .imported)
+            AnalyticsService.shared.capture(.soundSelected(
+                kind: kind,
+                rankBucket: SoundSelectionAnalytics.rankBucket(position: position)
+            ))
+        }
+        if outcome.plays, let sound {
             audioPlayer.play(sound, source: .selectTap)
         }
-    }
-
-    private func select(_ sound: AlarmSound?, isPreset: Bool, position: Int) {
-        let changed = SoundPreviewLogic.selectionChanged(
-            tapped: sound,
-            selected: selectedSound
-        )
-        selectedSound = sound
-        guard changed else { return }
-
-        let kind: SoundSelectionKind = sound == nil
-            ? .default
-            : (isPreset ? .preset : .imported)
-        AnalyticsService.shared.capture(.soundSelected(
-            kind: kind,
-            rankBucket: SoundSelectionAnalytics.rankBucket(position: position)
-        ))
-        onSelect?(sound)
     }
 
     private func togglePreview(_ sound: AlarmSound) {

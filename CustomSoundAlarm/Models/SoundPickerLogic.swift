@@ -61,26 +61,58 @@ enum SoundPickerLogic {
 /// 音を選ぶ画面で行をタップしたときの試し聴き（#196・純粋関数・単体テスト対象）。
 ///
 /// 標準の時計アプリと同じく、タップで選ぶと同時に鳴らす。
-/// 同じ行をもう一度タップしたら止める（選択は変えない）。
+/// 有効な選択の行をもう一度タップしたら止める（選択は変えない）。
 enum SoundPreviewLogic {
 
-    /// 行をタップしたときの動き。
-    enum Tap: Equatable {
-        /// 選んで鳴らす（別の行から切り替える場合も含む）
-        case selectAndPlay
-        /// 鳴っている同じ行をもう一度タップ → 止める（選択はそのまま）
-        case stop
-        /// 鳴らせない行（既定の音）を選ぶ。鳴っている音は止める
-        case selectOnly
+    /// 行をタップした結果。画面はこれを見て選択の通知・再生・停止を行う。
+    struct Outcome: Equatable {
+        /// 選択を画面へ通知するか（プレイリスト選択中でも音に切り替える）
+        let notifiesSelection: Bool
+        /// 鳴らすか
+        let plays: Bool
+        /// 鳴っている音を止めるか
+        let stops: Bool
+        /// 有効な選択が変わったか（`sound_selected` の二重送信を防ぐ）
+        let selectionChanged: Bool
     }
 
     /// 行をタップしたときの動きを返す。
     /// - Parameters:
     ///   - tapped: タップした行の音（既定の音の行は nil）
+    ///   - selected: いま選ばれている音（プレイリスト選択中は残っていることがある）
     ///   - playingFileName: いま鳴っているファイル名
-    static func tap(tapped: AlarmSound?, playingFileName: String?) -> Tap {
-        guard let tapped else { return .selectOnly }
-        return playingFileName == tapped.fileName ? .stop : .selectAndPlay
+    ///   - isActiveSelection: タップした行が「いま有効な選択」か（`selectionActive` を含む）
+    static func tap(
+        tapped: AlarmSound?,
+        selected: AlarmSound?,
+        playingFileName: String?,
+        isActiveSelection: Bool
+    ) -> Outcome {
+        // プレイリスト選択中は、同じ音が選ばれていても音に切り替える必要がある
+        let changed = !isActiveSelection || selectionChanged(tapped: tapped, selected: selected)
+        guard let tapped else {
+            return Outcome(
+                notifiesSelection: true,
+                plays: false,
+                stops: true,
+                selectionChanged: changed
+            )
+        }
+        if isActiveSelection, playingFileName == tapped.fileName {
+            // 鳴っている行が有効な選択 → 止める（選択はそのまま）
+            return Outcome(
+                notifiesSelection: false,
+                plays: false,
+                stops: true,
+                selectionChanged: false
+            )
+        }
+        return Outcome(
+            notifiesSelection: true,
+            plays: true,
+            stops: false,
+            selectionChanged: changed
+        )
     }
 
     /// 選択が実際に変わったか。同じ行の再タップ（停止）で
