@@ -310,3 +310,27 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Playlist anhören";
 "play_order_footer" = "Wecker wiederholen sich, bis du sie stoppst. Zufällig ändert bei jedem Stoppen die nächste Reihenfolge. Ein zufälliger Titel wiederholt denselben Titel.";
+
+// #197 skip days
+"skip_section_header" = "Pause";
+"skip_alarm_count" = "%d Wecker";
+"skip_one_time_warning" = "Ein einmaliger Wecker (%d) klingelt nicht.";
+"skip_this_day" = "Diesen Tag pausieren";
+"skip_select" = "Wecker auswählen";
+"skip_range" = "Zeitraum auswählen";
+"skip_active_notice" = "%@ pausiert. Nächster: %@";
+"skip_active_notice_no_next" = "%@ pausiert";
+"skip_undo" = "Rückgängig";
+"skip_select_title" = "Wecker zum Pausieren auswählen";
+"skip_select_hint" = "Nicht markierte Wecker klingeln an diesem Tag nicht.";
+"skip_apply" = "Pausieren";
+"skip_range_title" = "Zeitraum auswählen";
+"skip_start_date" = "Beginn";
+"skip_end_date" = "Ende";
+"holiday_skip_toggle" = "An Feiertagen nicht klingeln";
+"holiday_next_skipped" = "%@ pausiert";
+"holiday_none" = "Keine kommenden Feiertage";
+"holiday_overrides_title" = "Feiertage";
+"holiday_ring_on" = "An diesem Feiertag klingeln";
+"holiday_mark" = "Feiertag";
+"skip_alarms_intent" = "Wecker pausieren";

@@ -49,6 +49,10 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.customSoundImported(source: .video).name == "custom_sound_imported")
         #expect(AnalyticsEvent.customSoundImported(source: .audio).name == "custom_sound_imported")
         #expect(AnalyticsEvent.soundPreviewPlayed.name == "sound_preview_played")
+        #expect(AnalyticsEvent.alarmSkipSet(scope: .day, days: 1, alarmCount: 3).name == "alarm_skip_set")
+        #expect(AnalyticsEvent.alarmSkipUndone.name == "alarm_skip_undone")
+        #expect(AnalyticsEvent.holidaySkipToggled(enabled: true).name == "holiday_skip_toggled")
+        #expect(AnalyticsEvent.holidayRingOverride.name == "holiday_ring_override")
         // Phase 2
         #expect(AnalyticsEvent.alarmEdited(hasCustomSound: true, isRepeating: false, snoozeMinutes: 0).name == "alarm_edited")
         #expect(AnalyticsEvent.alarmDeleted.name == "alarm_deleted")
@@ -424,6 +428,25 @@ struct AnalyticsEventTests {
         #expect(props.isEmpty)
     }
 
+    @Test
+    func alarmSkipSetProperties_includeScopeDaysAlarmCount() {
+        let props = AnalyticsEvent.alarmSkipSet(scope: .range, days: 3, alarmCount: 2).properties
+        #expect(props["scope"] as? String == "range")
+        #expect(props["days"] as? Int == 3)
+        #expect(props["alarm_count"] as? Int == 2)
+    }
+
+    @Test
+    func holidaySkipToggledProperties_includeEnabled() {
+        #expect(AnalyticsEvent.holidaySkipToggled(enabled: true).properties["enabled"] as? Bool == true)
+    }
+
+    @Test
+    func alarmSkipUndoneAndHolidayOverride_haveNoProperties() {
+        #expect(AnalyticsEvent.alarmSkipUndone.properties.isEmpty)
+        #expect(AnalyticsEvent.holidayRingOverride.properties.isEmpty)
+    }
+
     // MARK: 全ケース網羅 (コンパイル時の網羅性も兼ねる)
 
     @Test
@@ -433,6 +456,10 @@ struct AnalyticsEventTests {
             .customSoundImported(source: .video),
             .customSoundImported(source: .audio),
             .soundPreviewPlayed,
+            .alarmSkipSet(scope: .day, days: 1, alarmCount: 1),
+            .alarmSkipUndone,
+            .holidaySkipToggled(enabled: false),
+            .holidayRingOverride,
             .alarmEdited(hasCustomSound: true, isRepeating: true, snoozeMinutes: 0),
             .alarmDeleted,
             .alarmPermission(status: .authorized),

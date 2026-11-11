@@ -137,6 +137,17 @@ enum AnalyticsEvent: Sendable {
     /// サウンド選択で音を選んだ（#124）
     case soundSelected(kind: SoundSelectionKind, rankBucket: String)
 
+    // MARK: 休み・祝日（#197）
+
+    /// 日付でアラームを休む
+    /// - scope: day / selected / range
+    /// - days: 休む日数
+    /// - alarmCount: 対象のアラーム数
+    case alarmSkipSet(scope: AlarmSkipScope, days: Int, alarmCount: Int)
+    case alarmSkipUndone
+    case holidaySkipToggled(enabled: Bool)
+    case holidayRingOverride
+
     // MARK: プレイリスト・#151
 
     /// プレイリストを作成した
@@ -289,6 +300,10 @@ enum AnalyticsEvent: Sendable {
         case .backupAlarmCancelledByStop: return "backup_alarm_cancelled_by_stop"
         case .backupAlarmStopped: return "backup_alarm_stopped"
         case .soundSelected: return "sound_selected"
+        case .alarmSkipSet: return "alarm_skip_set"
+        case .alarmSkipUndone: return "alarm_skip_undone"
+        case .holidaySkipToggled: return "holiday_skip_toggled"
+        case .holidayRingOverride: return "holiday_ring_override"
         case .playlistCreated: return "playlist_created"
         case .playlistEmptyViewed: return "playlist_empty_viewed"
         case .playlistEdited: return "playlist_edited"
@@ -426,6 +441,16 @@ enum AnalyticsEvent: Sendable {
                 "kind": kind.rawValue,
                 "rank_bucket": rankBucket
             ]
+        case let .alarmSkipSet(scope, days, alarmCount):
+            return [
+                "scope": scope.rawValue,
+                "days": days,
+                "alarm_count": alarmCount
+            ]
+        case .alarmSkipUndone, .holidayRingOverride:
+            return [:]
+        case let .holidaySkipToggled(enabled):
+            return ["enabled": enabled]
         case let .playlistCreated(
             trackCount,
             totalSecondsBucket,

@@ -206,6 +206,16 @@ struct DismissAlarmIntent: LiveActivityIntent {
             }
         }
 
+        // 休みで外した曜日を補うために登録した .fixed を止めたら、
+        // 休みが過ぎていれば元のくり返しに戻す（#197）。
+        if let stoppedID,
+           let coverageEntryID = AlarmIDMaps.skipCoverageEntryID(
+               of: stoppedID,
+               map: AlarmIDMaps.loadSkipCoverage()
+           ) {
+            await restoreSkipSchedule(entryID: coverageEntryID, stoppedAlarmID: stoppedID)
+        }
+
         AlarmEventBuffer.enqueue(PendingAlarmEvent(
             name: AnalyticsEvent.alarmStopped(
                 hour: hour,
@@ -217,5 +227,32 @@ struct DismissAlarmIntent: LiveActivityIntent {
         ))
 
         return .result()
+    }
+
+    /// 休みの補完を止めたあと、過ぎた休みを落として元の予定に戻す（#197）。
+    private func restoreSkipSchedule(entryID: UUID, stoppedAlarmID: UUID) async {
+        var map = AlarmIDMaps.loadSkipCoverage()
+        map[entryID]?.removeValue(forKey: stoppedAlarmID)
+        if map[entryID]?.isEmpty == true {
+            map.removeValue(forKey: entryID)
+        }
+        AlarmIDMaps.saveSkipCoverage(map)
+
+        await MainActor.run {
+            AlarmStore.shared.reload()
+            if let entry = AlarmStore.shared.alarms.first(where: { $0.id == entryID }) {
+                let pruned = AlarmSkipLogic.pruning(entry, now: Date())
+                if pruned.skipDates != entry.skipDates
+                    || pruned.holidayRingOverrides != entry.holidayRingOverrides {
+                    AlarmStore.shared.update(pruned)
+                }
+            }
+            AlarmScheduler.shared.syncAlarms(
+                AlarmStore.shared.alarms,
+                forceRescheduleEntryIDs: [entryID],
+                trigger: .intent
+            )
+        }
+        await AlarmScheduler.shared.waitForPendingSync()
     }
 }

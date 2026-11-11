@@ -310,3 +310,27 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "试听播放列表";
 "play_order_footer" = "闹钟会一直重复，直到你停止。每次停止后，随机播放会改变下一次的顺序。随机一首会重复同一首曲目。";
+
+// #197 skip days
+"skip_section_header" = "休息";
+"skip_alarm_count" = "%d 个";
+"skip_one_time_warning" = "一次性闹钟 %d 个将不会响。";
+"skip_this_day" = "这天休息";
+"skip_select" = "选择闹钟";
+"skip_range" = "选择日期";
+"skip_active_notice" = "%@ 休息，下次 %@";
+"skip_active_notice_no_next" = "%@ 休息";
+"skip_undo" = "撤销";
+"skip_select_title" = "选择要休息的闹钟";
+"skip_select_hint" = "取消勾选的闹钟在这天不会响。";
+"skip_apply" = "休息";
+"skip_range_title" = "选择日期";
+"skip_start_date" = "开始";
+"skip_end_date" = "结束";
+"holiday_skip_toggle" = "节假日不响";
+"holiday_next_skipped" = "%@ 休息";
+"holiday_none" = "近期没有节假日";
+"holiday_overrides_title" = "节假日";
+"holiday_ring_on" = "这个节假日也响";
+"holiday_mark" = "节假日";
+"skip_alarms_intent" = "让闹钟休息";

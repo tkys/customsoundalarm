@@ -310,3 +310,27 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "재생목록 미리 듣기";
 "play_order_footer" = "알람은 중지할 때까지 반복됩니다. 셔플은 중지할 때마다 다음 순서를 바꿉니다. 한 곡 랜덤은 매번 같은 한 곡을 반복합니다.";
+
+// #197 skip days
+"skip_section_header" = "쉬는 날";
+"skip_alarm_count" = "%d개";
+"skip_one_time_warning" = "1회성 알람 %d개는 울리지 않고 끝납니다.";
+"skip_this_day" = "이 날은 쉬기";
+"skip_select" = "알람 선택";
+"skip_range" = "기간 선택";
+"skip_active_notice" = "%@은(는) 쉬는 날. 다음은 %@";
+"skip_active_notice_no_next" = "%@은(는) 쉬는 날";
+"skip_undo" = "되돌리기";
+"skip_select_title" = "쉬게 할 알람 선택";
+"skip_select_hint" = "체크를 해제한 알람은 이 날 울리지 않습니다.";
+"skip_apply" = "쉬기";
+"skip_range_title" = "기간 선택";
+"skip_start_date" = "시작일";
+"skip_end_date" = "종료일";
+"holiday_skip_toggle" = "공휴일에는 울리지 않기";
+"holiday_next_skipped" = "%@은(는) 쉬는 날";
+"holiday_none" = "다가오는 공휴일이 없습니다";
+"holiday_overrides_title" = "공휴일";
+"holiday_ring_on" = "이 공휴일에는 울리기";
+"holiday_mark" = "공휴일";
+"skip_alarms_intent" = "알람 쉬기";

@@ -14,7 +14,9 @@ enum AlarmSaveLogic {
         backupMinutes: Int?,
         playlistID: UUID? = nil,
         fadeIn: PlaylistFadeIn = .off,
-        isEnabled: Bool = true
+        isEnabled: Bool = true,
+        skipsHolidays: Bool = false,
+        holidayRingOverrides: [String] = []
     ) -> AlarmEntry {
         AlarmEntry(
             hour: hour,
@@ -26,7 +28,9 @@ enum AlarmSaveLogic {
             snoozeMinutes: snoozeMinutes,
             backupMinutes: backupMinutes,
             playlistID: playlistID,
-            fadeIn: fadeIn
+            fadeIn: fadeIn,
+            skipsHolidays: skipsHolidays,
+            holidayRingOverrides: holidayRingOverrides
         )
     }
 
@@ -40,7 +44,9 @@ enum AlarmSaveLogic {
         snoozeMinutes: Int,
         backupMinutes: Int?,
         playlistID: UUID? = nil,
-        fadeIn: PlaylistFadeIn = .off
+        fadeIn: PlaylistFadeIn = .off,
+        skipsHolidays: Bool? = nil,
+        holidayRingOverrides: [String]? = nil
     ) -> AlarmEntry {
         var updated = existing
         updated.hour = hour
@@ -52,6 +58,8 @@ enum AlarmSaveLogic {
         updated.backupMinutes = backupMinutes
         updated.playlistID = playlistID
         updated.fadeIn = fadeIn
+        if let skipsHolidays { updated.skipsHolidays = skipsHolidays }
+        if let holidayRingOverrides { updated.holidayRingOverrides = holidayRingOverrides }
         // 編集画面にオン/オフは置かない。保存したら必ずオン（#122）
         updated.isEnabled = true
         return updated

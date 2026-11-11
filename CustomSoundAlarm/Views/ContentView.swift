@@ -20,6 +20,9 @@ struct ContentView: View {
     @State private var addAlarmRequest: AddAlarmRequest?
     /// アップデート案内（#116）
     @State private var updateChecker = UpdateChecker.shared
+    /// 休みのシート（#197）
+    @State private var skipSelectionGroup: AlarmSkipLogic.DayGroup?
+    @State private var showingSkipRange = false
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.requestReview) private var requestReview
@@ -203,11 +206,41 @@ struct ContentView: View {
         .accessibilityIdentifier("empty.title")
     }
 
+    // MARK: - Skip (#197)
+
+    /// 一覧の一番上に出す「次に鳴る日」。
+    private var nextSkipDayGroup: AlarmSkipLogic.DayGroup? {
+        AlarmSkipLogic.upcomingDayGroups(
+            entries: alarmStore.alarms,
+            after: Date(),
+            limit: 1
+        ).first
+    }
+
+    /// 休みにした日の案内（その日が終わるまで）。
+    private var skipNotice: AlarmSkipLogic.Notice? {
+        AlarmSkipLogic.activeNotice(entries: alarmStore.alarms, now: Date())
+    }
+
     // MARK: - Alarm List
 
     private var alarmList: some View {
         let displayed = AlarmListOrdering.sortedForDisplay(alarmStore.alarms)
         return List {
+            if let group = nextSkipDayGroup {
+                AlarmSkipDaySection(
+                    group: group,
+                    onSelect: { skipSelectionGroup = group },
+                    onRange: { showingSkipRange = true }
+                )
+                .warmCard()
+            }
+            if let notice = skipNotice {
+                AlarmSkipNoticeView(notice: notice) {
+                    AlarmSkipService.undo(dateKey: notice.dateKey)
+                }
+                .warmCard()
+            }
             ForEach(displayed, id: \.id) { alarm in
                 AlarmRow(
                     alarm: alarm,
@@ -243,6 +276,12 @@ struct ContentView: View {
         }
         .animation(.default, value: alarmStore.alarms)
         .warmListBackground()
+        .sheet(item: $skipSelectionGroup) { group in
+            AlarmSkipSelectionSheet(date: group.date, entries: group.entries)
+        }
+        .sheet(isPresented: $showingSkipRange) {
+            AlarmSkipPeriodSheet()
+        }
     }
 
 }
@@ -288,6 +327,12 @@ struct AlarmRow: View {
                         .lineLimit(1)
                 }
                 metadataLine(vertical: false)
+                if let holidaySummary {
+                    Text(holidaySummary)
+                        .font(.caption)
+                        .foregroundStyle(metaColor)
+                        .lineLimit(1)
+                }
             }
 
             Spacer(minLength: 8)
@@ -313,6 +358,12 @@ struct AlarmRow: View {
             }
 
             metadataLine(vertical: true)
+            if let holidaySummary {
+                Text(holidaySummary)
+                    .font(.caption)
+                    .foregroundStyle(metaColor)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 
@@ -399,6 +450,16 @@ struct AlarmRow: View {
 
     private var soundDisplayName: String {
         soundName.isEmpty ? String(localized: "default_sound") : soundName
+    }
+
+    private var holidaySummary: String? {
+        guard alarm.skipsHolidays,
+              let holiday = AlarmSkipLogic.nextSkippedHoliday(for: alarm, after: Date())
+        else { return nil }
+        return String(
+            format: String(localized: "holiday_next_skipped"),
+            AlarmSkipFormat.holiday(holiday)
+        )
     }
 
     private var repeatSummary: String {

@@ -30,6 +30,12 @@ final class AlarmStore {
         save()
     }
 
+    /// 複数件をまとめて置き換える（休みの一括適用・#197）。
+    func replaceAll(_ newAlarms: [AlarmEntry]) {
+        alarms = newAlarms
+        save()
+    }
+
     func remove(_ alarm: AlarmEntry) {
         alarms.removeAll { $0.id == alarm.id }
         save()
@@ -68,8 +74,14 @@ final class AlarmStore {
               let decoded = try? JSONDecoder().decode([AlarmEntry].self, from: data) else {
             return
         }
-        alarms = decoded
-        contentHash = data.hashValue
+        // 過ぎた休み・祝日の上書きは読み込み時に落とす（#197）
+        let pruned = decoded.map { AlarmSkipLogic.pruning($0, now: Date()) }
+        alarms = pruned
+        if pruned != decoded {
+            save()
+        } else {
+            contentHash = data.hashValue
+        }
         logger.info("Loaded \(self.alarms.count) alarms")
     }
 

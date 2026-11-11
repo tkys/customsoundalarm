@@ -5,13 +5,16 @@ import Foundation
 enum AlarmIDMaps {
     static let primaryKey = "alarm_id_map"
     static let backupKey = "backup_alarm_id_map"
+    /// 休みでくり返しから外した曜日を補う `.fixed` の対応表（#197）。
+    /// entryID → [AlarmKit ID: 休みの日キー（yyyy-MM-dd）]
+    static let skipCoverageKey = "skip_alarm_id_map"
 
     static func loadPrimary(defaults: UserDefaults = AppGroup.userDefaults) -> [UUID: UUID] {
-        decode(key: primaryKey, defaults: defaults)
+        decode(key: primaryKey, defaults: defaults) ?? [:]
     }
 
     static func loadBackup(defaults: UserDefaults = AppGroup.userDefaults) -> [UUID: UUID] {
-        decode(key: backupKey, defaults: defaults)
+        decode(key: backupKey, defaults: defaults) ?? [:]
     }
 
     static func savePrimary(_ map: [UUID: UUID], defaults: UserDefaults = AppGroup.userDefaults) {
@@ -20,6 +23,27 @@ enum AlarmIDMaps {
 
     static func saveBackup(_ map: [UUID: UUID], defaults: UserDefaults = AppGroup.userDefaults) {
         encode(map, key: backupKey, defaults: defaults)
+    }
+
+    static func loadSkipCoverage(
+        defaults: UserDefaults = AppGroup.userDefaults
+    ) -> [UUID: [UUID: String]] {
+        decode(key: skipCoverageKey, defaults: defaults) ?? [:]
+    }
+
+    static func saveSkipCoverage(
+        _ map: [UUID: [UUID: String]],
+        defaults: UserDefaults = AppGroup.userDefaults
+    ) {
+        encode(map, key: skipCoverageKey, defaults: defaults)
+    }
+
+    /// 休みの補完として登録したアラームなら、その AlarmEntry.ID を返す（#197）。
+    static func skipCoverageEntryID(
+        of alarmID: UUID,
+        map: [UUID: [UUID: String]]
+    ) -> UUID? {
+        map.first { $0.value.keys.contains(alarmID) }?.key
     }
 
     /// 停止されたアラームに対応する「もう片方」の ID を返す。
@@ -86,18 +110,16 @@ enum AlarmIDMaps {
         return .unknown
     }
 
-    private static func decode(
+    private static func decode<T: Decodable>(
         key: String,
         defaults: UserDefaults
-    ) -> [UUID: UUID] {
-        guard let data = defaults.data(forKey: key),
-              let map = try? JSONDecoder().decode([UUID: UUID].self, from: data)
-        else { return [:] }
-        return map
+    ) -> T? {
+        guard let data = defaults.data(forKey: key) else { return nil }
+        return try? JSONDecoder().decode(T.self, from: data)
     }
 
-    private static func encode(
-        _ map: [UUID: UUID],
+    private static func encode<T: Encodable>(
+        _ map: T,
         key: String,
         defaults: UserDefaults
     ) {

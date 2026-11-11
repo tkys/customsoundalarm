@@ -178,7 +178,13 @@ final class AlarmScheduler {
         let store = AlarmStore.shared
         var didChange = false
 
+        let reconcileNow = Date()
+        let todayKey = AlarmSkipLogic.dateKey(reconcileNow)
         for alarm in store.alarms where alarm.isEnabled && alarm.repeatWeekdays.isEmpty {
+            // まだ来ていない休みの日がある一回限りは、鳴らずに終わる日まで残す（#197）
+            if alarm.skipDates.contains(where: { $0 >= todayKey }) {
+                continue
+            }
             if let mappedID = alarmIDMap[alarm.id], !activeAlarmIDs.contains(mappedID) {
                 // 発火済みの一回限りアラーム → 遡及記録してから無効化
                 AnalyticsService.shared.capture(.alarmFired(
@@ -545,6 +551,17 @@ final class AlarmScheduler {
         saveIDMap()
         saveBackupIDMap()
 
+        // 休みでくり返しから外した曜日の補完（#197）。
+        // 取り残しの掃除より前に登録して対応表に載せる。
+        await syncSkipCoverage(
+            entries: entries,
+            signatures: desiredSignatures,
+            forceRecreateEntryIDs: Set(diff.scheduleEntries.map(\.id))
+                .union(effectiveForceEntryIDs)
+                .union(diff.rescheduleAlarmIDs.keys),
+            trigger: trigger
+        )
+
         // 取り残し（対応表に無いのに AlarmKit に残っているアラーム）を取り消す
         cancelUnmappedAlarms(trigger: trigger)
 
@@ -614,6 +631,11 @@ final class AlarmScheduler {
 
     /// 単一アラームをスケジュール（成功時に Alarm.ID を返す）
     private func scheduleAlarm(for entry: AlarmEntry) async -> Alarm.ID? {
+        // 休みのため次回が無い（一回限りを休む等）ときは登録しない（#197）
+        guard entry.nextFireDate(from: Date()) != nil else {
+            logger.info("No next fire date (skipped); not scheduling: \(entry.label)")
+            return nil
+        }
         let resolution = await PlaylistRenderService.shared.prepareSound(
             for: entry.playlistRenderInput
         )
@@ -658,7 +680,8 @@ final class AlarmScheduler {
         for entry: AlarmEntry,
         soundFileName: String,
         displayName: String,
-        alarmID: Alarm.ID
+        alarmID: Alarm.ID,
+        fireDate: Date? = nil
     ) -> AlarmManager.AlarmConfiguration<CustomAlarmMetadata> {
         let metadata = CustomAlarmMetadata(entry: entry, soundDisplayName: displayName)
 
@@ -735,23 +758,37 @@ final class AlarmScheduler {
         )
 
         let schedule: Alarm.Schedule
-        if entry.repeatWeekdays.isEmpty {
+        if let fireDate {
+            // 休みで外した曜日を補う1回（#197）
+            schedule = .fixed(fireDate)
+        } else if entry.repeatWeekdays.isEmpty {
             schedule = .relative(.init(time: alarmTime, repeats: .never))
         } else {
-            let weekdays = entry.repeatWeekdays.compactMap { dayInt -> Locale.Weekday? in
-                switch dayInt {
-                case 1: .sunday
-                case 2: .monday
-                case 3: .tuesday
-                case 4: .wednesday
-                case 5: .thursday
-                case 6: .friday
-                case 7: .saturday
-                default: nil
+            let now = Date()
+            let effective = AlarmSkipLogic.effectiveWeekdays(for: entry, after: now)
+            if effective.isEmpty {
+                // 休みが続いて全曜日を外す場合は、次の1回だけ .fixed で登録する（#197）
+                if let next = entry.nextFireDate(from: now) {
+                    schedule = .fixed(next)
+                } else {
+                    schedule = .relative(.init(time: alarmTime, repeats: .never))
                 }
+            } else {
+                let weekdays = effective.compactMap { dayInt -> Locale.Weekday? in
+                    switch dayInt {
+                    case 1: .sunday
+                    case 2: .monday
+                    case 3: .tuesday
+                    case 4: .wednesday
+                    case 5: .thursday
+                    case 6: .friday
+                    case 7: .saturday
+                    default: nil
+                    }
+                }
+                let recurrence = Alarm.Schedule.Relative.Recurrence.weekly(weekdays)
+                schedule = .relative(.init(time: alarmTime, repeats: recurrence))
             }
-            let recurrence = Alarm.Schedule.Relative.Recurrence.weekly(weekdays)
-            schedule = .relative(.init(time: alarmTime, repeats: recurrence))
         }
 
         let countdownDuration: Alarm.CountdownDuration?
@@ -871,6 +908,108 @@ final class AlarmScheduler {
         }
     }
 
+    // MARK: - Skip coverage (#197)
+
+    /// 休みでくり返しから外した曜日の回を `.fixed` で補う。
+    ///
+    /// 本体のくり返しから外した曜日でも、休みの日以外は鳴るようにする。
+    /// すべて対応表に保存し、取り残しの掃除で消されないようにする。
+    private func syncSkipCoverage(
+        entries: [AlarmEntry],
+        signatures: [UUID: AlarmScheduleSignature],
+        forceRecreateEntryIDs: Set<UUID>,
+        trigger: AlarmSyncTrigger
+    ) async {
+        let existing = AlarmIDMaps.loadSkipCoverage()
+        let byID = Dictionary(uniqueKeysWithValues: entries.map { ($0.id, $0) })
+        let now = Date()
+        var result: [UUID: [UUID: String]] = [:]
+
+        func cancelAll(_ ids: [UUID: String]) {
+            for id in ids.keys {
+                try? manager.cancel(id: id)
+            }
+        }
+
+        func schedule(
+            desired: [AlarmSkipLogic.Coverage],
+            sound: String,
+            entry: AlarmEntry,
+            kept: inout [UUID: String],
+            covered: inout Set<String>
+        ) async {
+            for coverage in desired where !covered.contains(coverage.dateKey) {
+                let alarmID = Alarm.ID()
+                nonisolated(unsafe) let config = makeAlarmConfiguration(
+                    for: entry,
+                    soundFileName: sound,
+                    displayName: soundDisplayName(for: entry),
+                    alarmID: alarmID,
+                    fireDate: coverage.date
+                )
+                do {
+                    try await manager.schedule(id: alarmID, configuration: config)
+                    kept[alarmID] = coverage.dateKey
+                    covered.insert(coverage.dateKey)
+                } catch {
+                    logger.error(
+                        "Failed to schedule skip coverage \(coverage.dateKey): \(error.localizedDescription)"
+                    )
+                }
+            }
+        }
+
+        for (entryID, ids) in existing {
+            guard let entry = byID[entryID], entry.isEnabled else {
+                cancelAll(ids)
+                continue
+            }
+            let desired = AlarmSkipLogic.coverageOccurrences(for: entry, after: now)
+            let desiredKeys = Set(desired.map(\.dateKey))
+            var kept: [UUID: String] = [:]
+            for (id, key) in ids {
+                if !forceRecreateEntryIDs.contains(entryID), desiredKeys.contains(key) {
+                    kept[id] = key
+                } else {
+                    try? manager.cancel(id: id)
+                }
+            }
+            var covered = Set(kept.values)
+            if let sound = signatures[entryID]?.soundFileName {
+                await schedule(
+                    desired: desired,
+                    sound: sound,
+                    entry: entry,
+                    kept: &kept,
+                    covered: &covered
+                )
+            }
+            if !kept.isEmpty { result[entryID] = kept }
+        }
+
+        for entry in entries where entry.isEnabled && existing[entry.id] == nil {
+            guard let sound = signatures[entry.id]?.soundFileName else { continue }
+            let desired = AlarmSkipLogic.coverageOccurrences(for: entry, after: now)
+            guard !desired.isEmpty else { continue }
+            var kept: [UUID: String] = [:]
+            var covered = Set<String>()
+            await schedule(
+                desired: desired,
+                sound: sound,
+                entry: entry,
+                kept: &kept,
+                covered: &covered
+            )
+            if !kept.isEmpty { result[entry.id] = kept }
+        }
+
+        AlarmIDMaps.saveSkipCoverage(result)
+        let count = result.values.reduce(0) { $0 + $1.count }
+        if count > 0 {
+            logger.info("Synced \(count) skip coverage alarm(s) (trigger: \(trigger.rawValue))")
+        }
+    }
+
     // MARK: - Unmapped alarms (取り残し)
 
     /// 試し鳴らしなど、登録処理中でまだ記録に載っていない ID（掃除で消さない）
@@ -884,6 +1023,8 @@ final class AlarmScheduler {
             // 停止 Intent が保存した最新の対応表も含める
             .union(AlarmIDMaps.loadPrimary().values)
             .union(AlarmIDMaps.loadBackup().values)
+            // 休みで外した曜日を補う .fixed も消さない（#197）
+            .union(AlarmIDMaps.loadSkipCoverage().values.flatMap { $0.keys })
             .union(AppGroup.testAlarmRecords.map(\.id))
             .union(inFlightAlarmIDs)
     }

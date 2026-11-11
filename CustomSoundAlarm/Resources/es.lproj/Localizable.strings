@@ -310,3 +310,27 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Escuchar lista";
 "play_order_footer" = "Las alarmas se repiten hasta que las detengas. El orden aleatorio cambia el siguiente orden cada vez que la detienes. Una aleatoria repite la misma pista.";
+
+// #197 skip days
+"skip_section_header" = "Descanso";
+"skip_alarm_count" = "%d alarmas";
+"skip_one_time_warning" = "Una alarma única (%d) no sonará.";
+"skip_this_day" = "No sonar este día";
+"skip_select" = "Elegir alarmas";
+"skip_range" = "Elegir fechas";
+"skip_active_notice" = "%@ sin alarma. Siguiente: %@";
+"skip_active_notice_no_next" = "%@ sin alarma";
+"skip_undo" = "Deshacer";
+"skip_select_title" = "Alarmas que no sonarán";
+"skip_select_hint" = "Las alarmas desmarcadas no sonarán este día.";
+"skip_apply" = "No sonar";
+"skip_range_title" = "Elegir fechas";
+"skip_start_date" = "Inicio";
+"skip_end_date" = "Fin";
+"holiday_skip_toggle" = "No sonar en días festivos";
+"holiday_next_skipped" = "%@ sin alarma";
+"holiday_none" = "No hay días festivos próximos";
+"holiday_overrides_title" = "Días festivos";
+"holiday_ring_on" = "Sonar este día festivo";
+"holiday_mark" = "Festivo";
+"skip_alarms_intent" = "Pausar alarmas";

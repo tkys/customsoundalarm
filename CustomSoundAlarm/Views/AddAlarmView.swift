@@ -44,6 +44,10 @@ struct AlarmDetailView: View {
     @State private var fadeIn: PlaylistFadeIn
     @State private var playlistStore = PlaylistStore.shared
     @State private var showingPlaylistRequired = false
+    /// 祝日は鳴らさない（#197）
+    @State private var skipsHolidays: Bool
+    @State private var holidayRingOverrides: Set<String>
+    @State private var showingHolidayOverrides = false
 
     /// オンボ指定の初期動作を1回だけ適用したか
     @State private var didApplyInitialImport = false
@@ -80,6 +84,8 @@ struct AlarmDetailView: View {
             _backupMinutes = State(initialValue: entry.backupMinutes)
             _playlistID = State(initialValue: entry.playlistID)
             _fadeIn = State(initialValue: entry.fadeIn)
+            _skipsHolidays = State(initialValue: entry.skipsHolidays)
+            _holidayRingOverrides = State(initialValue: Set(entry.holidayRingOverrides))
         } else {
             _selectedTime = State(initialValue: Date())
             _label = State(initialValue: String(localized: "alarm_placeholder"))
@@ -93,6 +99,8 @@ struct AlarmDetailView: View {
             _backupMinutes = State(initialValue: nil)
             _playlistID = State(initialValue: nil)
             _fadeIn = State(initialValue: .off)
+            _skipsHolidays = State(initialValue: false)
+            _holidayRingOverrides = State(initialValue: [])
         }
     }
 
@@ -106,6 +114,7 @@ struct AlarmDetailView: View {
                 timeSection
                 Section {
                     repeatSection
+                    holidaySection
                     labelSection
                     soundRow
                     fadeInRow
@@ -726,6 +735,64 @@ struct AlarmDetailView: View {
         }
     }
 
+    // MARK: - Holiday (#197)
+
+    /// 祝日は鳴らさない（端末の地域が日本のときだけ・繰り返しのときだけ）。
+    @ViewBuilder
+    private var holidaySection: some View {
+        if AlarmSkipLogic.isJapanRegion(), !repeatWeekdays.isEmpty {
+            Toggle("holiday_skip_toggle", isOn: Binding(
+                get: { skipsHolidays },
+                set: { enabled in
+                    skipsHolidays = enabled
+                    AnalyticsService.shared.capture(.holidaySkipToggled(enabled: enabled))
+                }
+            ))
+            .accessibilityIdentifier("addAlarm.holidaySkip")
+
+            if skipsHolidays {
+                if let holiday = nextHolidayPreview {
+                    Text(String(
+                        format: String(localized: "holiday_next_skipped"),
+                        AlarmSkipFormat.holiday(holiday)
+                    ))
+                    .font(.footnote)
+                    .foregroundStyle(Color.textSecondary)
+                } else {
+                    Text("holiday_none")
+                        .font(.footnote)
+                        .foregroundStyle(Color.textSecondary)
+                }
+                Button("holiday_overrides_title") {
+                    showingHolidayOverrides = true
+                }
+                .accessibilityIdentifier("addAlarm.holidayOverrides")
+                .sheet(isPresented: $showingHolidayOverrides) {
+                    HolidayOverrideSheet(
+                        holidays: holidayCandidates,
+                        overrides: $holidayRingOverrides
+                    )
+                }
+            }
+        }
+    }
+
+    private var nextHolidayPreview: JapaneseHoliday? {
+        AlarmSkipLogic.nextSkippedHoliday(
+            forWeekdays: Array(repeatWeekdays).sorted(),
+            overrides: holidayRingOverrides,
+            after: Date()
+        )
+    }
+
+    private var holidayCandidates: [JapaneseHoliday] {
+        let calendar = Calendar.current
+        return JapaneseHolidays.upcoming(from: Date(), days: 400).filter { holiday in
+            guard let date = AlarmSkipLogic.date(fromKey: holiday.dateKey) else { return false }
+            return repeatWeekdays.contains(calendar.component(.weekday, from: date))
+        }
+    }
+
     // MARK: - Snooze (#122: pull-down menu)
 
     private var snoozeOptions: [Int] {
@@ -860,7 +927,9 @@ struct AlarmDetailView: View {
                 backupMinutes: backupMinutes,
                 playlistID: playlistID,
                 fadeIn: fadeIn,
-                isEnabled: !AppGroup.isUITestDisableNewAlarm
+                isEnabled: !AppGroup.isUITestDisableNewAlarm,
+                skipsHolidays: skipsHolidays,
+                holidayRingOverrides: Array(holidayRingOverrides).sorted()
             )
             alarmStore.add(entry)
             AnalyticsService.shared.capture(
@@ -889,7 +958,9 @@ struct AlarmDetailView: View {
                 snoozeMinutes: snoozeMinutes,
                 backupMinutes: backupMinutes,
                 playlistID: playlistID,
-                fadeIn: fadeIn
+                fadeIn: fadeIn,
+                skipsHolidays: skipsHolidays,
+                holidayRingOverrides: Array(holidayRingOverrides).sorted()
             )
             alarmStore.update(updated)
             AnalyticsService.shared.capture(

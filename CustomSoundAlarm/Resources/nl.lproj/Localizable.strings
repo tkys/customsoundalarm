@@ -310,3 +310,27 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Afspeellijst beluisteren";
 "play_order_footer" = "Wekkers herhalen zich tot je ze stopt. Shuffle wijzigt bij elke stop de volgende volgorde. Eén willekeurig herhaalt steeds hetzelfde nummer.";
+
+// #197 skip days
+"skip_section_header" = "Pauze";
+"skip_alarm_count" = "%d wekkers";
+"skip_one_time_warning" = "Een eenmalige wekker (%d) gaat niet af.";
+"skip_this_day" = "Deze dag niet laten afgaan";
+"skip_select" = "Wekkers kiezen";
+"skip_range" = "Datums kiezen";
+"skip_active_notice" = "%@ geen wekker. Volgende: %@";
+"skip_active_notice_no_next" = "%@ geen wekker";
+"skip_undo" = "Ongedaan maken";
+"skip_select_title" = "Wekkers om te pauzeren";
+"skip_select_hint" = "Wekkers die je uitvinkt, gaan deze dag niet af.";
+"skip_apply" = "Pauzeren";
+"skip_range_title" = "Datums kiezen";
+"skip_start_date" = "Begin";
+"skip_end_date" = "Einde";
+"holiday_skip_toggle" = "Niet afgaan op feestdagen";
+"holiday_next_skipped" = "%@ geen wekker";
+"holiday_none" = "Geen komende feestdagen";
+"holiday_overrides_title" = "Feestdagen";
+"holiday_ring_on" = "Wel afgaan op deze feestdag";
+"holiday_mark" = "Feestdag";
+"skip_alarms_intent" = "Wekkers pauzeren";

@@ -310,3 +310,27 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Écouter la playlist";
 "play_order_footer" = "Les alarmes se répètent jusqu’à ce que vous les arrêtiez. La lecture aléatoire change l’ordre suivant à chaque arrêt. Un titre au hasard répète le même titre.";
+
+// #197 skip days
+"skip_section_header" = "Pause";
+"skip_alarm_count" = "%d alarmes";
+"skip_one_time_warning" = "Une alarme unique (%d) ne sonnera pas.";
+"skip_this_day" = "Ne pas sonner ce jour";
+"skip_select" = "Choisir les alarmes";
+"skip_range" = "Choisir des dates";
+"skip_active_notice" = "%@ : pas d’alarme. Prochaine : %@";
+"skip_active_notice_no_next" = "%@ : pas d’alarme";
+"skip_undo" = "Annuler";
+"skip_select_title" = "Alarmes à mettre en pause";
+"skip_select_hint" = "Les alarmes décochées ne sonneront pas ce jour.";
+"skip_apply" = "Mettre en pause";
+"skip_range_title" = "Choisir des dates";
+"skip_start_date" = "Début";
+"skip_end_date" = "Fin";
+"holiday_skip_toggle" = "Ne pas sonner les jours fériés";
+"holiday_next_skipped" = "%@ : pas d’alarme";
+"holiday_none" = "Aucun jour férié à venir";
+"holiday_overrides_title" = "Jours fériés";
+"holiday_ring_on" = "Sonner ce jour férié";
+"holiday_mark" = "Férié";
+"skip_alarms_intent" = "Mettre les alarmes en pause";

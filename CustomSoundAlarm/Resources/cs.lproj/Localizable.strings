@@ -310,3 +310,27 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Přehrát playlist";
 "play_order_footer" = "Budíky se opakují, dokud je nezastavíte. Náhodné pořadí změní další pořadí při každém zastavení. Jeden náhodný opakuje stejnou skladbu.";
+
+// #197 skip days
+"skip_section_header" = "Pauza";
+"skip_alarm_count" = "%d budíků";
+"skip_one_time_warning" = "Jednorázový budík (%d) nezazvoní.";
+"skip_this_day" = "Tento den nezvonit";
+"skip_select" = "Vybrat budíky";
+"skip_range" = "Vybrat data";
+"skip_active_notice" = "%@ bez budíku. Další: %@";
+"skip_active_notice_no_next" = "%@ bez budíku";
+"skip_undo" = "Zpět";
+"skip_select_title" = "Budíky k pozastavení";
+"skip_select_hint" = "Nezaškrtnuté budíky tento den nezazvoní.";
+"skip_apply" = "Pozastavit";
+"skip_range_title" = "Vybrat data";
+"skip_start_date" = "Začátek";
+"skip_end_date" = "Konec";
+"holiday_skip_toggle" = "Nezvonit o svátcích";
+"holiday_next_skipped" = "%@ bez budíku";
+"holiday_none" = "Žádné nadcházející svátky";
+"holiday_overrides_title" = "Svátky";
+"holiday_ring_on" = "Zvonit o tomto svátku";
+"holiday_mark" = "Svátky";
+"skip_alarms_intent" = "Pozastavit budíky";

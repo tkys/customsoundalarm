@@ -310,3 +310,27 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "معاينة قائمة التشغيل";
 "play_order_footer" = "تتكرر المنبهات حتى توقفها. يغيّر الترتيب العشوائي الترتيب التالي في كل مرة توقف فيها المنبه. خيار مقطع عشوائي يكرر المقطع نفسه في كل مرة.";
+
+// #197 skip days
+"skip_section_header" = "راحة";
+"skip_alarm_count" = "%d منبهات";
+"skip_one_time_warning" = "منبه لمرة واحدة (%d) لن يرن.";
+"skip_this_day" = "لا يرن في هذا اليوم";
+"skip_select" = "اختيار المنبهات";
+"skip_range" = "اختيار التواريخ";
+"skip_active_notice" = "%@ بلا منبه. التالي: %@";
+"skip_active_notice_no_next" = "%@ بلا منبه";
+"skip_undo" = "تراجع";
+"skip_select_title" = "منبهات لأخذ راحة";
+"skip_select_hint" = "المنبهات غير المحددة لن ترن في هذا اليوم.";
+"skip_apply" = "راحة";
+"skip_range_title" = "اختيار التواريخ";
+"skip_start_date" = "البداية";
+"skip_end_date" = "النهاية";
+"holiday_skip_toggle" = "لا يرن في العطلات";
+"holiday_next_skipped" = "%@ بلا منبه";
+"holiday_none" = "لا توجد عطلات قادمة";
+"holiday_overrides_title" = "العطلات";
+"holiday_ring_on" = "يرن في هذه العطلة";
+"holiday_mark" = "عطلة";
+"skip_alarms_intent" = "إراحة المنبهات";

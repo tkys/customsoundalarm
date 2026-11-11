@@ -310,3 +310,27 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Ascolta playlist";
 "play_order_footer" = "Le sveglie si ripetono finché non le fermi. L'ordine casuale cambia l'ordine successivo a ogni arresto. Un brano casuale ripete lo stesso brano.";
+
+// #197 skip days
+"skip_section_header" = "Pausa";
+"skip_alarm_count" = "%d sveglie";
+"skip_one_time_warning" = "Una sveglia singola (%d) non suonerà.";
+"skip_this_day" = "Non suonare questo giorno";
+"skip_select" = "Scegli le sveglie";
+"skip_range" = "Scegli le date";
+"skip_active_notice" = "%@ senza sveglia. Prossima: %@";
+"skip_active_notice_no_next" = "%@ senza sveglia";
+"skip_undo" = "Annulla";
+"skip_select_title" = "Sveglie da mettere in pausa";
+"skip_select_hint" = "Le sveglie non selezionate non suonano in questo giorno.";
+"skip_apply" = "Metti in pausa";
+"skip_range_title" = "Scegli le date";
+"skip_start_date" = "Inizio";
+"skip_end_date" = "Fine";
+"holiday_skip_toggle" = "Non suonare nei giorni festivi";
+"holiday_next_skipped" = "%@ senza sveglia";
+"holiday_none" = "Nessun giorno festivo in arrivo";
+"holiday_overrides_title" = "Giorni festivi";
+"holiday_ring_on" = "Suona in questo giorno festivo";
+"holiday_mark" = "Festivo";
+"skip_alarms_intent" = "Metti in pausa le sveglie";

@@ -20,6 +20,13 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
     var playlistID: UUID?
     /// やさしく鳴り始める（#160）。アラームが持つ。
     var fadeIn: PlaylistFadeIn
+    /// 休む日（ローカル日付の `yyyy-MM-dd`）。その日が過ぎたら自動で消える（#197）。
+    /// アラームを「オフ」にはしない。
+    var skipDates: [String]
+    /// 祝日は鳴らさない（日本のみ・#197）。
+    var skipsHolidays: Bool
+    /// 祝日でも鳴らす日（`yyyy-MM-dd`・#197）。
+    var holidayRingOverrides: [String]
 
     init(
         id: UUID = UUID(),
@@ -32,7 +39,10 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
         snoozeMinutes: Int = 9,
         backupMinutes: Int? = nil,
         playlistID: UUID? = nil,
-        fadeIn: PlaylistFadeIn = .off
+        fadeIn: PlaylistFadeIn = .off,
+        skipDates: [String] = [],
+        skipsHolidays: Bool = false,
+        holidayRingOverrides: [String] = []
     ) {
         self.id = id
         self.hour = hour
@@ -45,11 +55,14 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
         self.backupMinutes = backupMinutes
         self.playlistID = playlistID
         self.fadeIn = fadeIn
+        self.skipDates = skipDates
+        self.skipsHolidays = skipsHolidays
+        self.holidayRingOverrides = holidayRingOverrides
     }
 
     enum CodingKeys: String, CodingKey {
         case id, hour, minute, isEnabled, label, repeatWeekdays, soundFileName, snoozeMinutes, backupMinutes
-        case playlistID, fadeIn
+        case playlistID, fadeIn, skipDates, skipsHolidays, holidayRingOverrides
     }
 
     init(from decoder: any Decoder) throws {
@@ -65,6 +78,9 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
         backupMinutes = try container.decodeIfPresent(Int.self, forKey: .backupMinutes)
         playlistID = try container.decodeIfPresent(UUID.self, forKey: .playlistID)
         fadeIn = try container.decodeIfPresent(PlaylistFadeIn.self, forKey: .fadeIn) ?? .off
+        skipDates = try container.decodeIfPresent([String].self, forKey: .skipDates) ?? []
+        skipsHolidays = try container.decodeIfPresent(Bool.self, forKey: .skipsHolidays) ?? false
+        holidayRingOverrides = try container.decodeIfPresent([String].self, forKey: .holidayRingOverrides) ?? []
     }
 
     /// プレイリストか「やさしく鳴り始める」を使っているか（先行公開の権利付与判定・#160）
@@ -101,40 +117,7 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
     ///   - calendar: 計算に用いるカレンダー（デフォルト `.current`）
     /// - Returns: 次回発火予定日時、計算不能なら nil
     func nextFireDate(from referenceDate: Date, calendar: Calendar = .current) -> Date? {
-        guard isEnabled else { return nil }
-        guard (0...23).contains(hour), (0...59).contains(minute) else { return nil }
-
-        var timeComponents = DateComponents()
-        timeComponents.hour = hour
-        timeComponents.minute = minute
-        timeComponents.second = 0
-
-        // 一回限り: weekday を指定せず「次の hour:minute」を探す。
-        // 当日の時刻が未来なら当日、過ぎていれば翌日になる。
-        if repeatWeekdays.isEmpty {
-            return calendar.nextDate(
-                after: referenceDate,
-                matching: timeComponents,
-                matchingPolicy: .nextTime
-            )
-        }
-
-        // 繰り返しあり: 該当曜日ごとに「次回発火」を計算し、最も近いものを選ぶ。
-        var earliest: Date?
-        for weekday in repeatWeekdays {
-            guard (1...7).contains(weekday) else { continue }
-            var components = timeComponents
-            components.weekday = weekday
-            guard let candidate = calendar.nextDate(
-                after: referenceDate,
-                matching: components,
-                matchingPolicy: .nextTime
-            ) else { continue }
-            if earliest == nil || candidate < earliest! {
-                earliest = candidate
-            }
-        }
-        return earliest
+        AlarmSkipLogic.nextFireDate(for: self, after: referenceDate, calendar: calendar)
     }
 
     /// 複製用の新しいインスタンスを返す。
@@ -152,7 +135,8 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
             snoozeMinutes: snoozeMinutes,
             backupMinutes: backupMinutes,
             playlistID: playlistID,
-            fadeIn: fadeIn
+            fadeIn: fadeIn,
+            skipsHolidays: skipsHolidays
         )
     }
 }

@@ -310,3 +310,27 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Odsłuchaj playlistę";
 "play_order_footer" = "Budziki powtarzają się, dopóki ich nie zatrzymasz. Losowa kolejność zmienia następną kolejność po każdym zatrzymaniu. Jeden losowy powtarza ten sam utwór.";
+
+// #197 skip days
+"skip_section_header" = "Pauza";
+"skip_alarm_count" = "%d budzików";
+"skip_one_time_warning" = "Budzik jednorazowy (%d) nie zadzwoni.";
+"skip_this_day" = "Nie dzwoń tego dnia";
+"skip_select" = "Wybierz budziki";
+"skip_range" = "Wybierz daty";
+"skip_active_notice" = "%@ bez budzika. Następny: %@";
+"skip_active_notice_no_next" = "%@ bez budzika";
+"skip_undo" = "Cofnij";
+"skip_select_title" = "Budziki do pauzy";
+"skip_select_hint" = "Odznaczone budziki nie zadzwonią tego dnia.";
+"skip_apply" = "Pauza";
+"skip_range_title" = "Wybierz daty";
+"skip_start_date" = "Początek";
+"skip_end_date" = "Koniec";
+"holiday_skip_toggle" = "Nie dzwoń w święta";
+"holiday_next_skipped" = "%@ bez budzika";
+"holiday_none" = "Brak nadchodzących świąt";
+"holiday_overrides_title" = "Święta";
+"holiday_ring_on" = "Dzwoń w to święto";
+"holiday_mark" = "Święto";
+"skip_alarms_intent" = "Wstrzymaj budziki";
