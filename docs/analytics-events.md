@@ -44,7 +44,7 @@
 | `alarm_orphan_cancelled` | `trigger` string, `count` int | 対応表に無いのに AlarmKit に残っていたアラーム（アプリに出ない・削除できない）を取り消したとき。停止直後と `intent` の同期では行わない | 「設定していないのに鳴る」不具合の影響と、修正の効果の確認 | アプリ動作中／起動時にも送る | 1.8.1 |
 | `alarm_sync_deferred` | `trigger` string, `count` int | 発火した分の中なので次の同期まで延期したとき | 安全柵が効いた回数の確認 | アプリ動作中／起動時にも送る | 1.8.1 |
 | `ad_slot_eligible` | `slot` string（banner_sounds/banner_import/banner_alarm_list/interstitial_import_saved）, `allowed` bool, `reason` string（eligible/existing_user/version_unavailable/pro/first_week/quiet_hours/frequency_cap/forbidden_context/wrong_context）, `region` string（standard/limited） | 広告枠の判定時（`AdsConfig.isEnabled = false` でも送る） | 1.9.0 前に実際の表示機会を測る | アプリ動作中のみ | 1.9.0 |
-| `sound_preview_played` | — | サウンドの試聴 | 試聴行動 | アプリ動作中のみ | 既存 |
+| `sound_preview_played` | `source` string（select_tap/play_button/library） | サウンドの試聴（行タップ・再生ボタン・ライブラリ） | 試聴の入口ごとの使われ方 | アプリ動作中のみ | 既存（`source` は1.8.2） |
 | `custom_sound_imported` | `source` string（video/audio）, `peak_db_bucket` string, `gain_db_bucket` string, `lufs_bucket` string（取り込み前のLUFS区分） | カスタムサウンド取り込み成功 | 取り込み経路・音量 | アプリ動作中のみ | 既存（`lufs_bucket` は1.8.0） |
 | `video_import_started` | `source` string（photo_library/file） | 動画取り込み開始 | 動画経路 | アプリ動作中のみ | 既存 |
 | `video_import_failed` | `reason` string（安定識別子） | 動画取り込み失敗 | 失敗原因 | アプリ動作中のみ | 既存 |

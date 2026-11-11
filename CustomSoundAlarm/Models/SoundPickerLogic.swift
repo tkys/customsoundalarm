@@ -57,3 +57,48 @@ enum SoundPickerLogic {
         sounds.filter { $0.isPreset }
     }
 }
+
+/// 音を選ぶ画面で行をタップしたときの試し聴き（#196・純粋関数・単体テスト対象）。
+///
+/// 標準の時計アプリと同じく、タップで選ぶと同時に鳴らす。
+/// 同じ行をもう一度タップしたら止める（選択は変えない）。
+enum SoundPreviewLogic {
+
+    /// 行をタップしたときの動き。
+    enum Tap: Equatable {
+        /// 選んで鳴らす（別の行から切り替える場合も含む）
+        case selectAndPlay
+        /// 鳴っている同じ行をもう一度タップ → 止める（選択はそのまま）
+        case stop
+        /// 鳴らせない行（既定の音）を選ぶ。鳴っている音は止める
+        case selectOnly
+    }
+
+    /// 行をタップしたときの動きを返す。
+    /// - Parameters:
+    ///   - tapped: タップした行の音（既定の音の行は nil）
+    ///   - playingFileName: いま鳴っているファイル名
+    static func tap(tapped: AlarmSound?, playingFileName: String?) -> Tap {
+        guard let tapped else { return .selectOnly }
+        return playingFileName == tapped.fileName ? .stop : .selectAndPlay
+    }
+
+    /// 選択が実際に変わったか。同じ行の再タップ（停止）で
+    /// `sound_selected` を二重に送らないために使う。
+    static func selectionChanged(tapped: AlarmSound?, selected: AlarmSound?) -> Bool {
+        switch (tapped, selected) {
+        case (nil, nil):
+            return false
+        case (nil, _), (_, nil):
+            return true
+        case let (tapped?, selected?):
+            return tapped.id != selected.id
+        }
+    }
+
+    /// 試し聴きを止める必要があるか（鳴っているときだけ）。
+    /// 画面を閉じる・保存する・取り込みを始める、のどの導線でも使う（#196）。
+    static func shouldStop(playingFileName: String?) -> Bool {
+        playingFileName != nil
+    }
+}

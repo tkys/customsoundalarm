@@ -823,6 +823,11 @@ struct AlarmDetailView: View {
     @State private var saveConfirmation: String?
 
     private func save() {
+        // 試し聴きが残っていれば止める（#196）
+        if SoundPreviewLogic.shouldStop(playingFileName: AudioPlayer.shared.playingFileName) {
+            AudioPlayer.shared.stop()
+        }
+
         let components = Calendar.current.dateComponents([.hour, .minute], from: selectedTime)
         let resolvedHour = components.hour ?? 7
         let resolvedMinute = components.minute ?? 0

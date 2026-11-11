@@ -216,4 +216,74 @@ struct SoundPickerLogicTests {
 
         #expect(sorted.map(\.fileName) == ["m.caf"])
     }
+
+    // MARK: - 行タップの試し聴き（#196）
+
+    private var marimba: AlarmSound {
+        AlarmSound(name: "Marimba", fileName: "PresetMarimba.caf", isPreset: true)
+    }
+
+    private var bell: AlarmSound {
+        AlarmSound(name: "Bell", fileName: "PresetBell.caf", isPreset: true)
+    }
+
+    @Test
+    func previewTap_stoppedRow_selectsAndPlays() {
+        let action = SoundPreviewLogic.tap(
+            tapped: marimba,
+            playingFileName: nil
+        )
+        #expect(action == .selectAndPlay)
+    }
+
+    @Test
+    func previewTap_otherRowPlaying_switchesAndPlays() {
+        let action = SoundPreviewLogic.tap(
+            tapped: bell,
+            playingFileName: marimba.fileName
+        )
+        #expect(action == .selectAndPlay)
+    }
+
+    @Test
+    func previewTap_samePlayingRow_stops() {
+        let action = SoundPreviewLogic.tap(
+            tapped: marimba,
+            playingFileName: marimba.fileName
+        )
+        #expect(action == .stop)
+    }
+
+    @Test
+    func previewTap_defaultRow_selectsOnly() {
+        // 既定の音には鳴らすファイルがない
+        let action = SoundPreviewLogic.tap(
+            tapped: nil,
+            playingFileName: marimba.fileName
+        )
+        #expect(action == .selectOnly)
+    }
+
+    @Test
+    func previewSelectionChanged_sameRow_isFalse() {
+        // 再タップで止めるときに sound_selected を二重に送らない
+        let sound = marimba
+        #expect(!SoundPreviewLogic.selectionChanged(tapped: sound, selected: sound))
+        #expect(!SoundPreviewLogic.selectionChanged(tapped: nil, selected: nil))
+    }
+
+    @Test
+    func previewSelectionChanged_otherRow_isTrue() {
+        #expect(SoundPreviewLogic.selectionChanged(tapped: bell, selected: marimba))
+        #expect(SoundPreviewLogic.selectionChanged(tapped: nil, selected: marimba))
+        #expect(SoundPreviewLogic.selectionChanged(tapped: marimba, selected: nil))
+    }
+
+    @Test
+    func previewStopsWhenLeaving() {
+        // 鳴っているときは、画面を閉じる・保存する・取り込みを始めるときに止める
+        #expect(SoundPreviewLogic.shouldStop(playingFileName: marimba.fileName))
+        // 鳴っていなければ止める必要はない
+        #expect(!SoundPreviewLogic.shouldStop(playingFileName: nil))
+    }
 }

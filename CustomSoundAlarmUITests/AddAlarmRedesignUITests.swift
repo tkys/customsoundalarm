@@ -66,6 +66,51 @@ final class AddAlarmRedesignUITests: XCTestCase {
         XCTAssertTrue(importRoot.exists, "video import should stay open: \(app.debugDescription)")
     }
 
+    /// #196: 音を選ぶ画面で行をタップすると、選ばれて再生中になる。
+    /// 同じ行をもう一度タップすると止まり、選択は残る。
+    func testSoundRowTapSelectsAndPreviews() {
+        launchAdd()
+        let choice = openSoundChoice()
+
+        let row = app.buttons["library.preset.PresetMarimba.caf"]
+        scrollToRow(row, in: choice)
+        let preview = app.buttons["soundPicker.preview.PresetMarimba.caf"]
+        XCTAssertTrue(preview.waitForExistence(timeout: 5), "play button should exist")
+        XCTAssertFalse(row.isSelected, "not selected before tap")
+        XCTAssertTrue(waitForPreviewLabel(preview, playing: false), "preview should be idle")
+
+        row.tap()
+        XCTAssertTrue(row.isSelected, "tapping a row should select it: \(app.debugDescription)")
+        XCTAssertTrue(waitForPreviewLabel(preview, playing: true), "preview should start")
+
+        // 同じ行の再タップで止める（選択はそのまま）
+        row.tap()
+        XCTAssertTrue(row.isSelected, "selection should stay after stop")
+        XCTAssertTrue(waitForPreviewLabel(preview, playing: false), "preview should stop")
+    }
+
+    private func scrollToRow(_ row: XCUIElement, in choice: XCUIElement) {
+        var swipes = 0
+        while (!row.exists || !row.isHittable) && swipes < 12 {
+            choice.swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(
+            row.waitForExistence(timeout: 5),
+            "row should be reachable: \(app.debugDescription)"
+        )
+    }
+
+    /// 再生中は再生ボタンのラベルが「停止 / Stop」に変わる（#196）。
+    private func waitForPreviewLabel(_ element: XCUIElement, playing: Bool) -> Bool {
+        let labels = playing ? ["停止", "Stop"] : ["試聴", "Preview"]
+        let expectation = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "label IN %@", labels),
+            object: element
+        )
+        return XCTWaiter.wait(for: [expectation], timeout: 5) == .completed
+    }
+
     func testSoundChoicePlaylistEmptyStateExplainsAndOffersCreate() {
         app.launchArguments = [
             "-uitest-open-add-alarm",

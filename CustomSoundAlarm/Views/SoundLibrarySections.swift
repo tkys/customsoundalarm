@@ -52,6 +52,9 @@ struct SoundLibrarySections: View {
         let imported = importedSounds
         Section {
             Button {
+                if SoundPreviewLogic.shouldStop(playingFileName: audioPlayer.playingFileName) {
+                    audioPlayer.stop()
+                }
                 showingVideoImport = true
             } label: {
                 Label {
@@ -92,6 +95,9 @@ struct SoundLibrarySections: View {
             }
 
             Button {
+                if SoundPreviewLogic.shouldStop(playingFileName: audioPlayer.playingFileName) {
+                    audioPlayer.stop()
+                }
                 isImporting = true
             } label: {
                 Label {
@@ -234,15 +240,7 @@ struct SoundLibrarySections: View {
 
             Button {
                 if isSelecting {
-                    selectedSound = sound
-                    let kind: SoundSelectionKind = sound == nil
-                        ? .default
-                        : (isPreset ? .preset : .imported)
-                    AnalyticsService.shared.capture(.soundSelected(
-                        kind: kind,
-                        rankBucket: SoundSelectionAnalytics.rankBucket(position: position)
-                    ))
-                    onSelect?(sound)
+                    handleSelectionTap(sound: sound, isPreset: isPreset, position: position)
                 } else if let sound {
                     togglePreview(sound)
                 }
@@ -259,6 +257,7 @@ struct SoundLibrarySections: View {
                 .contentShape(Rectangle())
             }
             .foregroundStyle(.primary)
+            .accessibilityAddTraits(isSelected ? .isSelected : [])
             .accessibilityIdentifier(
                 isPreset
                     ? "library.preset.\(sound?.fileName ?? "default")"
@@ -270,7 +269,7 @@ struct SoundLibrarySections: View {
                     if audioPlayer.playingFileName == sound.fileName {
                         audioPlayer.stop()
                     } else {
-                        audioPlayer.play(sound)
+                        audioPlayer.play(sound, source: .playButton)
                     }
                 } label: {
                     Image(systemName: isPlaying ? "stop.circle.fill" : "play.circle")
@@ -279,15 +278,59 @@ struct SoundLibrarySections: View {
                         .symbolEffect(.variableColor.iterative, isActive: isPlaying)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(isPlaying ? Text("stop") : Text("preview"))
+                .accessibilityIdentifier("soundPicker.preview.\(sound.fileName)")
             }
         }
+    }
+
+    /// 選択モードの行タップ。選ぶと同時に鳴らし、同じ行の再タップで止める（#196）。
+    private func handleSelectionTap(
+        sound: AlarmSound?,
+        isPreset: Bool,
+        position: Int
+    ) {
+        switch SoundPreviewLogic.tap(
+            tapped: sound,
+            playingFileName: audioPlayer.playingFileName
+        ) {
+        case .stop:
+            // 選択はそのまま、鳴っている音だけ止める
+            audioPlayer.stop()
+        case .selectOnly:
+            // 既定の音には鳴らすファイルがない。別の音が鳴っていれば止める
+            audioPlayer.stop()
+            select(sound, isPreset: isPreset, position: position)
+        case .selectAndPlay:
+            guard let sound else { return }
+            select(sound, isPreset: isPreset, position: position)
+            audioPlayer.play(sound, source: .selectTap)
+        }
+    }
+
+    private func select(_ sound: AlarmSound?, isPreset: Bool, position: Int) {
+        let changed = SoundPreviewLogic.selectionChanged(
+            tapped: sound,
+            selected: selectedSound
+        )
+        selectedSound = sound
+        guard changed else { return }
+
+        let kind: SoundSelectionKind = sound == nil
+            ? .default
+            : (isPreset ? .preset : .imported)
+        AnalyticsService.shared.capture(.soundSelected(
+            kind: kind,
+            rankBucket: SoundSelectionAnalytics.rankBucket(position: position)
+        ))
+        onSelect?(sound)
     }
 
     private func togglePreview(_ sound: AlarmSound) {
         if audioPlayer.playingFileName == sound.fileName {
             audioPlayer.stop()
         } else {
-            audioPlayer.play(sound)
+            audioPlayer.play(sound, source: .library)
         }
     }
 }
