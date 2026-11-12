@@ -325,7 +325,6 @@ final class AddAlarmRedesignUITests: XCTestCase {
         app.launchArguments = [
             "-uitest-open-add-alarm",
             "-uitest-seed-design-audit",
-            "-uitest-force-light",
             "-UIPreferredContentSizeCategoryName",
             "UICTContentSizeCategoryAccessibilityXXXL"
         ]
