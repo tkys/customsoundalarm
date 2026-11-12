@@ -79,7 +79,6 @@
 /* VideoTrimView */
 "add_from_video_title" = "동영상에서 오디오 추가";
 "loading" = "불러오는 중…";
-"select_video" = "동영상 선택";
 "preview" = "미리보기";
 "selected_duration" = "선택: %@";
 "stop" = "중지";
@@ -171,9 +170,6 @@
 "no_video" = "동영상 없음";
 
 /* Video Import Source */
-"video_source_title" = "동영상 소스 선택";
-"video_source_photo" = "사진 보관함";
-"video_source_file" = "파일";
 "error_file_access_denied" = "파일 접근이 거부되었습니다.";
 "error_file_copy_failed" = "파일을 복사하지 못했습니다.";
 "error_unsupported_video_format" = "지원하지 않는 동영상 형식입니다.";
@@ -310,3 +306,7 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "재생목록 미리 듣기";
 "play_order_footer" = "알람은 중지할 때까지 반복됩니다. 셔플은 중지할 때마다 다음 순서를 바꿉니다. 한 곡 랜덤은 매번 같은 한 곡을 반복합니다.";
+"video_source_header" = "동영상 선택";
+"video_source_photo_row" = "사진 보관함에서 선택";
+"video_source_file_row" = "파일에서 선택";
+"video_source_footer" = "MOV, MP4 지원";

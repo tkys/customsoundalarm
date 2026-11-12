@@ -79,7 +79,6 @@
 /* VideoTrimView */
 "add_from_video_title" = "Aggiungi audio da video";
 "loading" = "Caricamento…";
-"select_video" = "Seleziona un video";
 "preview" = "Anteprima";
 "selected_duration" = "Selezione: %@";
 "stop" = "Interrompi";
@@ -171,9 +170,6 @@
 "no_video" = "Nessun video";
 
 /* Video Import Source */
-"video_source_title" = "Seleziona origine video";
-"video_source_photo" = "Libreria foto";
-"video_source_file" = "File";
 "error_file_access_denied" = "Accesso al file negato.";
 "error_file_copy_failed" = "Impossibile copiare il file.";
 "error_unsupported_video_format" = "Formato video non supportato.";
@@ -310,3 +306,7 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Ascolta playlist";
 "play_order_footer" = "Le sveglie si ripetono finché non le fermi. L'ordine casuale cambia l'ordine successivo a ogni arresto. Un brano casuale ripete lo stesso brano.";
+"video_source_header" = "Scegli un video";
+"video_source_photo_row" = "Scegli dalla libreria foto";
+"video_source_file_row" = "Scegli da File";
+"video_source_footer" = "Supporta MOV e MP4";

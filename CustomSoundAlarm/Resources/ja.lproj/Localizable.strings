@@ -79,7 +79,6 @@
 /* VideoTrimView */
 "add_from_video_title" = "動画から音声を追加";
 "loading" = "読み込み中...";
-"select_video" = "動画を選択してください";
 "preview" = "試聴";
 "selected_duration" = "選択: %@";
 "stop" = "停止";
@@ -171,9 +170,6 @@
 "no_video" = "動画がありません";
 
 /* Video Import Source */
-"video_source_title" = "動画の選択元";
-"video_source_photo" = "写真ライブラリ";
-"video_source_file" = "ファイル";
 "error_file_access_denied" = "ファイルへのアクセスが拒否されました。";
 "error_file_copy_failed" = "ファイルのコピーに失敗しました。";
 "error_unsupported_video_format" = "サポートされていない動画形式です。";
@@ -310,3 +306,7 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "プレイリストを試聴";
 "play_order_footer" = "アラームは止めるまで繰り返します。シャッフルは止めるたびに次の順番を変えます。1曲だけランダムは、毎回選んだ1曲を繰り返します。";
+"video_source_header" = "動画を選ぶ";
+"video_source_photo_row" = "写真ライブラリから選ぶ";
+"video_source_file_row" = "ファイルから選ぶ";
+"video_source_footer" = "MOV・MP4 に対応";

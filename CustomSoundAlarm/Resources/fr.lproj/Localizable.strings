@@ -79,7 +79,6 @@
 /* VideoTrimView */
 "add_from_video_title" = "Ajouter l’audio d’une vidéo";
 "loading" = "Chargement…";
-"select_video" = "Sélectionnez une vidéo";
 "preview" = "Aperçu";
 "selected_duration" = "Sélection : %@";
 "stop" = "Arrêter";
@@ -171,9 +170,6 @@
 "no_video" = "Aucune vidéo";
 
 /* Video Import Source */
-"video_source_title" = "Sélectionner la source vidéo";
-"video_source_photo" = "Photothèque";
-"video_source_file" = "Fichiers";
 "error_file_access_denied" = "L’accès au fichier a été refusé.";
 "error_file_copy_failed" = "Impossible de copier le fichier.";
 "error_unsupported_video_format" = "Format vidéo non pris en charge.";
@@ -310,3 +306,7 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Écouter la playlist";
 "play_order_footer" = "Les alarmes se répètent jusqu’à ce que vous les arrêtiez. La lecture aléatoire change l’ordre suivant à chaque arrêt. Un titre au hasard répète le même titre.";
+"video_source_header" = "Choisir une vidéo";
+"video_source_photo_row" = "Choisir dans la photothèque";
+"video_source_file_row" = "Choisir dans Fichiers";
+"video_source_footer" = "Formats MOV et MP4";

@@ -79,7 +79,6 @@
 /* VideoTrimView */
 "add_from_video_title" = "Audio uit video toevoegen";
 "loading" = "Laden…";
-"select_video" = "Kies een video";
 "preview" = "Voorbeeld";
 "selected_duration" = "Selectie: %@";
 "stop" = "Stop";
@@ -171,9 +170,6 @@
 "no_video" = "Geen video";
 
 /* Video Import Source */
-"video_source_title" = "Kies videobron";
-"video_source_photo" = "Fotobibliotheek";
-"video_source_file" = "Bestanden";
 "error_file_access_denied" = "Toegang tot het bestand is geweigerd.";
 "error_file_copy_failed" = "Kan het bestand niet kopiëren.";
 "error_unsupported_video_format" = "Niet-ondersteunde video-indeling.";
@@ -310,3 +306,7 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Afspeellijst beluisteren";
 "play_order_footer" = "Wekkers herhalen zich tot je ze stopt. Shuffle wijzigt bij elke stop de volgende volgorde. Eén willekeurig herhaalt steeds hetzelfde nummer.";
+"video_source_header" = "Kies een video";
+"video_source_photo_row" = "Kies uit de fotobibliotheek";
+"video_source_file_row" = "Kies uit Bestanden";
+"video_source_footer" = "Werkt met MOV en MP4";

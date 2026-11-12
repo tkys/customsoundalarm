@@ -79,7 +79,6 @@
 /* VideoTrimView */
 "add_from_video_title" = "从视频添加音频";
 "loading" = "正在载入…";
-"select_video" = "选择视频";
 "preview" = "预览";
 "selected_duration" = "已选：%@";
 "stop" = "停止";
@@ -171,9 +170,6 @@
 "no_video" = "无视频";
 
 /* Video Import Source */
-"video_source_title" = "选择视频来源";
-"video_source_photo" = "照片图库";
-"video_source_file" = "文件";
 "error_file_access_denied" = "文件访问被拒绝。";
 "error_file_copy_failed" = "无法复制文件。";
 "error_unsupported_video_format" = "不支持的视频格式。";
@@ -310,3 +306,7 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "试听播放列表";
 "play_order_footer" = "闹钟会一直重复，直到你停止。每次停止后，随机播放会改变下一次的顺序。随机一首会重复同一首曲目。";
+"video_source_header" = "选择视频";
+"video_source_photo_row" = "从照片图库选择";
+"video_source_file_row" = "从“文件”选择";
+"video_source_footer" = "支持 MOV 和 MP4";

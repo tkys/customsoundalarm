@@ -18,7 +18,6 @@ struct VideoImportFlow: View {
     @State private var soundName = ""
     @State private var isProcessing = false
     @State private var errorMessage: String?
-    @State private var showingSourceDialog = false
     @State private var showingPhotoPicker = false
     @State private var showingFilePicker = false
 
@@ -47,7 +46,7 @@ struct VideoImportFlow: View {
                 if let videoURL {
                     trimView(url: videoURL)
                 } else {
-                    loadingView
+                    sourceSelectionView
                 }
             }
         }
@@ -85,28 +84,7 @@ struct VideoImportFlow: View {
         } message: {
             Text("discard_edits_message")
         }
-        .onAppear {
-            if videoURL == nil { showingSourceDialog = true }
-        }
         .onDisappear { previewer.stop() }
-        // ソース選択ダイアログ
-        .confirmationDialog(
-            String(localized: "video_source_title"),
-            isPresented: $showingSourceDialog,
-            titleVisibility: .visible
-        ) {
-            Button(String(localized: "video_source_photo")) {
-                showingPhotoPicker = true
-                importSource = .photoLibrary
-            }
-            Button(String(localized: "video_source_file")) {
-                showingFilePicker = true
-                importSource = .file
-            }
-            Button("cancel", role: .cancel) {
-                if videoURL == nil { dismiss() }
-            }
-        }
         // 写真ライブラリ
         .photosPicker(
             isPresented: $showingPhotoPicker,
@@ -132,39 +110,90 @@ struct VideoImportFlow: View {
                 errorMessage = error.localizedDescription
             }
         }
-        .onChange(of: showingPhotoPicker) { _, isPresented in
-            if !isPresented && videoURL == nil && selectedItem == nil && !showingFilePicker {
-                showingSourceDialog = true
+    }
+
+    // MARK: - Source selection
+
+    /// 動画が未選択のあいだの2行（#200）。標準のダイアログは使わない。
+    private var sourceSelectionView: some View {
+        List {
+            Section {
+                sourceRow(
+                    title: "video_source_photo_row",
+                    systemImage: "photo.on.rectangle",
+                    identifier: "videoImport.source.photo"
+                ) {
+                    importSource = .photoLibrary
+                    showingPhotoPicker = true
+                }
+                sourceRow(
+                    title: "video_source_file_row",
+                    systemImage: "folder",
+                    identifier: "videoImport.source.file"
+                ) {
+                    importSource = .file
+                    showingFilePicker = true
+                }
+            } header: {
+                WarmSectionHeader(title: String(localized: "video_source_header"))
+            } footer: {
+                Text("video_source_footer")
+            }
+
+            if isProcessing || errorMessage != nil {
+                Section {
+                    loadingStatus
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                }
             }
         }
-        .onChange(of: showingFilePicker) { _, isPresented in
-            if !isPresented && videoURL == nil && !showingPhotoPicker {
-                showingSourceDialog = true
+        .warmListBackground()
+    }
+
+    private func sourceRow(
+        title: LocalizedStringKey,
+        systemImage: String,
+        identifier: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Label {
+                Text(title)
+            } icon: {
+                Image(systemName: systemImage)
+                    .foregroundStyle(Color.actionText)
+                    .padding(4)
+                    .background(
+                        Circle()
+                            .fill(Color.actionText.opacity(0.12))
+                    )
             }
         }
+        .accessibilityIdentifier(identifier)
     }
 
     // MARK: - Loading
 
-    private var loadingView: some View {
-        VStack(spacing: 16) {
-            if isProcessing {
+    /// 読み込み中・エラーの表示。2行はこの下でも押せる（#200）。
+    @ViewBuilder
+    private var loadingStatus: some View {
+        if isProcessing {
+            VStack(spacing: 12) {
                 ProgressView()
                 Text("loading")
                     .foregroundStyle(Color.textSecondary)
-            } else if let errorMessage {
+            }
+        } else if let errorMessage {
+            VStack(spacing: 12) {
                 Image(systemName: "exclamationmark.triangle")
                     .font(.largeTitle)
                     .foregroundStyle(.orange)
                 Text(errorMessage)
                     .foregroundStyle(Color.textSecondary)
                     .multilineTextAlignment(.center)
-            } else {
-                Text("select_video")
-                    .foregroundStyle(Color.textSecondary)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - Trim View
