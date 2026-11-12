@@ -176,6 +176,34 @@ final class AddAlarmRedesignUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["動画の選択元"].exists)
     }
 
+    /// #200 レビュー: 写真の行からピッカーを閉じても、もう一度開ける。
+    func testPhotoSourceRowCanReopenPicker() {
+        launchAdd()
+        _ = openSoundChoice()
+        let addVideo = app.buttons["soundPicker.addVideo"]
+        XCTAssertTrue(addVideo.waitForExistence(timeout: 10))
+        addVideo.tap()
+
+        let photo = app.buttons["videoImport.source.photo"]
+        XCTAssertTrue(photo.waitForExistence(timeout: 10))
+        photo.tap()
+
+        let cancel = app.buttons["Cancel"]
+        XCTAssertTrue(
+            cancel.waitForExistence(timeout: 10),
+            "photo picker should open: \(app.debugDescription)"
+        )
+        cancel.tap()
+
+        XCTAssertTrue(photo.waitForExistence(timeout: 10))
+        photo.tap()
+        XCTAssertTrue(
+            cancel.waitForExistence(timeout: 10),
+            "photo picker should open again: \(app.debugDescription)"
+        )
+        cancel.tap()
+    }
+
     func testSoundChoicePlaylistEmptyStateExplainsAndOffersCreate() {
         app.launchArguments = [
             "-uitest-open-add-alarm",

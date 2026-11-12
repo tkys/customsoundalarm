@@ -123,9 +123,13 @@ struct VideoImportFlow: View {
                     systemImage: "photo.on.rectangle",
                     identifier: "videoImport.source.photo"
                 ) {
+                    // 同じ動画を選び直しても onChange が発火するように消してから開く（#200 レビュー）
+                    selectedItem = nil
                     importSource = .photoLibrary
                     showingPhotoPicker = true
                 }
+                .disabled(isProcessing)
+
                 sourceRow(
                     title: "video_source_file_row",
                     systemImage: "folder",
@@ -134,10 +138,9 @@ struct VideoImportFlow: View {
                     importSource = .file
                     showingFilePicker = true
                 }
+                .disabled(isProcessing)
             } header: {
                 WarmSectionHeader(title: String(localized: "video_source_header"))
-            } footer: {
-                Text("video_source_footer")
             }
 
             if isProcessing || errorMessage != nil {
@@ -366,6 +369,8 @@ struct VideoImportFlow: View {
     private func loadVideo(from item: PhotosPickerItem) {
         isProcessing = true
         errorMessage = nil
+        // 失敗しても同じ動画を選び直せるように、読み取り後は選択を空に戻す（#200 レビュー）
+        selectedItem = nil
 
         Task {
             defer { isProcessing = false }

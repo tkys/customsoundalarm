@@ -309,4 +309,3 @@
 "video_source_header" = "选择视频";
 "video_source_photo_row" = "从照片图库选择";
 "video_source_file_row" = "从“文件”选择";
-"video_source_footer" = "支持 MOV 和 MP4";
