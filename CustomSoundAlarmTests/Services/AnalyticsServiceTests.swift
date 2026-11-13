@@ -102,6 +102,7 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.playlistCreated(
             trackCount: 3, totalSecondsBucket: "5_10min"
         ).name == "playlist_created")
+        #expect(AnalyticsEvent.playlistSuggestionShown.name == "playlist_suggestion_shown")
         #expect(AnalyticsEvent.playlistEmptyViewed(
             source: .library,
             hasOwnSounds: false
@@ -444,6 +445,7 @@ struct AnalyticsEventTests {
             .soundPickerRecentUsed,
             .adSlotEligible(slot: .bannerSounds, allowed: true, reason: .eligible, region: .standard),
             .playlistCreated(trackCount: 2, totalSecondsBucket: "1_5min"),
+            .playlistSuggestionShown,
             .playlistEmptyViewed(source: .library, hasOwnSounds: false),
             .playlistEdited(),
             .playlistRenderFailed(reason: .renderFailed),
@@ -724,6 +726,17 @@ struct AnalyticsEventTests {
         #expect(props["play_order"] as? String == "shuffle")
         #expect(props["transition"] as? String == "crossfade")
         #expect(props["source"] as? String == "sound_choice")
+    }
+
+    @Test
+    func playlistCreatedFromSuggestionHasSource() {
+        let props = AnalyticsEvent.playlistCreated(
+            trackCount: 3,
+            totalSecondsBucket: "1_5min",
+            playOrder: .oneRandom,
+            source: .suggestion
+        ).properties
+        #expect(props["source"] as? String == "suggestion")
     }
 
     @Test

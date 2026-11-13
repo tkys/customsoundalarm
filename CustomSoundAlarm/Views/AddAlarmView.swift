@@ -311,8 +311,8 @@ struct AlarmDetailView: View {
     private func playlistSummary(for playlist: Playlist) -> String {
         String(
             format: String(localized: "playlist_summary_fmt"),
-            playOrderTitle(playlist.playOrder),
-            playlist.trackCount
+            playlist.trackCount,
+            playOrderTitle(playlist.playOrder)
         )
     }
 

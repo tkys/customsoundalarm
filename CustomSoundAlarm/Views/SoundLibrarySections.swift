@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// ライブラリとアラームの音選択で共通の「自分の音」「プリセット」（#160 PR-2）。
+/// ライブラリとアラームの音選択で共通の「自分の音」「標準の音」（#160 PR-2 / #207）。
 ///
-/// `List` の直下に置くと、そのまま2つの Section として表示される。
+/// `List` の直下に置くと、そのまま Section として表示される。
+/// `middle` にはプレイリストの Section を挟める（#207）。
 struct SoundLibrarySections: View {
     /// true = アラームの音を選ぶ / false = ライブラリで管理する
     let isSelecting: Bool
@@ -10,12 +11,15 @@ struct SoundLibrarySections: View {
     /// 選択モードで1つ選ばれたとき（プレイリスト選択中はチェックを出さない）
     var selectionActive: Bool = true
     var onSelect: ((AlarmSound?) -> Void)?
+    /// 取り込んだ音と標準の音の間に置く Section（プレイリスト・#207）
+    var middle: AnyView?
 
     @State private var soundStore = SoundStore.shared
     @State private var audioPlayer = AudioPlayer.shared
     @State private var isImporting = false
     @State private var pendingAudio: PendingAudioImport?
     @State private var showingVideoImport = false
+    @State private var showingStandardSounds = false
     @State private var errorMessage: String?
     @State private var renamingSound: AlarmSound?
     @State private var renameText = ""
@@ -41,7 +45,8 @@ struct SoundLibrarySections: View {
         // Group や Section に付けると、List の中では各セクション・各行に複製され、
         // 同じシートを何度も開こうとして失敗し、アラームの追加画面ごと閉じてしまう（1.8.1・実機で再現）。
         importedSection
-        presetSection
+        if let middle { middle }
+        standardSection
         errorSection
     }
 
@@ -130,11 +135,15 @@ struct SoundLibrarySections: View {
                 .padding(.vertical, 12)
             } else {
                 ForEach(Array(imported.enumerated()), id: \.element.id) { index, sound in
-                    soundRow(
+                    SoundSelectionRow(
                         name: sound.name,
                         sound: sound,
                         isPreset: false,
-                        position: index + 1
+                        position: index + 1,
+                        isSelecting: isSelecting,
+                        selectionActive: selectionActive,
+                        selectedSound: $selectedSound,
+                        onSelect: onSelect
                     )
                     .contextMenu {
                         if !isSelecting {
@@ -165,31 +174,60 @@ struct SoundLibrarySections: View {
         }
     }
 
-    // MARK: - Presets
+    // MARK: - Standard sounds (#207)
 
     @ViewBuilder
-    private var presetSection: some View {
-        let presets = presets
+    private var standardSection: some View {
         Section {
-            if isSelecting {
-                soundRow(
-                    name: String(localized: "default_sound"),
-                    sound: nil,
-                    isPreset: true,
-                    position: 1
+            Button {
+                showingStandardSounds = true
+            } label: {
+                HStack(spacing: 12) {
+                    Label {
+                        Text(String(
+                            format: String(localized: "standard_sounds_fmt"),
+                            1 + presets.count
+                        ))
+                    } icon: {
+                        Image(systemName: "music.note")
+                            .foregroundStyle(Color.actionText)
+                            .padding(4)
+                            .background(
+                                Circle()
+                                    .fill(Color.actionText.opacity(0.12))
+                            )
+                    }
+                    Spacer(minLength: 8)
+                    if let selectedStandardName {
+                        Text(selectedStandardName)
+                            .foregroundStyle(Color.textSecondary)
+                            .lineLimit(1)
+                    }
+                    Image(systemName: "chevron.right")
+                        .font(.footnote)
+                        .foregroundStyle(Color.textSecondary)
+                }
+            }
+            .accessibilityIdentifier("library.standardSounds")
+            .sheet(isPresented: $showingStandardSounds) {
+                StandardSoundsSheet(
+                    presets: presets,
+                    isSelecting: isSelecting,
+                    selectionActive: selectionActive,
+                    selectedSound: $selectedSound,
+                    onSelect: onSelect
                 )
             }
-            ForEach(Array(presets.enumerated()), id: \.element.id) { index, sound in
-                soundRow(
-                    name: sound.name,
-                    sound: sound,
-                    isPreset: true,
-                    position: index + (isSelecting ? 2 : 1)
-                )
-            }
-        } header: {
-            WarmSectionHeader(title: String(localized: "presets"))
         }
+    }
+
+    /// 選んでいる音が標準の音なら、その名前。ライブラリでは出さない。
+    private var selectedStandardName: String? {
+        guard isSelecting, selectionActive else { return nil }
+        if let sound = selectedSound {
+            return sound.isPreset ? sound.name : nil
+        }
+        return String(localized: "default_sound")
     }
 
     // MARK: - Error
@@ -204,22 +242,88 @@ struct SoundLibrarySections: View {
             }
         }
     }
+}
 
-    // MARK: - Row
+// MARK: - Standard sounds sheet
 
-    private func soundRow(
-        name: String,
-        sound: AlarmSound?,
-        isPreset: Bool,
-        position: Int
-    ) -> some View {
-        let isPlaying = sound != nil && audioPlayer.playingFileName == sound?.fileName
-        let isSelected = isSelecting
+/// 既定の音＋プリセットの一覧（#207）。
+struct StandardSoundsSheet: View {
+    let presets: [AlarmSound]
+    let isSelecting: Bool
+    let selectionActive: Bool
+    @Binding var selectedSound: AlarmSound?
+    var onSelect: ((AlarmSound?) -> Void)?
+
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    SoundSelectionRow(
+                        name: String(localized: "default_sound"),
+                        sound: nil,
+                        isPreset: true,
+                        position: 1,
+                        isSelecting: isSelecting,
+                        selectionActive: selectionActive,
+                        selectedSound: $selectedSound,
+                        onSelect: onSelect
+                    )
+                    ForEach(Array(presets.enumerated()), id: \.element.id) { index, sound in
+                        SoundSelectionRow(
+                            name: sound.name,
+                            sound: sound,
+                            isPreset: true,
+                            position: index + 2,
+                            isSelecting: isSelecting,
+                            selectionActive: selectionActive,
+                            selectedSound: $selectedSound,
+                            onSelect: onSelect
+                        )
+                    }
+                }
+            }
+            .warmListBackground()
+            .navigationTitle(String(localized: "standard_sounds_title"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("close") { dismiss() }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Row
+
+/// サウンド1行。選ぶ画面では選ぶと同時に鳴らし、再生ボタンは選ばずに鳴らす（#196）。
+struct SoundSelectionRow: View {
+    let name: String
+    let sound: AlarmSound?
+    let isPreset: Bool
+    let position: Int
+    let isSelecting: Bool
+    let selectionActive: Bool
+    @Binding var selectedSound: AlarmSound?
+    var onSelect: ((AlarmSound?) -> Void)?
+
+    @State private var audioPlayer = AudioPlayer.shared
+
+    private var isPlaying: Bool {
+        sound != nil && audioPlayer.playingFileName == sound?.fileName
+    }
+
+    private var isSelected: Bool {
+        isSelecting
             && selectionActive
             && selectedSound?.id == sound?.id
             && (sound != nil || selectedSound == nil)
+    }
 
-        return HStack {
+    var body: some View {
+        HStack {
             ZStack {
                 if isPlaying {
                     Circle()
@@ -240,12 +344,7 @@ struct SoundLibrarySections: View {
 
             Button {
                 if isSelecting {
-                    handleSelectionTap(
-                        sound: sound,
-                        isPreset: isPreset,
-                        position: position,
-                        isActiveSelection: isSelected
-                    )
+                    handleSelectionTap()
                 } else if let sound {
                     togglePreview(sound)
                 }
@@ -289,25 +388,18 @@ struct SoundLibrarySections: View {
         }
     }
 
-    /// 選択モードの行タップ。選ぶと同時に鳴らし、同じ行の再タップで止める（#196）。
-    private func handleSelectionTap(
-        sound: AlarmSound?,
-        isPreset: Bool,
-        position: Int,
-        isActiveSelection: Bool
-    ) {
+    private func handleSelectionTap() {
         let outcome = SoundPreviewLogic.tap(
             tapped: sound,
             selected: selectedSound,
             playingFileName: audioPlayer.playingFileName,
-            isActiveSelection: isActiveSelection
+            isActiveSelection: isSelected
         )
 
         if outcome.stops {
             audioPlayer.stop()
         }
         if outcome.notifiesSelection {
-            // プレイリスト選択中でも音に切り替わるよう、選択が同じでも必ず通知する
             selectedSound = sound
             onSelect?(sound)
         }

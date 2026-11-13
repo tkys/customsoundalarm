@@ -146,15 +146,28 @@ struct PlaylistEditorView: View {
             }
 
             Section {
-                Picker("play_order", selection: $playOrder) {
-                    Label("play_order_in_order", systemImage: "repeat")
-                        .tag(PlaylistPlayOrder.inOrder)
-                    Label("play_order_shuffle", systemImage: "shuffle")
-                        .tag(PlaylistPlayOrder.shuffle)
-                    Label("play_order_one_random", systemImage: "repeat.1")
-                        .tag(PlaylistPlayOrder.oneRandom)
+                ForEach(PlaylistPlayOrder.allCases, id: \.self) { order in
+                    Button {
+                        playOrder = order
+                    } label: {
+                        HStack(alignment: .top, spacing: 10) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(localizedPlayOrderTitle(order))
+                                Text(playOrderWhenText(order))
+                                    .font(.footnote)
+                                    .foregroundStyle(Color.textSecondary)
+                            }
+                            Spacer()
+                            if playOrder == order {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(Brand.orange)
+                            }
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("playlist.playOrder.\(order.rawValue)")
                 }
-                .accessibilityIdentifier("playlist.playOrder")
 
                 Picker("transition", selection: $transition) {
                     Text("transition_off").tag(PlaylistTransition.off)
@@ -166,10 +179,13 @@ struct PlaylistEditorView: View {
             } header: {
                 WarmSectionHeader(title: String(localized: "playlist_playback"))
             } footer: {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("play_order_footer")
-                    Text("transition_footer")
-                }
+                Text("transition_footer")
+            }
+
+            Section {
+                Text("playlist_early_access_note")
+                    .font(.footnote)
+                    .foregroundStyle(Color.textSecondary)
             }
 
         }
@@ -270,6 +286,14 @@ struct PlaylistEditorView: View {
             }
             isRenderingPreview = false
             audioPlayer.playFile(fileName: resolution.fileName)
+        }
+    }
+
+    private func playOrderWhenText(_ order: PlaylistPlayOrder) -> String {
+        switch order {
+        case .inOrder: String(localized: "play_order_when_in_order")
+        case .shuffle: String(localized: "play_order_when_shuffle")
+        case .oneRandom: String(localized: "play_order_when_one_random")
         }
     }
 

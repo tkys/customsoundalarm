@@ -134,6 +134,15 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: 取り込んだ音が2つある状態（#207 の提案行）
+    static var isUITestSeedSuggestion: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-suggestion")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト・スクリーンショット用: デザイン監査の固定シード（DEBUGのみ・#173）
     static var isUITestSeedDesignAudit: Bool {
     #if DEBUG

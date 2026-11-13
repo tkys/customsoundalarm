@@ -25,8 +25,8 @@ struct PlaylistRowLabel: View {
     private var summary: String {
         String(
             format: String(localized: "playlist_summary_fmt"),
-            localizedPlayOrderTitle(playlist.playOrder),
-            playlist.trackCount
+            playlist.trackCount,
+            localizedPlayOrderTitle(playlist.playOrder)
         )
     }
 }
@@ -66,6 +66,53 @@ func localizedPlayOrderTitle(_ order: PlaylistPlayOrder) -> String {
     }
 }
 
+
+// MARK: - Suggestion (#207)
+
+/// プレイリストが無いときの「作る1行」。
+struct PlaylistSuggestionRow: View {
+    let importedCount: Int
+    let subtitle: LocalizedStringKey
+    let onCreate: () -> Void
+
+    @State private var reported = false
+
+    var body: some View {
+        Button(action: onCreate) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: "music.note.list")
+                    .foregroundStyle(Color.actionText)
+                    .padding(4)
+                    .background(
+                        Circle()
+                            .fill(Color.actionText.opacity(0.12))
+                    )
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(String(
+                        format: String(localized: "playlist_suggestion_title"),
+                        min(importedCount, PlaylistSuggestionLogic.maxTracks)
+                    ))
+                    .foregroundStyle(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                    Text(subtitle)
+                        .font(.footnote)
+                        .foregroundStyle(Color.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+            .contentShape(Rectangle())
+        }
+        .accessibilityIdentifier("playlist.suggestion")
+        .onAppear {
+            guard !reported else { return }
+            reported = true
+            AnalyticsService.shared.capture(.playlistSuggestionShown)
+        }
+    }
+}
 
 // MARK: - Empty state (#183)
 

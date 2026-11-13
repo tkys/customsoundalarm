@@ -8,6 +8,8 @@ import PostHog
 enum PlaylistSource: String, Sendable, CaseIterable, Hashable {
     case library
     case soundChoice = "sound_choice"
+    /// 「作る1行」から作成（#207）
+    case suggestion
 }
 
 // MARK: - AnalyticsEvent
@@ -148,6 +150,9 @@ enum AnalyticsEvent: Sendable {
         transition: PlaylistTransition = .off,
         source: PlaylistSource = .library
     )
+
+    /// プレイリストの「作る1行」を出した（#207）
+    case playlistSuggestionShown
 
     /// プレイリストが空の状態を見た（#183）
     /// 起動ごと・source ごとに1回だけ送る（PlaylistEmptyViewTracker が制御）。
@@ -291,6 +296,7 @@ enum AnalyticsEvent: Sendable {
         case .backupAlarmStopped: return "backup_alarm_stopped"
         case .soundSelected: return "sound_selected"
         case .playlistCreated: return "playlist_created"
+        case .playlistSuggestionShown: return "playlist_suggestion_shown"
         case .playlistEmptyViewed: return "playlist_empty_viewed"
         case .playlistEdited: return "playlist_edited"
         case .playlistRenderFailed: return "playlist_render_failed"
@@ -427,6 +433,8 @@ enum AnalyticsEvent: Sendable {
                 "kind": kind.rawValue,
                 "rank_bucket": rankBucket
             ]
+        case .playlistSuggestionShown:
+            return [:]
         case let .playlistCreated(
             trackCount,
             totalSecondsBucket,
