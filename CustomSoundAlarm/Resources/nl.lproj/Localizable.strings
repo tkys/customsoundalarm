@@ -319,4 +319,4 @@
 "settings_privacy" = "Privacybeleid";
 "settings_version" = "Versie";
 "settings_mail_subject" = "Over My Sound Alarm";
-"settings_mail_body" = "Bedankt voor je bericht.\n\nSchrijf je bericht hieronder.\n\n\n---\nApp: My Sound Alarm %@\niOS: %@\nApparaat: %@";
+"settings_mail_body" = "\n\n---\nApp: My Sound Alarm %@\niOS: %@\nApparaat: %@";

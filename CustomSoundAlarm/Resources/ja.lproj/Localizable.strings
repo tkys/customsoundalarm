@@ -319,4 +319,4 @@
 "settings_privacy" = "プライバシーポリシー";
 "settings_version" = "バージョン";
 "settings_mail_subject" = "My Sound Alarm について";
-"settings_mail_body" = "お問い合わせありがとうございます。\n\n以下に内容を書いてください。\n\n\n---\nアプリ: My Sound Alarm %@\niOS: %@\n機種: %@";
+"settings_mail_body" = "\n\n---\nアプリ: My Sound Alarm %@\niOS: %@\n機種: %@";

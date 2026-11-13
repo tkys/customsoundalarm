@@ -319,4 +319,4 @@
 "settings_privacy" = "隐私政策";
 "settings_version" = "版本";
 "settings_mail_subject" = "关于 My Sound Alarm";
-"settings_mail_body" = "感谢联系。\n\n请在下面写下内容。\n\n\n---\nApp：My Sound Alarm %@\niOS：%@\n设备：%@";
+"settings_mail_body" = "\n\n---\nApp：My Sound Alarm %@\niOS：%@\n设备：%@";

@@ -60,6 +60,10 @@ struct SettingsLogicTests {
             osVersion: "26.5",
             deviceModel: "iPhone (iPhone18,1)"
         )
+        // お礼の定型文は入れず、空行2つのあとに区切りと端末情報だけ
+        #expect(body.hasPrefix("\n\n---\n"))
+        #expect(!body.contains("Thanks"))
+        #expect(!body.lowercased().contains("please write"))
         #expect(body.contains("1.8.2 (14)"))
         #expect(body.contains("26.5"))
         #expect(body.contains("iPhone (iPhone18,1)"))

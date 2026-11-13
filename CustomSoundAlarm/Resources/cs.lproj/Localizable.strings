@@ -319,4 +319,4 @@
 "settings_privacy" = "Zásady ochrany soukromí";
 "settings_version" = "Verze";
 "settings_mail_subject" = "O aplikaci My Sound Alarm";
-"settings_mail_body" = "Děkujeme za zprávu.\n\nNapište zprávu níže.\n\n\n---\nAplikace: My Sound Alarm %@\niOS: %@\nZařízení: %@";
+"settings_mail_body" = "\n\n---\nAplikace: My Sound Alarm %@\niOS: %@\nZařízení: %@";

@@ -23,7 +23,9 @@ struct SettingsView: View {
                         row(title: "night_mode", systemImage: "moon.zzz")
                     }
                     .accessibilityIdentifier("settings.bedside")
+                }
 
+                Section {
                     Button {
                         openContact()
                     } label: {
@@ -35,27 +37,27 @@ struct SettingsView: View {
                         AnalyticsService.shared.capture(.reviewLinkOpened)
                         openURL(SettingsLogic.reviewURL)
                     } label: {
-                        row(title: "settings_review", systemImage: "star")
+                        externalRow(title: "settings_review", systemImage: "star")
                     }
                     .accessibilityIdentifier("settings.review")
 
                     Button {
                         openURL(SettingsLogic.howToURL(locale: .current))
                     } label: {
-                        row(title: "settings_howto", systemImage: "book")
+                        externalRow(title: "settings_howto", systemImage: "book")
                     }
                     .accessibilityIdentifier("settings.howto")
+                }
 
+                Section {
                     Button {
                         openURL(SettingsLogic.privacyURL)
                     } label: {
-                        row(title: "settings_privacy", systemImage: "hand.raised")
+                        externalRow(title: "settings_privacy", systemImage: "hand.raised")
                     }
                     .accessibilityIdentifier("settings.privacy")
 
                     versionRow
-                } header: {
-                    WarmSectionHeader(title: String(localized: "settings"))
                 }
             }
             .warmListBackground()
@@ -83,6 +85,18 @@ struct SettingsView: View {
                     showingMail = false
                 }
             }
+        }
+    }
+
+    /// アプリの外に出る行。右端に小さな矢印を置く（読み上げ不要）。
+    private func externalRow(title: LocalizedStringKey, systemImage: String) -> some View {
+        HStack {
+            row(title: title, systemImage: systemImage)
+            Spacer(minLength: 8)
+            Image(systemName: "arrow.up.right")
+                .font(.footnote)
+                .foregroundStyle(Color.textSecondary)
+                .accessibilityHidden(true)
         }
     }
 

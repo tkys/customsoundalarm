@@ -319,4 +319,4 @@
 "settings_privacy" = "개인정보 처리방침";
 "settings_version" = "버전";
 "settings_mail_subject" = "My Sound Alarm 정보";
-"settings_mail_body" = "문의해 주셔서 감사합니다.\n\n아래에 내용을 적어 주세요.\n\n\n---\n앱: My Sound Alarm %@\niOS: %@\n기기: %@";
+"settings_mail_body" = "\n\n---\n앱: My Sound Alarm %@\niOS: %@\n기기: %@";

@@ -319,4 +319,4 @@
 "settings_privacy" = "Política de privacidad";
 "settings_version" = "Versión";
 "settings_mail_subject" = "Acerca de My Sound Alarm";
-"settings_mail_body" = "Gracias por escribirnos.\n\nEscribe tu mensaje abajo.\n\n\n---\nApp: My Sound Alarm %@\niOS: %@\nDispositivo: %@";
+"settings_mail_body" = "\n\n---\nApp: My Sound Alarm %@\niOS: %@\nDispositivo: %@";
