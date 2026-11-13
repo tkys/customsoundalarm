@@ -3,8 +3,8 @@ import UIKit
 
 /// 設定画面の純ロジック（#204）。
 enum SettingsLogic {
-    static let supportEmail = "tkysyskw.dev@gmail.com"
-    static let siteBase = "https://tkys.github.io/customsoundalarm/"
+    static let supportEmail = "support@mysoundalarm.com"
+    static let siteBase = "https://mysoundalarm.com/"
 
     static let supportURL = URL(string: siteBase + "support.html")!
     static let privacyURL = URL(string: siteBase + "privacy.html")!

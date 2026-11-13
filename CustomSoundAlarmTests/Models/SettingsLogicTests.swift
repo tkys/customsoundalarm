@@ -36,7 +36,7 @@ struct SettingsLogicTests {
         for (identifier, path) in cases {
             let url = SettingsLogic.howToURL(locale: Locale(identifier: identifier))
             #expect(
-                url.absoluteString == "https://tkys.github.io/customsoundalarm/\(path)howto.html",
+                url.absoluteString == "https://mysoundalarm.com/\(path)howto.html",
                 "\(identifier): \(url)"
             )
         }
@@ -47,7 +47,7 @@ struct SettingsLogicTests {
         for identifier in ["en_US", "ru_RU", "zh_Hant_TW", "th_TH"] {
             let url = SettingsLogic.howToURL(locale: Locale(identifier: identifier))
             #expect(
-                url.absoluteString == "https://tkys.github.io/customsoundalarm/howto.html",
+                url.absoluteString == "https://mysoundalarm.com/howto.html",
                 "\(identifier): \(url)"
             )
         }
@@ -75,8 +75,15 @@ struct SettingsLogicTests {
 
     @Test
     func links_pointToThePublishedPages() {
-        #expect(SettingsLogic.supportURL.absoluteString == "https://tkys.github.io/customsoundalarm/support.html")
-        #expect(SettingsLogic.privacyURL.absoluteString == "https://tkys.github.io/customsoundalarm/privacy.html")
+        #expect(SettingsLogic.supportURL.absoluteString == "https://mysoundalarm.com/support.html")
+        #expect(SettingsLogic.privacyURL.absoluteString == "https://mysoundalarm.com/privacy.html")
         #expect(SettingsLogic.reviewURL.absoluteString == "https://apps.apple.com/app/id6760616800?action=write-review")
+    }
+
+    /// 旧 URL（tkys.github.io）は http:// への転送を返し、iOS の ATS で読めないため新ドメインを直接指す。
+    @Test
+    func appUsesTheNewDomainDirectly() {
+        #expect(SettingsLogic.supportEmail == "support@mysoundalarm.com")
+        #expect(URLSessionAppConfigFetcher.defaultURL.absoluteString == "https://mysoundalarm.com/app-config.json")
     }
 }
