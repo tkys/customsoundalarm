@@ -178,3 +178,68 @@ struct AlarmSaveLogicTests {
         #expect(none.skipDates.isEmpty)
     }
 }
+
+/// 繰り返し行の要約文言（#197 レビュー）。
+struct RepeatSummaryLogicTests {
+
+    private func japaneseStrings() throws -> RepeatSummaryStrings {
+        let path = try #require(
+            Bundle.main.path(forResource: "ja", ofType: "lproj"),
+            "ja.lproj"
+        )
+        let bundle = try #require(Bundle(path: path))
+        return RepeatSummaryStrings(bundle: bundle)
+    }
+
+    @Test
+    func noSkipsKeepsTheCurrentText() throws {
+        let strings = try japaneseStrings()
+        #expect(RepeatSummaryLogic.text(
+            weekdays: [2, 3, 4, 5, 6],
+            skipsHolidays: false,
+            skipDateCount: 0,
+            strings: strings
+        ) == "平日")
+        #expect(RepeatSummaryLogic.text(
+            weekdays: [1, 2, 3, 4, 5, 6, 7],
+            skipsHolidays: false,
+            skipDateCount: 0,
+            strings: strings
+        ) == "毎日")
+        #expect(RepeatSummaryLogic.text(
+            weekdays: [2, 4, 6],
+            skipsHolidays: false,
+            skipDateCount: 0,
+            strings: strings
+        ) == "月 水 金")
+        #expect(RepeatSummaryLogic.text(
+            weekdays: [],
+            skipsHolidays: true,
+            skipDateCount: 2,
+            strings: strings
+        ) == "しない")
+    }
+
+    @Test
+    func holidayAndDateSkipsAreShownAsResults() throws {
+        let strings = try japaneseStrings()
+        #expect(RepeatSummaryLogic.text(
+            weekdays: [2, 3, 4, 5, 6],
+            skipsHolidays: true,
+            skipDateCount: 0,
+            strings: strings
+        ) == "平日・祝日を除く")
+        #expect(RepeatSummaryLogic.text(
+            weekdays: [1, 2, 3, 4, 5, 6, 7],
+            skipsHolidays: false,
+            skipDateCount: 2,
+            strings: strings
+        ) == "毎日・2日休み")
+        #expect(RepeatSummaryLogic.text(
+            weekdays: [1, 2, 3, 4, 5, 6, 7],
+            skipsHolidays: true,
+            skipDateCount: 2,
+            strings: strings
+        ) == "毎日・祝日を除く・2日休み")
+    }
+}

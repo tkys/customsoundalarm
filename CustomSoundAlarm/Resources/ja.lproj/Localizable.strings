@@ -352,3 +352,6 @@
 "holiday_others_message_fmt" = "同じ曜日のアラームがほかにも%d本あります。";
 "holiday_apply_to_others_fmt" = "ほかの%d本にも";
 "holiday_apply_only_this" = "このアラームだけ";
+"repeat_summary_holiday_suffix" = "祝日を除く";
+"repeat_summary_skip_days_fmt" = "%d日休み";
+"holiday_skip_section_title" = "休み";

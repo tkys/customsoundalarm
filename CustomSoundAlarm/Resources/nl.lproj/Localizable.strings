@@ -352,3 +352,6 @@
 "holiday_others_message_fmt" = "Er zijn %d andere wekkers op dezelfde weekdagen.";
 "holiday_apply_to_others_fmt" = "Ook voor de andere %d";
 "holiday_apply_only_this" = "Alleen deze wekker";
+"repeat_summary_holiday_suffix" = "feestdagen uitgesloten";
+"repeat_summary_skip_days_fmt" = "%d dagen pauze";
+"holiday_skip_section_title" = "Pauzedagen";

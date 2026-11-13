@@ -352,3 +352,6 @@
 "holiday_others_message_fmt" = "Há %d outros alarmes nos mesmos dias da semana.";
 "holiday_apply_to_others_fmt" = "Também nos outros %d";
 "holiday_apply_only_this" = "Só neste alarme";
+"repeat_summary_holiday_suffix" = "feriados excluídos";
+"repeat_summary_skip_days_fmt" = "%d dias de pausa";
+"holiday_skip_section_title" = "Dias de pausa";

@@ -82,3 +82,70 @@ enum AlarmSaveLogic {
         return updated
     }
 }
+
+// MARK: - 繰り返し行の要約（#197 レビュー）
+
+/// 繰り返し行に出す文言の材料。テストでは日本語の lproj を渡せる。
+struct RepeatSummaryStrings {
+    let never: String
+    let everyDay: String
+    let weekdays: String
+    let weekends: String
+    let dayLabels: [Int: String]
+    let holidaySuffix: String
+    let skipDaysFormat: String
+
+    init(bundle: Bundle = .main) {
+        func value(_ key: String) -> String {
+            bundle.localizedString(forKey: key, value: nil, table: nil)
+        }
+        never = value("never")
+        everyDay = value("every_day")
+        weekdays = value("weekdays")
+        weekends = value("weekends")
+        dayLabels = [
+            1: value("day_sun"),
+            2: value("day_mon"),
+            3: value("day_tue"),
+            4: value("day_wed"),
+            5: value("day_thu"),
+            6: value("day_fri"),
+            7: value("day_sat"),
+        ]
+        holidaySuffix = value("repeat_summary_holiday_suffix")
+        skipDaysFormat = value("repeat_summary_skip_days_fmt")
+    }
+}
+
+/// 繰り返し行の値。休みが無ければ今までどおり、あるときは結果だけを添える（#197）。
+enum RepeatSummaryLogic {
+    static func text(
+        weekdays: Set<Int>,
+        skipsHolidays: Bool,
+        skipDateCount: Int,
+        strings: RepeatSummaryStrings = RepeatSummaryStrings()
+    ) -> String {
+        let days = weekdays.filter { (1...7).contains($0) }.sorted()
+        guard !days.isEmpty else { return strings.never }
+
+        let base: String
+        if days.count == 7 {
+            base = strings.everyDay
+        } else if Set(days) == Set([2, 3, 4, 5, 6]) {
+            base = strings.weekdays
+        } else if Set(days) == Set([1, 7]) {
+            base = strings.weekends
+        } else {
+            base = days.compactMap { strings.dayLabels[$0] }.joined(separator: " ")
+        }
+
+        var parts = [base]
+        if skipsHolidays {
+            parts.append(strings.holidaySuffix)
+        }
+        if skipDateCount > 0 {
+            parts.append(String(format: strings.skipDaysFormat, skipDateCount))
+        }
+        return parts.joined(separator: "・")
+    }
+}

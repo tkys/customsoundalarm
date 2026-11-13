@@ -352,3 +352,6 @@
 "holiday_others_message_fmt" = "Es gibt %d weitere Wecker an denselben Wochentagen.";
 "holiday_apply_to_others_fmt" = "Auch für %d weitere";
 "holiday_apply_only_this" = "Nur dieser Wecker";
+"repeat_summary_holiday_suffix" = "Feiertage ausgenommen";
+"repeat_summary_skip_days_fmt" = "%d Tage Pause";
+"holiday_skip_section_title" = "Ruhetage";

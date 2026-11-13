@@ -434,6 +434,7 @@ struct AlarmRow: View {
                         .font(.caption)
                         .foregroundStyle(metaColor)
                         .lineLimit(1)
+                        .accessibilityIdentifier("holiday.summary")
                 }
             }
 
@@ -481,6 +482,7 @@ struct AlarmRow: View {
                     .font(.caption)
                     .foregroundStyle(metaColor)
                     .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("holiday.summary")
             }
         }
     }

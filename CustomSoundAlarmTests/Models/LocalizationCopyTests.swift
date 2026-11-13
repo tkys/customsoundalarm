@@ -124,4 +124,49 @@ struct LocalizationCopyTests {
             )
         }
     }
+
+    @Test
+    func repeatSummarySkipsUseEveryLanguage() throws {
+        let holiday = [
+            "en": "holidays excluded",
+            "ja": "祝日を除く",
+            "fr": "jours fériés exclus",
+            "de": "Feiertage ausgenommen",
+            "es": "festivos excluidos",
+            "pt-BR": "feriados excluídos",
+            "it": "festività escluse",
+            "nl": "feestdagen uitgesloten",
+            "ko": "공휴일 제외",
+            "zh-Hans": "不含节假日",
+            "ar": "بدون العطلات",
+            "pl": "bez świąt",
+            "cs": "bez svátků",
+        ]
+        let skipDays = [
+            "en": "%d days off",
+            "ja": "%d日休み",
+            "fr": "%d jours de pause",
+            "de": "%d Tage Pause",
+            "es": "%d días de pausa",
+            "pt-BR": "%d dias de pausa",
+            "it": "%d giorni di pausa",
+            "nl": "%d dagen pauze",
+            "ko": "%d일 쉼",
+            "zh-Hans": "休%d天",
+            "ar": "%d أيام راحة",
+            "pl": "%d dni przerwy",
+            "cs": "%d dní pauzy",
+        ]
+        for language in Self.languages {
+            let strings = try strings(for: language)
+            #expect(
+                strings["repeat_summary_holiday_suffix"] == holiday[language],
+                "\(language): \(strings["repeat_summary_holiday_suffix"] ?? "nil")"
+            )
+            #expect(
+                strings["repeat_summary_skip_days_fmt"] == skipDays[language],
+                "\(language): \(strings["repeat_summary_skip_days_fmt"] ?? "nil")"
+            )
+        }
+    }
 }

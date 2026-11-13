@@ -6,6 +6,11 @@ import XCTest
 /// 行の右スワイプ → 次の1回を休む → 行の案内 → 取り消し。
 final class AlarmSkipUITests: XCTestCase {
 
+    override func setUp() {
+        super.setUp()
+        continueAfterFailure = false
+    }
+
     private func launchSkipSeed() -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["-uitest-seed-skip"]
@@ -138,6 +143,98 @@ final class AlarmSkipUITests: XCTestCase {
         XCTAssertFalse(
             app.staticTexts["skipAll.notice"].waitForExistence(timeout: 5),
             "custom rest should be undone so later tests start clean"
+        )
+    }
+
+    func testHolidayToggleInRepeatScreenSavesAndShowsInList() {
+        let app = launchJapaneseSeed()
+        openFirstAlarmRepeatScreen(app)
+
+        let holiday = app.switches["addAlarm.holidaySkip"]
+        XCTAssertTrue(
+            holiday.waitForExistence(timeout: 10),
+            "holiday toggle should be in the repeat screen: \(app.debugDescription)"
+        )
+        // List の行はラベル側をタップしても切り替わらないことがあるため、
+        // 右端のスイッチを押す。
+        holiday.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+
+        // 同じ曜日のアラームがあるときの提案は、このアラームだけにする。
+        let onlyThis = app.buttons["このアラームだけ"]
+        XCTAssertTrue(
+            onlyThis.waitForExistence(timeout: 10),
+            "holiday offer should appear: \(app.debugDescription)"
+        )
+        onlyThis.tap()
+        XCTAssertEqual(holiday.value as? String, "1")
+
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10))
+        app.buttons["addAlarm.save"].tap()
+
+        XCTAssertTrue(
+            app.staticTexts["holiday.summary"].firstMatch.waitForExistence(timeout: 15),
+            "saved holiday setting should show on the alarm row: \(app.debugDescription)"
+        )
+    }
+
+    func testDateSkipFromRepeatScreenShowsRowNotice() {
+        let app = launchJapaneseSeed()
+        openFirstAlarmRepeatScreen(app)
+
+        let skipDates = app.buttons["addAlarm.skipDates"]
+        XCTAssertTrue(
+            skipDates.waitForExistence(timeout: 10),
+            "date-skip row should be in the repeat screen: \(app.debugDescription)"
+        )
+        skipDates.tap()
+
+        let today = app.buttons.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "今日")
+        ).firstMatch
+        XCTAssertTrue(
+            today.waitForExistence(timeout: 10),
+            "calendar should open: \(app.debugDescription)"
+        )
+        today.tap()
+        app.buttons["skipDates.close"].tap()
+
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10))
+        app.buttons["addAlarm.save"].tap()
+
+        XCTAssertTrue(
+            app.staticTexts["skip.row.summary"].firstMatch.waitForExistence(timeout: 15),
+            "saved date skip should show on the alarm row: \(app.debugDescription)"
+        )
+    }
+
+    private func launchJapaneseSeed() -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-uitest-seed-skip",
+            "-AppleLanguages", "(ja)",
+            "-AppleLocale", "ja_JP"
+        ]
+        app.launch()
+        XCTAssertTrue(app.buttons["alarmList.skipAll"].waitForExistence(timeout: 20))
+        return app
+    }
+
+    private func openFirstAlarmRepeatScreen(_ app: XCUIApplication) {
+        let firstRow = app.cells.firstMatch
+        XCTAssertTrue(firstRow.waitForExistence(timeout: 10))
+        firstRow.tap()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 20),
+            "edit screen should open: \(app.debugDescription)"
+        )
+        let repeatRow = app.buttons["addAlarm.repeatRow"]
+        XCTAssertTrue(repeatRow.waitForExistence(timeout: 10))
+        repeatRow.tap()
+        XCTAssertTrue(
+            app.buttons["repeat.day.1"].waitForExistence(timeout: 10),
+            "repeat screen should open: \(app.debugDescription)"
         )
     }
 }

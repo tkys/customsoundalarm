@@ -352,3 +352,6 @@
 "holiday_others_message_fmt" = "같은 요일에 다른 알람이 %d개 있습니다.";
 "holiday_apply_to_others_fmt" = "다른 %d개에도";
 "holiday_apply_only_this" = "이 알람만";
+"repeat_summary_holiday_suffix" = "공휴일 제외";
+"repeat_summary_skip_days_fmt" = "%d일 쉼";
+"holiday_skip_section_title" = "쉬는 날";

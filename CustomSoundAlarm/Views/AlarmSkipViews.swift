@@ -603,6 +603,7 @@ struct AlarmSkipDatesSheet: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("close") { dismiss() }
+                        .accessibilityIdentifier("skipDates.close")
                 }
             }
             .onChange(of: selection) { _, newValue in
