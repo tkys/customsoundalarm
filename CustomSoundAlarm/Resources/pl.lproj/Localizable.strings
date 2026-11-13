@@ -329,10 +329,11 @@
 "skip_all_24h" = "24 godziny";
 "skip_all_3d" = "3 dni";
 "skip_all_7d" = "7 dni";
-"skip_all_row_fmt" = "do %@ · %d";
+"skip_all_row_fmt" = "do %@ · %d razy";
 "skip_all_custom" = "Wybierz daty";
 "skip_all_summary_fmt" = "Budziki, które nie zadzwonią: %@";
 "skip_all_active_fmt" = "Wstrzymane do %1$@ · %2$d";
+"skip_row_global_fmt" = "Wstrzymane do %@";
 "skip_row_skip_fmt" = "Wstrzymaj %@";
 "skip_row_undo" = "Anuluj wstrzymanie";
 "skip_row_summary_fmt" = "Wstrzymany %@ · następny %@";

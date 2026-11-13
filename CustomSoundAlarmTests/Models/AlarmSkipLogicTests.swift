@@ -591,7 +591,7 @@ extension AlarmSkipLogicTests {
     }
 
     @Test
-    func globalSkipCountIncludesDisabledOneTimeAlarms() {
+    func globalSkipAlarmCountIncludesDisabledOneTimeAlarms() {
         let entry = AlarmEntry(hour: 7, minute: 0, repeatWeekdays: [])
         var disabled = entry
         disabled.isEnabled = false
@@ -603,9 +603,54 @@ extension AlarmSkipLogicTests {
             entryIDs: [entry.id],
             disabledOneTimeIDs: [entry.id]
         )
-        #expect(AlarmSkipLogic.globalSkipCount(
-            skip: skip, entries: [disabled], calendar: calendar
+        #expect(AlarmSkipLogic.globalSkipAlarmCount(
+            skip: skip, entries: [disabled]
         ) == 1)
+    }
+
+    @Test
+    func globalSkipAlarmCountDoesNotCountOccurrences() {
+        let entry = repeating([1, 2, 3, 4, 5, 6, 7])
+        let now = date(2026, 11, 13, 12)
+        let skip = GlobalSkip(
+            start: now,
+            end: calendar.date(byAdding: .day, value: 7, to: now)!,
+            entryIDs: [entry.id]
+        )
+        // 7日間で7回鳴っても、一覧上部はアラーム1本。
+        #expect(AlarmSkipLogic.globalSkipAlarmCount(skip: skip, entries: [entry]) == 1)
+    }
+
+    @Test
+    func globalSkipRowEndOnlyForIncludedEnabledAlarms() {
+        let included = repeating([1, 2, 3, 4, 5, 6, 7])
+        let notIncluded = repeating([1, 2, 3, 4, 5, 6, 7])
+        var oneTimeDisabled = AlarmEntry(hour: 7, minute: 0, repeatWeekdays: [])
+        oneTimeDisabled.isEnabled = false
+        oneTimeDisabled.skipDisabledDate = "2026-11-14"
+        let now = date(2026, 11, 13, 12)
+        let end = calendar.date(byAdding: .day, value: 1, to: now)!
+        let skip = GlobalSkip(
+            start: now,
+            end: end,
+            entryIDs: [included.id, oneTimeDisabled.id],
+            disabledOneTimeIDs: [oneTimeDisabled.id]
+        )
+
+        #expect(AlarmSkipLogic.globalSkipRowEnd(
+            for: included, now: now, globalSkip: skip
+        ) == end)
+        #expect(AlarmSkipLogic.globalSkipRowEnd(
+            for: notIncluded, now: now, globalSkip: skip
+        ) == nil)
+        #expect(AlarmSkipLogic.globalSkipRowEnd(
+            for: oneTimeDisabled, now: now, globalSkip: skip
+        ) == nil)
+        #expect(AlarmSkipLogic.globalSkipRowEnd(
+            for: included,
+            now: end.addingTimeInterval(1),
+            globalSkip: skip
+        ) == nil)
     }
 }
 

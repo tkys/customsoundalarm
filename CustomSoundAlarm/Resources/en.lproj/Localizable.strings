@@ -329,10 +329,11 @@
 "skip_all_24h" = "24 hours";
 "skip_all_3d" = "3 days";
 "skip_all_7d" = "7 days";
-"skip_all_row_fmt" = "until %@ · %d";
+"skip_all_row_fmt" = "until %@ · %d times";
 "skip_all_custom" = "Choose dates";
 "skip_all_summary_fmt" = "Alarms that won't ring: %@";
 "skip_all_active_fmt" = "Resting until %1$@ · %2$d";
+"skip_row_global_fmt" = "Resting until %@";
 "skip_row_skip_fmt" = "Rest on %@";
 "skip_row_undo" = "Cancel the rest";
 "skip_row_summary_fmt" = "Resting on %@ · next %@";

@@ -329,10 +329,11 @@
 "skip_all_24h" = "24시간";
 "skip_all_3d" = "3일";
 "skip_all_7d" = "7일";
-"skip_all_row_fmt" = "%@ 까지 · %d개";
+"skip_all_row_fmt" = "%@ 까지 · %d회";
 "skip_all_custom" = "날짜 선택";
 "skip_all_summary_fmt" = "울리지 않는 알람: %@";
 "skip_all_active_fmt" = "%1$@ 까지 쉬기 · %2$d개";
+"skip_row_global_fmt" = "%@ 까지 쉬기";
 "skip_row_skip_fmt" = "%@ 쉬기";
 "skip_row_undo" = "쉬기 취소";
 "skip_row_summary_fmt" = "%@ 쉬기 · 다음은 %@";

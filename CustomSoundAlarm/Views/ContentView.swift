@@ -415,6 +415,13 @@ struct AlarmRow: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .accessibilityIdentifier("skip.row.summary")
                 }
+                if let globalSkipSummaryText {
+                    Text(globalSkipSummaryText)
+                        .font(.caption)
+                        .foregroundStyle(metaColor)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityIdentifier("skip.row.globalSummary")
+                }
                 if !alarm.label.isEmpty {
                     Text(alarm.label)
                         .font(.subheadline)
@@ -451,6 +458,14 @@ struct AlarmRow: View {
                     .foregroundStyle(metaColor)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("skip.row.summary")
+            }
+
+            if let globalSkipSummaryText {
+                Text(globalSkipSummaryText)
+                    .font(.caption)
+                    .foregroundStyle(metaColor)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("skip.row.globalSummary")
             }
 
             if !alarm.label.isEmpty {
@@ -580,6 +595,14 @@ struct AlarmRow: View {
         return String(
             format: String(localized: "skip_row_summary_no_next_fmt"),
             AlarmSkipFormat.day(summary.skipped)
+        )
+    }
+
+    private var globalSkipSummaryText: String? {
+        guard let end = AlarmSkipLogic.globalSkipRowEnd(for: alarm) else { return nil }
+        return String(
+            format: String(localized: "skip_row_global_fmt"),
+            AlarmSkipFormat.dayAndTime(end)
         )
     }
 

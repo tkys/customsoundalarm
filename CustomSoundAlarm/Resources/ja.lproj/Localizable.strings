@@ -329,10 +329,11 @@
 "skip_all_24h" = "24時間";
 "skip_all_3d" = "3日間";
 "skip_all_7d" = "7日間";
-"skip_all_row_fmt" = "%@ まで・%d本";
+"skip_all_row_fmt" = "%@ まで・%d回";
 "skip_all_custom" = "日付を選ぶ";
 "skip_all_summary_fmt" = "鳴らなくなるアラーム：%@";
 "skip_all_active_fmt" = "%1$@ まで休み・%2$d本";
+"skip_row_global_fmt" = "%@ まで休み";
 "skip_row_skip_fmt" = "%@ を休む";
 "skip_row_undo" = "休みを取り消す";
 "skip_row_summary_fmt" = "%@ は休み・次は %@";

@@ -329,10 +329,11 @@
 "skip_all_24h" = "24 horas";
 "skip_all_3d" = "3 dias";
 "skip_all_7d" = "7 dias";
-"skip_all_row_fmt" = "até %@ · %d";
+"skip_all_row_fmt" = "até %@ · %d vezes";
 "skip_all_custom" = "Escolher datas";
 "skip_all_summary_fmt" = "Alarmes que não vão tocar: %@";
 "skip_all_active_fmt" = "Em pausa até %1$@ · %2$d";
+"skip_row_global_fmt" = "Em pausa até %@";
 "skip_row_skip_fmt" = "Pausar em %@";
 "skip_row_undo" = "Cancelar a pausa";
 "skip_row_summary_fmt" = "Em pausa em %@ · próxima %@";

@@ -329,10 +329,11 @@
 "skip_all_24h" = "24小时";
 "skip_all_3d" = "3天";
 "skip_all_7d" = "7天";
-"skip_all_row_fmt" = "至 %@ · %d个";
+"skip_all_row_fmt" = "至 %@ · %d次";
 "skip_all_custom" = "选择日期";
 "skip_all_summary_fmt" = "不会响的闹钟：%@";
 "skip_all_active_fmt" = "休息至 %1$@ · %2$d个";
+"skip_row_global_fmt" = "休息至 %@";
 "skip_row_skip_fmt" = "让 %@ 休息";
 "skip_row_undo" = "取消休息";
 "skip_row_summary_fmt" = "%@ 休息 · 下次 %@";

@@ -105,7 +105,7 @@ struct GlobalSkipNoticeRow: View {
     }
 
     private var count: Int {
-        AlarmSkipLogic.globalSkipCount(skip: skip, entries: entries)
+        AlarmSkipLogic.globalSkipAlarmCount(skip: skip, entries: entries)
     }
 }
 

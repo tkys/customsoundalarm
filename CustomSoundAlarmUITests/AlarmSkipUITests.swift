@@ -44,6 +44,11 @@ final class AlarmSkipUITests: XCTestCase {
             notice.waitForExistence(timeout: 10),
             "rest notice should appear: \(app.debugDescription)"
         )
+        let gridLine = app.staticTexts["skip.row.globalSummary"].firstMatch
+        XCTAssertTrue(
+            gridLine.waitForExistence(timeout: 10),
+            "included alarm rows should show the global rest line: \(app.debugDescription)"
+        )
         let undo = app.buttons["skipAll.undo"]
         XCTAssertTrue(undo.exists, "undo should appear: \(app.debugDescription)")
 
@@ -53,6 +58,10 @@ final class AlarmSkipUITests: XCTestCase {
             "notice should disappear after undo"
         )
         XCTAssertTrue(bell.waitForExistence(timeout: 5), "bell should remain")
+        XCTAssertFalse(
+            app.staticTexts["skip.row.globalSummary"].firstMatch.exists,
+            "global rest line should disappear after undo"
+        )
     }
 
     func testLeadingSwipeSkipsNextAndShowsRowSummary() {

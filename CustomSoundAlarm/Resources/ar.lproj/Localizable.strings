@@ -329,10 +329,11 @@
 "skip_all_24h" = "24 ساعة";
 "skip_all_3d" = "3 أيام";
 "skip_all_7d" = "7 أيام";
-"skip_all_row_fmt" = "حتى %@ · %d";
+"skip_all_row_fmt" = "حتى %@ · %d مرات";
 "skip_all_custom" = "اختيار التواريخ";
 "skip_all_summary_fmt" = "المنبهات التي لن ترن: %@";
 "skip_all_active_fmt" = "إيقاف مؤقت حتى %1$@ · %2$d";
+"skip_row_global_fmt" = "إيقاف مؤقت حتى %@";
 "skip_row_skip_fmt" = "إيقاف مؤقت في %@";
 "skip_row_undo" = "إلغاء الإيقاف المؤقت";
 "skip_row_summary_fmt" = "إيقاف مؤقت في %@ · التالي %@";

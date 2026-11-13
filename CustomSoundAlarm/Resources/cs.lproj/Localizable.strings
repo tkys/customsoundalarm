@@ -329,10 +329,11 @@
 "skip_all_24h" = "24 hodin";
 "skip_all_3d" = "3 dny";
 "skip_all_7d" = "7 dní";
-"skip_all_row_fmt" = "do %@ · %d";
+"skip_all_row_fmt" = "do %@ · %d krát";
 "skip_all_custom" = "Vybrat data";
 "skip_all_summary_fmt" = "Budíky, které nezazvoní: %@";
 "skip_all_active_fmt" = "Pozastaveno do %1$@ · %2$d";
+"skip_row_global_fmt" = "Pozastaveno do %@";
 "skip_row_skip_fmt" = "Pozastavit %@";
 "skip_row_undo" = "Zrušit pozastavení";
 "skip_row_summary_fmt" = "Pozastaveno %@ · další %@";

@@ -329,10 +329,11 @@
 "skip_all_24h" = "24 Stunden";
 "skip_all_3d" = "3 Tage";
 "skip_all_7d" = "7 Tage";
-"skip_all_row_fmt" = "bis %@ · %d";
+"skip_all_row_fmt" = "bis %@ · %d Mal";
 "skip_all_custom" = "Daten wählen";
 "skip_all_summary_fmt" = "Wecker, die nicht klingeln: %@";
 "skip_all_active_fmt" = "Pause bis %1$@ · %2$d";
+"skip_row_global_fmt" = "Pause bis %@";
 "skip_row_skip_fmt" = "Am %@ pausieren";
 "skip_row_undo" = "Pause beenden";
 "skip_row_summary_fmt" = "Pause am %@ · nächster %@";

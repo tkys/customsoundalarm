@@ -703,26 +703,32 @@ enum AlarmSkipLogic {
         return calendar.startOfDay(for: next ?? now)
     }
 
-    /// 一覧上部に出す「何本」。
+    /// 一覧上部に出す「何本」。鳴る回数ではなく、対象のアラーム数。
     ///
     /// 全体の休みで止めた1回きりのアラームも1本として数える。
-    static func globalSkipCount(
+    static func globalSkipAlarmCount(
         skip: GlobalSkip,
-        entries: [AlarmEntry],
-        calendar: Calendar = .current
+        entries: [AlarmEntry]
     ) -> Int {
-        let interval = DateInterval(start: skip.start, end: skip.end)
-        let disabled = Set(skip.disabledOneTimeIDs)
-        return entries.reduce(0) { total, entry in
-            guard skip.entryIDs.contains(entry.id) else { return total }
-            if entry.isEnabled {
-                return total + occurrences(of: entry, in: interval, calendar: calendar).count
-            }
-            if disabled.contains(entry.id) {
-                return total + 1
-            }
-            return total
+        entries.filter { skip.entryIDs.contains($0.id) }.count
+    }
+
+    /// 行の時刻の下に出す「11/14（土）22:55 まで休み」の終わり。
+    ///
+    /// 全体の休みの対象で、まだオンのアラームだけ。1回きりで止めた行は
+    /// オフのままなので、ここでは何も返さない（#197 レビュー）。
+    static func globalSkipRowEnd(
+        for entry: AlarmEntry,
+        now: Date = Date(),
+        globalSkip: GlobalSkip? = AppGroup.globalSkip
+    ) -> Date? {
+        guard let globalSkip,
+              globalSkip.end > now,
+              globalSkip.entryIDs.contains(entry.id),
+              entry.isEnabled else {
+            return nil
         }
+        return globalSkip.end
     }
 
     // MARK: - 一覧のまとめ
