@@ -52,6 +52,9 @@ struct SoundLibrarySections: View {
         let imported = importedSounds
         Section {
             Button {
+                if SoundPreviewLogic.shouldStop(playingFileName: audioPlayer.playingFileName) {
+                    audioPlayer.stop()
+                }
                 showingVideoImport = true
             } label: {
                 Label {
@@ -92,6 +95,9 @@ struct SoundLibrarySections: View {
             }
 
             Button {
+                if SoundPreviewLogic.shouldStop(playingFileName: audioPlayer.playingFileName) {
+                    audioPlayer.stop()
+                }
                 isImporting = true
             } label: {
                 Label {
@@ -234,15 +240,12 @@ struct SoundLibrarySections: View {
 
             Button {
                 if isSelecting {
-                    selectedSound = sound
-                    let kind: SoundSelectionKind = sound == nil
-                        ? .default
-                        : (isPreset ? .preset : .imported)
-                    AnalyticsService.shared.capture(.soundSelected(
-                        kind: kind,
-                        rankBucket: SoundSelectionAnalytics.rankBucket(position: position)
-                    ))
-                    onSelect?(sound)
+                    handleSelectionTap(
+                        sound: sound,
+                        isPreset: isPreset,
+                        position: position,
+                        isActiveSelection: isSelected
+                    )
                 } else if let sound {
                     togglePreview(sound)
                 }
@@ -259,6 +262,7 @@ struct SoundLibrarySections: View {
                 .contentShape(Rectangle())
             }
             .foregroundStyle(.primary)
+            .accessibilityAddTraits(isSelected ? .isSelected : [])
             .accessibilityIdentifier(
                 isPreset
                     ? "library.preset.\(sound?.fileName ?? "default")"
@@ -270,7 +274,7 @@ struct SoundLibrarySections: View {
                     if audioPlayer.playingFileName == sound.fileName {
                         audioPlayer.stop()
                     } else {
-                        audioPlayer.play(sound)
+                        audioPlayer.play(sound, source: .playButton)
                     }
                 } label: {
                     Image(systemName: isPlaying ? "stop.circle.fill" : "play.circle")
@@ -279,7 +283,45 @@ struct SoundLibrarySections: View {
                         .symbolEffect(.variableColor.iterative, isActive: isPlaying)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(isPlaying ? Text("stop") : Text("preview"))
+                .accessibilityIdentifier("soundPicker.preview.\(sound.fileName)")
             }
+        }
+    }
+
+    /// 選択モードの行タップ。選ぶと同時に鳴らし、同じ行の再タップで止める（#196）。
+    private func handleSelectionTap(
+        sound: AlarmSound?,
+        isPreset: Bool,
+        position: Int,
+        isActiveSelection: Bool
+    ) {
+        let outcome = SoundPreviewLogic.tap(
+            tapped: sound,
+            selected: selectedSound,
+            playingFileName: audioPlayer.playingFileName,
+            isActiveSelection: isActiveSelection
+        )
+
+        if outcome.stops {
+            audioPlayer.stop()
+        }
+        if outcome.notifiesSelection {
+            // プレイリスト選択中でも音に切り替わるよう、選択が同じでも必ず通知する
+            selectedSound = sound
+            onSelect?(sound)
+        }
+        if outcome.selectionChanged {
+            let kind: SoundSelectionKind = sound == nil
+                ? .default
+                : (isPreset ? .preset : .imported)
+            AnalyticsService.shared.capture(.soundSelected(
+                kind: kind,
+                rankBucket: SoundSelectionAnalytics.rankBucket(position: position)
+            ))
+        }
+        if outcome.plays, let sound {
+            audioPlayer.play(sound, source: .selectTap)
         }
     }
 
@@ -287,7 +329,7 @@ struct SoundLibrarySections: View {
         if audioPlayer.playingFileName == sound.fileName {
             audioPlayer.stop()
         } else {
-            audioPlayer.play(sound)
+            audioPlayer.play(sound, source: .library)
         }
     }
 }

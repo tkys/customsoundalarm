@@ -67,6 +67,20 @@ struct AnalyticsEventsDocTests {
     }
 
     @Test
+    func soundPreviewSourcesAreDocumented() throws {
+        let doc = try String(contentsOf: docURL, encoding: .utf8)
+        let row = try #require(
+            doc.split(separator: "\n").first { $0.hasPrefix("| `sound_preview_played` |") }
+        )
+        for source in SoundPreviewSource.allCases {
+            #expect(
+                row.contains(source.rawValue),
+                "docs/analytics-events.md の sound_preview_played に \(source.rawValue) がありません"
+            )
+        }
+    }
+
+    @Test
     func userPropertiesAreDocumented() throws {
         let doc = try String(contentsOf: docURL, encoding: .utf8)
         let properties = [

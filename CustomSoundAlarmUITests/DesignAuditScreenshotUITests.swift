@@ -310,10 +310,11 @@ final class DesignAuditScreenshotUITests: XCTestCase {
             capture(app, screen: "sound-selection", context: context)
         }
 
-        // 1つの音
+        // 1つの音（#196: 選んでも画面は閉じないので、戻ってから撮る）
         let preset = app.buttons["library.preset.PresetMarimba.caf"]
         scrollWithin(preset, in: choice)
         preset.tap()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
         XCTAssertTrue(
             app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10)
         )

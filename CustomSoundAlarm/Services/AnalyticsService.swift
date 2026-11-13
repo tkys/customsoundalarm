@@ -42,7 +42,8 @@ enum AnalyticsEvent: Sendable {
     )
 
     /// サウンドプレビュー再生
-    case soundPreviewPlayed
+    /// - source: 鳴らした入口（#196）
+    case soundPreviewPlayed(source: SoundPreviewSource)
 
     // MARK: Phase 2（リテンション/運用拡張）
 
@@ -357,8 +358,8 @@ enum AnalyticsEvent: Sendable {
             if let gainDbBucket { d["gain_db_bucket"] = gainDbBucket }
             if let lufsBucket { d["lufs_bucket"] = lufsBucket }
             return d
-        case .soundPreviewPlayed:
-            return [:]
+        case let .soundPreviewPlayed(source):
+            return ["source": source.rawValue]
         case let .alarmEdited(
             hasCustomSound,
             isRepeating,
@@ -645,6 +646,18 @@ enum BedsideExitMethod: String, Sendable {
 enum SoundImportSource: String, Sendable {
     case video
     case audio
+}
+
+// MARK: - SoundPreviewSource
+
+/// サウンド試聴の入口（#196）
+enum SoundPreviewSource: String, Sendable, CaseIterable {
+    /// 選択画面で行をタップ
+    case selectTap = "select_tap"
+    /// 行の右端の再生ボタン
+    case playButton = "play_button"
+    /// ライブラリ画面
+    case library
 }
 
 // MARK: - VideoImportSource
