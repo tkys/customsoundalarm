@@ -146,6 +146,10 @@ enum AnalyticsEvent: Sendable {
     /// - alarmCount: 対象のアラーム数
     case alarmSkipSet(scope: AlarmSkipScope, days: Int, alarmCount: Int)
     case alarmSkipUndone
+    /// すべてのアラームを休んだ（#197 画面作り直し）
+    /// - preset: 24h / 3d / 7d / custom
+    case skipAllSet(preset: String, alarmCount: Int)
+    case skipAllUndone
     case holidaySkipToggled(enabled: Bool)
     case holidayRingOverride
 
@@ -303,6 +307,8 @@ enum AnalyticsEvent: Sendable {
         case .soundSelected: return "sound_selected"
         case .alarmSkipSet: return "alarm_skip_set"
         case .alarmSkipUndone: return "alarm_skip_undone"
+        case .skipAllSet: return "skip_all_set"
+        case .skipAllUndone: return "skip_all_undone"
         case .holidaySkipToggled: return "holiday_skip_toggled"
         case .holidayRingOverride: return "holiday_ring_override"
         case .playlistCreated: return "playlist_created"
@@ -448,7 +454,12 @@ enum AnalyticsEvent: Sendable {
                 "days": days,
                 "alarm_count": alarmCount
             ]
-        case .alarmSkipUndone, .holidayRingOverride:
+        case let .skipAllSet(preset, alarmCount):
+            return [
+                "preset": preset,
+                "alarm_count": alarmCount
+            ]
+        case .alarmSkipUndone, .skipAllUndone, .holidayRingOverride:
             return [:]
         case let .holidaySkipToggled(enabled):
             return ["enabled": enabled]

@@ -83,6 +83,49 @@ struct CustomSoundAlarmApp: App {
                             playlistID: weekend.id
                         ))
                     }
+                    if AppGroup.isUITestSeedSkip {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        PlaylistStore.shared.resetForUITest()
+                        AppGroup.dismissedPresetFileNames = []
+                        SoundStore.shared.resetForUITest()
+                        SoundStore.shared.resetPresetNamesForUITest()
+                        AppGroup.globalSkip = nil
+                        AppGroup.lastSkipTimeZone = TimeZone.current.identifier
+
+                        let calendar = Calendar.current
+                        let now = Date()
+                        let labels = ["朝", "ストレッチ", "読書"]
+                        for (index, label) in labels.enumerated() {
+                            let time = calendar.date(
+                                byAdding: .hour,
+                                value: index + 1,
+                                to: now
+                            ) ?? now
+                            let parts = calendar.dateComponents(
+                                [.hour, .minute],
+                                from: time
+                            )
+                            AlarmStore.shared.add(AlarmEntry(
+                                hour: parts.hour ?? 7,
+                                minute: parts.minute ?? 0,
+                                isEnabled: true,
+                                label: label,
+                                repeatWeekdays: [1, 2, 3, 4, 5, 6, 7],
+                                soundFileName: "PresetBell.caf"
+                            ))
+                        }
+                        let oneTime = calendar.date(byAdding: .hour, value: 2, to: now) ?? now
+                        let parts = calendar.dateComponents([.hour, .minute], from: oneTime)
+                        AlarmStore.shared.add(AlarmEntry(
+                            hour: parts.hour ?? 9,
+                            minute: parts.minute ?? 0,
+                            isEnabled: true,
+                            label: "病院",
+                            repeatWeekdays: [],
+                            soundFileName: "PresetMarimba.caf"
+                        ))
+                    }
                     if AppGroup.isUITestSeedDesignAudit {
                         AppGroup.hasCompletedOnboarding = true
                         AlarmStore.shared.resetForUITest()

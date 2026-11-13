@@ -269,6 +269,7 @@ struct AlarmSkipLogicTests {
 
 /// 休みの適用と取り消しが AlarmStore に反映される（#197）。
 @MainActor
+@Suite(.serialized)
 struct AlarmSkipServiceTests {
 
     @Test
@@ -431,6 +432,223 @@ extension AlarmSkipServiceTests {
         AlarmSkipService.undo(dateKey: occurrence)
         #expect(AlarmStore.shared.alarms.first?.isEnabled == true)
         #expect(AlarmStore.shared.alarms.first?.skipDisabledDate == nil)
+
+        await AlarmScheduler.shared.waitForPendingSync()
+    }
+}
+
+/// 全体の休み（#197 画面作り直し）。
+extension AlarmSkipLogicTests {
+
+    @Test
+    func presetIntervalsEndAfterTheExpectedDays() {
+        let now = date(2026, 11, 13, 12)
+        #expect(AlarmSkipLogic.presetInterval(.hours24, from: now, calendar: calendar)?.end
+            == date(2026, 11, 14, 12))
+        #expect(AlarmSkipLogic.presetInterval(.days3, from: now, calendar: calendar)?.end
+            == date(2026, 11, 16, 12))
+        #expect(AlarmSkipLogic.presetInterval(.days7, from: now, calendar: calendar)?.end
+            == date(2026, 11, 20, 12))
+        #expect(AlarmSkipLogic.presetInterval(.custom, from: now, calendar: calendar) == nil)
+    }
+
+    @Test
+    func customIntervalIsCappedAtEightWeeks() {
+        let now = date(2026, 11, 13, 12)
+        let last = calendar.date(byAdding: .day, value: 56, to: now)!
+        let tooLate = calendar.date(byAdding: .day, value: 57, to: now)!
+
+        #expect(AlarmSkipLogic.customInterval(
+            startDay: now, endDay: last, now: now, calendar: calendar
+        ) != nil)
+        #expect(AlarmSkipLogic.customInterval(
+            startDay: now, endDay: tooLate, now: now, calendar: calendar
+        ) == nil)
+        #expect(AlarmSkipLogic.customInterval(
+            startDay: tooLate, endDay: tooLate, now: now, calendar: calendar
+        ) == nil)
+        // 終了日はその日の終わりまで
+        let interval = AlarmSkipLogic.customInterval(
+            startDay: now, endDay: last, now: now, calendar: calendar
+        )
+        #expect(interval?.end == calendar.date(
+            byAdding: .second,
+            value: -1,
+            to: calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: last))!
+        ))
+    }
+
+    @Test
+    func globalSkipOnlyAffectsTheSavedEntryIDs() {
+        let entry = repeating([1, 2, 3, 4, 5, 6, 7])
+        let other = repeating([1, 2, 3, 4, 5, 6, 7])
+        let now = date(2026, 11, 13, 12)
+        let skip = GlobalSkip(
+            start: now,
+            end: calendar.date(byAdding: .day, value: 1, to: now)!,
+            entryIDs: [entry.id]
+        )
+        let tomorrow = date(2026, 11, 14, 7)
+
+        #expect(AlarmSkipLogic.isSkipped(
+            tomorrow, entry: entry, calendar: calendar, globalSkip: skip
+        ))
+        #expect(!AlarmSkipLogic.isSkipped(
+            tomorrow, entry: other, calendar: calendar, globalSkip: skip
+        ))
+    }
+
+    @Test
+    func globalSkipLeavesTheOccurrenceAfterTheEnd() {
+        let entry = AlarmEntry(hour: 23, minute: 0, repeatWeekdays: [1, 2, 3, 4, 5, 6, 7])
+        let now = date(2026, 11, 13, 22)
+        let end = calendar.date(byAdding: .minute, value: 40, to: date(2026, 11, 14, 22))!
+        let skip = GlobalSkip(start: now, end: end, entryIDs: [entry.id])
+
+        #expect(AlarmSkipLogic.isSkipped(
+            date(2026, 11, 13), entry: entry, calendar: calendar, globalSkip: skip
+        ))
+        #expect(!AlarmSkipLogic.isSkipped(
+            date(2026, 11, 14), entry: entry, calendar: calendar, globalSkip: skip
+        ))
+        #expect(AlarmSkipLogic.nextFireDate(
+            for: entry, after: now, calendar: calendar, globalSkip: skip
+        ) == date(2026, 11, 14, 23))
+    }
+
+    @Test
+    func occurrenceCountMatchesThePresetWindow() {
+        let entry = AlarmEntry(hour: 6, minute: 0, repeatWeekdays: [1, 2, 3, 4, 5, 6, 7])
+        let now = date(2026, 11, 13, 12)
+
+        for (preset, expected) in [
+            (AlarmSkipLogic.GlobalSkipPreset.hours24, 1),
+            (.days3, 3),
+            (.days7, 7)
+        ] {
+            let interval = AlarmSkipLogic.presetInterval(
+                preset, from: now, calendar: calendar
+            )!
+            #expect(AlarmSkipLogic.occurrenceCount(
+                entries: [entry], in: interval, calendar: calendar
+            ) == expected)
+        }
+    }
+
+    @Test
+    func swipeWordingUsesTheDate() {
+        let text = AlarmSkipFormat.day(
+            date(2026, 11, 14),
+            locale: Locale(identifier: "ja_JP")
+        )
+        #expect(text.contains("11"))
+        #expect(text.contains("14"))
+        #expect(!text.contains("次"))
+        #expect(!text.contains("明日"))
+    }
+
+    @Test
+    func oneTimeAlarmCountsOnceEvenInALongBreak() {
+        let calendar = Calendar.current
+        let hour = (calendar.component(.hour, from: Date()) + 2) % 24
+        let oneTime = AlarmEntry(hour: hour, minute: 0, repeatWeekdays: [])
+        let now = Date()
+        let interval = AlarmSkipLogic.presetInterval(
+            .days7,
+            from: now,
+            calendar: calendar
+        )!
+        #expect(AlarmSkipLogic.occurrenceCount(
+            entries: [oneTime],
+            in: interval,
+            calendar: calendar
+        ) == 1)
+
+        let skip = GlobalSkip(
+            start: interval.start,
+            end: interval.end,
+            entryIDs: [oneTime.id]
+        )
+        let keys = AlarmSkipLogic.globalSkipKeys(
+            for: oneTime,
+            from: now,
+            days: 7,
+            globalSkip: skip,
+            calendar: calendar
+        )
+        #expect(keys.count == 1)
+        if let key = keys.first,
+           let date = AlarmSkipLogic.date(fromKey: key, calendar: calendar) {
+            #expect(AlarmSkipLogic.isSkipped(
+                date,
+                entry: oneTime,
+                calendar: calendar,
+                globalSkip: skip
+            ))
+        } else {
+            Issue.record("one-time global skip key should exist")
+        }
+    }
+
+    @Test
+    func globalSkipCountIncludesDisabledOneTimeAlarms() {
+        let entry = AlarmEntry(hour: 7, minute: 0, repeatWeekdays: [])
+        var disabled = entry
+        disabled.isEnabled = false
+        disabled.skipDisabledDate = "2026-11-14"
+        let now = date(2026, 11, 13, 12)
+        let skip = GlobalSkip(
+            start: now,
+            end: calendar.date(byAdding: .day, value: 1, to: now)!,
+            entryIDs: [entry.id],
+            disabledOneTimeIDs: [entry.id]
+        )
+        #expect(AlarmSkipLogic.globalSkipCount(
+            skip: skip, entries: [disabled], calendar: calendar
+        ) == 1)
+    }
+}
+
+/// 全体の休みの取り消しは、個別の休みを消さない（#197 画面作り直し）。
+@MainActor
+extension AlarmSkipServiceTests {
+
+    @Test
+    func undoAllKeepsIndividualSkipsAndRestoresOneTimeAlarms() async {
+        let original = AlarmStore.shared.alarms
+        let originalSkip = AppGroup.globalSkip
+        defer {
+            AlarmStore.shared.replaceAll(original)
+            AppGroup.globalSkip = originalSkip
+        }
+        AppGroup.globalSkip = nil
+
+        let calendar = Calendar.current
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: Date())!
+        let key = AlarmSkipLogic.dateKey(tomorrow, calendar: calendar)
+
+        var repeating = AlarmEntry(
+            hour: 7,
+            minute: 0,
+            label: "global-test",
+            repeatWeekdays: [1, 2, 3, 4, 5, 6, 7]
+        )
+        repeating.skipDates = [key]
+        let oneTime = AlarmEntry(hour: 8, minute: 0, label: "global-one-time")
+        AlarmStore.shared.replaceAll([repeating, oneTime])
+
+        let count = AlarmSkipService.skipAll(preset: .hours24)
+        #expect(count == 2)
+        #expect(AppGroup.globalSkip?.entryIDs.count == 2)
+        #expect(AppGroup.globalSkip?.disabledOneTimeIDs.contains(oneTime.id) == true)
+        #expect(AlarmStore.shared.alarms.first { $0.id == oneTime.id }?.isEnabled == false)
+
+        AlarmSkipService.undoAll()
+        #expect(AppGroup.globalSkip == nil)
+        let restored = AlarmStore.shared.alarms
+        #expect(restored.first { $0.id == repeating.id }?.skipDates == [key])
+        #expect(restored.first { $0.id == oneTime.id }?.isEnabled == true)
+        #expect(restored.first { $0.id == oneTime.id }?.skipDisabledDate == nil)
 
         await AlarmScheduler.shared.waitForPendingSync()
     }

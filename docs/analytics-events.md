@@ -47,6 +47,8 @@
 | `sound_preview_played` | `source` string（select_tap/play_button/library） | サウンドの試聴（行タップ・再生ボタン・ライブラリ） | 試聴の入口ごとの使われ方 | アプリ動作中のみ | 既存（`source` は1.8.2） |
 | `alarm_skip_set` | `scope` string（day/selected/range）, `days` int, `alarm_count` int | 日付でアラームを休んだ（休みを付けたアラーム数） | 休みの使われ方（日・選択・期間） | アプリ動作中のみ | 1.8.2 |
 | `alarm_skip_undone` | — | 休みを取り消した | 取り消しの頻度 | アプリ動作中のみ | 1.8.2 |
+| `skip_all_set` | `preset` string（24h/3d/7d/custom）, `alarm_count` int | すべてのアラームを休んだ | 全体の休みの使われ方 | アプリ動作中のみ | 1.8.2 |
+| `skip_all_undone` | — | 全体の休みを取り消した | 取り消しの頻度 | アプリ動作中のみ | 1.8.2 |
 | `holiday_skip_toggled` | `enabled` bool | 「祝日は鳴らさない」を切り替えた | 祝日スキップの利用率 | アプリ動作中のみ | 1.8.2 |
 | `holiday_ring_override` | — | 「この祝日は鳴らす」を切り替えた | 祝日に出勤する人の利用 | アプリ動作中のみ | 1.8.2 |
 | `custom_sound_imported` | `source` string（video/audio）, `peak_db_bucket` string, `gain_db_bucket` string, `lufs_bucket` string（取り込み前のLUFS区分） | カスタムサウンド取り込み成功 | 取り込み経路・音量 | アプリ動作中のみ | 既存（`lufs_bucket` は1.8.0） |

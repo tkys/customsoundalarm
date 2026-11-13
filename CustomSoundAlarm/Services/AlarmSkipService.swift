@@ -146,9 +146,14 @@ enum AlarmSkipService {
 
     /// 休みを取り消す。1回だけのアラームはオンに戻す。
     static func undo(dateKey: String) {
+        undo(entryIDs: Set(AlarmStore.shared.alarms.map(\.id)), dateKey: dateKey)
+    }
+
+    /// 指定したアラームの休みだけを取り消す（#197 画面作り直し）。
+    static func undo(entryIDs: Set<UUID>, dateKey: String) {
         var alarms = AlarmStore.shared.alarms
         var affected: Set<UUID> = []
-        for index in alarms.indices {
+        for index in alarms.indices where entryIDs.contains(alarms[index].id) {
             var changed = false
             if alarms[index].skipDates.contains(dateKey) {
                 alarms[index].skipDates.removeAll { $0 == dateKey }
@@ -171,5 +176,155 @@ enum AlarmSkipService {
             trigger: .edit
         )
         AnalyticsService.shared.capture(.alarmSkipUndone)
+    }
+
+    // MARK: - すべてのアラームを休む（#197 画面作り直し）
+
+    /// プリセット（24時間 / 3日間 / 7日間）で、いまオンのアラームをまとめて休む。
+    /// - Returns: 休みに入れたアラーム数（同時に鳴らなくなる回数ではない）
+    @discardableResult
+    static func skipAll(preset: AlarmSkipLogic.GlobalSkipPreset) -> Int {
+        guard let interval = AlarmSkipLogic.presetInterval(preset, from: Date()) else {
+            return 0
+        }
+        return applyGlobalSkip(interval: interval, preset: preset.rawValue)
+    }
+
+    /// 開始日〜終了日で、いまオンのアラームをまとめて休む。
+    @discardableResult
+    static func skipAll(startDay: Date, endDay: Date) -> Int {
+        guard let interval = AlarmSkipLogic.customInterval(
+            startDay: startDay,
+            endDay: endDay
+        ) else { return 0 }
+        return applyGlobalSkip(interval: interval, preset: "custom")
+    }
+
+    private static func applyGlobalSkip(
+        interval: DateInterval,
+        preset: String
+    ) -> Int {
+        let now = Date()
+        let todayKey = AlarmSkipLogic.dateKey(now)
+        var alarms = AlarmStore.shared.alarms.map {
+            AlarmSkipLogic.pruning($0, now: now)
+        }
+
+        // 前の全体の休みで止めた1回きりのアラームを、新しい休みの判定に載せ直す。
+        // すでに予定時刻が過ぎたものは、鳴らずに終わったままにする（#197）。
+        if let previous = AppGroup.globalSkip {
+            let previousDisabled = Set(previous.disabledOneTimeIDs)
+            for index in alarms.indices
+            where previousDisabled.contains(alarms[index].id) && !alarms[index].isEnabled {
+                if let marker = alarms[index].skipDisabledDate, marker >= todayKey {
+                    alarms[index].isEnabled = true
+                    alarms[index].skipDisabledDate = nil
+                } else {
+                    alarms[index].skipDisabledDate = nil
+                }
+            }
+        }
+
+        let targetIDs = Set(alarms.filter(\.isEnabled).map(\.id))
+        guard !targetIDs.isEmpty else { return 0 }
+
+        let silencedIDs = Set(alarms.filter { alarm in
+            targetIDs.contains(alarm.id)
+                && !AlarmSkipLogic.occurrences(of: alarm, in: interval).isEmpty
+        }.map(\.id))
+
+        var disabledOneTimeIDs: [UUID] = []
+        for index in alarms.indices where targetIDs.contains(alarms[index].id) {
+            guard alarms[index].repeatWeekdays.isEmpty else { continue }
+            guard let occurrence = AlarmSkipLogic.occurrences(
+                of: alarms[index],
+                in: interval
+            ).first else { continue }
+            alarms[index].isEnabled = false
+            alarms[index].skipDisabledDate = AlarmSkipLogic.dateKey(occurrence)
+            disabledOneTimeIDs.append(alarms[index].id)
+        }
+
+        AppGroup.globalSkip = GlobalSkip(
+            start: interval.start,
+            end: interval.end,
+            entryIDs: Array(targetIDs),
+            disabledOneTimeIDs: disabledOneTimeIDs
+        )
+        AlarmStore.shared.replaceAll(alarms)
+        AlarmScheduler.shared.syncAlarms(
+            alarms,
+            forceRescheduleEntryIDs: targetIDs,
+            trigger: .edit
+        )
+        AnalyticsService.shared.capture(.skipAllSet(
+            preset: preset,
+            alarmCount: silencedIDs.count
+        ))
+        return targetIDs.count
+    }
+
+    /// 全体の休みを取り消す。個別の休みは残す。
+    static func undoAll() {
+        guard let skip = AppGroup.globalSkip else { return }
+        let now = Date()
+        var alarms = AlarmStore.shared.alarms.map {
+            AlarmSkipLogic.pruning($0, now: now)
+        }
+        let disabled = Set(skip.disabledOneTimeIDs)
+        let todayKey = AlarmSkipLogic.dateKey(now)
+        var affected = skippedEntryIDs(in: alarms, skip: skip)
+        for index in alarms.indices where disabled.contains(alarms[index].id) {
+            guard !alarms[index].isEnabled,
+                  let marker = alarms[index].skipDisabledDate else { continue }
+            if marker >= todayKey {
+                alarms[index].isEnabled = true
+            }
+            alarms[index].skipDisabledDate = nil
+            affected.insert(alarms[index].id)
+        }
+        AppGroup.globalSkip = nil
+        AlarmStore.shared.replaceAll(alarms)
+        AlarmScheduler.shared.syncAlarms(
+            alarms,
+            forceRescheduleEntryIDs: affected.union(skip.entryIDs),
+            trigger: .edit
+        )
+        AnalyticsService.shared.capture(.skipAllUndone)
+    }
+
+    private static func skippedEntryIDs(
+        in alarms: [AlarmEntry],
+        skip: GlobalSkip
+    ) -> Set<UUID> {
+        Set(alarms.map(\.id)).intersection(skip.entryIDs)
+    }
+
+    // MARK: - 1本だけ次の1回を休む
+
+    /// 繰り返しのアラームの、次に鳴る日を休む。
+    @discardableResult
+    static func skipNext(entryID: UUID) -> Bool {
+        guard let entry = AlarmStore.shared.alarms.first(where: { $0.id == entryID }),
+              !entry.repeatWeekdays.isEmpty,
+              let next = AlarmSkipLogic.nextFireDate(for: entry, after: Date())
+        else { return false }
+        let key = AlarmSkipLogic.dateKey(next)
+        skip(entryIDs: [entryID], dateKeys: [key], scope: .day)
+        return true
+    }
+
+    /// 繰り返しのアラームの、いちばん近い休みを取り消す。
+    @discardableResult
+    static func undoNext(entryID: UUID) -> Bool {
+        guard let entry = AlarmStore.shared.alarms.first(where: { $0.id == entryID }),
+              !entry.repeatWeekdays.isEmpty,
+              let skipped = AlarmSkipLogic.nextIndividualSkipDate(
+                  for: entry,
+                  after: Date()
+              )
+        else { return false }
+        undo(entryIDs: [entryID], dateKey: AlarmSkipLogic.dateKey(skipped))
+        return true
     }
 }

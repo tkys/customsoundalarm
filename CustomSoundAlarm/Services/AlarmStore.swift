@@ -39,6 +39,12 @@ final class AlarmStore {
     func remove(_ alarm: AlarmEntry) {
         alarms.removeAll { $0.id == alarm.id }
         save()
+        // 全体の休みの対象からも外す（#197 画面作り直し）
+        if var skip = AppGroup.globalSkip {
+            skip.entryIDs.removeAll { $0 == alarm.id }
+            skip.disabledOneTimeIDs.removeAll { $0 == alarm.id }
+            AppGroup.globalSkip = skip.entryIDs.isEmpty ? nil : skip
+        }
 
         AnalyticsService.shared.capture(.alarmDeleted)
     }
@@ -58,6 +64,12 @@ final class AlarmStore {
         if alarms[index].isEnabled {
             // 休みで止めた1回だけのアラームを、手動でオンに戻した（#197 レビュー）
             alarms[index].skipDisabledDate = nil
+            // 全体の休みの最中にオンにし直したアラームは鳴らす（#197 画面作り直し）
+            if var skip = AppGroup.globalSkip {
+                skip.entryIDs.removeAll { $0 == alarms[index].id }
+                skip.disabledOneTimeIDs.removeAll { $0 == alarms[index].id }
+                AppGroup.globalSkip = skip.entryIDs.isEmpty ? nil : skip
+            }
         }
         save()
     }

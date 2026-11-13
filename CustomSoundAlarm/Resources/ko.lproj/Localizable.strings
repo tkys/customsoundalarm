@@ -312,21 +312,9 @@
 "play_order_footer" = "알람은 중지할 때까지 반복됩니다. 셔플은 중지할 때마다 다음 순서를 바꿉니다. 한 곡 랜덤은 매번 같은 한 곡을 반복합니다.";
 
 // #197 skip days
-"skip_section_header" = "쉬는 날";
-"skip_alarm_count" = "%d개";
 "skip_one_time_warning" = "1회성 알람 %d개는 울리지 않고 끝납니다.";
-"skip_this_day" = "이 날은 쉬기";
-"skip_select" = "알람 선택";
-"skip_range" = "기간 선택";
-"skip_active_notice" = "%@은(는) 쉬는 날. 다음은 %@";
-"skip_active_notice_no_next" = "%@은(는) 쉬는 날";
 "skip_undo" = "되돌리기";
-"skip_select_title" = "쉬게 할 알람 선택";
-"skip_select_hint" = "체크를 해제한 알람은 이 날 울리지 않습니다.";
 "skip_apply" = "쉬기";
-"skip_range_title" = "기간 선택";
-"skip_start_date" = "시작일";
-"skip_end_date" = "종료일";
 "holiday_skip_toggle" = "공휴일에는 울리지 않기";
 "holiday_next_skipped" = "%@은(는) 쉬는 날";
 "holiday_none" = "다가오는 공휴일이 없습니다";
@@ -334,3 +322,32 @@
 "holiday_ring_on" = "이 공휴일에는 울리기";
 "holiday_mark" = "공휴일";
 "skip_alarms_intent" = "알람 쉬기";
+
+// #197 skip redesign
+"skip_all_button" = "알람 쉬기";
+"skip_all_title" = "알람 쉬기";
+"skip_all_24h" = "24시간";
+"skip_all_3d" = "3일";
+"skip_all_7d" = "7일";
+"skip_all_row_fmt" = "%@ 까지 · %d개";
+"skip_all_custom" = "날짜 선택";
+"skip_all_summary_fmt" = "울리지 않는 알람: %@";
+"skip_all_active_fmt" = "%1$@ 까지 쉬기 · %2$d개";
+"skip_row_skip_fmt" = "%@ 쉬기";
+"skip_row_undo" = "쉬기 취소";
+"skip_row_summary_fmt" = "%@ 쉬기 · 다음은 %@";
+"skip_row_summary_no_next_fmt" = "%@ 쉬기";
+"skip_dates_title" = "쉬는 날 선택";
+"skip_dates_none" = "없음";
+"skip_dates_count_fmt" = "%d일";
+"skip_dates_selected" = "쉬는 날";
+"skip_dates_empty" = "쉬는 날이 없습니다";
+"skip_dates_footer" = "선택한 날은 울리지 않습니다.";
+"skip_calendar_title" = "날짜 선택";
+"skip_calendar_hint" = "시작일과 종료일을 탭하세요. 8주 뒤까지 선택할 수 있습니다.";
+"skip_calendar_range_fmt" = "%@ ~ %@";
+"skip_calendar_previous_month" = "이전 달";
+"skip_calendar_next_month" = "다음 달";
+"holiday_others_message_fmt" = "같은 요일에 다른 알람이 %d개 있습니다.";
+"holiday_apply_to_others_fmt" = "다른 %d개에도";
+"holiday_apply_only_this" = "이 알람만";

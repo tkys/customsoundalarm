@@ -1,6 +1,49 @@
 import Foundation
 
 /// App Group共有コンテナへのアクセス
+/// すべてのアラームを休む区間（#197 画面作り直し）。
+///
+/// 押したときにオンだったアラームの ID だけを持つ。あとから作った／
+/// オンにし直したアラームは入らないので、休み中でも鳴る。
+struct GlobalSkip: Codable, Equatable, Sendable {
+    var start: Date
+    var end: Date
+    var entryIDs: [UUID]
+    /// 全体の休みで止めた1回きりのアラーム（取り消すときに戻す）。
+    var disabledOneTimeIDs: [UUID]
+
+    init(
+        start: Date,
+        end: Date,
+        entryIDs: [UUID],
+        disabledOneTimeIDs: [UUID] = []
+    ) {
+        self.start = start
+        self.end = end
+        self.entryIDs = entryIDs
+        self.disabledOneTimeIDs = disabledOneTimeIDs
+    }
+
+    var isActive: Bool {
+        end > Date() && !entryIDs.isEmpty
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case start, end, entryIDs, disabledOneTimeIDs
+    }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        start = try container.decode(Date.self, forKey: .start)
+        end = try container.decode(Date.self, forKey: .end)
+        entryIDs = try container.decodeIfPresent([UUID].self, forKey: .entryIDs) ?? []
+        disabledOneTimeIDs = try container.decodeIfPresent(
+            [UUID].self,
+            forKey: .disabledOneTimeIDs
+        ) ?? []
+    }
+}
+
 enum AppGroup {
     static let identifier = "group.com.tkysdev.customsoundalarm"
 
@@ -129,6 +172,15 @@ enum AppGroup {
     static var isUITestSeedLibrary: Bool {
     #if DEBUG
         CommandLine.arguments.contains("-uitest-seed-library")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト・スクリーンショット用: 休みの画面確認用（DEBUGのみ・#197）
+    static var isUITestSeedSkip: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-skip")
     #else
         false
     #endif
@@ -438,6 +490,30 @@ enum AppGroup {
             guard let data = try? JSONEncoder().encode(newValue) else { return }
             userDefaults.set(data, forKey: "backup_canceled_at")
         }
+    }
+
+    /// すべてのアラームを休む区間（#197 画面作り直し）。
+    /// 押したときにオンだったアラームの ID だけを対象にする。
+    static var globalSkip: GlobalSkip? {
+        get {
+            guard let data = userDefaults.data(forKey: "global_skip"),
+                  let skip = try? JSONDecoder().decode(GlobalSkip.self, from: data)
+            else { return nil }
+            return skip
+        }
+        set {
+            if let newValue, let data = try? JSONEncoder().encode(newValue) {
+                userDefaults.set(data, forKey: "global_skip")
+            } else {
+                userDefaults.removeObject(forKey: "global_skip")
+            }
+        }
+    }
+
+    /// 前面復帰時にタイムゾーンの変化を検知するための最後の ID（#197）。
+    static var lastSkipTimeZone: String? {
+        get { userDefaults.string(forKey: "last_skip_time_zone") }
+        set { userDefaults.set(newValue, forKey: "last_skip_time_zone") }
     }
 
     /// 保存済みアラーム（停止 Intent が最終アラームの設定を読むため・#110）

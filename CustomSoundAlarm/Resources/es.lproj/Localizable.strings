@@ -312,21 +312,9 @@
 "play_order_footer" = "Las alarmas se repiten hasta que las detengas. El orden aleatorio cambia el siguiente orden cada vez que la detienes. Una aleatoria repite la misma pista.";
 
 // #197 skip days
-"skip_section_header" = "Descanso";
-"skip_alarm_count" = "%d alarmas";
 "skip_one_time_warning" = "Una alarma única (%d) no sonará.";
-"skip_this_day" = "No sonar este día";
-"skip_select" = "Elegir alarmas";
-"skip_range" = "Elegir fechas";
-"skip_active_notice" = "%@ sin alarma. Siguiente: %@";
-"skip_active_notice_no_next" = "%@ sin alarma";
 "skip_undo" = "Deshacer";
-"skip_select_title" = "Alarmas que no sonarán";
-"skip_select_hint" = "Las alarmas desmarcadas no sonarán este día.";
 "skip_apply" = "No sonar";
-"skip_range_title" = "Elegir fechas";
-"skip_start_date" = "Inicio";
-"skip_end_date" = "Fin";
 "holiday_skip_toggle" = "No sonar en días festivos";
 "holiday_next_skipped" = "%@ sin alarma";
 "holiday_none" = "No hay días festivos próximos";
@@ -334,3 +322,32 @@
 "holiday_ring_on" = "Sonar este día festivo";
 "holiday_mark" = "Festivo";
 "skip_alarms_intent" = "Pausar alarmas";
+
+// #197 skip redesign
+"skip_all_button" = "Pausar alarmas";
+"skip_all_title" = "Pausar alarmas";
+"skip_all_24h" = "24 horas";
+"skip_all_3d" = "3 días";
+"skip_all_7d" = "7 días";
+"skip_all_row_fmt" = "hasta el %@ · %d";
+"skip_all_custom" = "Elegir fechas";
+"skip_all_summary_fmt" = "Alarmas que no sonarán: %@";
+"skip_all_active_fmt" = "En pausa hasta el %1$@ · %2$d";
+"skip_row_skip_fmt" = "Pausar el %@";
+"skip_row_undo" = "Cancelar la pausa";
+"skip_row_summary_fmt" = "En pausa el %@ · siguiente %@";
+"skip_row_summary_no_next_fmt" = "En pausa el %@";
+"skip_dates_title" = "Elegir días de pausa";
+"skip_dates_none" = "Ninguno";
+"skip_dates_count_fmt" = "%d días";
+"skip_dates_selected" = "Días de pausa";
+"skip_dates_empty" = "No hay días de pausa";
+"skip_dates_footer" = "Los días elegidos no sonarán.";
+"skip_calendar_title" = "Elegir fechas";
+"skip_calendar_hint" = "Toca una fecha de inicio y de fin. Hasta 8 semanas por adelantado.";
+"skip_calendar_range_fmt" = "%@ – %@";
+"skip_calendar_previous_month" = "Mes anterior";
+"skip_calendar_next_month" = "Mes siguiente";
+"holiday_others_message_fmt" = "Hay %d alarmas más en los mismos días de la semana.";
+"holiday_apply_to_others_fmt" = "También en las otras %d";
+"holiday_apply_only_this" = "Solo esta alarma";

@@ -34,6 +34,8 @@ struct AnalyticsEventsDocTests {
         "sound_preview_played",
         "alarm_skip_set",
         "alarm_skip_undone",
+        "skip_all_set",
+        "skip_all_undone",
         "holiday_skip_toggled",
         "holiday_ring_override",
         "custom_sound_imported",

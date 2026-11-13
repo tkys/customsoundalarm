@@ -312,21 +312,9 @@
 "play_order_footer" = "Budíky se opakují, dokud je nezastavíte. Náhodné pořadí změní další pořadí při každém zastavení. Jeden náhodný opakuje stejnou skladbu.";
 
 // #197 skip days
-"skip_section_header" = "Pauza";
-"skip_alarm_count" = "%d budíků";
 "skip_one_time_warning" = "Jednorázový budík (%d) nezazvoní.";
-"skip_this_day" = "Tento den nezvonit";
-"skip_select" = "Vybrat budíky";
-"skip_range" = "Vybrat data";
-"skip_active_notice" = "%@ bez budíku. Další: %@";
-"skip_active_notice_no_next" = "%@ bez budíku";
 "skip_undo" = "Zpět";
-"skip_select_title" = "Budíky k pozastavení";
-"skip_select_hint" = "Nezaškrtnuté budíky tento den nezazvoní.";
 "skip_apply" = "Pozastavit";
-"skip_range_title" = "Vybrat data";
-"skip_start_date" = "Začátek";
-"skip_end_date" = "Konec";
 "holiday_skip_toggle" = "Nezvonit o svátcích";
 "holiday_next_skipped" = "%@ bez budíku";
 "holiday_none" = "Žádné nadcházející svátky";
@@ -334,3 +322,32 @@
 "holiday_ring_on" = "Zvonit o tomto svátku";
 "holiday_mark" = "Svátky";
 "skip_alarms_intent" = "Pozastavit budíky";
+
+// #197 skip redesign
+"skip_all_button" = "Pozastavit budíky";
+"skip_all_title" = "Pozastavit budíky";
+"skip_all_24h" = "24 hodin";
+"skip_all_3d" = "3 dny";
+"skip_all_7d" = "7 dní";
+"skip_all_row_fmt" = "do %@ · %d";
+"skip_all_custom" = "Vybrat data";
+"skip_all_summary_fmt" = "Budíky, které nezazvoní: %@";
+"skip_all_active_fmt" = "Pozastaveno do %1$@ · %2$d";
+"skip_row_skip_fmt" = "Pozastavit %@";
+"skip_row_undo" = "Zrušit pozastavení";
+"skip_row_summary_fmt" = "Pozastaveno %@ · další %@";
+"skip_row_summary_no_next_fmt" = "Pozastaveno %@";
+"skip_dates_title" = "Vybrat dny pauzy";
+"skip_dates_none" = "Žádné";
+"skip_dates_count_fmt" = "%d dní";
+"skip_dates_selected" = "Dny pauzy";
+"skip_dates_empty" = "Žádné dny pauzy";
+"skip_dates_footer" = "Vybrané dny nezazvoní.";
+"skip_calendar_title" = "Vybrat data";
+"skip_calendar_hint" = "Klepněte na datum začátku a konce. Až 8 týdnů dopředu.";
+"skip_calendar_range_fmt" = "%@ – %@";
+"skip_calendar_previous_month" = "Předchozí měsíc";
+"skip_calendar_next_month" = "Další měsíc";
+"holiday_others_message_fmt" = "Na stejné dny v týdnu připadá %d dalších budíků.";
+"holiday_apply_to_others_fmt" = "Také pro další %d";
+"holiday_apply_only_this" = "Jen tento budík";

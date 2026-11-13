@@ -312,21 +312,9 @@
 "play_order_footer" = "アラームは止めるまで繰り返します。シャッフルは止めるたびに次の順番を変えます。1曲だけランダムは、毎回選んだ1曲を繰り返します。";
 
 // #197 skip days
-"skip_section_header" = "休み";
-"skip_alarm_count" = "%d本";
 "skip_one_time_warning" = "1回きりのアラーム %d本は鳴らずに終わります";
-"skip_this_day" = "この日は休む";
-"skip_select" = "選んで休む";
-"skip_range" = "期間を選ぶ";
-"skip_active_notice" = "%@ は休み・次は %@";
-"skip_active_notice_no_next" = "%@ は休み";
 "skip_undo" = "取り消す";
-"skip_select_title" = "休むアラームを選ぶ";
-"skip_select_hint" = "チェックを外したアラームを、この日だけ休みます。";
 "skip_apply" = "休む";
-"skip_range_title" = "期間を選ぶ";
-"skip_start_date" = "開始日";
-"skip_end_date" = "終了日";
 "holiday_skip_toggle" = "祝日は鳴らさない";
 "holiday_next_skipped" = "%@ は休み";
 "holiday_none" = "次の祝日はありません";
@@ -334,3 +322,32 @@
 "holiday_ring_on" = "この祝日は鳴らす";
 "holiday_mark" = "祝";
 "skip_alarms_intent" = "アラームを休む";
+
+// #197 skip redesign
+"skip_all_button" = "アラームを休む";
+"skip_all_title" = "アラームを休む";
+"skip_all_24h" = "24時間";
+"skip_all_3d" = "3日間";
+"skip_all_7d" = "7日間";
+"skip_all_row_fmt" = "%@ まで・%d本";
+"skip_all_custom" = "日付を選ぶ";
+"skip_all_summary_fmt" = "鳴らなくなるアラーム：%@";
+"skip_all_active_fmt" = "%1$@ まで休み・%2$d本";
+"skip_row_skip_fmt" = "%@ を休む";
+"skip_row_undo" = "休みを取り消す";
+"skip_row_summary_fmt" = "%@ は休み・次は %@";
+"skip_row_summary_no_next_fmt" = "%@ は休み";
+"skip_dates_title" = "日付を選んで休む";
+"skip_dates_none" = "なし";
+"skip_dates_count_fmt" = "%d日";
+"skip_dates_selected" = "休む日";
+"skip_dates_empty" = "休む日はありません";
+"skip_dates_footer" = "選んだ日は鳴りません。";
+"skip_calendar_title" = "日付を選ぶ";
+"skip_calendar_hint" = "開始日と終了日をタップします。8週間先まで選べます。";
+"skip_calendar_range_fmt" = "%@ 〜 %@";
+"skip_calendar_previous_month" = "前の月";
+"skip_calendar_next_month" = "次の月";
+"holiday_others_message_fmt" = "同じ曜日のアラームがほかにも%d本あります。";
+"holiday_apply_to_others_fmt" = "ほかの%d本にも";
+"holiday_apply_only_this" = "このアラームだけ";

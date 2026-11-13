@@ -51,6 +51,8 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.soundPreviewPlayed(source: .selectTap).name == "sound_preview_played")
         #expect(AnalyticsEvent.alarmSkipSet(scope: .day, days: 1, alarmCount: 3).name == "alarm_skip_set")
         #expect(AnalyticsEvent.alarmSkipUndone.name == "alarm_skip_undone")
+        #expect(AnalyticsEvent.skipAllSet(preset: "24h", alarmCount: 3).name == "skip_all_set")
+        #expect(AnalyticsEvent.skipAllUndone.name == "skip_all_undone")
         #expect(AnalyticsEvent.holidaySkipToggled(enabled: true).name == "holiday_skip_toggled")
         #expect(AnalyticsEvent.holidayRingOverride.name == "holiday_ring_override")
         // Phase 2
@@ -460,6 +462,8 @@ struct AnalyticsEventTests {
             .soundPreviewPlayed(source: .selectTap),
             .alarmSkipSet(scope: .day, days: 1, alarmCount: 1),
             .alarmSkipUndone,
+            .skipAllSet(preset: "7d", alarmCount: 2),
+            .skipAllUndone,
             .holidaySkipToggled(enabled: false),
             .holidayRingOverride,
             .alarmEdited(hasCustomSound: true, isRepeating: true, snoozeMinutes: 0),
@@ -735,6 +739,13 @@ struct AnalyticsEventTests {
     }
 
     // MARK: playlist (#151)
+
+    @Test
+    func skipAllSetProperties() {
+        let props = AnalyticsEvent.skipAllSet(preset: "custom", alarmCount: 4).properties
+        #expect(props["preset"] as? String == "custom")
+        #expect(props["alarm_count"] as? Int == 4)
+    }
 
     @Test
     func playlistCreatedProperties() {

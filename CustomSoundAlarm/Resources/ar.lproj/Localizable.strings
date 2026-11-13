@@ -312,21 +312,9 @@
 "play_order_footer" = "تتكرر المنبهات حتى توقفها. يغيّر الترتيب العشوائي الترتيب التالي في كل مرة توقف فيها المنبه. خيار مقطع عشوائي يكرر المقطع نفسه في كل مرة.";
 
 // #197 skip days
-"skip_section_header" = "راحة";
-"skip_alarm_count" = "%d منبهات";
 "skip_one_time_warning" = "منبه لمرة واحدة (%d) لن يرن.";
-"skip_this_day" = "لا يرن في هذا اليوم";
-"skip_select" = "اختيار المنبهات";
-"skip_range" = "اختيار التواريخ";
-"skip_active_notice" = "%@ بلا منبه. التالي: %@";
-"skip_active_notice_no_next" = "%@ بلا منبه";
 "skip_undo" = "تراجع";
-"skip_select_title" = "منبهات لأخذ راحة";
-"skip_select_hint" = "المنبهات غير المحددة لن ترن في هذا اليوم.";
 "skip_apply" = "راحة";
-"skip_range_title" = "اختيار التواريخ";
-"skip_start_date" = "البداية";
-"skip_end_date" = "النهاية";
 "holiday_skip_toggle" = "لا يرن في العطلات";
 "holiday_next_skipped" = "%@ بلا منبه";
 "holiday_none" = "لا توجد عطلات قادمة";
@@ -334,3 +322,32 @@
 "holiday_ring_on" = "يرن في هذه العطلة";
 "holiday_mark" = "عطلة";
 "skip_alarms_intent" = "إراحة المنبهات";
+
+// #197 skip redesign
+"skip_all_button" = "إيقاف المنبهات مؤقتًا";
+"skip_all_title" = "إيقاف المنبهات مؤقتًا";
+"skip_all_24h" = "24 ساعة";
+"skip_all_3d" = "3 أيام";
+"skip_all_7d" = "7 أيام";
+"skip_all_row_fmt" = "حتى %@ · %d";
+"skip_all_custom" = "اختيار التواريخ";
+"skip_all_summary_fmt" = "المنبهات التي لن ترن: %@";
+"skip_all_active_fmt" = "إيقاف مؤقت حتى %1$@ · %2$d";
+"skip_row_skip_fmt" = "إيقاف مؤقت في %@";
+"skip_row_undo" = "إلغاء الإيقاف المؤقت";
+"skip_row_summary_fmt" = "إيقاف مؤقت في %@ · التالي %@";
+"skip_row_summary_no_next_fmt" = "إيقاف مؤقت في %@";
+"skip_dates_title" = "اختيار أيام الراحة";
+"skip_dates_none" = "لا شيء";
+"skip_dates_count_fmt" = "%d أيام";
+"skip_dates_selected" = "أيام الراحة";
+"skip_dates_empty" = "لا توجد أيام راحة";
+"skip_dates_footer" = "الأيام المختارة لن ترن.";
+"skip_calendar_title" = "اختيار التواريخ";
+"skip_calendar_hint" = "اضغط على تاريخ البداية والنهاية. حتى 8 أسابيع مقدمًا.";
+"skip_calendar_range_fmt" = "%@ – %@";
+"skip_calendar_previous_month" = "الشهر السابق";
+"skip_calendar_next_month" = "الشهر التالي";
+"holiday_others_message_fmt" = "هناك %d منبهات أخرى في أيام الأسبوع نفسها.";
+"holiday_apply_to_others_fmt" = "وأيضًا للمنبهات الـ%d الأخرى";
+"holiday_apply_only_this" = "هذا المنبه فقط";

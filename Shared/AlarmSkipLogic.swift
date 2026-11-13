@@ -44,14 +44,67 @@ enum AlarmSkipLogic {
     static func isSkipped(
         _ date: Date,
         entry: AlarmEntry,
-        calendar: Calendar = .current
+        calendar: Calendar = .current,
+        globalSkip: GlobalSkip? = AppGroup.globalSkip
     ) -> Bool {
         let key = dateKey(date, calendar: calendar)
         if entry.skipDates.contains(key) { return true }
+        if let globalSkip,
+           isGloballySkipped(date, entry: entry, globalSkip: globalSkip, calendar: calendar) {
+            return true
+        }
         guard entry.skipsHolidays, JapaneseHolidays.holiday(on: key) != nil else {
             return false
         }
         return !entry.holidayRingOverrides.contains(key)
+    }
+
+    /// 全体の休みの区間に入る回か（#197 画面作り直し）。
+    ///
+    /// 区間は時刻まで見る。24時間の休みが 22:40 に終わるとき、
+    /// 同じ日の 23:00 のアラームは鳴らす。
+    static func isGloballySkipped(
+        _ date: Date,
+        entry: AlarmEntry,
+        globalSkip: GlobalSkip,
+        calendar: Calendar = .current
+    ) -> Bool {
+        guard entry.isEnabled,
+              globalSkip.entryIDs.contains(entry.id),
+              let occurrence = occurrence(
+                  on: date,
+                  entry: entry,
+                  calendar: calendar
+              )
+        else { return false }
+        return occurrence >= globalSkip.start && occurrence <= globalSkip.end
+    }
+
+    /// `date` の日に鳴る予定の日時（休みは考えない）。鳴らない日は nil。
+    static func occurrence(
+        on date: Date,
+        entry: AlarmEntry,
+        calendar: Calendar = .current
+    ) -> Date? {
+        guard entry.isEnabled, (0...23).contains(entry.hour), (0...59).contains(entry.minute) else {
+            return nil
+        }
+        if entry.repeatWeekdays.isEmpty {
+            let start = calendar.startOfDay(for: date)
+            let before = calendar.date(byAdding: .second, value: -1, to: start) ?? start
+            guard let raw = rawNextFireDate(for: entry, after: before, calendar: calendar),
+                  calendar.isDate(raw, inSameDayAs: date) else { return nil }
+            return raw
+        }
+        guard entry.repeatWeekdays.contains(calendar.component(.weekday, from: date)) else {
+            return nil
+        }
+        return calendar.date(
+            bySettingHour: entry.hour,
+            minute: entry.minute,
+            second: 0,
+            of: date
+        )
     }
 
     /// `start` の日から `days` 日以内に休む日（明示＋祝日）のキー。
@@ -59,7 +112,8 @@ enum AlarmSkipLogic {
         entry: AlarmEntry,
         from start: Date,
         days: Int = scheduleHorizonDays,
-        calendar: Calendar = .current
+        calendar: Calendar = .current,
+        globalSkip: GlobalSkip? = AppGroup.globalSkip
     ) -> [String] {
         let startDay = calendar.startOfDay(for: start)
         let end = calendar.date(byAdding: .day, value: days, to: startDay) ?? startDay
@@ -74,9 +128,69 @@ enum AlarmSkipLogic {
                 }
             }
         }
+        if let globalSkip {
+            keys.formUnion(globalSkipKeys(
+                for: entry,
+                from: startDay,
+                days: days,
+                globalSkip: globalSkip,
+                calendar: calendar
+            ))
+        }
         return keys
             .filter { $0 >= startKey && $0 <= endKey }
             .sorted()
+    }
+
+    /// 全体の休みで鳴らなくなる日のキー（#197 画面作り直し）。
+    ///
+    /// 区間の終わりが日付の途中でも、終わったあとの回は残す。
+    /// 例: 22:40 までの休みなら、同じ日の 23:00 は鳴る。
+    static func globalSkipKeys(
+        for entry: AlarmEntry,
+        from start: Date,
+        days: Int = scheduleHorizonDays,
+        globalSkip: GlobalSkip,
+        calendar: Calendar = .current
+    ) -> [String] {
+        guard entry.isEnabled,
+              globalSkip.entryIDs.contains(entry.id),
+              globalSkip.end > start
+        else { return [] }
+
+        let startDay = calendar.startOfDay(for: start)
+        let endDay = calendar.startOfDay(for: globalSkip.end)
+        let horizonEnd = calendar.date(byAdding: .day, value: days, to: startDay) ?? startDay
+        let lastDay = min(endDay, horizonEnd)
+        let startKey = dateKey(startDay, calendar: calendar)
+        let endKey = dateKey(horizonEnd, calendar: calendar)
+
+        if entry.repeatWeekdays.isEmpty {
+            // 1回きりのアラームは、実際の次の1回だけを外す。
+            guard let occurrence = rawNextFireDate(
+                for: entry,
+                after: Date(),
+                calendar: calendar
+            ), occurrence >= globalSkip.start,
+               occurrence <= globalSkip.end else {
+                return []
+            }
+            let key = dateKey(occurrence, calendar: calendar)
+            return key >= startKey && key <= endKey ? [key] : []
+        }
+
+        var day = max(startDay, calendar.startOfDay(for: globalSkip.start))
+        var keys: [String] = []
+        while day <= lastDay {
+            if let occurrence = occurrence(on: day, entry: entry, calendar: calendar),
+               occurrence >= globalSkip.start,
+               occurrence <= globalSkip.end {
+                keys.append(dateKey(day, calendar: calendar))
+            }
+            guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+            day = next
+        }
+        return keys
     }
 
     /// 休む日がある曜日を除いた、くり返しの曜日。
@@ -84,14 +198,16 @@ enum AlarmSkipLogic {
         for entry: AlarmEntry,
         after now: Date,
         horizonDays: Int = scheduleHorizonDays,
-        calendar: Calendar = .current
+        calendar: Calendar = .current,
+        globalSkip: GlobalSkip? = AppGroup.globalSkip
     ) -> [Int] {
         guard !entry.repeatWeekdays.isEmpty else { return [] }
         let skippedWeekdays = skippedWeekdays(
             for: entry,
             after: now,
             horizonDays: horizonDays,
-            calendar: calendar
+            calendar: calendar,
+            globalSkip: globalSkip
         )
         guard !skippedWeekdays.isEmpty else { return entry.repeatWeekdays }
         return entry.repeatWeekdays.filter { !skippedWeekdays.contains($0) }
@@ -102,9 +218,16 @@ enum AlarmSkipLogic {
         for entry: AlarmEntry,
         after now: Date,
         horizonDays: Int = scheduleHorizonDays,
-        calendar: Calendar = .current
+        calendar: Calendar = .current,
+        globalSkip: GlobalSkip? = AppGroup.globalSkip
     ) -> Set<Int> {
-        let keys = upcomingSkipKeys(entry: entry, from: now, days: horizonDays, calendar: calendar)
+        let keys = upcomingSkipKeys(
+            entry: entry,
+            from: now,
+            days: horizonDays,
+            calendar: calendar,
+            globalSkip: globalSkip
+        )
         let weekdays = keys.compactMap { key -> Int? in
             guard let date = date(fromKey: key, calendar: calendar) else { return nil }
             return calendar.component(.weekday, from: date)
@@ -118,7 +241,8 @@ enum AlarmSkipLogic {
     static func nextFireDate(
         for entry: AlarmEntry,
         after referenceDate: Date,
-        calendar: Calendar = .current
+        calendar: Calendar = .current,
+        globalSkip: GlobalSkip? = AppGroup.globalSkip
     ) -> Date? {
         guard entry.isEnabled, (0...23).contains(entry.hour), (0...59).contains(entry.minute) else {
             return nil
@@ -127,7 +251,11 @@ enum AlarmSkipLogic {
         if entry.repeatWeekdays.isEmpty {
             // 一回限り。休みの日なら鳴らずに終わる。
             return rawNextFireDate(for: entry, after: referenceDate, calendar: calendar)
-                .flatMap { isSkipped($0, entry: entry, calendar: calendar) ? nil : $0 }
+                .flatMap {
+                    isSkipped($0, entry: entry, calendar: calendar, globalSkip: globalSkip)
+                        ? nil
+                        : $0
+                }
         }
 
         let start = calendar.startOfDay(for: referenceDate)
@@ -135,7 +263,8 @@ enum AlarmSkipLogic {
             entry: entry,
             from: start,
             days: 400,
-            calendar: calendar
+            calendar: calendar,
+            globalSkip: globalSkip
         ))
         var offset = 0
         while offset <= 400 {
@@ -225,11 +354,17 @@ enum AlarmSkipLogic {
     static func entries(
         firingOn date: Date,
         among entries: [AlarmEntry],
-        calendar: Calendar = .current
+        calendar: Calendar = .current,
+        globalSkip: GlobalSkip? = AppGroup.globalSkip
     ) -> [AlarmEntry] {
         entries.filter {
             fires(on: date, entry: $0, calendar: calendar)
-                && !isSkipped(date, entry: $0, calendar: calendar)
+                && !isSkipped(
+                    date,
+                    entry: $0,
+                    calendar: calendar,
+                    globalSkip: globalSkip
+                )
         }
     }
 
@@ -250,7 +385,8 @@ enum AlarmSkipLogic {
         after referenceDate: Date,
         horizonDays: Int = scheduleHorizonDays,
         maxPerWeekday: Int = maxCoveragePerWeekday,
-        calendar: Calendar = .current
+        calendar: Calendar = .current,
+        globalSkip: GlobalSkip? = AppGroup.globalSkip
     ) -> [Coverage] {
         guard entry.isEnabled, !entry.repeatWeekdays.isEmpty else { return [] }
 
@@ -259,19 +395,22 @@ enum AlarmSkipLogic {
             entry: entry,
             from: start,
             days: horizonDays,
-            calendar: calendar
+            calendar: calendar,
+            globalSkip: globalSkip
         ))
         let effective = effectiveWeekdays(
             for: entry,
             after: referenceDate,
             horizonDays: horizonDays,
-            calendar: calendar
+            calendar: calendar,
+            globalSkip: globalSkip
         )
         let removed = skippedWeekdays(
             for: entry,
             after: referenceDate,
             horizonDays: horizonDays,
-            calendar: calendar
+            calendar: calendar,
+            globalSkip: globalSkip
         )
 
         // 全曜日を外す場合（年末年始など）は、本体を最初の1回だけ `.fixed` にし、
@@ -345,15 +484,245 @@ enum AlarmSkipLogic {
         for entry: AlarmEntry,
         after now: Date,
         horizonDays: Int = scheduleHorizonDays,
-        calendar: Calendar = .current
+        calendar: Calendar = .current,
+        globalSkip: GlobalSkip? = AppGroup.globalSkip
     ) -> Bool {
         !entry.repeatWeekdays.isEmpty
             && effectiveWeekdays(
                 for: entry,
                 after: now,
                 horizonDays: horizonDays,
-                calendar: calendar
+                calendar: calendar,
+                globalSkip: globalSkip
             ).isEmpty
+    }
+
+    // MARK: - 全体の休み（#197 画面作り直し）
+
+    /// 全体の休みのプリセット。
+    enum GlobalSkipPreset: String, CaseIterable, Sendable {
+        case hours24 = "24h"
+        case days3 = "3d"
+        case days7 = "7d"
+        case custom
+    }
+
+    /// 8週間先まで（56日）。
+    static let maxGlobalSkipDays = 56
+
+    /// 押した時点からのプリセットの区間。
+    static func presetInterval(
+        _ preset: GlobalSkipPreset,
+        from now: Date,
+        calendar: Calendar = .current
+    ) -> DateInterval? {
+        let days: Int
+        switch preset {
+        case .hours24: days = 1
+        case .days3: days = 3
+        case .days7: days = 7
+        case .custom: return nil
+        }
+        let end = calendar.date(byAdding: .day, value: days, to: now) ?? now
+        return DateInterval(start: now, end: end)
+    }
+
+    /// 開始日〜終了日（終了日はその日の終わりまで）。
+    static func customInterval(
+        startDay: Date,
+        endDay: Date,
+        now: Date = Date(),
+        calendar: Calendar = .current
+    ) -> DateInterval? {
+        let today = calendar.startOfDay(for: now)
+        let firstDay = calendar.startOfDay(for: startDay)
+        let lastDay = calendar.startOfDay(for: endDay)
+        guard lastDay >= firstDay else { return nil }
+        let maxDay = calendar.date(byAdding: .day, value: maxGlobalSkipDays, to: today) ?? today
+        guard firstDay <= maxDay, lastDay <= maxDay else { return nil }
+
+        let start = max(now, firstDay)
+        let endOfLastDay = calendar.date(byAdding: .day, value: 1, to: lastDay) ?? lastDay
+        let end = calendar.date(byAdding: .second, value: -1, to: endOfLastDay) ?? lastDay
+        guard end >= start else { return nil }
+        return DateInterval(start: start, end: end)
+    }
+
+    /// いま有効な全体の休み。
+    static func activeGlobalSkip(now: Date = Date()) -> GlobalSkip? {
+        guard let skip = AppGroup.globalSkip,
+              skip.end > now,
+              !skip.entryIDs.isEmpty else { return nil }
+        return skip
+    }
+
+    /// 区間内に鳴る回（休みは考えない）。
+    static func occurrences(
+        of entry: AlarmEntry,
+        in interval: DateInterval,
+        calendar: Calendar = .current,
+        excludingIndividualSkips: Bool = true,
+        globalSkip: GlobalSkip? = nil,
+        referenceDate: Date = Date()
+    ) -> [Date] {
+        guard interval.end >= interval.start else { return [] }
+
+        if entry.repeatWeekdays.isEmpty {
+            // 1回きりのアラームは、区間内の実際の次の1回だけ。
+            guard let occurrence = rawNextFireDate(
+                for: entry,
+                after: referenceDate,
+                calendar: calendar
+            ), occurrence >= interval.start,
+               occurrence <= interval.end else {
+                return []
+            }
+            if excludingIndividualSkips,
+               isSkipped(occurrence, entry: entry, calendar: calendar, globalSkip: globalSkip) {
+                return []
+            }
+            return [occurrence]
+        }
+
+        let startDay = calendar.startOfDay(for: interval.start)
+        let lastDay = calendar.startOfDay(for: interval.end)
+        var day = startDay
+        var result: [Date] = []
+        var guardCount = 0
+        while day <= lastDay, guardCount <= maxGlobalSkipDays + 1 {
+            guardCount += 1
+            if let occurrence = occurrence(on: day, entry: entry, calendar: calendar),
+               occurrence >= interval.start,
+               occurrence <= interval.end {
+                let alreadySkipped = excludingIndividualSkips && isSkipped(
+                    occurrence,
+                    entry: entry,
+                    calendar: calendar,
+                    globalSkip: globalSkip
+                )
+                if !alreadySkipped { result.append(occurrence) }
+            }
+            guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+            day = next
+        }
+        return result
+    }
+
+    /// 区間内に鳴る回の数。
+    static func occurrenceCount(
+        entries: [AlarmEntry],
+        in interval: DateInterval,
+        calendar: Calendar = .current,
+        excludingIndividualSkips: Bool = true
+    ) -> Int {
+        entries.reduce(0) { count, entry in
+            count + occurrences(
+                of: entry,
+                in: interval,
+                calendar: calendar,
+                excludingIndividualSkips: excludingIndividualSkips
+            ).count
+        }
+    }
+
+    /// 区間内に鳴る回の日時（時刻順）。
+    static func occurrences(
+        entries: [AlarmEntry],
+        in interval: DateInterval,
+        calendar: Calendar = .current,
+        excludingIndividualSkips: Bool = true
+    ) -> [Date] {
+        entries.flatMap {
+            occurrences(
+                of: $0,
+                in: interval,
+                calendar: calendar,
+                excludingIndividualSkips: excludingIndividualSkips
+            )
+        }.sorted()
+    }
+
+    /// 区間内に鳴らなくなる 1回きりのアラームの数。
+    static func oneTimeCount(
+        entries: [AlarmEntry],
+        in interval: DateInterval,
+        calendar: Calendar = .current
+    ) -> Int {
+        entries.filter { $0.repeatWeekdays.isEmpty }.reduce(0) { count, entry in
+            count + (occurrences(of: entry, in: interval, calendar: calendar).isEmpty ? 0 : 1)
+        }
+    }
+
+    /// 次に休む日（個別の休みだけ。全体の休みは含めない）。
+    static func nextIndividualSkipDate(
+        for entry: AlarmEntry,
+        after now: Date,
+        calendar: Calendar = .current
+    ) -> Date? {
+        let todayKey = dateKey(calendar.startOfDay(for: now), calendar: calendar)
+        guard let key = entry.skipDates.filter({ $0 >= todayKey }).min() else {
+            return nil
+        }
+        return date(fromKey: key, calendar: calendar)
+    }
+
+    /// 行に出す「11/16（月）は休み・次は 11/17（火）」の材料。
+    static func individualSkipSummary(
+        for entry: AlarmEntry,
+        after now: Date,
+        calendar: Calendar = .current
+    ) -> (skipped: Date, next: Date?)? {
+        guard let skipped = nextIndividualSkipDate(
+            for: entry,
+            after: now,
+            calendar: calendar
+        ) else { return nil }
+        let endOfSkippedDay = calendar.date(
+            byAdding: .second,
+            value: -1,
+            to: calendar.date(byAdding: .day, value: 1, to: skipped) ?? skipped
+        ) ?? skipped
+        let next = nextFireDate(
+            for: entry,
+            after: max(now, endOfSkippedDay),
+            calendar: calendar
+        )
+        return (skipped, next)
+    }
+
+    /// 「日付を選ぶ」の初期値（次に鳴る日）。
+    static func nextFiringDay(
+        entries: [AlarmEntry],
+        after now: Date,
+        calendar: Calendar = .current
+    ) -> Date {
+        let next = entries
+            .filter(\.isEnabled)
+            .compactMap { nextFireDate(for: $0, after: now, calendar: calendar) }
+            .min()
+        return calendar.startOfDay(for: next ?? now)
+    }
+
+    /// 一覧上部に出す「何本」。
+    ///
+    /// 全体の休みで止めた1回きりのアラームも1本として数える。
+    static func globalSkipCount(
+        skip: GlobalSkip,
+        entries: [AlarmEntry],
+        calendar: Calendar = .current
+    ) -> Int {
+        let interval = DateInterval(start: skip.start, end: skip.end)
+        let disabled = Set(skip.disabledOneTimeIDs)
+        return entries.reduce(0) { total, entry in
+            guard skip.entryIDs.contains(entry.id) else { return total }
+            if entry.isEnabled {
+                return total + occurrences(of: entry, in: interval, calendar: calendar).count
+            }
+            if disabled.contains(entry.id) {
+                return total + 1
+            }
+            return total
+        }
     }
 
     // MARK: - 一覧のまとめ

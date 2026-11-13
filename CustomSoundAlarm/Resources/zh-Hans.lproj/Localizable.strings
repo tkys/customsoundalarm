@@ -312,21 +312,9 @@
 "play_order_footer" = "闹钟会一直重复，直到你停止。每次停止后，随机播放会改变下一次的顺序。随机一首会重复同一首曲目。";
 
 // #197 skip days
-"skip_section_header" = "休息";
-"skip_alarm_count" = "%d 个";
 "skip_one_time_warning" = "一次性闹钟 %d 个将不会响。";
-"skip_this_day" = "这天休息";
-"skip_select" = "选择闹钟";
-"skip_range" = "选择日期";
-"skip_active_notice" = "%@ 休息，下次 %@";
-"skip_active_notice_no_next" = "%@ 休息";
 "skip_undo" = "撤销";
-"skip_select_title" = "选择要休息的闹钟";
-"skip_select_hint" = "取消勾选的闹钟在这天不会响。";
 "skip_apply" = "休息";
-"skip_range_title" = "选择日期";
-"skip_start_date" = "开始";
-"skip_end_date" = "结束";
 "holiday_skip_toggle" = "节假日不响";
 "holiday_next_skipped" = "%@ 休息";
 "holiday_none" = "近期没有节假日";
@@ -334,3 +322,32 @@
 "holiday_ring_on" = "这个节假日也响";
 "holiday_mark" = "节假日";
 "skip_alarms_intent" = "让闹钟休息";
+
+// #197 skip redesign
+"skip_all_button" = "让闹钟休息";
+"skip_all_title" = "让闹钟休息";
+"skip_all_24h" = "24小时";
+"skip_all_3d" = "3天";
+"skip_all_7d" = "7天";
+"skip_all_row_fmt" = "至 %@ · %d个";
+"skip_all_custom" = "选择日期";
+"skip_all_summary_fmt" = "不会响的闹钟：%@";
+"skip_all_active_fmt" = "休息至 %1$@ · %2$d个";
+"skip_row_skip_fmt" = "让 %@ 休息";
+"skip_row_undo" = "取消休息";
+"skip_row_summary_fmt" = "%@ 休息 · 下次 %@";
+"skip_row_summary_no_next_fmt" = "%@ 休息";
+"skip_dates_title" = "选择休息日";
+"skip_dates_none" = "无";
+"skip_dates_count_fmt" = "%d天";
+"skip_dates_selected" = "休息日";
+"skip_dates_empty" = "没有休息日";
+"skip_dates_footer" = "选中的日期不会响。";
+"skip_calendar_title" = "选择日期";
+"skip_calendar_hint" = "点按开始日期和结束日期。最多可选8周后。";
+"skip_calendar_range_fmt" = "%@ – %@";
+"skip_calendar_previous_month" = "上个月";
+"skip_calendar_next_month" = "下个月";
+"holiday_others_message_fmt" = "还有 %d 个同星期的闹钟。";
+"holiday_apply_to_others_fmt" = "也应用到其他 %d 个";
+"holiday_apply_only_this" = "仅此闹钟";

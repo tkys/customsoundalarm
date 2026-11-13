@@ -24,7 +24,9 @@ struct AlarmSchedulerSkipTests {
         let lastStop = AppGroup.lastStopIntentAt
         let testRecords = AppGroup.testAlarmRecords
         let pendingShuffle = AppGroup.pendingShuffleRefreshEntryIDs
+        let globalSkip = AppGroup.globalSkip
         defer {
+            AppGroup.globalSkip = globalSkip
             AppGroup.lastStopIntentAt = lastStop
             AppGroup.testAlarmRecords = testRecords
             AppGroup.pendingShuffleRefreshEntryIDs = pendingShuffle
@@ -47,6 +49,7 @@ struct AlarmSchedulerSkipTests {
         AppGroup.lastStopIntentAt = nil
         AppGroup.testAlarmRecords = []
         AppGroup.pendingShuffleRefreshEntryIDs = []
+        AppGroup.globalSkip = nil
         try await body()
     }
 
@@ -372,6 +375,52 @@ final class RecordingAlarmManager: AlarmManaging, @unchecked Sendable {
         lock.withLock {
             stored.removeValue(forKey: id)
             canceledIDs.insert(id)
+        }
+    }
+}
+
+extension AlarmSchedulerSkipTests {
+
+    @Test
+    func globalSkip_removesTheWeekdayAndRestoresAfterUndo() async throws {
+        try await withCleanState {
+            let fake = RecordingAlarmManager()
+            let scheduler = AlarmScheduler(manager: fake)
+            let calendar = Calendar.current
+            let hour = (calendar.component(.hour, from: Date()) + 1) % 24
+            let entry = AlarmEntry(
+                hour: hour,
+                minute: 0,
+                label: "global-skip",
+                repeatWeekdays: [1, 2, 3, 4, 5, 6, 7]
+            )
+            let now = Date()
+            AppGroup.globalSkip = GlobalSkip(
+                start: now,
+                end: calendar.date(byAdding: .day, value: 1, to: now)!,
+                entryIDs: [entry.id]
+            )
+
+            scheduler.syncAlarms([entry], trigger: .launch)
+            await scheduler.waitForPendingSync()
+
+            let weekly = fake.configurations.values.compactMap {
+                schedule(of: $0).flatMap(weekdaySet)
+            }
+            #expect(weekly.count == 1)
+            #expect(weekly[0].count == 6)
+            #expect(!(AlarmIDMaps.loadSkipCoverage()[entry.id] ?? [:]).isEmpty)
+
+            AppGroup.globalSkip = nil
+            scheduler.syncAlarms([entry], trigger: .edit)
+            await scheduler.waitForPendingSync()
+
+            let restored = fake.configurations.values.compactMap {
+                schedule(of: $0).flatMap(weekdaySet)
+            }
+            #expect(restored.count == 1)
+            #expect(restored[0] == Set([1, 2, 3, 4, 5, 6, 7]))
+            #expect((AlarmIDMaps.loadSkipCoverage()[entry.id] ?? [:]).isEmpty)
         }
     }
 }

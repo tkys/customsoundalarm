@@ -312,21 +312,9 @@
 "play_order_footer" = "Budziki powtarzają się, dopóki ich nie zatrzymasz. Losowa kolejność zmienia następną kolejność po każdym zatrzymaniu. Jeden losowy powtarza ten sam utwór.";
 
 // #197 skip days
-"skip_section_header" = "Pauza";
-"skip_alarm_count" = "%d budzików";
 "skip_one_time_warning" = "Budzik jednorazowy (%d) nie zadzwoni.";
-"skip_this_day" = "Nie dzwoń tego dnia";
-"skip_select" = "Wybierz budziki";
-"skip_range" = "Wybierz daty";
-"skip_active_notice" = "%@ bez budzika. Następny: %@";
-"skip_active_notice_no_next" = "%@ bez budzika";
 "skip_undo" = "Cofnij";
-"skip_select_title" = "Budziki do pauzy";
-"skip_select_hint" = "Odznaczone budziki nie zadzwonią tego dnia.";
 "skip_apply" = "Pauza";
-"skip_range_title" = "Wybierz daty";
-"skip_start_date" = "Początek";
-"skip_end_date" = "Koniec";
 "holiday_skip_toggle" = "Nie dzwoń w święta";
 "holiday_next_skipped" = "%@ bez budzika";
 "holiday_none" = "Brak nadchodzących świąt";
@@ -334,3 +322,32 @@
 "holiday_ring_on" = "Dzwoń w to święto";
 "holiday_mark" = "Święto";
 "skip_alarms_intent" = "Wstrzymaj budziki";
+
+// #197 skip redesign
+"skip_all_button" = "Wstrzymaj budziki";
+"skip_all_title" = "Wstrzymaj budziki";
+"skip_all_24h" = "24 godziny";
+"skip_all_3d" = "3 dni";
+"skip_all_7d" = "7 dni";
+"skip_all_row_fmt" = "do %@ · %d";
+"skip_all_custom" = "Wybierz daty";
+"skip_all_summary_fmt" = "Budziki, które nie zadzwonią: %@";
+"skip_all_active_fmt" = "Wstrzymane do %1$@ · %2$d";
+"skip_row_skip_fmt" = "Wstrzymaj %@";
+"skip_row_undo" = "Anuluj wstrzymanie";
+"skip_row_summary_fmt" = "Wstrzymany %@ · następny %@";
+"skip_row_summary_no_next_fmt" = "Wstrzymany %@";
+"skip_dates_title" = "Wybierz dni przerwy";
+"skip_dates_none" = "Brak";
+"skip_dates_count_fmt" = "%d dni";
+"skip_dates_selected" = "Dni przerwy";
+"skip_dates_empty" = "Brak dni przerwy";
+"skip_dates_footer" = "Wybrane dni nie zadzwonią.";
+"skip_calendar_title" = "Wybierz daty";
+"skip_calendar_hint" = "Dotknij daty początku i końca. Do 8 tygodni naprzód.";
+"skip_calendar_range_fmt" = "%@ – %@";
+"skip_calendar_previous_month" = "Poprzedni miesiąc";
+"skip_calendar_next_month" = "Następny miesiąc";
+"holiday_others_message_fmt" = "Są jeszcze %d budziki w te same dni tygodnia.";
+"holiday_apply_to_others_fmt" = "Także dla pozostałych %d";
+"holiday_apply_only_this" = "Tylko ten budzik";

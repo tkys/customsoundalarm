@@ -16,7 +16,8 @@ enum AlarmSaveLogic {
         fadeIn: PlaylistFadeIn = .off,
         isEnabled: Bool = true,
         skipsHolidays: Bool = false,
-        holidayRingOverrides: [String] = []
+        holidayRingOverrides: [String] = [],
+        skipDates: [String] = []
     ) -> AlarmEntry {
         AlarmEntry(
             hour: hour,
@@ -29,6 +30,7 @@ enum AlarmSaveLogic {
             backupMinutes: backupMinutes,
             playlistID: playlistID,
             fadeIn: fadeIn,
+            skipDates: skipDates,
             skipsHolidays: skipsHolidays,
             holidayRingOverrides: holidayRingOverrides
         )
@@ -46,7 +48,8 @@ enum AlarmSaveLogic {
         playlistID: UUID? = nil,
         fadeIn: PlaylistFadeIn = .off,
         skipsHolidays: Bool? = nil,
-        holidayRingOverrides: [String]? = nil
+        holidayRingOverrides: [String]? = nil,
+        skipDates: [String]? = nil
     ) -> AlarmEntry {
         var updated = existing
         updated.hour = hour
@@ -60,7 +63,21 @@ enum AlarmSaveLogic {
         updated.fadeIn = fadeIn
         if let skipsHolidays { updated.skipsHolidays = skipsHolidays }
         if let holidayRingOverrides { updated.holidayRingOverrides = holidayRingOverrides }
-        // 編集画面にオン/オフは置かない。保存したら必ずオン（#122）
+        if let skipDates {
+            // 時刻を変えても休む日は残す。曜日を変えたら合わない日付は黙って落とす（#197）
+            if repeatWeekdays.isEmpty {
+                updated.skipDates = []
+            } else {
+                let calendar = Calendar.current
+                updated.skipDates = skipDates.filter { key in
+                    guard let date = AlarmSkipLogic.date(fromKey: key, calendar: calendar) else {
+                        return false
+                    }
+                    return repeatWeekdays.contains(calendar.component(.weekday, from: date))
+                }.sorted()
+            }
+        }
+        // 編集画面にオン/オフは置かない。保存したらオン（#122）
         updated.isEnabled = true
         return updated
     }

@@ -312,21 +312,9 @@
 "play_order_footer" = "Les alarmes se répètent jusqu’à ce que vous les arrêtiez. La lecture aléatoire change l’ordre suivant à chaque arrêt. Un titre au hasard répète le même titre.";
 
 // #197 skip days
-"skip_section_header" = "Pause";
-"skip_alarm_count" = "%d alarmes";
 "skip_one_time_warning" = "Une alarme unique (%d) ne sonnera pas.";
-"skip_this_day" = "Ne pas sonner ce jour";
-"skip_select" = "Choisir les alarmes";
-"skip_range" = "Choisir des dates";
-"skip_active_notice" = "%@ : pas d’alarme. Prochaine : %@";
-"skip_active_notice_no_next" = "%@ : pas d’alarme";
 "skip_undo" = "Annuler";
-"skip_select_title" = "Alarmes à mettre en pause";
-"skip_select_hint" = "Les alarmes décochées ne sonneront pas ce jour.";
 "skip_apply" = "Mettre en pause";
-"skip_range_title" = "Choisir des dates";
-"skip_start_date" = "Début";
-"skip_end_date" = "Fin";
 "holiday_skip_toggle" = "Ne pas sonner les jours fériés";
 "holiday_next_skipped" = "%@ : pas d’alarme";
 "holiday_none" = "Aucun jour férié à venir";
@@ -334,3 +322,32 @@
 "holiday_ring_on" = "Sonner ce jour férié";
 "holiday_mark" = "Férié";
 "skip_alarms_intent" = "Mettre les alarmes en pause";
+
+// #197 skip redesign
+"skip_all_button" = "Mettre les alarmes en pause";
+"skip_all_title" = "Mettre les alarmes en pause";
+"skip_all_24h" = "24 heures";
+"skip_all_3d" = "3 jours";
+"skip_all_7d" = "7 jours";
+"skip_all_row_fmt" = "jusqu’à %@ · %d";
+"skip_all_custom" = "Choisir des dates";
+"skip_all_summary_fmt" = "Alarmes qui ne sonneront pas : %@";
+"skip_all_active_fmt" = "En pause jusqu’à %1$@ · %2$d";
+"skip_row_skip_fmt" = "Mettre en pause le %@";
+"skip_row_undo" = "Annuler la pause";
+"skip_row_summary_fmt" = "En pause le %@ · prochaine %@";
+"skip_row_summary_no_next_fmt" = "En pause le %@";
+"skip_dates_title" = "Choisir des jours de pause";
+"skip_dates_none" = "Aucun";
+"skip_dates_count_fmt" = "%d jours";
+"skip_dates_selected" = "Jours de pause";
+"skip_dates_empty" = "Aucun jour de pause";
+"skip_dates_footer" = "Les jours choisis ne sonneront pas.";
+"skip_calendar_title" = "Choisir des dates";
+"skip_calendar_hint" = "Touchez une date de début et de fin. Jusqu’à 8 semaines à l’avance.";
+"skip_calendar_range_fmt" = "%@ – %@";
+"skip_calendar_previous_month" = "Mois précédent";
+"skip_calendar_next_month" = "Mois suivant";
+"holiday_others_message_fmt" = "Il y a %d autres alarmes sur les mêmes jours.";
+"holiday_apply_to_others_fmt" = "Aussi pour les %d autres";
+"holiday_apply_only_this" = "Seulement cette alarme";

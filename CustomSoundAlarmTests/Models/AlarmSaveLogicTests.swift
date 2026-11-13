@@ -50,7 +50,7 @@ struct AlarmSaveLogicTests {
             backupMinutes: 20
         )
 
-        #expect(updated.isEnabled, "編集して保存したら必ずオン")
+        #expect(updated.isEnabled, "編集して保存したらオン")
         #expect(updated.id == existing.id)
         #expect(updated.hour == 8)
         #expect(updated.minute == 15)
@@ -100,5 +100,81 @@ struct AlarmSaveLogicTests {
 
         #expect(updated.playlistID == playlistID)
         #expect(updated.fadeIn == .fifteen)
+    }
+
+    @Test
+    func updatedEntry_keepsSkipDatesWhenOnlyTheTimeChanges() {
+        let calendar = Calendar.current
+        let monday = calendar.date(
+            from: DateComponents(year: 2026, month: 11, day: 16)
+        )!
+        let key = AlarmSkipLogic.dateKey(monday, calendar: calendar)
+        var existing = AlarmEntry(
+            hour: 7,
+            minute: 0,
+            repeatWeekdays: [2],
+            skipDates: [key]
+        )
+
+        let updated = AlarmSaveLogic.updatedEntry(
+            from: existing,
+            hour: 8,
+            minute: 30,
+            label: "New",
+            repeatWeekdays: [2],
+            soundFileName: "",
+            snoozeMinutes: 9,
+            backupMinutes: nil,
+            skipDates: existing.skipDates
+        )
+
+        #expect(updated.skipDates == [key])
+        existing.hour = 8
+        #expect(updated.hour == 8)
+    }
+
+    @Test
+    func updatedEntry_dropsSkipDatesThatDoNotMatchTheNewWeekdays() {
+        let calendar = Calendar.current
+        let monday = calendar.date(
+            from: DateComponents(year: 2026, month: 11, day: 16)
+        )!
+        let tuesday = calendar.date(
+            from: DateComponents(year: 2026, month: 11, day: 17)
+        )!
+        let mondayKey = AlarmSkipLogic.dateKey(monday, calendar: calendar)
+        let tuesdayKey = AlarmSkipLogic.dateKey(tuesday, calendar: calendar)
+        let existing = AlarmEntry(
+            hour: 7,
+            minute: 0,
+            repeatWeekdays: [2, 3],
+            skipDates: [mondayKey, tuesdayKey]
+        )
+
+        let onlyMonday = AlarmSaveLogic.updatedEntry(
+            from: existing,
+            hour: 7,
+            minute: 0,
+            label: "New",
+            repeatWeekdays: [2],
+            soundFileName: "",
+            snoozeMinutes: 9,
+            backupMinutes: nil,
+            skipDates: existing.skipDates
+        )
+        #expect(onlyMonday.skipDates == [mondayKey])
+
+        let none = AlarmSaveLogic.updatedEntry(
+            from: existing,
+            hour: 7,
+            minute: 0,
+            label: "New",
+            repeatWeekdays: [5],
+            soundFileName: "",
+            snoozeMinutes: 9,
+            backupMinutes: nil,
+            skipDates: existing.skipDates
+        )
+        #expect(none.skipDates.isEmpty)
     }
 }
