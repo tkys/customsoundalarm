@@ -7,7 +7,7 @@ The privacy policy's substance is the English text; translations say so (note).
 App UI names are quoted in English outside Japanese; Settings paths use Apple's wording.
 """
 
-EMAIL = "tkysyskw.dev@gmail.com"
+EMAIL = "support@mysoundalarm.com"
 UPDATED = "2026-11-04"
 
 SUPPORT = {
