@@ -13,7 +13,7 @@ struct ContentView: View {
     @State private var alarmStore = AlarmStore.shared
     @State private var soundStore = SoundStore.shared
     @State private var selectedAlarm: AlarmEntry?
-    @State private var showingBedsideClock = false
+    @State private var showingSettings = false
     /// オンボの表示（#98）。初回評価は .task で1回だけ
     @State private var showingOnboarding = false
     /// オンボ場面4で選ばれた取り込み入口（追加画面に伝える・#98 Phase 4）
@@ -39,12 +39,12 @@ struct ContentView: View {
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         Button {
-                            showingBedsideClock = true
+                            showingSettings = true
                         } label: {
-                            Image(systemName: "moon.zzz")
+                            Image(systemName: "gearshape")
                         }
-                        .accessibilityLabel(Text("night_mode"))
-                        .accessibilityIdentifier("alarmList.bedside")
+                        .accessibilityLabel(Text("settings"))
+                        .accessibilityIdentifier("alarmList.settings")
                     }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -94,8 +94,8 @@ struct ContentView: View {
             .sheet(item: $selectedAlarm) { alarm in
                 AlarmDetailView(mode: .edit(alarm))
             }
-            .fullScreenCover(isPresented: $showingBedsideClock) {
-                BedsideClockView()
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
             }
             .fullScreenCover(item: requiredPromptBinding) { prompt in
                 UpdatePromptView(

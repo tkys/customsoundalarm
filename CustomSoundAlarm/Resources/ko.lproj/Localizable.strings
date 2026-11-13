@@ -310,3 +310,13 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "재생목록 미리 듣기";
 "play_order_footer" = "알람은 중지할 때까지 반복됩니다. 셔플은 중지할 때마다 다음 순서를 바꿉니다. 한 곡 랜덤은 매번 같은 한 곡을 반복합니다.";
+
+// #204 settings
+"settings" = "설정";
+"settings_contact" = "문제 신고 또는 문의";
+"settings_review" = "리뷰 쓰기";
+"settings_howto" = "사용 방법";
+"settings_privacy" = "개인정보 처리방침";
+"settings_version" = "버전";
+"settings_mail_subject" = "My Sound Alarm 정보";
+"settings_mail_body" = "문의해 주셔서 감사합니다.\n\n아래에 내용을 적어 주세요.\n\n\n---\n앱: My Sound Alarm %@\niOS: %@\n기기: %@";

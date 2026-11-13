@@ -310,3 +310,13 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "プレイリストを試聴";
 "play_order_footer" = "アラームは止めるまで繰り返します。シャッフルは止めるたびに次の順番を変えます。1曲だけランダムは、毎回選んだ1曲を繰り返します。";
+
+// #204 settings
+"settings" = "設定";
+"settings_contact" = "不具合を報告する／問い合わせ";
+"settings_review" = "レビューを書く";
+"settings_howto" = "使い方";
+"settings_privacy" = "プライバシーポリシー";
+"settings_version" = "バージョン";
+"settings_mail_subject" = "My Sound Alarm について";
+"settings_mail_body" = "お問い合わせありがとうございます。\n\n以下に内容を書いてください。\n\n\n---\nアプリ: My Sound Alarm %@\niOS: %@\n機種: %@";

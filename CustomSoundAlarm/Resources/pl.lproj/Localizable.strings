@@ -310,3 +310,13 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Odsłuchaj playlistę";
 "play_order_footer" = "Budziki powtarzają się, dopóki ich nie zatrzymasz. Losowa kolejność zmienia następną kolejność po każdym zatrzymaniu. Jeden losowy powtarza ten sam utwór.";
+
+// #204 settings
+"settings" = "Ustawienia";
+"settings_contact" = "Zgłoś problem lub zapytaj";
+"settings_review" = "Napisz opinię";
+"settings_howto" = "Jak używać";
+"settings_privacy" = "Polityka prywatności";
+"settings_version" = "Wersja";
+"settings_mail_subject" = "O aplikacji My Sound Alarm";
+"settings_mail_body" = "Dziękujemy za wiadomość.\n\nNapisz wiadomość poniżej.\n\n\n---\nAplikacja: My Sound Alarm %@\niOS: %@\nUrządzenie: %@";

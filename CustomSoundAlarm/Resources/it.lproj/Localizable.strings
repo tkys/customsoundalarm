@@ -310,3 +310,13 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Ascolta playlist";
 "play_order_footer" = "Le sveglie si ripetono finché non le fermi. L'ordine casuale cambia l'ordine successivo a ogni arresto. Un brano casuale ripete lo stesso brano.";
+
+// #204 settings
+"settings" = "Impostazioni";
+"settings_contact" = "Segnala un problema o fai una domanda";
+"settings_review" = "Scrivi una recensione";
+"settings_howto" = "Come si usa";
+"settings_privacy" = "Informativa sulla privacy";
+"settings_version" = "Versione";
+"settings_mail_subject" = "Informazioni su My Sound Alarm";
+"settings_mail_body" = "Grazie per averci scritto.\n\nScrivi il tuo messaggio qui sotto.\n\n\n---\nApp: My Sound Alarm %@\niOS: %@\nDispositivo: %@";
