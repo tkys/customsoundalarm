@@ -44,6 +44,11 @@ struct AlarmDetailView: View {
     @State private var fadeIn: PlaylistFadeIn
     @State private var playlistStore = PlaylistStore.shared
     @State private var showingPlaylistRequired = false
+    /// 祝日は鳴らさない（#197）
+    @State private var skipsHolidays: Bool
+    @State private var holidayRingOverrides: Set<String>
+    /// 日付を選んで休む（#197 画面作り直し）
+    @State private var skipDates: Set<String>
 
     /// オンボ指定の初期動作を1回だけ適用したか
     @State private var didApplyInitialImport = false
@@ -80,6 +85,9 @@ struct AlarmDetailView: View {
             _backupMinutes = State(initialValue: entry.backupMinutes)
             _playlistID = State(initialValue: entry.playlistID)
             _fadeIn = State(initialValue: entry.fadeIn)
+            _skipsHolidays = State(initialValue: entry.skipsHolidays)
+            _holidayRingOverrides = State(initialValue: Set(entry.holidayRingOverrides))
+            _skipDates = State(initialValue: Set(entry.skipDates))
         } else {
             _selectedTime = State(initialValue: Date())
             _label = State(initialValue: String(localized: "alarm_placeholder"))
@@ -93,6 +101,9 @@ struct AlarmDetailView: View {
             _backupMinutes = State(initialValue: nil)
             _playlistID = State(initialValue: nil)
             _fadeIn = State(initialValue: .off)
+            _skipsHolidays = State(initialValue: false)
+            _holidayRingOverrides = State(initialValue: [])
+            _skipDates = State(initialValue: [])
         }
     }
 
@@ -123,6 +134,16 @@ struct AlarmDetailView: View {
             }
             .accessibilityIdentifier("addAlarm.root")
             .warmListBackground()
+            .onChange(of: repeatWeekdays) { _, weekdays in
+                // 曜日を変えたら、合わない日付は黙って落とす（#197）
+                let calendar = Calendar.current
+                skipDates = skipDates.filter { key in
+                    guard let date = AlarmSkipLogic.date(fromKey: key, calendar: calendar) else {
+                        return false
+                    }
+                    return weekdays.contains(calendar.component(.weekday, from: date))
+                }
+            }
             .navigationTitle(isEditing ? String(localized: "edit_alarm") : String(localized: "add_alarm"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -148,6 +169,7 @@ struct AlarmDetailView: View {
                     .buttonStyle(.borderedProminent)
                     .tint(Color.actionFillEnd)
                     .disabled(saveConfirmation != nil)
+                    .accessibilityIdentifier("addAlarm.save")
                 }
             }
             .overlay(alignment: .top) {
@@ -221,6 +243,11 @@ struct AlarmDetailView: View {
     private var isEditing: Bool {
         if case .edit = mode { return true }
         return false
+    }
+
+    private var editingAlarmID: UUID? {
+        if case .edit(let entry) = mode { return entry.id }
+        return nil
     }
 
     /// UIテスト用: 同梱のプリセット音で波形クロップ画面を開く（DEBUGのみ・#149）。
@@ -712,7 +739,13 @@ struct AlarmDetailView: View {
     private var repeatSection: some View {
         Group {
             NavigationLink {
-                RepeatSelectionView(selectedDays: $repeatWeekdays)
+                RepeatSelectionView(
+                    selectedDays: $repeatWeekdays,
+                    skipsHolidays: $skipsHolidays,
+                    holidayRingOverrides: $holidayRingOverrides,
+                    skipDates: $skipDates,
+                    currentAlarmID: editingAlarmID
+                )
             } label: {
                 AdaptiveDetailRow {
                     Text("repeat")
@@ -865,7 +898,10 @@ struct AlarmDetailView: View {
                 backupMinutes: backupMinutes,
                 playlistID: playlistID,
                 fadeIn: fadeIn,
-                isEnabled: !AppGroup.isUITestDisableNewAlarm
+                isEnabled: !AppGroup.isUITestDisableNewAlarm,
+                skipsHolidays: skipsHolidays,
+                holidayRingOverrides: Array(holidayRingOverrides).sorted(),
+                skipDates: Array(skipDates).sorted()
             )
             alarmStore.add(entry)
             AnalyticsService.shared.capture(
@@ -894,7 +930,10 @@ struct AlarmDetailView: View {
                 snoozeMinutes: snoozeMinutes,
                 backupMinutes: backupMinutes,
                 playlistID: playlistID,
-                fadeIn: fadeIn
+                fadeIn: fadeIn,
+                skipsHolidays: skipsHolidays,
+                holidayRingOverrides: Array(holidayRingOverrides).sorted(),
+                skipDates: Array(skipDates).sorted()
             )
             alarmStore.update(updated)
             AnalyticsService.shared.capture(
@@ -971,20 +1010,11 @@ struct AlarmDetailView: View {
     }
 
     private var repeatSummary: String {
-        if repeatWeekdays.isEmpty { return String(localized: "never") }
-        let labels = [
-            String(localized: "day_sun"), String(localized: "day_mon"),
-            String(localized: "day_tue"), String(localized: "day_wed"),
-            String(localized: "day_thu"), String(localized: "day_fri"),
-            String(localized: "day_sat")
-        ]
-        let days = repeatWeekdays.sorted()
-        if days.count == 7 { return String(localized: "every_day") }
-        if repeatWeekdays == Set([2, 3, 4, 5, 6]) { return String(localized: "weekdays") }
-        if repeatWeekdays == Set([1, 7]) { return String(localized: "weekends") }
-        return days.compactMap { d in
-            (1...7).contains(d) ? labels[d - 1] : nil
-        }.joined(separator: " ")
+        RepeatSummaryLogic.text(
+            weekdays: repeatWeekdays,
+            skipsHolidays: skipsHolidays,
+            skipDateCount: skipDates.count
+        )
     }
 }
 
@@ -1030,6 +1060,18 @@ struct BackupAlarmInfoView: View {
 /// 繰り返し曜日選択（Apple Clock準拠のチェックリスト形式）
 struct RepeatSelectionView: View {
     @Binding var selectedDays: Set<Int>
+    @Binding var skipsHolidays: Bool
+    @Binding var holidayRingOverrides: Set<String>
+    @Binding var skipDates: Set<String>
+    /// 編集中のアラーム（「ほかのN本にも」から自分を除く）。
+    let currentAlarmID: UUID?
+
+    @State private var alarmStore = AlarmStore.shared
+    @State private var scheduler = AlarmScheduler.shared
+    @State private var showingSkipDates = false
+    @State private var showingAllResults = false
+    @State private var holidayOthersOffer: [UUID] = []
+    @State private var showingHolidayOthersOffer = false
 
     private let weekdays: [(id: Int, labelKey: String)] = [
         (2, "every_monday"), (3, "every_tuesday"), (4, "every_wednesday"),
@@ -1056,11 +1098,214 @@ struct RepeatSelectionView: View {
                     }
                 }
                 .foregroundStyle(.primary)
+                .accessibilityIdentifier("repeat.day.\(day.id)")
+            }
+
+            // 曜日が空（1回きり）のときは、休みの設定を出さない（#197）。
+            if !selectedDays.isEmpty {
+                Section {
+                    if AlarmSkipLogic.isJapanRegion() {
+                        holidayToggle
+                    }
+                    skipDatesRow
+                } header: {
+                    Text("holiday_skip_section_title")
+                }
+
+                if !resultSections.isEmpty {
+                    Section {
+                        ForEach(resultSections) { yearSection in
+                            if yearSection.year != currentYear {
+                                Text(AlarmSkipFormat.year(yearSection.year))
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(Color.textSecondary)
+                                    .accessibilityAddTraits(.isHeader)
+                            }
+                            ForEach(yearSection.days) { day in
+                                resultRow(day)
+                            }
+                        }
+                        if hasMoreResults {
+                            Button("skip_result_more") {
+                                showingAllResults = true
+                            }
+                            .accessibilityIdentifier("skipResult.more")
+                        }
+                    } header: {
+                        Text("skip_result_section_title")
+                            .accessibilityIdentifier("skipResult.sectionTitle")
+                    } footer: {
+                        if skipsHolidays {
+                            Text("skip_result_footer")
+                                .accessibilityIdentifier("skipResult.footer")
+                        }
+                    }
+                }
             }
         }
         .warmListBackground()
         .navigationTitle(String(localized: "repeat"))
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    // MARK: - Holiday
+
+    private var holidayToggle: some View {
+        Toggle("holiday_skip_toggle", isOn: Binding(
+            get: { skipsHolidays },
+            set: { enabled in
+                let wasOn = skipsHolidays
+                skipsHolidays = enabled
+                AnalyticsService.shared.capture(.holidaySkipToggled(enabled: enabled))
+                guard enabled, !wasOn else { return }
+                let others = otherAlarmsSharingWeekday
+                guard !others.isEmpty else { return }
+                holidayOthersOffer = others.map(\.id)
+                showingHolidayOthersOffer = true
+            }
+        ))
+        .accessibilityIdentifier("addAlarm.holidaySkip")
+        .alert(
+            Text("holiday_skip_toggle"),
+            isPresented: $showingHolidayOthersOffer
+        ) {
+            Button(String(
+                format: String(localized: "holiday_apply_to_others_fmt"),
+                holidayOthersOffer.count
+            )) {
+                applyHolidayToOthers()
+            }
+            Button("holiday_apply_only_this", role: .cancel) {}
+        } message: {
+            Text(String(
+                format: String(localized: "holiday_others_message_fmt"),
+                holidayOthersOffer.count
+            ))
+        }
+    }
+
+    /// 同じ曜日を含む、ほかのアラーム（#197）。
+    private var otherAlarmsSharingWeekday: [AlarmEntry] {
+        guard !selectedDays.isEmpty else { return [] }
+        return alarmStore.alarms.filter { alarm in
+            guard alarm.id != currentAlarmID, !alarm.repeatWeekdays.isEmpty else { return false }
+            return !Set(alarm.repeatWeekdays).isDisjoint(with: selectedDays)
+        }
+    }
+
+    private func applyHolidayToOthers() {
+        for alarm in otherAlarmsSharingWeekday {
+            var copy = alarm
+            copy.skipsHolidays = true
+            alarmStore.update(copy)
+        }
+        scheduler.syncAlarms(alarmStore.alarms, trigger: .edit)
+    }
+
+    // MARK: - Date skips
+
+    private var skipDatesRow: some View {
+        Button {
+            showingSkipDates = true
+        } label: {
+            AdaptiveDetailRow {
+                Text("skip_dates_title")
+            } content: {
+                Text(skipDatesCountText)
+                    .foregroundStyle(Color.textSecondary)
+            }
+        }
+        .accessibilityIdentifier("addAlarm.skipDates")
+        .sheet(isPresented: $showingSkipDates) {
+            AlarmSkipDatesSheet(skipDates: $skipDates)
+        }
+    }
+
+    private var skipDatesCountText: String {
+        skipDates.isEmpty
+            ? String(localized: "skip_dates_none")
+            : String(format: String(localized: "skip_dates_count_fmt"), skipDates.count)
+    }
+
+    // MARK: - Result list (#197 実機レビュー)
+
+    private var currentYear: Int {
+        Calendar.current.component(.year, from: Date())
+    }
+
+    private var resultSections: [SkipResultYear] {
+        resultSections(horizonDays: showingAllResults
+            ? SkipResultLogic.extendedDays
+            : SkipResultLogic.initialDays)
+    }
+
+    private var hasMoreResults: Bool {
+        guard !showingAllResults else { return false }
+        let initial = resultSections(horizonDays: SkipResultLogic.initialDays)
+            .reduce(0) { $0 + $1.days.count }
+        let extended = resultSections(horizonDays: SkipResultLogic.extendedDays)
+            .reduce(0) { $0 + $1.days.count }
+        return extended > initial
+    }
+
+    private func resultSections(horizonDays: Int) -> [SkipResultYear] {
+        SkipResultLogic.sections(
+            weekdays: selectedDays,
+            skipsHolidays: skipsHolidays,
+            skipDates: skipDates,
+            holidayRingOverrides: holidayRingOverrides,
+            isJapan: AlarmSkipLogic.isJapanRegion(),
+            now: Date(),
+            horizonDays: horizonDays
+        )
+    }
+
+    @ViewBuilder
+    private func resultRow(_ day: SkipResultDay) -> some View {
+        switch day.kind {
+        case .holiday(let name):
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Text("\(AlarmSkipFormat.day(day.date, includeYear: false)) \(name)")
+                Spacer(minLength: 8)
+                Button {
+                    toggleHoliday(day.dateKey)
+                } label: {
+                    resultStatus(day.isSkipped)
+                }
+                .buttonStyle(.borderless)
+                .accessibilityIdentifier("skipResult.toggle.\(day.dateKey)")
+            }
+        case .picked:
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Text("\(AlarmSkipFormat.day(day.date, includeYear: false)) \(String(localized: "skip_result_picked"))")
+                Spacer(minLength: 8)
+                resultStatus(true)
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier("skipResult.picked.\(day.dateKey)")
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                Button(role: .destructive) {
+                    skipDates.remove(day.dateKey)
+                } label: {
+                    Text("skip_result_remove")
+                }
+                .accessibilityIdentifier("skipResult.remove.\(day.dateKey)")
+            }
+        }
+    }
+
+    private func resultStatus(_ skipped: Bool) -> some View {
+        Text(skipped ? "skip_result_off" : "skip_result_on")
+            .foregroundStyle(skipped ? Color.textSecondary : Brand.orange)
+    }
+
+    private func toggleHoliday(_ dateKey: String) {
+        if holidayRingOverrides.contains(dateKey) {
+            holidayRingOverrides.remove(dateKey)
+        } else {
+            holidayRingOverrides.insert(dateKey)
+        }
+        AnalyticsService.shared.capture(.holidayRingOverride)
     }
 }
 
@@ -1088,6 +1333,7 @@ struct SaveConfirmationToast: View {
                 .foregroundStyle(Brand.warmGoldGradient)
             Text(text)
                 .font(.subheadline.weight(.medium))
+                .accessibilityIdentifier("toast.text")
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)

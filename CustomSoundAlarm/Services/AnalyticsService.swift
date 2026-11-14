@@ -140,6 +140,21 @@ enum AnalyticsEvent: Sendable {
     /// サウンド選択で音を選んだ（#124）
     case soundSelected(kind: SoundSelectionKind, rankBucket: String)
 
+    // MARK: 休み・祝日（#197）
+
+    /// 日付でアラームを休む
+    /// - scope: day / selected / range
+    /// - days: 休む日数
+    /// - alarmCount: 対象のアラーム数
+    case alarmSkipSet(scope: AlarmSkipScope, days: Int, alarmCount: Int)
+    case alarmSkipUndone
+    /// すべてのアラームを休んだ（#197 画面作り直し）
+    /// - preset: 24h / 3d / 7d / custom
+    case skipAllSet(preset: String, alarmCount: Int)
+    case skipAllUndone
+    case holidaySkipToggled(enabled: Bool)
+    case holidayRingOverride
+
     // MARK: プレイリスト・#151
 
     /// プレイリストを作成した
@@ -233,7 +248,8 @@ enum AnalyticsEvent: Sendable {
     /// - layout: 選択中レイアウトの安定識別子（digital_large 等）
     /// - theme: 配色テーマの安定識別子（white / amber）
     /// - hour: 入った時刻の「時」（PII なし・時刻帯のみ）
-    case bedsideEntered(layout: String, theme: String, hour: Int)
+    /// - entry: 入口（#204 で settings に移動）
+    case bedsideEntered(layout: String, theme: String, hour: Int, entry: BedsideEntry)
 
     /// ベッドサイドモードを抜けた
     /// - durationBucket: 滞在時間の区分（under_1min 等・生の秒数は送らない）
@@ -244,6 +260,16 @@ enum AnalyticsEvent: Sendable {
     /// - setting: layout / theme / brightness / font_scale / elements / seconds
     /// - value: 変更後の値（PII なし）
     case bedsideSettingChanged(setting: BedsideSetting, value: BedsideSettingValue)
+
+    // MARK: 設定（#204）
+
+    /// 設定画面を開いた
+    case settingsOpened
+    /// 問い合わせを開いた
+    /// - method: mail（メール作成）/ web（サポートページ）
+    case supportContactOpened(method: SupportContactMethod)
+    /// レビューを書くリンクを開いた
+    case reviewLinkOpened
 
     // MARK: オンボーディング（#98）
 
@@ -295,6 +321,12 @@ enum AnalyticsEvent: Sendable {
         case .backupAlarmCancelledByStop: return "backup_alarm_cancelled_by_stop"
         case .backupAlarmStopped: return "backup_alarm_stopped"
         case .soundSelected: return "sound_selected"
+        case .alarmSkipSet: return "alarm_skip_set"
+        case .alarmSkipUndone: return "alarm_skip_undone"
+        case .skipAllSet: return "skip_all_set"
+        case .skipAllUndone: return "skip_all_undone"
+        case .holidaySkipToggled: return "holiday_skip_toggled"
+        case .holidayRingOverride: return "holiday_ring_override"
         case .playlistCreated: return "playlist_created"
         case .playlistSuggestionShown: return "playlist_suggestion_shown"
         case .playlistEmptyViewed: return "playlist_empty_viewed"
@@ -313,6 +345,9 @@ enum AnalyticsEvent: Sendable {
         case .updatePromptDismissed: return "update_prompt_dismissed"
         case .adSlotEligible: return "ad_slot_eligible"
         case .bedsideEntered: return "bedside_entered"
+        case .settingsOpened: return "settings_opened"
+        case .supportContactOpened: return "support_contact_opened"
+        case .reviewLinkOpened: return "review_link_opened"
         case .bedsideExited: return "bedside_exited"
         case .bedsideSettingChanged: return "bedside_setting_changed"
         case .onboardingStepViewed: return "onboarding_step_viewed"
@@ -435,6 +470,21 @@ enum AnalyticsEvent: Sendable {
             ]
         case .playlistSuggestionShown:
             return [:]
+        case let .alarmSkipSet(scope, days, alarmCount):
+            return [
+                "scope": scope.rawValue,
+                "days": days,
+                "alarm_count": alarmCount
+            ]
+        case let .skipAllSet(preset, alarmCount):
+            return [
+                "preset": preset,
+                "alarm_count": alarmCount
+            ]
+        case .alarmSkipUndone, .skipAllUndone, .holidayRingOverride:
+            return [:]
+        case let .holidaySkipToggled(enabled):
+            return ["enabled": enabled]
         case let .playlistCreated(
             trackCount,
             totalSecondsBucket,
@@ -509,12 +559,17 @@ enum AnalyticsEvent: Sendable {
                 "reason": reason.rawValue,
                 "region": region.rawValue
             ]
-        case let .bedsideEntered(layout, theme, hour):
+        case let .bedsideEntered(layout, theme, hour, entry):
             return [
                 "layout": layout,
                 "theme": theme,
-                "hour": hour
+                "hour": hour,
+                "entry": entry.rawValue
             ]
+        case .settingsOpened, .reviewLinkOpened:
+            return [:]
+        case let .supportContactOpened(method):
+            return ["method": method.rawValue]
         case let .bedsideExited(durationBucket, exitMethod):
             return [
                 "duration_bucket": durationBucket,
@@ -622,6 +677,21 @@ enum BedsideExitMethod: String, Sendable {
     case longPress = "long_press"
     /// バックグラウンド化による退出（#71）。明示的な終了ではない
     case backgrounded
+}
+
+// MARK: - BedsideEntry
+
+/// ベッドサイドモードの入口（#204）。
+enum BedsideEntry: String, Sendable {
+    case settings
+}
+
+// MARK: - SupportContactMethod
+
+/// 問い合わせの方法（#204）。
+enum SupportContactMethod: String, Sendable {
+    case mail
+    case web
 }
 
 // MARK: - SoundImportSource

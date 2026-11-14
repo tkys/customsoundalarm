@@ -79,7 +79,6 @@
 /* VideoTrimView */
 "add_from_video_title" = "동영상에서 오디오 추가";
 "loading" = "불러오는 중…";
-"select_video" = "동영상 선택";
 "preview" = "미리보기";
 "selected_duration" = "선택: %@";
 "stop" = "중지";
@@ -171,9 +170,6 @@
 "no_video" = "동영상 없음";
 
 /* Video Import Source */
-"video_source_title" = "동영상 소스 선택";
-"video_source_photo" = "사진 보관함";
-"video_source_file" = "파일";
 "error_file_access_denied" = "파일 접근이 거부되었습니다.";
 "error_file_copy_failed" = "파일을 복사하지 못했습니다.";
 "error_unsupported_video_format" = "지원하지 않는 동영상 형식입니다.";
@@ -319,3 +315,71 @@
 "play_order_when_in_order" = "항상 같은 순서";
 "play_order_when_shuffle" = "울릴 때마다 순서가 바뀜";
 "play_order_when_one_random" = "울릴 때마다 한 곡을 골라 반복";
+// #204 settings
+"settings" = "설정";
+"settings_contact" = "문제 신고 또는 문의";
+"settings_review" = "리뷰 쓰기";
+"settings_howto" = "사용 방법";
+"settings_privacy" = "개인정보 처리방침";
+"settings_version" = "버전";
+"settings_mail_subject" = "My Sound Alarm 정보";
+"settings_mail_body" = "\n\n---\n앱: My Sound Alarm %@\niOS: %@\n기기: %@";
+"video_source_header" = "동영상 선택";
+"video_source_photo_row" = "사진 보관함에서 선택";
+"video_source_file_row" = "파일에서 선택";
+
+// #197 skip days
+"skip_one_time_warning" = "1회성 알람 %d개는 울리지 않고 끝납니다.";
+"skip_undo" = "되돌리기";
+"skip_apply" = "쉬기";
+"holiday_skip_toggle" = "공휴일에는 울리지 않기";
+"holiday_next_skipped" = "%@은(는) 쉬는 날";
+"holiday_mark" = "공휴일";
+"skip_alarms_intent" = "알람 쉬기";
+
+// #197 skip redesign
+"skip_all_button" = "알람 쉬기";
+"skip_all_title" = "알람 쉬기";
+"skip_all_24h" = "24시간";
+"skip_all_3d" = "3일";
+"skip_all_7d" = "7일";
+"skip_all_row_fmt" = "%@ 까지 · %d회";
+"skip_all_custom" = "날짜 선택";
+"skip_all_active_fmt" = "%1$@ 까지 쉬기 · %2$d개";
+"skip_row_global_fmt" = "%@ 까지 쉬기";
+"skip_row_skip_fmt" = "%@ 쉬기";
+"skip_row_undo" = "쉬기 취소";
+"skip_row_summary_fmt" = "%@ 쉬기 · 다음은 %@";
+"skip_row_summary_no_next_fmt" = "%@ 쉬기";
+"skip_dates_title" = "쉬는 날 선택";
+"skip_dates_none" = "없음";
+"skip_dates_count_fmt" = "%d일";
+"skip_dates_selected" = "쉬는 날";
+"skip_dates_empty" = "쉬는 날이 없습니다";
+"skip_dates_footer" = "선택한 날은 울리지 않습니다.";
+"skip_calendar_title" = "날짜 선택";
+"skip_calendar_hint" = "시작일과 종료일을 탭하세요. 8주 뒤까지 선택할 수 있습니다.";
+"skip_calendar_range_fmt" = "%@ ~ %@";
+"skip_calendar_previous_month" = "이전 달";
+"skip_calendar_next_month" = "다음 달";
+"holiday_others_message_fmt" = "같은 요일에 다른 알람이 %d개 있습니다.";
+"holiday_apply_to_others_fmt" = "다른 %d개에도";
+"holiday_apply_only_this" = "이 알람만";
+"repeat_summary_holiday_suffix" = "공휴일 제외";
+"repeat_summary_skip_days_fmt" = "%d일 쉼";
+"holiday_skip_section_title" = "쉬는 날";
+"repeat_summary_holiday_and_days_fmt" = "공휴일과 %d일 제외";
+"repeat_summary_days_only_fmt" = "%d일 제외";
+"skip_all_silenced_title" = "울리지 않는 알람";
+"skip_all_more_fmt" = "외 %d개";
+
+// #197 result list
+"skip_result_section_title" = "앞으로 울리지 않는 날";
+"skip_result_off" = "울리지 않음";
+"skip_result_on" = "울림";
+"skip_result_picked" = "선택한 날";
+"skip_result_more" = "더 보기";
+"skip_result_remove" = "빼기";
+"skip_result_footer" = "우는 요일에 해당하는 공휴일만 표시합니다.";
+"skip_row_toast_skipped_fmt" = "%@은(는) 울리지 않습니다";
+"skip_row_toast_undone_fmt" = "%@은(는) 울립니다";

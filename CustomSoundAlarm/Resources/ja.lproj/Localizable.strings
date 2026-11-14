@@ -79,7 +79,6 @@
 /* VideoTrimView */
 "add_from_video_title" = "動画から音声を追加";
 "loading" = "読み込み中...";
-"select_video" = "動画を選択してください";
 "preview" = "試聴";
 "selected_duration" = "選択: %@";
 "stop" = "停止";
@@ -171,9 +170,6 @@
 "no_video" = "動画がありません";
 
 /* Video Import Source */
-"video_source_title" = "動画の選択元";
-"video_source_photo" = "写真ライブラリ";
-"video_source_file" = "ファイル";
 "error_file_access_denied" = "ファイルへのアクセスが拒否されました。";
 "error_file_copy_failed" = "ファイルのコピーに失敗しました。";
 "error_unsupported_video_format" = "サポートされていない動画形式です。";
@@ -315,7 +311,75 @@
 "playlist_suggestion_title" = "取り込んだ%d曲で、鳴るたびに曲を変える";
 "playlist_suggestion_library_subtitle" = "プレイリストを作ります";
 "playlist_suggestion_alarm_subtitle" = "プレイリストを作って、このアラームに使います";
-"playlist_suggestion_name" = "マイサウンド";
+"playlist_suggestion_name" = "自分の音";
 "play_order_when_in_order" = "いつも同じ順番";
 "play_order_when_shuffle" = "鳴るたびに順番が変わる";
 "play_order_when_one_random" = "鳴るたびに1曲を選んで繰り返す";
+// #204 settings
+"settings" = "設定";
+"settings_contact" = "不具合を報告する／問い合わせ";
+"settings_review" = "レビューを書く";
+"settings_howto" = "使い方";
+"settings_privacy" = "プライバシーポリシー";
+"settings_version" = "バージョン";
+"settings_mail_subject" = "My Sound Alarm について";
+"settings_mail_body" = "\n\n---\nアプリ: My Sound Alarm %@\niOS: %@\n機種: %@";
+"video_source_header" = "動画を選ぶ";
+"video_source_photo_row" = "写真ライブラリから選ぶ";
+"video_source_file_row" = "ファイルから選ぶ";
+
+// #197 skip days
+"skip_one_time_warning" = "1回きりのアラーム %d本は鳴らずに終わります";
+"skip_undo" = "取り消す";
+"skip_apply" = "鳴らさない";
+"holiday_skip_toggle" = "祝日は鳴らさない";
+"holiday_next_skipped" = "%@ は鳴らさない";
+"holiday_mark" = "祝";
+"skip_alarms_intent" = "しばらく鳴らさない";
+
+// #197 skip redesign
+"skip_all_button" = "しばらく鳴らさない";
+"skip_all_title" = "しばらく鳴らさない";
+"skip_all_24h" = "24時間";
+"skip_all_3d" = "3日間";
+"skip_all_7d" = "7日間";
+"skip_all_row_fmt" = "%@ まで・%d回";
+"skip_all_custom" = "日付を選ぶ";
+"skip_all_active_fmt" = "%1$@ まで鳴らさない・%2$d本";
+"skip_row_global_fmt" = "%@ まで鳴らさない";
+"skip_row_skip_fmt" = "%@ は鳴らさない";
+"skip_row_undo" = "元に戻す";
+"skip_row_summary_fmt" = "%@ は鳴らさない・次は %@";
+"skip_row_summary_no_next_fmt" = "%@ は鳴らさない";
+"skip_dates_title" = "日付を選ぶ";
+"skip_dates_none" = "なし";
+"skip_dates_count_fmt" = "%d日";
+"skip_dates_selected" = "鳴らさない日";
+"skip_dates_empty" = "鳴らさない日はありません";
+"skip_dates_footer" = "選んだ日は鳴りません。";
+"skip_calendar_title" = "日付を選ぶ";
+"skip_calendar_hint" = "開始日と終了日をタップします。8週間先まで選べます。";
+"skip_calendar_range_fmt" = "%@ 〜 %@";
+"skip_calendar_previous_month" = "前の月";
+"skip_calendar_next_month" = "次の月";
+"holiday_others_message_fmt" = "同じ曜日のアラームがほかにも%d本あります。";
+"holiday_apply_to_others_fmt" = "ほかの%d本にも";
+"holiday_apply_only_this" = "このアラームだけ";
+"repeat_summary_holiday_suffix" = "祝日を除く";
+"repeat_summary_skip_days_fmt" = "%d日休み";
+"holiday_skip_section_title" = "鳴らさない日";
+"repeat_summary_holiday_and_days_fmt" = "祝日と%d日を除く";
+"repeat_summary_days_only_fmt" = "%d日を除く";
+"skip_all_silenced_title" = "鳴らなくなるアラーム";
+"skip_all_more_fmt" = "ほか%d本";
+
+// #197 result list
+"skip_result_section_title" = "この先、鳴らない日";
+"skip_result_off" = "鳴らない";
+"skip_result_on" = "鳴る";
+"skip_result_picked" = "選んだ日";
+"skip_result_more" = "もっと見る";
+"skip_result_remove" = "外す";
+"skip_result_footer" = "鳴る曜日に当たる祝日だけを出しています";
+"skip_row_toast_skipped_fmt" = "%@ は鳴らしません";
+"skip_row_toast_undone_fmt" = "%@ は鳴らします";

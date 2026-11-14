@@ -28,6 +28,26 @@ struct AlarmIDMapsTests {
     }
 
     @Test
+    func stopAction_coverageCancelsBackup() {
+        let entryID = uuid(1)
+        let primaryID = uuid(10)
+        let backupID = uuid(11)
+        let coverageID = uuid(12)
+
+        let action = AlarmIDMaps.stopAction(
+            of: coverageID,
+            primary: [entryID: primaryID],
+            backup: [entryID: backupID],
+            coverage: [entryID: [coverageID: "2026-11-23"]]
+        )
+
+        // 補完の回も本体の1回として扱い、その回の最終アラームを取り消す
+        #expect(action.role == .coverage(entryID: entryID))
+        #expect(action.entryID == entryID)
+        #expect(action.counterpartAlarmID == backupID)
+    }
+
+    @Test
     func stopAction_backupCancelsPrimary() {
         let entryID = uuid(1)
         let primaryID = uuid(10)

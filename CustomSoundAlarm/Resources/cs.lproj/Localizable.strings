@@ -79,7 +79,6 @@
 /* VideoTrimView */
 "add_from_video_title" = "Přidat zvuk z videa";
 "loading" = "Načítání…";
-"select_video" = "Vyber video";
 "preview" = "Náhled";
 "selected_duration" = "Vybráno: %@";
 "stop" = "Zastavit";
@@ -171,9 +170,6 @@
 "no_video" = "Žádné video";
 
 /* Video Import Source */
-"video_source_title" = "Vybrat zdroj videa";
-"video_source_photo" = "Knihovna fotek";
-"video_source_file" = "Soubory";
 "error_file_access_denied" = "Přístup k souboru byl zamítnut.";
 "error_file_copy_failed" = "Soubor se nepodařilo zkopírovat.";
 "error_unsupported_video_format" = "Nepodporovaný formát videa.";
@@ -319,3 +315,71 @@
 "play_order_when_in_order" = "Vždy stejné pořadí";
 "play_order_when_shuffle" = "Pokaždé nové pořadí";
 "play_order_when_one_random" = "Pokaždé jedna písnička, v opakování";
+// #204 settings
+"settings" = "Nastavení";
+"settings_contact" = "Nahlásit problém nebo se zeptat";
+"settings_review" = "Napsat recenzi";
+"settings_howto" = "Jak používat";
+"settings_privacy" = "Zásady ochrany soukromí";
+"settings_version" = "Verze";
+"settings_mail_subject" = "O aplikaci My Sound Alarm";
+"settings_mail_body" = "\n\n---\nAplikace: My Sound Alarm %@\niOS: %@\nZařízení: %@";
+"video_source_header" = "Vybrat video";
+"video_source_photo_row" = "Vybrat z knihovny fotek";
+"video_source_file_row" = "Vybrat ze Souborů";
+
+// #197 skip days
+"skip_one_time_warning" = "Jednorázový budík (%d) nezazvoní.";
+"skip_undo" = "Zpět";
+"skip_apply" = "Pozastavit";
+"holiday_skip_toggle" = "Nezvonit o svátcích";
+"holiday_next_skipped" = "%@ bez budíku";
+"holiday_mark" = "Svátky";
+"skip_alarms_intent" = "Pozastavit budíky";
+
+// #197 skip redesign
+"skip_all_button" = "Pozastavit budíky";
+"skip_all_title" = "Pozastavit budíky";
+"skip_all_24h" = "24 hodin";
+"skip_all_3d" = "3 dny";
+"skip_all_7d" = "7 dní";
+"skip_all_row_fmt" = "do %@ · %d krát";
+"skip_all_custom" = "Vybrat data";
+"skip_all_active_fmt" = "Pozastaveno do %1$@ · %2$d";
+"skip_row_global_fmt" = "Pozastaveno do %@";
+"skip_row_skip_fmt" = "Pozastavit %@";
+"skip_row_undo" = "Zrušit pozastavení";
+"skip_row_summary_fmt" = "Pozastaveno %@ · další %@";
+"skip_row_summary_no_next_fmt" = "Pozastaveno %@";
+"skip_dates_title" = "Vybrat dny pauzy";
+"skip_dates_none" = "Žádné";
+"skip_dates_count_fmt" = "%d dní";
+"skip_dates_selected" = "Dny pauzy";
+"skip_dates_empty" = "Žádné dny pauzy";
+"skip_dates_footer" = "Vybrané dny nezazvoní.";
+"skip_calendar_title" = "Vybrat data";
+"skip_calendar_hint" = "Klepněte na datum začátku a konce. Až 8 týdnů dopředu.";
+"skip_calendar_range_fmt" = "%@ – %@";
+"skip_calendar_previous_month" = "Předchozí měsíc";
+"skip_calendar_next_month" = "Další měsíc";
+"holiday_others_message_fmt" = "Na stejné dny v týdnu připadá %d dalších budíků.";
+"holiday_apply_to_others_fmt" = "Také pro další %d";
+"holiday_apply_only_this" = "Jen tento budík";
+"repeat_summary_holiday_suffix" = "bez svátků";
+"repeat_summary_skip_days_fmt" = "%d dní pauzy";
+"holiday_skip_section_title" = "Dny pauzy";
+"repeat_summary_holiday_and_days_fmt" = "bez svátků a %d dní";
+"repeat_summary_days_only_fmt" = "%d dní vyloučeno";
+"skip_all_silenced_title" = "Budíky, které nezazvoní";
+"skip_all_more_fmt" = "další %d";
+
+// #197 result list
+"skip_result_section_title" = "Nadcházející dny bez zvonění";
+"skip_result_off" = "Bez zvonění";
+"skip_result_on" = "Zvoní";
+"skip_result_picked" = "Vybraný den";
+"skip_result_more" = "Zobrazit více";
+"skip_result_remove" = "Odebrat";
+"skip_result_footer" = "Zobrazujeme jen svátky připadající na den zvonění.";
+"skip_row_toast_skipped_fmt" = "%@ nezazvoní";
+"skip_row_toast_undone_fmt" = "%@ zazvoní";

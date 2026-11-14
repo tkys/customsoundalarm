@@ -79,7 +79,6 @@
 /* VideoTrimView */
 "add_from_video_title" = "إضافة صوت من فيديو";
 "loading" = "جارٍ التحميل…";
-"select_video" = "اختر فيديو";
 "preview" = "معاينة";
 "selected_duration" = "المحدد: %@";
 "stop" = "إيقاف";
@@ -171,9 +170,6 @@
 "no_video" = "لا يوجد فيديو";
 
 /* Video Import Source */
-"video_source_title" = "اختيار مصدر الفيديو";
-"video_source_photo" = "مكتبة الصور";
-"video_source_file" = "الملفات";
 "error_file_access_denied" = "تم رفض الوصول إلى الملف.";
 "error_file_copy_failed" = "تعذّر نسخ الملف.";
 "error_unsupported_video_format" = "تنسيق فيديو غير مدعوم.";
@@ -319,3 +315,71 @@
 "play_order_when_in_order" = "الترتيب نفسه دائمًا";
 "play_order_when_shuffle" = "ترتيب جديد في كل مرة";
 "play_order_when_one_random" = "أغنية واحدة تُختار في كل مرة، مع التكرار";
+// #204 settings
+"settings" = "الإعدادات";
+"settings_contact" = "الإبلاغ عن مشكلة أو السؤال";
+"settings_review" = "كتابة مراجعة";
+"settings_howto" = "كيفية الاستخدام";
+"settings_privacy" = "سياسة الخصوصية";
+"settings_version" = "الإصدار";
+"settings_mail_subject" = "حول My Sound Alarm";
+"settings_mail_body" = "\n\n---\nالتطبيق: My Sound Alarm %@\niOS: %@\nالجهاز: %@";
+"video_source_header" = "اختيار فيديو";
+"video_source_photo_row" = "اختيار من مكتبة الصور";
+"video_source_file_row" = "اختيار من الملفات";
+
+// #197 skip days
+"skip_one_time_warning" = "منبه لمرة واحدة (%d) لن يرن.";
+"skip_undo" = "تراجع";
+"skip_apply" = "راحة";
+"holiday_skip_toggle" = "لا يرن في العطلات";
+"holiday_next_skipped" = "%@ بلا منبه";
+"holiday_mark" = "عطلة";
+"skip_alarms_intent" = "إراحة المنبهات";
+
+// #197 skip redesign
+"skip_all_button" = "إيقاف المنبهات مؤقتًا";
+"skip_all_title" = "إيقاف المنبهات مؤقتًا";
+"skip_all_24h" = "24 ساعة";
+"skip_all_3d" = "3 أيام";
+"skip_all_7d" = "7 أيام";
+"skip_all_row_fmt" = "حتى %@ · %d مرات";
+"skip_all_custom" = "اختيار التواريخ";
+"skip_all_active_fmt" = "إيقاف مؤقت حتى %1$@ · %2$d";
+"skip_row_global_fmt" = "إيقاف مؤقت حتى %@";
+"skip_row_skip_fmt" = "إيقاف مؤقت في %@";
+"skip_row_undo" = "إلغاء الإيقاف المؤقت";
+"skip_row_summary_fmt" = "إيقاف مؤقت في %@ · التالي %@";
+"skip_row_summary_no_next_fmt" = "إيقاف مؤقت في %@";
+"skip_dates_title" = "اختيار أيام الراحة";
+"skip_dates_none" = "لا شيء";
+"skip_dates_count_fmt" = "%d أيام";
+"skip_dates_selected" = "أيام الراحة";
+"skip_dates_empty" = "لا توجد أيام راحة";
+"skip_dates_footer" = "الأيام المختارة لن ترن.";
+"skip_calendar_title" = "اختيار التواريخ";
+"skip_calendar_hint" = "اضغط على تاريخ البداية والنهاية. حتى 8 أسابيع مقدمًا.";
+"skip_calendar_range_fmt" = "%@ – %@";
+"skip_calendar_previous_month" = "الشهر السابق";
+"skip_calendar_next_month" = "الشهر التالي";
+"holiday_others_message_fmt" = "هناك %d منبهات أخرى في أيام الأسبوع نفسها.";
+"holiday_apply_to_others_fmt" = "وأيضًا للمنبهات الـ%d الأخرى";
+"holiday_apply_only_this" = "هذا المنبه فقط";
+"repeat_summary_holiday_suffix" = "بدون العطلات";
+"repeat_summary_skip_days_fmt" = "%d أيام راحة";
+"holiday_skip_section_title" = "أيام الراحة";
+"repeat_summary_holiday_and_days_fmt" = "بدون العطلات و%d أيام";
+"repeat_summary_days_only_fmt" = "بدون %d أيام";
+"skip_all_silenced_title" = "المنبهات التي لن ترن";
+"skip_all_more_fmt" = "%d أخرى";
+
+// #197 result list
+"skip_result_section_title" = "الأيام القادمة بدون رنين";
+"skip_result_off" = "بدون رنين";
+"skip_result_on" = "يرن";
+"skip_result_picked" = "اليوم المختار";
+"skip_result_more" = "عرض المزيد";
+"skip_result_remove" = "إزالة";
+"skip_result_footer" = "نعرض فقط العطلات التي تقع في يوم رنين.";
+"skip_row_toast_skipped_fmt" = "لن يرن %@";
+"skip_row_toast_undone_fmt" = "سيرن %@";

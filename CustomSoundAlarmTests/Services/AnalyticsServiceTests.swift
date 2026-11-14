@@ -49,6 +49,12 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.customSoundImported(source: .video).name == "custom_sound_imported")
         #expect(AnalyticsEvent.customSoundImported(source: .audio).name == "custom_sound_imported")
         #expect(AnalyticsEvent.soundPreviewPlayed(source: .selectTap).name == "sound_preview_played")
+        #expect(AnalyticsEvent.alarmSkipSet(scope: .day, days: 1, alarmCount: 3).name == "alarm_skip_set")
+        #expect(AnalyticsEvent.alarmSkipUndone.name == "alarm_skip_undone")
+        #expect(AnalyticsEvent.skipAllSet(preset: "24h", alarmCount: 3).name == "skip_all_set")
+        #expect(AnalyticsEvent.skipAllUndone.name == "skip_all_undone")
+        #expect(AnalyticsEvent.holidaySkipToggled(enabled: true).name == "holiday_skip_toggled")
+        #expect(AnalyticsEvent.holidayRingOverride.name == "holiday_ring_override")
         // Phase 2
         #expect(AnalyticsEvent.alarmEdited(hasCustomSound: true, isRepeating: false, snoozeMinutes: 0).name == "alarm_edited")
         #expect(AnalyticsEvent.alarmDeleted.name == "alarm_deleted")
@@ -62,7 +68,10 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.alarmStopped(hour: 8).name == "alarm_stopped")
         #expect(AnalyticsEvent.alarmSnoozed(from: "observer").name == "alarm_snoozed")
         // Phase 4（ベッドサイドモード・#68）
-        #expect(AnalyticsEvent.bedsideEntered(layout: "digital_large", theme: "white", hour: 23).name == "bedside_entered")
+        #expect(AnalyticsEvent.bedsideEntered(layout: "digital_large", theme: "white", hour: 23, entry: .settings).name == "bedside_entered")
+        #expect(AnalyticsEvent.settingsOpened.name == "settings_opened")
+        #expect(AnalyticsEvent.supportContactOpened(method: .mail).name == "support_contact_opened")
+        #expect(AnalyticsEvent.reviewLinkOpened.name == "review_link_opened")
         #expect(AnalyticsEvent.bedsideExited(durationBucket: "over_2h", exitMethod: "long_press").name == "bedside_exited")
         #expect(AnalyticsEvent.bedsideSettingChanged(setting: .layout, value: .string("minimal")).name == "bedside_setting_changed")
         // #71: バックグラウンド退出も同じイベント名
@@ -427,6 +436,25 @@ struct AnalyticsEventTests {
         }
     }
 
+    @Test
+    func alarmSkipSetProperties_includeScopeDaysAlarmCount() {
+        let props = AnalyticsEvent.alarmSkipSet(scope: .range, days: 3, alarmCount: 2).properties
+        #expect(props["scope"] as? String == "range")
+        #expect(props["days"] as? Int == 3)
+        #expect(props["alarm_count"] as? Int == 2)
+    }
+
+    @Test
+    func holidaySkipToggledProperties_includeEnabled() {
+        #expect(AnalyticsEvent.holidaySkipToggled(enabled: true).properties["enabled"] as? Bool == true)
+    }
+
+    @Test
+    func alarmSkipUndoneAndHolidayOverride_haveNoProperties() {
+        #expect(AnalyticsEvent.alarmSkipUndone.properties.isEmpty)
+        #expect(AnalyticsEvent.holidayRingOverride.properties.isEmpty)
+    }
+
     // MARK: 全ケース網羅 (コンパイル時の網羅性も兼ねる)
 
     @Test
@@ -436,6 +464,12 @@ struct AnalyticsEventTests {
             .customSoundImported(source: .video),
             .customSoundImported(source: .audio),
             .soundPreviewPlayed(source: .selectTap),
+            .alarmSkipSet(scope: .day, days: 1, alarmCount: 1),
+            .alarmSkipUndone,
+            .skipAllSet(preset: "7d", alarmCount: 2),
+            .skipAllUndone,
+            .holidaySkipToggled(enabled: false),
+            .holidayRingOverride,
             .alarmEdited(hasCustomSound: true, isRepeating: true, snoozeMinutes: 0),
             .alarmDeleted,
             .alarmPermission(status: .authorized),
@@ -457,7 +491,10 @@ struct AnalyticsEventTests {
             .alarmFired(wasAppForeground: true, hour: 8, isRepeating: false, detection: "observer"),
             .alarmStopped(hour: 8),
             .alarmSnoozed(from: "observer"),
-            .bedsideEntered(layout: "digital_large", theme: "white", hour: 23),
+            .bedsideEntered(layout: "digital_large", theme: "white", hour: 23, entry: .settings),
+            .settingsOpened,
+            .supportContactOpened(method: .web),
+            .reviewLinkOpened,
             .bedsideExited(durationBucket: "1_5min", exitMethod: "exit_button"),
             .bedsideSettingChanged(setting: .layout, value: .string("minimal")),
             .bedsideSettingChanged(setting: .brightness, value: .number(0.8)),
@@ -583,17 +620,18 @@ struct AnalyticsEventTests {
 
     @Test
     func bedsideEnteredProperties_carryLayoutThemeHour() {
-        let props = AnalyticsEvent.bedsideEntered(layout: "digital_large", theme: "amber", hour: 23).properties
+        let props = AnalyticsEvent.bedsideEntered(layout: "digital_large", theme: "amber", hour: 23, entry: .settings).properties
 
-        #expect(props.count == 3)
+        #expect(props.count == 4)
         #expect(props["layout"] as? String == "digital_large")
         #expect(props["theme"] as? String == "amber")
         #expect(props["hour"] as? Int == 23)
+        #expect(props["entry"] as? String == "settings")
     }
 
     @Test
     func bedsideEnteredProperties_midnightHour() {
-        let props = AnalyticsEvent.bedsideEntered(layout: "minimal", theme: "white", hour: 0).properties
+        let props = AnalyticsEvent.bedsideEntered(layout: "minimal", theme: "white", hour: 0, entry: .settings).properties
         #expect(props["hour"] as? Int == 0)
     }
 
@@ -710,6 +748,13 @@ struct AnalyticsEventTests {
     }
 
     // MARK: playlist (#151)
+
+    @Test
+    func skipAllSetProperties() {
+        let props = AnalyticsEvent.skipAllSet(preset: "custom", alarmCount: 4).properties
+        #expect(props["preset"] as? String == "custom")
+        #expect(props["alarm_count"] as? Int == 4)
+    }
 
     @Test
     func playlistCreatedProperties() {
@@ -1065,7 +1110,7 @@ struct AnalyticsServiceCaptureTests {
         let mock = MockBackend()
         let service = AnalyticsService(backend: mock)
 
-        service.capture(.bedsideEntered(layout: "minimal", theme: "amber", hour: 22))
+        service.capture(.bedsideEntered(layout: "minimal", theme: "amber", hour: 22, entry: .settings))
 
         #expect(mock.captureCount == 1)
         let captured = mock.captures[0]

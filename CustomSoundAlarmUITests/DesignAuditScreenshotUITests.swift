@@ -385,7 +385,11 @@ final class DesignAuditScreenshotUITests: XCTestCase {
         XCTAssertTrue(
             app.buttons["alarmList.add"].waitForExistence(timeout: 10)
         )
-        app.buttons["alarmList.bedside"].tap()
+        app.buttons["alarmList.settings"].tap()
+        XCTAssertTrue(
+            app.buttons["settings.bedside"].waitForExistence(timeout: 10)
+        )
+        app.buttons["settings.bedside"].tap()
         settle(5.5)
         capture(app, screen: "bedside", context: context)
     }

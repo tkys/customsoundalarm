@@ -125,7 +125,7 @@ final class LibraryUITests: XCTestCase {
         suggestion.tap()
 
         XCTAssertTrue(
-            app.buttons["library.playlist.マイサウンド"].waitForExistence(timeout: 10),
+            app.buttons["library.playlist.自分の音"].waitForExistence(timeout: 10),
             "created playlist should appear: \(app.debugDescription)"
         )
         XCTAssertFalse(app.buttons["library.playlistSuggestion"].exists)

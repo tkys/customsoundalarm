@@ -40,6 +40,12 @@ final class AlarmListUITests: XCTestCase {
 
         for text in ["朝", "ジョギング", "読書", "やわらかベル", "モーニング", "お気に入り"] {
             let element = app.staticTexts[text].firstMatch
+            // 休みの欄（#197）が上に増えたぶん、AX サイズでは下の行が画面外に出る
+            var swipes = 0
+            while !element.exists && swipes < 6 {
+                app.swipeUp()
+                swipes += 1
+            }
             XCTAssertTrue(
                 element.waitForExistence(timeout: 5),
                 "AX5: missing \(text): \(app.debugDescription)"
