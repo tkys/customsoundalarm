@@ -2,11 +2,18 @@ import SwiftUI
 
 /// 休みの日付表示（#197）。
 enum AlarmSkipFormat {
-    /// 「11/14（金）」。月日は数字で、曜日を添える（#197）。
-    static func day(_ date: Date, locale: Locale = .current) -> String {
+    /// 「11/14（金）」。今年は月日だけ、今年以外は年を付ける（#197 実機レビュー）。
+    static func day(
+        _ date: Date,
+        locale: Locale = .current,
+        now: Date = Date()
+    ) -> String {
+        let calendar = Calendar.current
+        let sameYear = calendar.component(.year, from: date)
+            == calendar.component(.year, from: now)
         let dateFormatter = DateFormatter()
         dateFormatter.locale = locale
-        dateFormatter.setLocalizedDateFormatFromTemplate("Md")
+        dateFormatter.setLocalizedDateFormatFromTemplate(sameYear ? "Md" : "yMd")
         let datePart = dateFormatter.string(from: date)
 
         let weekdayFormatter = DateFormatter()
@@ -22,8 +29,25 @@ enum AlarmSkipFormat {
     }
 
     /// 「11/14（金）22:40」
-    static func dayAndTime(_ date: Date, locale: Locale = .current) -> String {
-        "\(day(date, locale: locale)) \(time(date))"
+    static func dayAndTime(
+        _ date: Date,
+        locale: Locale = .current,
+        now: Date = Date()
+    ) -> String {
+        "\(day(date, locale: locale, now: now)) \(time(date))"
+    }
+
+    /// 祝日の一覧の年見出し（ja は「2027年」）。
+    static func year(_ year: Int, locale: Locale = .current) -> String {
+        var components = DateComponents()
+        components.year = year
+        components.month = 1
+        components.day = 1
+        let date = Calendar.current.date(from: components) ?? Date()
+        let formatter = DateFormatter()
+        formatter.locale = locale
+        formatter.setLocalizedDateFormatFromTemplate("y")
+        return formatter.string(from: date)
     }
 
     static func time(_ date: Date) -> String {
@@ -232,16 +256,12 @@ struct SkipAllSheet: View {
         }
     }
 
-    private func distinctTimes(_ occurrences: [Date]) -> [String] {
-        var seen: Set<String> = []
-        var times: [String] = []
-        for occurrence in occurrences {
-            let time = AlarmSkipFormat.time(occurrence)
-            if seen.insert(time).inserted {
-                times.append(time)
-            }
+    /// 24時間の間に鳴らなくなるアラーム（最大4本＋「ほかN本」）。
+    private func silencedEntries(in interval: DateInterval) -> [AlarmEntry] {
+        entries.filter { alarm in
+            !AlarmSkipLogic.occurrences(of: alarm, in: interval).isEmpty
         }
-        return times
+        .sorted { ($0.hour, $0.minute) < ($1.hour, $1.minute) }
     }
 
     // MARK: - Summary
@@ -249,17 +269,31 @@ struct SkipAllSheet: View {
     @ViewBuilder
     private var summary: some View {
         if let interval = previewInterval {
-            let occurrences = AlarmSkipLogic.occurrences(entries: entries, in: interval)
+            let silenced = silencedEntries(in: interval)
             let oneTime = AlarmSkipLogic.oneTimeCount(entries: entries, in: interval)
             VStack(alignment: .leading, spacing: 8) {
-                Text(String(
-                    format: String(localized: "skip_all_summary_fmt"),
-                    distinctTimes(occurrences).joined(separator: "・")
-                ))
-                .font(.footnote)
-                .foregroundStyle(Color.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-                .accessibilityIdentifier("skipAll.summary")
+                if !silenced.isEmpty {
+                    Text("skip_all_silenced_title")
+                        .font(.footnote)
+                        .foregroundStyle(Color.textSecondary)
+                        .accessibilityIdentifier("skipAll.silencedTitle")
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(silenced.prefix(4)) { alarm in
+                            SkipSilencedAlarmRow(alarm: alarm)
+                        }
+                        if silenced.count > 4 {
+                            Text(String(
+                                format: String(localized: "skip_all_more_fmt"),
+                                silenced.count - 4
+                            ))
+                            .font(.footnote)
+                            .foregroundStyle(Color.textSecondary)
+                            .accessibilityIdentifier("skipAll.more")
+                        }
+                    }
+                    .accessibilityIdentifier("skipAll.silencedList")
+                }
 
                 if oneTime > 0 {
                     Text(String(
@@ -273,6 +307,37 @@ struct SkipAllSheet: View {
                 }
             }
         }
+    }
+}
+
+/// 一括シートに出す「鳴らなくなるアラーム」の小さな行（#197 実機レビュー）。
+private struct SkipSilencedAlarmRow: View {
+    let alarm: AlarmEntry
+
+    var body: some View {
+        HStack(spacing: 10) {
+            SoundThumbnail(
+                sound: AlarmSoundDisplay.representativeSound(for: alarm),
+                size: 26
+            )
+            VStack(alignment: .leading, spacing: 1) {
+                Text(alarm.timeString)
+                    .font(.subheadline)
+                    .foregroundStyle(.primary)
+                Text(displayName)
+                    .font(.caption)
+                    .foregroundStyle(Color.textSecondary)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 0)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private var displayName: String {
+        if !alarm.label.isEmpty { return alarm.label }
+        let soundName = AlarmSoundDisplay.name(for: alarm)
+        return soundName.isEmpty ? String(localized: "default_sound") : soundName
     }
 }
 
@@ -662,30 +727,36 @@ struct HolidayOverrideSheet: View {
     var body: some View {
         NavigationStack {
             List {
-                Section {
-                    ForEach(holidays) { holiday in
-                        Toggle(isOn: Binding(
-                            get: { overrides.contains(holiday.dateKey) },
-                            set: { ring in
-                                if ring {
-                                    overrides.insert(holiday.dateKey)
-                                } else {
-                                    overrides.remove(holiday.dateKey)
+                ForEach(Array(groupedHolidays.enumerated()), id: \.offset) { index, group in
+                    Section {
+                        ForEach(group.holidays) { holiday in
+                            Toggle(isOn: Binding(
+                                get: { overrides.contains(holiday.dateKey) },
+                                set: { ring in
+                                    if ring {
+                                        overrides.insert(holiday.dateKey)
+                                    } else {
+                                        overrides.remove(holiday.dateKey)
+                                    }
+                                    AnalyticsService.shared.capture(.holidayRingOverride)
                                 }
-                                AnalyticsService.shared.capture(.holidayRingOverride)
+                            )) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(AlarmSkipFormat.holiday(holiday))
+                                    Text(holiday.name)
+                                        .font(.footnote)
+                                        .foregroundStyle(Color.textSecondary)
+                                }
                             }
-                        )) {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(AlarmSkipFormat.holiday(holiday))
-                                Text(holiday.name)
-                                    .font(.footnote)
-                                    .foregroundStyle(Color.textSecondary)
-                            }
+                            .accessibilityIdentifier("holiday.override.\(holiday.dateKey)")
                         }
-                        .accessibilityIdentifier("holiday.override.\(holiday.dateKey)")
+                    } header: {
+                        Text(AlarmSkipFormat.year(group.year))
+                    } footer: {
+                        if index == groupedHolidays.count - 1 {
+                            Text("holiday_ring_on")
+                        }
                     }
-                } footer: {
-                    Text("holiday_ring_on")
                 }
             }
             .navigationTitle(String(localized: "holiday_overrides_title"))
@@ -695,6 +766,18 @@ struct HolidayOverrideSheet: View {
                     Button("close") { dismiss() }
                 }
             }
+        }
+    }
+
+    private var groupedHolidays: [(year: Int, holidays: [JapaneseHoliday])] {
+        let calendar = Calendar.current
+        var byYear: [Int: [JapaneseHoliday]] = [:]
+        for holiday in holidays {
+            guard let date = AlarmSkipLogic.date(fromKey: holiday.dateKey) else { continue }
+            byYear[calendar.component(.year, from: date), default: []].append(holiday)
+        }
+        return byYear.keys.sorted().map { year in
+            (year, byYear[year]!.sorted { $0.dateKey < $1.dateKey })
         }
     }
 }

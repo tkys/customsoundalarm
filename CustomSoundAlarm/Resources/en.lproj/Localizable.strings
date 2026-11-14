@@ -331,7 +331,6 @@
 "skip_all_7d" = "7 days";
 "skip_all_row_fmt" = "until %@ · %d times";
 "skip_all_custom" = "Choose dates";
-"skip_all_summary_fmt" = "Alarms that won't ring: %@";
 "skip_all_active_fmt" = "Resting until %1$@ · %2$d";
 "skip_row_global_fmt" = "Resting until %@";
 "skip_row_skip_fmt" = "Rest on %@";
@@ -355,3 +354,7 @@
 "repeat_summary_holiday_suffix" = "holidays excluded";
 "repeat_summary_skip_days_fmt" = "%d days off";
 "holiday_skip_section_title" = "Rest days";
+"repeat_summary_holiday_and_days_fmt" = "holidays and %d days excluded";
+"repeat_summary_days_only_fmt" = "%d days excluded";
+"skip_all_silenced_title" = "Alarms that won't ring";
+"skip_all_more_fmt" = "%d more";

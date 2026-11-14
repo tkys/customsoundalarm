@@ -331,7 +331,6 @@
 "skip_all_7d" = "7 jours";
 "skip_all_row_fmt" = "jusqu’à %@ · %d fois";
 "skip_all_custom" = "Choisir des dates";
-"skip_all_summary_fmt" = "Alarmes qui ne sonneront pas : %@";
 "skip_all_active_fmt" = "En pause jusqu’à %1$@ · %2$d";
 "skip_row_global_fmt" = "En pause jusqu’à %@";
 "skip_row_skip_fmt" = "Mettre en pause le %@";
@@ -355,3 +354,7 @@
 "repeat_summary_holiday_suffix" = "jours fériés exclus";
 "repeat_summary_skip_days_fmt" = "%d jours de pause";
 "holiday_skip_section_title" = "Jours de pause";
+"repeat_summary_holiday_and_days_fmt" = "jours fériés et %d jours exclus";
+"repeat_summary_days_only_fmt" = "%d jours exclus";
+"skip_all_silenced_title" = "Alarmes qui ne sonneront pas";
+"skip_all_more_fmt" = "%d de plus";

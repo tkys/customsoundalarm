@@ -331,7 +331,6 @@
 "skip_all_7d" = "7 dagen";
 "skip_all_row_fmt" = "tot %@ · %d keer";
 "skip_all_custom" = "Kies datums";
-"skip_all_summary_fmt" = "Wekkers die niet afgaan: %@";
 "skip_all_active_fmt" = "Gepauzeerd tot %1$@ · %2$d";
 "skip_row_global_fmt" = "Gepauzeerd tot %@";
 "skip_row_skip_fmt" = "Pauzeer op %@";
@@ -355,3 +354,7 @@
 "repeat_summary_holiday_suffix" = "feestdagen uitgesloten";
 "repeat_summary_skip_days_fmt" = "%d dagen pauze";
 "holiday_skip_section_title" = "Pauzedagen";
+"repeat_summary_holiday_and_days_fmt" = "feestdagen en %d dagen uitgesloten";
+"repeat_summary_days_only_fmt" = "%d dagen uitgesloten";
+"skip_all_silenced_title" = "Wekkers die niet afgaan";
+"skip_all_more_fmt" = "%d meer";

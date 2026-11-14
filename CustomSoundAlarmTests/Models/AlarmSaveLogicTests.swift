@@ -188,7 +188,7 @@ struct RepeatSummaryLogicTests {
             "ja.lproj"
         )
         let bundle = try #require(Bundle(path: path))
-        return RepeatSummaryStrings(bundle: bundle)
+        return RepeatSummaryStrings(bundle: bundle, language: "ja")
     }
 
     @Test
@@ -234,12 +234,12 @@ struct RepeatSummaryLogicTests {
             skipsHolidays: false,
             skipDateCount: 2,
             strings: strings
-        ) == "毎日・2日休み")
+        ) == "毎日・2日を除く")
         #expect(RepeatSummaryLogic.text(
             weekdays: [1, 2, 3, 4, 5, 6, 7],
             skipsHolidays: true,
             skipDateCount: 2,
             strings: strings
-        ) == "毎日・祝日を除く・2日休み")
+        ) == "毎日・祝日と2日を除く")
     }
 }

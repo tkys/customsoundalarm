@@ -698,3 +698,39 @@ extension AlarmSkipServiceTests {
         await AlarmScheduler.shared.waitForPendingSync()
     }
 }
+
+/// 年をまたぐ日付の表示（#197 実機レビュー）。
+extension AlarmSkipLogicTests {
+
+    @Test
+    func dateLabelsAddTheYearOnlyOutsideTheCurrentYear() {
+        let ja = Locale(identifier: "ja_JP")
+        let thisYear = date(2026, 11, 1)
+
+        #expect(AlarmSkipFormat.day(
+            date(2026, 11, 14), locale: ja, now: thisYear
+        ) == "11/14（土）")
+        #expect(AlarmSkipFormat.day(
+            date(2026, 12, 31), locale: ja, now: thisYear
+        ) == "12/31（木）")
+        #expect(AlarmSkipFormat.day(
+            date(2027, 1, 1), locale: ja, now: thisYear
+        ) == "2027/1/1（金）")
+        #expect(AlarmSkipFormat.day(
+            date(2027, 1, 1), locale: ja, now: date(2027, 1, 1)
+        ) == "1/1（金）")
+        // 12/31 → 1/1 をまたぐ基準日でも、翌年側だけ年が付く
+        #expect(AlarmSkipFormat.day(
+            date(2026, 12, 31), locale: ja, now: date(2026, 12, 31)
+        ) == "12/31（木）")
+        #expect(AlarmSkipFormat.day(
+            date(2027, 1, 1), locale: ja, now: date(2026, 12, 31)
+        ) == "2027/1/1（金）")
+
+        let en = Locale(identifier: "en_US")
+        #expect(AlarmSkipFormat.day(
+            date(2027, 1, 1), locale: en, now: thisYear
+        ).contains("2027"))
+        #expect(AlarmSkipFormat.year(2027, locale: ja) == "2027年")
+    }
+}

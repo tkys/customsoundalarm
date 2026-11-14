@@ -103,7 +103,7 @@ struct LocalizationCopyTests {
     func globalSkipRowCopyExistsInEveryLanguage() throws {
         let expected = [
             "en": "Resting until %@",
-            "ja": "%@ まで休み",
+            "ja": "%@ まで鳴らさない",
             "fr": "En pause jusqu’à %@",
             "de": "Pause bis %@",
             "es": "En pausa hasta el %@",
@@ -168,5 +168,28 @@ struct LocalizationCopyTests {
                 "\(language): \(strings["repeat_summary_skip_days_fmt"] ?? "nil")"
             )
         }
+    }
+
+    @Test
+    func japaneseSkipCopyMatchesTheReviewedWording() throws {
+        let strings = try strings(for: "ja")
+        #expect(strings["skip_all_button"] == "しばらく鳴らさない")
+        #expect(strings["skip_all_title"] == "しばらく鳴らさない")
+        #expect(strings["skip_alarms_intent"] == "しばらく鳴らさない")
+        #expect(strings["skip_apply"] == "鳴らさない")
+        #expect(strings["skip_all_active_fmt"] == "%1$@ まで鳴らさない・%2$d本")
+        #expect(strings["skip_row_global_fmt"] == "%@ まで鳴らさない")
+        #expect(strings["skip_row_skip_fmt"] == "%@ は鳴らさない")
+        #expect(strings["skip_row_undo"] == "元に戻す")
+        #expect(strings["skip_row_summary_fmt"] == "%@ は鳴らさない・次は %@")
+        #expect(strings["skip_row_summary_no_next_fmt"] == "%@ は鳴らさない")
+        #expect(strings["holiday_next_skipped"] == "%@ は鳴らさない")
+        #expect(strings["holiday_skip_section_title"] == "鳴らさない日")
+        #expect(strings["skip_dates_title"] == "日付を選ぶ")
+        #expect(strings["skip_dates_selected"] == "鳴らさない日")
+        #expect(strings["skip_dates_empty"] == "鳴らさない日はありません")
+        #expect(strings["holiday_overrides_title"] == "鳴らす祝日を選ぶ")
+        #expect(strings["repeat_summary_holiday_and_days_fmt"] == "祝日と%d日を除く")
+        #expect(strings["repeat_summary_days_only_fmt"] == "%d日を除く")
     }
 }

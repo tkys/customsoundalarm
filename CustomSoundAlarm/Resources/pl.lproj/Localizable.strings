@@ -331,7 +331,6 @@
 "skip_all_7d" = "7 dni";
 "skip_all_row_fmt" = "do %@ · %d razy";
 "skip_all_custom" = "Wybierz daty";
-"skip_all_summary_fmt" = "Budziki, które nie zadzwonią: %@";
 "skip_all_active_fmt" = "Wstrzymane do %1$@ · %2$d";
 "skip_row_global_fmt" = "Wstrzymane do %@";
 "skip_row_skip_fmt" = "Wstrzymaj %@";
@@ -355,3 +354,7 @@
 "repeat_summary_holiday_suffix" = "bez świąt";
 "repeat_summary_skip_days_fmt" = "%d dni przerwy";
 "holiday_skip_section_title" = "Dni przerwy";
+"repeat_summary_holiday_and_days_fmt" = "bez świąt i %d dni";
+"repeat_summary_days_only_fmt" = "%d dni wyłączone";
+"skip_all_silenced_title" = "Budziki, które nie zadzwonią";
+"skip_all_more_fmt" = "jeszcze %d";

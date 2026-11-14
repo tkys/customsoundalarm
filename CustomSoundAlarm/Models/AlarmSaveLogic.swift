@@ -94,11 +94,21 @@ struct RepeatSummaryStrings {
     let dayLabels: [Int: String]
     let holidaySuffix: String
     let skipDaysFormat: String
+    /// 日本語は「祝日と1日を除く」のように、1つの形でまとめる（#197 実機レビュー）。
+    let holidayAndDaysFormat: String
+    /// 日本語は「1日を除く」。
+    let daysOnlyFormat: String
+    let isJapanese: Bool
 
-    init(bundle: Bundle = .main) {
+    init(bundle: Bundle = .main, language: String? = nil) {
         func value(_ key: String) -> String {
             bundle.localizedString(forKey: key, value: nil, table: nil)
         }
+        let language = language
+            ?? Locale.current.language.languageCode?.identifier
+            ?? bundle.preferredLocalizations.first
+            ?? "en"
+        isJapanese = language.hasPrefix("ja")
         never = value("never")
         everyDay = value("every_day")
         weekdays = value("weekdays")
@@ -114,6 +124,8 @@ struct RepeatSummaryStrings {
         ]
         holidaySuffix = value("repeat_summary_holiday_suffix")
         skipDaysFormat = value("repeat_summary_skip_days_fmt")
+        holidayAndDaysFormat = value("repeat_summary_holiday_and_days_fmt")
+        daysOnlyFormat = value("repeat_summary_days_only_fmt")
     }
 }
 
@@ -140,11 +152,21 @@ enum RepeatSummaryLogic {
         }
 
         var parts = [base]
-        if skipsHolidays {
+        if skipsHolidays, skipDateCount > 0 {
+            if strings.isJapanese {
+                parts.append(String(
+                    format: strings.holidayAndDaysFormat,
+                    skipDateCount
+                ))
+            } else {
+                parts.append(strings.holidaySuffix)
+                parts.append(String(format: strings.skipDaysFormat, skipDateCount))
+            }
+        } else if skipsHolidays {
             parts.append(strings.holidaySuffix)
-        }
-        if skipDateCount > 0 {
-            parts.append(String(format: strings.skipDaysFormat, skipDateCount))
+        } else if skipDateCount > 0 {
+            let format = strings.isJapanese ? strings.daysOnlyFormat : strings.skipDaysFormat
+            parts.append(String(format: format, skipDateCount))
         }
         return parts.joined(separator: "・")
     }

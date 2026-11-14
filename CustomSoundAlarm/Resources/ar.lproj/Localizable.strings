@@ -331,7 +331,6 @@
 "skip_all_7d" = "7 أيام";
 "skip_all_row_fmt" = "حتى %@ · %d مرات";
 "skip_all_custom" = "اختيار التواريخ";
-"skip_all_summary_fmt" = "المنبهات التي لن ترن: %@";
 "skip_all_active_fmt" = "إيقاف مؤقت حتى %1$@ · %2$d";
 "skip_row_global_fmt" = "إيقاف مؤقت حتى %@";
 "skip_row_skip_fmt" = "إيقاف مؤقت في %@";
@@ -355,3 +354,7 @@
 "repeat_summary_holiday_suffix" = "بدون العطلات";
 "repeat_summary_skip_days_fmt" = "%d أيام راحة";
 "holiday_skip_section_title" = "أيام الراحة";
+"repeat_summary_holiday_and_days_fmt" = "بدون العطلات و%d أيام";
+"repeat_summary_days_only_fmt" = "بدون %d أيام";
+"skip_all_silenced_title" = "المنبهات التي لن ترن";
+"skip_all_more_fmt" = "%d أخرى";

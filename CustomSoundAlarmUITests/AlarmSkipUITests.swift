@@ -34,8 +34,9 @@ final class AlarmSkipUITests: XCTestCase {
             "skip-all sheet should open: \(app.debugDescription)"
         )
         XCTAssertTrue(
-            app.staticTexts["skipAll.summary"].waitForExistence(timeout: 5),
-            "summary should appear before applying"
+            app.descendants(matching: .any)["skipAll.silencedList"]
+                .waitForExistence(timeout: 5),
+            "silenced alarm rows should appear before applying"
         )
         XCTAssertTrue(
             app.staticTexts["skipAll.oneTimeWarning"].waitForExistence(timeout: 5),

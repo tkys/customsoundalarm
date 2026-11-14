@@ -331,7 +331,6 @@
 "skip_all_7d" = "7일";
 "skip_all_row_fmt" = "%@ 까지 · %d회";
 "skip_all_custom" = "날짜 선택";
-"skip_all_summary_fmt" = "울리지 않는 알람: %@";
 "skip_all_active_fmt" = "%1$@ 까지 쉬기 · %2$d개";
 "skip_row_global_fmt" = "%@ 까지 쉬기";
 "skip_row_skip_fmt" = "%@ 쉬기";
@@ -355,3 +354,7 @@
 "repeat_summary_holiday_suffix" = "공휴일 제외";
 "repeat_summary_skip_days_fmt" = "%d일 쉼";
 "holiday_skip_section_title" = "쉬는 날";
+"repeat_summary_holiday_and_days_fmt" = "공휴일과 %d일 제외";
+"repeat_summary_days_only_fmt" = "%d일 제외";
+"skip_all_silenced_title" = "울리지 않는 알람";
+"skip_all_more_fmt" = "외 %d개";

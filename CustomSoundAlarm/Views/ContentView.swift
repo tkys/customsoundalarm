@@ -287,14 +287,14 @@ struct ContentView: View {
                     }
                 }
                 .contextMenu {
+                    if !alarm.repeatWeekdays.isEmpty {
+                        skipMenuButton(for: alarm)
+                    }
                     Button {
                         alarmStore.duplicate(alarm)
                         AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
                     } label: {
                         Label("duplicate_alarm", systemImage: "plus.square.on.square")
-                    }
-                    if !alarm.repeatWeekdays.isEmpty {
-                        skipMenuButton(for: alarm)
                     }
                 }
             }
