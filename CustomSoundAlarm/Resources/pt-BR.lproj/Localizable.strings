@@ -363,3 +363,6 @@
 "skip_result_picked" = "Dia escolhido";
 "skip_result_more" = "Ver mais";
 "skip_result_remove" = "Remover";
+"skip_result_footer" = "Só mostramos feriados que caem em um dia que toca.";
+"skip_row_toast_skipped_fmt" = "%@ não vai tocar";
+"skip_row_toast_undone_fmt" = "%@ vai tocar";

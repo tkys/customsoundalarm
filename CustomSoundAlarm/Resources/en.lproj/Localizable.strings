@@ -363,3 +363,6 @@
 "skip_result_picked" = "Chosen day";
 "skip_result_more" = "Show more";
 "skip_result_remove" = "Remove";
+"skip_result_footer" = "Only holidays that fall on a ringing weekday are shown.";
+"skip_row_toast_skipped_fmt" = "%@ won't ring";
+"skip_row_toast_undone_fmt" = "%@ will ring";

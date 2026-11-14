@@ -363,3 +363,6 @@
 "skip_result_picked" = "Jour choisi";
 "skip_result_more" = "Voir plus";
 "skip_result_remove" = "Retirer";
+"skip_result_footer" = "Seuls les jours fériés qui tombent un jour de sonnerie sont affichés.";
+"skip_row_toast_skipped_fmt" = "%@ ne sonnera pas";
+"skip_row_toast_undone_fmt" = "%@ sonnera";

@@ -13,7 +13,11 @@ final class AlarmSkipUITests: XCTestCase {
 
     private func launchSkipSeed() -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-uitest-seed-skip"]
+        app.launchArguments = [
+            "-uitest-seed-skip",
+            "-AppleLanguages", "(ja)",
+            "-AppleLocale", "ja_JP"
+        ]
         app.launch()
         return app
     }
@@ -93,6 +97,18 @@ final class AlarmSkipUITests: XCTestCase {
         )
         skip.tap()
 
+        let skippedToast = app.staticTexts.matching(
+            NSPredicate(
+                format: "identifier == %@ AND label CONTAINS %@",
+                "skip.row.toast",
+                "鳴らしません"
+            )
+        ).firstMatch
+        XCTAssertTrue(
+            skippedToast.waitForExistence(timeout: 5),
+            "skipping one alarm should show the short notice: \(app.debugDescription)"
+        )
+
         let summary = app.staticTexts["skip.row.summary"].firstMatch
         XCTAssertTrue(
             summary.waitForExistence(timeout: 10),
@@ -108,6 +124,17 @@ final class AlarmSkipUITests: XCTestCase {
             "undo swipe action should appear: \(app.debugDescription)"
         )
         undo.tap()
+        let undoneToast = app.staticTexts.matching(
+            NSPredicate(
+                format: "identifier == %@ AND label CONTAINS %@",
+                "skip.row.toast",
+                "鳴らします"
+            )
+        ).firstMatch
+        XCTAssertTrue(
+            undoneToast.waitForExistence(timeout: 5),
+            "undoing one alarm should show the short notice: \(app.debugDescription)"
+        )
         XCTAssertFalse(
             summary.waitForExistence(timeout: 5),
             "row summary should disappear after undo"

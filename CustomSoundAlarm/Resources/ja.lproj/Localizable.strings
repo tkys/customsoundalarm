@@ -363,3 +363,6 @@
 "skip_result_picked" = "選んだ日";
 "skip_result_more" = "もっと見る";
 "skip_result_remove" = "外す";
+"skip_result_footer" = "鳴る曜日に当たる祝日だけを出しています";
+"skip_row_toast_skipped_fmt" = "%@ は鳴らしません";
+"skip_row_toast_undone_fmt" = "%@ は鳴らします";

@@ -363,3 +363,6 @@
 "skip_result_picked" = "Giorno scelto";
 "skip_result_more" = "Mostra altro";
 "skip_result_remove" = "Rimuovi";
+"skip_result_footer" = "Mostriamo solo le festività che cadono in un giorno in cui suona.";
+"skip_row_toast_skipped_fmt" = "%@ non suonerà";
+"skip_row_toast_undone_fmt" = "%@ suonerà";

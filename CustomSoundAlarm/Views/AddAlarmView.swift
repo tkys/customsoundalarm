@@ -1134,6 +1134,11 @@ struct RepeatSelectionView: View {
                     } header: {
                         Text("skip_result_section_title")
                             .accessibilityIdentifier("skipResult.sectionTitle")
+                    } footer: {
+                        if skipsHolidays {
+                            Text("skip_result_footer")
+                                .accessibilityIdentifier("skipResult.footer")
+                        }
                     }
                 }
             }
@@ -1328,6 +1333,7 @@ struct SaveConfirmationToast: View {
                 .foregroundStyle(Brand.warmGoldGradient)
             Text(text)
                 .font(.subheadline.weight(.medium))
+                .accessibilityIdentifier("toast.text")
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)

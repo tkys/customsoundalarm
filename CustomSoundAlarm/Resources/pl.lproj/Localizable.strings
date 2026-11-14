@@ -363,3 +363,6 @@
 "skip_result_picked" = "Wybrany dzień";
 "skip_result_more" = "Pokaż więcej";
 "skip_result_remove" = "Usuń";
+"skip_result_footer" = "Pokazujemy tylko święta przypadające w dzień dzwonienia.";
+"skip_row_toast_skipped_fmt" = "%@ nie zadzwoni";
+"skip_row_toast_undone_fmt" = "%@ zadzwoni";

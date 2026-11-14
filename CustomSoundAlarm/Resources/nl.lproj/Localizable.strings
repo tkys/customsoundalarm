@@ -363,3 +363,6 @@
 "skip_result_picked" = "Gekozen dag";
 "skip_result_more" = "Meer tonen";
 "skip_result_remove" = "Verwijderen";
+"skip_result_footer" = "Alleen feestdagen op een dag dat de wekker afgaat worden getoond.";
+"skip_row_toast_skipped_fmt" = "%@ gaat niet af";
+"skip_row_toast_undone_fmt" = "%@ gaat af";

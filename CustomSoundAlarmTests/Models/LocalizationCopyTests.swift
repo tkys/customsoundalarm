@@ -196,5 +196,8 @@ struct LocalizationCopyTests {
         #expect(strings["skip_result_remove"] == "外す")
         #expect(strings["repeat_summary_holiday_and_days_fmt"] == "祝日と%d日を除く")
         #expect(strings["repeat_summary_days_only_fmt"] == "%d日を除く")
+        #expect(strings["skip_result_footer"] == "鳴る曜日に当たる祝日だけを出しています")
+        #expect(strings["skip_row_toast_skipped_fmt"] == "%@ は鳴らしません")
+        #expect(strings["skip_row_toast_undone_fmt"] == "%@ は鳴らします")
     }
 }

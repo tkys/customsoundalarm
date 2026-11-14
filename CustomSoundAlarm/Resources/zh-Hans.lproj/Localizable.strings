@@ -363,3 +363,6 @@
 "skip_result_picked" = "选择的日期";
 "skip_result_more" = "查看更多";
 "skip_result_remove" = "移除";
+"skip_result_footer" = "仅显示落在会响的星期几的节假日。";
+"skip_row_toast_skipped_fmt" = "%@ 不会响";
+"skip_row_toast_undone_fmt" = "%@ 会响";

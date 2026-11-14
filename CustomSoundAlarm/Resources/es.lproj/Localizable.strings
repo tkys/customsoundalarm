@@ -363,3 +363,6 @@
 "skip_result_picked" = "Día elegido";
 "skip_result_more" = "Ver más";
 "skip_result_remove" = "Quitar";
+"skip_result_footer" = "Solo se muestran los festivos que caen en un día que suena.";
+"skip_row_toast_skipped_fmt" = "%@ no sonará";
+"skip_row_toast_undone_fmt" = "%@ sonará";

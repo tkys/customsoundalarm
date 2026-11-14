@@ -363,3 +363,6 @@
 "skip_result_picked" = "선택한 날";
 "skip_result_more" = "더 보기";
 "skip_result_remove" = "빼기";
+"skip_result_footer" = "우는 요일에 해당하는 공휴일만 표시합니다.";
+"skip_row_toast_skipped_fmt" = "%@은(는) 울리지 않습니다";
+"skip_row_toast_undone_fmt" = "%@은(는) 울립니다";

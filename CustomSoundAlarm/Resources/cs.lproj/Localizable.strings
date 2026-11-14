@@ -363,3 +363,6 @@
 "skip_result_picked" = "Vybraný den";
 "skip_result_more" = "Zobrazit více";
 "skip_result_remove" = "Odebrat";
+"skip_result_footer" = "Zobrazujeme jen svátky připadající na den zvonění.";
+"skip_row_toast_skipped_fmt" = "%@ nezazvoní";
+"skip_row_toast_undone_fmt" = "%@ zazvoní";

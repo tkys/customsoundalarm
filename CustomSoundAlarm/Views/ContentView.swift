@@ -1,6 +1,7 @@
 import SwiftUI
 import StoreKit
 import UIKit
+import Accessibility
 
 /// 追加画面への要求（sheet(item:) 用・#101）
 struct AddAlarmRequest: Identifiable {
@@ -24,10 +25,13 @@ struct ContentView: View {
     /// すべてのアラームを休む（#197 画面作り直し）
     @State private var showingSkipAll = false
     @State private var globalSkip: GlobalSkip?
+    @State private var skipToast: String?
+    @State private var skipToastTask: Task<Void, Never>?
     @ScaledMetric(relativeTo: .body) private var skipActionIconSize: CGFloat = 17
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.requestReview) private var requestReview
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         NavigationStack {
@@ -144,6 +148,16 @@ struct ContentView: View {
                 await updateChecker.check(isOnboardingVisible: showingOnboarding)
             }
         }
+        .overlay(alignment: .bottom) {
+            if let skipToast {
+                SaveConfirmationToast(text: skipToast)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, dynamicTypeSize.isAccessibilitySize ? 100 : 12)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .accessibilityIdentifier("skip.row.toast")
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: skipToast)
     }
 
     // MARK: - Update prompt bindings (#116)
@@ -318,11 +332,49 @@ struct ContentView: View {
         }
     }
 
+    private func skipNextWithToast(_ alarm: AlarmEntry) {
+        guard let next = AlarmSkipLogic.nextFireDate(for: alarm, after: Date()) else {
+            return
+        }
+        AlarmSkipService.skipNext(entryID: alarm.id)
+        showSkipToast(String(
+            format: String(localized: "skip_row_toast_skipped_fmt"),
+            AlarmSkipFormat.day(next)
+        ))
+    }
+
+    private func undoNextWithToast(_ alarm: AlarmEntry) {
+        guard let skipped = AlarmSkipLogic.nextIndividualSkipDate(
+            for: alarm,
+            after: Date()
+        ) else { return }
+        AlarmSkipService.undoNext(entryID: alarm.id)
+        showSkipToast(String(
+            format: String(localized: "skip_row_toast_undone_fmt"),
+            AlarmSkipFormat.day(skipped)
+        ))
+    }
+
+    private func showSkipToast(_ text: String) {
+        skipToastTask?.cancel()
+        withAnimation(.easeInOut(duration: 0.2)) {
+            skipToast = text
+        }
+        AccessibilityNotification.Announcement(text).post()
+        skipToastTask = Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(2500))
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeInOut(duration: 0.25)) {
+                skipToast = nil
+            }
+        }
+    }
+
     @ViewBuilder
     private func skipSwipeAction(for alarm: AlarmEntry) -> some View {
         if AlarmSkipLogic.nextIndividualSkipDate(for: alarm, after: Date()) != nil {
             Button {
-                AlarmSkipService.undoNext(entryID: alarm.id)
+                undoNextWithToast(alarm)
             } label: {
                 Label {
                     Text("skip_row_undo")
@@ -334,7 +386,7 @@ struct ContentView: View {
             .accessibilityIdentifier("skip.row.undo.\(alarm.id.uuidString)")
         } else if let next = AlarmSkipLogic.nextFireDate(for: alarm, after: Date()) {
             Button {
-                AlarmSkipService.skipNext(entryID: alarm.id)
+                skipNextWithToast(alarm)
             } label: {
                 Label {
                     Text(String(
@@ -367,7 +419,7 @@ struct ContentView: View {
     private func skipMenuButton(for alarm: AlarmEntry) -> some View {
         if AlarmSkipLogic.nextIndividualSkipDate(for: alarm, after: Date()) != nil {
             Button {
-                AlarmSkipService.undoNext(entryID: alarm.id)
+                undoNextWithToast(alarm)
             } label: {
                 Label {
                     Text("skip_row_undo")
@@ -377,7 +429,7 @@ struct ContentView: View {
             }
         } else if let next = AlarmSkipLogic.nextFireDate(for: alarm, after: Date()) {
             Button {
-                AlarmSkipService.skipNext(entryID: alarm.id)
+                skipNextWithToast(alarm)
             } label: {
                 Label {
                     Text(String(

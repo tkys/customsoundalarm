@@ -363,3 +363,6 @@
 "skip_result_picked" = "Gewählter Tag";
 "skip_result_more" = "Mehr anzeigen";
 "skip_result_remove" = "Entfernen";
+"skip_result_footer" = "Es werden nur Feiertage an einem klingelnden Wochentag angezeigt.";
+"skip_row_toast_skipped_fmt" = "%@ klingelt nicht";
+"skip_row_toast_undone_fmt" = "%@ klingelt";
