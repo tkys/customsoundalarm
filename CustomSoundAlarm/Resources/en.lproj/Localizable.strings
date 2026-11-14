@@ -306,6 +306,16 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Preview playlist";
 "play_order_footer" = "Alarms repeat until you stop them. Shuffle changes the next order each time you stop. One random repeats the same single track each time.";
+
+// #204 settings
+"settings" = "Settings";
+"settings_contact" = "Report a bug or ask a question";
+"settings_review" = "Write a review";
+"settings_howto" = "How to use";
+"settings_privacy" = "Privacy Policy";
+"settings_version" = "Version";
+"settings_mail_subject" = "About My Sound Alarm";
+"settings_mail_body" = "\n\n---\nApp: My Sound Alarm %@\niOS: %@\nDevice: %@";
 "video_source_header" = "Choose a video";
 "video_source_photo_row" = "Choose from Photo Library";
 "video_source_file_row" = "Choose from Files";

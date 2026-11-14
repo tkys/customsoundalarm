@@ -306,6 +306,16 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "试听播放列表";
 "play_order_footer" = "闹钟会一直重复，直到你停止。每次停止后，随机播放会改变下一次的顺序。随机一首会重复同一首曲目。";
+
+// #204 settings
+"settings" = "设置";
+"settings_contact" = "报告问题或咨询";
+"settings_review" = "写评论";
+"settings_howto" = "使用方法";
+"settings_privacy" = "隐私政策";
+"settings_version" = "版本";
+"settings_mail_subject" = "关于 My Sound Alarm";
+"settings_mail_body" = "\n\n---\nApp：My Sound Alarm %@\niOS：%@\n设备：%@";
 "video_source_header" = "选择视频";
 "video_source_photo_row" = "从照片图库选择";
 "video_source_file_row" = "从“文件”选择";

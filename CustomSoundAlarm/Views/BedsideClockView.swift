@@ -73,6 +73,7 @@ struct BedsideClockView: View {
         }
         .statusBarHidden()
         .persistentSystemOverlays(.hidden)
+        .accessibilityIdentifier("bedside.root")
         .onReceive(clockTimer) { _ in now = Date() }
         .onReceive(countdownTimer) { _ in now = Date() }
         .onReceive(offsetTimer) { _ in offset = BedsideClockLogic.clockOffset(for: now) }
@@ -365,6 +366,7 @@ struct BedsideClockView: View {
                     .foregroundStyle(theme.warningColor)
             }
             .padding(.top, 8)
+            .accessibilityIdentifier("bedside.exit")
         }
         .padding(24)
         .background(
@@ -459,7 +461,8 @@ struct BedsideClockView: View {
         AnalyticsService.shared.capture(.bedsideEntered(
             layout: clockLayout.rawValue,
             theme: settings.colorTheme,
-            hour: Calendar.current.component(.hour, from: now)
+            hour: Calendar.current.component(.hour, from: now),
+            entry: .settings
         ))
 
         // 初回ヒント

@@ -68,7 +68,10 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.alarmStopped(hour: 8).name == "alarm_stopped")
         #expect(AnalyticsEvent.alarmSnoozed(from: "observer").name == "alarm_snoozed")
         // Phase 4（ベッドサイドモード・#68）
-        #expect(AnalyticsEvent.bedsideEntered(layout: "digital_large", theme: "white", hour: 23).name == "bedside_entered")
+        #expect(AnalyticsEvent.bedsideEntered(layout: "digital_large", theme: "white", hour: 23, entry: .settings).name == "bedside_entered")
+        #expect(AnalyticsEvent.settingsOpened.name == "settings_opened")
+        #expect(AnalyticsEvent.supportContactOpened(method: .mail).name == "support_contact_opened")
+        #expect(AnalyticsEvent.reviewLinkOpened.name == "review_link_opened")
         #expect(AnalyticsEvent.bedsideExited(durationBucket: "over_2h", exitMethod: "long_press").name == "bedside_exited")
         #expect(AnalyticsEvent.bedsideSettingChanged(setting: .layout, value: .string("minimal")).name == "bedside_setting_changed")
         // #71: バックグラウンド退出も同じイベント名
@@ -486,7 +489,10 @@ struct AnalyticsEventTests {
             .alarmFired(wasAppForeground: true, hour: 8, isRepeating: false, detection: "observer"),
             .alarmStopped(hour: 8),
             .alarmSnoozed(from: "observer"),
-            .bedsideEntered(layout: "digital_large", theme: "white", hour: 23),
+            .bedsideEntered(layout: "digital_large", theme: "white", hour: 23, entry: .settings),
+            .settingsOpened,
+            .supportContactOpened(method: .web),
+            .reviewLinkOpened,
             .bedsideExited(durationBucket: "1_5min", exitMethod: "exit_button"),
             .bedsideSettingChanged(setting: .layout, value: .string("minimal")),
             .bedsideSettingChanged(setting: .brightness, value: .number(0.8)),
@@ -612,17 +618,18 @@ struct AnalyticsEventTests {
 
     @Test
     func bedsideEnteredProperties_carryLayoutThemeHour() {
-        let props = AnalyticsEvent.bedsideEntered(layout: "digital_large", theme: "amber", hour: 23).properties
+        let props = AnalyticsEvent.bedsideEntered(layout: "digital_large", theme: "amber", hour: 23, entry: .settings).properties
 
-        #expect(props.count == 3)
+        #expect(props.count == 4)
         #expect(props["layout"] as? String == "digital_large")
         #expect(props["theme"] as? String == "amber")
         #expect(props["hour"] as? Int == 23)
+        #expect(props["entry"] as? String == "settings")
     }
 
     @Test
     func bedsideEnteredProperties_midnightHour() {
-        let props = AnalyticsEvent.bedsideEntered(layout: "minimal", theme: "white", hour: 0).properties
+        let props = AnalyticsEvent.bedsideEntered(layout: "minimal", theme: "white", hour: 0, entry: .settings).properties
         #expect(props["hour"] as? Int == 0)
     }
 
@@ -1090,7 +1097,7 @@ struct AnalyticsServiceCaptureTests {
         let mock = MockBackend()
         let service = AnalyticsService(backend: mock)
 
-        service.capture(.bedsideEntered(layout: "minimal", theme: "amber", hour: 22))
+        service.capture(.bedsideEntered(layout: "minimal", theme: "amber", hour: 22, entry: .settings))
 
         #expect(mock.captureCount == 1)
         let captured = mock.captures[0]

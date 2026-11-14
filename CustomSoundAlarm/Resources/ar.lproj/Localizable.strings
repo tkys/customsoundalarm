@@ -306,6 +306,16 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "معاينة قائمة التشغيل";
 "play_order_footer" = "تتكرر المنبهات حتى توقفها. يغيّر الترتيب العشوائي الترتيب التالي في كل مرة توقف فيها المنبه. خيار مقطع عشوائي يكرر المقطع نفسه في كل مرة.";
+
+// #204 settings
+"settings" = "الإعدادات";
+"settings_contact" = "الإبلاغ عن مشكلة أو السؤال";
+"settings_review" = "كتابة مراجعة";
+"settings_howto" = "كيفية الاستخدام";
+"settings_privacy" = "سياسة الخصوصية";
+"settings_version" = "الإصدار";
+"settings_mail_subject" = "حول My Sound Alarm";
+"settings_mail_body" = "\n\n---\nالتطبيق: My Sound Alarm %@\niOS: %@\nالجهاز: %@";
 "video_source_header" = "اختيار فيديو";
 "video_source_photo_row" = "اختيار من مكتبة الصور";
 "video_source_file_row" = "اختيار من الملفات";

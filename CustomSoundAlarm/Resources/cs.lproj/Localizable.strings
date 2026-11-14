@@ -306,6 +306,16 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Přehrát playlist";
 "play_order_footer" = "Budíky se opakují, dokud je nezastavíte. Náhodné pořadí změní další pořadí při každém zastavení. Jeden náhodný opakuje stejnou skladbu.";
+
+// #204 settings
+"settings" = "Nastavení";
+"settings_contact" = "Nahlásit problém nebo se zeptat";
+"settings_review" = "Napsat recenzi";
+"settings_howto" = "Jak používat";
+"settings_privacy" = "Zásady ochrany soukromí";
+"settings_version" = "Verze";
+"settings_mail_subject" = "O aplikaci My Sound Alarm";
+"settings_mail_body" = "\n\n---\nAplikace: My Sound Alarm %@\niOS: %@\nZařízení: %@";
 "video_source_header" = "Vybrat video";
 "video_source_photo_row" = "Vybrat z knihovny fotek";
 "video_source_file_row" = "Vybrat ze Souborů";

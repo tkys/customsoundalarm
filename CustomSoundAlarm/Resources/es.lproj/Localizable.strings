@@ -306,6 +306,16 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Escuchar lista";
 "play_order_footer" = "Las alarmas se repiten hasta que las detengas. El orden aleatorio cambia el siguiente orden cada vez que la detienes. Una aleatoria repite la misma pista.";
+
+// #204 settings
+"settings" = "Ajustes";
+"settings_contact" = "Informar de un problema o preguntar";
+"settings_review" = "Escribir una reseña";
+"settings_howto" = "Cómo se usa";
+"settings_privacy" = "Política de privacidad";
+"settings_version" = "Versión";
+"settings_mail_subject" = "Acerca de My Sound Alarm";
+"settings_mail_body" = "\n\n---\nApp: My Sound Alarm %@\niOS: %@\nDispositivo: %@";
 "video_source_header" = "Elegir un vídeo";
 "video_source_photo_row" = "Elegir de la fototeca";
 "video_source_file_row" = "Elegir de Archivos";
