@@ -310,3 +310,59 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Odsłuchaj playlistę";
 "play_order_footer" = "Budziki powtarzają się, dopóki ich nie zatrzymasz. Losowa kolejność zmienia następną kolejność po każdym zatrzymaniu. Jeden losowy powtarza ten sam utwór.";
+
+// #197 skip days
+"skip_one_time_warning" = "Budzik jednorazowy (%d) nie zadzwoni.";
+"skip_undo" = "Cofnij";
+"skip_apply" = "Pauza";
+"holiday_skip_toggle" = "Nie dzwoń w święta";
+"holiday_next_skipped" = "%@ bez budzika";
+"holiday_mark" = "Święto";
+"skip_alarms_intent" = "Wstrzymaj budziki";
+
+// #197 skip redesign
+"skip_all_button" = "Wstrzymaj budziki";
+"skip_all_title" = "Wstrzymaj budziki";
+"skip_all_24h" = "24 godziny";
+"skip_all_3d" = "3 dni";
+"skip_all_7d" = "7 dni";
+"skip_all_row_fmt" = "do %@ · %d razy";
+"skip_all_custom" = "Wybierz daty";
+"skip_all_active_fmt" = "Wstrzymane do %1$@ · %2$d";
+"skip_row_global_fmt" = "Wstrzymane do %@";
+"skip_row_skip_fmt" = "Wstrzymaj %@";
+"skip_row_undo" = "Anuluj wstrzymanie";
+"skip_row_summary_fmt" = "Wstrzymany %@ · następny %@";
+"skip_row_summary_no_next_fmt" = "Wstrzymany %@";
+"skip_dates_title" = "Wybierz dni przerwy";
+"skip_dates_none" = "Brak";
+"skip_dates_count_fmt" = "%d dni";
+"skip_dates_selected" = "Dni przerwy";
+"skip_dates_empty" = "Brak dni przerwy";
+"skip_dates_footer" = "Wybrane dni nie zadzwonią.";
+"skip_calendar_title" = "Wybierz daty";
+"skip_calendar_hint" = "Dotknij daty początku i końca. Do 8 tygodni naprzód.";
+"skip_calendar_range_fmt" = "%@ – %@";
+"skip_calendar_previous_month" = "Poprzedni miesiąc";
+"skip_calendar_next_month" = "Następny miesiąc";
+"holiday_others_message_fmt" = "Są jeszcze %d budziki w te same dni tygodnia.";
+"holiday_apply_to_others_fmt" = "Także dla pozostałych %d";
+"holiday_apply_only_this" = "Tylko ten budzik";
+"repeat_summary_holiday_suffix" = "bez świąt";
+"repeat_summary_skip_days_fmt" = "%d dni przerwy";
+"holiday_skip_section_title" = "Dni przerwy";
+"repeat_summary_holiday_and_days_fmt" = "bez świąt i %d dni";
+"repeat_summary_days_only_fmt" = "%d dni wyłączone";
+"skip_all_silenced_title" = "Budziki, które nie zadzwonią";
+"skip_all_more_fmt" = "jeszcze %d";
+
+// #197 result list
+"skip_result_section_title" = "Nadchodzące dni bez dzwonka";
+"skip_result_off" = "Bez dzwonka";
+"skip_result_on" = "Dzwoni";
+"skip_result_picked" = "Wybrany dzień";
+"skip_result_more" = "Pokaż więcej";
+"skip_result_remove" = "Usuń";
+"skip_result_footer" = "Pokazujemy tylko święta przypadające w dzień dzwonienia.";
+"skip_row_toast_skipped_fmt" = "%@ nie zadzwoni";
+"skip_row_toast_undone_fmt" = "%@ zadzwoni";

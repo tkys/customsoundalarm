@@ -310,3 +310,59 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Playlist anhören";
 "play_order_footer" = "Wecker wiederholen sich, bis du sie stoppst. Zufällig ändert bei jedem Stoppen die nächste Reihenfolge. Ein zufälliger Titel wiederholt denselben Titel.";
+
+// #197 skip days
+"skip_one_time_warning" = "Ein einmaliger Wecker (%d) klingelt nicht.";
+"skip_undo" = "Rückgängig";
+"skip_apply" = "Pausieren";
+"holiday_skip_toggle" = "An Feiertagen nicht klingeln";
+"holiday_next_skipped" = "%@ pausiert";
+"holiday_mark" = "Feiertag";
+"skip_alarms_intent" = "Wecker pausieren";
+
+// #197 skip redesign
+"skip_all_button" = "Wecker pausieren";
+"skip_all_title" = "Wecker pausieren";
+"skip_all_24h" = "24 Stunden";
+"skip_all_3d" = "3 Tage";
+"skip_all_7d" = "7 Tage";
+"skip_all_row_fmt" = "bis %@ · %d Mal";
+"skip_all_custom" = "Daten wählen";
+"skip_all_active_fmt" = "Pause bis %1$@ · %2$d";
+"skip_row_global_fmt" = "Pause bis %@";
+"skip_row_skip_fmt" = "Am %@ pausieren";
+"skip_row_undo" = "Pause beenden";
+"skip_row_summary_fmt" = "Pause am %@ · nächster %@";
+"skip_row_summary_no_next_fmt" = "Pause am %@";
+"skip_dates_title" = "Ruhetage wählen";
+"skip_dates_none" = "Keine";
+"skip_dates_count_fmt" = "%d Tage";
+"skip_dates_selected" = "Ruhetage";
+"skip_dates_empty" = "Keine Ruhetage";
+"skip_dates_footer" = "Gewählte Tage klingeln nicht.";
+"skip_calendar_title" = "Daten wählen";
+"skip_calendar_hint" = "Start- und Enddatum antippen. Bis zu 8 Wochen im Voraus.";
+"skip_calendar_range_fmt" = "%@ – %@";
+"skip_calendar_previous_month" = "Vorheriger Monat";
+"skip_calendar_next_month" = "Nächster Monat";
+"holiday_others_message_fmt" = "Es gibt %d weitere Wecker an denselben Wochentagen.";
+"holiday_apply_to_others_fmt" = "Auch für %d weitere";
+"holiday_apply_only_this" = "Nur dieser Wecker";
+"repeat_summary_holiday_suffix" = "Feiertage ausgenommen";
+"repeat_summary_skip_days_fmt" = "%d Tage Pause";
+"holiday_skip_section_title" = "Ruhetage";
+"repeat_summary_holiday_and_days_fmt" = "Feiertage und %d Tage ausgenommen";
+"repeat_summary_days_only_fmt" = "%d Tage ausgenommen";
+"skip_all_silenced_title" = "Wecker, die nicht klingeln";
+"skip_all_more_fmt" = "%d weitere";
+
+// #197 result list
+"skip_result_section_title" = "Kommende stille Tage";
+"skip_result_off" = "Still";
+"skip_result_on" = "Klingelt";
+"skip_result_picked" = "Gewählter Tag";
+"skip_result_more" = "Mehr anzeigen";
+"skip_result_remove" = "Entfernen";
+"skip_result_footer" = "Es werden nur Feiertage an einem klingelnden Wochentag angezeigt.";
+"skip_row_toast_skipped_fmt" = "%@ klingelt nicht";
+"skip_row_toast_undone_fmt" = "%@ klingelt";

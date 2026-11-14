@@ -72,6 +72,11 @@ enum BackupAlarmLogic {
             guard entry.repeatWeekdays.contains(weekday) else { return nil }
         }
 
+        // 休む日は寝過ごし防止も鳴らさない（#197）
+        guard !AlarmSkipLogic.isSkipped(primaryToday, entry: entry, calendar: calendar) else {
+            return nil
+        }
+
         return primaryToday.addingTimeInterval(TimeInterval(minutes * 60))
     }
 

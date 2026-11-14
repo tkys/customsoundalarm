@@ -310,3 +310,59 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "プレイリストを試聴";
 "play_order_footer" = "アラームは止めるまで繰り返します。シャッフルは止めるたびに次の順番を変えます。1曲だけランダムは、毎回選んだ1曲を繰り返します。";
+
+// #197 skip days
+"skip_one_time_warning" = "1回きりのアラーム %d本は鳴らずに終わります";
+"skip_undo" = "取り消す";
+"skip_apply" = "鳴らさない";
+"holiday_skip_toggle" = "祝日は鳴らさない";
+"holiday_next_skipped" = "%@ は鳴らさない";
+"holiday_mark" = "祝";
+"skip_alarms_intent" = "しばらく鳴らさない";
+
+// #197 skip redesign
+"skip_all_button" = "しばらく鳴らさない";
+"skip_all_title" = "しばらく鳴らさない";
+"skip_all_24h" = "24時間";
+"skip_all_3d" = "3日間";
+"skip_all_7d" = "7日間";
+"skip_all_row_fmt" = "%@ まで・%d回";
+"skip_all_custom" = "日付を選ぶ";
+"skip_all_active_fmt" = "%1$@ まで鳴らさない・%2$d本";
+"skip_row_global_fmt" = "%@ まで鳴らさない";
+"skip_row_skip_fmt" = "%@ は鳴らさない";
+"skip_row_undo" = "元に戻す";
+"skip_row_summary_fmt" = "%@ は鳴らさない・次は %@";
+"skip_row_summary_no_next_fmt" = "%@ は鳴らさない";
+"skip_dates_title" = "日付を選ぶ";
+"skip_dates_none" = "なし";
+"skip_dates_count_fmt" = "%d日";
+"skip_dates_selected" = "鳴らさない日";
+"skip_dates_empty" = "鳴らさない日はありません";
+"skip_dates_footer" = "選んだ日は鳴りません。";
+"skip_calendar_title" = "日付を選ぶ";
+"skip_calendar_hint" = "開始日と終了日をタップします。8週間先まで選べます。";
+"skip_calendar_range_fmt" = "%@ 〜 %@";
+"skip_calendar_previous_month" = "前の月";
+"skip_calendar_next_month" = "次の月";
+"holiday_others_message_fmt" = "同じ曜日のアラームがほかにも%d本あります。";
+"holiday_apply_to_others_fmt" = "ほかの%d本にも";
+"holiday_apply_only_this" = "このアラームだけ";
+"repeat_summary_holiday_suffix" = "祝日を除く";
+"repeat_summary_skip_days_fmt" = "%d日休み";
+"holiday_skip_section_title" = "鳴らさない日";
+"repeat_summary_holiday_and_days_fmt" = "祝日と%d日を除く";
+"repeat_summary_days_only_fmt" = "%d日を除く";
+"skip_all_silenced_title" = "鳴らなくなるアラーム";
+"skip_all_more_fmt" = "ほか%d本";
+
+// #197 result list
+"skip_result_section_title" = "この先、鳴らない日";
+"skip_result_off" = "鳴らない";
+"skip_result_on" = "鳴る";
+"skip_result_picked" = "選んだ日";
+"skip_result_more" = "もっと見る";
+"skip_result_remove" = "外す";
+"skip_result_footer" = "鳴る曜日に当たる祝日だけを出しています";
+"skip_row_toast_skipped_fmt" = "%@ は鳴らしません";
+"skip_row_toast_undone_fmt" = "%@ は鳴らします";

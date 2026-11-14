@@ -310,3 +310,59 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Afspeellijst beluisteren";
 "play_order_footer" = "Wekkers herhalen zich tot je ze stopt. Shuffle wijzigt bij elke stop de volgende volgorde. Eén willekeurig herhaalt steeds hetzelfde nummer.";
+
+// #197 skip days
+"skip_one_time_warning" = "Een eenmalige wekker (%d) gaat niet af.";
+"skip_undo" = "Ongedaan maken";
+"skip_apply" = "Pauzeren";
+"holiday_skip_toggle" = "Niet afgaan op feestdagen";
+"holiday_next_skipped" = "%@ geen wekker";
+"holiday_mark" = "Feestdag";
+"skip_alarms_intent" = "Wekkers pauzeren";
+
+// #197 skip redesign
+"skip_all_button" = "Wekkers pauzeren";
+"skip_all_title" = "Wekkers pauzeren";
+"skip_all_24h" = "24 uur";
+"skip_all_3d" = "3 dagen";
+"skip_all_7d" = "7 dagen";
+"skip_all_row_fmt" = "tot %@ · %d keer";
+"skip_all_custom" = "Kies datums";
+"skip_all_active_fmt" = "Gepauzeerd tot %1$@ · %2$d";
+"skip_row_global_fmt" = "Gepauzeerd tot %@";
+"skip_row_skip_fmt" = "Pauzeer op %@";
+"skip_row_undo" = "Pauze ongedaan maken";
+"skip_row_summary_fmt" = "Gepauzeerd op %@ · volgende %@";
+"skip_row_summary_no_next_fmt" = "Gepauzeerd op %@";
+"skip_dates_title" = "Kies pauzedagen";
+"skip_dates_none" = "Geen";
+"skip_dates_count_fmt" = "%d dagen";
+"skip_dates_selected" = "Pauzedagen";
+"skip_dates_empty" = "Geen pauzedagen";
+"skip_dates_footer" = "Gekozen dagen gaan niet af.";
+"skip_calendar_title" = "Kies datums";
+"skip_calendar_hint" = "Tik een begin- en einddatum aan. Tot 8 weken vooruit.";
+"skip_calendar_range_fmt" = "%@ – %@";
+"skip_calendar_previous_month" = "Vorige maand";
+"skip_calendar_next_month" = "Volgende maand";
+"holiday_others_message_fmt" = "Er zijn %d andere wekkers op dezelfde weekdagen.";
+"holiday_apply_to_others_fmt" = "Ook voor de andere %d";
+"holiday_apply_only_this" = "Alleen deze wekker";
+"repeat_summary_holiday_suffix" = "feestdagen uitgesloten";
+"repeat_summary_skip_days_fmt" = "%d dagen pauze";
+"holiday_skip_section_title" = "Pauzedagen";
+"repeat_summary_holiday_and_days_fmt" = "feestdagen en %d dagen uitgesloten";
+"repeat_summary_days_only_fmt" = "%d dagen uitgesloten";
+"skip_all_silenced_title" = "Wekkers die niet afgaan";
+"skip_all_more_fmt" = "%d meer";
+
+// #197 result list
+"skip_result_section_title" = "Komende stille dagen";
+"skip_result_off" = "Stil";
+"skip_result_on" = "Gaat af";
+"skip_result_picked" = "Gekozen dag";
+"skip_result_more" = "Meer tonen";
+"skip_result_remove" = "Verwijderen";
+"skip_result_footer" = "Alleen feestdagen op een dag dat de wekker afgaat worden getoond.";
+"skip_row_toast_skipped_fmt" = "%@ gaat niet af";
+"skip_row_toast_undone_fmt" = "%@ gaat af";
