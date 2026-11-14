@@ -317,9 +317,6 @@
 "skip_apply" = "Pauzeren";
 "holiday_skip_toggle" = "Niet afgaan op feestdagen";
 "holiday_next_skipped" = "%@ geen wekker";
-"holiday_none" = "Geen komende feestdagen";
-"holiday_overrides_title" = "Feestdagen";
-"holiday_ring_on" = "Wel afgaan op deze feestdag";
 "holiday_mark" = "Feestdag";
 "skip_alarms_intent" = "Wekkers pauzeren";
 
@@ -358,3 +355,11 @@
 "repeat_summary_days_only_fmt" = "%d dagen uitgesloten";
 "skip_all_silenced_title" = "Wekkers die niet afgaan";
 "skip_all_more_fmt" = "%d meer";
+
+// #197 result list
+"skip_result_section_title" = "Komende stille dagen";
+"skip_result_off" = "Stil";
+"skip_result_on" = "Gaat af";
+"skip_result_picked" = "Gekozen dag";
+"skip_result_more" = "Meer tonen";
+"skip_result_remove" = "Verwijderen";

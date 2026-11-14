@@ -317,9 +317,6 @@
 "skip_apply" = "Pausar";
 "holiday_skip_toggle" = "Não tocar em feriados";
 "holiday_next_skipped" = "%@ sem alarme";
-"holiday_none" = "Nenhum feriado próximo";
-"holiday_overrides_title" = "Feriados";
-"holiday_ring_on" = "Tocar neste feriado";
 "holiday_mark" = "Feriado";
 "skip_alarms_intent" = "Pausar alarmes";
 
@@ -358,3 +355,11 @@
 "repeat_summary_days_only_fmt" = "%d dias excluídos";
 "skip_all_silenced_title" = "Alarmes que não vão tocar";
 "skip_all_more_fmt" = "mais %d";
+
+// #197 result list
+"skip_result_section_title" = "Próximos dias sem tocar";
+"skip_result_off" = "Sem tocar";
+"skip_result_on" = "Toca";
+"skip_result_picked" = "Dia escolhido";
+"skip_result_more" = "Ver mais";
+"skip_result_remove" = "Remover";

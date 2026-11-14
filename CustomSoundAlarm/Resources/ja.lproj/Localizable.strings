@@ -317,9 +317,6 @@
 "skip_apply" = "鳴らさない";
 "holiday_skip_toggle" = "祝日は鳴らさない";
 "holiday_next_skipped" = "%@ は鳴らさない";
-"holiday_none" = "次の祝日はありません";
-"holiday_overrides_title" = "鳴らす祝日を選ぶ";
-"holiday_ring_on" = "この祝日は鳴らす";
 "holiday_mark" = "祝";
 "skip_alarms_intent" = "しばらく鳴らさない";
 
@@ -358,3 +355,11 @@
 "repeat_summary_days_only_fmt" = "%d日を除く";
 "skip_all_silenced_title" = "鳴らなくなるアラーム";
 "skip_all_more_fmt" = "ほか%d本";
+
+// #197 result list
+"skip_result_section_title" = "この先、鳴らない日";
+"skip_result_off" = "鳴らない";
+"skip_result_on" = "鳴る";
+"skip_result_picked" = "選んだ日";
+"skip_result_more" = "もっと見る";
+"skip_result_remove" = "外す";

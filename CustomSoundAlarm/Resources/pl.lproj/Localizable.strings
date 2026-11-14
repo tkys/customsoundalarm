@@ -317,9 +317,6 @@
 "skip_apply" = "Pauza";
 "holiday_skip_toggle" = "Nie dzwoń w święta";
 "holiday_next_skipped" = "%@ bez budzika";
-"holiday_none" = "Brak nadchodzących świąt";
-"holiday_overrides_title" = "Święta";
-"holiday_ring_on" = "Dzwoń w to święto";
 "holiday_mark" = "Święto";
 "skip_alarms_intent" = "Wstrzymaj budziki";
 
@@ -358,3 +355,11 @@
 "repeat_summary_days_only_fmt" = "%d dni wyłączone";
 "skip_all_silenced_title" = "Budziki, które nie zadzwonią";
 "skip_all_more_fmt" = "jeszcze %d";
+
+// #197 result list
+"skip_result_section_title" = "Nadchodzące dni bez dzwonka";
+"skip_result_off" = "Bez dzwonka";
+"skip_result_on" = "Dzwoni";
+"skip_result_picked" = "Wybrany dzień";
+"skip_result_more" = "Pokaż więcej";
+"skip_result_remove" = "Usuń";

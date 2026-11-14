@@ -1068,8 +1068,8 @@ struct RepeatSelectionView: View {
 
     @State private var alarmStore = AlarmStore.shared
     @State private var scheduler = AlarmScheduler.shared
-    @State private var showingHolidayOverrides = false
     @State private var showingSkipDates = false
+    @State private var showingAllResults = false
     @State private var holidayOthersOffer: [UUID] = []
     @State private var showingHolidayOthersOffer = false
 
@@ -1106,20 +1106,35 @@ struct RepeatSelectionView: View {
                 Section {
                     if AlarmSkipLogic.isJapanRegion() {
                         holidayToggle
-                        if skipsHolidays {
-                            holidayDetails
-                        }
                     }
                     skipDatesRow
-                    if !skipDates.isEmpty {
-                        Text(selectedSkipDatesText)
-                            .font(.footnote)
-                            .foregroundStyle(Color.textSecondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .accessibilityIdentifier("addAlarm.skipDates.list")
-                    }
                 } header: {
                     Text("holiday_skip_section_title")
+                }
+
+                if !resultSections.isEmpty {
+                    Section {
+                        ForEach(resultSections) { yearSection in
+                            if yearSection.year != currentYear {
+                                Text(AlarmSkipFormat.year(yearSection.year))
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(Color.textSecondary)
+                                    .accessibilityAddTraits(.isHeader)
+                            }
+                            ForEach(yearSection.days) { day in
+                                resultRow(day)
+                            }
+                        }
+                        if hasMoreResults {
+                            Button("skip_result_more") {
+                                showingAllResults = true
+                            }
+                            .accessibilityIdentifier("skipResult.more")
+                        }
+                    } header: {
+                        Text("skip_result_section_title")
+                            .accessibilityIdentifier("skipResult.sectionTitle")
+                    }
                 }
             }
         }
@@ -1161,48 +1176,6 @@ struct RepeatSelectionView: View {
                 format: String(localized: "holiday_others_message_fmt"),
                 holidayOthersOffer.count
             ))
-        }
-    }
-
-    @ViewBuilder
-    private var holidayDetails: some View {
-        if let holiday = nextHolidayPreview {
-            Text(String(
-                format: String(localized: "holiday_next_skipped"),
-                AlarmSkipFormat.holiday(holiday)
-            ))
-            .font(.footnote)
-            .foregroundStyle(Color.textSecondary)
-        } else {
-            Text("holiday_none")
-                .font(.footnote)
-                .foregroundStyle(Color.textSecondary)
-        }
-        Button("holiday_overrides_title") {
-            showingHolidayOverrides = true
-        }
-        .accessibilityIdentifier("addAlarm.holidayOverrides")
-        .sheet(isPresented: $showingHolidayOverrides) {
-            HolidayOverrideSheet(
-                holidays: holidayCandidates,
-                overrides: $holidayRingOverrides
-            )
-        }
-    }
-
-    private var nextHolidayPreview: JapaneseHoliday? {
-        AlarmSkipLogic.nextSkippedHoliday(
-            forWeekdays: Array(selectedDays).sorted(),
-            overrides: holidayRingOverrides,
-            after: Date()
-        )
-    }
-
-    private var holidayCandidates: [JapaneseHoliday] {
-        let calendar = Calendar.current
-        return JapaneseHolidays.upcoming(from: Date(), days: 400).filter { holiday in
-            guard let date = AlarmSkipLogic.date(fromKey: holiday.dateKey) else { return false }
-            return selectedDays.contains(calendar.component(.weekday, from: date))
         }
     }
 
@@ -1249,10 +1222,85 @@ struct RepeatSelectionView: View {
             : String(format: String(localized: "skip_dates_count_fmt"), skipDates.count)
     }
 
-    private var selectedSkipDatesText: String {
-        skipDates.sorted().compactMap { key -> String? in
-            AlarmSkipLogic.date(fromKey: key).map { AlarmSkipFormat.day($0) }
-        }.joined(separator: "・")
+    // MARK: - Result list (#197 実機レビュー)
+
+    private var currentYear: Int {
+        Calendar.current.component(.year, from: Date())
+    }
+
+    private var resultSections: [SkipResultYear] {
+        resultSections(horizonDays: showingAllResults
+            ? SkipResultLogic.extendedDays
+            : SkipResultLogic.initialDays)
+    }
+
+    private var hasMoreResults: Bool {
+        guard !showingAllResults else { return false }
+        let initial = resultSections(horizonDays: SkipResultLogic.initialDays)
+            .reduce(0) { $0 + $1.days.count }
+        let extended = resultSections(horizonDays: SkipResultLogic.extendedDays)
+            .reduce(0) { $0 + $1.days.count }
+        return extended > initial
+    }
+
+    private func resultSections(horizonDays: Int) -> [SkipResultYear] {
+        SkipResultLogic.sections(
+            weekdays: selectedDays,
+            skipsHolidays: skipsHolidays,
+            skipDates: skipDates,
+            holidayRingOverrides: holidayRingOverrides,
+            isJapan: AlarmSkipLogic.isJapanRegion(),
+            now: Date(),
+            horizonDays: horizonDays
+        )
+    }
+
+    @ViewBuilder
+    private func resultRow(_ day: SkipResultDay) -> some View {
+        switch day.kind {
+        case .holiday(let name):
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Text("\(AlarmSkipFormat.day(day.date, includeYear: false)) \(name)")
+                Spacer(minLength: 8)
+                Button {
+                    toggleHoliday(day.dateKey)
+                } label: {
+                    resultStatus(day.isSkipped)
+                }
+                .buttonStyle(.borderless)
+                .accessibilityIdentifier("skipResult.toggle.\(day.dateKey)")
+            }
+        case .picked:
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Text("\(AlarmSkipFormat.day(day.date, includeYear: false)) \(String(localized: "skip_result_picked"))")
+                Spacer(minLength: 8)
+                resultStatus(true)
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier("skipResult.picked.\(day.dateKey)")
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                Button(role: .destructive) {
+                    skipDates.remove(day.dateKey)
+                } label: {
+                    Text("skip_result_remove")
+                }
+                .accessibilityIdentifier("skipResult.remove.\(day.dateKey)")
+            }
+        }
+    }
+
+    private func resultStatus(_ skipped: Bool) -> some View {
+        Text(skipped ? "skip_result_off" : "skip_result_on")
+            .foregroundStyle(skipped ? Color.textSecondary : Brand.orange)
+    }
+
+    private func toggleHoliday(_ dateKey: String) {
+        if holidayRingOverrides.contains(dateKey) {
+            holidayRingOverrides.remove(dateKey)
+        } else {
+            holidayRingOverrides.insert(dateKey)
+        }
+        AnalyticsService.shared.capture(.holidayRingOverride)
     }
 }
 

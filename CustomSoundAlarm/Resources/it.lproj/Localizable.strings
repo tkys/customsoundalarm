@@ -317,9 +317,6 @@
 "skip_apply" = "Metti in pausa";
 "holiday_skip_toggle" = "Non suonare nei giorni festivi";
 "holiday_next_skipped" = "%@ senza sveglia";
-"holiday_none" = "Nessun giorno festivo in arrivo";
-"holiday_overrides_title" = "Giorni festivi";
-"holiday_ring_on" = "Suona in questo giorno festivo";
 "holiday_mark" = "Festivo";
 "skip_alarms_intent" = "Metti in pausa le sveglie";
 
@@ -358,3 +355,11 @@
 "repeat_summary_days_only_fmt" = "%d giorni esclusi";
 "skip_all_silenced_title" = "Sveglie che non suoneranno";
 "skip_all_more_fmt" = "altre %d";
+
+// #197 result list
+"skip_result_section_title" = "Prossimi giorni senza suoneria";
+"skip_result_off" = "Senza suoneria";
+"skip_result_on" = "Suona";
+"skip_result_picked" = "Giorno scelto";
+"skip_result_more" = "Mostra altro";
+"skip_result_remove" = "Rimuovi";

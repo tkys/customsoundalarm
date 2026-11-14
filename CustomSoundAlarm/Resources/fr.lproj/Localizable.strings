@@ -317,9 +317,6 @@
 "skip_apply" = "Mettre en pause";
 "holiday_skip_toggle" = "Ne pas sonner les jours fériés";
 "holiday_next_skipped" = "%@ : pas d’alarme";
-"holiday_none" = "Aucun jour férié à venir";
-"holiday_overrides_title" = "Jours fériés";
-"holiday_ring_on" = "Sonner ce jour férié";
 "holiday_mark" = "Férié";
 "skip_alarms_intent" = "Mettre les alarmes en pause";
 
@@ -358,3 +355,11 @@
 "repeat_summary_days_only_fmt" = "%d jours exclus";
 "skip_all_silenced_title" = "Alarmes qui ne sonneront pas";
 "skip_all_more_fmt" = "%d de plus";
+
+// #197 result list
+"skip_result_section_title" = "Jours sans sonnerie à venir";
+"skip_result_off" = "Sans sonnerie";
+"skip_result_on" = "Sonne";
+"skip_result_picked" = "Jour choisi";
+"skip_result_more" = "Voir plus";
+"skip_result_remove" = "Retirer";

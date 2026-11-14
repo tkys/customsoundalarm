@@ -171,3 +171,97 @@ enum RepeatSummaryLogic {
         return parts.joined(separator: "・")
     }
 }
+
+// MARK: - 「この先、鳴らない日」の結果リスト（#197 実機レビュー）
+
+struct SkipResultDay: Identifiable, Equatable, Sendable {
+    enum Kind: Equatable, Sendable {
+        case holiday(name: String)
+        case picked
+    }
+
+    let dateKey: String
+    let date: Date
+    let kind: Kind
+    let isSkipped: Bool
+
+    var id: String { dateKey }
+}
+
+struct SkipResultYear: Identifiable, Equatable, Sendable {
+    let year: Int
+    let days: [SkipResultDay]
+
+    var id: Int { year }
+}
+
+/// 祝日と選んだ日を日付順に1つにまとめる。
+///
+/// 同じ日は「選んだ日」を優先し、必ず鳴らない扱いにする。
+enum SkipResultLogic {
+    static let initialDays = 56
+    static let extendedDays = 365
+
+    static func sections(
+        weekdays: Set<Int>,
+        skipsHolidays: Bool,
+        skipDates: Set<String>,
+        holidayRingOverrides: Set<String>,
+        isJapan: Bool = true,
+        now: Date = Date(),
+        horizonDays: Int = initialDays,
+        holidays: [JapaneseHoliday] = JapaneseHolidays.all,
+        calendar: Calendar = .current
+    ) -> [SkipResultYear] {
+        guard !weekdays.isEmpty else { return [] }
+        let today = calendar.startOfDay(for: now)
+        let end = calendar.date(byAdding: .day, value: horizonDays, to: today) ?? today
+        let todayKey = AlarmSkipLogic.dateKey(today, calendar: calendar)
+        let endKey = AlarmSkipLogic.dateKey(end, calendar: calendar)
+
+        var byKey: [String: SkipResultDay] = [:]
+
+        if isJapan, skipsHolidays {
+            for holiday in holidays {
+                guard holiday.dateKey >= todayKey,
+                      holiday.dateKey <= endKey,
+                      let date = AlarmSkipLogic.date(
+                          fromKey: holiday.dateKey,
+                          calendar: calendar
+                      ),
+                      weekdays.contains(calendar.component(.weekday, from: date))
+                else { continue }
+                byKey[holiday.dateKey] = SkipResultDay(
+                    dateKey: holiday.dateKey,
+                    date: date,
+                    kind: .holiday(name: holiday.name),
+                    isSkipped: !holidayRingOverrides.contains(holiday.dateKey)
+                )
+            }
+        }
+
+        for key in skipDates where key >= todayKey && key <= endKey {
+            guard let date = AlarmSkipLogic.date(fromKey: key, calendar: calendar),
+                  weekdays.contains(calendar.component(.weekday, from: date))
+            else { continue }
+            // 同じ日が祝日でも、選んだ日を優先して1行にまとめる。
+            byKey[key] = SkipResultDay(
+                dateKey: key,
+                date: date,
+                kind: .picked,
+                isSkipped: true
+            )
+        }
+
+        let days = byKey.values.sorted { $0.date < $1.date }
+        let byYear = Dictionary(grouping: days) {
+            calendar.component(.year, from: $0.date)
+        }
+        return byYear.keys.sorted().map { year in
+            SkipResultYear(
+                year: year,
+                days: byYear[year]!.sorted { $0.date < $1.date }
+            )
+        }
+    }
+}

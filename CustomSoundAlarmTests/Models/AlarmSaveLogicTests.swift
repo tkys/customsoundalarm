@@ -243,3 +243,140 @@ struct RepeatSummaryLogicTests {
         ) == "毎日・祝日と2日を除く")
     }
 }
+
+/// 「この先、鳴らない日」の結果リスト（#197 実機レビュー）。
+struct SkipResultLogicTests {
+
+    private var calendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Asia/Tokyo")!
+        calendar.locale = Locale(identifier: "ja_JP")
+        return calendar
+    }
+
+    private func date(_ year: Int, _ month: Int, _ day: Int) -> Date {
+        calendar.date(from: DateComponents(
+            year: year, month: month, day: day
+        ))!
+    }
+
+    private let holidays = [
+        JapaneseHoliday(dateKey: "2026-11-23", name: "勤労感謝の日"),
+        JapaneseHoliday(dateKey: "2027-01-01", name: "元日"),
+        JapaneseHoliday(dateKey: "2027-01-11", name: "成人の日"),
+    ]
+
+    private func sections(
+        now: Date,
+        skipsHolidays: Bool = true,
+        skipDates: Set<String> = [],
+        overrides: Set<String> = [],
+        isJapan: Bool = true,
+        horizonDays: Int = SkipResultLogic.initialDays
+    ) -> [SkipResultYear] {
+        SkipResultLogic.sections(
+            weekdays: [1, 2, 3, 4, 5, 6, 7],
+            skipsHolidays: skipsHolidays,
+            skipDates: skipDates,
+            holidayRingOverrides: overrides,
+            isJapan: isJapan,
+            now: now,
+            horizonDays: horizonDays,
+            holidays: holidays,
+            calendar: calendar
+        )
+    }
+
+    @Test
+    func sameDayPickedWinsOverHoliday() throws {
+        let result = sections(
+            now: date(2026, 11, 14),
+            skipDates: ["2026-11-23"]
+        )
+        let days = result.flatMap(\.days)
+        let sameDay = days.filter { $0.dateKey == "2026-11-23" }
+        #expect(sameDay.count == 1)
+        let day = try #require(sameDay.first)
+        #expect(day.kind == .picked)
+        #expect(day.isSkipped)
+    }
+
+    @Test
+    func holidayOverrideRings() throws {
+        let result = sections(
+            now: date(2026, 11, 14),
+            overrides: ["2026-11-23"]
+        )
+        let day = try #require(
+            result.flatMap(\.days).first { $0.dateKey == "2026-11-23" }
+        )
+        #expect(day.kind == .holiday(name: "勤労感謝の日"))
+        #expect(!day.isSkipped)
+    }
+
+    @Test
+    func holidayOffShowsOnlyPickedDays() {
+        let result = sections(
+            now: date(2026, 11, 14),
+            skipsHolidays: false,
+            skipDates: ["2026-11-23"],
+            horizonDays: SkipResultLogic.extendedDays
+        )
+        let days = result.flatMap(\.days)
+        #expect(days.count == 1)
+        #expect(days.first?.kind == .picked)
+        #expect(days.first?.dateKey == "2026-11-23")
+    }
+
+    @Test
+    func horizonStartsAtEightWeeksAndExtendsToOneYear() {
+        // 2026-11-14 の56日後は 2027-01-09。1/11 は8週間の外、1年の中。
+        let now = date(2026, 11, 14)
+        let initial = sections(now: now, horizonDays: SkipResultLogic.initialDays)
+        let extended = sections(now: now, horizonDays: SkipResultLogic.extendedDays)
+        #expect(!initial.flatMap(\.days).contains { $0.dateKey == "2027-01-11" })
+        #expect(extended.flatMap(\.days).contains { $0.dateKey == "2027-01-11" })
+    }
+
+    @Test
+    func sectionsAreSortedByYearAndDate() {
+        let result = sections(
+            now: date(2026, 11, 14),
+            horizonDays: SkipResultLogic.extendedDays
+        )
+        #expect(result.map(\.year) == [2026, 2027])
+        let days = result.flatMap(\.days)
+        #expect(days.map(\.date) == days.map(\.date).sorted())
+        #expect(days.first?.dateKey == "2026-11-23")
+        #expect(days.last?.dateKey == "2027-01-11")
+    }
+
+    @Test
+    func nonJapanHasNoHolidayRows() {
+        let result = sections(
+            now: date(2026, 11, 14),
+            skipDates: ["2026-11-23"],
+            isJapan: false
+        )
+        let days = result.flatMap(\.days)
+        #expect(days.count == 1)
+        #expect(days.first?.kind == .picked)
+    }
+
+    @Test
+    func holidayOnAnUnselectedWeekdayIsExcluded() {
+        // 水曜だけ選ぶと、月曜・金曜の祝日は出ない。
+        let result = SkipResultLogic.sections(
+            weekdays: [4],
+            skipsHolidays: true,
+            skipDates: [],
+            holidayRingOverrides: [],
+            isJapan: true,
+            now: date(2026, 11, 14),
+            horizonDays: SkipResultLogic.extendedDays,
+            holidays: holidays,
+            calendar: calendar
+        )
+        #expect(result.isEmpty)
+    }
+}

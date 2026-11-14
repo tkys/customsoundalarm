@@ -238,4 +238,64 @@ final class AlarmSkipUITests: XCTestCase {
             "repeat screen should open: \(app.debugDescription)"
         )
     }
+
+    func testRepeatResultListTogglesHolidayAndRemovesPickedDate() {
+        let app = launchJapaneseSeed()
+        openFirstAlarmRepeatScreen(app)
+
+        // 先に日付を選ぶ（結果リストに「選んだ日」を出す）。
+        let skipDates = app.buttons["addAlarm.skipDates"]
+        XCTAssertTrue(skipDates.waitForExistence(timeout: 10))
+        skipDates.tap()
+        let today = app.buttons.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "今日")
+        ).firstMatch
+        XCTAssertTrue(today.waitForExistence(timeout: 10))
+        today.tap()
+        app.buttons["skipDates.close"].tap()
+
+        // 祝日をオンにする。
+        let holiday = app.switches["addAlarm.holidaySkip"]
+        scrollTo(holiday, app: app)
+        holiday.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+        let onlyThis = app.buttons["このアラームだけ"]
+        if onlyThis.waitForExistence(timeout: 10) {
+            onlyThis.tap()
+        }
+
+        // 選んだ日の行を左スワイプで外す。
+        let picked = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "skipResult.picked.")
+        ).firstMatch
+        scrollTo(picked, app: app)
+        XCTAssertTrue(picked.waitForExistence(timeout: 10))
+        picked.swipeLeft()
+        let remove = app.buttons.matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "skipResult.remove.")
+        ).firstMatch
+        XCTAssertTrue(remove.waitForExistence(timeout: 10))
+        remove.tap()
+        XCTAssertFalse(
+            picked.waitForExistence(timeout: 5),
+            "picked date should be removed from the result list"
+        )
+
+        // 祝日行の右端をタップして「鳴る」に変える。
+        let status = app.buttons.matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "skipResult.toggle.")
+        ).firstMatch
+        scrollTo(status, app: app)
+        XCTAssertTrue(status.waitForExistence(timeout: 10))
+        XCTAssertEqual(status.label, "鳴らない")
+        status.tap()
+        XCTAssertEqual(status.label, "鳴る")
+    }
+
+    private func scrollTo(_ element: XCUIElement, app: XCUIApplication) {
+        var swipes = 0
+        while (!element.exists || !element.isHittable) && swipes < 14 {
+            app.swipeUp()
+            swipes += 1
+        }
+    }
 }

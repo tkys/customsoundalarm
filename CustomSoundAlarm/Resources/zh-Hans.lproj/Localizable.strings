@@ -317,9 +317,6 @@
 "skip_apply" = "休息";
 "holiday_skip_toggle" = "节假日不响";
 "holiday_next_skipped" = "%@ 休息";
-"holiday_none" = "近期没有节假日";
-"holiday_overrides_title" = "节假日";
-"holiday_ring_on" = "这个节假日也响";
 "holiday_mark" = "节假日";
 "skip_alarms_intent" = "让闹钟休息";
 
@@ -358,3 +355,11 @@
 "repeat_summary_days_only_fmt" = "不含%d天";
 "skip_all_silenced_title" = "不会响的闹钟";
 "skip_all_more_fmt" = "还有%d个";
+
+// #197 result list
+"skip_result_section_title" = "接下来的静音日";
+"skip_result_off" = "不响";
+"skip_result_on" = "会响";
+"skip_result_picked" = "选择的日期";
+"skip_result_more" = "查看更多";
+"skip_result_remove" = "移除";

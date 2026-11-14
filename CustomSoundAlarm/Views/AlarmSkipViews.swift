@@ -119,14 +119,16 @@ enum AlarmSkipFormat {
     static func day(
         _ date: Date,
         locale: Locale = .current,
-        now: Date = Date()
+        now: Date = Date(),
+        includeYear: Bool = true
     ) -> String {
         let calendar = Calendar.current
         let sameYear = calendar.component(.year, from: date)
             == calendar.component(.year, from: now)
+        let template = includeYear && !sameYear ? "yMd" : "Md"
         let dateFormatter = DateFormatter()
         dateFormatter.locale = locale
-        dateFormatter.setLocalizedDateFormatFromTemplate(sameYear ? "Md" : "yMd")
+        dateFormatter.setLocalizedDateFormatFromTemplate(template)
         let datePart = dateFormatter.string(from: date)
 
         let weekdayFormatter = DateFormatter()
@@ -825,72 +827,5 @@ struct AlarmSkipDatesSheet: View {
             keys.insert(AlarmSkipLogic.dateKey(date, calendar: calendar))
         }
         return keys
-    }
-}
-
-// MARK: - 祝日
-
-/// 「この祝日は鳴らす」の一覧（#197）。
-struct HolidayOverrideSheet: View {
-    let holidays: [JapaneseHoliday]
-    @Binding var overrides: Set<String>
-
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            List {
-                ForEach(Array(groupedHolidays.enumerated()), id: \.offset) { index, group in
-                    Section {
-                        ForEach(group.holidays) { holiday in
-                            Toggle(isOn: Binding(
-                                get: { overrides.contains(holiday.dateKey) },
-                                set: { ring in
-                                    if ring {
-                                        overrides.insert(holiday.dateKey)
-                                    } else {
-                                        overrides.remove(holiday.dateKey)
-                                    }
-                                    AnalyticsService.shared.capture(.holidayRingOverride)
-                                }
-                            )) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(AlarmSkipFormat.holiday(holiday))
-                                    Text(holiday.name)
-                                        .font(.footnote)
-                                        .foregroundStyle(Color.textSecondary)
-                                }
-                            }
-                            .accessibilityIdentifier("holiday.override.\(holiday.dateKey)")
-                        }
-                    } header: {
-                        Text(AlarmSkipFormat.year(group.year))
-                    } footer: {
-                        if index == groupedHolidays.count - 1 {
-                            Text("holiday_ring_on")
-                        }
-                    }
-                }
-            }
-            .navigationTitle(String(localized: "holiday_overrides_title"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("close") { dismiss() }
-                }
-            }
-        }
-    }
-
-    private var groupedHolidays: [(year: Int, holidays: [JapaneseHoliday])] {
-        let calendar = Calendar.current
-        var byYear: [Int: [JapaneseHoliday]] = [:]
-        for holiday in holidays {
-            guard let date = AlarmSkipLogic.date(fromKey: holiday.dateKey) else { continue }
-            byYear[calendar.component(.year, from: date), default: []].append(holiday)
-        }
-        return byYear.keys.sorted().map { year in
-            (year, byYear[year]!.sorted { $0.dateKey < $1.dateKey })
-        }
     }
 }

@@ -317,9 +317,6 @@
 "skip_apply" = "Skip";
 "holiday_skip_toggle" = "Don't ring on holidays";
 "holiday_next_skipped" = "%@ is skipped";
-"holiday_none" = "No upcoming holidays";
-"holiday_overrides_title" = "Holidays";
-"holiday_ring_on" = "Ring on this holiday";
 "holiday_mark" = "Holiday";
 "skip_alarms_intent" = "Skip alarms";
 
@@ -358,3 +355,11 @@
 "repeat_summary_days_only_fmt" = "%d days excluded";
 "skip_all_silenced_title" = "Alarms that won't ring";
 "skip_all_more_fmt" = "%d more";
+
+// #197 result list
+"skip_result_section_title" = "Upcoming silent days";
+"skip_result_off" = "Silent";
+"skip_result_on" = "Rings";
+"skip_result_picked" = "Chosen day";
+"skip_result_more" = "Show more";
+"skip_result_remove" = "Remove";

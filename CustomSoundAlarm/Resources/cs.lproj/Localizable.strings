@@ -317,9 +317,6 @@
 "skip_apply" = "Pozastavit";
 "holiday_skip_toggle" = "Nezvonit o svátcích";
 "holiday_next_skipped" = "%@ bez budíku";
-"holiday_none" = "Žádné nadcházející svátky";
-"holiday_overrides_title" = "Svátky";
-"holiday_ring_on" = "Zvonit o tomto svátku";
 "holiday_mark" = "Svátky";
 "skip_alarms_intent" = "Pozastavit budíky";
 
@@ -358,3 +355,11 @@
 "repeat_summary_days_only_fmt" = "%d dní vyloučeno";
 "skip_all_silenced_title" = "Budíky, které nezazvoní";
 "skip_all_more_fmt" = "další %d";
+
+// #197 result list
+"skip_result_section_title" = "Nadcházející dny bez zvonění";
+"skip_result_off" = "Bez zvonění";
+"skip_result_on" = "Zvoní";
+"skip_result_picked" = "Vybraný den";
+"skip_result_more" = "Zobrazit více";
+"skip_result_remove" = "Odebrat";

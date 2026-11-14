@@ -317,9 +317,6 @@
 "skip_apply" = "Pausieren";
 "holiday_skip_toggle" = "An Feiertagen nicht klingeln";
 "holiday_next_skipped" = "%@ pausiert";
-"holiday_none" = "Keine kommenden Feiertage";
-"holiday_overrides_title" = "Feiertage";
-"holiday_ring_on" = "An diesem Feiertag klingeln";
 "holiday_mark" = "Feiertag";
 "skip_alarms_intent" = "Wecker pausieren";
 
@@ -358,3 +355,11 @@
 "repeat_summary_days_only_fmt" = "%d Tage ausgenommen";
 "skip_all_silenced_title" = "Wecker, die nicht klingeln";
 "skip_all_more_fmt" = "%d weitere";
+
+// #197 result list
+"skip_result_section_title" = "Kommende stille Tage";
+"skip_result_off" = "Still";
+"skip_result_on" = "Klingelt";
+"skip_result_picked" = "Gewählter Tag";
+"skip_result_more" = "Mehr anzeigen";
+"skip_result_remove" = "Entfernen";

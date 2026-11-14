@@ -317,9 +317,6 @@
 "skip_apply" = "راحة";
 "holiday_skip_toggle" = "لا يرن في العطلات";
 "holiday_next_skipped" = "%@ بلا منبه";
-"holiday_none" = "لا توجد عطلات قادمة";
-"holiday_overrides_title" = "العطلات";
-"holiday_ring_on" = "يرن في هذه العطلة";
 "holiday_mark" = "عطلة";
 "skip_alarms_intent" = "إراحة المنبهات";
 
@@ -358,3 +355,11 @@
 "repeat_summary_days_only_fmt" = "بدون %d أيام";
 "skip_all_silenced_title" = "المنبهات التي لن ترن";
 "skip_all_more_fmt" = "%d أخرى";
+
+// #197 result list
+"skip_result_section_title" = "الأيام القادمة بدون رنين";
+"skip_result_off" = "بدون رنين";
+"skip_result_on" = "يرن";
+"skip_result_picked" = "اليوم المختار";
+"skip_result_more" = "عرض المزيد";
+"skip_result_remove" = "إزالة";

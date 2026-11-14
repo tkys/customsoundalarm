@@ -317,9 +317,6 @@
 "skip_apply" = "쉬기";
 "holiday_skip_toggle" = "공휴일에는 울리지 않기";
 "holiday_next_skipped" = "%@은(는) 쉬는 날";
-"holiday_none" = "다가오는 공휴일이 없습니다";
-"holiday_overrides_title" = "공휴일";
-"holiday_ring_on" = "이 공휴일에는 울리기";
 "holiday_mark" = "공휴일";
 "skip_alarms_intent" = "알람 쉬기";
 
@@ -358,3 +355,11 @@
 "repeat_summary_days_only_fmt" = "%d일 제외";
 "skip_all_silenced_title" = "울리지 않는 알람";
 "skip_all_more_fmt" = "외 %d개";
+
+// #197 result list
+"skip_result_section_title" = "앞으로 울리지 않는 날";
+"skip_result_off" = "울리지 않음";
+"skip_result_on" = "울림";
+"skip_result_picked" = "선택한 날";
+"skip_result_more" = "더 보기";
+"skip_result_remove" = "빼기";

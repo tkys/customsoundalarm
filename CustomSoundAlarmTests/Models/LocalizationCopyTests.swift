@@ -188,7 +188,12 @@ struct LocalizationCopyTests {
         #expect(strings["skip_dates_title"] == "日付を選ぶ")
         #expect(strings["skip_dates_selected"] == "鳴らさない日")
         #expect(strings["skip_dates_empty"] == "鳴らさない日はありません")
-        #expect(strings["holiday_overrides_title"] == "鳴らす祝日を選ぶ")
+        #expect(strings["skip_result_section_title"] == "この先、鳴らない日")
+        #expect(strings["skip_result_off"] == "鳴らない")
+        #expect(strings["skip_result_on"] == "鳴る")
+        #expect(strings["skip_result_picked"] == "選んだ日")
+        #expect(strings["skip_result_more"] == "もっと見る")
+        #expect(strings["skip_result_remove"] == "外す")
         #expect(strings["repeat_summary_holiday_and_days_fmt"] == "祝日と%d日を除く")
         #expect(strings["repeat_summary_days_only_fmt"] == "%d日を除く")
     }
