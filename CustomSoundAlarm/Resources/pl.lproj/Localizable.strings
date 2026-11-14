@@ -79,7 +79,6 @@
 /* VideoTrimView */
 "add_from_video_title" = "Dodaj dźwięk z wideo";
 "loading" = "Wczytywanie…";
-"select_video" = "Wybierz wideo";
 "preview" = "Podgląd";
 "selected_duration" = "Zaznaczono: %@";
 "stop" = "Zatrzymaj";
@@ -171,9 +170,6 @@
 "no_video" = "Brak wideo";
 
 /* Video Import Source */
-"video_source_title" = "Wybierz źródło wideo";
-"video_source_photo" = "Biblioteka zdjęć";
-"video_source_file" = "Pliki";
 "error_file_access_denied" = "Odmówiono dostępu do pliku.";
 "error_file_copy_failed" = "Nie udało się skopiować pliku.";
 "error_unsupported_video_format" = "Nieobsługiwany format wideo.";
@@ -310,6 +306,9 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Odsłuchaj playlistę";
 "play_order_footer" = "Budziki powtarzają się, dopóki ich nie zatrzymasz. Losowa kolejność zmienia następną kolejność po każdym zatrzymaniu. Jeden losowy powtarza ten sam utwór.";
+"video_source_header" = "Wybierz film";
+"video_source_photo_row" = "Wybierz z biblioteki zdjęć";
+"video_source_file_row" = "Wybierz z Plików";
 
 // #197 skip days
 "skip_one_time_warning" = "Budzik jednorazowy (%d) nie zadzwoni.";

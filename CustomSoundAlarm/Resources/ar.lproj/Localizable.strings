@@ -79,7 +79,6 @@
 /* VideoTrimView */
 "add_from_video_title" = "إضافة صوت من فيديو";
 "loading" = "جارٍ التحميل…";
-"select_video" = "اختر فيديو";
 "preview" = "معاينة";
 "selected_duration" = "المحدد: %@";
 "stop" = "إيقاف";
@@ -171,9 +170,6 @@
 "no_video" = "لا يوجد فيديو";
 
 /* Video Import Source */
-"video_source_title" = "اختيار مصدر الفيديو";
-"video_source_photo" = "مكتبة الصور";
-"video_source_file" = "الملفات";
 "error_file_access_denied" = "تم رفض الوصول إلى الملف.";
 "error_file_copy_failed" = "تعذّر نسخ الملف.";
 "error_unsupported_video_format" = "تنسيق فيديو غير مدعوم.";
@@ -310,6 +306,9 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "معاينة قائمة التشغيل";
 "play_order_footer" = "تتكرر المنبهات حتى توقفها. يغيّر الترتيب العشوائي الترتيب التالي في كل مرة توقف فيها المنبه. خيار مقطع عشوائي يكرر المقطع نفسه في كل مرة.";
+"video_source_header" = "اختيار فيديو";
+"video_source_photo_row" = "اختيار من مكتبة الصور";
+"video_source_file_row" = "اختيار من الملفات";
 
 // #197 skip days
 "skip_one_time_warning" = "منبه لمرة واحدة (%d) لن يرن.";

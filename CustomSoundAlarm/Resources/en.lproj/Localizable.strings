@@ -79,7 +79,6 @@
 /* VideoTrimView */
 "add_from_video_title" = "Add Audio from Video";
 "loading" = "Loading...";
-"select_video" = "Select a video";
 "preview" = "Preview";
 "selected_duration" = "Selected: %@";
 "stop" = "Stop";
@@ -171,9 +170,6 @@
 "no_video" = "No video";
 
 /* Video Import Source */
-"video_source_title" = "Select Video Source";
-"video_source_photo" = "Photo Library";
-"video_source_file" = "Files";
 "error_file_access_denied" = "Access to the file was denied.";
 "error_file_copy_failed" = "Failed to copy the file.";
 "error_unsupported_video_format" = "Unsupported video format.";
@@ -310,6 +306,9 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Preview playlist";
 "play_order_footer" = "Alarms repeat until you stop them. Shuffle changes the next order each time you stop. One random repeats the same single track each time.";
+"video_source_header" = "Choose a video";
+"video_source_photo_row" = "Choose from Photo Library";
+"video_source_file_row" = "Choose from Files";
 
 // #197 skip days
 "skip_one_time_warning" = "A one-time alarm (%d) will not ring.";

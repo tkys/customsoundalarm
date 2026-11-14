@@ -79,7 +79,6 @@
 /* VideoTrimView */
 "add_from_video_title" = "Añadir audio de un vídeo";
 "loading" = "Cargando…";
-"select_video" = "Selecciona un vídeo";
 "preview" = "Vista previa";
 "selected_duration" = "Selección: %@";
 "stop" = "Detener";
@@ -171,9 +170,6 @@
 "no_video" = "Ningún vídeo";
 
 /* Video Import Source */
-"video_source_title" = "Seleccionar origen del vídeo";
-"video_source_photo" = "Fototeca";
-"video_source_file" = "Archivos";
 "error_file_access_denied" = "Se ha denegado el acceso al archivo.";
 "error_file_copy_failed" = "No se ha podido copiar el archivo.";
 "error_unsupported_video_format" = "Formato de vídeo no compatible.";
@@ -310,6 +306,9 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Escuchar lista";
 "play_order_footer" = "Las alarmas se repiten hasta que las detengas. El orden aleatorio cambia el siguiente orden cada vez que la detienes. Una aleatoria repite la misma pista.";
+"video_source_header" = "Elegir un vídeo";
+"video_source_photo_row" = "Elegir de la fototeca";
+"video_source_file_row" = "Elegir de Archivos";
 
 // #197 skip days
 "skip_one_time_warning" = "Una alarma única (%d) no sonará.";

@@ -79,7 +79,6 @@
 /* VideoTrimView */
 "add_from_video_title" = "Přidat zvuk z videa";
 "loading" = "Načítání…";
-"select_video" = "Vyber video";
 "preview" = "Náhled";
 "selected_duration" = "Vybráno: %@";
 "stop" = "Zastavit";
@@ -171,9 +170,6 @@
 "no_video" = "Žádné video";
 
 /* Video Import Source */
-"video_source_title" = "Vybrat zdroj videa";
-"video_source_photo" = "Knihovna fotek";
-"video_source_file" = "Soubory";
 "error_file_access_denied" = "Přístup k souboru byl zamítnut.";
 "error_file_copy_failed" = "Soubor se nepodařilo zkopírovat.";
 "error_unsupported_video_format" = "Nepodporovaný formát videa.";
@@ -310,6 +306,9 @@
 /* Playlist polish (#169) */
 "playlist_preview" = "Přehrát playlist";
 "play_order_footer" = "Budíky se opakují, dokud je nezastavíte. Náhodné pořadí změní další pořadí při každém zastavení. Jeden náhodný opakuje stejnou skladbu.";
+"video_source_header" = "Vybrat video";
+"video_source_photo_row" = "Vybrat z knihovny fotek";
+"video_source_file_row" = "Vybrat ze Souborů";
 
 // #197 skip days
 "skip_one_time_warning" = "Jednorázový budík (%d) nezazvoní.";
