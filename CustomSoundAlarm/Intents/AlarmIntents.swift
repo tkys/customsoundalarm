@@ -232,14 +232,18 @@ struct DismissAlarmIntent: LiveActivityIntent {
             // シャッフル／1曲ランダムは、停止した次の回に向けて順番を作り直す（#151）。
             if case .primary = action.role,
                let entry,
-               !entry.repeatWeekdays.isEmpty,
                playOrder?.changesOrderOnStop == true,
                let oldPrimaryID = primaryID,
                stoppedID == oldPrimaryID {
-                await AlarmScheduler.shared.reschedulePrimaryAfterStop(
-                    entry: entry,
-                    oldAlarmID: oldPrimaryID
-                )
+                if entry.repeatWeekdays.isEmpty {
+                    // 1回きりは次の登録までオフになるため、印だけ残す（#212）。
+                    await AlarmScheduler.shared.markPendingShuffleRefresh(for: entry)
+                } else {
+                    await AlarmScheduler.shared.reschedulePrimaryAfterStop(
+                        entry: entry,
+                        oldAlarmID: oldPrimaryID
+                    )
+                }
             }
 
             // 補完の .fixed、全曜日を外した本体、祝日・休みの設定があるアラームを
