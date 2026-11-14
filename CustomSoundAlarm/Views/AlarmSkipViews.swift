@@ -4,7 +4,7 @@ import UIKit
 /// 目覚まし時計に左下→右上の斜線を引いたアイコン（#197 実機レビュー）。
 ///
 /// SF Symbols には `alarm.slash` が無いため、`alarm` / `alarm.fill` の上に
-/// 斜線を描き、斜線の両側を `.destinationOut` で抜いてすき間を作る。
+/// 斜線を描く。斜線の両側は、本体をマスクで抜いてすき間を作る。
 struct AlarmSlashIcon: View {
     let filled: Bool
     /// メニュー用に ImageRenderer から描くときの固定サイズ。nil なら Dynamic Type。
@@ -16,21 +16,39 @@ struct AlarmSlashIcon: View {
     private var gapWidth: CGFloat { size * 0.15 }
     private var slashWidth: CGFloat { size * 0.085 }
 
+    private var symbol: UIImage? {
+        UIImage(systemName: filled ? "alarm.fill" : "alarm")
+    }
+
+    /// SF Symbol の実際の縦横比。正方形の枠に押し込めない。
+    private var aspectRatio: CGFloat {
+        guard let size = symbol?.size, size.height > 0 else { return 1 }
+        return size.width / size.height
+    }
+
+    private var iconSize: CGSize {
+        CGSize(width: size * aspectRatio, height: size)
+    }
+
+    private var baseImage: Image {
+        if let symbol {
+            return Image(uiImage: symbol).renderingMode(.template)
+        }
+        return Image(systemName: filled ? "alarm.fill" : "alarm")
+    }
+
     var body: some View {
         ZStack {
-            Image(systemName: filled ? "alarm.fill" : "alarm")
-                .resizable()
-                .scaledToFit()
-
-            // 斜線の両側を本体から抜く。
-            AlarmSlashShape()
-                .stroke(
-                    style: StrokeStyle(
-                        lineWidth: slashWidth + gapWidth * 2,
-                        lineCap: .round
-                    )
+            baseImage
+            .resizable()
+            .scaledToFit()
+            .mask(
+                AlarmSlashMask(
+                    slashWidth: slashWidth,
+                    gapWidth: gapWidth
                 )
-                .blendMode(.destinationOut)
+                .fill(style: FillStyle(eoFill: true))
+            )
 
             // 抜いたすき間の中央に斜線を描く。
             AlarmSlashShape()
@@ -38,8 +56,7 @@ struct AlarmSlashIcon: View {
                     style: StrokeStyle(lineWidth: slashWidth, lineCap: .round)
                 )
         }
-        .compositingGroup()
-        .frame(width: size * 1.15, height: size * 1.15)
+        .frame(width: iconSize.width, height: iconSize.height)
     }
 }
 
@@ -54,6 +71,25 @@ private struct AlarmSlashShape: Shape {
             x: rect.minX + rect.width * 0.84,
             y: rect.minY + rect.height * 0.24
         ))
+        return path
+    }
+}
+
+/// 本体から斜線の両側を抜くマスク（even-odd）。
+private struct AlarmSlashMask: Shape {
+    let slashWidth: CGFloat
+    let gapWidth: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path(rect)
+        path.addPath(
+            AlarmSlashShape()
+                .path(in: rect)
+                .strokedPath(StrokeStyle(
+                    lineWidth: slashWidth + gapWidth * 2,
+                    lineCap: .round
+                ))
+        )
         return path
     }
 }
