@@ -1,4 +1,81 @@
 import SwiftUI
+import UIKit
+
+/// 目覚まし時計に左下→右上の斜線を引いたアイコン（#197 実機レビュー）。
+///
+/// SF Symbols には `alarm.slash` が無いため、`alarm` / `alarm.fill` の上に
+/// 斜線を描き、斜線の両側を `.destinationOut` で抜いてすき間を作る。
+struct AlarmSlashIcon: View {
+    let filled: Bool
+    /// メニュー用に ImageRenderer から描くときの固定サイズ。nil なら Dynamic Type。
+    var pointSize: CGFloat?
+
+    @ScaledMetric(relativeTo: .body) private var scaledPointSize: CGFloat = 17
+
+    private var size: CGFloat { pointSize ?? scaledPointSize }
+    private var gapWidth: CGFloat { size * 0.15 }
+    private var slashWidth: CGFloat { size * 0.085 }
+
+    var body: some View {
+        ZStack {
+            Image(systemName: filled ? "alarm.fill" : "alarm")
+                .resizable()
+                .scaledToFit()
+
+            // 斜線の両側を本体から抜く。
+            AlarmSlashShape()
+                .stroke(
+                    style: StrokeStyle(
+                        lineWidth: slashWidth + gapWidth * 2,
+                        lineCap: .round
+                    )
+                )
+                .blendMode(.destinationOut)
+
+            // 抜いたすき間の中央に斜線を描く。
+            AlarmSlashShape()
+                .stroke(
+                    style: StrokeStyle(lineWidth: slashWidth, lineCap: .round)
+                )
+        }
+        .compositingGroup()
+        .frame(width: size * 1.15, height: size * 1.15)
+    }
+}
+
+private struct AlarmSlashShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(
+            x: rect.minX + rect.width * 0.05,
+            y: rect.minY + rect.height * 0.98
+        ))
+        path.addLine(to: CGPoint(
+            x: rect.minX + rect.width * 0.84,
+            y: rect.minY + rect.height * 0.24
+        ))
+        return path
+    }
+}
+
+/// `Label` の icon に使うため、`AlarmSlashIcon` を UIImage にする。
+@MainActor
+enum AlarmSlashIconRenderer {
+    private static var cache: [String: UIImage] = [:]
+
+    static func image(filled: Bool, pointSize: CGFloat) -> UIImage? {
+        let key = "\(filled)-\(pointSize)"
+        if let cached = cache[key] { return cached }
+        let renderer = ImageRenderer(
+            content: AlarmSlashIcon(filled: filled, pointSize: pointSize)
+                .foregroundStyle(.black)
+        )
+        renderer.scale = UIScreen.main.scale
+        guard let image = renderer.uiImage else { return nil }
+        cache[key] = image
+        return image
+    }
+}
 
 /// 休みの日付表示（#197）。
 enum AlarmSkipFormat {
@@ -135,7 +212,7 @@ struct GlobalSkipNoticeRow: View {
 
 // MARK: - すべてのアラームを休む
 
-/// 右上の bell.slash から開くシート（#197 画面作り直し）。
+/// 右上の目覚まし時計の斜線アイコンから開くシート（#197 画面作り直し）。
 struct SkipAllSheet: View {
     let entries: [AlarmEntry]
 

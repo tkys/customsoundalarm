@@ -1,5 +1,6 @@
 import SwiftUI
 import StoreKit
+import UIKit
 
 /// 追加画面への要求（sheet(item:) 用・#101）
 struct AddAlarmRequest: Identifiable {
@@ -23,6 +24,7 @@ struct ContentView: View {
     /// すべてのアラームを休む（#197 画面作り直し）
     @State private var showingSkipAll = false
     @State private var globalSkip: GlobalSkip?
+    @ScaledMetric(relativeTo: .body) private var skipActionIconSize: CGFloat = 17
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.requestReview) private var requestReview
@@ -54,7 +56,7 @@ struct ContentView: View {
                         Button {
                             showingSkipAll = true
                         } label: {
-                            Image(systemName: isGlobalSkipActive ? "bell.slash.fill" : "bell.slash")
+                            AlarmSlashIcon(filled: isGlobalSkipActive)
                         }
                         .foregroundStyle(isGlobalSkipActive ? Brand.orange : Color.primary)
                         .accessibilityLabel(Text("skip_all_button"))
@@ -325,7 +327,7 @@ struct ContentView: View {
                 Label {
                     Text("skip_row_undo")
                 } icon: {
-                    Image(systemName: "bell")
+                    Image(systemName: "alarm")
                 }
             }
             .tint(Color.textSecondary)
@@ -340,11 +342,24 @@ struct ContentView: View {
                         AlarmSkipFormat.day(next)
                     ))
                 } icon: {
-                    Image(systemName: "bell.slash")
+                    skipActionIcon(filled: false)
                 }
             }
             .tint(Brand.orange)
             .accessibilityIdentifier("skip.row.skip.\(alarm.id.uuidString)")
+        }
+    }
+
+    @ViewBuilder
+    private func skipActionIcon(filled: Bool) -> some View {
+        if let image = AlarmSlashIconRenderer.image(
+            filled: filled,
+            pointSize: skipActionIconSize
+        ) {
+            Image(uiImage: image)
+                .renderingMode(.template)
+        } else {
+            Image(systemName: filled ? "alarm.fill" : "alarm")
         }
     }
 
@@ -354,19 +369,24 @@ struct ContentView: View {
             Button {
                 AlarmSkipService.undoNext(entryID: alarm.id)
             } label: {
-                Label("skip_row_undo", systemImage: "bell")
+                Label {
+                    Text("skip_row_undo")
+                } icon: {
+                    Image(systemName: "alarm")
+                }
             }
         } else if let next = AlarmSkipLogic.nextFireDate(for: alarm, after: Date()) {
             Button {
                 AlarmSkipService.skipNext(entryID: alarm.id)
             } label: {
-                Label(
-                    String(
+                Label {
+                    Text(String(
                         format: String(localized: "skip_row_skip_fmt"),
                         AlarmSkipFormat.day(next)
-                    ),
-                    systemImage: "bell.slash"
-                )
+                    ))
+                } icon: {
+                    skipActionIcon(filled: false)
+                }
             }
         }
     }
