@@ -309,3 +309,59 @@
 "video_source_header" = "Escolher um vídeo";
 "video_source_photo_row" = "Escolher da Fototeca";
 "video_source_file_row" = "Escolher em Arquivos";
+
+// #197 skip days
+"skip_one_time_warning" = "Um alarme único (%d) não vai tocar.";
+"skip_undo" = "Desfazer";
+"skip_apply" = "Pausar";
+"holiday_skip_toggle" = "Não tocar em feriados";
+"holiday_next_skipped" = "%@ sem alarme";
+"holiday_mark" = "Feriado";
+"skip_alarms_intent" = "Pausar alarmes";
+
+// #197 skip redesign
+"skip_all_button" = "Pausar alarmes";
+"skip_all_title" = "Pausar alarmes";
+"skip_all_24h" = "24 horas";
+"skip_all_3d" = "3 dias";
+"skip_all_7d" = "7 dias";
+"skip_all_row_fmt" = "até %@ · %d vezes";
+"skip_all_custom" = "Escolher datas";
+"skip_all_active_fmt" = "Em pausa até %1$@ · %2$d";
+"skip_row_global_fmt" = "Em pausa até %@";
+"skip_row_skip_fmt" = "Pausar em %@";
+"skip_row_undo" = "Cancelar a pausa";
+"skip_row_summary_fmt" = "Em pausa em %@ · próxima %@";
+"skip_row_summary_no_next_fmt" = "Em pausa em %@";
+"skip_dates_title" = "Escolher dias de pausa";
+"skip_dates_none" = "Nenhum";
+"skip_dates_count_fmt" = "%d dias";
+"skip_dates_selected" = "Dias de pausa";
+"skip_dates_empty" = "Nenhum dia de pausa";
+"skip_dates_footer" = "Os dias escolhidos não vão tocar.";
+"skip_calendar_title" = "Escolher datas";
+"skip_calendar_hint" = "Toque em uma data de início e de fim. Até 8 semanas à frente.";
+"skip_calendar_range_fmt" = "%@ – %@";
+"skip_calendar_previous_month" = "Mês anterior";
+"skip_calendar_next_month" = "Próximo mês";
+"holiday_others_message_fmt" = "Há %d outros alarmes nos mesmos dias da semana.";
+"holiday_apply_to_others_fmt" = "Também nos outros %d";
+"holiday_apply_only_this" = "Só neste alarme";
+"repeat_summary_holiday_suffix" = "feriados excluídos";
+"repeat_summary_skip_days_fmt" = "%d dias de pausa";
+"holiday_skip_section_title" = "Dias de pausa";
+"repeat_summary_holiday_and_days_fmt" = "feriados e %d dias excluídos";
+"repeat_summary_days_only_fmt" = "%d dias excluídos";
+"skip_all_silenced_title" = "Alarmes que não vão tocar";
+"skip_all_more_fmt" = "mais %d";
+
+// #197 result list
+"skip_result_section_title" = "Próximos dias sem tocar";
+"skip_result_off" = "Sem tocar";
+"skip_result_on" = "Toca";
+"skip_result_picked" = "Dia escolhido";
+"skip_result_more" = "Ver mais";
+"skip_result_remove" = "Remover";
+"skip_result_footer" = "Só mostramos feriados que caem em um dia que toca.";
+"skip_row_toast_skipped_fmt" = "%@ não vai tocar";
+"skip_row_toast_undone_fmt" = "%@ vai tocar";

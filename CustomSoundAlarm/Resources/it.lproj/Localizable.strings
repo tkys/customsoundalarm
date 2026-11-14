@@ -309,3 +309,59 @@
 "video_source_header" = "Scegli un video";
 "video_source_photo_row" = "Scegli dalla libreria foto";
 "video_source_file_row" = "Scegli da File";
+
+// #197 skip days
+"skip_one_time_warning" = "Una sveglia singola (%d) non suonerà.";
+"skip_undo" = "Annulla";
+"skip_apply" = "Metti in pausa";
+"holiday_skip_toggle" = "Non suonare nei giorni festivi";
+"holiday_next_skipped" = "%@ senza sveglia";
+"holiday_mark" = "Festivo";
+"skip_alarms_intent" = "Metti in pausa le sveglie";
+
+// #197 skip redesign
+"skip_all_button" = "Metti in pausa le sveglie";
+"skip_all_title" = "Metti in pausa le sveglie";
+"skip_all_24h" = "24 ore";
+"skip_all_3d" = "3 giorni";
+"skip_all_7d" = "7 giorni";
+"skip_all_row_fmt" = "fino a %@ · %d volte";
+"skip_all_custom" = "Scegli le date";
+"skip_all_active_fmt" = "In pausa fino a %1$@ · %2$d";
+"skip_row_global_fmt" = "In pausa fino a %@";
+"skip_row_skip_fmt" = "Metti in pausa il %@";
+"skip_row_undo" = "Annulla la pausa";
+"skip_row_summary_fmt" = "In pausa il %@ · prossima %@";
+"skip_row_summary_no_next_fmt" = "In pausa il %@";
+"skip_dates_title" = "Scegli i giorni di pausa";
+"skip_dates_none" = "Nessuno";
+"skip_dates_count_fmt" = "%d giorni";
+"skip_dates_selected" = "Giorni di pausa";
+"skip_dates_empty" = "Nessun giorno di pausa";
+"skip_dates_footer" = "I giorni scelti non suoneranno.";
+"skip_calendar_title" = "Scegli le date";
+"skip_calendar_hint" = "Tocca una data di inizio e di fine. Fino a 8 settimane in anticipo.";
+"skip_calendar_range_fmt" = "%@ – %@";
+"skip_calendar_previous_month" = "Mese precedente";
+"skip_calendar_next_month" = "Mese successivo";
+"holiday_others_message_fmt" = "Ci sono altre %d sveglie negli stessi giorni.";
+"holiday_apply_to_others_fmt" = "Anche sulle altre %d";
+"holiday_apply_only_this" = "Solo questa sveglia";
+"repeat_summary_holiday_suffix" = "festività escluse";
+"repeat_summary_skip_days_fmt" = "%d giorni di pausa";
+"holiday_skip_section_title" = "Giorni di pausa";
+"repeat_summary_holiday_and_days_fmt" = "festività e %d giorni esclusi";
+"repeat_summary_days_only_fmt" = "%d giorni esclusi";
+"skip_all_silenced_title" = "Sveglie che non suoneranno";
+"skip_all_more_fmt" = "altre %d";
+
+// #197 result list
+"skip_result_section_title" = "Prossimi giorni senza suoneria";
+"skip_result_off" = "Senza suoneria";
+"skip_result_on" = "Suona";
+"skip_result_picked" = "Giorno scelto";
+"skip_result_more" = "Mostra altro";
+"skip_result_remove" = "Rimuovi";
+"skip_result_footer" = "Mostriamo solo le festività che cadono in un giorno in cui suona.";
+"skip_row_toast_skipped_fmt" = "%@ non suonerà";
+"skip_row_toast_undone_fmt" = "%@ suonerà";

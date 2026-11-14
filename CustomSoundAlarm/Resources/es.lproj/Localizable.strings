@@ -309,3 +309,59 @@
 "video_source_header" = "Elegir un vídeo";
 "video_source_photo_row" = "Elegir de la fototeca";
 "video_source_file_row" = "Elegir de Archivos";
+
+// #197 skip days
+"skip_one_time_warning" = "Una alarma única (%d) no sonará.";
+"skip_undo" = "Deshacer";
+"skip_apply" = "No sonar";
+"holiday_skip_toggle" = "No sonar en días festivos";
+"holiday_next_skipped" = "%@ sin alarma";
+"holiday_mark" = "Festivo";
+"skip_alarms_intent" = "Pausar alarmas";
+
+// #197 skip redesign
+"skip_all_button" = "Pausar alarmas";
+"skip_all_title" = "Pausar alarmas";
+"skip_all_24h" = "24 horas";
+"skip_all_3d" = "3 días";
+"skip_all_7d" = "7 días";
+"skip_all_row_fmt" = "hasta el %@ · %d veces";
+"skip_all_custom" = "Elegir fechas";
+"skip_all_active_fmt" = "En pausa hasta el %1$@ · %2$d";
+"skip_row_global_fmt" = "En pausa hasta el %@";
+"skip_row_skip_fmt" = "Pausar el %@";
+"skip_row_undo" = "Cancelar la pausa";
+"skip_row_summary_fmt" = "En pausa el %@ · siguiente %@";
+"skip_row_summary_no_next_fmt" = "En pausa el %@";
+"skip_dates_title" = "Elegir días de pausa";
+"skip_dates_none" = "Ninguno";
+"skip_dates_count_fmt" = "%d días";
+"skip_dates_selected" = "Días de pausa";
+"skip_dates_empty" = "No hay días de pausa";
+"skip_dates_footer" = "Los días elegidos no sonarán.";
+"skip_calendar_title" = "Elegir fechas";
+"skip_calendar_hint" = "Toca una fecha de inicio y de fin. Hasta 8 semanas por adelantado.";
+"skip_calendar_range_fmt" = "%@ – %@";
+"skip_calendar_previous_month" = "Mes anterior";
+"skip_calendar_next_month" = "Mes siguiente";
+"holiday_others_message_fmt" = "Hay %d alarmas más en los mismos días de la semana.";
+"holiday_apply_to_others_fmt" = "También en las otras %d";
+"holiday_apply_only_this" = "Solo esta alarma";
+"repeat_summary_holiday_suffix" = "festivos excluidos";
+"repeat_summary_skip_days_fmt" = "%d días de pausa";
+"holiday_skip_section_title" = "Días de descanso";
+"repeat_summary_holiday_and_days_fmt" = "festivos y %d días excluidos";
+"repeat_summary_days_only_fmt" = "%d días excluidos";
+"skip_all_silenced_title" = "Alarmas que no sonarán";
+"skip_all_more_fmt" = "%d más";
+
+// #197 result list
+"skip_result_section_title" = "Próximos días sin sonar";
+"skip_result_off" = "Sin sonar";
+"skip_result_on" = "Suena";
+"skip_result_picked" = "Día elegido";
+"skip_result_more" = "Ver más";
+"skip_result_remove" = "Quitar";
+"skip_result_footer" = "Solo se muestran los festivos que caen en un día que suena.";
+"skip_row_toast_skipped_fmt" = "%@ no sonará";
+"skip_row_toast_undone_fmt" = "%@ sonará";

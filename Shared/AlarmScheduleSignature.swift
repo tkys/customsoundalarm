@@ -36,6 +36,13 @@ struct AlarmScheduleSignature: Codable, Equatable, Sendable {
     let displayName: String
     let fadeIn: Int
     let playlistID: UUID?
+    /// 休み・祝日の設定（#197）。変わったらくり返しを作り直す。
+    let skipDates: [String]
+    let skipsHolidays: Bool
+    let holidayRingOverrides: [String]
+    /// 休みを反映した実際の曜日（#197）。日付が過ぎたときに作り直すため。
+    let effectiveWeekdays: [Int]
+    let primaryUsesFixed: Bool
 
     init(
         entry: AlarmEntry,
@@ -51,6 +58,12 @@ struct AlarmScheduleSignature: Codable, Equatable, Sendable {
         self.displayName = displayName
         self.fadeIn = entry.fadeIn.rawValue
         self.playlistID = entry.playlistID
+        self.skipDates = entry.skipDates.sorted()
+        self.skipsHolidays = entry.skipsHolidays
+        self.holidayRingOverrides = entry.holidayRingOverrides.sorted()
+        let now = Date()
+        self.effectiveWeekdays = AlarmSkipLogic.effectiveWeekdays(for: entry, after: now)
+        self.primaryUsesFixed = AlarmSkipLogic.primaryUsesFixed(for: entry, after: now)
     }
 }
 

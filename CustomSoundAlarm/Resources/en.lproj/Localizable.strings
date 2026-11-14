@@ -309,3 +309,59 @@
 "video_source_header" = "Choose a video";
 "video_source_photo_row" = "Choose from Photo Library";
 "video_source_file_row" = "Choose from Files";
+
+// #197 skip days
+"skip_one_time_warning" = "A one-time alarm (%d) will not ring.";
+"skip_undo" = "Undo";
+"skip_apply" = "Skip";
+"holiday_skip_toggle" = "Don't ring on holidays";
+"holiday_next_skipped" = "%@ is skipped";
+"holiday_mark" = "Holiday";
+"skip_alarms_intent" = "Skip alarms";
+
+// #197 skip redesign
+"skip_all_button" = "Rest alarms";
+"skip_all_title" = "Rest alarms";
+"skip_all_24h" = "24 hours";
+"skip_all_3d" = "3 days";
+"skip_all_7d" = "7 days";
+"skip_all_row_fmt" = "until %@ · %d times";
+"skip_all_custom" = "Choose dates";
+"skip_all_active_fmt" = "Resting until %1$@ · %2$d";
+"skip_row_global_fmt" = "Resting until %@";
+"skip_row_skip_fmt" = "Rest on %@";
+"skip_row_undo" = "Cancel the rest";
+"skip_row_summary_fmt" = "Resting on %@ · next %@";
+"skip_row_summary_no_next_fmt" = "Resting on %@";
+"skip_dates_title" = "Choose dates to rest";
+"skip_dates_none" = "None";
+"skip_dates_count_fmt" = "%d days";
+"skip_dates_selected" = "Rest days";
+"skip_dates_empty" = "No rest days";
+"skip_dates_footer" = "Selected days won't ring.";
+"skip_calendar_title" = "Choose dates";
+"skip_calendar_hint" = "Tap a start and end date. You can choose up to 8 weeks ahead.";
+"skip_calendar_range_fmt" = "%@ – %@";
+"skip_calendar_previous_month" = "Previous month";
+"skip_calendar_next_month" = "Next month";
+"holiday_others_message_fmt" = "There are %d other alarms on the same weekdays.";
+"holiday_apply_to_others_fmt" = "Also apply to %d others";
+"holiday_apply_only_this" = "Only this alarm";
+"repeat_summary_holiday_suffix" = "holidays excluded";
+"repeat_summary_skip_days_fmt" = "%d days off";
+"holiday_skip_section_title" = "Rest days";
+"repeat_summary_holiday_and_days_fmt" = "holidays and %d days excluded";
+"repeat_summary_days_only_fmt" = "%d days excluded";
+"skip_all_silenced_title" = "Alarms that won't ring";
+"skip_all_more_fmt" = "%d more";
+
+// #197 result list
+"skip_result_section_title" = "Upcoming silent days";
+"skip_result_off" = "Silent";
+"skip_result_on" = "Rings";
+"skip_result_picked" = "Chosen day";
+"skip_result_more" = "Show more";
+"skip_result_remove" = "Remove";
+"skip_result_footer" = "Only holidays that fall on a ringing weekday are shown.";
+"skip_row_toast_skipped_fmt" = "%@ won't ring";
+"skip_row_toast_undone_fmt" = "%@ will ring";
