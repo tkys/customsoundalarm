@@ -157,6 +157,18 @@ final class AlarmScheduler {
         AnalyticsService.shared.capture(.alarmPermission(status: status))
     }
 
+    /// 1回きりのランダム／シャッフルが鳴ったあと、次に登録するとき新しい順番にする印（#212）。
+    /// 発火後にオフになっても、エントリが存在する間は消さない。
+    func markPendingShuffleRefresh(for entry: AlarmEntry) {
+        guard entry.repeatWeekdays.isEmpty,
+              AlarmSoundModeResolver.changesOrderOnStop(for: entry) else {
+            return
+        }
+        var pending = AppGroup.pendingShuffleRefreshEntryIDs
+        pending.insert(entry.id)
+        AppGroup.pendingShuffleRefreshEntryIDs = pending
+    }
+
     // MARK: - Reconciliation (起動時の整合性チェック)
 
     /// アプリ起動時に AlarmKit の状態と AlarmStore を突合し、
@@ -194,6 +206,7 @@ final class AlarmScheduler {
                     detection: "reconcile",
                     soundMode: AlarmSoundModeResolver.soundMode(for: alarm)
                 ))
+                markPendingShuffleRefresh(for: alarm)
                 store.toggleEnabled(alarm)
                 alarmIDMap.removeValue(forKey: alarm.id)
                 var primaryNames = AppGroup.primarySoundNames
@@ -321,10 +334,12 @@ final class AlarmScheduler {
             return
         }
 
-        // 停止時に発火分のため延期したシャッフル順の作り直し（#163）
+        // 停止時に発火分のため延期したシャッフル順の作り直し（#163）。
+        // 1回きりのアラームは発火後にオフになるため、有効な ID ではなく
+        // 「存在するエントリ」と交差して、オフの間も印を残す（#212）。
         let enabledEntryIDs = Set(entries.filter(\.isEnabled).map(\.id))
         var pendingShuffleRefresh = AppGroup.pendingShuffleRefreshEntryIDs
-        pendingShuffleRefresh.formIntersection(enabledEntryIDs)
+        pendingShuffleRefresh.formIntersection(Set(entries.map(\.id)))
         AppGroup.pendingShuffleRefreshEntryIDs = pendingShuffleRefresh
         // バックグラウンド起動（intent）では新しい順番の書き出しをせず、
         // 前面復帰か次の同期に回す（#163 レビュー）。
@@ -1374,6 +1389,7 @@ final class AlarmScheduler {
         }
 
         if alarm.repeatWeekdays.isEmpty && alarm.isEnabled {
+            markPendingShuffleRefresh(for: alarm)
             store.toggleEnabled(alarm)
             alarmIDMap.removeValue(forKey: entryID)
             saveIDMap()
