@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import UIKit
 @testable import CustomSoundAlarm
 
 /// 休み・祝日の純ロジック（#197）。
@@ -732,5 +733,32 @@ extension AlarmSkipLogicTests {
             date(2027, 1, 1), locale: en, now: thisYear
         ).contains("2027"))
         #expect(AlarmSkipFormat.year(2027, locale: ja) == "2027年")
+    }
+}
+
+/// 一覧右上・スワイプ・長押しで使うアイコン（#197 実機レビュー：禁止マーク案）。
+@MainActor
+struct AlarmOffIconTests {
+
+    @Test
+    func rendersForMenuAtFixedSize() throws {
+        let image = try #require(AlarmOffIconRenderer.image(pointSize: 20))
+        #expect(image.size.width > 0)
+        #expect(image.size.height > 0)
+    }
+
+    @Test
+    func reusesTheRenderedImageForTheSameSize() throws {
+        let first = try #require(AlarmOffIconRenderer.image(pointSize: 22))
+        let second = try #require(AlarmOffIconRenderer.image(pointSize: 22))
+        #expect(first === second)
+    }
+
+    @Test
+    func badgeSitsAtTheBottomRightAndStaysSmallerThanTheClock() {
+        #expect(AlarmOffIcon.badgeDiameterRatio < 1)
+        #expect(AlarmOffIcon.badgeDiameterRatio > 0.4)
+        #expect(AlarmOffIcon.badgeCenterInsetRatio < 0.5)
+        #expect(AlarmOffIcon.badgeGapRatio > 0)
     }
 }

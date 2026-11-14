@@ -60,7 +60,7 @@ struct ContentView: View {
                         Button {
                             showingSkipAll = true
                         } label: {
-                            AlarmSlashIcon(filled: isGlobalSkipActive)
+                            AlarmOffIcon()
                         }
                         .foregroundStyle(isGlobalSkipActive ? Brand.orange : Color.primary)
                         .accessibilityLabel(Text("skip_all_button"))
@@ -394,7 +394,7 @@ struct ContentView: View {
                         AlarmSkipFormat.day(next)
                     ))
                 } icon: {
-                    skipActionIcon(filled: false)
+                    skipActionIcon()
                 }
             }
             .tint(Brand.orange)
@@ -403,15 +403,12 @@ struct ContentView: View {
     }
 
     @ViewBuilder
-    private func skipActionIcon(filled: Bool) -> some View {
-        if let image = AlarmSlashIconRenderer.image(
-            filled: filled,
-            pointSize: skipActionIconSize
-        ) {
+    private func skipActionIcon() -> some View {
+        if let image = AlarmOffIconRenderer.image(pointSize: skipActionIconSize) {
             Image(uiImage: image)
                 .renderingMode(.template)
         } else {
-            Image(systemName: filled ? "alarm.fill" : "alarm")
+            Image(systemName: "alarm")
         }
     }
 
@@ -437,7 +434,7 @@ struct ContentView: View {
                         AlarmSkipFormat.day(next)
                     ))
                 } icon: {
-                    skipActionIcon(filled: false)
+                    skipActionIcon()
                 }
             }
         }

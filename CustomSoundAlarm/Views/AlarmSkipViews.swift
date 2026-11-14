@@ -1,114 +1,107 @@
 import SwiftUI
 import UIKit
 
-/// 目覚まし時計に左下→右上の斜線を引いたアイコン（#197 実機レビュー）。
+/// 目覚まし時計の右下に禁止マーク（⊘）を付けたアイコン（#197 実機レビュー）。
 ///
-/// SF Symbols には `alarm.slash` が無いため、`alarm` / `alarm.fill` の上に
-/// 斜線を描く。斜線の両側は、本体をマスクで抜いてすき間を作る。
-struct AlarmSlashIcon: View {
-    let filled: Bool
+/// 斜線を時計に重ねる案は、小さいと針と斜線が重なって時計に見えなかった。
+/// 時計の形はそのまま残し、右下を丸く抜いて `nosign` を置く。
+/// 「鳴らさない設定中」は呼び出し側で色（オレンジ）を変えて示す。
+struct AlarmOffIcon: View {
     /// メニュー用に ImageRenderer から描くときの固定サイズ。nil なら Dynamic Type。
     var pointSize: CGFloat?
 
     @ScaledMetric(relativeTo: .body) private var scaledPointSize: CGFloat = 17
 
     private var size: CGFloat { pointSize ?? scaledPointSize }
-    private var gapWidth: CGFloat { size * 0.15 }
-    private var slashWidth: CGFloat { size * 0.085 }
 
-    private var symbol: UIImage? {
-        UIImage(systemName: filled ? "alarm.fill" : "alarm")
+    /// 時計の枠に対する禁止マークの直径・中心・抜く余白（描画して比べて決めた値）。
+    static let badgeDiameterRatio: CGFloat = 0.62
+    static let badgeCenterInsetRatio: CGFloat = 0.25
+    static let badgeGapRatio: CGFloat = 0.10
+
+    private var clockSize: CGSize {
+        let symbol = UIImage(systemName: "alarm")?.size ?? CGSize(width: 1, height: 1)
+        let ratio = symbol.height > 0 ? symbol.width / symbol.height : 1
+        return CGSize(width: size * ratio, height: size)
     }
 
-    /// SF Symbol の実際の縦横比。正方形の枠に押し込めない。
-    private var aspectRatio: CGFloat {
-        guard let size = symbol?.size, size.height > 0 else { return 1 }
-        return size.width / size.height
+    private var badgeDiameter: CGFloat { size * Self.badgeDiameterRatio }
+
+    /// 時計の枠（左上原点）での禁止マークの中心。右下の角から内側へ寄せる。
+    private var badgeCenter: CGPoint {
+        CGPoint(
+            x: clockSize.width - badgeDiameter * Self.badgeCenterInsetRatio,
+            y: clockSize.height - badgeDiameter * Self.badgeCenterInsetRatio
+        )
     }
 
-    private var iconSize: CGSize {
-        CGSize(width: size * aspectRatio, height: size)
-    }
-
-    private var baseImage: Image {
-        if let symbol {
-            return Image(uiImage: symbol).renderingMode(.template)
-        }
-        return Image(systemName: filled ? "alarm.fill" : "alarm")
+    /// 時計とマークの両方が収まる枠。
+    private var canvasSize: CGSize {
+        let radius = badgeDiameter / 2
+        return CGSize(
+            width: max(clockSize.width, badgeCenter.x + radius),
+            height: max(clockSize.height, badgeCenter.y + radius)
+        )
     }
 
     var body: some View {
-        ZStack {
-            baseImage
-            .resizable()
-            .scaledToFit()
-            .mask(
-                AlarmSlashMask(
-                    slashWidth: slashWidth,
-                    gapWidth: gapWidth
+        let radius = badgeDiameter / 2
+        ZStack(alignment: .topLeading) {
+            Image(systemName: "alarm")
+                .resizable()
+                .scaledToFit()
+                .frame(width: clockSize.width, height: clockSize.height)
+                .mask(
+                    BadgeCutoutMask(
+                        center: badgeCenter,
+                        radius: radius + size * Self.badgeGapRatio
+                    )
+                    .fill(style: FillStyle(eoFill: true))
                 )
-                .fill(style: FillStyle(eoFill: true))
-            )
 
-            // 抜いたすき間の中央に斜線を描く。
-            AlarmSlashShape()
-                .stroke(
-                    style: StrokeStyle(lineWidth: slashWidth, lineCap: .round)
-                )
+            Image(systemName: "nosign")
+                .resizable()
+                .scaledToFit()
+                .fontWeight(.bold)
+                .frame(width: badgeDiameter * 0.92, height: badgeDiameter * 0.92)
+                .position(badgeCenter)
         }
-        .frame(width: iconSize.width, height: iconSize.height)
+        .frame(width: canvasSize.width, height: canvasSize.height, alignment: .topLeading)
+        .accessibilityHidden(true)
     }
 }
 
-private struct AlarmSlashShape: Shape {
+/// 時計の右下を丸く抜くマスク（even-odd）。blendMode は toolbar で効かないため使わない。
+private struct BadgeCutoutMask: Shape {
+    let center: CGPoint
+    let radius: CGFloat
+
     func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.move(to: CGPoint(
-            x: rect.minX + rect.width * 0.05,
-            y: rect.minY + rect.height * 0.98
-        ))
-        path.addLine(to: CGPoint(
-            x: rect.minX + rect.width * 0.84,
-            y: rect.minY + rect.height * 0.24
+        var path = Path(rect.insetBy(dx: -radius, dy: -radius))
+        path.addEllipse(in: CGRect(
+            x: center.x - radius,
+            y: center.y - radius,
+            width: radius * 2,
+            height: radius * 2
         ))
         return path
     }
 }
 
-/// 本体から斜線の両側を抜くマスク（even-odd）。
-private struct AlarmSlashMask: Shape {
-    let slashWidth: CGFloat
-    let gapWidth: CGFloat
-
-    func path(in rect: CGRect) -> Path {
-        var path = Path(rect)
-        path.addPath(
-            AlarmSlashShape()
-                .path(in: rect)
-                .strokedPath(StrokeStyle(
-                    lineWidth: slashWidth + gapWidth * 2,
-                    lineCap: .round
-                ))
-        )
-        return path
-    }
-}
-
-/// `Label` の icon に使うため、`AlarmSlashIcon` を UIImage にする。
+/// `Label` の icon に使うため、`AlarmOffIcon` を UIImage にする。
 @MainActor
-enum AlarmSlashIconRenderer {
-    private static var cache: [String: UIImage] = [:]
+enum AlarmOffIconRenderer {
+    private static var cache: [CGFloat: UIImage] = [:]
 
-    static func image(filled: Bool, pointSize: CGFloat) -> UIImage? {
-        let key = "\(filled)-\(pointSize)"
-        if let cached = cache[key] { return cached }
+    static func image(pointSize: CGFloat) -> UIImage? {
+        if let cached = cache[pointSize] { return cached }
         let renderer = ImageRenderer(
-            content: AlarmSlashIcon(filled: filled, pointSize: pointSize)
+            content: AlarmOffIcon(pointSize: pointSize)
                 .foregroundStyle(.black)
         )
         renderer.scale = UIScreen.main.scale
         guard let image = renderer.uiImage else { return nil }
-        cache[key] = image
+        cache[pointSize] = image
         return image
     }
 }
@@ -250,7 +243,7 @@ struct GlobalSkipNoticeRow: View {
 
 // MARK: - すべてのアラームを休む
 
-/// 右上の目覚まし時計の斜線アイコンから開くシート（#197 画面作り直し）。
+/// 右上の目覚まし時計＋禁止マークのアイコンから開くシート（#197 画面作り直し）。
 struct SkipAllSheet: View {
     let entries: [AlarmEntry]
 
