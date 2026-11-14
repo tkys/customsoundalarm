@@ -157,6 +157,53 @@ final class AddAlarmRedesignUITests: XCTestCase {
         return XCTWaiter.wait(for: [expectation], timeout: 5) == .completed
     }
 
+    /// #200: 動画の取り込み元は、吹き出しのダイアログではなく画面内の2行で出す。
+    func testVideoImportShowsTwoSourceRowsWithoutDialog() {
+        launchAdd()
+        _ = openSoundChoice()
+
+        let addVideo = app.buttons["soundPicker.addVideo"]
+        XCTAssertTrue(addVideo.waitForExistence(timeout: 10))
+        addVideo.tap()
+
+        XCTAssertTrue(
+            app.buttons["videoImport.source.photo"].waitForExistence(timeout: 10),
+            "photo library row should appear: \(app.debugDescription)"
+        )
+        XCTAssertTrue(app.buttons["videoImport.source.file"].exists, "files row should appear")
+        // 標準のダイアログ（吹き出し）のタイトルは出さない
+        XCTAssertFalse(app.staticTexts["Select Video Source"].exists)
+        XCTAssertFalse(app.staticTexts["動画の選択元"].exists)
+    }
+
+    /// #200 レビュー: 写真の行からピッカーを閉じても、もう一度開ける。
+    func testPhotoSourceRowCanReopenPicker() {
+        launchAdd()
+        _ = openSoundChoice()
+        let addVideo = app.buttons["soundPicker.addVideo"]
+        XCTAssertTrue(addVideo.waitForExistence(timeout: 10))
+        addVideo.tap()
+
+        let photo = app.buttons["videoImport.source.photo"]
+        XCTAssertTrue(photo.waitForExistence(timeout: 10))
+        photo.tap()
+
+        let cancel = app.buttons["Cancel"]
+        XCTAssertTrue(
+            cancel.waitForExistence(timeout: 10),
+            "photo picker should open: \(app.debugDescription)"
+        )
+        cancel.tap()
+
+        XCTAssertTrue(photo.waitForExistence(timeout: 10))
+        photo.tap()
+        XCTAssertTrue(
+            cancel.waitForExistence(timeout: 10),
+            "photo picker should open again: \(app.debugDescription)"
+        )
+        cancel.tap()
+    }
+
     func testSoundChoicePlaylistEmptyStateExplainsAndOffersCreate() {
         app.launchArguments = [
             "-uitest-open-add-alarm",
@@ -277,6 +324,7 @@ final class AddAlarmRedesignUITests: XCTestCase {
     func testAccessibilitySizeKeepsAllRows() {
         app.launchArguments = [
             "-uitest-open-add-alarm",
+            "-uitest-seed-design-audit",
             "-UIPreferredContentSizeCategoryName",
             "UICTContentSizeCategoryAccessibilityXXXL"
         ]

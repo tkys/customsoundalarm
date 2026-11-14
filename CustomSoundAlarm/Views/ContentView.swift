@@ -1,5 +1,7 @@
 import SwiftUI
 import StoreKit
+import UIKit
+import Accessibility
 
 /// 追加画面への要求（sheet(item:) 用・#101）
 struct AddAlarmRequest: Identifiable {
@@ -20,9 +22,16 @@ struct ContentView: View {
     @State private var addAlarmRequest: AddAlarmRequest?
     /// アップデート案内（#116）
     @State private var updateChecker = UpdateChecker.shared
+    /// すべてのアラームを休む（#197 画面作り直し）
+    @State private var showingSkipAll = false
+    @State private var globalSkip: GlobalSkip?
+    @State private var skipToast: String?
+    @State private var skipToastTask: Task<Void, Never>?
+    @ScaledMetric(relativeTo: .body) private var skipActionIconSize: CGFloat = 17
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.requestReview) private var requestReview
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         NavigationStack {
@@ -46,7 +55,17 @@ struct ContentView: View {
                         .accessibilityLabel(Text("settings"))
                         .accessibilityIdentifier("alarmList.settings")
                     }
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    if alarmStore.alarms.contains(where: \.isEnabled) {
+                        Button {
+                            showingSkipAll = true
+                        } label: {
+                            AlarmOffIcon()
+                        }
+                        .foregroundStyle(isGlobalSkipActive ? Brand.orange : Color.primary)
+                        .accessibilityLabel(Text("skip_all_button"))
+                        .accessibilityIdentifier("alarmList.skipAll")
+                    }
                     Button {
                         addAlarmRequest = AddAlarmRequest(source: nil)
                     } label: {
@@ -57,6 +76,8 @@ struct ContentView: View {
                 }
                 }
                 .task {
+                    refreshGlobalSkip()
+                    syncSkipTimeZoneIfNeeded()
                     evaluateOnboarding()
                     #if DEBUG
                     if AppGroup.isUITestOpenAddAlarm {
@@ -118,6 +139,8 @@ struct ContentView: View {
             // 定着ユーザー（発火実績あり・同一バージョン未依頼・当セッションで発火なし）にのみ
             // App Store レビューを依頼する。実際に表示するか否かは OS が最終判断する。
             guard phase == .active else { return }
+            syncSkipTimeZoneIfNeeded()
+            refreshGlobalSkip()
             ReviewRequestManager.shared.requestReviewIfAppropriate {
                 requestReview()
             }
@@ -125,6 +148,16 @@ struct ContentView: View {
                 await updateChecker.check(isOnboardingVisible: showingOnboarding)
             }
         }
+        .overlay(alignment: .bottom) {
+            if let skipToast {
+                SaveConfirmationToast(text: skipToast)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, dynamicTypeSize.isAccessibilitySize ? 100 : 12)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .accessibilityIdentifier("skip.row.toast")
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: skipToast)
     }
 
     // MARK: - Update prompt bindings (#116)
@@ -203,11 +236,52 @@ struct ContentView: View {
         .accessibilityIdentifier("empty.title")
     }
 
+    // MARK: - Skip (#197)
+
+    private var isGlobalSkipActive: Bool {
+        globalSkip?.isActive == true
+    }
+
+    private var activeGlobalSkip: GlobalSkip? {
+        guard let globalSkip, globalSkip.isActive else { return nil }
+        return globalSkip
+    }
+
+    private func refreshGlobalSkip() {
+        if let skip = AppGroup.globalSkip, !skip.isActive {
+            AppGroup.globalSkip = nil
+        }
+        globalSkip = AppGroup.globalSkip
+    }
+
+    /// タイムゾーンが変わったら、補いのアラームを登録し直す（#197）。
+    private func syncSkipTimeZoneIfNeeded() {
+        let current = TimeZone.current.identifier
+        let previous = AppGroup.lastSkipTimeZone
+        AppGroup.lastSkipTimeZone = current
+        guard let previous, previous != current else { return }
+        let hasSkip = AppGroup.globalSkip != nil
+            || alarmStore.alarms.contains { !$0.skipDates.isEmpty || $0.skipsHolidays }
+        guard hasSkip else { return }
+        AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
+    }
+
     // MARK: - Alarm List
 
     private var alarmList: some View {
         let displayed = AlarmListOrdering.sortedForDisplay(alarmStore.alarms)
         return List {
+            if let skip = activeGlobalSkip {
+                GlobalSkipNoticeRow(
+                    skip: skip,
+                    entries: alarmStore.alarms,
+                    onUndo: {
+                        AlarmSkipService.undoAll()
+                        refreshGlobalSkip()
+                    }
+                )
+                .warmCard()
+            }
             ForEach(displayed, id: \.id) { alarm in
                 AlarmRow(
                     alarm: alarm,
@@ -216,13 +290,22 @@ struct ContentView: View {
                     onToggle: {
                         alarmStore.toggleEnabled(alarm)
                         AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
+                        refreshGlobalSkip()
                     },
                     onTap: {
                         selectedAlarm = alarm
                     }
                 )
                 .warmCard()
+                .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                    if !alarm.repeatWeekdays.isEmpty {
+                        skipSwipeAction(for: alarm)
+                    }
+                }
                 .contextMenu {
+                    if !alarm.repeatWeekdays.isEmpty {
+                        skipMenuButton(for: alarm)
+                    }
                     Button {
                         alarmStore.duplicate(alarm)
                         AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
@@ -239,10 +322,122 @@ struct ContentView: View {
                     }
                 }
                 AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
+                refreshGlobalSkip()
             }
         }
         .animation(.default, value: alarmStore.alarms)
         .warmListBackground()
+        .sheet(isPresented: $showingSkipAll, onDismiss: refreshGlobalSkip) {
+            SkipAllSheet(entries: alarmStore.alarms.filter(\.isEnabled))
+        }
+    }
+
+    private func skipNextWithToast(_ alarm: AlarmEntry) {
+        guard let next = AlarmSkipLogic.nextFireDate(for: alarm, after: Date()) else {
+            return
+        }
+        AlarmSkipService.skipNext(entryID: alarm.id)
+        showSkipToast(String(
+            format: String(localized: "skip_row_toast_skipped_fmt"),
+            AlarmSkipFormat.day(next)
+        ))
+    }
+
+    private func undoNextWithToast(_ alarm: AlarmEntry) {
+        guard let skipped = AlarmSkipLogic.nextIndividualSkipDate(
+            for: alarm,
+            after: Date()
+        ) else { return }
+        AlarmSkipService.undoNext(entryID: alarm.id)
+        showSkipToast(String(
+            format: String(localized: "skip_row_toast_undone_fmt"),
+            AlarmSkipFormat.day(skipped)
+        ))
+    }
+
+    private func showSkipToast(_ text: String) {
+        skipToastTask?.cancel()
+        withAnimation(.easeInOut(duration: 0.2)) {
+            skipToast = text
+        }
+        AccessibilityNotification.Announcement(text).post()
+        skipToastTask = Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(2500))
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeInOut(duration: 0.25)) {
+                skipToast = nil
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func skipSwipeAction(for alarm: AlarmEntry) -> some View {
+        if AlarmSkipLogic.nextIndividualSkipDate(for: alarm, after: Date()) != nil {
+            Button {
+                undoNextWithToast(alarm)
+            } label: {
+                Label {
+                    Text("skip_row_undo")
+                } icon: {
+                    Image(systemName: "alarm")
+                }
+            }
+            .tint(Color.textSecondary)
+            .accessibilityIdentifier("skip.row.undo.\(alarm.id.uuidString)")
+        } else if let next = AlarmSkipLogic.nextFireDate(for: alarm, after: Date()) {
+            Button {
+                skipNextWithToast(alarm)
+            } label: {
+                Label {
+                    Text(String(
+                        format: String(localized: "skip_row_skip_fmt"),
+                        AlarmSkipFormat.day(next)
+                    ))
+                } icon: {
+                    skipActionIcon()
+                }
+            }
+            .tint(Brand.orange)
+            .accessibilityIdentifier("skip.row.skip.\(alarm.id.uuidString)")
+        }
+    }
+
+    @ViewBuilder
+    private func skipActionIcon() -> some View {
+        if let image = AlarmOffIconRenderer.image(pointSize: skipActionIconSize) {
+            Image(uiImage: image)
+                .renderingMode(.template)
+        } else {
+            Image(systemName: "alarm")
+        }
+    }
+
+    @ViewBuilder
+    private func skipMenuButton(for alarm: AlarmEntry) -> some View {
+        if AlarmSkipLogic.nextIndividualSkipDate(for: alarm, after: Date()) != nil {
+            Button {
+                undoNextWithToast(alarm)
+            } label: {
+                Label {
+                    Text("skip_row_undo")
+                } icon: {
+                    Image(systemName: "alarm")
+                }
+            }
+        } else if let next = AlarmSkipLogic.nextFireDate(for: alarm, after: Date()) {
+            Button {
+                skipNextWithToast(alarm)
+            } label: {
+                Label {
+                    Text(String(
+                        format: String(localized: "skip_row_skip_fmt"),
+                        AlarmSkipFormat.day(next)
+                    ))
+                } icon: {
+                    skipActionIcon()
+                }
+            }
+        }
     }
 
 }
@@ -270,6 +465,7 @@ struct AlarmRow: View {
             .padding(.vertical, dynamicTypeSize.isAccessibilitySize ? 8 : 4)
         }
         .foregroundStyle(.primary)
+        .accessibilityIdentifier("alarm.row")
     }
 
     // MARK: - Layouts
@@ -281,6 +477,20 @@ struct AlarmRow: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 timeText
+                if let skipSummaryText {
+                    Text(skipSummaryText)
+                        .font(.caption)
+                        .foregroundStyle(metaColor)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityIdentifier("skip.row.summary")
+                }
+                if let globalSkipSummaryText {
+                    Text(globalSkipSummaryText)
+                        .font(.caption)
+                        .foregroundStyle(metaColor)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityIdentifier("skip.row.globalSummary")
+                }
                 if !alarm.label.isEmpty {
                     Text(alarm.label)
                         .font(.subheadline)
@@ -288,6 +498,13 @@ struct AlarmRow: View {
                         .lineLimit(1)
                 }
                 metadataLine(vertical: false)
+                if let holidaySummary {
+                    Text(holidaySummary)
+                        .font(.caption)
+                        .foregroundStyle(metaColor)
+                        .lineLimit(1)
+                        .accessibilityIdentifier("holiday.summary")
+                }
             }
 
             Spacer(minLength: 8)
@@ -305,6 +522,22 @@ struct AlarmRow: View {
                 toggle
             }
 
+            if let skipSummaryText {
+                Text(skipSummaryText)
+                    .font(.caption)
+                    .foregroundStyle(metaColor)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("skip.row.summary")
+            }
+
+            if let globalSkipSummaryText {
+                Text(globalSkipSummaryText)
+                    .font(.caption)
+                    .foregroundStyle(metaColor)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("skip.row.globalSummary")
+            }
+
             if !alarm.label.isEmpty {
                 Text(alarm.label)
                     .font(.body)
@@ -313,6 +546,13 @@ struct AlarmRow: View {
             }
 
             metadataLine(vertical: true)
+            if let holidaySummary {
+                Text(holidaySummary)
+                    .font(.caption)
+                    .foregroundStyle(metaColor)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("holiday.summary")
+            }
         }
     }
 
@@ -399,6 +639,42 @@ struct AlarmRow: View {
 
     private var soundDisplayName: String {
         soundName.isEmpty ? String(localized: "default_sound") : soundName
+    }
+
+    private var holidaySummary: String? {
+        guard alarm.skipsHolidays,
+              let holiday = AlarmSkipLogic.nextSkippedHoliday(for: alarm, after: Date())
+        else { return nil }
+        return String(
+            format: String(localized: "holiday_next_skipped"),
+            AlarmSkipFormat.holiday(holiday)
+        )
+    }
+
+    private var skipSummaryText: String? {
+        guard let summary = AlarmSkipLogic.individualSkipSummary(
+            for: alarm,
+            after: Date()
+        ) else { return nil }
+        if let next = summary.next {
+            return String(
+                format: String(localized: "skip_row_summary_fmt"),
+                AlarmSkipFormat.day(summary.skipped),
+                AlarmSkipFormat.day(next)
+            )
+        }
+        return String(
+            format: String(localized: "skip_row_summary_no_next_fmt"),
+            AlarmSkipFormat.day(summary.skipped)
+        )
+    }
+
+    private var globalSkipSummaryText: String? {
+        guard let end = AlarmSkipLogic.globalSkipRowEnd(for: alarm) else { return nil }
+        return String(
+            format: String(localized: "skip_row_global_fmt"),
+            AlarmSkipFormat.dayAndTime(end)
+        )
     }
 
     private var repeatSummary: String {

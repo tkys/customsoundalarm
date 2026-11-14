@@ -77,12 +77,10 @@ final class OnboardingUITests: XCTestCase {
         let addRoot = app.collectionViews["addAlarm.root"]
         XCTAssertTrue(addRoot.waitForExistence(timeout: 8), "add screen should appear: \(app.debugDescription)")
 
-        // 取り込み画面は開いた直後にソース選択ダイアログ（写真ライブラリ / ファイル）を出す。
-        // このボタンは動画の取り込みにしか無いので、出ていれば直接開けている。
-        // "Cancel" は追加画面のツールバーにもあるため判定に使わない（#101 偽陽性の原因）
-        let photoButton = app.buttons["写真ライブラリ"]
-        let photoButtonEn = app.buttons["Photo Library"]
-        let videoExists = photoButtonEn.waitForExistence(timeout: 6) || photoButton.waitForExistence(timeout: 1)
+        // 取り込み画面は、開いた直後に画面内の2行（写真ライブラリ / ファイル）を出す（#200）。
+        // この行は動画の取り込みにしか無いので、出ていれば直接開けている。
+        let photoRow = app.buttons["videoImport.source.photo"]
+        let videoExists = photoRow.waitForExistence(timeout: 6)
         if !videoExists {
             print("DEBUG videoImport not found, hierarchy:\n\(app.debugDescription)")
         }
