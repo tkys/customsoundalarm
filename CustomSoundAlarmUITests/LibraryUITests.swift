@@ -108,61 +108,44 @@ final class LibraryUITests: XCTestCase {
         )
     }
 
-    func testPlaylistEmptyStateExplainsAndOffersCreate() {
-        let app = launch([
-            "-uitest-open-library",
-            "-uitest-reset-playlists",
-            "-uitest-reset-sounds"
-        ])
-
+    func testPlaylistSuggestionCreatesPlaylist() {
+        let app = launch(["-uitest-seed-suggestion", "-uitest-open-library"])
         XCTAssertTrue(
             app.collectionViews["library.root"].waitForExistence(timeout: 15),
             "library should open: \(app.debugDescription)"
         )
-        let explanation = app.staticTexts["playlist.empty.explanation"]
-        XCTAssertTrue(
-            explanation.waitForExistence(timeout: 10),
-            "empty explanation should appear: \(app.debugDescription)"
-        )
-        XCTAssertTrue(
-            app.staticTexts["playlist.empty.importHint"].exists,
-            "import hint should appear when there are no own sounds"
-        )
+        XCTAssertFalse(app.staticTexts["playlist.empty.explanation"].exists)
+        XCTAssertFalse(app.buttons["library.addPlaylist"].exists)
 
-        let create = app.buttons["library.addPlaylist"]
-        XCTAssertTrue(create.exists, "create button should be in the empty state")
-        XCTAssertLessThan(
-            explanation.frame.minY,
-            create.frame.minY,
-            "explanation should be read before the create button"
-        )
-
-        create.tap()
+        let suggestion = app.buttons["library.playlistSuggestion"]
         XCTAssertTrue(
-            app.textFields["playlist.name"].waitForExistence(timeout: 10),
-            "create button should open the playlist editor"
+            suggestion.waitForExistence(timeout: 10),
+            "suggestion should appear: \(app.debugDescription)"
         )
+        suggestion.tap()
+
+        XCTAssertTrue(
+            app.buttons["library.playlist.自分の音"].waitForExistence(timeout: 10),
+            "created playlist should appear: \(app.debugDescription)"
+        )
+        XCTAssertFalse(app.buttons["library.playlistSuggestion"].exists)
     }
 
-    func testPlaylistEmptyStateHiddenWhenPlaylistsExist() {
+    func testPlaylistsShowRowsAndAddButton() {
         let app = launch(["-uitest-seed-library", "-uitest-open-library"])
         XCTAssertTrue(
             app.collectionViews["library.root"].waitForExistence(timeout: 15),
             "library should open: \(app.debugDescription)"
         )
-        XCTAssertFalse(
-            app.staticTexts["playlist.empty.explanation"]
-                .waitForExistence(timeout: 2),
-            "empty explanation should not appear when playlists exist"
-        )
+        XCTAssertFalse(app.staticTexts["playlist.empty.explanation"].exists)
+        XCTAssertTrue(app.buttons["library.playlist.朝の支度"].exists)
         XCTAssertTrue(app.buttons["library.addPlaylist"].exists)
     }
 
-    func testPlaylistEmptyStateAtAccessibilitySize() {
+    func testPlaylistSuggestionAtAccessibilitySize() {
         let app = launch([
+            "-uitest-seed-suggestion",
             "-uitest-open-library",
-            "-uitest-reset-playlists",
-            "-uitest-reset-sounds",
             "-UIPreferredContentSizeCategoryName",
             "UICTContentSizeCategoryAccessibilityXXXL"
         ])
@@ -170,19 +153,23 @@ final class LibraryUITests: XCTestCase {
             app.collectionViews["library.root"].waitForExistence(timeout: 15),
             "library should open: \(app.debugDescription)"
         )
-        let explanation = app.staticTexts["playlist.empty.explanation"]
-        XCTAssertTrue(explanation.waitForExistence(timeout: 10))
+        let suggestion = app.buttons["library.playlistSuggestion"]
+        var swipes = 0
+        while (!suggestion.exists || !suggestion.isHittable) && swipes < 8 {
+            app.swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(suggestion.waitForExistence(timeout: 10))
         XCTAssertFalse(
-            explanation.label.hasSuffix("…"),
-            "AX5 explanation should not be truncated: \(explanation.label)"
+            suggestion.label.hasSuffix("…"),
+            "AX5 suggestion should not be truncated: \(suggestion.label)"
         )
-        XCTAssertTrue(app.buttons["library.addPlaylist"].exists)
     }
 
     func testCreatePlaylistInLibraryAndSelectItForAlarm() {
         let app = launch([
             "-uitest-open-library",
-            "-uitest-reset-playlists",
+            "-uitest-seed-library",
             "-uitest-save-alarm-disabled"
         ])
 
@@ -190,7 +177,14 @@ final class LibraryUITests: XCTestCase {
             app.collectionViews["library.root"].waitForExistence(timeout: 15),
             "library should open: \(app.debugDescription)"
         )
-        app.buttons["library.addPlaylist"].tap()
+        let addPlaylist = app.buttons["library.addPlaylist"]
+        var swipes = 0
+        while !addPlaylist.isHittable && swipes < 8 {
+            app.swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(addPlaylist.waitForExistence(timeout: 10))
+        addPlaylist.tap()
 
         let nameField = app.textFields["playlist.name"]
         XCTAssertTrue(nameField.waitForExistence(timeout: 10))
@@ -243,6 +237,12 @@ final class LibraryUITests: XCTestCase {
         soundRow.tap()
 
         let choice = app.buttons["alarmSoundChoice.playlist.LibUITest"]
+        let choiceRoot = app.collectionViews["alarmSoundChoice.root"]
+        var choiceSwipes = 0
+        while (!choice.exists || !choice.isHittable) && choiceSwipes < 8 {
+            choiceRoot.swipeUp()
+            choiceSwipes += 1
+        }
         XCTAssertTrue(
             choice.waitForExistence(timeout: 10),
             "library playlist should appear in sound choice: \(app.debugDescription)"

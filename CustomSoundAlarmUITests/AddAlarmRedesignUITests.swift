@@ -71,9 +71,12 @@ final class AddAlarmRedesignUITests: XCTestCase {
     func testSoundRowTapSelectsAndPreviews() {
         launchAdd()
         let choice = openSoundChoice()
+        let standard = app.buttons["library.standardSounds"]
+        scrollTo(standard, in: choice)
+        standard.tap()
 
         let row = app.buttons["library.preset.PresetMarimba.caf"]
-        scrollToRow(row, in: choice)
+        XCTAssertTrue(row.waitForExistence(timeout: 10), "standard row should appear")
         let preview = app.buttons["soundPicker.preview.PresetMarimba.caf"]
         XCTAssertTrue(preview.waitForExistence(timeout: 5), "play button should exist")
         XCTAssertFalse(row.isSelected, "not selected before tap")
@@ -116,11 +119,15 @@ final class AddAlarmRedesignUITests: XCTestCase {
             "playlist should be selected: \(soundRow.label)"
         )
 
-        _ = openSoundChoice()
+        let choice = openSoundChoice()
+        let standard = app.buttons["library.standardSounds"]
+        scrollTo(standard, in: choice)
+        standard.tap()
         let sound = app.buttons["library.preset.PresetMarimba.caf"]
-        scrollToRow(sound, in: app.collectionViews["alarmSoundChoice.root"])
+        XCTAssertTrue(sound.waitForExistence(timeout: 10))
         let soundName = sound.label
         sound.tap()
+        closeStandardSoundsSheet()
 
         // 選んでも閉じない（#196）。戻って追加画面の表示を確認する
         app.navigationBars.buttons.element(boundBy: 0).tap()
@@ -135,16 +142,21 @@ final class AddAlarmRedesignUITests: XCTestCase {
         )
     }
 
-    private func scrollToRow(_ row: XCUIElement, in choice: XCUIElement) {
+    private func scrollTo(_ element: XCUIElement, in container: XCUIElement) {
         var swipes = 0
-        while (!row.exists || !row.isHittable) && swipes < 12 {
-            choice.swipeUp()
+        while (!element.exists || !element.isHittable) && swipes < 10 {
+            container.swipeUp()
             swipes += 1
         }
-        XCTAssertTrue(
-            row.waitForExistence(timeout: 5),
-            "row should be reachable: \(app.debugDescription)"
-        )
+    }
+
+    private func closeStandardSoundsSheet() {
+        for label in ["Close", "閉じる"] {
+            if app.buttons[label].waitForExistence(timeout: 2) {
+                app.buttons[label].tap()
+                return
+            }
+        }
     }
 
     /// 再生中は再生ボタンのラベルが「停止 / Stop」に変わる（#196）。
@@ -204,35 +216,44 @@ final class AddAlarmRedesignUITests: XCTestCase {
         cancel.tap()
     }
 
-    func testSoundChoicePlaylistEmptyStateExplainsAndOffersCreate() {
+    func testSoundChoicePlaylistSuggestionCreatesAndSelects() {
         app.launchArguments = [
             "-uitest-open-add-alarm",
-            "-uitest-reset-playlists",
-            "-uitest-reset-sounds"
+            "-uitest-seed-suggestion"
         ]
         app.launch()
         XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
 
+        let soundRow = findElement("addAlarm.soundRow")
+        let choice = openSoundChoice()
+        XCTAssertFalse(app.staticTexts["playlist.empty.explanation"].exists)
+        XCTAssertFalse(app.buttons["alarmSoundChoice.addPlaylist"].exists)
+
+        let suggestion = app.buttons["alarmSoundChoice.playlistSuggestion"]
+        scrollTo(suggestion, in: choice)
+        XCTAssertTrue(
+            suggestion.waitForExistence(timeout: 10),
+            "suggestion should appear: \(app.debugDescription)"
+        )
+        suggestion.tap()
+
+        XCTAssertTrue(soundRow.waitForExistence(timeout: 10), "should return to add screen")
+        XCTAssertTrue(
+            soundRow.label.contains("My sounds") || soundRow.label.contains("自分の音"),
+            "created playlist should be selected: \(soundRow.label)"
+        )
+
         _ = openSoundChoice()
-        let explanation = app.staticTexts["playlist.empty.explanation"]
         XCTAssertTrue(
-            explanation.waitForExistence(timeout: 10),
-            "empty explanation should appear: \(app.debugDescription)"
+            app.buttons.matching(
+                NSPredicate(format: "identifier BEGINSWITH %@", "alarmSoundChoice.playlist.")
+            ).firstMatch.waitForExistence(timeout: 10),
+            "created playlist row should replace the suggestion"
         )
-        XCTAssertTrue(
-            app.staticTexts["playlist.empty.importHint"].exists,
-            "import hint should appear when there are no own sounds"
-        )
-        let create = app.buttons["alarmSoundChoice.addPlaylist"]
-        XCTAssertTrue(create.exists)
-        XCTAssertLessThan(
-            explanation.frame.minY,
-            create.frame.minY,
-            "explanation should be read before the create button"
-        )
+        XCTAssertFalse(app.buttons["alarmSoundChoice.playlistSuggestion"].exists)
     }
 
-    func testSoundChoicePlaylistEmptyStateHiddenWhenPlaylistsExist() {
+    func testSoundChoicePlaylistsShowRowsAndAddButton() {
         app.launchArguments = [
             "-uitest-open-add-alarm",
             "-uitest-seed-design-audit"
@@ -241,33 +262,57 @@ final class AddAlarmRedesignUITests: XCTestCase {
         XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
 
         _ = openSoundChoice()
-        XCTAssertFalse(
-            app.staticTexts["playlist.empty.explanation"]
-                .waitForExistence(timeout: 2),
-            "empty explanation should not appear when playlists exist"
+        XCTAssertFalse(app.staticTexts["playlist.empty.explanation"].exists)
+        XCTAssertTrue(
+            app.buttons.matching(
+                NSPredicate(format: "identifier BEGINSWITH %@", "alarmSoundChoice.playlist.")
+            ).firstMatch.waitForExistence(timeout: 10)
         )
         XCTAssertTrue(app.buttons["alarmSoundChoice.addPlaylist"].exists)
+        XCTAssertTrue(app.buttons["library.standardSounds"].exists)
     }
 
-    func testSoundChoicePlaylistEmptyStateAtAccessibilitySize() {
+    func testSoundChoicePlaylistSuggestionAtAccessibilitySize() {
         app.launchArguments = [
             "-uitest-open-add-alarm",
-            "-uitest-reset-playlists",
-            "-uitest-reset-sounds",
+            "-uitest-seed-suggestion",
             "-UIPreferredContentSizeCategoryName",
             "UICTContentSizeCategoryAccessibilityXXXL"
         ]
         app.launch()
         XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
 
-        _ = openSoundChoice()
-        let explanation = app.staticTexts["playlist.empty.explanation"]
-        XCTAssertTrue(explanation.waitForExistence(timeout: 10))
+        let choice = openSoundChoice()
+        let suggestion = app.buttons["alarmSoundChoice.playlistSuggestion"]
+        scrollTo(suggestion, in: choice)
+        XCTAssertTrue(suggestion.waitForExistence(timeout: 10))
         XCTAssertFalse(
-            explanation.label.hasSuffix("…"),
-            "AX5 explanation should not be truncated: \(explanation.label)"
+            suggestion.label.hasSuffix("…"),
+            "AX5 suggestion should not be truncated: \(suggestion.label)"
         )
-        XCTAssertTrue(app.buttons["alarmSoundChoice.addPlaylist"].exists)
+    }
+
+    func testStandardSoundsRowOpensAndSelects() {
+        launchAdd()
+        _ = openSoundChoice()
+        let standard = app.buttons["library.standardSounds"]
+        XCTAssertTrue(
+            standard.waitForExistence(timeout: 10),
+            "standard row should appear: \(app.debugDescription)"
+        )
+        standard.tap()
+
+        let row = app.buttons["library.preset.PresetMarimba.caf"]
+        XCTAssertTrue(row.waitForExistence(timeout: 10), "standard list should open")
+        row.tap()
+        XCTAssertTrue(row.isSelected, "tapping a standard sound should select it")
+        closeStandardSoundsSheet()
+
+        XCTAssertTrue(standard.waitForExistence(timeout: 10))
+        XCTAssertTrue(
+            standard.label.contains("Marimba") || standard.label.contains("マリンバ"),
+            "selected standard name should appear on the row: \(standard.label)"
+        )
     }
 
     func testOversleepDetailsAppearOnlyWhenOn() {

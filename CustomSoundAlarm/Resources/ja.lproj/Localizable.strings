@@ -296,7 +296,7 @@
 "transition_crossfade" = "クロスフェード";
 "transition_footer" = "曲をつなぐときに適用されます。";
 "playlist_playback" = "再生方法";
-"playlist_summary_fmt" = "%@・%d曲";
+"playlist_summary_fmt" = "%d曲・%@";
 
 /* Library (#160 PR-2) */
 "library_title" = "ライブラリ";
@@ -305,8 +305,16 @@
 
 /* Playlist polish (#169) */
 "playlist_preview" = "プレイリストを試聴";
-"play_order_footer" = "アラームは止めるまで繰り返します。シャッフルは止めるたびに次の順番を変えます。1曲だけランダムは、毎回選んだ1曲を繰り返します。";
-
+// #207 library order
+"standard_sounds_fmt" = "標準の音（%d）";
+"standard_sounds_title" = "標準の音";
+"playlist_suggestion_title" = "取り込んだ%d曲で、鳴るたびに曲を変える";
+"playlist_suggestion_library_subtitle" = "プレイリストを作ります";
+"playlist_suggestion_alarm_subtitle" = "プレイリストを作って、このアラームに使います";
+"playlist_suggestion_name" = "自分の音";
+"play_order_when_in_order" = "いつも同じ順番";
+"play_order_when_shuffle" = "鳴るたびに順番が変わる";
+"play_order_when_one_random" = "鳴るたびに1曲を選んで繰り返す";
 // #204 settings
 "settings" = "設定";
 "settings_contact" = "不具合を報告する／問い合わせ";

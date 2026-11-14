@@ -15,10 +15,10 @@ struct LibraryView: View {
     var body: some View {
         NavigationStack(path: $path) {
             List {
-                playlistSection
                 SoundLibrarySections(
                     isSelecting: false,
-                    selectedSound: $selectedSound
+                    selectedSound: $selectedSound,
+                    middle: AnyView(playlistSection)
                 )
 
                 #if DEBUG
@@ -87,21 +87,29 @@ struct LibraryView: View {
 
     // MARK: - Playlists
 
-    private var hasOwnSounds: Bool {
-        soundStore.sounds.contains { !$0.isPreset }
+    private var importedCount: Int {
+        SoundPickerLogic.mySounds(in: soundStore.sounds).count
     }
 
+    @ViewBuilder
     private var playlistSection: some View {
-        Section {
-            if store.playlists.isEmpty {
-                PlaylistEmptyStateView(
-                    source: .library,
-                    hasOwnSounds: hasOwnSounds,
-                    createButtonIdentifier: "library.addPlaylist"
-                ) {
-                    showingNewPlaylist = true
+        if store.playlists.isEmpty {
+            if PlaylistSuggestionLogic.shouldShow(
+                playlistCount: 0,
+                importedSoundCount: importedCount
+            ) {
+                Section {
+                    PlaylistSuggestionRow(
+                        importedCount: importedCount,
+                        subtitle: "playlist_suggestion_library_subtitle"
+                    ) {
+                        _ = PlaylistSuggestionService.create()
+                    }
+                    .accessibilityIdentifier("library.playlistSuggestion")
                 }
-            } else {
+            }
+        } else {
+            Section {
                 ForEach(store.playlists) { playlist in
                     NavigationLink(value: playlist.id) {
                         PlaylistRowLabel(playlist: playlist)
@@ -129,13 +137,9 @@ struct LibraryView: View {
                     Label("playlist_new", systemImage: "plus")
                 }
                 .accessibilityIdentifier("library.addPlaylist")
+            } header: {
+                PlaylistSectionHeader()
             }
-        } header: {
-            PlaylistSectionHeader()
-        } footer: {
-            Text("playlist_early_access_note")
-                .font(.footnote)
-                .foregroundStyle(Color.textSecondary)
         }
     }
 

@@ -296,7 +296,7 @@
 "transition_crossfade" = "Crossfade";
 "transition_footer" = "Geldt bij het aan elkaar zetten van nummers.";
 "playlist_playback" = "Weergave";
-"playlist_summary_fmt" = "%@ · %d nummers";
+"playlist_summary_fmt" = "%d nummers · %@";
 
 /* Library (#160 PR-2) */
 "library_title" = "Bibliotheek";
@@ -305,8 +305,16 @@
 
 /* Playlist polish (#169) */
 "playlist_preview" = "Afspeellijst beluisteren";
-"play_order_footer" = "Wekkers herhalen zich tot je ze stopt. Shuffle wijzigt bij elke stop de volgende volgorde. Eén willekeurig herhaalt steeds hetzelfde nummer.";
-
+// #207 library order
+"standard_sounds_fmt" = "Standaardgeluiden (%d)";
+"standard_sounds_title" = "Standaardgeluiden";
+"playlist_suggestion_title" = "Kies elk moment een ander nummer, met je %d geluiden";
+"playlist_suggestion_library_subtitle" = "Maakt een playlist.";
+"playlist_suggestion_alarm_subtitle" = "Maakt een playlist en gebruikt die voor deze wekker.";
+"playlist_suggestion_name" = "Mijn geluiden";
+"play_order_when_in_order" = "Altijd dezelfde volgorde";
+"play_order_when_shuffle" = "Elke keer een nieuwe volgorde";
+"play_order_when_one_random" = "Elke keer één nummer, op herhaling";
 // #204 settings
 "settings" = "Instellingen";
 "settings_contact" = "Probleem melden of vraag stellen";

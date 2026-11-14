@@ -296,7 +296,7 @@
 "transition_crossfade" = "Crossfade";
 "transition_footer" = "Gilt beim Verbinden der Titel.";
 "playlist_playback" = "Wiedergabe";
-"playlist_summary_fmt" = "%@ · %d Titel";
+"playlist_summary_fmt" = "%d Titel · %@";
 
 /* Library (#160 PR-2) */
 "library_title" = "Bibliothek";
@@ -305,8 +305,16 @@
 
 /* Playlist polish (#169) */
 "playlist_preview" = "Playlist anhören";
-"play_order_footer" = "Wecker wiederholen sich, bis du sie stoppst. Zufällig ändert bei jedem Stoppen die nächste Reihenfolge. Ein zufälliger Titel wiederholt denselben Titel.";
-
+// #207 library order
+"standard_sounds_fmt" = "Standardsounds (%d)";
+"standard_sounds_title" = "Standardsounds";
+"playlist_suggestion_title" = "Jedes Mal ein anderes Lied, mit deinen %d Sounds";
+"playlist_suggestion_library_subtitle" = "Erstellt eine Playlist.";
+"playlist_suggestion_alarm_subtitle" = "Erstellt eine Playlist und nutzt sie für diesen Wecker.";
+"playlist_suggestion_name" = "Meine Sounds";
+"play_order_when_in_order" = "Immer dieselbe Reihenfolge";
+"play_order_when_shuffle" = "Jedes Mal eine neue Reihenfolge";
+"play_order_when_one_random" = "Jedes Mal ein Lied, in Schleife";
 // #204 settings
 "settings" = "Einstellungen";
 "settings_contact" = "Problem melden oder Frage stellen";

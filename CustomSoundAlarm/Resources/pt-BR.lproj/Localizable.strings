@@ -296,7 +296,7 @@
 "transition_crossfade" = "Crossfade";
 "transition_footer" = "Aplica-se ao unir as faixas.";
 "playlist_playback" = "Reprodução";
-"playlist_summary_fmt" = "%@ · %d faixas";
+"playlist_summary_fmt" = "%d faixas · %@";
 
 /* Library (#160 PR-2) */
 "library_title" = "Biblioteca";
@@ -305,8 +305,16 @@
 
 /* Playlist polish (#169) */
 "playlist_preview" = "Ouvir playlist";
-"play_order_footer" = "Os alarmes se repetem até você pará-los. A ordem aleatória muda a próxima ordem a cada parada. Uma aleatória repete a mesma faixa.";
-
+// #207 library order
+"standard_sounds_fmt" = "Sons padrão (%d)";
+"standard_sounds_title" = "Sons padrão";
+"playlist_suggestion_title" = "Troque de música a cada vez, com os seus %d sons";
+"playlist_suggestion_library_subtitle" = "Cria uma playlist.";
+"playlist_suggestion_alarm_subtitle" = "Cria uma playlist e usa neste alarme.";
+"playlist_suggestion_name" = "Meus sons";
+"play_order_when_in_order" = "Sempre a mesma ordem";
+"play_order_when_shuffle" = "Uma ordem nova a cada vez";
+"play_order_when_one_random" = "Uma música escolhida a cada vez, em repetição";
 // #204 settings
 "settings" = "Ajustes";
 "settings_contact" = "Relatar um problema ou perguntar";
