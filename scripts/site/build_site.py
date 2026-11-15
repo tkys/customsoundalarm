@@ -351,6 +351,96 @@ def reviews_html(lang, c, r):
 
 
 PAGES.update(LOCALES)
+
+# 2026-11-15: section headlines match the store screenshots (#218), and the
+# closing line moves to the top. (s1, s3, s4 title, s4 body) per language.
+SECTION_COPY = {
+    "en": [
+        "Your favorite part, on repeat",
+        "Chorus after chorus",
+        "Sounds from your videos",
+        "Open a video from your photo library or the Files app, and the app takes just the sound. A trip video, or the voices of family and pets, can be your alarm too."
+    ],
+    "ja": [
+        "好きな部分がくり返し鳴る",
+        "好きなサビがつぎつぎに",
+        "動画の音もアラームに",
+        "写真ライブラリやファイルアプリの動画を開くと、音だけを取り出してアラームにできます。旅行の動画や、家族・ペットの声も使えます。"
+    ],
+    "fr": [
+        "Ton passage préféré, en boucle",
+        "Refrain après refrain",
+        "Le son de tes vidéos",
+        "Ouvre une vidéo de ta photothèque ou de l’app Fichiers : l’app n’en garde que le son. Une vidéo de voyage, la voix de tes proches ou de ton animal peuvent aussi devenir ton réveil."
+    ],
+    "de": [
+        "Dein Lieblingsteil, in Dauerschleife",
+        "Refrain für Refrain",
+        "Der Ton aus deinen Videos",
+        "Öffne ein Video aus deiner Mediathek oder der Dateien-App, und die App übernimmt nur den Ton. Auch ein Reisevideo oder die Stimmen von Familie und Haustier werden so zum Wecker."
+    ],
+    "es": [
+        "Tu parte favorita, en bucle",
+        "Estribillo tras estribillo",
+        "El sonido de tus vídeos",
+        "Abre un vídeo de tu fototeca o de la app Archivos y la app se queda solo con el sonido. Un vídeo de un viaje o la voz de tu familia o tu mascota también pueden ser tu alarma."
+    ],
+    "pt-BR": [
+        "Seu trecho favorito, em repetição",
+        "Refrão atrás de refrão",
+        "O som dos seus vídeos",
+        "Abra um vídeo da Fototeca ou do app Arquivos e o app usa só o som. Um vídeo de viagem ou a voz da família e do seu pet também podem virar seu despertador."
+    ],
+    "it": [
+        "La tua parte preferita, a ripetizione",
+        "Un ritornello dopo l’altro",
+        "L’audio dei tuoi video",
+        "Apri un video dalla libreria foto o dall’app File e l’app ne prende solo l’audio. Anche un video di viaggio o la voce della famiglia o del tuo animale possono diventare la sveglia."
+    ],
+    "nl": [
+        "Je favoriete stuk, steeds opnieuw",
+        "Refrein na refrein",
+        "Het geluid van je video’s",
+        "Open een video uit je fotobibliotheek of de Bestanden-app en de app neemt alleen het geluid. Ook een reisvideo of de stem van je familie of huisdier kan je wekker worden."
+    ],
+    "ko": [
+        "좋아하는 부분이 반복해서 울려요",
+        "좋아하는 후렴이 차례로",
+        "동영상 소리도 알람으로",
+        "사진 보관함이나 파일 앱의 동영상을 열면 소리만 꺼내 알람으로 쓸 수 있어요. 여행 동영상이나 가족·반려동물의 목소리도 쓸 수 있습니다."
+    ],
+    "zh-Hans": [
+        "最爱的片段，循环响起",
+        "最爱的副歌，一首接一首",
+        "视频里的声音也能当闹钟",
+        "打开照片图库或“文件”App 里的视频，App 只取出其中的声音做成闹钟。旅行视频、家人或宠物的声音也可以。"
+    ],
+    "pl": [
+        "Ulubiony fragment w pętli",
+        "Refren za refrenem",
+        "Dźwięk z twoich filmów",
+        "Otwórz film z biblioteki zdjęć lub aplikacji Pliki, a aplikacja weźmie z niego tylko dźwięk. Film z podróży albo głos rodziny czy zwierzaka też może być budzikiem."
+    ],
+    "cs": [
+        "Oblíbená část pořád dokola",
+        "Refrén za refrénem",
+        "Zvuk z tvých videí",
+        "Otevři video z knihovny fotek nebo z aplikace Soubory a aplikace z něj vezme jen zvuk. Budíkem může být i video z cesty nebo hlas rodiny či mazlíčka."
+    ],
+    "ar": [
+        "جزؤك المفضل يتكرر",
+        "لازمة تلو الأخرى",
+        "الصوت من مقاطع الفيديو",
+        "افتح فيديو من مكتبة الصور أو تطبيق الملفات، فيأخذ التطبيق الصوت فقط. يمكن أن يصبح فيديو من رحلة أو صوت عائلتك أو حيوانك الأليف منبهك أيضًا."
+    ]
+}
+# The top headline. Japanese keeps 「曲」 for search; other languages reuse their closing line.
+TOP_TITLE = {"ja": "明日の朝は、好きな曲のサビで起きる"}
+for _lang, _c in PAGES.items():
+    _s1, _s3, _s4t, _s4b = SECTION_COPY[_lang]
+    _c.update(s1_title=_s1, s3_title=_s3, s4_title=_s4t, s4_body=_s4b)
+    _c["closing_title"] = _c["hero_title"]
+    _c["hero_title"] = TOP_TITLE.get(_lang, _c["end_title"].rstrip("。.!"))
 for _c in PAGES.values():
     _c.setdefault("dir", "ltr")
 
@@ -385,6 +475,10 @@ h2{font-size:26px;line-height:1.35;margin:56px 0 10px}
 @media (max-width:520px){.side{float:none;display:block;width:180px;margin:4px auto 12px}}
 h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
 .faq p{margin:0;color:var(--muted)}
+.hero{display:flex;gap:32px;align-items:center}
+.hero>div{flex:1;min-width:0}
+.hero-art{width:240px;height:auto;flex:none}
+@media (max-width:560px){.hero{flex-direction:column;align-items:stretch;gap:20px}.hero-art{width:230px;align-self:center}}
 .end{margin:64px 0 0;padding-top:32px;border-top:1px solid var(--line);display:flex;gap:28px;align-items:center}
 .end h2{margin:0 0 18px}
 .end-art{width:180px;height:auto;flex:none}
@@ -633,11 +727,13 @@ def page(lang, c, ratings):
 <header><a class="brand" href="{BASE + c["path"]}"><img src="{img}icon.png" alt="">My Sound Alarm</a>
 <a href="#languages">{esc(c["lang_name"])} ▾</a></header>
 <main>
+<section class="hero"><div>
 <h1>{phrases(c["hero_title"])}</h1>
 <p class="lead">{esc(c["hero_body"])}</p>
 {badge(c, img, "hero")}
 {hero_stats_html(c, ratings)}
 <p class="req">{esc(c["req"])}</p>{howto_link}
+</div><img class="hero-art" src="{img}hero.jpg" alt="" width="420" height="560"></section>
 <figure>{waveform_svg(c)}<figcaption>{esc(c["wave_caption"])}</figcaption></figure>
 {featured_html(lang, c)}
 <h2>{esc(c["s1_title"])}</h2>
@@ -651,10 +747,13 @@ def page(lang, c, ratings):
 <img class="side" src="{img}playlist.jpg" alt="" width="132" height="132" loading="lazy">
 <p>{esc(c["s3_body"])}</p>
 <div class="clear"></div>
+<h2>{esc(c["s4_title"])}</h2>
+<img class="side" src="{img}video.jpg" alt="" width="132" height="132" loading="lazy">
+<p>{esc(c["s4_body"])}</p>
+<div class="clear"></div>
 {reviews_html(lang, c, ratings)}
 <section class="faq"><h2>{esc(c["faq_title"])}</h2>{"".join(faqs)}</section>
-<section class="end"><img class="end-art" src="{img}hero.jpg" alt="" width="420" height="560" loading="lazy">
-<div><h2>{phrases(c["end_title"])}</h2>{badge(c, img, "bottom")}</div></section>
+<section class="end"><div><h2>{phrases(c["closing_title"])}</h2>{badge(c, img, "bottom")}</div></section>
 </main>
 <nav id="languages" class="langs" aria-label="Language">{langs}</nav>
 <footer><span class="made">{esc(c["made_by"])}</span><a href="support.html">{esc(c["footer_support"])}</a><a href="privacy.html">{esc(c["footer_privacy"])}</a></footer>
