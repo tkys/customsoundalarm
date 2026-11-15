@@ -53,8 +53,8 @@ final class StoreScreenshotUITests: XCTestCase {
         save(dir, "\(language)-playlist-mid")
 
         // #1 波形の切り取り
-        let source = URL(fileURLWithPath: dir).appendingPathComponent("song2.m4a")
-        let copy = URL(fileURLWithPath: dir).appendingPathComponent("crop2-\(language).m4a")
+        let source = URL(fileURLWithPath: dir).appendingPathComponent("song4.m4a")
+        let copy = URL(fileURLWithPath: dir).appendingPathComponent("crop4-\(language).m4a")
         try? FileManager.default.removeItem(at: copy)
         try FileManager.default.copyItem(at: source, to: copy)
         launch(language: language, locale: locale, arguments: [
