@@ -312,13 +312,6 @@ def hero_stats_html(c, ratings):
     return f'<p class="hstats">{esc(c["hero_stats"].format(avg=avg, count=ratings["count"], fired=fired))}</p>'
 
 
-def playlist_image_html(c, img):
-    """Optional playlist illustration. The art is added in #218; keep the slot ready."""
-    if not c.get("s3_img"):
-        return ""
-    alt = esc(c.get("s3_img_alt", ""))
-    return f'<img class="shot" src="{img}{c["s3_img"]}" alt="{alt}" width="340" height="383" loading="lazy">'
-
 
 def featured_html(lang, c):
     """One real review, near the top, that says what the app is for in the user's own words."""
@@ -389,6 +382,7 @@ h2{font-size:26px;line-height:1.35;margin:56px 0 10px}
 .shot{display:block;width:100%;max-width:340px;height:auto;border:1px solid var(--line);border-radius:22px;margin:18px 0 0}
 .side{float:inline-end;width:132px;height:auto;margin-block:0 12px;margin-inline:20px 0}
 .clear{clear:both}
+@media (max-width:520px){.side{float:none;display:block;width:180px;margin:4px auto 12px}}
 h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
 .faq p{margin:0;color:var(--muted)}
 .end{margin:64px 0 0;padding-top:32px;border-top:1px solid var(--line);display:flex;gap:28px;align-items:center}
@@ -654,8 +648,9 @@ def page(lang, c, ratings):
 <p>{esc(c["s2_body"])}</p>
 <div class="clear"></div>
 <h2>{esc(c["s3_title"])}</h2>
-{playlist_image_html(c, img)}
+<img class="side" src="{img}playlist.jpg" alt="" width="132" height="132" loading="lazy">
 <p>{esc(c["s3_body"])}</p>
+<div class="clear"></div>
 {reviews_html(lang, c, ratings)}
 <section class="faq"><h2>{esc(c["faq_title"])}</h2>{"".join(faqs)}</section>
 <section class="end"><img class="end-art" src="{img}hero.jpg" alt="" width="420" height="560" loading="lazy">
