@@ -186,6 +186,15 @@ enum AppGroup {
     #endif
     }
 
+    /// ストアのスクリーンショット用: 取り込んだ音4つとプレイリストを入れる（DEBUGのみ）
+    static var isUITestSeedStore: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-store")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト・スクリーンショット用: 休みの画面確認用（DEBUGのみ・#197）
     static var isUITestSeedSkip: Bool {
     #if DEBUG

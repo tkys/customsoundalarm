@@ -1,25 +1,17 @@
-■ Playlists (PRO · Vorabzugang)
-Fasse deine Töne in einer Playlist zusammen und lass dich davon wecken – der Reihe nach, zufällig oder mit einem zufälligen Titel. Du kannst auch wählen, wie die Titel ineinander übergehen: mit Blende oder Crossfade.
+■ Tage ohne Wecker
+• Wische einen Wecker nach rechts oder halte ihn gedrückt und wähle „Pausieren“, um nur das nächste Klingeln auszulassen.
+• Wiederholte Wecker können ausgewählte Tage auslassen.
+• Mit der Taste oben rechts pausierst du alle Wecker für eine Weile.
 
-■ Sanfter Start (PRO · Vorabzugang)
-Der Wecker beginnt leise und wird über 5, 15 oder 30 Sekunden lauter.
+■ Playlist mit einem Tipp
+Sobald du mindestens zwei eigene Sounds hast, schlagen die Bibliothek und die Sound-Auswahl eine Playlist vor, die jedes Mal ein anderes Lied spielt. Tippe darauf, um sie zu erstellen.
 
-Wer diese Funktionen im Vorabzugang nutzt, kann sie auch nach der finalen Version weiter nutzen.
+■ Einstellungen
+Über das Zahnrad oben links erreichst du Nachtmodus, Anleitung, Kontakt und Bewertung.
 
-■ Bibliothek
-Der neue Tab „Bibliothek“ bündelt deine Töne und Playlists an einem Ort.
+■ Außerdem
+• In der Sound-Auswahl hörst du einen Sound, wenn du auf seine Zeile tippst.
+• Die Quelle für Videos wählst du jetzt direkt auf dem Bildschirm.
+• Behoben: Ein einmaliger Wecker mit Playlist spielte jedes Mal dasselbe Lied.
 
-■ Jetzt auf Deutsch
-My Sound Alarm ist jetzt auf Deutsch und in 12 weiteren Sprachen verfügbar. Die App folgt der Sprache deines Geräts.
-
-■ Fehlerbehebung
-Ein Wiederholungswecker konnte nach dem Stoppen in derselben Minute erneut klingeln. Das ist behoben.
-Ein Wecker, der nicht mehr in der App angezeigt wurde, konnte zu einer Uhrzeit klingeln, die du nicht eingestellt hast. Das ist behoben: Öffne nach dem Update die App, um solche Wecker zu entfernen.
-
-■ Besser lesbar
-Textfarben und Kontrast wurden überarbeitet, und die Bildschirme bleiben auch mit großen Textgrößen lesbar.
-
-■ „Jetzt klingeln“
-„Jetzt klingeln“ spielt jetzt den Ton, den du gerade bearbeitest. Kann es nicht klingeln, zeigt der Bildschirm den Grund an, und du kannst Alarme direkt erlauben.
-
-Danke, dass du My Sound Alarm nutzt.
+Danke, dass du My Sound Alarm verwendest.
