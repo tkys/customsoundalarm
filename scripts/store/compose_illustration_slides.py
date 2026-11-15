@@ -49,7 +49,7 @@ for l in ['ja','en']:
     # 1
     bg=Image.open(EX+f'{l}/01-no-device.png').convert('RGBA'); W,H=bg.size
     h=hero.resize((W,int(hero.height*W/hero.width)),Image.LANCZOS); place(bg,h,0,H-h.height)
-    c=card(SH+f'{l}-alarms.png',(59,510,1146,1290),980); place(bg,c,(W-c.width)/2,640)
+    # no card: the slide breathes like the LP's closing section
     bg.convert('RGB').save(OUT+f'{l}-01.png')
     # 3
     bg=Image.open(EX+f'{l}/03-no-device.png').convert('RGBA')
