@@ -43,6 +43,9 @@ def card(path, box, width, radius=44):
 def place(bg,img,x,y): bg.alpha_composite(img,(int(x),int(y)))
 
 hero=knockout(SC+'onboarding_hero.png'); silent=knockout(SC+'onboarding_silent.png')
+# the nightstand is cut at the bottom of the art; extend it by repeating the last row
+_ext=170; _row=silent.crop((0,silent.height-2,silent.width,silent.height-1)).resize((silent.width,_ext))
+_s2=Image.new('RGBA',(silent.width,silent.height+_ext),(0,0,0,0)); _s2.alpha_composite(silent,(0,0)); _s2.alpha_composite(_row,(0,silent.height)); silent=_s2
 vd=Image.open(SC+'msa-video-illust-v2.png').convert('RGBA')
 pl=Image.open(SC+'msa-playlist-illust-v2.png').convert('RGBA'); pl=pl.crop(pl.getchannel('A').point(lambda a:255 if a>20 else 0).getbbox())
 for l in ['ja','en']:
@@ -58,7 +61,7 @@ for l in ['ja','en']:
     bg.convert('RGB').save(OUT+f'{l}-03.png')
     # 4
     bg=Image.open(EX+f'{l}/04-no-device.png').convert('RGBA')
-    S=int(1254*1.32); s=silent.resize((S,S),Image.LANCZOS); place(bg,s,(W-S)/2,H-S)
+    S=int(1254*1.32); s=silent.resize((S,int(silent.height*S/silent.width)),Image.LANCZOS); place(bg,s,(W-S)/2,H-s.height)
     bg.convert('RGB').save(OUT+f'{l}-04.png')
     # 5
     bg=Image.open(EX+f'{l}/05-no-device.png').convert('RGBA')
