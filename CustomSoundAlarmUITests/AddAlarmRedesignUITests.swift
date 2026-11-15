@@ -239,7 +239,7 @@ final class AddAlarmRedesignUITests: XCTestCase {
 
         XCTAssertTrue(soundRow.waitForExistence(timeout: 10), "should return to add screen")
         XCTAssertTrue(
-            soundRow.label.contains("My sounds") || soundRow.label.contains("自分の音"),
+            soundRow.label.contains("My Playlist") || soundRow.label.contains("マイプレイリスト"),
             "created playlist should be selected: \(soundRow.label)"
         )
 

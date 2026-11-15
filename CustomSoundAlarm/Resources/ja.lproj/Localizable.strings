@@ -289,12 +289,12 @@
 "play_order_in_order" = "順番";
 "play_order_shuffle" = "シャッフル";
 "play_order_one_random" = "1曲ランダム";
-"transition" = "つなぎ方";
+"transition" = "曲の切り替え";
 "transition_off" = "なし";
-"transition_short" = "短いフェード（0.5秒）";
-"transition_long" = "長いフェード（2秒）";
-"transition_crossfade" = "クロスフェード";
-"transition_footer" = "曲をつなぐときに適用されます。";
+"transition_short" = "短くフェード（0.5秒）";
+"transition_long" = "長くフェード（2秒）";
+"transition_crossfade" = "クロスフェード（前の曲と重ねる）";
+"transition_footer" = "前の曲から次の曲に移るときの音の変わり方です。";
 "playlist_playback" = "再生方法";
 "playlist_summary_fmt" = "%d曲・%@";
 
@@ -311,7 +311,7 @@
 "playlist_suggestion_title" = "取り込んだ%d曲で、鳴るたびに曲を変える";
 "playlist_suggestion_library_subtitle" = "プレイリストを作ります";
 "playlist_suggestion_alarm_subtitle" = "プレイリストを作って、このアラームに使います";
-"playlist_suggestion_name" = "自分の音";
+"playlist_suggestion_name" = "マイプレイリスト";
 "play_order_when_in_order" = "いつも同じ順番";
 "play_order_when_shuffle" = "鳴るたびに順番が変わる";
 "play_order_when_one_random" = "鳴るたびに1曲を選んで繰り返す";

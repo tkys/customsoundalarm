@@ -289,12 +289,12 @@
 "play_order_in_order" = "Der Reihe nach";
 "play_order_shuffle" = "Zufällig";
 "play_order_one_random" = "Ein zufälliger";
-"transition" = "Übergänge";
+"transition" = "Zwischen Titeln";
 "transition_off" = "Keine";
 "transition_short" = "Kurze Überblendung (0,5 s)";
 "transition_long" = "Lange Überblendung (2 s)";
-"transition_crossfade" = "Crossfade";
-"transition_footer" = "Gilt beim Verbinden der Titel.";
+"transition_crossfade" = "Crossfade (überlappt den vorherigen Titel)";
+"transition_footer" = "Wie ein Titel in den nächsten übergeht.";
 "playlist_playback" = "Wiedergabe";
 "playlist_summary_fmt" = "%d Titel · %@";
 
@@ -311,7 +311,7 @@
 "playlist_suggestion_title" = "Jedes Mal ein anderes Lied, mit deinen %d Sounds";
 "playlist_suggestion_library_subtitle" = "Erstellt eine Playlist.";
 "playlist_suggestion_alarm_subtitle" = "Erstellt eine Playlist und nutzt sie für diesen Wecker.";
-"playlist_suggestion_name" = "Meine Sounds";
+"playlist_suggestion_name" = "Meine Playlist";
 "play_order_when_in_order" = "Immer dieselbe Reihenfolge";
 "play_order_when_shuffle" = "Jedes Mal eine neue Reihenfolge";
 "play_order_when_one_random" = "Jedes Mal ein Lied, in Schleife";

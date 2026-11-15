@@ -28,6 +28,18 @@ enum PlaylistSuggestionLogic {
         sounds.reduce(0) { $0 + ($1.durationSeconds ?? 0) }
     }
 
+    /// 同じ名前が既にあるとき、空いている最小の番号を付ける。
+    /// 例: なし→「マイプレイリスト」、無印あり→「マイプレイリスト 2」。
+    static func availableName(base: String, existingNames: [String]) -> String {
+        let existing = Set(existingNames)
+        guard existing.contains(base) else { return base }
+        var number = 2
+        while existing.contains("\(base) \(number)") {
+            number += 1
+        }
+        return "\(base) \(number)"
+    }
+
     /// 提案から作るプレイリストの鳴らし方。
     static let playOrder: PlaylistPlayOrder = .oneRandom
 
@@ -55,8 +67,13 @@ enum PlaylistSuggestionService {
         )
         guard sounds.count >= 2 else { return nil }
 
+        let baseName = String(localized: "playlist_suggestion_name")
+        let name = PlaylistSuggestionLogic.availableName(
+            base: baseName,
+            existingNames: PlaylistStore.shared.playlists.map(\.name)
+        )
         let playlist = PlaylistStore.shared.add(
-            name: String(localized: "playlist_suggestion_name"),
+            name: name,
             tracks: PlaylistSuggestionLogic.makeTracks(from: sounds),
             playOrder: PlaylistSuggestionLogic.playOrder
         )

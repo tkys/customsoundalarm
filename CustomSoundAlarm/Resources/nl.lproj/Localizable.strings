@@ -289,12 +289,12 @@
 "play_order_in_order" = "Op volgorde";
 "play_order_shuffle" = "Shuffle";
 "play_order_one_random" = "Eén willekeurig";
-"transition" = "Overgangen";
+"transition" = "Tussen nummers";
 "transition_off" = "Geen";
 "transition_short" = "Korte fade (0,5 s)";
 "transition_long" = "Lange fade (2 s)";
-"transition_crossfade" = "Crossfade";
-"transition_footer" = "Geldt bij het aan elkaar zetten van nummers.";
+"transition_crossfade" = "Crossfade (overlapt het vorige nummer)";
+"transition_footer" = "Hoe het ene nummer overgaat in het volgende.";
 "playlist_playback" = "Weergave";
 "playlist_summary_fmt" = "%d nummers · %@";
 
@@ -311,7 +311,7 @@
 "playlist_suggestion_title" = "Kies elk moment een ander nummer, met je %d geluiden";
 "playlist_suggestion_library_subtitle" = "Maakt een playlist.";
 "playlist_suggestion_alarm_subtitle" = "Maakt een playlist en gebruikt die voor deze wekker.";
-"playlist_suggestion_name" = "Mijn geluiden";
+"playlist_suggestion_name" = "Mijn afspeellijst";
 "play_order_when_in_order" = "Altijd dezelfde volgorde";
 "play_order_when_shuffle" = "Elke keer een nieuwe volgorde";
 "play_order_when_one_random" = "Elke keer één nummer, op herhaling";

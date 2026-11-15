@@ -289,12 +289,12 @@
 "play_order_in_order" = "In order";
 "play_order_shuffle" = "Shuffle";
 "play_order_one_random" = "One random";
-"transition" = "Transitions";
+"transition" = "Between Tracks";
 "transition_off" = "None";
 "transition_short" = "Short fade (0.5s)";
 "transition_long" = "Long fade (2s)";
-"transition_crossfade" = "Crossfade";
-"transition_footer" = "Applies when tracks are joined.";
+"transition_crossfade" = "Crossfade (overlaps the previous track)";
+"transition_footer" = "How one track changes into the next.";
 "playlist_playback" = "Playback";
 "playlist_summary_fmt" = "%d tracks · %@";
 
@@ -311,7 +311,7 @@
 "playlist_suggestion_title" = "Change the song each time, using your %d sounds";
 "playlist_suggestion_library_subtitle" = "Creates a playlist.";
 "playlist_suggestion_alarm_subtitle" = "Creates a playlist and uses it for this alarm.";
-"playlist_suggestion_name" = "My sounds";
+"playlist_suggestion_name" = "My Playlist";
 "play_order_when_in_order" = "Same order every time";
 "play_order_when_shuffle" = "New order each time";
 "play_order_when_one_random" = "One song picked each time, on repeat";

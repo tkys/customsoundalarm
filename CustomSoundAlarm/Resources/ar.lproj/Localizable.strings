@@ -289,12 +289,12 @@
 "play_order_in_order" = "بالترتيب";
 "play_order_shuffle" = "عشوائي";
 "play_order_one_random" = "مقطع عشوائي";
-"transition" = "الانتقالات";
+"transition" = "بين المقاطع";
 "transition_off" = "بدون";
 "transition_short" = "تلاشٍ قصير (0.5 ث)";
 "transition_long" = "تلاشٍ طويل (2 ث)";
-"transition_crossfade" = "تلاشي متقاطع";
-"transition_footer" = "يُطبَّق عند وصل المقاطع.";
+"transition_crossfade" = "تلاشي متقاطع (يتداخل مع المقطع السابق)";
+"transition_footer" = "كيف ينتقل المقطع إلى المقطع التالي.";
 "playlist_playback" = "التشغيل";
 "playlist_summary_fmt" = "%d مقاطع · %@";
 
@@ -311,7 +311,7 @@
 "playlist_suggestion_title" = "غيّر الأغنية في كل مرة، بأصواتك الـ%d";
 "playlist_suggestion_library_subtitle" = "ينشئ قائمة تشغيل.";
 "playlist_suggestion_alarm_subtitle" = "ينشئ قائمة تشغيل ويستخدمها لهذا المنبه.";
-"playlist_suggestion_name" = "أصواتي";
+"playlist_suggestion_name" = "قائمتي";
 "play_order_when_in_order" = "الترتيب نفسه دائمًا";
 "play_order_when_shuffle" = "ترتيب جديد في كل مرة";
 "play_order_when_one_random" = "أغنية واحدة تُختار في كل مرة، مع التكرار";

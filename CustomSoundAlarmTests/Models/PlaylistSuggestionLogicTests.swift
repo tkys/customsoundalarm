@@ -58,4 +58,21 @@ struct PlaylistSuggestionLogicTests {
         ]
         #expect(PlaylistSuggestionLogic.totalSeconds(sounds) == 12)
     }
+
+    @Test
+    func availableNameUsesTheSmallestFreeNumber() {
+        let base = "マイプレイリスト"
+        #expect(PlaylistSuggestionLogic.availableName(
+            base: base, existingNames: []
+        ) == base)
+        #expect(PlaylistSuggestionLogic.availableName(
+            base: base, existingNames: [base]
+        ) == "\(base) 2")
+        #expect(PlaylistSuggestionLogic.availableName(
+            base: base, existingNames: [base, "\(base) 2"]
+        ) == "\(base) 3")
+        #expect(PlaylistSuggestionLogic.availableName(
+            base: base, existingNames: ["\(base) 2"]
+        ) == base)
+    }
 }

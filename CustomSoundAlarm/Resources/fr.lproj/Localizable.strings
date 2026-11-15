@@ -289,12 +289,12 @@
 "play_order_in_order" = "Dans l'ordre";
 "play_order_shuffle" = "Aléatoire";
 "play_order_one_random" = "Un titre au hasard";
-"transition" = "Transitions";
+"transition" = "Entre les titres";
 "transition_off" = "Aucune";
 "transition_short" = "Fondu court (0,5 s)";
 "transition_long" = "Fondu long (2 s)";
-"transition_crossfade" = "Fondu enchaîné";
-"transition_footer" = "S'applique lors de l'assemblage des titres.";
+"transition_crossfade" = "Fondu enchaîné (chevauche le titre précédent)";
+"transition_footer" = "Comment un titre passe au suivant.";
 "playlist_playback" = "Lecture";
 "playlist_summary_fmt" = "%d morceaux · %@";
 
@@ -311,7 +311,7 @@
 "playlist_suggestion_title" = "Change de morceau à chaque fois, avec tes %d sons";
 "playlist_suggestion_library_subtitle" = "Crée une playlist.";
 "playlist_suggestion_alarm_subtitle" = "Crée une playlist et l’utilise pour cette alarme.";
-"playlist_suggestion_name" = "Mes sons";
+"playlist_suggestion_name" = "Ma playlist";
 "play_order_when_in_order" = "Toujours le même ordre";
 "play_order_when_shuffle" = "Un nouvel ordre à chaque fois";
 "play_order_when_one_random" = "Un morceau choisi à chaque fois, en boucle";

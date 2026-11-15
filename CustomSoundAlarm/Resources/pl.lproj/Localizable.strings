@@ -289,12 +289,12 @@
 "play_order_in_order" = "Po kolei";
 "play_order_shuffle" = "Losowo";
 "play_order_one_random" = "Jeden losowy";
-"transition" = "Przejścia";
+"transition" = "Między utworami";
 "transition_off" = "Brak";
 "transition_short" = "Krótkie przenikanie (0,5 s)";
 "transition_long" = "Długie przenikanie (2 s)";
-"transition_crossfade" = "Przenikanie";
-"transition_footer" = "Dotyczy łączenia utworów.";
+"transition_crossfade" = "Przenikanie (nakłada się na poprzedni utwór)";
+"transition_footer" = "Jak jeden utwór przechodzi w następny.";
 "playlist_playback" = "Odtwarzanie";
 "playlist_summary_fmt" = "%d utworów · %@";
 
@@ -311,7 +311,7 @@
 "playlist_suggestion_title" = "Zmieniaj utwór za każdym razem, z Twoimi %d dźwiękami";
 "playlist_suggestion_library_subtitle" = "Tworzy playlistę.";
 "playlist_suggestion_alarm_subtitle" = "Tworzy playlistę i używa jej w tym budziku.";
-"playlist_suggestion_name" = "Moje dźwięki";
+"playlist_suggestion_name" = "Moja playlista";
 "play_order_when_in_order" = "Zawsze ta sama kolejność";
 "play_order_when_shuffle" = "Za każdym razem nowa kolejność";
 "play_order_when_one_random" = "Za każdym razem jeden utwór, w powtórzeniu";

@@ -289,12 +289,12 @@
 "play_order_in_order" = "순서대로";
 "play_order_shuffle" = "셔플";
 "play_order_one_random" = "한 곡 랜덤";
-"transition" = "전환";
+"transition" = "곡 사이";
 "transition_off" = "없음";
-"transition_short" = "짧은 페이드 (0.5초)";
-"transition_long" = "긴 페이드 (2초)";
-"transition_crossfade" = "크로스페이드";
-"transition_footer" = "곡을 이을 때 적용됩니다.";
+"transition_short" = "짧게 페이드(0.5초)";
+"transition_long" = "길게 페이드(2초)";
+"transition_crossfade" = "크로스페이드(이전 곡과 겹침)";
+"transition_footer" = "한 곡에서 다음 곡으로 넘어갈 때의 소리 변화입니다.";
 "playlist_playback" = "재생";
 "playlist_summary_fmt" = "%d곡 · %@";
 
@@ -311,7 +311,7 @@
 "playlist_suggestion_title" = "가져온 %d곡으로 매번 다른 곡을 재생";
 "playlist_suggestion_library_subtitle" = "플레이리스트를 만듭니다.";
 "playlist_suggestion_alarm_subtitle" = "플레이리스트를 만들어 이 알람에 사용합니다.";
-"playlist_suggestion_name" = "내 사운드";
+"playlist_suggestion_name" = "내 플레이리스트";
 "play_order_when_in_order" = "항상 같은 순서";
 "play_order_when_shuffle" = "울릴 때마다 순서가 바뀜";
 "play_order_when_one_random" = "울릴 때마다 한 곡을 골라 반복";
