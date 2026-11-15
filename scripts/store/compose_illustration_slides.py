@@ -52,8 +52,8 @@ for l in ['ja','en']:
     bg.convert('RGB').save(OUT+f'{l}-01.png')
     # 3
     bg=Image.open(EX+f'{l}/03-no-device.png').convert('RGBA')
-    c=card(SH+f'{l}-playlist-order.png',(48,1100,1156,1712),960); place(bg,c,(W-c.width)/2,640)
-    ph=H-1330; p=pl.resize((int(pl.width*ph/pl.height),ph),Image.LANCZOS); place(bg,p,(W-p.width)/2,H-ph-40)
+    # no screen card: its text is unreadable at phone size. The illustration carries it.
+    ph=H-900; p=pl.resize((int(pl.width*ph/pl.height),ph),Image.LANCZOS); place(bg,p,(W-p.width)/2,H-ph-60)
     bg.convert('RGB').save(OUT+f'{l}-03.png')
     # 4
     bg=Image.open(EX+f'{l}/04-no-device.png').convert('RGBA')
