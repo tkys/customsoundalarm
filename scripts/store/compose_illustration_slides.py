@@ -43,6 +43,7 @@ def card(path, box, width, radius=44):
 def place(bg,img,x,y): bg.alpha_composite(img,(int(x),int(y)))
 
 hero=knockout(SC+'onboarding_hero.png'); silent=knockout(SC+'onboarding_silent.png')
+vd=Image.open(SC+'msa-video-illust-v1.png').convert('RGBA'); vd=vd.crop(vd.getchannel('A').point(lambda a:255 if a>20 else 0).getbbox())
 pl=Image.open(SC+'msa-playlist-illust-v2.png').convert('RGBA'); pl=pl.crop(pl.getchannel('A').point(lambda a:255 if a>20 else 0).getbbox())
 for l in ['ja','en']:
     # 1
@@ -59,7 +60,11 @@ for l in ['ja','en']:
     bg=Image.open(EX+f'{l}/04-no-device.png').convert('RGBA')
     S=int(1254*1.32); s=silent.resize((S,S),Image.LANCZOS); place(bg,s,(W-S)/2,H-S)
     bg.convert('RGB').save(OUT+f'{l}-04.png')
-    for n,src in [('02','02-device-bottom'),('05','05-device-bottom')]:
+    # 5
+    bg=Image.open(EX+f'{l}/05-no-device.png').convert('RGBA')
+    vw=1220; v=vd.resize((vw,int(vd.height*vw/vd.width)),Image.LANCZOS); place(bg,v,(W-vw)/2,1750-v.height/2)
+    bg.convert('RGB').save(OUT+f'{l}-05.png')
+    for n,src in [('02','02-device-bottom')]:
         Image.open(EX+f'{l}/{src}.png').convert('RGB').save(OUT+f'{l}-{n}.png')
 # contact sheet
 for l in ['ja','en']:
