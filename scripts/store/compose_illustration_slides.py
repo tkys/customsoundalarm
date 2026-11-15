@@ -43,7 +43,7 @@ def card(path, box, width, radius=44):
 def place(bg,img,x,y): bg.alpha_composite(img,(int(x),int(y)))
 
 hero=knockout(SC+'onboarding_hero.png'); silent=knockout(SC+'onboarding_silent.png')
-vd=Image.open(SC+'msa-video-illust-v1.png').convert('RGBA'); vd=vd.crop(vd.getchannel('A').point(lambda a:255 if a>20 else 0).getbbox())
+vd=Image.open(SC+'msa-video-illust-v2.png').convert('RGBA')
 pl=Image.open(SC+'msa-playlist-illust-v2.png').convert('RGBA'); pl=pl.crop(pl.getchannel('A').point(lambda a:255 if a>20 else 0).getbbox())
 for l in ['ja','en']:
     # 1
@@ -62,7 +62,7 @@ for l in ['ja','en']:
     bg.convert('RGB').save(OUT+f'{l}-04.png')
     # 5
     bg=Image.open(EX+f'{l}/05-no-device.png').convert('RGBA')
-    vw=1220; v=vd.resize((vw,int(vd.height*vw/vd.width)),Image.LANCZOS); place(bg,v,(W-vw)/2,1750-v.height/2)
+    vh=H-760; v=vd.resize((int(vd.width*vh/vd.height),vh),Image.LANCZOS); place(bg,v,(W-v.width)/2,H-vh)
     bg.convert('RGB').save(OUT+f'{l}-05.png')
     for n,src in [('02','02-device-bottom')]:
         Image.open(EX+f'{l}/{src}.png').convert('RGB').save(OUT+f'{l}-{n}.png')
