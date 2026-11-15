@@ -1,25 +1,17 @@
-■ Afspeellijsten (PRO · Vroege toegang)
-Zet je geluiden in een afspeellijst en word ermee wakker: op volgorde, in shuffle of met één willekeurig nummer. Je kiest ook hoe de nummers in elkaar overlopen: met een fade of een crossfade.
+■ Dagen zonder wekker
+• Veeg een wekker naar rechts of houd hem ingedrukt en kies ‘Pauzeren’ om alleen de volgende over te slaan.
+• Herhalende wekkers kunnen datums overslaan die jij kiest.
+• Met de knop rechtsboven pauzeer je alle wekkers een tijdje.
 
-■ Zachte start (PRO · Vroege toegang)
-De wekker begint zacht en wordt in 5, 15 of 30 seconden luider.
+■ Playlist met één tik
+Heb je twee of meer eigen geluiden, dan stellen de Bibliotheek en de geluidskeuze een playlist voor die elke keer een ander nummer speelt. Tik erop om hem te maken.
 
-Begin je ermee tijdens de vroege toegang, dan kun je ze na de definitieve versie blijven gebruiken.
+■ Instellingen
+Tik op het tandwiel linksboven voor de nachtmodus, uitleg, contact en beoordelingen.
 
-■ Bibliotheek
-Het nieuwe tabblad Bibliotheek bundelt je geluiden en afspeellijsten op één plek.
+■ Verder
+• Tik in de geluidskeuze op een rij om dat geluid te horen.
+• Kies de bron van een video nu direct op het scherm.
+• Opgelost: een eenmalige wekker met een playlist speelde elke keer hetzelfde nummer.
 
-■ Nu in het Nederlands
-My Sound Alarm is nu beschikbaar in het Nederlands en in 12 andere talen. De app volgt de taal van je apparaat.
-
-■ Oplossingen
-Een herhalende wekker kon binnen dezelfde minuut opnieuw afgaan nadat je hem had gestopt. Dat is opgelost.
-Een wekker die niet meer in de app stond, kon afgaan op een tijd die je niet had ingesteld. Dat is opgelost: open na de update de app om zulke wekkers te verwijderen.
-
-■ Beter leesbaar
-Tekstkleuren en contrast zijn herzien, en schermen blijven leesbaar met grote tekstgroottes.
-
-■ ‘Laat nu afgaan’
-‘Laat nu afgaan’ speelt nu het geluid dat je aan het bewerken bent. Kan het niet afgaan, dan toont het scherm de reden en kun je wekkers meteen toestaan.
-
-Bedankt dat je My Sound Alarm gebruikt.
+Bedankt voor het gebruiken van My Sound Alarm.

@@ -242,6 +242,15 @@ struct AudioCropView: View {
         // 初期選択は全範囲（音声は上限なし）
         startTime = 0
         endTime = seconds
+        #if DEBUG
+        // ストアのスクショ用: -uitestCropStart / -uitestCropEnd（秒）で選択範囲を決める。
+        let defaults = UserDefaults.standard
+        if defaults.object(forKey: "uitestCropStart") != nil,
+           defaults.object(forKey: "uitestCropEnd") != nil {
+            startTime = min(max(0, defaults.double(forKey: "uitestCropStart")), seconds)
+            endTime = min(max(startTime, defaults.double(forKey: "uitestCropEnd")), seconds)
+        }
+        #endif
         if soundName.isEmpty {
             soundName = source.name
         }

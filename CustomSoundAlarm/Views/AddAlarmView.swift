@@ -254,8 +254,18 @@ struct AlarmDetailView: View {
     /// RTL 言語でも波形が左→右のままか screenshot で確認するために使う。
     private func openUITestWaveformCropIfNeeded() {
         #if DEBUG
-        guard AppGroup.isUITestOpenWaveformCrop, pendingAudio == nil,
-              let url = Bundle.main.url(forResource: "PresetMarimba", withExtension: "caf")
+        guard AppGroup.isUITestOpenWaveformCrop, pendingAudio == nil else { return }
+        // ストアのスクショ用: -uitestCropPath <音声ファイル> -uitestCropName <表示名> で差し替える。
+        let defaults = UserDefaults.standard
+        if let path = defaults.string(forKey: "uitestCropPath"),
+           FileManager.default.fileExists(atPath: path) {
+            pendingAudio = PendingAudioImport(
+                url: URL(fileURLWithPath: path),
+                name: defaults.string(forKey: "uitestCropName") ?? "Morning"
+            )
+            return
+        }
+        guard let url = Bundle.main.url(forResource: "PresetMarimba", withExtension: "caf")
         else { return }
         pendingAudio = PendingAudioImport(url: url, name: String(localized: "preset_marimba"))
         #endif

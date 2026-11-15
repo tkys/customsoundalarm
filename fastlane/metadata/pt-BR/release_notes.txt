@@ -1,25 +1,17 @@
-■ Playlists (PRO · Acesso antecipado)
-Junte seus sons em uma playlist e acorde com ela: em ordem, aleatória ou com uma faixa sorteada. Você também escolhe como as faixas se emendam, com fade ou crossfade.
+■ Dias sem alarme
+• Deslize um alarme para a direita ou toque e segure, e escolha "Pausar" para pular só o próximo.
+• Alarmes que se repetem podem pular as datas que você escolher.
+• Use o botão no canto superior direito para pausar todos os alarmes por um tempo.
 
-■ Início suave (PRO · Acesso antecipado)
-O alarme começa baixo e aumenta ao longo de 5, 15 ou 30 segundos.
+■ Playlist com um toque
+Quando você tem dois ou mais sons seus, a Biblioteca e a escolha de som sugerem uma playlist que troca de música a cada vez. Toque para criar.
 
-Quem começar a usar durante o acesso antecipado poderá continuar usando após a versão final.
+■ Ajustes
+Toque na engrenagem no canto superior esquerdo para o modo noturno, o guia, o contato e as avaliações.
 
-■ Biblioteca
-A nova aba Biblioteca reúne seus sons e playlists em um só lugar.
-
-■ Agora em português
-O My Sound Alarm agora está disponível em português e em mais 12 idiomas. O app segue o idioma do seu aparelho.
-
-■ Correções
-Um alarme repetido podia tocar de novo no mesmo minuto depois de ser parado. Isso foi corrigido.
-Um alarme que não aparecia mais no app podia tocar em um horário que você não configurou. Isso foi corrigido: depois de atualizar, abra o app para remover esses alarmes.
-
-■ Mais fácil de ler
-As cores e o contraste do texto foram revistos, e as telas continuam legíveis com tamanhos de texto grandes.
-
-■ “Tocar agora”
-“Tocar agora” agora toca o som que você está editando. Se não puder tocar, a tela mostra o motivo e permite autorizar os alarmes ali mesmo.
+■ Também
+• Na escolha de som, toque em uma linha para ouvir aquele som.
+• Escolha a origem do vídeo direto na tela.
+• Corrigido: um alarme único com playlist tocava sempre a mesma música.
 
 Obrigado por usar o My Sound Alarm.
