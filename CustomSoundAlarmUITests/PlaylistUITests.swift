@@ -13,6 +13,7 @@ final class PlaylistUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = [
             "-uitest-open-add-alarm",
+            "-uitest-seed-library",
             "-AppleLanguages", "(ja)",
             "-AppleLocale", "ja_JP"
         ]
@@ -25,11 +26,17 @@ final class PlaylistUITests: XCTestCase {
         )
         soundRow.tap()
 
+        let addPlaylist = app.buttons["alarmSoundChoice.addPlaylist"]
+        var swipes = 0
+        while !addPlaylist.isHittable && swipes < 8 {
+            app.collectionViews["alarmSoundChoice.root"].swipeUp()
+            swipes += 1
+        }
         XCTAssertTrue(
-            app.buttons["alarmSoundChoice.addPlaylist"].waitForExistence(timeout: 10),
+            addPlaylist.waitForExistence(timeout: 10),
             "sound choice should open: \(app.debugDescription)"
         )
-        app.buttons["alarmSoundChoice.addPlaylist"].tap()
+        addPlaylist.tap()
 
         let nameField = app.textFields["playlist.name"]
         XCTAssertTrue(nameField.waitForExistence(timeout: 10))
@@ -49,6 +56,12 @@ final class PlaylistUITests: XCTestCase {
         let playlistRow = app.buttons.matching(
             NSPredicate(format: "identifier CONTAINS %@", "UITest")
         ).firstMatch
+        let choiceRoot = app.collectionViews["alarmSoundChoice.root"]
+        var rowSwipes = 0
+        while (!playlistRow.exists || !playlistRow.isHittable) && rowSwipes < 8 {
+            choiceRoot.swipeUp()
+            rowSwipes += 1
+        }
         XCTAssertTrue(
             playlistRow.waitForExistence(timeout: 10),
             "created playlist should appear: \(app.debugDescription)"

@@ -40,6 +40,7 @@ struct CustomSoundAlarmApp: App {
                         AlarmStore.shared.resetForUITest()
                         PlaylistStore.shared.resetForUITest()
                         AppGroup.dismissedPresetFileNames = []
+                        SoundStore.shared.resetForUITest()
                         SoundStore.shared.resetPresetNamesForUITest()
                         SoundStore.shared.backfillMissingDurations()
                         let morning = PlaylistStore.shared.add(
@@ -82,6 +83,35 @@ struct CustomSoundAlarmApp: App {
                             label: String(localized: "alarm_title"),
                             playlistID: weekend.id
                         ))
+                    }
+                    if AppGroup.isUITestSeedSuggestion {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        PlaylistStore.shared.resetForUITest()
+                        AppGroup.dismissedPresetFileNames = []
+                        SoundStore.shared.resetForUITest()
+                        SoundStore.shared.resetPresetNamesForUITest()
+
+                        let seeds: [(resource: String, fileName: String, name: String)] = [
+                            ("PresetBell", "SuggestionBell.caf", "Suggestion Bell"),
+                            ("PresetMarimba", "SuggestionMarimba.caf", "Suggestion Marimba"),
+                        ]
+                        for seed in seeds {
+                            let url = AudioConverter.shared.soundsDirectory
+                                .appendingPathComponent(seed.fileName)
+                            try? FileManager.default.removeItem(at: url)
+                            if let source = Bundle.main.url(
+                                forResource: seed.resource,
+                                withExtension: "caf"
+                            ) {
+                                try? FileManager.default.copyItem(at: source, to: url)
+                                SoundStore.shared.add(AlarmSound(
+                                    name: seed.name,
+                                    fileName: seed.fileName,
+                                    isPreset: false
+                                ))
+                            }
+                        }
                     }
                     if AppGroup.isUITestSeedSkip {
                         AppGroup.hasCompletedOnboarding = true

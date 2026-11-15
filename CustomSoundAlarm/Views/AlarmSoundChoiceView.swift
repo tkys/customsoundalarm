@@ -13,61 +13,12 @@ struct AlarmSoundChoiceView: View {
     @State private var editingPlaylist: Playlist?
     @State private var showingNewPlaylist = false
 
-    private var hasOwnSounds: Bool {
-        soundStore.sounds.contains { !$0.isPreset }
+    private var importedCount: Int {
+        SoundPickerLogic.mySounds(in: soundStore.sounds).count
     }
 
     var body: some View {
         List {
-            Section {
-                if store.playlists.isEmpty {
-                    PlaylistEmptyStateView(
-                        source: .soundChoice,
-                        hasOwnSounds: hasOwnSounds,
-                        createButtonIdentifier: "alarmSoundChoice.addPlaylist"
-                    ) {
-                        showingNewPlaylist = true
-                    }
-                } else {
-                    ForEach(store.playlists) { playlist in
-                        HStack(spacing: 12) {
-                            Button {
-                                select(playlist)
-                            } label: {
-                                PlaylistRowLabel(
-                                    playlist: playlist,
-                                    isSelected: playlistID == playlist.id
-                                )
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityIdentifier(
-                                "alarmSoundChoice.playlist.\(playlist.name)"
-                            )
-
-                            Button {
-                                editingPlaylist = playlist
-                            } label: {
-                                Image(systemName: "pencil")
-                            }
-                            .buttonStyle(.borderless)
-                            .accessibilityLabel(Text("edit"))
-                            .accessibilityIdentifier(
-                                "alarmSoundChoice.edit.\(playlist.name)"
-                            )
-                        }
-                    }
-
-                    Button {
-                        showingNewPlaylist = true
-                    } label: {
-                        Label("playlist_new", systemImage: "plus")
-                    }
-                    .accessibilityIdentifier("alarmSoundChoice.addPlaylist")
-                }
-            } header: {
-                PlaylistSectionHeader()
-            }
-
             SoundLibrarySections(
                 isSelecting: true,
                 selectedSound: $selectedSound,
@@ -76,7 +27,8 @@ struct AlarmSoundChoiceView: View {
                     // 選んでも画面は閉じない。タップで鳴らした音を確かめてから戻れる（#196）
                     playlistID = nil
                     selectedSound = sound
-                }
+                },
+                middle: AnyView(playlistSectionView)
             )
         }
         .accessibilityIdentifier("alarmSoundChoice.root")
@@ -108,6 +60,75 @@ struct AlarmSoundChoiceView: View {
             NavigationStack {
                 PlaylistEditorView(playlist: playlist) { _ in }
             }
+        }
+    }
+
+    // MARK: - Playlists (#207)
+
+    @ViewBuilder
+    private var playlistSectionView: some View {
+        if store.playlists.isEmpty {
+            if PlaylistSuggestionLogic.shouldShow(
+                playlistCount: 0,
+                importedSoundCount: importedCount
+            ) {
+                Section {
+                    PlaylistSuggestionRow(
+                        importedCount: importedCount,
+                        subtitle: "playlist_suggestion_alarm_subtitle"
+                    ) {
+                        createSuggestedPlaylist()
+                    }
+                    .accessibilityIdentifier("alarmSoundChoice.playlistSuggestion")
+                }
+            }
+        } else {
+            Section {
+                ForEach(store.playlists) { playlist in
+                    HStack(spacing: 12) {
+                        Button {
+                            select(playlist)
+                        } label: {
+                            PlaylistRowLabel(
+                                playlist: playlist,
+                                isSelected: playlistID == playlist.id
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier(
+                            "alarmSoundChoice.playlist.\(playlist.name)"
+                        )
+
+                        Button {
+                            editingPlaylist = playlist
+                        } label: {
+                            Image(systemName: "pencil")
+                        }
+                        .buttonStyle(.borderless)
+                        .accessibilityLabel(Text("edit"))
+                        .accessibilityIdentifier(
+                            "alarmSoundChoice.edit.\(playlist.name)"
+                        )
+                    }
+                }
+
+                Button {
+                    showingNewPlaylist = true
+                } label: {
+                    Label("playlist_new", systemImage: "plus")
+                }
+                .accessibilityIdentifier("alarmSoundChoice.addPlaylist")
+            } header: {
+                PlaylistSectionHeader()
+            }
+        }
+    }
+
+    private func createSuggestedPlaylist() {
+        if let playlist = PlaylistSuggestionService.create() {
+            playlistID = playlist.id
+            selectedSound = nil
+            dismiss()
         }
     }
 

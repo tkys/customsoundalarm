@@ -289,14 +289,14 @@
 "play_order_in_order" = "Po kolei";
 "play_order_shuffle" = "Losowo";
 "play_order_one_random" = "Jeden losowy";
-"transition" = "Przejścia";
+"transition" = "Między utworami";
 "transition_off" = "Brak";
 "transition_short" = "Krótkie przenikanie (0,5 s)";
 "transition_long" = "Długie przenikanie (2 s)";
-"transition_crossfade" = "Przenikanie";
-"transition_footer" = "Dotyczy łączenia utworów.";
+"transition_crossfade" = "Przenikanie (nakłada się na poprzedni utwór)";
+"transition_footer" = "Jak jeden utwór przechodzi w następny.";
 "playlist_playback" = "Odtwarzanie";
-"playlist_summary_fmt" = "%@ · %d utworów";
+"playlist_summary_fmt" = "%d utworów · %@";
 
 /* Library (#160 PR-2) */
 "library_title" = "Biblioteka";
@@ -305,8 +305,16 @@
 
 /* Playlist polish (#169) */
 "playlist_preview" = "Odsłuchaj playlistę";
-"play_order_footer" = "Budziki powtarzają się, dopóki ich nie zatrzymasz. Losowa kolejność zmienia następną kolejność po każdym zatrzymaniu. Jeden losowy powtarza ten sam utwór.";
-
+// #207 library order
+"standard_sounds_fmt" = "Dźwięki standardowe (%d)";
+"standard_sounds_title" = "Dźwięki standardowe";
+"playlist_suggestion_title" = "Zmieniaj utwór za każdym razem, z Twoimi %d dźwiękami";
+"playlist_suggestion_library_subtitle" = "Tworzy playlistę.";
+"playlist_suggestion_alarm_subtitle" = "Tworzy playlistę i używa jej w tym budziku.";
+"playlist_suggestion_name" = "Moja playlista";
+"play_order_when_in_order" = "Zawsze ta sama kolejność";
+"play_order_when_shuffle" = "Za każdym razem nowa kolejność";
+"play_order_when_one_random" = "Za każdym razem jeden utwór, w powtórzeniu";
 // #204 settings
 "settings" = "Ustawienia";
 "settings_contact" = "Zgłoś problem lub zapytaj";

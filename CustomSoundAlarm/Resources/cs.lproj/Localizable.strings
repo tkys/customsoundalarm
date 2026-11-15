@@ -289,14 +289,14 @@
 "play_order_in_order" = "V pořadí";
 "play_order_shuffle" = "Náhodně";
 "play_order_one_random" = "Jeden náhodný";
-"transition" = "Přechody";
+"transition" = "Mezi skladbami";
 "transition_off" = "Žádné";
 "transition_short" = "Krátké prolnutí (0,5 s)";
 "transition_long" = "Dlouhé prolnutí (2 s)";
-"transition_crossfade" = "Crossfade";
-"transition_footer" = "Použije se při spojování skladeb.";
+"transition_crossfade" = "Crossfade (překrývá předchozí skladbu)";
+"transition_footer" = "Jak jedna skladba přechází do další.";
 "playlist_playback" = "Přehrávání";
-"playlist_summary_fmt" = "%@ · %d skladeb";
+"playlist_summary_fmt" = "%d skladeb · %@";
 
 /* Library (#160 PR-2) */
 "library_title" = "Knihovna";
@@ -305,8 +305,16 @@
 
 /* Playlist polish (#169) */
 "playlist_preview" = "Přehrát playlist";
-"play_order_footer" = "Budíky se opakují, dokud je nezastavíte. Náhodné pořadí změní další pořadí při každém zastavení. Jeden náhodný opakuje stejnou skladbu.";
-
+// #207 library order
+"standard_sounds_fmt" = "Standardní zvuky (%d)";
+"standard_sounds_title" = "Standardní zvuky";
+"playlist_suggestion_title" = "Pokaždé jiná písnička, s tvými %d zvuky";
+"playlist_suggestion_library_subtitle" = "Vytvoří playlist.";
+"playlist_suggestion_alarm_subtitle" = "Vytvoří playlist a použije ho pro tento budík.";
+"playlist_suggestion_name" = "Můj playlist";
+"play_order_when_in_order" = "Vždy stejné pořadí";
+"play_order_when_shuffle" = "Pokaždé nové pořadí";
+"play_order_when_one_random" = "Pokaždé jedna písnička, v opakování";
 // #204 settings
 "settings" = "Nastavení";
 "settings_contact" = "Nahlásit problém nebo se zeptat";
