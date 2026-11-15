@@ -25,6 +25,11 @@ final class StoreScreenshotUITests: XCTestCase {
     private func capture(language: String, locale: String, cropName: String) throws {
         guard let dir = shotDir else { throw XCTSkip("STORE_SHOT_DIR が無い") }
 
+        // アラーム一覧
+        launch(language: language, locale: locale, arguments: ["-uitest-seed-store"])
+        Thread.sleep(forTimeInterval: 4)
+        save(dir, "\(language)-alarms")
+
         // #3 プレイリスト
         launch(language: language, locale: locale, arguments: ["-uitest-seed-store", "-uitest-open-library"])
         let name = language == "ja" ? "マイプレイリスト" : "My Playlist"

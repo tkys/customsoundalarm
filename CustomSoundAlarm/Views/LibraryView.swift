@@ -22,6 +22,8 @@ struct LibraryView: View {
                 )
 
                 #if DEBUG
+                // ストアのスクショには開発者向けの項目を写さない。
+                if !AppGroup.isUITestSeedStore {
                 Section {
                     NavigationLink {
                         SyncLogView()
@@ -31,6 +33,7 @@ struct LibraryView: View {
                     .accessibilityIdentifier("library.syncLog")
                 } header: {
                     WarmSectionHeader(title: String(localized: "開発者向け"))
+                }
                 }
                 #endif
             }

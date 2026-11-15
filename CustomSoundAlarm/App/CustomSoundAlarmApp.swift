@@ -153,12 +153,27 @@ struct CustomSoundAlarmApp: App {
                             playOrder: .oneRandom,
                             transition: .crossfade
                         )
+                        // 一覧のスクショ用。時刻は撮影中に鳴らない朝にする。
+                        AlarmStore.shared.add(AlarmEntry(
+                            hour: 6,
+                            minute: 30,
+                            label: String(localized: "alarm_placeholder"),
+                            repeatWeekdays: [2, 3, 4, 5, 6],
+                            soundFileName: "StoreSeed1.caf"
+                        ))
                         AlarmStore.shared.add(AlarmEntry(
                             hour: 7,
                             minute: 0,
-                            isEnabled: false,
-                            label: String(localized: "alarm_title"),
+                            label: String(localized: "alarm_placeholder"),
+                            repeatWeekdays: [2, 3, 4, 5, 6],
                             playlistID: playlist.id
+                        ))
+                        AlarmStore.shared.add(AlarmEntry(
+                            hour: 8,
+                            minute: 30,
+                            label: String(localized: "alarm_placeholder"),
+                            repeatWeekdays: [1, 7],
+                            soundFileName: "StoreSeed3.caf"
                         ))
                     }
                     if AppGroup.isUITestSeedSkip {
