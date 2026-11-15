@@ -424,3 +424,87 @@ extension AlarmSchedulerSkipTests {
         }
     }
 }
+
+/// 1回きりのランダム／シャッフルの作り直し（#212）。
+extension AlarmSchedulerSkipTests {
+
+    private func oneTimeEntry(playlistID: UUID, hour: Int = 7) -> AlarmEntry {
+        AlarmEntry(
+            hour: hour,
+            minute: 0,
+            isEnabled: true,
+            label: "one-off-shuffle",
+            repeatWeekdays: [],
+            playlistID: playlistID
+        )
+    }
+
+    @Test
+    func oneTimeRandom_pendingSurvivesWhileTheEntryIsOff() async {
+        try? await withCleanState {
+            let playlist = PlaylistStore.shared.add(
+                name: "one-off-random-\(UUID().uuidString)",
+                tracks: [
+                    PlaylistTrack(soundFileName: "PresetMarimba.caf"),
+                    PlaylistTrack(soundFileName: "PresetBell.caf"),
+                ],
+                playOrder: .oneRandom
+            )
+            defer { PlaylistStore.shared.remove(id: playlist.id) }
+
+            let entry = oneTimeEntry(playlistID: playlist.id)
+            let scheduler = AlarmScheduler(manager: RecordingAlarmManager())
+            scheduler.markPendingShuffleRefresh(for: entry)
+            #expect(AppGroup.pendingShuffleRefreshEntryIDs.contains(entry.id))
+
+            var off = entry
+            off.isEnabled = false
+            scheduler.syncAlarms([off], trigger: .edit)
+            await scheduler.waitForPendingSync()
+
+            // オフの間もエントリが存在する限り、印は残る。
+            #expect(AppGroup.pendingShuffleRefreshEntryIDs.contains(entry.id))
+        }
+    }
+
+    @Test
+    func oneTimeShuffle_getsANewOrderWhenItIsEnabledAgain() async throws {
+        try await withCleanState {
+            let playlist = PlaylistStore.shared.add(
+                name: "one-off-shuffle-\(UUID().uuidString)",
+                tracks: [
+                    PlaylistTrack(soundFileName: "PresetMarimba.caf"),
+                    PlaylistTrack(soundFileName: "PresetBell.caf"),
+                    PlaylistTrack(soundFileName: "PresetCrescendo.caf"),
+                    PlaylistTrack(soundFileName: "PresetBeep.caf"),
+                ],
+                playOrder: .shuffle
+            )
+            defer { PlaylistStore.shared.remove(id: playlist.id) }
+
+            let entry = oneTimeEntry(playlistID: playlist.id)
+            let scheduler = AlarmScheduler(manager: RecordingAlarmManager())
+            let first = await PlaylistRenderService.shared.prepareSound(
+                for: entry.playlistRenderInput
+            )
+
+            scheduler.markPendingShuffleRefresh(for: entry)
+            var off = entry
+            off.isEnabled = false
+            scheduler.syncAlarms([off], trigger: .edit)
+            await scheduler.waitForPendingSync()
+            #expect(AppGroup.pendingShuffleRefreshEntryIDs.contains(entry.id))
+
+            var reenabled = entry
+            reenabled.hour = 8
+            reenabled.isEnabled = true
+            scheduler.syncAlarms([reenabled], trigger: .edit)
+            await scheduler.waitForPendingSync()
+
+            let second = AppGroup.primarySoundNames[entry.id]
+            #expect(second != nil)
+            #expect(second != first.fileName)
+            #expect(!AppGroup.pendingShuffleRefreshEntryIDs.contains(entry.id))
+        }
+    }
+}
