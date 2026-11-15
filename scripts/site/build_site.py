@@ -144,8 +144,8 @@ REVIEWS = [{'id': 'US',
   'body': 'I can use my custom sound as ringtone instead of paying my assests to Apple for just some selected tones, I genuinely love this App a great salute '
           'to the developer, there is no other app this in the App Store this app need some publicity, and once again Thanks to the developer for making such '
           'a great App.',
-  'tr': {'ja': '素晴らしいアプリ、卓越した性能（このアプリの利用者による本物のレビュー!!! 偽物や paid review ではありません）\n'
-               'Apple にいくつかのお金を払って限られた音を買う代わりに、自分の音を着信音として使えます。このアプリが本当に好きです。開発者に大きな拍手を。App Store '
+  'tr': {'ja': '素晴らしいアプリ、卓越した性能（このアプリの利用者による本物のレビュー!!! 偽物でも、お金をもらって書いたものでもありません）\n'
+               '決まった着信音のために Apple にお金を払う代わりに、自分の音を着信音として使えます。このアプリが本当に好きです。開発者に大きな拍手を。App Store '
                'にこれ以外に同じアプリはありません。もっと知られてほしいです。改めて、こんな素晴らしいアプリを作ってくれてありがとうございます。'}},
  {'id': 'JP1',
   'stars': 4,
@@ -240,7 +240,7 @@ RATINGS_ASC = {"as_of": "2026-11-15", "counts": {5: 83, 4: 8, 3: 2, 2: 1, 1: 3}}
 # regions: countries/regions with active users in the last 30 days (105 on 2026-11-15; the page shows 100).
 USAGE = {"as_of": "2026-11-15", "fired": 45000, "regions": 100}
 # Used when the App Store can't be reached at build time (2026-11-15).
-RATINGS_FALLBACK = {"count": 97, "avg": 4.7, "regions": 20}
+RATINGS_FALLBACK = {"count": 97, "avg": 4.7, "regions": 23}
 
 
 def fetch_ratings():
@@ -261,7 +261,14 @@ def fetch_ratings():
     except Exception as e:  # offline, TLS, rate limit
         print("ratings: using fallback,", e)
         return RATINGS_FALLBACK
-    return {"count": total, "avg": round(weighted / total, 1), "regions": regions} if total else RATINGS_FALLBACK
+    if not total:
+        return RATINGS_FALLBACK
+    # The public lookup lags behind App Store Connect; never show fewer ratings than ASC's breakdown.
+    asc = RATINGS_ASC["counts"]
+    asc_total = sum(asc.values())
+    if asc_total > total:
+        return {"count": asc_total, "avg": round(sum(k * v for k, v in asc.items()) / asc_total, 1), "regions": regions}
+    return {"count": total, "avg": round(weighted / total, 1), "regions": regions}
 
 
 def stars(n):
