@@ -37,3 +37,4 @@ AppScreenshot/
 
 # Design audit screenshots (local only)
 design-audit-output/
+scripts/site/__pycache__/

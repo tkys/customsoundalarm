@@ -38,6 +38,7 @@ PAGES = {
         "badge_alt": "Download on the App Store",
         "hero_title": "Wake up to your favorite part of a song",
         "hero_body": "An iPhone alarm clock app that wakes you up to your favorite part of a song or the sound from a video. The part you choose plays on repeat until you stop it.",
+        "hero_stats": "★{avg} · {count} App Store ratings · {fired}+ alarms rung",
         "req": "Rings in Silent mode and when a Focus is on. For iPhone with iOS\u00a026 or later.",
         "wave_label": "Chorus 0:42–1:12",
         "wave_caption": "Only this part plays, over and over, until you turn it off.",
@@ -45,12 +46,15 @@ PAGES = {
         "s1_body": "Open an audio file, a recording of your own voice, or a video you saved, and select a range on the waveform. Keep just the chorus or the whole song (up to 10 minutes from a video). When it reaches the end, it starts again.",
         "s1_img_alt": "The trim screen: a waveform with a 32-second section selected",
         "s2_title": "Rings in Silent mode",
-        "s2_body": "My Sound Alarm schedules its alarms with AlarmKit, the alarm framework Apple added in iOS 26. They appear on the Lock Screen like alarms from the built-in Clock app and ring in Silent mode and when a Focus is on, even when My Sound Alarm is closed.",
+        "s2_body": "It uses AlarmKit, the alarm system Apple introduced in iOS 26, so it rings in Silent mode, with a Focus on, and when the app is closed. It appears on the Lock Screen like the Clock app.",
+        "s3_title": "A different song each time",
+        "s3_body": "Group your own sounds into a playlist and wake up to a different song each time. Choose in order, shuffle, or one random song. (PRO · Early access)",
         "voices_title": "From the App Store",
         "rating_summary": "{count} ratings on the App Store from {regions} countries and regions, {as_of}.",
         "stars_label": "{n} out of 5 stars",
         "usage_line": "More than {fired} alarms have rung with My Sound Alarm, in over {regions} countries and regions in the last 30 days ({as_of}).",
         "voices_note": "Every written review so far, in the reviewer's own words (one shortened to its title). Translations are ours.",
+        "fixed_in_note": "This issue was fixed in {version}.",
         "faq_title": "Questions",
         "faq": [
             ("How do I set a song as my alarm on iPhone?",
@@ -65,6 +69,12 @@ PAGES = {
              "Yes, as long as you allow alarms when My Sound Alarm asks the first time you open it. Its alarms are scheduled with Apple's AlarmKit, so the app doesn't need to be running."),
             ("How do I make the alarm louder?",
              "My Sound Alarm's alarms use the same volume as the Clock app: Settings > Sounds & Haptics > Ringtone and Alerts. Turn on Change with Buttons to use the volume buttons. The volume in Control Center is for music and videos and doesn't change alarm volume."),
+            ("How is this different from \"Use as Ringtone\" in the Files app on iOS 26?",
+             "On iOS 26 and later, the Files app can turn an MP3 or M4A of 30 seconds or less into a ringtone, and you can pick it as an alarm sound. It can't trim, and longer files can't be used. My Sound Alarm lets you choose any part of a long song or video on the waveform and play up to 10 minutes."),
+            ("I picked a song in the Clock app, so why does the alarm play the default sound?",
+             "When you pick an Apple Music song in the Clock app, the alarm can fall back to the default sound, for example if the song isn't downloaded to the iPhone. My Sound Alarm stores the sounds you import on the iPhone and plays them from there, so streaming or download status doesn't matter."),
+            ("Can I use a song for the wake-up alarm in my Sleep Schedule?",
+             "The wake-up alarm in the Health app's Sleep Schedule doesn't offer songs or sounds you made. To wake up to a song or the sound from a video, set the alarm in My Sound Alarm."),
         ],
         "end_title": "Tomorrow morning, wake up to your favorite chorus.",
         "made_by": "Made by tkys, an independent developer in Japan.",
@@ -79,6 +89,7 @@ PAGES = {
         "badge_alt": "App Store からダウンロード",
         "hero_title": "好きな曲のサビで起きる",
         "hero_body": "曲のサビなど、いちばん好きな部分や動画の音を iPhone のアラームに。止めるまで、くり返し鳴ります。GarageBand なしで、音声ファイルや動画から作れます。",
+        "hero_stats": "★{avg}・App Store の評価{count}件・鳴ったアラーム{fired}回以上",
         "req": "マナーモードや集中モードでも鳴ります。iOS\u00a026 以降の iPhone 向け。",
         "wave_label": "サビ 0:42–1:12",
         "wave_caption": "止めるまで、この部分だけがくり返し鳴ります。",
@@ -86,12 +97,15 @@ PAGES = {
         "s1_body": "音声ファイル、自分で録音した声、保存した動画を開いて、波形の上で範囲を選ぶだけ。サビだけを切り出しても、1曲まるごとでもかまいません（動画は最長10分）。最後まで鳴ったら、また最初から鳴ります。",
         "s1_img_alt": "切り出し画面：波形の中で33秒ぶんを選んだところ",
         "s2_title": "マナーモードでも鳴る",
-        "s2_body": "My Sound Alarm のアラームは、Apple が iOS 26 で用意した仕組み（AlarmKit）で登録します。iPhone 標準の時計アプリのアラームと同じようにロック画面に表示され、マナーモードや集中モードでも、このアプリを閉じていても鳴ります。",
+        "s2_body": "Apple が iOS 26 で用意したアラームの仕組み（AlarmKit）を使うので、マナーモードや集中モード、アプリを閉じているときも鳴ります。ロック画面には時計アプリと同じように表示されます。",
+        "s3_title": "鳴るたびに違う曲で",
+        "s3_body": "自分の音をプレイリストにまとめると、鳴るたびに違う曲で起きられます。順番どおり・シャッフル・1曲ランダムから選べます。（PRO・先行公開中）",
         "voices_title": "App Store のレビュー",
         "rating_summary": "App Store で {regions} の国と地域から {count} 件の評価（{as_of}）。",
         "stars_label": "5 点中 {n} 点",
         "usage_line": "My Sound Alarm で鳴ったアラームは {fired} 回以上。直近30日では {regions} 以上の国と地域で使われています（{as_of}）。",
         "voices_note": "これまでに書かれたレビューを原文のまま載せています（1件はタイトルのみ）。訳は当サイトによるものです。",
+        "fixed_in_note": "この不具合は {version} で直しました。",
         "faq_title": "よくある質問",
         "faq": [
             ("iPhone で好きな曲をアラームにするには？",
@@ -106,6 +120,14 @@ PAGES = {
              "My Sound Alarm を最初に開いたときに出る「アラーム」の許可をオンにしていれば鳴ります。Apple の AlarmKit でアラームを登録するので、アプリが起動していなくても鳴ります。"),
             ("アラームの音を大きくするには？",
              "My Sound Alarm のアラームの音量も、時計アプリと同じく「設定 → サウンドと触覚 →『着信音と通知音』」で決まります。「ボタンで変更」をオンにすると、本体の音量ボタンでも変えられます。コントロールセンターの音量は音楽や動画の音量で、アラームには効きません。"),
+            ("祝日は鳴らさないようにできますか？",
+             "できます（1.8.2 以降）。繰り返しのアラームの設定で「祝日は鳴らさない」をオンにします。日付を選んで鳴らさないことや、すべてのアラームをしばらく鳴らさないこともできます。"),
+            ("iOS 26 のファイルアプリの「着信音として使用」とは何が違いますか？",
+             "iOS 26 以降は、ファイルアプリの共有メニューから 30 秒以内の MP3・M4A を着信音にでき、アラームの音としても選べます。ただし切り取りはできず、30 秒を超えるファイルは使えません。My Sound Alarm なら、長い曲や動画から好きな部分を波形で選び、最長 10 分まで鳴らせます。"),
+            ("時計アプリで曲を選んだのに、標準の音で鳴るのはなぜですか？",
+             "時計アプリで Apple Music の曲を選んだ場合、曲が端末にダウンロードされていないなどの理由で、標準の音に戻ることがあります。My Sound Alarm は取り込んだ音を iPhone の中に保存して鳴らすので、配信サービスやダウンロードの状態には左右されません。"),
+            ("睡眠スケジュールの「起床アラーム」でも好きな曲を使えますか？",
+             "ヘルスケアの睡眠スケジュールにある起床アラームでは、曲や自分で作った音は選べません。好きな曲や動画の音で起きたいときは、My Sound Alarm でアラームを作ってください。"),
         ],
         "end_title": "明日の朝は、好きなサビで起きる。",
         "made_by": "日本の個人開発者 tkys がつくっています。",
@@ -117,42 +139,120 @@ PAGES = {
 # Written App Store reviews, quoted as written (reviewer names left out).
 # "tr" = our translation into the page language; omitted when the review is already in it.
 # Only the title of the Spanish review is quoted: its body uses a word we keep off the site.
-REVIEWS = [
-    # Featured: says in the user's own words what the app is for (shown near the top).
-    {"id": "KR2", "featured": True, "stars": 5, "cc": "KR", "date": "2026-10", "lang": "ko",
-     "title": '넘 조아여',
-     "body": '안녕하세요!\n갠적으로 전 하투하를 좋아하는데,,💫\n아이폰 알람에서는 노래 길이가\n짧게만 알람설정이 가능하더라구요.\n그래서 찾아보다 이 앱을 찾았어요!\n여기서는 폰을 잘 못쓰는 저 조차도\n영상촬영을 해서 너무나도 쉽게\n알람을 정할 수 있어요!! 🎀🎀\n내 최애 노래를 들으며 일어나니깐\n좋은게 한둘이 아니네요,, 😌',
-     "tr": {"ja": "すごくいい\nこんにちは！個人的に Hearts2Hearts が好きなんですが、iPhone のアラームでは曲を短くしか設定できなくて。それで探していたら、このアプリを見つけました！ここでは、スマホが得意じゃない私でも、動画を撮るだけでとても簡単にアラームを設定できます!! 🎀🎀 推しの曲を聴きながら起きられるので、いいことがひとつやふたつじゃありません 😌",
-            "en": "So good\nHi! I really love Hearts2Hearts, but the iPhone alarm only lets you set a short part of a song. So I searched and found this app! Here, even I, who isn't good with phones, can set an alarm so easily just by recording a video!! 🎀🎀 Waking up to my favorite song is good in more ways than one 😌"}},
-    {"stars": 5, "cc": "KR", "date": "2026-09", "lang": "en",
-     "title": "This app is the goat.",
-     "body": "It contains what i really wanted, thank you for creating this app.",
-     "tr": {"ja": "最高のアプリ。本当にほしかったものが入っていました。作ってくれてありがとう。"}},
-    {"stars": 3, "cc": "FR", "date": "2026-09", "lang": "fr",
-     "title": "Enlever les vibrations",
-     "body": "Super application qui fonctionne très bien, même en mode avion, ne pas déranger etc Seul bémol il est impossible depuis l’application d’enlever les vibrations ou de les modifier",
-     "tr": {"ja": "とてもよく動くアプリ。機内モードやおやすみモードでも鳴ります。唯一の難点は、アプリからバイブレーションを切ったり変えたりできないこと。",
-            "en": "A great app that works very well, even in Airplane mode, Do Not Disturb and so on. The one drawback: you can't turn off or change the vibration from the app."}},
-    {"stars": 5, "cc": "ES", "date": "2026-08", "lang": "en",
-     "title": "Simply what I want for an alarm clock",
-     "body": "",
-     "tr": {"ja": "目覚ましに求めていたものそのもの"}},
-]
+REVIEWS = [{'id': 'US',
+  'stars': 5,
+  'cc': 'US',
+  'date': '2026-11',
+  'lang': 'en',
+  'title': 'Amazing app great customization',
+  'body': 'Great customization',
+  'tr': {'ja': '素晴らしいアプリ。カスタマイズがとてもいい'}},
+ {'id': 'IN',
+  'stars': 5,
+  'cc': 'IN',
+  'date': '2026-11',
+  'lang': 'en',
+  'title': 'Great App, Outstanding Performance (Genuine Review by the user of this App!!!) NOT FAKE OR PAID REW',
+  'body': 'I can use my custom sound as ringtone instead of paying my assests to Apple for just some selected tones, I genuinely love this App a great salute '
+          'to the developer, there is no other app this in the App Store this app need some publicity, and once again Thanks to the developer for making such '
+          'a great App.',
+  'tr': {'ja': '素晴らしいアプリ、卓越した性能（このアプリの利用者による本物のレビュー!!! 偽物でも、お金をもらって書いたものでもありません）\n'
+               '決まった着信音のために Apple にお金を払う代わりに、自分の音を着信音として使えます。このアプリが本当に好きです。開発者に大きな拍手を。App Store '
+               'にこれ以外に同じアプリはありません。もっと知られてほしいです。改めて、こんな素晴らしいアプリを作ってくれてありがとうございます。'}},
+ {'id': 'JP1',
+  'stars': 4,
+  'cc': 'JP',
+  'date': '2026-11',
+  'lang': 'ja',
+  'title': '気になったところが…',
+  'body': 'とても使いやすくものすごく便利なのですが１個気になるところが… アラームを全て止めたのにも関わらず鳴ってしまうのはどうしたらいいんでしょうか？やはりそこは不具合なのでしょうか？でしたら改善もお願いしたいです。',
+  'fixed_in': '1.8.1',
+  'tr': {'en': 'A few things I noticed…\n'
+               'It’s very easy to use and extremely convenient, but there’s one thing that bothers me… Even after I stopped all the alarms, they still ring. '
+               'What should I do? Is this a bug? If so, I’d appreciate a fix.'}},
+ {'id': 'ES1',
+  'stars': 2,
+  'cc': 'ES',
+  'date': '2026-11',
+  'lang': 'es',
+  'title': 'Alarmas no programadas',
+  'body': 'Las alarmas están muy bien, y está muy bien que puedas poner las canciones que quieras, pero a mí de repente me van saltando alarmas a las 00:00 de '
+          'la mañana y ahora es que no he programado alarmas',
+  'fixed_in': '1.8.1',
+  'tr': {'ja': '予定していないアラーム\nアラームはとても良くできていて、好きな曲を設定できるのも素晴らしいのですが、突然 00:00 にアラームが鳴り始めて、今はアラームを設定していないのに鳴ります。',
+         'en': 'Unscheduled alarms\n'
+               'The alarms are fine, and it’s great that you can set any songs you want, but suddenly alarms keep going off at 00:00 and now I have no alarms '
+               'scheduled.'}},
+ {'id': 'PH',
+  'featured': True,
+  'stars': 5,
+  'cc': 'PH',
+  'date': '2026-10',
+  'lang': 'en',
+  'title': '10/10',
+  'body': 'My SoundAlarm has been incredibly helpful, and I genuinely appreciate the brilliant minds behind it. It’s impressive to see such a thoughtful and '
+          'advanced feature implemented on iOS. Customizing alarm sounds has always been surprisingly difficult on iOS, so having a solution like this is '
+          'truly a game-changer. Thank you to the developers for making something that solves a problem many ios users have struggled with!',
+  'tr': {'ja': '10/10\n'
+               'My Sound Alarm には本当に助けられました。作ってくれた開発者のみなさんに心から感謝しています。iOS でこんなに丁寧で先進的な機能が使えるのはすごいことです。iOS でアラームの音を変えるのは思っていた以上に難しかったので、このアプリがあるのは本当に画期的です。多くの '
+               'iOS ユーザーが困ってきた問題を解決してくれて、ありがとうございます！'}},
+ {'id': 'KR2',
+  'stars': 5,
+  'cc': 'KR',
+  'date': '2026-10',
+  'lang': 'ko',
+  'title': '넘 조아여',
+  'body': '안녕하세요!\n'
+          '갠적으로 전 하투하를 좋아하는데,,💫\n'
+          '아이폰 알람에서는 노래 길이가\n'
+          '짧게만 알람설정이 가능하더라구요.\n'
+          '그래서 찾아보다 이 앱을 찾았어요!\n'
+          '여기서는 폰을 잘 못쓰는 저 조차도\n'
+          '영상촬영을 해서 너무나도 쉽게\n'
+          '알람을 정할 수 있어요!! 🎀🎀\n'
+          '내 최애 노래를 들으며 일어나니깐\n'
+          '좋은게 한둘이 아니네요,, 😌',
+  'tr': {'ja': 'すごくいい\n'
+               'こんにちは！個人的に好きなグループがいるんですが、iPhone のアラームでは曲を短くしか設定できなくて。それで探していたら、このアプリを見つけました！ここでは、スマホが得意じゃない私でも、動画を撮るだけでとても簡単にアラームを設定できます!! 🎀🎀 '
+               '大好きな曲を聴きながら起きられるので、いいことがひとつやふたつじゃありません 😌',
+         'en': 'So good\n'
+               'Hi! I have a group I really love, but the iPhone alarm only lets you set a short part of a song. So I searched and found this app! Here, even '
+               'I, who isn’t good with phones, can set an alarm so easily just by recording a video!! 🎀🎀 Waking up to my favorite song is good in more ways '
+               'than one 😌'}},
+ {'stars': 5,
+  'cc': 'KR',
+  'date': '2026-09',
+  'lang': 'en',
+  'title': 'This app is the goat.',
+  'body': 'It contains what i really wanted, thank you for creating this app.',
+  'tr': {'ja': '最高のアプリ。本当にほしかったものが入っていました。作ってくれてありがとう。'}},
+ {'stars': 3,
+  'cc': 'FR',
+  'date': '2026-09',
+  'lang': 'fr',
+  'title': 'Enlever les vibrations',
+  'body': 'Super application qui fonctionne très bien, même en mode avion, ne pas déranger etc Seul bémol il est impossible depuis l’application d’enlever les '
+          'vibrations ou de les modifier',
+  'tr': {'ja': 'とてもよく動くアプリ。機内モードやおやすみモードでも鳴ります。唯一の難点は、アプリからバイブレーションを切ったり変えたりできないこと。',
+         'en': "A great app that works very well, even in Airplane mode, Do Not Disturb and so on. The one drawback: you can't turn off or change the "
+               'vibration from the app.'}},
+ {'stars': 5, 'cc': 'ES', 'date': '2026-08', 'lang': 'en', 'title': 'Simply what I want for an alarm clock', 'body': '', 'tr': {'ja': '目覚ましに求めていたものそのもの'}}]
+
 COUNTRY = {
-    "ja": {"KR": "韓国", "FR": "フランス", "ES": "スペイン"},
-    "en": {"KR": "South Korea", "FR": "France", "ES": "Spain"},
+    "ja": {"KR": "韓国", "FR": "フランス", "ES": "スペイン", "PH": "フィリピン", "US": "アメリカ", "IN": "インド", "JP": "日本"},
+    "en": {"KR": "South Korea", "FR": "France", "ES": "Spain", "PH": "Philippines", "US": "United States", "IN": "India", "JP": "Japan"},
 }
 STOREFRONTS = ("us jp gb ca au de fr es it nl se no dk fi pl cz pt br mx ar cl co kr tw hk cn sg th vn id my ph in "
                "sa ae eg tr ru ua il za nz at ch be ie gr hu ro sk").split()
 # Star breakdown from App Store Connect > Ratings and Reviews (all countries and regions).
 # The public lookup API lags and has no breakdown, so update this by hand from ASC.
-RATINGS_ASC = {"as_of": "2026-10-29", "counts": {5: 59, 4: 7, 3: 2, 2: 0, 1: 2}}
+RATINGS_ASC = {"as_of": "2026-11-15", "counts": {5: 83, 4: 8, 3: 2, 2: 1, 1: 3}}
 # Usage from PostHog (store installs only; dev/simulator/TestFlight excluded). Update by hand monthly.
 # fired: alarm_fired since tracking began (2026-07-26), so the real total is higher -> "or more".
-# regions: countries/regions with active users in the last 30 days (108 on 2026-10-29).
-USAGE = {"as_of": "2026-10-29", "fired": 32000, "regions": 100}
-# Used when the App Store can't be reached at build time (2026-10-25).
-RATINGS_FALLBACK = {"count": 59, "avg": 4.8, "regions": 20}
+# regions: countries/regions with active users in the last 30 days (105 on 2026-11-15; the page shows 100).
+USAGE = {"as_of": "2026-11-17", "fired": 45000, "regions": 100}
+# Used when the App Store can't be reached at build time (2026-11-15).
+RATINGS_FALLBACK = {"count": 97, "avg": 4.7, "regions": 23}
 
 
 def fetch_ratings():
@@ -173,7 +273,14 @@ def fetch_ratings():
     except Exception as e:  # offline, TLS, rate limit
         print("ratings: using fallback,", e)
         return RATINGS_FALLBACK
-    return {"count": total, "avg": round(weighted / total, 1), "regions": regions} if total else RATINGS_FALLBACK
+    if not total:
+        return RATINGS_FALLBACK
+    # The public lookup lags behind App Store Connect; never show fewer ratings than ASC's breakdown.
+    asc = RATINGS_ASC["counts"]
+    asc_total = sum(asc.values())
+    if asc_total > total:
+        return {"count": asc_total, "avg": round(sum(k * v for k, v in asc.items()) / asc_total, 1), "regions": regions}
+    return {"count": total, "avg": round(weighted / total, 1), "regions": regions}
 
 
 def stars(n):
@@ -190,17 +297,32 @@ def review_parts(v, lang, c):
     quote = f'<p class="orig" lang="{v["lang"]}" dir="auto">{original}</p>'
     if tr:
         quote += f'<p class="tr">{esc(tr).replace(chr(10), "<br>")}</p>'
+    if v.get("fixed_in"):
+        note = c.get("fixed_in_note", "Fixed in {version}.").format(version=v["fixed_in"])
+        quote += f'<p class="fixed">{esc(note)}</p>'
     country = COUNTRY.get(lang, {}).get(v["cc"]) or c["countries"][v["cc"]]
     meta = f'{country} · {v["date"]}'
     star = f'<span class="stars" aria-label="{c["stars_label"].format(n=v["stars"])}">{stars(v["stars"])}</span>'
     return star, meta, quote
 
 
-def usage_line(c, as_of):
+def number(c, value):
     sep = {"fr": "\u202f", "pl": "\u00a0", "cs": "\u00a0", "de": ".", "es": ".", "pt-BR": ".", "it": ".", "nl": "."}.get(c["html_lang"], ",")
-    fired = f'{USAGE["fired"]:,}'.replace(",", sep)
+    return f"{value:,}".replace(",", sep)
+
+
+def usage_line(c, as_of):
+    fired = number(c, USAGE["fired"])
     y, m, d = USAGE["as_of"].split("-")
     return c["usage_line"].format(fired=fired, regions=USAGE["regions"], as_of=c["as_of_fmt"].format(y=int(y), m=int(m), d=int(d)))
+
+
+def hero_stats_html(c, ratings):
+    """One muted line under the App Store badge: rating, review count and alarms rung."""
+    avg = f'{ratings["avg"]:.1f}'
+    fired = number(c, USAGE["fired"])
+    return f'<p class="hstats">{esc(c["hero_stats"].format(avg=avg, count=ratings["count"], fired=fired))}</p>'
+
 
 
 def featured_html(lang, c):
@@ -241,6 +363,96 @@ def reviews_html(lang, c, r):
 
 
 PAGES.update(LOCALES)
+
+# 2026-11-15: section headlines match the store screenshots (#218), and the
+# closing line moves to the top. (s1, s3, s4 title, s4 body) per language.
+SECTION_COPY = {
+    "en": [
+        "Your favorite part, on repeat",
+        "Chorus after chorus",
+        "Sounds from your videos",
+        "Open a video from your photo library or the Files app, and the app takes just the sound. A trip video, or the voices of family and pets, can be your alarm too."
+    ],
+    "ja": [
+        "好きな部分がくり返し鳴る",
+        "好きなサビがつぎつぎに",
+        "動画の音もアラームに",
+        "写真ライブラリやファイルアプリの動画を開くと、音だけを取り出してアラームにできます。旅行の動画や、家族・ペットの声も使えます。"
+    ],
+    "fr": [
+        "Ton passage préféré, en boucle",
+        "Refrain après refrain",
+        "Le son de tes vidéos",
+        "Ouvre une vidéo de ta photothèque ou de l’app Fichiers : l’app n’en garde que le son. Une vidéo de voyage, la voix de tes proches ou de ton animal peuvent aussi devenir ton réveil."
+    ],
+    "de": [
+        "Dein Lieblingsteil, in Dauerschleife",
+        "Refrain für Refrain",
+        "Der Ton aus deinen Videos",
+        "Öffne ein Video aus deiner Mediathek oder der Dateien-App, und die App übernimmt nur den Ton. Auch ein Reisevideo oder die Stimmen von Familie und Haustier werden so zum Wecker."
+    ],
+    "es": [
+        "Tu parte favorita, en bucle",
+        "Estribillo tras estribillo",
+        "El sonido de tus vídeos",
+        "Abre un vídeo de tu fototeca o de la app Archivos y la app se queda solo con el sonido. Un vídeo de un viaje o la voz de tu familia o tu mascota también pueden ser tu alarma."
+    ],
+    "pt-BR": [
+        "Seu trecho favorito, em repetição",
+        "Refrão atrás de refrão",
+        "O som dos seus vídeos",
+        "Abra um vídeo da Fototeca ou do app Arquivos e o app usa só o som. Um vídeo de viagem ou a voz da família e do seu pet também podem virar seu despertador."
+    ],
+    "it": [
+        "La tua parte preferita, a ripetizione",
+        "Un ritornello dopo l’altro",
+        "L’audio dei tuoi video",
+        "Apri un video dalla libreria foto o dall’app File e l’app ne prende solo l’audio. Anche un video di viaggio o la voce della famiglia o del tuo animale possono diventare la sveglia."
+    ],
+    "nl": [
+        "Je favoriete stuk, steeds opnieuw",
+        "Refrein na refrein",
+        "Het geluid van je video’s",
+        "Open een video uit je fotobibliotheek of de Bestanden-app en de app neemt alleen het geluid. Ook een reisvideo of de stem van je familie of huisdier kan je wekker worden."
+    ],
+    "ko": [
+        "좋아하는 부분이 반복해서 울려요",
+        "좋아하는 후렴이 차례로",
+        "동영상 소리도 알람으로",
+        "사진 보관함이나 파일 앱의 동영상을 열면 소리만 꺼내 알람으로 쓸 수 있어요. 여행 동영상이나 가족·반려동물의 목소리도 쓸 수 있습니다."
+    ],
+    "zh-Hans": [
+        "最爱的片段，循环响起",
+        "最爱的副歌，一首接一首",
+        "视频里的声音也能当闹钟",
+        "打开照片图库或“文件”App 里的视频，App 只取出其中的声音做成闹钟。旅行视频、家人或宠物的声音也可以。"
+    ],
+    "pl": [
+        "Ulubiony fragment w pętli",
+        "Refren za refrenem",
+        "Dźwięk z twoich filmów",
+        "Otwórz film z biblioteki zdjęć lub aplikacji Pliki, a aplikacja weźmie z niego tylko dźwięk. Film z podróży albo głos rodziny czy zwierzaka też może być budzikiem."
+    ],
+    "cs": [
+        "Oblíbená část pořád dokola",
+        "Refrén za refrénem",
+        "Zvuk z tvých videí",
+        "Otevři video z knihovny fotek nebo z aplikace Soubory a aplikace z něj vezme jen zvuk. Budíkem může být i video z cesty nebo hlas rodiny či mazlíčka."
+    ],
+    "ar": [
+        "جزؤك المفضل يتكرر",
+        "لازمة تلو الأخرى",
+        "الصوت من مقاطع الفيديو",
+        "افتح فيديو من مكتبة الصور أو تطبيق الملفات، فيأخذ التطبيق الصوت فقط. يمكن أن يصبح فيديو من رحلة أو صوت عائلتك أو حيوانك الأليف منبهك أيضًا."
+    ]
+}
+# The top headline. Japanese keeps 「曲」 for search; other languages reuse their closing line.
+TOP_TITLE = {"ja": "明日の朝は、好きな曲のサビで起きる"}
+for _lang, _c in PAGES.items():
+    _s1, _s3, _s4t, _s4b = SECTION_COPY[_lang]
+    _c.update(s1_title=_s1, s3_title=_s3, s4_title=_s4t, s4_body=_s4b)
+    _c["closing_title"] = _c["hero_title"]
+    _c["hero_title"] = TOP_TITLE.get(_lang, _c["end_title"].rstrip("。.!"))
 for _c in PAGES.values():
     _c.setdefault("dir", "ltr")
 
@@ -262,6 +474,7 @@ h1{font-size:clamp(32px,6.4vw,48px);line-height:1.2;letter-spacing:-.015em;margi
 .lead{font-size:20px;color:var(--muted);margin:0 0 24px;max-width:34em}
 .badge img{height:52px;width:auto;display:block}
 .req{font-size:15px;color:var(--muted);margin:10px 0 0}
+.hstats{font-size:15px;color:var(--muted);margin:10px 0 0}
 figure{margin:44px 0 8px}
 .wavebox{position:relative;padding-bottom:26px;direction:ltr}
 .wave{display:block;width:100%;height:auto}
@@ -271,8 +484,13 @@ h2{font-size:26px;line-height:1.35;margin:56px 0 10px}
 .shot{display:block;width:100%;max-width:340px;height:auto;border:1px solid var(--line);border-radius:22px;margin:18px 0 0}
 .side{float:inline-end;width:132px;height:auto;margin-block:0 12px;margin-inline:20px 0}
 .clear{clear:both}
+@media (max-width:520px){.side{float:none;display:block;width:180px;margin:4px auto 12px}}
 h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
 .faq p{margin:0;color:var(--muted)}
+.hero{display:flex;gap:32px;align-items:center}
+.hero>div{flex:1;min-width:0}
+.hero-art{width:240px;height:auto;flex:none}
+@media (max-width:560px){.hero{flex-direction:column;align-items:stretch;gap:20px}.hero-art{width:230px;align-self:center}}
 .end{margin:64px 0 0;padding-top:32px;border-top:1px solid var(--line);display:flex;gap:28px;align-items:center}
 .end h2{margin:0 0 18px}
 .end-art{width:180px;height:auto;flex:none}
@@ -283,6 +501,7 @@ h3{font-size:19px;line-height:1.4;margin:30px 0 6px}
 .rmeta{font-size:15px;color:var(--muted)}
 .voices p{margin:6px 0 0}
 .voices .tr{color:var(--muted);font-size:16px}
+.fixed{font-size:13px;color:var(--muted);margin-top:8px}
 .rsum{margin:8px 0 0;color:var(--muted);font-size:15px}
 .rating{display:flex;gap:28px;align-items:center;margin:16px 0 0}
 .score{text-align:center;flex:none}
@@ -520,10 +739,13 @@ def page(lang, c, ratings):
 <header><a class="brand" href="{BASE + c["path"]}"><img src="{img}icon.png" alt="">My Sound Alarm</a>
 <a href="#languages">{esc(c["lang_name"])} ▾</a></header>
 <main>
+<section class="hero"><div>
 <h1>{phrases(c["hero_title"])}</h1>
 <p class="lead">{esc(c["hero_body"])}</p>
 {badge(c, img, "hero")}
+{hero_stats_html(c, ratings)}
 <p class="req">{esc(c["req"])}</p>{howto_link}
+</div><img class="hero-art" src="{img}hero.jpg" alt="" width="420" height="560"></section>
 <figure>{waveform_svg(c)}<figcaption>{esc(c["wave_caption"])}</figcaption></figure>
 {featured_html(lang, c)}
 <h2>{esc(c["s1_title"])}</h2>
@@ -533,10 +755,17 @@ def page(lang, c, ratings):
 <img class="side" src="{img}silent.jpg" alt="" width="132" height="132" loading="lazy">
 <p>{esc(c["s2_body"])}</p>
 <div class="clear"></div>
+<h2>{esc(c["s3_title"])}</h2>
+<img class="side" src="{img}playlist.jpg" alt="" width="132" height="132" loading="lazy">
+<p>{esc(c["s3_body"])}</p>
+<div class="clear"></div>
+<h2>{esc(c["s4_title"])}</h2>
+<img class="side" src="{img}video.jpg" alt="" width="132" height="132" loading="lazy">
+<p>{esc(c["s4_body"])}</p>
+<div class="clear"></div>
 {reviews_html(lang, c, ratings)}
 <section class="faq"><h2>{esc(c["faq_title"])}</h2>{"".join(faqs)}</section>
-<section class="end"><img class="end-art" src="{img}hero.jpg" alt="" width="420" height="560" loading="lazy">
-<div><h2>{phrases(c["end_title"])}</h2>{badge(c, img, "bottom")}</div></section>
+<section class="end"><div><h2>{phrases(c["closing_title"])}</h2>{badge(c, img, "bottom")}</div></section>
 </main>
 <nav id="languages" class="langs" aria-label="Language">{langs}</nav>
 <footer><span class="made">{esc(c["made_by"])}</span><a href="support.html">{esc(c["footer_support"])}</a><a href="privacy.html">{esc(c["footer_privacy"])}</a></footer>
