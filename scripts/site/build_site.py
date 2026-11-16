@@ -250,7 +250,7 @@ RATINGS_ASC = {"as_of": "2026-11-15", "counts": {5: 83, 4: 8, 3: 2, 2: 1, 1: 3}}
 # Usage from PostHog (store installs only; dev/simulator/TestFlight excluded). Update by hand monthly.
 # fired: alarm_fired since tracking began (2026-07-26), so the real total is higher -> "or more".
 # regions: countries/regions with active users in the last 30 days (105 on 2026-11-15; the page shows 100).
-USAGE = {"as_of": "2026-11-15", "fired": 45000, "regions": 100}
+USAGE = {"as_of": "2026-11-17", "fired": 45000, "regions": 100}
 # Used when the App Store can't be reached at build time (2026-11-15).
 RATINGS_FALLBACK = {"count": 97, "avg": 4.7, "regions": 23}
 
