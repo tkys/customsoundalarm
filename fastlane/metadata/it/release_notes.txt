@@ -1,25 +1,17 @@
-■ Playlist (PRO · Accesso anticipato)
-Raccogli i tuoi suoni in una playlist e svegliati con quella: in ordine, in modo casuale o con un brano a caso. Puoi anche scegliere come si collegano i brani, con una dissolvenza o una dissolvenza incrociata.
+■ Giorni senza sveglia
+• Scorri una sveglia verso destra, o tienila premuta, e scegli «Metti in pausa» per saltare solo la prossima.
+• Le sveglie ripetute possono saltare le date che scegli.
+• Con il pulsante in alto a destra metti in pausa tutte le sveglie per un po’.
 
-■ Avvio delicato (PRO · Accesso anticipato)
-La sveglia parte piano e aumenta di volume in 5, 15 o 30 secondi.
+■ Playlist con un tocco
+Quando hai almeno due suoni tuoi, la Libreria e la scelta del suono ti propongono una playlist che cambia brano ogni volta. Toccala per crearla.
 
-Se inizi a usarle durante l’accesso anticipato, potrai continuare a usarle anche dopo la versione definitiva.
+■ Impostazioni
+Tocca l’ingranaggio in alto a sinistra per la modalità notte, la guida, i contatti e le recensioni.
 
-■ Libreria
-La nuova scheda Libreria raccoglie i tuoi suoni e le tue playlist in un unico posto.
-
-■ Ora in italiano
-My Sound Alarm è ora disponibile in italiano e in altre 12 lingue. L’app segue la lingua del tuo dispositivo.
-
-■ Correzioni
-Una sveglia ripetuta poteva suonare di nuovo nello stesso minuto dopo averla fermata. Ora è corretto.
-Una sveglia che non compariva più nell’app poteva suonare a un orario che non avevi impostato. Ora è corretto: dopo l’aggiornamento, apri l’app per rimuovere queste sveglie.
-
-■ Più leggibile
-Colori e contrasto del testo sono stati rivisti, e le schermate restano leggibili anche con le dimensioni del testo più grandi.
-
-■ “Suona ora”
-“Suona ora” riproduce il suono che stai modificando. Se non può suonare, la schermata ne indica il motivo e ti permette di consentire le sveglie subito.
+■ Inoltre
+• Nella scelta del suono, tocca una riga per ascoltare quel suono.
+• Scegli da dove importare un video direttamente sullo schermo.
+• Risolto: una sveglia singola con playlist suonava sempre lo stesso brano.
 
 Grazie per usare My Sound Alarm.

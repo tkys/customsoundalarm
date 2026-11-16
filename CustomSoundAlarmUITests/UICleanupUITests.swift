@@ -31,12 +31,12 @@ final class UICleanupUITests: XCTestCase {
         )
     }
 
-    func testNightModeAndAddButtonsHaveLabels() {
+    func testSettingsAndAddButtonsHaveLabels() {
         launchList()
 
         XCTAssertTrue(
-            app.buttons["ナイトモード"].waitForExistence(timeout: 5),
-            "月のボタンは「ナイトモード」と読み上げるべき"
+            app.buttons["設定"].waitForExistence(timeout: 5),
+            "歯車のボタンは「設定」と読み上げるべき"
         )
         XCTAssertTrue(
             app.navigationBars.buttons["アラームを追加"].waitForExistence(timeout: 5),

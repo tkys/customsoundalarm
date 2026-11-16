@@ -40,6 +40,7 @@ struct CustomSoundAlarmApp: App {
                         AlarmStore.shared.resetForUITest()
                         PlaylistStore.shared.resetForUITest()
                         AppGroup.dismissedPresetFileNames = []
+                        SoundStore.shared.resetForUITest()
                         SoundStore.shared.resetPresetNamesForUITest()
                         SoundStore.shared.backfillMissingDurations()
                         let morning = PlaylistStore.shared.add(
@@ -81,6 +82,126 @@ struct CustomSoundAlarmApp: App {
                             isEnabled: false,
                             label: String(localized: "alarm_title"),
                             playlistID: weekend.id
+                        ))
+                    }
+                    if AppGroup.isUITestSeedSuggestion {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        PlaylistStore.shared.resetForUITest()
+                        AppGroup.dismissedPresetFileNames = []
+                        SoundStore.shared.resetForUITest()
+                        SoundStore.shared.resetPresetNamesForUITest()
+
+                        let seeds: [(resource: String, fileName: String, name: String)] = [
+                            ("PresetBell", "SuggestionBell.caf", "Suggestion Bell"),
+                            ("PresetMarimba", "SuggestionMarimba.caf", "Suggestion Marimba"),
+                        ]
+                        for seed in seeds {
+                            let url = AudioConverter.shared.soundsDirectory
+                                .appendingPathComponent(seed.fileName)
+                            try? FileManager.default.removeItem(at: url)
+                            if let source = Bundle.main.url(
+                                forResource: seed.resource,
+                                withExtension: "caf"
+                            ) {
+                                try? FileManager.default.copyItem(at: source, to: url)
+                                SoundStore.shared.add(AlarmSound(
+                                    name: seed.name,
+                                    fileName: seed.fileName,
+                                    isPreset: false
+                                ))
+                            }
+                        }
+                    }
+                    if AppGroup.isUITestSeedStore {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        PlaylistStore.shared.resetForUITest()
+                        AppGroup.dismissedPresetFileNames = []
+                        SoundStore.shared.resetForUITest()
+                        SoundStore.shared.resetPresetNamesForUITest()
+
+                        let japanese = Locale.current.language.languageCode?.identifier == "ja"
+                        let seeds: [(resource: String, fileName: String, name: String, seconds: Double)] = [
+                            ("PresetMusicBox", "StoreSeed1.caf", japanese ? "朝のピアノ" : "Morning Piano", 192),
+                            ("PresetMarimba", "StoreSeed2.caf", japanese ? "ライブの動画" : "Live Concert Clip", 125),
+                            ("PresetBell", "StoreSeed3.caf", japanese ? "海の音" : "Ocean Waves", 160),
+                            ("PresetCrescendo", "StoreSeed4.caf", japanese ? "家族の声" : "Family Voice Memo", 18),
+                        ]
+                        var tracks: [PlaylistTrack] = []
+                        for seed in seeds {
+                            let url = AudioConverter.shared.soundsDirectory
+                                .appendingPathComponent(seed.fileName)
+                            try? FileManager.default.removeItem(at: url)
+                            if let source = Bundle.main.url(
+                                forResource: seed.resource,
+                                withExtension: "caf"
+                            ) {
+                                try? FileManager.default.copyItem(at: source, to: url)
+                                SoundStore.shared.add(AlarmSound(
+                                    name: seed.name,
+                                    fileName: seed.fileName,
+                                    isPreset: false,
+                                    durationSeconds: seed.seconds
+                                ))
+                                tracks.append(PlaylistTrack(soundFileName: seed.fileName))
+                            }
+                        }
+                        let playlist = PlaylistStore.shared.add(
+                            name: String(localized: "playlist_suggestion_name"),
+                            tracks: tracks,
+                            playOrder: .oneRandom,
+                            transition: .crossfade
+                        )
+                        AlarmStore.shared.add(AlarmEntry(
+                            hour: 7,
+                            minute: 0,
+                            isEnabled: false,
+                            label: String(localized: "alarm_title"),
+                            playlistID: playlist.id
+                        ))
+                    }
+                    if AppGroup.isUITestSeedSkip {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        PlaylistStore.shared.resetForUITest()
+                        AppGroup.dismissedPresetFileNames = []
+                        SoundStore.shared.resetForUITest()
+                        SoundStore.shared.resetPresetNamesForUITest()
+                        AppGroup.globalSkip = nil
+                        AppGroup.lastSkipTimeZone = TimeZone.current.identifier
+
+                        let calendar = Calendar.current
+                        let now = Date()
+                        let labels = ["朝", "ストレッチ", "読書"]
+                        for (index, label) in labels.enumerated() {
+                            let time = calendar.date(
+                                byAdding: .hour,
+                                value: index + 1,
+                                to: now
+                            ) ?? now
+                            let parts = calendar.dateComponents(
+                                [.hour, .minute],
+                                from: time
+                            )
+                            AlarmStore.shared.add(AlarmEntry(
+                                hour: parts.hour ?? 7,
+                                minute: parts.minute ?? 0,
+                                isEnabled: true,
+                                label: label,
+                                repeatWeekdays: [1, 2, 3, 4, 5, 6, 7],
+                                soundFileName: "PresetBell.caf"
+                            ))
+                        }
+                        let oneTime = calendar.date(byAdding: .hour, value: 2, to: now) ?? now
+                        let parts = calendar.dateComponents([.hour, .minute], from: oneTime)
+                        AlarmStore.shared.add(AlarmEntry(
+                            hour: parts.hour ?? 9,
+                            minute: parts.minute ?? 0,
+                            isEnabled: true,
+                            label: "病院",
+                            repeatWeekdays: [],
+                            soundFileName: "PresetMarimba.caf"
                         ))
                     }
                     if AppGroup.isUITestSeedDesignAudit {

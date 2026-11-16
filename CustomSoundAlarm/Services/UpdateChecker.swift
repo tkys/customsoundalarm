@@ -6,9 +6,9 @@ protocol AppConfigFetching: Sendable {
     func fetch() async -> AppConfig?
 }
 
-/// GitHub Pages の `app-config.json` を 5 秒で取得する。
+/// サイト（mysoundalarm.com）の `app-config.json` を 5 秒で取得する。
 struct URLSessionAppConfigFetcher: AppConfigFetching {
-    static let defaultURL = URL(string: "https://tkys.github.io/customsoundalarm/app-config.json")!
+    static let defaultURL = URL(string: "https://mysoundalarm.com/app-config.json")!
 
     let url: URL
 

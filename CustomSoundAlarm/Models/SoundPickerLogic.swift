@@ -57,3 +57,80 @@ enum SoundPickerLogic {
         sounds.filter { $0.isPreset }
     }
 }
+
+/// 音を選ぶ画面で行をタップしたときの試し聴き（#196・純粋関数・単体テスト対象）。
+///
+/// 標準の時計アプリと同じく、タップで選ぶと同時に鳴らす。
+/// 有効な選択の行をもう一度タップしたら止める（選択は変えない）。
+enum SoundPreviewLogic {
+
+    /// 行をタップした結果。画面はこれを見て選択の通知・再生・停止を行う。
+    struct Outcome: Equatable {
+        /// 選択を画面へ通知するか（プレイリスト選択中でも音に切り替える）
+        let notifiesSelection: Bool
+        /// 鳴らすか
+        let plays: Bool
+        /// 鳴っている音を止めるか
+        let stops: Bool
+        /// 有効な選択が変わったか（`sound_selected` の二重送信を防ぐ）
+        let selectionChanged: Bool
+    }
+
+    /// 行をタップしたときの動きを返す。
+    /// - Parameters:
+    ///   - tapped: タップした行の音（既定の音の行は nil）
+    ///   - selected: いま選ばれている音（プレイリスト選択中は残っていることがある）
+    ///   - playingFileName: いま鳴っているファイル名
+    ///   - isActiveSelection: タップした行が「いま有効な選択」か（`selectionActive` を含む）
+    static func tap(
+        tapped: AlarmSound?,
+        selected: AlarmSound?,
+        playingFileName: String?,
+        isActiveSelection: Bool
+    ) -> Outcome {
+        // プレイリスト選択中は、同じ音が選ばれていても音に切り替える必要がある
+        let changed = !isActiveSelection || selectionChanged(tapped: tapped, selected: selected)
+        guard let tapped else {
+            return Outcome(
+                notifiesSelection: true,
+                plays: false,
+                stops: true,
+                selectionChanged: changed
+            )
+        }
+        if isActiveSelection, playingFileName == tapped.fileName {
+            // 鳴っている行が有効な選択 → 止める（選択はそのまま）
+            return Outcome(
+                notifiesSelection: false,
+                plays: false,
+                stops: true,
+                selectionChanged: false
+            )
+        }
+        return Outcome(
+            notifiesSelection: true,
+            plays: true,
+            stops: false,
+            selectionChanged: changed
+        )
+    }
+
+    /// 選択が実際に変わったか。同じ行の再タップ（停止）で
+    /// `sound_selected` を二重に送らないために使う。
+    static func selectionChanged(tapped: AlarmSound?, selected: AlarmSound?) -> Bool {
+        switch (tapped, selected) {
+        case (nil, nil):
+            return false
+        case (nil, _), (_, nil):
+            return true
+        case let (tapped?, selected?):
+            return tapped.id != selected.id
+        }
+    }
+
+    /// 試し聴きを止める必要があるか（鳴っているときだけ）。
+    /// 画面を閉じる・保存する・取り込みを始める、のどの導線でも使う（#196）。
+    static func shouldStop(playingFileName: String?) -> Bool {
+        playingFileName != nil
+    }
+}

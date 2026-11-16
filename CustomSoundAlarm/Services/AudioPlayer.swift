@@ -10,6 +10,8 @@ final class AudioPlayer {
 
     private let logger = Logger(subsystem: "com.tkysdev.customsoundalarm", category: "AudioPlayer")
     private var player: AVAudioPlayer?
+    /// 夜中に急に大きな音が出ないよう、鳴り始めだけ短くフェードインする（#196）。
+    private static let fadeInDuration: TimeInterval = 0.3
 
     private(set) var isPlaying = false
     private(set) var playingFileName: String?
@@ -17,7 +19,8 @@ final class AudioPlayer {
     private init() {}
 
     /// 指定サウンドを再生（バンドルまたはLibrary/Sounds）
-    func play(_ sound: AlarmSound) {
+    /// - Parameter source: 鳴らした入口（計測用・#196）
+    func play(_ sound: AlarmSound, source: SoundPreviewSource) {
         stop()
 
         let url: URL?
@@ -40,11 +43,13 @@ final class AudioPlayer {
             try AVAudioSession.sharedInstance().setActive(true)
             player = try AVAudioPlayer(contentsOf: url)
             player?.numberOfLoops = 0
+            player?.setVolume(0, fadeDuration: 0)
             player?.play()
+            player?.setVolume(1, fadeDuration: Self.fadeInDuration)
             isPlaying = true
             playingFileName = sound.fileName
 
-            AnalyticsService.shared.capture(.soundPreviewPlayed)
+            AnalyticsService.shared.capture(.soundPreviewPlayed(source: source))
 
             // 5秒後に自動停止（プレビュー用）
             Task {

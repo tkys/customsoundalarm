@@ -23,7 +23,7 @@ platform :ios do
       run_precheck_before_submit: false,
       submit_for_review: false,
       primary_category: "UTILITIES",
-      app_version: "1.8.1",
+      app_version: "1.8.2",
       languages: ["en-US", "en-GB", "ja", "fr-FR", "de-DE", "es-ES", "es-MX", "pt-BR", "it", "nl-NL", "ko", "zh-Hans", "ar-SA", "pl", "cs"]
     )
   end
@@ -37,11 +37,12 @@ platform :ios do
       screenshots_path: "./fastlane/screenshots",
       skip_binary_upload: true,
       skip_screenshots: false,
+      overwrite_screenshots: true,
       force: true,
       run_precheck_before_submit: false,
       submit_for_review: false,
       primary_category: "UTILITIES",
-      app_version: "1.8.1",
+      app_version: "1.8.2",
       languages: ["en-US", "en-GB", "ja", "fr-FR", "de-DE", "es-ES", "es-MX", "pt-BR", "it", "nl-NL", "ko", "zh-Hans", "ar-SA", "pl", "cs"]
     )
   end
@@ -75,8 +76,8 @@ platform :ios do
       # v1.8.1: スクショは変えない（新バージョンは前の版の画像を引き継ぐ）。
       # 手元の screenshots は 3 言語分だけなので、上書きすると他の言語に影響しうる。
       # スクショを差し替える版だけ false / overwrite true にする。PPO 実行中は必ず true。
-      skip_screenshots: true,
-      overwrite_screenshots: false,
+      skip_screenshots: false,
+      overwrite_screenshots: true,
       skip_metadata: false,
       force: true,
       run_precheck_before_submit: false,
@@ -90,7 +91,7 @@ platform :ios do
         export_compliance_uses_encryption: false,
         export_compliance_is_exempt: false
       },
-      app_version: "1.8.1",
+      app_version: "1.8.2",
       languages: ["en-US", "en-GB", "ja", "fr-FR", "de-DE", "es-ES", "es-MX", "pt-BR", "it", "nl-NL", "ko", "zh-Hans", "ar-SA", "pl", "cs"]
     )
   end
@@ -114,8 +115,8 @@ platform :ios do
         export_compliance_uses_encryption: false,
         export_compliance_is_exempt: false
       },
-      app_version: "1.8.1",
-      build_number: "13",
+      app_version: "1.8.2",
+      build_number: "14",
       languages: ["en-US", "en-GB", "ja", "fr-FR", "de-DE", "es-ES", "es-MX", "pt-BR", "it", "nl-NL", "ko", "zh-Hans", "ar-SA", "pl", "cs"]
     )
   end

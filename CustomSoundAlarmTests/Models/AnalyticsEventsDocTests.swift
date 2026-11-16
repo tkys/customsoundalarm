@@ -32,11 +32,20 @@ struct AnalyticsEventsDocTests {
         "sound_selected",
         "ad_slot_eligible",
         "sound_preview_played",
+        "alarm_skip_set",
+        "alarm_skip_undone",
+        "skip_all_set",
+        "skip_all_undone",
+        "holiday_skip_toggled",
+        "holiday_ring_override",
         "custom_sound_imported",
         "video_import_started",
         "video_import_failed",
         "sound_picker_recent_used",
         "bedside_entered",
+        "settings_opened",
+        "support_contact_opened",
+        "review_link_opened",
         "bedside_exited",
         "bedside_setting_changed",
         "onboarding_step_viewed",
@@ -59,6 +68,20 @@ struct AnalyticsEventsDocTests {
         let doc = try String(contentsOf: docURL, encoding: .utf8)
         for name in Self.allEventNames {
             #expect(doc.contains("| `\(name)` |"), "docs/analytics-events.md の表に `\(name)` がありません")
+        }
+    }
+
+    @Test
+    func soundPreviewSourcesAreDocumented() throws {
+        let doc = try String(contentsOf: docURL, encoding: .utf8)
+        let row = try #require(
+            doc.split(separator: "\n").first { $0.hasPrefix("| `sound_preview_played` |") }
+        )
+        for source in SoundPreviewSource.allCases {
+            #expect(
+                row.contains(source.rawValue),
+                "docs/analytics-events.md の sound_preview_played に \(source.rawValue) がありません"
+            )
         }
     }
 

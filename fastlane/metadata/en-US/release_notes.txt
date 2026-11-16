@@ -1,25 +1,17 @@
-■ Playlists (PRO · Early access)
-Group your sounds into a playlist and wake up to it: in order, shuffled, or one random track. You can also choose how tracks blend into each other, with a fade or a crossfade.
+■ Skip days
+• Swipe right on an alarm, or touch and hold it, then choose "Skip" to skip just the next one.
+• Repeating alarms can skip dates you choose.
+• Use the button at the top right to skip all alarms for a while.
 
-■ Gentle start (PRO · Early access)
-The alarm starts quiet and gets louder over 5, 15 or 30 seconds.
+■ Playlists in one tap
+When you have two or more of your own sounds, the Library and the sound picker suggest a playlist that plays a different song each time. Tap it to create one.
 
-If you start using these during early access, you can keep using them after the full release.
+■ Settings
+Tap the gear at the top left for Night Mode, how-to, contact and reviews.
 
-■ Library
-A new Library tab keeps your sounds and playlists in one place.
-
-■ Now in 13 languages
-My Sound Alarm is now available in French, German, Spanish, Portuguese, Italian, Dutch, Korean, Simplified Chinese, Polish, Czech and Arabic, following your device language.
-
-■ Bug fixes
-Fixed an issue where a repeating alarm could ring again within the same minute after you stopped it.
-Fixed an issue where an alarm that no longer appeared in the app could ring at a time you did not set. After updating, open the app to remove any such alarms.
-
-■ Easier to read
-Text colors and contrast have been revised, and screens stay readable with larger text sizes.
-
-■ “Ring now”
-“Ring now” now plays the sound you’re editing. If it can’t ring, the screen tells you why and lets you allow alarms right there.
+■ Also
+• In the sound picker, tap a row to hear that sound.
+• Choose where to import a video from right on the screen.
+• Fixed an issue where a one-time alarm with a playlist played the same song every time.
 
 Thank you for using My Sound Alarm.
