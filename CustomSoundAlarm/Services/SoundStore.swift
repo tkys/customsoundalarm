@@ -154,7 +154,8 @@ final class SoundStore {
                         source: isVideo ? .video : .audio,
                         peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
                         gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
-                        lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore)
+                        lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore),
+                        volumeNoticeShown: false
                     ))
                     try? fm.removeItem(at: file)
                     try? fm.removeItem(at: audioFile)

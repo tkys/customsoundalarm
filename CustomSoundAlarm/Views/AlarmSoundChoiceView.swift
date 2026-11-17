@@ -5,6 +5,7 @@ import SwiftUI
 struct AlarmSoundChoiceView: View {
     @Binding var playlistID: UUID?
     @Binding var selectedSound: AlarmSound?
+    @Binding var volumeBoostedFileName: String?
 
     @Environment(\.dismiss) private var dismiss
     @State private var store = PlaylistStore.shared
@@ -28,7 +29,8 @@ struct AlarmSoundChoiceView: View {
                     playlistID = nil
                     selectedSound = sound
                 },
-                middle: AnyView(playlistSectionView)
+                middle: AnyView(playlistSectionView),
+                volumeBoostedFileName: $volumeBoostedFileName
             )
         }
         .accessibilityIdentifier("alarmSoundChoice.root")

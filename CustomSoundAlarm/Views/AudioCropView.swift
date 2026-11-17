@@ -16,6 +16,7 @@ struct PendingAudioImport: Identifiable {
 struct AudioCropView: View {
     let source: PendingAudioImport
     @Binding var selectedSound: AlarmSound?
+    @Binding var volumeBoostedFileName: String?
     @Environment(\.dismiss) private var dismiss
     @State private var soundStore = SoundStore.shared
 
@@ -284,12 +285,19 @@ struct AudioCropView: View {
                 let sound = AlarmSound(name: soundName, fileName: fileName, thumbnailFileName: thumbnailFileName)
                 soundStore.add(sound)
                 selectedSound = sound
+                let showsVolumeNotice = LoudnessNormalizer.shouldShowVolumeNotice(
+                    gainDb: result.gainDb
+                )
+                if showsVolumeNotice {
+                    volumeBoostedFileName = fileName
+                }
 
                 AnalyticsService.shared.capture(.customSoundImported(
                     source: .audio,
                     peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
                     gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
-                    lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore)
+                    lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore),
+                    volumeNoticeShown: showsVolumeNotice
                 ))
                 await AdPresenter.presentInterstitialIfAllowed(after: .importSaved)
 
