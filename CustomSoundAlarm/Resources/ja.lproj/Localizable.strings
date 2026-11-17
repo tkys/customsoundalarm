@@ -386,5 +386,6 @@
 "playlist_unlock_title" = "プレイリストが使えるようになりました";
 "playlist_unlock_create" = "この2つでプレイリストを作る";
 "playlist_unlock_later" = "あとで";
+"volume_notice" = "小さかったので、聞こえる大きさにそろえました";
 "permission_banner_title" = "このままでは鳴りません";
 "permission_banner_allow" = "許可する";

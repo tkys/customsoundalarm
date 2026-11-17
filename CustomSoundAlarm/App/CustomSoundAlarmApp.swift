@@ -20,6 +20,10 @@ struct CustomSoundAlarmApp: App {
                     hasLaunched = true
 
 #if DEBUG
+                    // UIテスト間で前回の設定を持ち越さない（#206）
+                    if AppGroup.isUITestRun {
+                        AlarmCarryOverStore.clear()
+                    }
                     // UIテスト用: fresh onboarding で起動されたら永続化をクリアして空状態にする
                     if AppGroup.isUITestFreshOnboarding {
                         AppGroup.hasCompletedOnboarding = false
@@ -320,6 +324,20 @@ struct CustomSoundAlarmApp: App {
                     }
 
                     // UIテスト用: アラーム一覧を時刻順で検証するためのシード
+                    if AppGroup.isUITestSeedEnabledAlarms {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        // 時刻の候補（#206）: 一番遅い 6:30 から +5/+10 分が出る。
+                        for (hour, minute) in [(6, 24), (6, 30)] {
+                            AlarmStore.shared.add(AlarmEntry(
+                                hour: hour,
+                                minute: minute,
+                                isEnabled: true,
+                                label: String(localized: "alarm_placeholder")
+                            ))
+                        }
+                    }
+
                     if AppGroup.isUITestSeedAlarms {
                         AppGroup.hasCompletedOnboarding = true
                         AlarmStore.shared.resetForUITest()

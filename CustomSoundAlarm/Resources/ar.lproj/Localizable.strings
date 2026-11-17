@@ -386,5 +386,6 @@
 "playlist_unlock_title" = "تم تفعيل قوائم التشغيل";
 "playlist_unlock_create" = "إنشاء قائمة تشغيل بهذين الصوتين";
 "playlist_unlock_later" = "لاحقًا";
+"volume_notice" = "كان الصوت منخفضًا، لذا رفعناه إلى مستوى مسموع.";
 "permission_banner_title" = "لن ترن المنبهات";
 "permission_banner_allow" = "السماح";

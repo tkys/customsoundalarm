@@ -14,6 +14,7 @@ struct LibraryView: View {
     /// プレイリストの解放（#216）
     @State private var unlock = PlaylistUnlockCoordinator.shared
     @State private var scheduler = AlarmScheduler.shared
+    @State private var volumeBoostedFileName: String?
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -22,6 +23,8 @@ struct LibraryView: View {
                     isSelecting: false,
                     selectedSound: $selectedSound,
                     middle: AnyView(playlistSection),
+                    volumeBoostedFileName: $volumeBoostedFileName,
+                    showVolumeNoticeRow: true,
                     onImportFlowDismissed: { schedulePlaylistUnlockAttempt() }
                 )
 

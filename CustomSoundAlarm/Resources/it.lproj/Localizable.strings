@@ -386,5 +386,6 @@
 "playlist_unlock_title" = "Playlist sbloccate";
 "playlist_unlock_create" = "Crea una playlist con questi due";
 "playlist_unlock_later" = "Non ora";
+"volume_notice" = "Il suono era basso, quindi l’abbiamo reso più udibile.";
 "permission_banner_title" = "Le sveglie non suoneranno";
 "permission_banner_allow" = "Consenti";

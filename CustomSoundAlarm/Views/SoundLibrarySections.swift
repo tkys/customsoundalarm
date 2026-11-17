@@ -13,6 +13,10 @@ struct SoundLibrarySections: View {
     var onSelect: ((AlarmSound?) -> Void)?
     /// 取り込んだ音と標準の音の間に置く Section（プレイリスト・#207）
     var middle: AnyView?
+    /// 取り込みで音量を上げた音のファイル名（#224）
+    @Binding var volumeBoostedFileName: String?
+    /// ライブラリではこの画面の行として出す。音を選ぶ画面ではアラーム編集画面側で出す。
+    var showVolumeNoticeRow: Bool = false
     /// 取り込み画面（切り取り・動画）が閉じたとき（#216）
     var onImportFlowDismissed: (() -> Void)?
 
@@ -83,6 +87,7 @@ struct SoundLibrarySections: View {
                 pendingAudio: $pendingAudio,
                 showingVideoImport: $showingVideoImport,
                 errorMessage: $errorMessage,
+                volumeBoostedFileName: $volumeBoostedFileName,
                 onImportFlowDismissed: onImportFlowDismissed
             )
             .alert(String(localized: "rename"), isPresented: Binding(
@@ -162,6 +167,13 @@ struct SoundLibrarySections: View {
                                 Label("delete", systemImage: "trash")
                             }
                         }
+                    }
+                    if showVolumeNoticeRow,
+                       sound.fileName == volumeBoostedFileName {
+                        Label("volume_notice", systemImage: "speaker.wave.3")
+                            .font(.footnote)
+                            .foregroundStyle(Color.textSecondary)
+                            .accessibilityIdentifier("library.volumeNotice")
                     }
                 }
                 .onDelete { indexSet in

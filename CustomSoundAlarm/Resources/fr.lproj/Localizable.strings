@@ -386,5 +386,6 @@
 "playlist_unlock_title" = "Playlists débloquées";
 "playlist_unlock_create" = "Créer une playlist avec ces deux";
 "playlist_unlock_later" = "Plus tard";
+"volume_notice" = "Le son était faible : nous l’avons rendu plus audible.";
 "permission_banner_title" = "Les alarmes ne sonneront pas";
 "permission_banner_allow" = "Autoriser";

@@ -90,4 +90,13 @@ struct LoudnessNormalizerTests {
         #expect(LoudnessNormalizer.gainDbBucket(forGainDb: 12.1) == "12~20")
         #expect(LoudnessNormalizer.gainDbBucket(forGainDb: 20) == "12~20")
     }
+
+    @Test
+    func volumeNoticeOnlyForThreeDbOrMore() {
+        #expect(!LoudnessNormalizer.shouldShowVolumeNotice(gainDb: -6))
+        #expect(!LoudnessNormalizer.shouldShowVolumeNotice(gainDb: 0))
+        #expect(!LoudnessNormalizer.shouldShowVolumeNotice(gainDb: 2.99))
+        #expect(LoudnessNormalizer.shouldShowVolumeNotice(gainDb: 3.0))
+        #expect(LoudnessNormalizer.shouldShowVolumeNotice(gainDb: 12))
+    }
 }

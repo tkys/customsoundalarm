@@ -386,5 +386,6 @@
 "playlist_unlock_title" = "Playlists ontgrendeld";
 "playlist_unlock_create" = "Maak een playlist met deze twee";
 "playlist_unlock_later" = "Niet nu";
+"volume_notice" = "Het geluid was zacht, dus we hebben het luider gemaakt.";
 "permission_banner_title" = "Wekkers gaan niet af";
 "permission_banner_allow" = "Toestaan";
