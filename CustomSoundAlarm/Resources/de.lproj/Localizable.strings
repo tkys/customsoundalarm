@@ -384,3 +384,5 @@
 "skip_row_toast_skipped_fmt" = "%@ klingelt nicht";
 "skip_row_toast_undone_fmt" = "%@ klingelt";
 "volume_notice" = "Der Ton war leise, deshalb haben wir ihn lauter gemacht.";
+"permission_banner_title" = "Wecker klingeln nicht";
+"permission_banner_allow" = "Erlauben";

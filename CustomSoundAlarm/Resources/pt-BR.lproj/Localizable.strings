@@ -384,3 +384,5 @@
 "skip_row_toast_skipped_fmt" = "%@ não vai tocar";
 "skip_row_toast_undone_fmt" = "%@ vai tocar";
 "volume_notice" = "O som estava baixo, então o deixamos mais audível.";
+"permission_banner_title" = "Os alarmes não vão tocar";
+"permission_banner_allow" = "Permitir";

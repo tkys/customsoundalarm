@@ -384,3 +384,5 @@
 "skip_row_toast_skipped_fmt" = "%@ ne sonnera pas";
 "skip_row_toast_undone_fmt" = "%@ sonnera";
 "volume_notice" = "Le son était faible : nous l’avons rendu plus audible.";
+"permission_banner_title" = "Les alarmes ne sonneront pas";
+"permission_banner_allow" = "Autoriser";

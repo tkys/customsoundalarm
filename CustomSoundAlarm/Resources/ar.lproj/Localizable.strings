@@ -384,3 +384,5 @@
 "skip_row_toast_skipped_fmt" = "لن يرن %@";
 "skip_row_toast_undone_fmt" = "سيرن %@";
 "volume_notice" = "كان الصوت منخفضًا، لذا رفعناه إلى مستوى مسموع.";
+"permission_banner_title" = "لن ترن المنبهات";
+"permission_banner_allow" = "السماح";

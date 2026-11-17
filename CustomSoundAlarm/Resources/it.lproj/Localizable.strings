@@ -384,3 +384,5 @@
 "skip_row_toast_skipped_fmt" = "%@ non suonerà";
 "skip_row_toast_undone_fmt" = "%@ suonerà";
 "volume_notice" = "Il suono era basso, quindi l’abbiamo reso più udibile.";
+"permission_banner_title" = "Le sveglie non suoneranno";
+"permission_banner_allow" = "Consenti";

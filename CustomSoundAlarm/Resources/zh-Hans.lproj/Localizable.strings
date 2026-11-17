@@ -384,3 +384,5 @@
 "skip_row_toast_skipped_fmt" = "%@ 不会响";
 "skip_row_toast_undone_fmt" = "%@ 会响";
 "volume_notice" = "声音偏小，已调整为清晰可听的音量。";
+"permission_banner_title" = "闹钟不会响";
+"permission_banner_allow" = "允许";

@@ -384,3 +384,5 @@
 "skip_row_toast_skipped_fmt" = "%@은(는) 울리지 않습니다";
 "skip_row_toast_undone_fmt" = "%@은(는) 울립니다";
 "volume_notice" = "소리가 작아서 들리는 크기로 맞췄습니다.";
+"permission_banner_title" = "알람이 울리지 않습니다";
+"permission_banner_allow" = "허용";

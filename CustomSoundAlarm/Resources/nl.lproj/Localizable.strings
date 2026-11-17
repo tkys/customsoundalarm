@@ -384,3 +384,5 @@
 "skip_row_toast_skipped_fmt" = "%@ gaat niet af";
 "skip_row_toast_undone_fmt" = "%@ gaat af";
 "volume_notice" = "Het geluid was zacht, dus we hebben het luider gemaakt.";
+"permission_banner_title" = "Wekkers gaan niet af";
+"permission_banner_allow" = "Toestaan";
