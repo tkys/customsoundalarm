@@ -277,6 +277,25 @@ enum AppGroup {
 #endif
     }
 
+    /// UIテスト用: オンのアラームを入れる（DEBUGのみ・#206）。
+    /// 時刻の候補を出すために使う。実際の登録は `isUITestSkipAlarmSync` で止める。
+    static var isUITestSeedEnabledAlarms: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-enabled-alarms")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: AlarmKit への登録を止める（DEBUGのみ・#206）
+    static var isUITestSkipAlarmSync: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-enabled-alarms")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: 同梱のプリセット音で波形クロップ画面を直接開く（DEBUGのみ・#149）
     static var isUITestOpenWaveformCrop: Bool {
     #if DEBUG

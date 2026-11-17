@@ -267,6 +267,11 @@ final class AlarmScheduler {
         editedEntryIDs: Set<UUID> = [],
         trigger: AlarmSyncTrigger
     ) {
+        #if DEBUG
+        // UIテストでオンのアラームを入れたときに、シミュレータで鳴らさない（#206）
+        if AppGroup.isUITestSkipAlarmSync { return }
+        #endif
+
         // 前の同期を止めずに、終わってから次を始める（取り残し防止）。
         // 途中で止めると、AlarmKit に登録済みなのに対応表に書かれないアラームが残り、
         // アプリに出ないまま毎日鳴り続ける（App Store レビュー・1.8.0）。

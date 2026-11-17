@@ -452,4 +452,36 @@ final class AddAlarmRedesignUITests: XCTestCase {
             )
         }
     }
+
+    /// #206: 時刻の候補を押すと、その時刻で保存される。
+    func testTimeSuggestionSetsSavedTime() {
+        app.launchArguments = [
+            "-uitest-seed-enabled-alarms",
+            "-uitest-open-add-alarm",
+            "-uitest-disable-new-alarm"
+        ]
+        app.launch()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15),
+            app.debugDescription
+        )
+
+        let suggestion = findElement("addAlarm.timeSuggestion.6_35")
+        XCTAssertTrue(
+            suggestion.waitForExistence(timeout: 10),
+            "time suggestion should appear: \(app.debugDescription)"
+        )
+        XCTAssertTrue(
+            findElement("addAlarm.timeSuggestion.6_40").exists,
+            "both suggestions should appear: \(app.debugDescription)"
+        )
+
+        suggestion.tap()
+        app.buttons["addAlarm.save"].tap()
+
+        XCTAssertTrue(
+            app.staticTexts["06:35"].waitForExistence(timeout: 15),
+            "saved alarm should use the suggested time: \(app.debugDescription)"
+        )
+    }
 }
