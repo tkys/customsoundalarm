@@ -174,16 +174,18 @@ struct AnalyticsEventTests {
     func customSoundImportedProperties_videoSource() {
         let props = AnalyticsEvent.customSoundImported(source: .video).properties
 
-        #expect(props.count == 1)
+        #expect(props.count == 2)
         #expect(props["source"] as? String == "video")
+        #expect(props["volume_notice_shown"] as? Bool == false)
     }
 
     @Test
     func customSoundImportedProperties_audioSource() {
         let props = AnalyticsEvent.customSoundImported(source: .audio).properties
 
-        #expect(props.count == 1)
+        #expect(props.count == 2)
         #expect(props["source"] as? String == "audio")
+        #expect(props["volume_notice_shown"] as? Bool == false)
     }
 
     @Test
@@ -342,6 +344,15 @@ struct AnalyticsEventTests {
 
         #expect(props.count == 4)
         #expect(props["output_lufs_bucket"] as? String == ">=-9")
+    }
+
+    @Test
+    func customSoundImportedProperties_volumeNotice() {
+        let props = AnalyticsEvent.customSoundImported(
+            source: .audio,
+            volumeNoticeShown: true
+        ).properties
+        #expect(props["volume_notice_shown"] as? Bool == true)
     }
 
     @Test
