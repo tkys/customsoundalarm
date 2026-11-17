@@ -386,3 +386,5 @@
 "playlist_unlock_title" = "Playlists desbloqueadas";
 "playlist_unlock_create" = "Criar uma playlist com estes dois";
 "playlist_unlock_later" = "Agora não";
+"permission_banner_title" = "Os alarmes não vão tocar";
+"permission_banner_allow" = "Permitir";

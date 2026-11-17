@@ -386,3 +386,5 @@
 "playlist_unlock_title" = "已解锁播放列表";
 "playlist_unlock_create" = "用这两首创建播放列表";
 "playlist_unlock_later" = "稍后";
+"permission_banner_title" = "闹钟不会响";
+"permission_banner_allow" = "允许";

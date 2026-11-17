@@ -11,6 +11,8 @@ struct AnalyticsEventsDocTests {
         "alarm_deleted",
         "alarm_duplicated",
         "alarm_permission",
+        "permission_banner_shown",
+        "permission_banner_tapped",
         "alarm_fired",
         "alarm_stopped",
         "alarm_snoozed",

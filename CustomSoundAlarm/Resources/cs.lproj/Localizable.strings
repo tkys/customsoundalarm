@@ -384,5 +384,7 @@
 "skip_row_toast_skipped_fmt" = "%@ nezazvoní";
 "skip_row_toast_undone_fmt" = "%@ zazvoní";
 "playlist_unlock_title" = "Playlisty odemčené";
-"playlist_unlock_create" = "Vytvořit playlistu z těchto dvou";
+"playlist_unlock_create" = "Vytvořit playlist z těchto dvou";
 "playlist_unlock_later" = "Teď ne";
+"permission_banner_title" = "Budíky nezazvoní";
+"permission_banner_allow" = "Povolit";

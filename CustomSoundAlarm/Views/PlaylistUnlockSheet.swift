@@ -18,19 +18,19 @@ struct PlaylistUnlockSheet: View {
     }
 
     var body: some View {
-        VStack(spacing: isAccessibilitySize ? 8 : 20) {
+        VStack(spacing: isAccessibilitySize ? 16 : 20) {
             Spacer(minLength: isAccessibilitySize ? 0 : 8)
 
             Image("unlock_playlist")
                 .resizable()
                 .scaledToFit()
-                .frame(height: isAccessibilitySize ? 60 : 220)
+                .frame(height: isAccessibilitySize ? 160 : 220)
                 .scaleEffect(reduceMotion ? 1 : artScale)
                 .opacity(artOpacity)
                 .accessibilityHidden(true)
 
             Text("playlist_unlock_title")
-                .font(isAccessibilitySize ? .headline.weight(.bold) : .title2.weight(.bold))
+                .font(.title2.weight(.bold))
                 .multilineTextAlignment(.center)
                 .lineLimit(3)
                 .minimumScaleFactor(0.7)
@@ -47,7 +47,8 @@ struct PlaylistUnlockSheet: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .controlSize(isAccessibilitySize ? .regular : .large)
+            .controlSize(.large)
+            .tint(Color.actionFillEnd)
             .accessibilityIdentifier("playlistUnlock.create")
 
             Button("playlist_unlock_later", action: onLater)
@@ -57,7 +58,7 @@ struct PlaylistUnlockSheet: View {
             Spacer(minLength: isAccessibilitySize ? 0 : 8)
         }
         .padding(.horizontal, 24)
-        .padding(.vertical, isAccessibilitySize ? 4 : 16)
+        .padding(.vertical, 16)
         .sensoryFeedback(.success, trigger: feedbackTrigger)
         .onAppear {
             guard !didAnimate else { return }

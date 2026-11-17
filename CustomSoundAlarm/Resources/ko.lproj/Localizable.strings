@@ -386,3 +386,5 @@
 "playlist_unlock_title" = "플레이리스트를 사용할 수 있습니다";
 "playlist_unlock_create" = "이 두 곡으로 플레이리스트 만들기";
 "playlist_unlock_later" = "나중에";
+"permission_banner_title" = "알람이 울리지 않습니다";
+"permission_banner_allow" = "허용";

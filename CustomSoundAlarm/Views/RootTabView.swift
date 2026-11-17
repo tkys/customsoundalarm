@@ -14,6 +14,7 @@ struct RootTabView: View {
         return .alarms
     }()
     @State private var unlock = PlaylistUnlockCoordinator.shared
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     /// 解放シートの表示（coordinator の変更をローカル状態に写す・#216）
     @State private var showingUnlock = false
     /// 解放から作ったプレイリストの詳細（#216）
@@ -63,7 +64,9 @@ struct RootTabView: View {
                 onCreate: { unlock.create() },
                 onLater: { unlock.later() }
             )
-            .presentationDetents([.medium])
+            .presentationDetents(
+                dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium]
+            )
         }
         .sheet(item: $unlockPlaylist) { playlist in
             NavigationStack {
