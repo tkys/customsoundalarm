@@ -20,6 +20,52 @@ struct CustomSoundAlarmApp: App {
                     hasLaunched = true
 
 #if DEBUG
+                    // UIテスト用: 共有の staging を分離する（#222）
+                    if AppGroup.isUITestRun
+                        && !AppGroup.isUITestSeedShareImportAudio
+                        && !AppGroup.isUITestKeepShareImport {
+                        let staging = AppGroup.stagingDirectory
+                        if let files = try? FileManager.default.contentsOfDirectory(
+                            at: staging,
+                            includingPropertiesForKeys: nil
+                        ) {
+                            for file in files {
+                                try? FileManager.default.removeItem(at: file)
+                            }
+                        }
+                    }
+                    if AppGroup.isUITestSeedShareImportAudio {
+                        AppGroup.hasCompletedOnboarding = true
+                        let staging = AppGroup.stagingDirectory
+                        if let files = try? FileManager.default.contentsOfDirectory(
+                            at: staging,
+                            includingPropertiesForKeys: nil
+                        ) {
+                            for file in files {
+                                try? FileManager.default.removeItem(at: file)
+                            }
+                        }
+                        if let source = Bundle.main.url(
+                            forResource: "PresetMarimba",
+                            withExtension: "caf"
+                        ) {
+                            let stagedName = "SharedTest.caf"
+                            try? FileManager.default.copyItem(
+                                at: source,
+                                to: staging.appendingPathComponent(stagedName)
+                            )
+                            let pending = PendingSoundImport(
+                                displayName: "Shared Sound",
+                                stagedFileName: stagedName,
+                                mediaKind: "audio"
+                            )
+                            if let data = try? JSONEncoder().encode(pending) {
+                                try? data.write(to: staging.appendingPathComponent(
+                                    "SharedTest.json"
+                                ))
+                            }
+                        }
+                    }
                     // UIテスト用: fresh onboarding で起動されたら永続化をクリアして空状態にする
                     if AppGroup.isUITestFreshOnboarding {
                         AppGroup.hasCompletedOnboarding = false

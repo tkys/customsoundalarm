@@ -40,7 +40,8 @@ enum AnalyticsEvent: Sendable {
         source: SoundImportSource,
         peakDbBucket: String? = nil,
         gainDbBucket: String? = nil,
-        lufsBucket: String? = nil
+        lufsBucket: String? = nil,
+        shareMedia: ShareImportMedia? = nil
     )
 
     /// サウンドプレビュー再生
@@ -378,11 +379,12 @@ enum AnalyticsEvent: Sendable {
                 "sound_mode": soundMode.analyticsValue,
                 "fade_in": fadeIn.analyticsValue
             ]
-        case let .customSoundImported(source, peakDbBucket, gainDbBucket, lufsBucket):
+        case let .customSoundImported(source, peakDbBucket, gainDbBucket, lufsBucket, shareMedia):
             var d: [String: Any] = ["source": source.rawValue]
             if let peakDbBucket { d["peak_db_bucket"] = peakDbBucket }
             if let gainDbBucket { d["gain_db_bucket"] = gainDbBucket }
             if let lufsBucket { d["lufs_bucket"] = lufsBucket }
+            if let shareMedia { d["share_media"] = shareMedia.rawValue }
             return d
         case let .soundPreviewPlayed(source):
             return ["source": source.rawValue]
@@ -696,9 +698,17 @@ enum SupportContactMethod: String, Sendable {
 
 // MARK: - SoundImportSource
 
-enum SoundImportSource: String, Sendable {
+enum SoundImportSource: String, Sendable, CaseIterable {
     case video
     case audio
+    /// 共有シートから受け取った音（#222）
+    case share
+}
+
+/// 共有シートで受け取った種類（#222）
+enum ShareImportMedia: String, Sendable, CaseIterable {
+    case audio
+    case video
 }
 
 // MARK: - SoundPreviewSource

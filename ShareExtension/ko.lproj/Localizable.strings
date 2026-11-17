@@ -1,0 +1,6 @@
+"saving" = "저장 중…";
+"no_data_received" = "데이터를 받지 못했습니다";
+"no_audio_found" = "호환되는 오디오 파일이 없습니다";
+"file_load_failed" = "파일을 불러오지 못했습니다";
+"saved_format" = "\"%@\" 저장됨";
+"received" = "받았습니다. My Sound Alarm을 열어 울릴 부분을 선택하세요.";
