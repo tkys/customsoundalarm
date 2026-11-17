@@ -383,3 +383,5 @@
 "skip_result_footer" = "우는 요일에 해당하는 공휴일만 표시합니다.";
 "skip_row_toast_skipped_fmt" = "%@은(는) 울리지 않습니다";
 "skip_row_toast_undone_fmt" = "%@은(는) 울립니다";
+"permission_banner_title" = "알람이 울리지 않습니다";
+"permission_banner_allow" = "허용";

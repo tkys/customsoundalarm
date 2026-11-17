@@ -25,16 +25,20 @@ struct ContentView: View {
     /// 共有シートから受け取った音の切り取り（#222）
     @State private var shareImportItem: ShareImportItem?
     @State private var shareImportSelectedSound: AlarmSound?
-    @State private var shareImportDidSave = false
+    @State private var shareImportDidFinish = false
+    /// 許可状態（#230）
     @State private var scheduler = AlarmScheduler.shared
     /// すべてのアラームを休む（#197 画面作り直し）
     @State private var showingSkipAll = false
     @State private var globalSkip: GlobalSkip?
+    /// 許可バナーの表示済み計測（#230）
+    @State private var reportedPermissionBannerStatus: AlarmPermissionStatus?
     @State private var skipToast: String?
     @State private var skipToastTask: Task<Void, Never>?
     @ScaledMetric(relativeTo: .body) private var skipActionIconSize: CGFloat = 17
 
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
     @Environment(\.requestReview) private var requestReview
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -85,6 +89,8 @@ struct ContentView: View {
                     syncSkipTimeZoneIfNeeded()
                     evaluateOnboarding()
                     presentNextShareImportIfNeeded()
+                    scheduler.refreshPermissionStatus()
+                    reportPermissionBannerIfNeeded()
                     #if DEBUG
                     if AppGroup.isUITestOpenAddAlarm {
                         addAlarmRequest = AddAlarmRequest(source: nil)
@@ -125,11 +131,11 @@ struct ContentView: View {
                 SettingsView()
             }
             .sheet(item: $shareImportItem, onDismiss: {
-                let saved = shareImportDidSave
+                let finished = shareImportDidFinish
                 shareImportItem = nil
                 shareImportSelectedSound = nil
-                shareImportDidSave = false
-                if saved {
+                shareImportDidFinish = false
+                if finished {
                     // 複数を共有したときは、1つずつ順に開く（#222）
                     Task {
                         try? await Task.sleep(for: .milliseconds(400))
@@ -166,6 +172,12 @@ struct ContentView: View {
             syncSkipTimeZoneIfNeeded()
             refreshGlobalSkip()
             presentNextShareImportIfNeeded()
+            let wasAuthorized = scheduler.permissionStatus == .authorized
+            scheduler.refreshPermissionStatus()
+            if !wasAuthorized, scheduler.permissionStatus == .authorized {
+                scheduler.syncAlarms(alarmStore.alarms, trigger: .foreground)
+            }
+            reportPermissionBannerIfNeeded()
             ReviewRequestManager.shared.requestReviewIfAppropriate {
                 requestReview()
             }
@@ -216,7 +228,11 @@ struct ContentView: View {
                 shareMedia: .audio,
                 onSaved: {
                     ShareImportQueue.complete(item)
-                    shareImportDidSave = true
+                    shareImportDidFinish = true
+                },
+                onUserClosed: {
+                    ShareImportQueue.complete(item)
+                    shareImportDidFinish = true
                 },
                 deletesSourceOnDiscard: false
             )
@@ -228,7 +244,11 @@ struct ContentView: View {
                 shareMedia: .video,
                 onSaved: {
                     ShareImportQueue.complete(item)
-                    shareImportDidSave = true
+                    shareImportDidFinish = true
+                },
+                onUserClosed: {
+                    ShareImportQueue.complete(item)
+                    shareImportDidFinish = true
                 }
             )
         }
@@ -244,7 +264,7 @@ struct ContentView: View {
               updateChecker.prompt == nil,
               !scheduler.isAlarmRinging else { return }
         guard let item = ShareImportQueue.pendingItems().first else { return }
-        shareImportDidSave = false
+        shareImportDidFinish = false
         shareImportItem = item
     }
 
@@ -359,6 +379,9 @@ struct ContentView: View {
     private var alarmList: some View {
         let displayed = AlarmListOrdering.sortedForDisplay(alarmStore.alarms)
         return List {
+            if let permissionStatus = permissionBannerStatus {
+                permissionBannerRow(permissionStatus)
+            }
             if let skip = activeGlobalSkip {
                 GlobalSkipNoticeRow(
                     skip: skip,
@@ -418,6 +441,93 @@ struct ContentView: View {
         .sheet(isPresented: $showingSkipAll, onDismiss: refreshGlobalSkip) {
             SkipAllSheet(entries: alarmStore.alarms.filter(\.isEnabled))
         }
+    }
+
+    // MARK: - Permission Banner (#230)
+
+    /// 許可が拒否済み／未確認で、オンのアラームがあるときだけ出す。
+    private var permissionBannerStatus: AlarmPermissionStatus? {
+        let enabledCount = alarmStore.alarms.filter(\.isEnabled).count
+        guard PermissionBannerLogic.shouldShow(
+            status: scheduler.permissionStatus,
+            enabledAlarmCount: enabledCount
+        ) else { return nil }
+        return scheduler.permissionStatus
+    }
+
+    @ViewBuilder
+    private func permissionBannerRow(_ status: AlarmPermissionStatus) -> some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .top, spacing: 8) {
+                    warningIcon
+                    permissionBannerTitle
+                }
+                Button("permission_banner_allow") {
+                    handlePermissionBannerTap(status)
+                }
+                .buttonStyle(.borderless)
+                .font(.subheadline.weight(.medium))
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .accessibilityIdentifier("alarmList.permissionAllow")
+            }
+            .warmCard()
+        } else {
+            HStack(spacing: 8) {
+                warningIcon
+                permissionBannerTitle
+                Spacer()
+                Button("permission_banner_allow") {
+                    handlePermissionBannerTap(status)
+                }
+                .buttonStyle(.borderless)
+                .font(.subheadline.weight(.medium))
+                .accessibilityIdentifier("alarmList.permissionAllow")
+            }
+            .warmCard()
+        }
+    }
+
+    private var warningIcon: some View {
+        Image(systemName: "exclamationmark.triangle.fill")
+            .foregroundStyle(.orange)
+    }
+
+    private var permissionBannerTitle: some View {
+        Text("permission_banner_title")
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityIdentifier("alarmList.permissionBanner")
+    }
+
+    private func handlePermissionBannerTap(_ status: AlarmPermissionStatus) {
+        AnalyticsService.shared.capture(.permissionBannerTapped(status: status))
+        switch PermissionBannerLogic.action(for: status) {
+        case .openSettings:
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                openURL(url)
+            }
+        case .requestAuthorization:
+            Task {
+                let granted = await scheduler.requestAuthorization()
+                scheduler.refreshPermissionStatus()
+                if granted {
+                    scheduler.syncAlarms(alarmStore.alarms, trigger: .foreground)
+                }
+                reportPermissionBannerIfNeeded()
+            }
+        case nil:
+            break
+        }
+    }
+
+    private func reportPermissionBannerIfNeeded() {
+        guard let status = permissionBannerStatus else {
+            reportedPermissionBannerStatus = nil
+            return
+        }
+        guard reportedPermissionBannerStatus != status else { return }
+        reportedPermissionBannerStatus = status
+        AnalyticsService.shared.capture(.permissionBannerShown(status: status))
     }
 
     private func skipNextWithToast(_ alarm: AlarmEntry) {

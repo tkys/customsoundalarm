@@ -22,6 +22,8 @@ struct AudioCropView: View {
     var shareMedia: ShareImportMedia?
     /// 保存できたとき（共有シートの staging を消す・#222）
     var onSaved: (() -> Void)?
+    /// ユーザーが × で閉じたとき（共有シートの staging を消す・#222）
+    var onUserClosed: (() -> Void)?
     /// 破棄したときに元ファイルを消すか。共有シートの staging は残す（#222）
     var deletesSourceOnDiscard = true
     @Environment(\.dismiss) private var dismiss
@@ -181,6 +183,7 @@ struct AudioCropView: View {
                     if duration > 0 {
                         showingDiscardConfirm = true
                     } else {
+                        onUserClosed?()
                         dismiss()
                     }
                 } label: {
@@ -198,7 +201,8 @@ struct AudioCropView: View {
         ) {
             Button(String(localized: "discard"), role: .destructive) {
                 previewer.stop()
-                // 一時コピーを破棄して閉じる（共有の staging は残す・#222）
+                onUserClosed?()
+                // 通常の一時コピーは破棄。共有の staging は onUserClosed 側で消す（#222）
                 if deletesSourceOnDiscard {
                     try? FileManager.default.removeItem(at: source.url)
                 }

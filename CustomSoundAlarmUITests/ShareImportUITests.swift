@@ -16,8 +16,9 @@ final class ShareImportUITests: XCTestCase {
     }
 
     /// 共有された音は起動時に切り取り画面が開く。
-    /// キャンセルしたら次回も開き、保存したら staging から消える（#222）。
-    func testSharedAudioOpensCropAndKeepsUntilSaved() {
+    /// 自分で × を押して閉じた分も保存した分も staging から消え、次回は開かない（#222）。
+    func testSharedAudioOpensCropAndIsClearedAfterCloseOrSave() {
+        // × で閉じる → 次回は開かない
         launch(seed: true)
         var crop = findElement("audioCrop.cropAndSave")
         XCTAssertTrue(
@@ -25,19 +26,24 @@ final class ShareImportUITests: XCTestCase {
             "crop should open for a shared audio: \(app.debugDescription)"
         )
 
-        // キャンセルしても staging は残る
         cancelCrop()
         waitUntilGone(crop)
         app.terminate()
 
         launch(seed: false)
+        XCTAssertFalse(
+            findElement("audioCrop.cropAndSave").waitForExistence(timeout: 4),
+            "closed share should not open again: \(app.debugDescription)"
+        )
+
+        // 別の共有を保存 → 次回は開かない
+        app.terminate()
+        launch(seed: true)
         crop = findElement("audioCrop.cropAndSave")
         XCTAssertTrue(
             crop.waitForExistence(timeout: 20),
-            "cancelled share should open again: \(app.debugDescription)"
+            "crop should open for a newly shared audio: \(app.debugDescription)"
         )
-
-        // 保存すると staging から消え、次回は開かない
         crop.tap()
         waitUntilGone(crop)
         app.terminate()

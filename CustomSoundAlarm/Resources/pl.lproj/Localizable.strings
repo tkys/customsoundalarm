@@ -383,3 +383,5 @@
 "skip_result_footer" = "Pokazujemy tylko święta przypadające w dzień dzwonienia.";
 "skip_row_toast_skipped_fmt" = "%@ nie zadzwoni";
 "skip_row_toast_undone_fmt" = "%@ zadzwoni";
+"permission_banner_title" = "Budziki nie zadzwonią";
+"permission_banner_allow" = "Zezwól";

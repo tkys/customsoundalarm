@@ -15,6 +15,8 @@ struct VideoImportFlow: View {
     var shareMedia: ShareImportMedia?
     /// 保存できたとき（共有シートの staging を消す・#222）
     var onSaved: (() -> Void)?
+    /// ユーザーが × で閉じたとき（共有シートの staging を消す・#222）
+    var onUserClosed: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
     @State private var soundStore = SoundStore.shared
 
@@ -72,6 +74,7 @@ struct VideoImportFlow: View {
                     if videoURL != nil {
                         showingDiscardConfirm = true
                     } else {
+                        onUserClosed?()
                         dismiss()
                     }
                 } label: {
@@ -88,6 +91,7 @@ struct VideoImportFlow: View {
         ) {
             Button(String(localized: "discard"), role: .destructive) {
                 previewer.stop()
+                onUserClosed?()
                 dismiss()
             }
             Button("cancel", role: .cancel) {}

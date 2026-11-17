@@ -204,6 +204,20 @@ struct AnalyticsEventTests {
         #expect(SoundImportSource.share.rawValue == "share")
     }
 
+    // MARK: permission_banner (#230)
+
+    @Test
+    func permissionBannerProperties_areTyped() {
+        let shown = AnalyticsEvent.permissionBannerShown(status: .denied).properties
+        #expect(shown.count == 1)
+        #expect(shown["status"] as? String == "denied")
+
+        let tapped = AnalyticsEvent.permissionBannerTapped(
+            status: .notDetermined
+        ).properties
+        #expect(tapped["status"] as? String == "not_determined")
+    }
+
     // MARK: test_ring_scheduled / test_ring_stopped (#109)
 
     @Test
