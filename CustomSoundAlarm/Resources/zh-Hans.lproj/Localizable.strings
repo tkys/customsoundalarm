@@ -383,3 +383,6 @@
 "skip_result_footer" = "仅显示落在会响的星期几的节假日。";
 "skip_row_toast_skipped_fmt" = "%@ 不会响";
 "skip_row_toast_undone_fmt" = "%@ 会响";
+"playlist_unlock_title" = "已解锁播放列表";
+"playlist_unlock_create" = "用这两首创建播放列表";
+"playlist_unlock_later" = "稍后";

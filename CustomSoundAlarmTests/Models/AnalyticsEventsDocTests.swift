@@ -39,6 +39,8 @@ struct AnalyticsEventsDocTests {
         "holiday_skip_toggled",
         "holiday_ring_override",
         "custom_sound_imported",
+        "feature_unlock_shown",
+        "feature_unlock_action",
         "video_import_started",
         "video_import_failed",
         "sound_picker_recent_used",

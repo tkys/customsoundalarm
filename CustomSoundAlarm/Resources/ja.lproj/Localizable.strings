@@ -383,3 +383,6 @@
 "skip_result_footer" = "鳴る曜日に当たる祝日だけを出しています";
 "skip_row_toast_skipped_fmt" = "%@ は鳴らしません";
 "skip_row_toast_undone_fmt" = "%@ は鳴らします";
+"playlist_unlock_title" = "プレイリストが使えるようになりました";
+"playlist_unlock_create" = "この2つでプレイリストを作る";
+"playlist_unlock_later" = "あとで";

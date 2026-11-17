@@ -13,6 +13,8 @@ struct SoundLibrarySections: View {
     var onSelect: ((AlarmSound?) -> Void)?
     /// 取り込んだ音と標準の音の間に置く Section（プレイリスト・#207）
     var middle: AnyView?
+    /// 取り込み画面（切り取り・動画）が閉じたとき（#216）
+    var onImportFlowDismissed: (() -> Void)?
 
     @State private var soundStore = SoundStore.shared
     @State private var audioPlayer = AudioPlayer.shared
@@ -80,7 +82,8 @@ struct SoundLibrarySections: View {
                 isImporting: $isImporting,
                 pendingAudio: $pendingAudio,
                 showingVideoImport: $showingVideoImport,
-                errorMessage: $errorMessage
+                errorMessage: $errorMessage,
+                onImportFlowDismissed: onImportFlowDismissed
             )
             .alert(String(localized: "rename"), isPresented: Binding(
                 get: { renamingSound != nil },

@@ -383,3 +383,6 @@
 "skip_result_footer" = "Mostriamo solo le festività che cadono in un giorno in cui suona.";
 "skip_row_toast_skipped_fmt" = "%@ non suonerà";
 "skip_row_toast_undone_fmt" = "%@ suonerà";
+"playlist_unlock_title" = "Playlist sbloccate";
+"playlist_unlock_create" = "Crea una playlist con questi due";
+"playlist_unlock_later" = "Non ora";

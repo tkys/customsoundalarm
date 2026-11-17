@@ -383,3 +383,6 @@
 "skip_result_footer" = "Seuls les jours fériés qui tombent un jour de sonnerie sont affichés.";
 "skip_row_toast_skipped_fmt" = "%@ ne sonnera pas";
 "skip_row_toast_undone_fmt" = "%@ sonnera";
+"playlist_unlock_title" = "Playlists débloquées";
+"playlist_unlock_create" = "Créer une playlist avec ces deux";
+"playlist_unlock_later" = "Plus tard";

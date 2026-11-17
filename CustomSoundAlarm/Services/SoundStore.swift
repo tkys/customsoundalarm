@@ -13,6 +13,9 @@ final class SoundStore {
 
     private(set) var sounds: [AlarmSound] = []
 
+    /// 2つ目の取り込みで、プレイリストの解放を待っている（#216）。
+    private(set) var hasPendingPlaylistUnlock = false
+
     private init() {
         migrateFromStandard()
         load()
@@ -21,12 +24,44 @@ final class SoundStore {
 
     func add(_ sound: AlarmSound) {
         var sound = sound
+        let previousCustomCount = customSoundCount
         // 追加時に秒数を記録する（起動のたびに全ファイルを AVURLAsset で読まない・#68）
         if !sound.isPreset && sound.durationSeconds == nil {
             sound.durationSeconds = AudioConverter.shared.measureDurationSeconds(fileName: sound.fileName)
         }
         sounds.append(sound)
         save()
+
+        if shouldEvaluatePlaylistUnlock(for: sound) {
+            let shouldPend = PlaylistUnlockLogic.shouldPend(
+                previousCustomSoundCount: previousCustomCount,
+                newCustomSoundCount: customSoundCount,
+                playlistCount: PlaylistStore.shared.playlists.count,
+                hasShown: AppGroup.playlistUnlockShown
+            )
+            if shouldPend {
+                hasPendingPlaylistUnlock = true
+            }
+        }
+    }
+
+    /// 解放の待ち状態を消す（表示したとき・#216）。
+    func clearPendingPlaylistUnlock() {
+        hasPendingPlaylistUnlock = false
+    }
+
+    private var customSoundCount: Int {
+        sounds.filter { !$0.isPreset }.count
+    }
+
+    private func shouldEvaluatePlaylistUnlock(for sound: AlarmSound) -> Bool {
+        guard !sound.isPreset else { return false }
+        #if DEBUG
+        // UIテストでは、解放の確認をするテストだけ有効にする（#216）
+        return !AppGroup.isUITestRun || AppGroup.isUITestPlaylistUnlock
+        #else
+        return true
+        #endif
     }
 
     /// 既存のカスタム音源のうち秒数が未記録のものを一度だけ補完して永続化する。
@@ -179,6 +214,7 @@ final class SoundStore {
     /// UIテスト用: カスタム音をクリアして空状態にする（プリセットは残す）
     func resetForUITest() {
         sounds = sounds.filter(\.isPreset)
+        hasPendingPlaylistUnlock = false
         save()
     }
 

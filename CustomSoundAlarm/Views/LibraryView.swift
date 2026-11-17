@@ -11,6 +11,9 @@ struct LibraryView: View {
     @State private var pendingDelete: Playlist?
     /// SoundLibrarySections が使う選択値（ライブラリでは試聴のみ）
     @State private var selectedSound: AlarmSound?
+    /// プレイリストの解放（#216）
+    @State private var unlock = PlaylistUnlockCoordinator.shared
+    @State private var scheduler = AlarmScheduler.shared
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -18,7 +21,8 @@ struct LibraryView: View {
                 SoundLibrarySections(
                     isSelecting: false,
                     selectedSound: $selectedSound,
-                    middle: AnyView(playlistSection)
+                    middle: AnyView(playlistSection),
+                    onImportFlowDismissed: { schedulePlaylistUnlockAttempt() }
                 )
 
                 #if DEBUG
@@ -35,6 +39,9 @@ struct LibraryView: View {
                 #endif
             }
             .accessibilityIdentifier("library.root")
+            .onChange(of: soundStore.hasPendingPlaylistUnlock) { _, hasPending in
+                if hasPending { schedulePlaylistUnlockAttempt() }
+            }
             .warmListBackground()
             .navigationTitle(String(localized: "library_title"))
             .navigationDestination(for: UUID.self) { id in
@@ -149,5 +156,23 @@ struct LibraryView: View {
             path.removeLast()
         }
         pendingDelete = nil
+    }
+
+    /// 取り込み画面が閉じてから解放シートを出す（#216）。
+    private func schedulePlaylistUnlockAttempt() {
+        Task {
+            try? await Task.sleep(for: .milliseconds(350))
+            attemptPlaylistUnlock()
+        }
+    }
+
+    private func attemptPlaylistUnlock() {
+        guard !showingNewPlaylist,
+              pendingDelete == nil,
+              path.isEmpty else { return }
+        _ = unlock.presentIfNeeded(
+            isRinging: scheduler.isAlarmRinging,
+            isNightMode: BedsideModeTracker.shared.isActive
+        )
     }
 }

@@ -280,6 +280,33 @@ struct CustomSoundAlarmApp: App {
                     if AppGroup.isUITestOpenLibrary {
                         AppGroup.hasCompletedOnboarding = true
                     }
+                    // UIテスト用: 取り込んだ音が1つある状態（#216）
+                    if AppGroup.isUITestSeedOneSound {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        PlaylistStore.shared.resetForUITest()
+                        AppGroup.dismissedPresetFileNames = []
+                        SoundStore.shared.resetForUITest()
+                        SoundStore.shared.resetPresetNamesForUITest()
+                        AppGroup.playlistUnlockShown = false
+
+                        let fileName = "UnlockFirst.caf"
+                        let url = AudioConverter.shared.soundsDirectory
+                            .appendingPathComponent(fileName)
+                        try? FileManager.default.removeItem(at: url)
+                        if let source = Bundle.main.url(
+                            forResource: "PresetBell",
+                            withExtension: "caf"
+                        ) {
+                            try? FileManager.default.copyItem(at: source, to: url)
+                            SoundStore.shared.add(AlarmSound(
+                                name: "First Sound",
+                                fileName: fileName,
+                                isPreset: false
+                            ))
+                        }
+                    }
+
                     // UIテスト用: アラーム一覧を時刻順で検証するためのシード
                     if AppGroup.isUITestSeedAlarms {
                         AppGroup.hasCompletedOnboarding = true

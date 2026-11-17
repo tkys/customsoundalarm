@@ -11,6 +11,8 @@ struct SoundImportModifier: ViewModifier {
     @Binding var pendingAudio: PendingAudioImport?
     @Binding var showingVideoImport: Bool
     @Binding var errorMessage: String?
+    /// 取り込み画面（切り取り・動画）が閉じたとき（#216）
+    var onImportFlowDismissed: (() -> Void)?
 
     func body(content: Content) -> some View {
         content
@@ -21,13 +23,13 @@ struct SoundImportModifier: ViewModifier {
             ) { result in
                 handleImport(result)
             }
-            .sheet(item: $pendingAudio) { pending in
+            .sheet(item: $pendingAudio, onDismiss: onImportFlowDismissed) { pending in
                 NavigationStack {
                     AudioCropView(source: pending, selectedSound: $selectedSound)
                 }
                 .interactiveDismissDisabled()
             }
-            .sheet(isPresented: $showingVideoImport) {
+            .sheet(isPresented: $showingVideoImport, onDismiss: onImportFlowDismissed) {
                 NavigationStack {
                     VideoImportFlow(selectedSound: $selectedSound)
                 }
@@ -85,14 +87,16 @@ extension View {
         isImporting: Binding<Bool>,
         pendingAudio: Binding<PendingAudioImport?>,
         showingVideoImport: Binding<Bool>,
-        errorMessage: Binding<String?>
+        errorMessage: Binding<String?>,
+        onImportFlowDismissed: (() -> Void)? = nil
     ) -> some View {
         modifier(SoundImportModifier(
             selectedSound: selectedSound,
             isImporting: isImporting,
             pendingAudio: pendingAudio,
             showingVideoImport: showingVideoImport,
-            errorMessage: errorMessage
+            errorMessage: errorMessage,
+            onImportFlowDismissed: onImportFlowDismissed
         ))
     }
 }

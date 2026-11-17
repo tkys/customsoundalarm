@@ -22,6 +22,12 @@ struct ContentView: View {
     @State private var addAlarmRequest: AddAlarmRequest?
     /// アップデート案内（#116）
     @State private var updateChecker = UpdateChecker.shared
+    /// プレイリストの解放（#216）
+    @State private var unlock = PlaylistUnlockCoordinator.shared
+    @State private var scheduler = AlarmScheduler.shared
+    /// 追加・編集画面が実際に開いているか（sheet の item より確実・#216）
+    @State private var addScreenVisible = false
+    @State private var editScreenVisible = false
     /// すべてのアラームを休む（#197 画面作り直し）
     @State private var showingSkipAll = false
     @State private var globalSkip: GlobalSkip?
@@ -67,6 +73,7 @@ struct ContentView: View {
                         .accessibilityIdentifier("alarmList.skipAll")
                     }
                     Button {
+                        addScreenVisible = true
                         addAlarmRequest = AddAlarmRequest(source: nil)
                     } label: {
                         Image(systemName: "plus")
@@ -81,9 +88,11 @@ struct ContentView: View {
                     evaluateOnboarding()
                     #if DEBUG
                     if AppGroup.isUITestOpenAddAlarm {
+                        addScreenVisible = true
                         addAlarmRequest = AddAlarmRequest(source: nil)
                     } else if AppGroup.isUITestOpenEditAlarm,
                               let alarm = alarmStore.alarms.first {
+                        editScreenVisible = true
                         selectedAlarm = alarm
                     }
                     #endif
@@ -98,6 +107,7 @@ struct ContentView: View {
                         AppGroup.hasCompletedOnboarding = true
                         withAnimation { showingOnboarding = false }
                         if source.opensAddScreen {
+                            addScreenVisible = true
                             addAlarmRequest = AddAlarmRequest(source: source)
                         }
                         Task {
@@ -109,13 +119,48 @@ struct ContentView: View {
                     .zIndex(1)
                 }
             }
-            .sheet(item: $addAlarmRequest) { request in
-                AlarmDetailView(mode: .add, initialImport: request.source)
+            .sheet(item: $addAlarmRequest, onDismiss: {
+                addScreenVisible = false
+                addAlarmRequest = nil
+                schedulePlaylistUnlockAttempt()
+            }) { request in
+                AlarmDetailView(
+                    mode: .add,
+                    initialImport: request.source,
+                    onClose: {
+                        addScreenVisible = false
+                        addAlarmRequest = nil
+                        schedulePlaylistUnlockAttempt()
+                    }
+                )
+                    .onDisappear {
+                        addScreenVisible = false
+                        addAlarmRequest = nil
+                        schedulePlaylistUnlockAttempt()
+                    }
             }
-            .sheet(item: $selectedAlarm) { alarm in
-                AlarmDetailView(mode: .edit(alarm))
+            .sheet(item: $selectedAlarm, onDismiss: {
+                editScreenVisible = false
+                selectedAlarm = nil
+                schedulePlaylistUnlockAttempt()
+            }) { alarm in
+                AlarmDetailView(
+                    mode: .edit(alarm),
+                    onClose: {
+                        editScreenVisible = false
+                        selectedAlarm = nil
+                        schedulePlaylistUnlockAttempt()
+                    }
+                )
+                    .onDisappear {
+                        editScreenVisible = false
+                        selectedAlarm = nil
+                        schedulePlaylistUnlockAttempt()
+                    }
             }
-            .sheet(isPresented: $showingSettings) {
+            .sheet(isPresented: $showingSettings, onDismiss: {
+                schedulePlaylistUnlockAttempt()
+            }) {
                 SettingsView()
             }
             .fullScreenCover(item: requiredPromptBinding) { prompt in
@@ -158,6 +203,41 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: skipToast)
+        .onChange(of: soundStore.hasPendingPlaylistUnlock) { _, hasPending in
+            if hasPending { schedulePlaylistUnlockAttempt() }
+        }
+        .onChange(of: addScreenVisible) { _, isVisible in
+            if !isVisible { schedulePlaylistUnlockAttempt() }
+        }
+        .onChange(of: editScreenVisible) { _, isVisible in
+            if !isVisible { schedulePlaylistUnlockAttempt() }
+        }
+        .onChange(of: showingSettings) { _, isShowing in
+            if !isShowing { schedulePlaylistUnlockAttempt() }
+        }
+        .onChange(of: scheduler.isAlarmRinging) { _, isRinging in
+            if !isRinging { schedulePlaylistUnlockAttempt() }
+        }
+    }
+
+    /// 追加・編集・設定などのシートが閉じてから解放シートを出す（#216）。
+    private func schedulePlaylistUnlockAttempt() {
+        Task {
+            try? await Task.sleep(for: .milliseconds(350))
+            attemptPlaylistUnlock()
+        }
+    }
+
+    private func attemptPlaylistUnlock() {
+        guard !addScreenVisible,
+              !editScreenVisible,
+              !showingSettings,
+              !showingOnboarding,
+              updateChecker.prompt == nil else { return }
+        _ = unlock.presentIfNeeded(
+            isRinging: scheduler.isAlarmRinging,
+            isNightMode: BedsideModeTracker.shared.isActive
+        )
     }
 
     // MARK: - Update prompt bindings (#116)
@@ -226,6 +306,7 @@ struct ContentView: View {
             Text("empty_description")
         } actions: {
             Button {
+                addScreenVisible = true
                 addAlarmRequest = AddAlarmRequest(source: nil)
             } label: {
                 Text("add_alarm")
@@ -293,6 +374,7 @@ struct ContentView: View {
                         refreshGlobalSkip()
                     },
                     onTap: {
+                        editScreenVisible = true
                         selectedAlarm = alarm
                     }
                 )

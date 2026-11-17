@@ -383,3 +383,6 @@
 "skip_result_footer" = "نعرض فقط العطلات التي تقع في يوم رنين.";
 "skip_row_toast_skipped_fmt" = "لن يرن %@";
 "skip_row_toast_undone_fmt" = "سيرن %@";
+"playlist_unlock_title" = "تم تفعيل قوائم التشغيل";
+"playlist_unlock_create" = "إنشاء قائمة تشغيل بهذين الصوتين";
+"playlist_unlock_later" = "لاحقًا";

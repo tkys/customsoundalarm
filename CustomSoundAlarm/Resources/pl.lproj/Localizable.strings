@@ -383,3 +383,6 @@
 "skip_result_footer" = "Pokazujemy tylko święta przypadające w dzień dzwonienia.";
 "skip_row_toast_skipped_fmt" = "%@ nie zadzwoni";
 "skip_row_toast_undone_fmt" = "%@ zadzwoni";
+"playlist_unlock_title" = "Playlisty odblokowane";
+"playlist_unlock_create" = "Utwórz playlistę z tych dwóch";
+"playlist_unlock_later" = "Nie teraz";

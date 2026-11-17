@@ -447,6 +447,7 @@ struct BedsideClockView: View {
         AppDelegate.orientationLock = .allButUpsideDown
         forceRotateIfNeeded()
 
+        BedsideModeTracker.shared.isActive = true
         UIApplication.shared.isIdleTimerDisabled = true
         now = Date()
         offset = BedsideClockLogic.clockOffset(for: now)
@@ -478,6 +479,7 @@ struct BedsideClockView: View {
     }
 
     private func exitMode() {
+        BedsideModeTracker.shared.isActive = false
         isPresented = false
 
         // 計測: モードを抜けた（滞在時間は区分で送る・二重発火しない）
