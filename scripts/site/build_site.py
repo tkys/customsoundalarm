@@ -171,18 +171,20 @@ REVIEWS = [{'id': 'US',
                'It’s very easy to use and extremely convenient, but there’s one thing that bothers me… Even after I stopped all the alarms, they still ring. '
                'What should I do? Is this a bug? If so, I’d appreciate a fix.'}},
  {'id': 'ES1',
-  'stars': 2,
+  # 11/15 に本人が ★2 →★5 に書き直した（1.8.1 の修正と 11/11 の返信のあと）。
+  # 末尾の「y sin pagar nada」は LP で「無料」を書かない方針のため「…」で切って引用する。
+  'stars': 5,
   'cc': 'ES',
   'date': '2026-11',
   'lang': 'es',
-  'title': 'Alarmas no programadas',
-  'body': 'Las alarmas están muy bien, y está muy bien que puedas poner las canciones que quieras, pero a mí de repente me van saltando alarmas a las 00:00 de '
-          'la mañana y ahora es que no he programado alarmas',
+  'title': 'Ya se me ha solucionado el problema',
+  'body': 'Efectivamente, después de actualizar la app se me soluciona el problema de las alarmas que sonaban de vez en cuando. Me parece una de las mejores '
+          'apps de alarmas que hay porque puedes despertarte con tu música favorita…',
   'fixed_in': '1.8.1',
-  'tr': {'ja': '予定していないアラーム\nアラームはとても良くできていて、好きな曲を設定できるのも素晴らしいのですが、突然 00:00 にアラームが鳴り始めて、今はアラームを設定していないのに鳴ります。',
-         'en': 'Unscheduled alarms\n'
-               'The alarms are fine, and it’s great that you can set any songs you want, but suddenly alarms keep going off at 00:00 and now I have no alarms '
-               'scheduled.'}},
+  'tr': {'ja': 'もう問題は解決しました\nたしかに、アプリをアップデートしたら、ときどき勝手に鳴っていたアラームの問題が直りました。好きな音楽で目覚められるので、いまあるアラームアプリの中でも最高のひとつだと思います…',
+         'en': 'The problem is fixed now\n'
+               'Indeed, after updating the app, the problem with alarms that went off now and then is fixed. I think it’s one of the best alarm apps out there '
+               'because you can wake up to your favorite music…'}},
  {'id': 'PH',
   'featured': True,
   'stars': 5,
