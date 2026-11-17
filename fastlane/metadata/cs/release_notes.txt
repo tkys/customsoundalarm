@@ -1,17 +1,15 @@
-■ Dny bez budíku
-• Přejeď budíkem doprava nebo ho podrž a vyber „Pozastavit“, aby nezazvonil jen příště.
-• Opakované budíky mohou vynechat data, která vybereš.
-• Tlačítkem vpravo nahoře pozastavíš všechny budíky na nějakou dobu.
+■ Vyber část, která bude zvonit, přímo ze Sdílení
+Sdílej video nebo zvukový soubor z Fotek nebo Souborů a vyber My Sound Alarm. Po otevření aplikace se otevře obrazovka pro střih.
 
-■ Playlist jedním klepnutím
-Když máš aspoň dva vlastní zvuky, Knihovna a výběr zvuku ti nabídnou playlist, který pokaždé zahraje jinou písničku. Klepnutím ho vytvoříš.
+■ Rychlejší vytváření budíků
+• Nové budíky převezmou tvá poslední nastavení Odložení, Playlistu a Jemného startu.
+• Nad časem uvidíš 5 a 10 minut po tvém nejpozdějším budíku. Klepnutím je vybereš.
 
-■ Nastavení
-Klepni na ozubené kolo vlevo nahoře pro noční režim, návod, kontakt a hodnocení.
+■ Poznáš, kdy budík nemůže zazvonit
+Když je oprávnění pro budíky vypnuté, nahoře v seznamu se zobrazí „Budíky nezazvoní“. Klepni na „Povolit“ a oprav to.
 
 ■ Dále
-• Ve výběru zvuku si zvuk přehraješ klepnutím na jeho řádek.
-• Zdroj videa teď vybereš přímo na obrazovce.
-• Opraveno: jednorázový budík s playlistem hrál pokaždé stejnou písničku.
+• Když se tichý zvuk zesílí na běžnou hlasitost, zobrazí se pod ním krátká poznámka.
+• Jakmile budeš mít dva vlastní zvuky, aplikace ti dá vědět, že můžeš vytvořit playlist.
 
-Děkujeme, že používáš My Sound Alarm.
+Díky, že používáš My Sound Alarm.

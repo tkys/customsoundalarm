@@ -1,17 +1,15 @@
-■ Dias sem alarme
-• Deslize um alarme para a direita ou toque e segure, e escolha "Pausar" para pular só o próximo.
-• Alarmes que se repetem podem pular as datas que você escolher.
-• Use o botão no canto superior direito para pausar todos os alarmes por um tempo.
+■ Escolha o trecho que vai tocar, direto do Compartilhar
+Compartilhe um vídeo ou áudio do Fotos ou do Arquivos e escolha o My Sound Alarm. Ao abrir o app, a tela de corte se abre.
 
-■ Playlist com um toque
-Quando você tem dois ou mais sons seus, a Biblioteca e a escolha de som sugerem uma playlist que troca de música a cada vez. Toque para criar.
+■ Crie alarmes mais rápido
+• Novos alarmes mantêm suas últimas configurações de Soneca, Playlist e Início suave.
+• Acima do horário aparecem 5 e 10 minutos depois do seu alarme mais tarde. Toque para escolher.
 
-■ Ajustes
-Toque na engrenagem no canto superior esquerdo para o modo noturno, o guia, o contato e as avaliações.
+■ Saiba quando os alarmes não podem tocar
+Se a permissão de alarmes estiver desativada, o topo da lista mostra "Os alarmes não vão tocar". Toque em "Permitir" para resolver.
 
 ■ Também
-• Na escolha de som, toque em uma linha para ouvir aquele som.
-• Escolha a origem do vídeo direto na tela.
-• Corrigido: um alarme único com playlist tocava sempre a mesma música.
+• Quando um som baixo é ajustado para um volume normal, aparece um aviso curto embaixo dele.
+• Quando você tiver dois sons seus, o app avisa que já dá para criar uma playlist.
 
 Obrigado por usar o My Sound Alarm.

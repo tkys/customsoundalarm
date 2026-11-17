@@ -1,17 +1,15 @@
-■ Skip days
-• Swipe right on an alarm, or touch and hold it, then choose "Skip" to skip just the next one.
-• Repeating alarms can skip dates you choose.
-• Use the button at the top right to skip all alarms for a while.
+■ Pick the part to ring, right from Share
+Share a video or audio file from Photos or Files and choose My Sound Alarm. The trim screen opens when you open the app.
 
-■ Playlists in one tap
-When you have two or more of your own sounds, the Library and the sound picker suggest a playlist that plays a different song each time. Tap it to create one.
+■ Faster alarm setup
+• New alarms keep your last Snooze, Playlist and Gentle start settings.
+• Above the time, you'll see 5 and 10 minutes after your latest alarm. Tap one to set it.
 
-■ Settings
-Tap the gear at the top left for Night Mode, how-to, contact and reviews.
+■ Know when alarms can't ring
+If alarm permission is off, the top of the list shows "Alarms won't ring". Tap "Allow" to fix it.
 
 ■ Also
-• In the sound picker, tap a row to hear that sound.
-• Choose where to import a video from right on the screen.
-• Fixed an issue where a one-time alarm with a playlist played the same song every time.
+• When a quiet sound is made louder to match the others, a short note appears under it.
+• When you have two of your own sounds, the app lets you know you can make a playlist.
 
 Thank you for using My Sound Alarm.
