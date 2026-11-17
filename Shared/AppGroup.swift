@@ -332,6 +332,39 @@ enum AppGroup {
     #endif
     }
 
+    /// プレイリストの解放を一度でも出したか（#216）。
+    static var playlistUnlockShown: Bool {
+        get { userDefaults.bool(forKey: "playlistUnlockShown") }
+        set { userDefaults.set(newValue, forKey: "playlistUnlockShown") }
+    }
+
+    /// UIテスト用: プレイリストの解放条件を有効にする（DEBUGのみ・#216）
+    static var isUITestPlaylistUnlock: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-playlist-unlock")
+    #else
+        false
+    #endif
+    }
+
+    /// スクリーンショット用: 解放シートを直接出す（DEBUGのみ・#216）
+    static var isUITestShowPlaylistUnlock: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-show-unlock")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: 取り込んだ音が1つある状態にする（DEBUGのみ・#216）
+    static var isUITestSeedOneSound: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-one-sound")
+    #else
+        false
+    #endif
+    }
+
     /// オンボーディングを完了したか（#98）。
     /// 未完了かつアラーム0件・取り込み音源0件の新規インストールにだけオンボを出す。
     /// 既存ユーザーは初回起動時に条件を満たさなければ立てて以後出さない

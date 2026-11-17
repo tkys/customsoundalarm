@@ -112,6 +112,10 @@ struct AnalyticsEventTests {
             trackCount: 3, totalSecondsBucket: "5_10min"
         ).name == "playlist_created")
         #expect(AnalyticsEvent.playlistSuggestionShown.name == "playlist_suggestion_shown")
+        #expect(AnalyticsEvent.featureUnlockShown(feature: .playlist).name == "feature_unlock_shown")
+        #expect(AnalyticsEvent.featureUnlockAction(
+            feature: .playlist, action: .later
+        ).name == "feature_unlock_action")
         #expect(AnalyticsEvent.playlistEmptyViewed(
             source: .library,
             hasOwnSounds: false
@@ -219,6 +223,33 @@ struct AnalyticsEventTests {
         #expect(SoundImportSource.video.rawValue == "video")
         #expect(SoundImportSource.audio.rawValue == "audio")
         #expect(SoundImportSource.share.rawValue == "share")
+    }
+
+    // MARK: feature_unlock (#216)
+
+    @Test
+    func featureUnlockProperties_areTyped() {
+        let shown = AnalyticsEvent.featureUnlockShown(feature: .playlist).properties
+        #expect(shown.count == 1)
+        #expect(shown["feature"] as? String == "playlist")
+
+        let created = AnalyticsEvent.featureUnlockAction(
+            feature: .playlist, action: .create
+        ).properties
+        #expect(created.count == 2)
+        #expect(created["feature"] as? String == "playlist")
+        #expect(created["action"] as? String == "create")
+
+        let later = AnalyticsEvent.featureUnlockAction(
+            feature: .playlist, action: .later
+        ).properties
+        #expect(later["action"] as? String == "later")
+    }
+
+    @Test
+    func playlistCreatedSourceIncludesUnlock() {
+        #expect(PlaylistSource.unlock.rawValue == "unlock")
+        #expect(PlaylistSource.allCases.contains(.unlock))
     }
 
     // MARK: permission_banner (#230)

@@ -383,6 +383,9 @@
 "skip_result_footer" = "Only holidays that fall on a ringing weekday are shown.";
 "skip_row_toast_skipped_fmt" = "%@ won't ring";
 "skip_row_toast_undone_fmt" = "%@ will ring";
+"playlist_unlock_title" = "Playlists unlocked";
+"playlist_unlock_create" = "Make a playlist with these two";
+"playlist_unlock_later" = "Not now";
 "volume_notice" = "It was quiet, so we made it louder.";
 "permission_banner_title" = "Alarms won't ring";
 "permission_banner_allow" = "Allow";
