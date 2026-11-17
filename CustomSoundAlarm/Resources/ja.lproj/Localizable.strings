@@ -383,3 +383,5 @@
 "skip_result_footer" = "鳴る曜日に当たる祝日だけを出しています";
 "skip_row_toast_skipped_fmt" = "%@ は鳴らしません";
 "skip_row_toast_undone_fmt" = "%@ は鳴らします";
+"permission_banner_title" = "このままでは鳴りません";
+"permission_banner_allow" = "許可する";

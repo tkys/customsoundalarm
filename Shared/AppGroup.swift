@@ -277,8 +277,8 @@ enum AppGroup {
 #endif
     }
 
-    /// UIテスト用: オンのアラームを入れる（DEBUGのみ・#206）。
-    /// 時刻の候補を出すために使う。実際の登録は `isUITestSkipAlarmSync` で止める。
+    /// UIテスト用: オンのアラームを入れる（DEBUGのみ・#206 / #230）。
+    /// 時刻の候補と許可バナーの確認に使う。実際の登録は `isUITestSkipAlarmSync` で止める。
     static var isUITestSeedEnabledAlarms: Bool {
     #if DEBUG
         CommandLine.arguments.contains("-uitest-seed-enabled-alarms")
@@ -287,7 +287,7 @@ enum AppGroup {
     #endif
     }
 
-    /// UIテスト用: AlarmKit への登録を止める（DEBUGのみ・#206）
+    /// UIテスト用: AlarmKit への登録を止める（DEBUGのみ・#206 / #230）
     static var isUITestSkipAlarmSync: Bool {
     #if DEBUG
         CommandLine.arguments.contains("-uitest-seed-enabled-alarms")

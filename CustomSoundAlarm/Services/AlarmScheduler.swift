@@ -34,6 +34,9 @@ final class AlarmScheduler {
     /// 試しに鳴らすボタンの権限状態（#109）
     private(set) var testRingPermission: TestRingPermission = .unknown
 
+    /// AlarmKit の許可状態（#230）
+    private(set) var permissionStatus: AlarmPermissionStatus = .unknown
+
     /// いずれかのアラームが鳴動中か（アップデート案内の抑制・#116）
     private(set) var isAlarmRinging: Bool = false
 
@@ -81,6 +84,23 @@ final class AlarmScheduler {
         loadIDMap()
         loadBackupIDMap()
         refreshTestRingPermission()
+        refreshPermissionStatus()
+    }
+
+    /// アラーム一覧の許可バナー用に、現在の許可状態を更新する（#230）。
+    func refreshPermissionStatus() {
+        #if DEBUG
+        if let override = Self.uiTestAlarmPermissionOverride {
+            permissionStatus = override
+            return
+        }
+        #endif
+        switch manager.authorizationState {
+        case .authorized: permissionStatus = .authorized
+        case .denied: permissionStatus = .denied
+        case .notDetermined: permissionStatus = .notDetermined
+        @unknown default: permissionStatus = .unknown
+        }
     }
 
     /// 試しに鳴らすボタンの権限状態を更新する（#109）
@@ -100,6 +120,14 @@ final class AlarmScheduler {
     }
 
     #if DEBUG
+    /// UIテスト用: 許可バナーの状態を強制する（#230）。
+    static var uiTestAlarmPermissionOverride: AlarmPermissionStatus? {
+        if CommandLine.arguments.contains("-uitest-alarm-permission-denied") { return .denied }
+        if CommandLine.arguments.contains("-uitest-alarm-permission-not-determined") { return .notDetermined }
+        if CommandLine.arguments.contains("-uitest-alarm-permission-authorized") { return .authorized }
+        return nil
+    }
+
     /// UIテスト用: 「今すぐ鳴らす」の権限状態を強制する（#150）。
     /// 引数なしなら nil（実際の状態を使う）。
     static var uiTestPermissionOverride: TestRingPermission? {
@@ -268,7 +296,7 @@ final class AlarmScheduler {
         trigger: AlarmSyncTrigger
     ) {
         #if DEBUG
-        // UIテストでオンのアラームを入れたときに、シミュレータで鳴らさない（#206）
+        // UIテストでオンのアラームを入れても、シミュレータで鳴らさない（#206 / #230）
         if AppGroup.isUITestSkipAlarmSync { return }
         #endif
 

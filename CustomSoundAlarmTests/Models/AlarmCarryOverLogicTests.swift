@@ -174,6 +174,24 @@ struct AlarmCarryOverLogicTests {
         #expect(suggestions.map(\.label) == ["0:03", "0:08"])
     }
 
+    @Test
+    func suggestionLabelFollowsLocaleTimeStyle() {
+        let suggestion = AlarmTimeSuggestion(hour: 23, minute: 5)
+
+        let japanese = suggestion.label(
+            locale: Locale(identifier: "ja_JP"),
+            calendar: calendar
+        )
+        #expect(japanese == "23:05")
+
+        let english = suggestion.label(
+            locale: Locale(identifier: "en_US"),
+            calendar: calendar
+        )
+        #expect(english.contains("11:05"))
+        #expect(english.contains("PM"))
+    }
+
     // MARK: - Helpers
 
     private var calendar: Calendar {

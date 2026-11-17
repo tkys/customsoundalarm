@@ -350,7 +350,20 @@ struct AlarmTimeSuggestion: Identifiable, Equatable {
     let minute: Int
 
     var id: String { "\(hour):\(minute)" }
-    var label: String { String(format: "%d:%02d", hour, minute) }
+    var label: String { label(locale: .current) }
+
+    /// 端末の 12/24 時間設定に合わせた表示（#206 レビュー）。
+    func label(locale: Locale, calendar: Calendar = .current) -> String {
+        var components = calendar.dateComponents([.year, .month, .day], from: Date())
+        components.hour = hour
+        components.minute = minute
+        guard let date = calendar.date(from: components) else {
+            return String(format: "%d:%02d", hour, minute)
+        }
+        return date.formatted(
+            Date.FormatStyle(date: .omitted, time: .shortened).locale(locale)
+        )
+    }
 }
 
 enum AlarmTimeSuggestionLogic {

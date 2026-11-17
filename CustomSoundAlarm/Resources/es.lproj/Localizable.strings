@@ -383,3 +383,5 @@
 "skip_result_footer" = "Solo se muestran los festivos que caen en un día que suena.";
 "skip_row_toast_skipped_fmt" = "%@ no sonará";
 "skip_row_toast_undone_fmt" = "%@ sonará";
+"permission_banner_title" = "Las alarmas no sonarán";
+"permission_banner_allow" = "Permitir";

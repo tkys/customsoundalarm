@@ -70,6 +70,12 @@ enum AnalyticsEvent: Sendable {
     /// - status: 安定識別子（authorized / denied / notDetermined / requestFailed / unknown）
     case alarmPermission(status: AlarmPermissionStatus)
 
+    /// アラーム一覧の許可バナーを出した（#230）
+    case permissionBannerShown(status: AlarmPermissionStatus)
+
+    /// アラーム一覧の許可バナーのボタンを押した（#230）
+    case permissionBannerTapped(status: AlarmPermissionStatus)
+
     /// 動画からの音声抽出・変換フローの開始
     /// - source: 取得元（photo_library / file）
     case videoImportStarted(source: VideoImportSource)
@@ -307,6 +313,8 @@ enum AnalyticsEvent: Sendable {
         case .alarmEdited: return "alarm_edited"
         case .alarmDeleted: return "alarm_deleted"
         case .alarmPermission: return "alarm_permission"
+        case .permissionBannerShown: return "permission_banner_shown"
+        case .permissionBannerTapped: return "permission_banner_tapped"
         case .videoImportStarted: return "video_import_started"
         case .videoImportFailed: return "video_import_failed"
         case .alarmDuplicated: return "alarm_duplicated"
@@ -413,6 +421,10 @@ enum AnalyticsEvent: Sendable {
         case .alarmDeleted:
             return [:]
         case let .alarmPermission(status):
+            return ["status": status.rawValue]
+        case let .permissionBannerShown(status):
+            return ["status": status.rawValue]
+        case let .permissionBannerTapped(status):
             return ["status": status.rawValue]
         case let .videoImportStarted(source):
             return ["source": source.rawValue]
