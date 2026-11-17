@@ -29,6 +29,8 @@ struct AlarmDetailView: View {
     @State private var scheduler = AlarmScheduler.shared
 
     let mode: AlarmDetailMode
+    /// 画面を閉じる直前（#216: 戻った先で解放を出すため）
+    var onClose: (() -> Void)?
     /// 新規作成時に引き継いだ値（#206）
     private let carryOver: AlarmCarryOver
     /// オンボ場面4からの指定（#98 Phase 4）。
@@ -73,9 +75,14 @@ struct AlarmDetailView: View {
     /// 時刻の候補を使った（#206）
     @State private var timeSuggestionUsed = false
 
-    init(mode: AlarmDetailMode, initialImport: OnboardingSource? = nil) {
+    init(
+        mode: AlarmDetailMode,
+        initialImport: OnboardingSource? = nil,
+        onClose: (() -> Void)? = nil
+    ) {
         self.mode = mode
         self.initialImport = initialImport
+        self.onClose = onClose
 
         let carryOver: AlarmCarryOver
         if case .edit = mode {
@@ -177,10 +184,14 @@ struct AlarmDetailView: View {
                         .accessibilityAddTraits(.isHeader)
                 }
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: {
+                    Button {
+                        onClose?()
+                        dismiss()
+                    } label: {
                         Text("cancel")
                     }
                     .tint(Color.primary)
+                    .accessibilityIdentifier("addAlarm.cancel")
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button { save() } label: {
@@ -213,10 +224,11 @@ struct AlarmDetailView: View {
                 // 追加画面のシート提示完了後に取り込みを開く（約0.35秒待つ）
                 try? await Task.sleep(for: .milliseconds(500))
                 applyInitialImportOnce()
+                // 親シートの提示が終わってから開く（#149）
+                openUITestWaveformCropIfNeeded()
             }
             .onAppear {
                 scheduler.refreshTestRingPermission()
-                openUITestWaveformCropIfNeeded()
             }
             .sheet(isPresented: $showingVolumeGuide) {
                 AlarmVolumeGuideView(source: .testRing)
@@ -1096,9 +1108,11 @@ struct AlarmDetailView: View {
             Task {
                 try? await Task.sleep(for: .seconds(1.6))
                 saveConfirmation = nil
+                onClose?()
                 dismiss()
             }
         } else {
+            onClose?()
             dismiss()
         }
     }

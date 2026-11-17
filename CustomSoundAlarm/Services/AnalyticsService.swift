@@ -10,6 +10,19 @@ enum PlaylistSource: String, Sendable, CaseIterable, Hashable {
     case soundChoice = "sound_choice"
     /// 「作る1行」から作成（#207）
     case suggestion
+    /// プレイリストの解放シートから作成（#216）
+    case unlock
+}
+
+/// 解放シートで知らせる機能（#216）
+enum UnlockFeature: String, Sendable, CaseIterable {
+    case playlist
+}
+
+/// 解放シートの行動（#216）
+enum UnlockAction: String, Sendable, CaseIterable {
+    case create
+    case later
 }
 
 // MARK: - AnalyticsEvent
@@ -178,6 +191,12 @@ enum AnalyticsEvent: Sendable {
     /// プレイリストの「作る1行」を出した（#207）
     case playlistSuggestionShown
 
+    /// 機能の解放シートを出した（#216）
+    case featureUnlockShown(feature: UnlockFeature)
+
+    /// 機能の解放シートで選んだ行動（#216）
+    case featureUnlockAction(feature: UnlockFeature, action: UnlockAction)
+
     /// プレイリストが空の状態を見た（#183）
     /// 起動ごと・source ごとに1回だけ送る（PlaylistEmptyViewTracker が制御）。
     case playlistEmptyViewed(source: PlaylistSource, hasOwnSounds: Bool)
@@ -340,6 +359,8 @@ enum AnalyticsEvent: Sendable {
         case .holidayRingOverride: return "holiday_ring_override"
         case .playlistCreated: return "playlist_created"
         case .playlistSuggestionShown: return "playlist_suggestion_shown"
+        case .featureUnlockShown: return "feature_unlock_shown"
+        case .featureUnlockAction: return "feature_unlock_action"
         case .playlistEmptyViewed: return "playlist_empty_viewed"
         case .playlistEdited: return "playlist_edited"
         case .playlistRenderFailed: return "playlist_render_failed"
@@ -492,6 +513,10 @@ enum AnalyticsEvent: Sendable {
             ]
         case .playlistSuggestionShown:
             return [:]
+        case let .featureUnlockShown(feature):
+            return ["feature": feature.rawValue]
+        case let .featureUnlockAction(feature, action):
+            return ["feature": feature.rawValue, "action": action.rawValue]
         case let .alarmSkipSet(scope, days, alarmCount):
             return [
                 "scope": scope.rawValue,

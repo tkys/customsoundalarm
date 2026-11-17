@@ -383,6 +383,9 @@
 "skip_result_footer" = "Solo se muestran los festivos que caen en un día que suena.";
 "skip_row_toast_skipped_fmt" = "%@ no sonará";
 "skip_row_toast_undone_fmt" = "%@ sonará";
+"playlist_unlock_title" = "Playlists desbloqueadas";
+"playlist_unlock_create" = "Crear una playlist con estos dos";
+"playlist_unlock_later" = "Ahora no";
 "volume_notice" = "El sonido era bajo, así que lo hemos hecho más audible.";
 "permission_banner_title" = "Las alarmas no sonarán";
 "permission_banner_allow" = "Permitir";

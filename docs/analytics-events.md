@@ -36,8 +36,10 @@
 | `update_prompt_tapped` | `kind` string | 「App Store で更新」タップ | 更新への遷移 | アプリ動作中のみ | 1.8.0 |
 | `update_prompt_dismissed` | `kind` string（recommended） | おすすめを「あとで」/スワイプで閉じた | おすすめの受容 | アプリ動作中のみ | 1.8.0 |
 | `sound_selected` | `kind` string（imported/preset/default）, `rank_bucket` string（1/2-3/4-10/11+） | サウンド選択で音を選んだ | 音の種類・並び順の影響 | アプリ動作中のみ | 1.8.0 |
-| `playlist_created` | `track_count` int, `total_seconds_bucket` string（under_1min/1_5min/5_10min/10min）, `play_order` string（in_order/shuffle/one_random）, `transition` string（off/short/long/crossfade）, `source` string（library/sound_choice/suggestion） | プレイリストを新規作成 | プレイリスト作成者の割合・規模・再生設定・作成導線 | アプリ動作中のみ | 1.8.2（`play_order`/`transition` は1.8.1、`source` は1.8.1） |
+| `playlist_created` | `track_count` int, `total_seconds_bucket` string（under_1min/1_5min/5_10min/10min）, `play_order` string（in_order/shuffle/one_random）, `transition` string（off/short/long/crossfade）, `source` string（library/sound_choice/suggestion/unlock） | プレイリストを新規作成 | プレイリスト作成者の割合・規模・再生設定・作成導線 | アプリ動作中のみ | 1.8.2（`play_order`/`transition` は1.8.1、`source` は1.8.1） |
 | `playlist_suggestion_shown` | — | プレイリストの「作る1行」を出した | 提案の表示回数 | アプリ動作中のみ | 1.8.2 |
+| `feature_unlock_shown` | `feature` string（playlist） | 機能の解放シートを出した | 解放の表示回数 | アプリ動作中のみ | 1.8.3 |
+| `feature_unlock_action` | `feature` string（playlist）, `action` string（create/later） | 解放シートで選んだ行動 | 解放からの作成率 | アプリ動作中のみ | 1.8.3 |
 | `playlist_empty_viewed` | `source` string（library/sound_choice/suggestion）, `has_own_sounds` bool | 空のプレイリスト状態が表示されたとき（起動ごと・source ごと1回） | 空状態の到達と作成転換 | アプリ動作中のみ | 1.8.1 |
 | `playlist_edited` | `play_order` string, `transition` string | プレイリストを編集 | 編集の利用・再生設定 | アプリ動作中のみ | 1.8.2（`play_order`/`transition` は1.8.1） |
 | `playlist_render_failed` | `reason` string（no_tracks/too_long/render_failed/write_failed/missing_playlist） | プレイリストの書き出し失敗 | 失敗原因 | アプリ動作中のみ | 1.8.2 |

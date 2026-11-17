@@ -17,6 +17,8 @@ struct SoundLibrarySections: View {
     @Binding var volumeBoostedFileName: String?
     /// ライブラリではこの画面の行として出す。音を選ぶ画面ではアラーム編集画面側で出す。
     var showVolumeNoticeRow: Bool = false
+    /// 取り込み画面（切り取り・動画）が閉じたとき（#216）
+    var onImportFlowDismissed: (() -> Void)?
 
     @State private var soundStore = SoundStore.shared
     @State private var audioPlayer = AudioPlayer.shared
@@ -85,7 +87,8 @@ struct SoundLibrarySections: View {
                 pendingAudio: $pendingAudio,
                 showingVideoImport: $showingVideoImport,
                 errorMessage: $errorMessage,
-                volumeBoostedFileName: $volumeBoostedFileName
+                volumeBoostedFileName: $volumeBoostedFileName,
+                onImportFlowDismissed: onImportFlowDismissed
             )
             .alert(String(localized: "rename"), isPresented: Binding(
                 get: { renamingSound != nil },
