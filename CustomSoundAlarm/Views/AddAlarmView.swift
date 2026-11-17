@@ -57,8 +57,8 @@ struct AlarmDetailView: View {
     @State private var pendingAudio: PendingAudioImport?
     @State private var showingVideoImport = false
     @State private var importErrorMessage: String?
-    /// 取り込みで音量を上げたときの1行（#224）
-    @State private var volumeNotice = false
+    /// 取り込みで音量を上げた音のファイル名（#224）
+    @State private var volumeBoostedFileName: String?
 
     /// 試しに鳴らす（#109）
     @State private var isSchedulingTestRing = false
@@ -121,7 +121,7 @@ struct AlarmDetailView: View {
                     repeatSection
                     labelSection
                     soundRow
-                    if volumeNotice {
+                    if showsVolumeBoostedNotice {
                         volumeNoticeRow
                     }
                     fadeInRow
@@ -191,7 +191,7 @@ struct AlarmDetailView: View {
                 pendingAudio: $pendingAudio,
                 showingVideoImport: $showingVideoImport,
                 errorMessage: $importErrorMessage,
-                volumeNotice: $volumeNotice
+                volumeBoostedFileName: $volumeBoostedFileName
             )
             .task {
                 scheduler.refreshTestRingPermission()
@@ -311,6 +311,11 @@ struct AlarmDetailView: View {
 
     // MARK: - Sound / Fade (#160)
 
+    /// 1行は、いま選んでいる音が「大きくした音」のときだけ出す（#224 レビュー）。
+    private var showsVolumeBoostedNotice: Bool {
+        playlistID == nil && selectedSound?.fileName == volumeBoostedFileName
+    }
+
     private var volumeNoticeRow: some View {
         Label("volume_notice", systemImage: "speaker.wave.3")
             .font(.footnote)
@@ -324,7 +329,7 @@ struct AlarmDetailView: View {
             AlarmSoundChoiceView(
                 playlistID: $playlistID,
                 selectedSound: $selectedSound,
-                volumeNotice: $volumeNotice
+                volumeBoostedFileName: $volumeBoostedFileName
             )
         } label: {
             AdaptiveDetailRow {

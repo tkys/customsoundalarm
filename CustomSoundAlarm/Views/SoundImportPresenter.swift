@@ -11,7 +11,7 @@ struct SoundImportModifier: ViewModifier {
     @Binding var pendingAudio: PendingAudioImport?
     @Binding var showingVideoImport: Bool
     @Binding var errorMessage: String?
-    @Binding var volumeNotice: Bool
+    @Binding var volumeBoostedFileName: String?
 
     func body(content: Content) -> some View {
         content
@@ -27,7 +27,7 @@ struct SoundImportModifier: ViewModifier {
                     AudioCropView(
                         source: pending,
                         selectedSound: $selectedSound,
-                        volumeNotice: $volumeNotice
+                        volumeBoostedFileName: $volumeBoostedFileName
                     )
                 }
                 .interactiveDismissDisabled()
@@ -36,7 +36,7 @@ struct SoundImportModifier: ViewModifier {
                 NavigationStack {
                     VideoImportFlow(
                         selectedSound: $selectedSound,
-                        volumeNotice: $volumeNotice
+                        volumeBoostedFileName: $volumeBoostedFileName
                     )
                 }
                 .interactiveDismissDisabled()
@@ -94,7 +94,7 @@ extension View {
         pendingAudio: Binding<PendingAudioImport?>,
         showingVideoImport: Binding<Bool>,
         errorMessage: Binding<String?>,
-        volumeNotice: Binding<Bool>
+        volumeBoostedFileName: Binding<String?>
     ) -> some View {
         modifier(SoundImportModifier(
             selectedSound: selectedSound,
@@ -102,7 +102,7 @@ extension View {
             pendingAudio: pendingAudio,
             showingVideoImport: showingVideoImport,
             errorMessage: errorMessage,
-            volumeNotice: volumeNotice
+            volumeBoostedFileName: volumeBoostedFileName
         ))
     }
 }

@@ -13,8 +13,8 @@ struct SoundLibrarySections: View {
     var onSelect: ((AlarmSound?) -> Void)?
     /// 取り込んだ音と標準の音の間に置く Section（プレイリスト・#207）
     var middle: AnyView?
-    /// 取り込みで音量を上げたときの1行（#224）
-    @Binding var volumeNotice: Bool
+    /// 取り込みで音量を上げた音のファイル名（#224）
+    @Binding var volumeBoostedFileName: String?
     /// ライブラリではこの画面の行として出す。音を選ぶ画面ではアラーム編集画面側で出す。
     var showVolumeNoticeRow: Bool = false
 
@@ -85,7 +85,7 @@ struct SoundLibrarySections: View {
                 pendingAudio: $pendingAudio,
                 showingVideoImport: $showingVideoImport,
                 errorMessage: $errorMessage,
-                volumeNotice: $volumeNotice
+                volumeBoostedFileName: $volumeBoostedFileName
             )
             .alert(String(localized: "rename"), isPresented: Binding(
                 get: { renamingSound != nil },
@@ -165,6 +165,13 @@ struct SoundLibrarySections: View {
                             }
                         }
                     }
+                    if showVolumeNoticeRow,
+                       sound.fileName == volumeBoostedFileName {
+                        Label("volume_notice", systemImage: "speaker.wave.3")
+                            .font(.footnote)
+                            .foregroundStyle(Color.textSecondary)
+                            .accessibilityIdentifier("library.volumeNotice")
+                    }
                 }
                 .onDelete { indexSet in
                     guard !isSelecting else { return }
@@ -173,12 +180,6 @@ struct SoundLibrarySections: View {
                         soundStore.remove(targets[index])
                     }
                 }
-            }
-            if showVolumeNoticeRow && volumeNotice {
-                Label("volume_notice", systemImage: "speaker.wave.3")
-                    .font(.footnote)
-                    .foregroundStyle(Color.textSecondary)
-                    .accessibilityIdentifier("library.volumeNotice")
             }
         } header: {
             WarmSectionHeader(title: String(localized: "imported_sounds"))

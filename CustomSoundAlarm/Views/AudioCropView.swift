@@ -16,7 +16,7 @@ struct PendingAudioImport: Identifiable {
 struct AudioCropView: View {
     let source: PendingAudioImport
     @Binding var selectedSound: AlarmSound?
-    @Binding var volumeNotice: Bool
+    @Binding var volumeBoostedFileName: String?
     @Environment(\.dismiss) private var dismiss
     @State private var soundStore = SoundStore.shared
 
@@ -289,7 +289,7 @@ struct AudioCropView: View {
                     gainDb: result.gainDb
                 )
                 if showsVolumeNotice {
-                    volumeNotice = true
+                    volumeBoostedFileName = fileName
                 }
 
                 AnalyticsService.shared.capture(.customSoundImported(

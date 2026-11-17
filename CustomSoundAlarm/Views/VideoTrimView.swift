@@ -7,7 +7,7 @@ import UniformTypeIdentifiers
 /// ソース選択（写真ライブラリ / ファイル）→ トリム → 抽出 → CAF変換
 struct VideoImportFlow: View {
     @Binding var selectedSound: AlarmSound?
-    @Binding var volumeNotice: Bool
+    @Binding var volumeBoostedFileName: String?
     @Environment(\.dismiss) private var dismiss
     @State private var soundStore = SoundStore.shared
 
@@ -489,7 +489,7 @@ struct VideoImportFlow: View {
                     gainDb: result.gainDb
                 )
                 if showsVolumeNotice {
-                    volumeNotice = true
+                    volumeBoostedFileName = cafName
                 }
 
                 AnalyticsService.shared.capture(.customSoundImported(

@@ -473,6 +473,22 @@ final class AddAlarmRedesignUITests: XCTestCase {
             "quiet import should show the volume notice: \(app.debugDescription)"
         )
 
+        // 別の音を選ぶと、その音の話ではないので1行は消える（#224 レビュー）
+        _ = openSoundChoice()
+        let standard = app.buttons["library.standardSounds"]
+        XCTAssertTrue(standard.waitForExistence(timeout: 10))
+        standard.tap()
+        let preset = app.buttons["library.preset.PresetMarimba.caf"]
+        XCTAssertTrue(preset.waitForExistence(timeout: 10))
+        preset.tap()
+        closeStandardSoundsSheet()
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10))
+        XCTAssertFalse(
+            findElement("addAlarm.volumeNotice").waitForExistence(timeout: 3),
+            "notice should disappear when another sound is selected"
+        )
+
         app.terminate()
         app.launchArguments = [
             "-uitest-open-add-alarm",
