@@ -74,6 +74,16 @@ struct AnalyticsEventsDocTests {
     }
 
     @Test
+    func alarmCreatedCarryOverPropertiesAreDocumented() throws {
+        let doc = try String(contentsOf: docURL, encoding: .utf8)
+        let row = try #require(
+            doc.split(separator: "\n").first { $0.hasPrefix("| `alarm_created` |") }
+        )
+        #expect(row.contains("time_suggestion_used"))
+        #expect(row.contains("carried_over"))
+    }
+
+    @Test
     func soundPreviewSourcesAreDocumented() throws {
         let doc = try String(contentsOf: docURL, encoding: .utf8)
         let row = try #require(

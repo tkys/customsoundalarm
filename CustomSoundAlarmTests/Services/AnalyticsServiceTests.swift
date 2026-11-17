@@ -137,13 +137,28 @@ struct AnalyticsEventTests {
     func alarmCreatedProperties_whenCustomAndRepeating() {
         let props = AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: true, snoozeMinutes: 9).properties
 
-        #expect(props.count == 6)
+        #expect(props.count == 8)
         #expect(props["has_custom_sound"] as? Bool == true)
         #expect(props["is_repeating"] as? Bool == true)
         #expect(props["snooze_minutes"] as? Int == 9)
         #expect(props["backup_minutes"] as? Int == 0)
         #expect(props["sound_mode"] as? String == "single")
         #expect(props["fade_in"] as? String == "off")
+        #expect(props["time_suggestion_used"] as? Bool == false)
+        #expect(props["carried_over"] as? Bool == false)
+    }
+
+    @Test
+    func alarmCreatedProperties_withCarryOverAndSuggestion() {
+        let props = AnalyticsEvent.alarmCreated(
+            hasCustomSound: false,
+            isRepeating: false,
+            snoozeMinutes: 9,
+            timeSuggestionUsed: true,
+            carriedOver: true
+        ).properties
+        #expect(props["time_suggestion_used"] as? Bool == true)
+        #expect(props["carried_over"] as? Bool == true)
     }
 
     @Test
@@ -535,12 +550,16 @@ struct AnalyticsEventTests {
 
     @Test
     func alarmEditedProperties_matchAlarmCreatedShape() {
-        // alarm_created と共通の props + was_enabled（#124）
+        // alarm_created と共通の props + was_enabled（#124）。
+        // 時刻の候補と引き継ぎは新規作成だけの計測（#206）。
         let edited = AnalyticsEvent.alarmEdited(hasCustomSound: true, isRepeating: false, snoozeMinutes: 9).properties
         let created = AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: false, snoozeMinutes: 9).properties
 
         #expect(edited.count == 7)
-        #expect(Set(edited.keys).subtracting(["was_enabled"]) == Set(created.keys))
+        #expect(
+            Set(edited.keys).subtracting(["was_enabled"])
+                == Set(created.keys).subtracting(["time_suggestion_used", "carried_over"])
+        )
         #expect(edited["has_custom_sound"] as? Bool == true)
         #expect(edited["is_repeating"] as? Bool == false)
         #expect(edited["snooze_minutes"] as? Int == 9)

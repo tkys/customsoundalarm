@@ -265,3 +265,135 @@ enum SkipResultLogic {
         }
     }
 }
+
+// MARK: - 新規アラームの引き継ぎ（#206）
+
+struct AlarmCarryOverSnapshot: Codable, Equatable {
+    let snoozeMinutes: Int
+    let playlistID: UUID?
+    let fadeIn: PlaylistFadeIn
+}
+
+enum AlarmCarryOverStore {
+    private static let key = "last_alarm_carry_over_snapshot"
+
+    static var last: AlarmCarryOverSnapshot? {
+        guard let data = AppGroup.userDefaults.data(forKey: key) else { return nil }
+        return try? JSONDecoder().decode(AlarmCarryOverSnapshot.self, from: data)
+    }
+
+    static func save(from entry: AlarmEntry) {
+        let snapshot = AlarmCarryOverSnapshot(
+            snoozeMinutes: entry.snoozeMinutes,
+            playlistID: entry.playlistID,
+            fadeIn: entry.fadeIn
+        )
+        guard let data = try? JSONEncoder().encode(snapshot) else { return }
+        AppGroup.userDefaults.set(data, forKey: key)
+    }
+
+    static func clear() {
+        AppGroup.userDefaults.removeObject(forKey: key)
+    }
+}
+
+struct AlarmCarryOver: Equatable {
+    let hasPrevious: Bool
+    let snoozeMinutes: Int
+    let playlistID: UUID?
+    let fadeIn: PlaylistFadeIn
+
+    static let defaults = AlarmCarryOver(
+        hasPrevious: false,
+        snoozeMinutes: 9,
+        playlistID: nil,
+        fadeIn: .off
+    )
+}
+
+enum AlarmCarryOverLogic {
+    static func carryOver(
+        from snapshot: AlarmCarryOverSnapshot?,
+        playlistExists: (UUID) -> Bool
+    ) -> AlarmCarryOver {
+        guard let snapshot else { return .defaults }
+        var playlistID = snapshot.playlistID
+        if let id = playlistID, !playlistExists(id) {
+            playlistID = nil
+        }
+        return AlarmCarryOver(
+            hasPrevious: true,
+            snoozeMinutes: snapshot.snoozeMinutes,
+            playlistID: playlistID,
+            fadeIn: snapshot.fadeIn
+        )
+    }
+
+    /// 引き継いだ値を変えずに保存したか。前回が無ければ false。
+    static func carriedOver(
+        initial: AlarmCarryOver,
+        snoozeMinutes: Int,
+        playlistID: UUID?,
+        fadeIn: PlaylistFadeIn
+    ) -> Bool {
+        guard initial.hasPrevious else { return false }
+        return initial.snoozeMinutes == snoozeMinutes
+            && initial.playlistID == playlistID
+            && initial.fadeIn == fadeIn
+    }
+}
+
+// MARK: - 時刻の候補（#206）
+
+struct AlarmTimeSuggestion: Identifiable, Equatable {
+    let hour: Int
+    let minute: Int
+
+    var id: String { "\(hour):\(minute)" }
+    var label: String { label(locale: .current) }
+
+    /// 端末の 12/24 時間設定に合わせた表示（#206 レビュー）。
+    func label(locale: Locale, calendar: Calendar = .current) -> String {
+        var components = calendar.dateComponents([.year, .month, .day], from: Date())
+        components.hour = hour
+        components.minute = minute
+        guard let date = calendar.date(from: components) else {
+            return String(format: "%d:%02d", hour, minute)
+        }
+        return date.formatted(
+            Date.FormatStyle(date: .omitted, time: .shortened).locale(locale)
+        )
+    }
+}
+
+enum AlarmTimeSuggestionLogic {
+    /// 次に鳴る日の、いちばん遅い時刻の +5分・+10分。
+    /// オフのアラームは含めない。日付をまたぐ時刻も時・分だけ返す。
+    static func suggestions(
+        entries: [AlarmEntry],
+        after now: Date = Date(),
+        calendar: Calendar = .current
+    ) -> [AlarmTimeSuggestion] {
+        let upcoming = entries
+            .filter(\.isEnabled)
+            .compactMap { entry -> (AlarmEntry, Date)? in
+                entry.nextFireDate(from: now, calendar: calendar).map { (entry, $0) }
+            }
+        guard let firstDay = upcoming.map({ calendar.startOfDay(for: $0.1) }).min() else {
+            return []
+        }
+        let sameDay = upcoming.filter { calendar.isDate($0.1, inSameDayAs: firstDay) }
+        guard let latest = sameDay.map(\.1).max() else { return [] }
+
+        return [5, 10].compactMap { offset in
+            guard let date = calendar.date(byAdding: .minute, value: offset, to: latest) else {
+                return nil
+            }
+            let components = calendar.dateComponents([.hour, .minute], from: date)
+            return AlarmTimeSuggestion(
+                hour: components.hour ?? 0,
+                minute: components.minute ?? 0
+            )
+        }
+    }
+}

@@ -296,7 +296,7 @@ final class AlarmScheduler {
         trigger: AlarmSyncTrigger
     ) {
         #if DEBUG
-        // UIテストでオンのアラームを入れても、シミュレータで鳴らさない（#230）
+        // UIテストでオンのアラームを入れても、シミュレータで鳴らさない（#206 / #230）
         if AppGroup.isUITestSkipAlarmSync { return }
         #endif
 
