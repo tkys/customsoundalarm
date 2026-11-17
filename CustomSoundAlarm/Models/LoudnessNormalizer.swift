@@ -36,6 +36,13 @@ enum LoudnessNormalizer {
         return "<-12"
     }
 
+    /// 取り込み後に「聞こえる大きさにそろえました」を出すゲインの下限（#224）。
+    static let volumeNoticeThresholdDb: Double = 3.0
+
+    static func shouldShowVolumeNotice(gainDb: Double) -> Bool {
+        gainDb >= volumeNoticeThresholdDb
+    }
+
     /// かけたゲイン dB をバケットに分類（計測用）。
     /// - Returns: "0" / "0~3" / "3~6" / "6~12" / "12~20"
     static func gainDbBucket(forGainDb gainDb: Double) -> String {

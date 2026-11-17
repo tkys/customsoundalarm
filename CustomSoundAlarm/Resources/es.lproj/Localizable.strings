@@ -383,3 +383,4 @@
 "skip_result_footer" = "Solo se muestran los festivos que caen en un día que suena.";
 "skip_row_toast_skipped_fmt" = "%@ no sonará";
 "skip_row_toast_undone_fmt" = "%@ sonará";
+"volume_notice" = "El sonido era bajo, así que lo hemos hecho más audible.";

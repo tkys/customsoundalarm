@@ -383,3 +383,4 @@
 "skip_result_footer" = "Es werden nur Feiertage an einem klingelnden Wochentag angezeigt.";
 "skip_row_toast_skipped_fmt" = "%@ klingelt nicht";
 "skip_row_toast_undone_fmt" = "%@ klingelt";
+"volume_notice" = "Der Ton war leise, deshalb haben wir ihn lauter gemacht.";

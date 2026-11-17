@@ -11,6 +11,7 @@ struct LibraryView: View {
     @State private var pendingDelete: Playlist?
     /// SoundLibrarySections が使う選択値（ライブラリでは試聴のみ）
     @State private var selectedSound: AlarmSound?
+    @State private var volumeNotice = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -18,7 +19,9 @@ struct LibraryView: View {
                 SoundLibrarySections(
                     isSelecting: false,
                     selectedSound: $selectedSound,
-                    middle: AnyView(playlistSection)
+                    middle: AnyView(playlistSection),
+                    volumeNotice: $volumeNotice,
+                    showVolumeNoticeRow: true
                 )
 
                 #if DEBUG

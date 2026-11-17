@@ -7,6 +7,7 @@ import UniformTypeIdentifiers
 /// ソース選択（写真ライブラリ / ファイル）→ トリム → 抽出 → CAF変換
 struct VideoImportFlow: View {
     @Binding var selectedSound: AlarmSound?
+    @Binding var volumeNotice: Bool
     @Environment(\.dismiss) private var dismiss
     @State private var soundStore = SoundStore.shared
 
@@ -484,12 +485,19 @@ struct VideoImportFlow: View {
                 )
                 soundStore.add(sound)
                 selectedSound = sound
+                let showsVolumeNotice = LoudnessNormalizer.shouldShowVolumeNotice(
+                    gainDb: result.gainDb
+                )
+                if showsVolumeNotice {
+                    volumeNotice = true
+                }
 
                 AnalyticsService.shared.capture(.customSoundImported(
                     source: .video,
                     peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
                     gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
-                    lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore)
+                    lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore),
+                    volumeNoticeShown: showsVolumeNotice
                 ))
                 await AdPresenter.presentInterstitialIfAllowed(after: .importSaved)
                 dismiss()

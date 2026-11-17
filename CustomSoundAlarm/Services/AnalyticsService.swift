@@ -40,7 +40,8 @@ enum AnalyticsEvent: Sendable {
         source: SoundImportSource,
         peakDbBucket: String? = nil,
         gainDbBucket: String? = nil,
-        lufsBucket: String? = nil
+        lufsBucket: String? = nil,
+        volumeNoticeShown: Bool = false
     )
 
     /// サウンドプレビュー再生
@@ -378,8 +379,11 @@ enum AnalyticsEvent: Sendable {
                 "sound_mode": soundMode.analyticsValue,
                 "fade_in": fadeIn.analyticsValue
             ]
-        case let .customSoundImported(source, peakDbBucket, gainDbBucket, lufsBucket):
-            var d: [String: Any] = ["source": source.rawValue]
+        case let .customSoundImported(source, peakDbBucket, gainDbBucket, lufsBucket, volumeNoticeShown):
+            var d: [String: Any] = [
+                "source": source.rawValue,
+                "volume_notice_shown": volumeNoticeShown
+            ]
             if let peakDbBucket { d["peak_db_bucket"] = peakDbBucket }
             if let gainDbBucket { d["gain_db_bucket"] = gainDbBucket }
             if let lufsBucket { d["lufs_bucket"] = lufsBucket }

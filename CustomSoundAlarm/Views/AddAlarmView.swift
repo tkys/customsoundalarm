@@ -57,6 +57,8 @@ struct AlarmDetailView: View {
     @State private var pendingAudio: PendingAudioImport?
     @State private var showingVideoImport = false
     @State private var importErrorMessage: String?
+    /// 取り込みで音量を上げたときの1行（#224）
+    @State private var volumeNotice = false
 
     /// 試しに鳴らす（#109）
     @State private var isSchedulingTestRing = false
@@ -119,6 +121,9 @@ struct AlarmDetailView: View {
                     repeatSection
                     labelSection
                     soundRow
+                    if volumeNotice {
+                        volumeNoticeRow
+                    }
                     fadeInRow
                     snoozeSection
                 }
@@ -185,7 +190,8 @@ struct AlarmDetailView: View {
                 isImporting: $isImporting,
                 pendingAudio: $pendingAudio,
                 showingVideoImport: $showingVideoImport,
-                errorMessage: $importErrorMessage
+                errorMessage: $importErrorMessage,
+                volumeNotice: $volumeNotice
             )
             .task {
                 scheduler.refreshTestRingPermission()
@@ -256,6 +262,15 @@ struct AlarmDetailView: View {
         #if DEBUG
         guard AppGroup.isUITestOpenWaveformCrop, pendingAudio == nil else { return }
         // ストアのスクショ用: -uitestCropPath <音声ファイル> -uitestCropName <表示名> で差し替える。
+        if AppGroup.isUITestQuietCrop,
+           let source = Bundle.main.url(forResource: "PresetMarimba", withExtension: "caf") {
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent("QuietCrop-\(UUID().uuidString).caf")
+            try? FileManager.default.copyItem(at: source, to: url)
+            try? AudioConverter.applyGainSync(fileURL: url, gainDb: -20)
+            pendingAudio = PendingAudioImport(url: url, name: "Quiet")
+            return
+        }
         let defaults = UserDefaults.standard
         if let path = defaults.string(forKey: "uitestCropPath"),
            FileManager.default.fileExists(atPath: path) {
@@ -296,11 +311,20 @@ struct AlarmDetailView: View {
 
     // MARK: - Sound / Fade (#160)
 
+    private var volumeNoticeRow: some View {
+        Label("volume_notice", systemImage: "speaker.wave.3")
+            .font(.footnote)
+            .foregroundStyle(Color.textSecondary)
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityIdentifier("addAlarm.volumeNotice")
+    }
+
     private var soundRow: some View {
         NavigationLink {
             AlarmSoundChoiceView(
                 playlistID: $playlistID,
-                selectedSound: $selectedSound
+                selectedSound: $selectedSound,
+                volumeNotice: $volumeNotice
             )
         } label: {
             AdaptiveDetailRow {

@@ -177,6 +177,15 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: 小さい音声の取り込み（#224）
+    static var isUITestQuietCrop: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-quiet-crop")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: 取り込んだ音が2つある状態（#207 の提案行）
     static var isUITestSeedSuggestion: Bool {
     #if DEBUG

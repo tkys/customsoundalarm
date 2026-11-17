@@ -452,4 +452,41 @@ final class AddAlarmRedesignUITests: XCTestCase {
             )
         }
     }
+
+    /// #224: 小さい音声を取り込んだときだけ、音量を上げた1行を出す。
+    func testVolumeNoticeOnlyForQuietImport() {
+        app.launchArguments = [
+            "-uitest-open-add-alarm",
+            "-uitest-open-waveform-crop",
+            "-uitest-quiet-crop"
+        ]
+        app.launch()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
+
+        let crop = findElement("audioCrop.cropAndSave")
+        XCTAssertTrue(crop.waitForExistence(timeout: 20), app.debugDescription)
+        crop.tap()
+
+        let notice = findElement("addAlarm.volumeNotice")
+        XCTAssertTrue(
+            notice.waitForExistence(timeout: 15),
+            "quiet import should show the volume notice: \(app.debugDescription)"
+        )
+
+        app.terminate()
+        app.launchArguments = [
+            "-uitest-open-add-alarm",
+            "-uitest-open-waveform-crop"
+        ]
+        app.launch()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
+        let normalCrop = findElement("audioCrop.cropAndSave")
+        XCTAssertTrue(normalCrop.waitForExistence(timeout: 20), app.debugDescription)
+        normalCrop.tap()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
+        XCTAssertFalse(
+            findElement("addAlarm.volumeNotice").waitForExistence(timeout: 3),
+            "normal import should not show the volume notice"
+        )
+    }
 }

@@ -11,6 +11,7 @@ struct SoundImportModifier: ViewModifier {
     @Binding var pendingAudio: PendingAudioImport?
     @Binding var showingVideoImport: Bool
     @Binding var errorMessage: String?
+    @Binding var volumeNotice: Bool
 
     func body(content: Content) -> some View {
         content
@@ -23,13 +24,20 @@ struct SoundImportModifier: ViewModifier {
             }
             .sheet(item: $pendingAudio) { pending in
                 NavigationStack {
-                    AudioCropView(source: pending, selectedSound: $selectedSound)
+                    AudioCropView(
+                        source: pending,
+                        selectedSound: $selectedSound,
+                        volumeNotice: $volumeNotice
+                    )
                 }
                 .interactiveDismissDisabled()
             }
             .sheet(isPresented: $showingVideoImport) {
                 NavigationStack {
-                    VideoImportFlow(selectedSound: $selectedSound)
+                    VideoImportFlow(
+                        selectedSound: $selectedSound,
+                        volumeNotice: $volumeNotice
+                    )
                 }
                 .interactiveDismissDisabled()
             }
@@ -85,14 +93,16 @@ extension View {
         isImporting: Binding<Bool>,
         pendingAudio: Binding<PendingAudioImport?>,
         showingVideoImport: Binding<Bool>,
-        errorMessage: Binding<String?>
+        errorMessage: Binding<String?>,
+        volumeNotice: Binding<Bool>
     ) -> some View {
         modifier(SoundImportModifier(
             selectedSound: selectedSound,
             isImporting: isImporting,
             pendingAudio: pendingAudio,
             showingVideoImport: showingVideoImport,
-            errorMessage: errorMessage
+            errorMessage: errorMessage,
+            volumeNotice: volumeNotice
         ))
     }
 }

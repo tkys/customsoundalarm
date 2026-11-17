@@ -383,3 +383,4 @@
 "skip_result_footer" = "نعرض فقط العطلات التي تقع في يوم رنين.";
 "skip_row_toast_skipped_fmt" = "لن يرن %@";
 "skip_row_toast_undone_fmt" = "سيرن %@";
+"volume_notice" = "كان الصوت منخفضًا، لذا رفعناه إلى مستوى مسموع.";
