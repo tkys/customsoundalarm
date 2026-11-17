@@ -26,6 +26,8 @@ struct ContentView: View {
     @State private var shareImportItem: ShareImportItem?
     @State private var shareImportSelectedSound: AlarmSound?
     @State private var shareImportDidFinish = false
+    /// 共有経路の音量の1行（#224 / #222）
+    @State private var shareImportVolumeBoostedFileName: String?
     /// 許可状態（#230）
     @State private var scheduler = AlarmScheduler.shared
     /// すべてのアラームを休む（#197 画面作り直し）
@@ -234,7 +236,8 @@ struct ContentView: View {
                     ShareImportQueue.complete(item)
                     shareImportDidFinish = true
                 },
-                deletesSourceOnDiscard: false
+                deletesSourceOnDiscard: false,
+                volumeBoostedFileName: $shareImportVolumeBoostedFileName
             )
         case .video:
             VideoImportFlow(
@@ -249,7 +252,8 @@ struct ContentView: View {
                 onUserClosed: {
                     ShareImportQueue.complete(item)
                     shareImportDidFinish = true
-                }
+                },
+                volumeBoostedFileName: $shareImportVolumeBoostedFileName
             )
         }
     }
