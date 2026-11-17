@@ -1,17 +1,15 @@
-■ Dni bez budzika
-• Przesuń budzik w prawo albo przytrzymaj go i wybierz „Pauza”, aby pominąć tylko najbliższy.
-• Powtarzane budziki mogą pomijać wybrane daty.
-• Przyciskiem w prawym górnym rogu wstrzymasz wszystkie budziki na jakiś czas.
+■ Wybierz fragment budzika prosto z Udostępniania
+Udostępnij wideo lub plik audio ze Zdjęć albo z Plików i wybierz My Sound Alarm. Po otwarciu aplikacji pojawi się ekran przycinania.
 
-■ Playlista jednym dotknięciem
-Gdy masz co najmniej dwa własne dźwięki, Biblioteka i wybór dźwięku proponują playlistę, która za każdym razem gra inny utwór. Dotknij, aby ją utworzyć.
+■ Szybsze tworzenie budzików
+• Nowe budziki zachowują Twoje ostatnie ustawienia Drzemki, Playlisty i Łagodnego startu.
+• Nad godziną zobaczysz 5 i 10 minut po Twoim najpóźniejszym budziku. Stuknij, aby wybrać.
 
-■ Ustawienia
-Dotknij koła zębatego w lewym górnym rogu, aby otworzyć tryb nocny, instrukcję, kontakt i oceny.
+■ Wiesz, kiedy budzik nie może zadzwonić
+Jeśli zgoda na budziki jest wyłączona, na górze listy pojawi się „Budziki nie zadzwonią”. Stuknij „Zezwól”, aby to naprawić.
 
 ■ Poza tym
-• W wyborze dźwięku dotknij wiersza, aby posłuchać tego dźwięku.
-• Źródło filmu wybierzesz teraz bezpośrednio na ekranie.
-• Naprawiono: jednorazowy budzik z playlistą grał za każdym razem ten sam utwór.
+• Gdy cichy dźwięk zostanie podgłośniony do normalnej głośności, pod nim pojawi się krótka informacja.
+• Gdy będziesz mieć dwa własne dźwięki, aplikacja podpowie, że możesz utworzyć playlistę.
 
 Dziękujemy za korzystanie z My Sound Alarm.

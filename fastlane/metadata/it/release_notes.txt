@@ -1,17 +1,15 @@
-■ Giorni senza sveglia
-• Scorri una sveglia verso destra, o tienila premuta, e scegli «Metti in pausa» per saltare solo la prossima.
-• Le sveglie ripetute possono saltare le date che scegli.
-• Con il pulsante in alto a destra metti in pausa tutte le sveglie per un po’.
+■ Scegli la parte da far suonare, direttamente da Condividi
+Condividi un video o un file audio da Foto o File e scegli My Sound Alarm. All'apertura dell'app si apre la schermata di taglio.
 
-■ Playlist con un tocco
-Quando hai almeno due suoni tuoi, la Libreria e la scelta del suono ti propongono una playlist che cambia brano ogni volta. Toccala per crearla.
+■ Sveglie più veloci da creare
+• Le nuove sveglie mantengono le ultime impostazioni di Posticipa, Playlist e Avvio delicato.
+• Sopra l'orario vedi 5 e 10 minuti dopo la tua sveglia più tardi. Tocca per sceglierli.
 
-■ Impostazioni
-Tocca l’ingranaggio in alto a sinistra per la modalità notte, la guida, i contatti e le recensioni.
+■ Sai quando le sveglie non possono suonare
+Se il permesso per le sveglie è disattivato, in cima all'elenco compare «Le sveglie non suoneranno». Tocca «Consenti» per risolvere.
 
 ■ Inoltre
-• Nella scelta del suono, tocca una riga per ascoltare quel suono.
-• Scegli da dove importare un video direttamente sullo schermo.
-• Risolto: una sveglia singola con playlist suonava sempre lo stesso brano.
+• Quando un suono basso viene portato a un volume normale, sotto compare una breve nota.
+• Quando hai due suoni tuoi, l'app ti avvisa che puoi creare una playlist.
 
 Grazie per usare My Sound Alarm.

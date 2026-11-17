@@ -1,17 +1,15 @@
-■ Jours sans alarme
-• Balaie une alarme vers la droite, ou maintiens le doigt dessus, puis choisis « Mettre en pause » pour ne pas la faire sonner la prochaine fois.
-• Les alarmes répétées peuvent ignorer les dates que tu choisis.
-• Le bouton en haut à droite met toutes les alarmes en pause pendant un moment.
+■ Choisissez le passage qui sonnera, depuis Partager
+Partagez une vidéo ou un fichier audio depuis Photos ou Fichiers et choisissez My Sound Alarm. L'écran de découpe s'ouvre à l'ouverture de l'app.
 
-■ Une playlist en un geste
-Dès que tu as au moins deux sons à toi, la Bibliothèque et le choix du son te proposent une playlist qui change de morceau à chaque fois. Touche-la pour la créer.
+■ Créer une alarme plus vite
+• Les nouvelles alarmes reprennent vos derniers réglages de Rappel, Playlist et Démarrage en douceur.
+• Au-dessus de l'heure, vous voyez 5 et 10 minutes après votre alarme la plus tardive. Touchez-en une pour la choisir.
 
-■ Réglages
-Touche la roue dentée en haut à gauche pour le mode nuit, le mode d’emploi, le contact et les avis.
+■ Savoir quand les alarmes ne peuvent pas sonner
+Si l'autorisation des alarmes est désactivée, « Les alarmes ne sonneront pas » s'affiche en haut de la liste. Touchez « Autoriser » pour corriger.
 
-■ Et aussi
-• Dans le choix du son, touche une ligne pour l’écouter.
-• Choisis la source d’une vidéo directement à l’écran.
-• Correction : une alarme unique avec une playlist jouait toujours le même morceau.
+■ Aussi
+• Quand un son trop faible est remonté à un volume normal, une courte note s'affiche dessous.
+• Dès que vous avez deux sons à vous, l'app vous indique que vous pouvez créer une playlist.
 
-Merci d’utiliser My Sound Alarm.
+Merci d'utiliser My Sound Alarm.
