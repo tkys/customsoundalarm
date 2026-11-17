@@ -30,7 +30,9 @@ enum AnalyticsEvent: Sendable {
         snoozeMinutes: Int,
         backupMinutes: Int = 0,
         soundMode: PlaylistSoundMode = .single,
-        fadeIn: PlaylistFadeIn = .off
+        fadeIn: PlaylistFadeIn = .off,
+        timeSuggestionUsed: Bool = false,
+        carriedOver: Bool = false
     )
 
     /// カスタムサウンドのインポート成功
@@ -41,7 +43,8 @@ enum AnalyticsEvent: Sendable {
         peakDbBucket: String? = nil,
         gainDbBucket: String? = nil,
         lufsBucket: String? = nil,
-        shareMedia: ShareImportMedia? = nil
+        shareMedia: ShareImportMedia? = nil,
+        volumeNoticeShown: Bool = false
     )
 
     /// サウンドプレビュー再生
@@ -377,7 +380,9 @@ enum AnalyticsEvent: Sendable {
             snoozeMinutes,
             backupMinutes,
             soundMode,
-            fadeIn
+            fadeIn,
+            timeSuggestionUsed,
+            carriedOver
         ):
             return [
                 "has_custom_sound": hasCustomSound,
@@ -385,10 +390,22 @@ enum AnalyticsEvent: Sendable {
                 "snooze_minutes": snoozeMinutes,
                 "backup_minutes": backupMinutes,
                 "sound_mode": soundMode.analyticsValue,
-                "fade_in": fadeIn.analyticsValue
+                "fade_in": fadeIn.analyticsValue,
+                "time_suggestion_used": timeSuggestionUsed,
+                "carried_over": carriedOver
             ]
-        case let .customSoundImported(source, peakDbBucket, gainDbBucket, lufsBucket, shareMedia):
-            var d: [String: Any] = ["source": source.rawValue]
+        case let .customSoundImported(
+            source,
+            peakDbBucket,
+            gainDbBucket,
+            lufsBucket,
+            shareMedia,
+            volumeNoticeShown
+        ):
+            var d: [String: Any] = [
+                "source": source.rawValue,
+                "volume_notice_shown": volumeNoticeShown
+            ]
             if let peakDbBucket { d["peak_db_bucket"] = peakDbBucket }
             if let gainDbBucket { d["gain_db_bucket"] = gainDbBucket }
             if let lufsBucket { d["lufs_bucket"] = lufsBucket }

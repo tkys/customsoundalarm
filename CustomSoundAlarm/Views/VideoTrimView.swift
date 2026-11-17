@@ -17,6 +17,7 @@ struct VideoImportFlow: View {
     var onSaved: (() -> Void)?
     /// ユーザーが × で閉じたとき（共有シートの staging を消す・#222）
     var onUserClosed: (() -> Void)?
+    @Binding var volumeBoostedFileName: String?
     @Environment(\.dismiss) private var dismiss
     @State private var soundStore = SoundStore.shared
 
@@ -501,6 +502,12 @@ struct VideoImportFlow: View {
                 )
                 soundStore.add(sound)
                 selectedSound = sound
+                let showsVolumeNotice = LoudnessNormalizer.shouldShowVolumeNotice(
+                    gainDb: result.gainDb
+                )
+                if showsVolumeNotice {
+                    volumeBoostedFileName = cafName
+                }
 
                 onSaved?()
                 AnalyticsService.shared.capture(.customSoundImported(
@@ -508,7 +515,8 @@ struct VideoImportFlow: View {
                     peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
                     gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
                     lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore),
-                    shareMedia: shareMedia
+                    shareMedia: shareMedia,
+                    volumeNoticeShown: showsVolumeNotice
                 ))
                 await AdPresenter.presentInterstitialIfAllowed(after: .importSaved)
                 dismiss()

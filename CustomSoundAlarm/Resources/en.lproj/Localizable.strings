@@ -383,5 +383,6 @@
 "skip_result_footer" = "Only holidays that fall on a ringing weekday are shown.";
 "skip_row_toast_skipped_fmt" = "%@ won't ring";
 "skip_row_toast_undone_fmt" = "%@ will ring";
+"volume_notice" = "It was quiet, so we made it louder.";
 "permission_banner_title" = "Alarms won't ring";
 "permission_banner_allow" = "Allow";

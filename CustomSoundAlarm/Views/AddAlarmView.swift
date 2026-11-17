@@ -29,6 +29,8 @@ struct AlarmDetailView: View {
     @State private var scheduler = AlarmScheduler.shared
 
     let mode: AlarmDetailMode
+    /// 新規作成時に引き継いだ値（#206）
+    private let carryOver: AlarmCarryOver
     /// オンボ場面4からの指定（#98 Phase 4）。
     /// video/audio → 表示直後にサウンド選択を開き該当の取り込みを直接開く。
     /// preset → プリセット先頭を選択済みにする。nil なら従来どおり
@@ -57,6 +59,8 @@ struct AlarmDetailView: View {
     @State private var pendingAudio: PendingAudioImport?
     @State private var showingVideoImport = false
     @State private var importErrorMessage: String?
+    /// 取り込みで音量を上げた音のファイル名（#224）
+    @State private var volumeBoostedFileName: String?
 
     /// 試しに鳴らす（#109）
     @State private var isSchedulingTestRing = false
@@ -66,10 +70,23 @@ struct AlarmDetailView: View {
     /// 音量の案内（#121）・寝過ごし防止の説明（#122）
     @State private var showingVolumeGuide = false
     @State private var showingBackupInfo = false
+    /// 時刻の候補を使った（#206）
+    @State private var timeSuggestionUsed = false
 
     init(mode: AlarmDetailMode, initialImport: OnboardingSource? = nil) {
         self.mode = mode
         self.initialImport = initialImport
+
+        let carryOver: AlarmCarryOver
+        if case .edit = mode {
+            carryOver = .defaults
+        } else {
+            carryOver = AlarmCarryOverLogic.carryOver(
+                from: AlarmCarryOverStore.last,
+                playlistExists: { PlaylistStore.shared.playlist(id: $0) != nil }
+            )
+        }
+        self.carryOver = carryOver
 
         if case .edit(let entry) = mode {
             var components = DateComponents()
@@ -97,10 +114,10 @@ struct AlarmDetailView: View {
             }
             _selectedSound = State(initialValue: initialSound)
             _repeatWeekdays = State(initialValue: [])
-            _snoozeMinutes = State(initialValue: 9)
+            _snoozeMinutes = State(initialValue: carryOver.snoozeMinutes)
             _backupMinutes = State(initialValue: nil)
-            _playlistID = State(initialValue: nil)
-            _fadeIn = State(initialValue: .off)
+            _playlistID = State(initialValue: carryOver.playlistID)
+            _fadeIn = State(initialValue: carryOver.fadeIn)
             _skipsHolidays = State(initialValue: false)
             _holidayRingOverrides = State(initialValue: [])
             _skipDates = State(initialValue: [])
@@ -119,6 +136,9 @@ struct AlarmDetailView: View {
                     repeatSection
                     labelSection
                     soundRow
+                    if showsVolumeBoostedNotice {
+                        volumeNoticeRow
+                    }
                     fadeInRow
                     snoozeSection
                 }
@@ -185,7 +205,8 @@ struct AlarmDetailView: View {
                 isImporting: $isImporting,
                 pendingAudio: $pendingAudio,
                 showingVideoImport: $showingVideoImport,
-                errorMessage: $importErrorMessage
+                errorMessage: $importErrorMessage,
+                volumeBoostedFileName: $volumeBoostedFileName
             )
             .task {
                 scheduler.refreshTestRingPermission()
@@ -256,6 +277,15 @@ struct AlarmDetailView: View {
         #if DEBUG
         guard AppGroup.isUITestOpenWaveformCrop, pendingAudio == nil else { return }
         // ストアのスクショ用: -uitestCropPath <音声ファイル> -uitestCropName <表示名> で差し替える。
+        if AppGroup.isUITestQuietCrop,
+           let source = Bundle.main.url(forResource: "PresetMarimba", withExtension: "caf") {
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent("QuietCrop-\(UUID().uuidString).caf")
+            try? FileManager.default.copyItem(at: source, to: url)
+            try? AudioConverter.applyGainSync(fileURL: url, gainDb: -20)
+            pendingAudio = PendingAudioImport(url: url, name: "Quiet")
+            return
+        }
         let defaults = UserDefaults.standard
         if let path = defaults.string(forKey: "uitestCropPath"),
            FileManager.default.fileExists(atPath: path) {
@@ -273,8 +303,44 @@ struct AlarmDetailView: View {
 
     // MARK: - Time (HIG: DatePicker)
 
+    private var timeSuggestions: [AlarmTimeSuggestion] {
+        guard !isEditing else { return [] }
+        return AlarmTimeSuggestionLogic.suggestions(
+            entries: alarmStore.alarms,
+            after: Date()
+        )
+    }
+
+    private func applyTimeSuggestion(_ suggestion: AlarmTimeSuggestion) {
+        var components = Calendar.current.dateComponents(
+            [.year, .month, .day],
+            from: selectedTime
+        )
+        components.hour = suggestion.hour
+        components.minute = suggestion.minute
+        guard let date = Calendar.current.date(from: components) else { return }
+        selectedTime = date
+        timeSuggestionUsed = true
+    }
+
     private var timeSection: some View {
         Section {
+            if !timeSuggestions.isEmpty {
+                HStack(spacing: 8) {
+                    ForEach(timeSuggestions) { suggestion in
+                        Button(suggestion.label) {
+                            applyTimeSuggestion(suggestion)
+                        }
+                        .buttonStyle(.bordered)
+                        .accessibilityIdentifier(
+                            "addAlarm.timeSuggestion.\(suggestion.hour)_\(suggestion.minute)"
+                        )
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 4)
+            }
+
             // 時刻は「時 → 分」の並びを保つ（#149）。
             // RTL（アラビア語）だけ UIKit 版でホイールを LTR に固定し、
             // それ以外は従来の SwiftUI DatePicker のまま（影響範囲を RTL に限定）。
@@ -290,17 +356,32 @@ struct AlarmDetailView: View {
                 )
                 .datePickerStyle(.wheel)
                 .labelsHidden()
+                .accessibilityIdentifier("addAlarm.timePicker")
             }
         }
     }
 
     // MARK: - Sound / Fade (#160)
 
+    /// 1行は、いま選んでいる音が「大きくした音」のときだけ出す（#224 レビュー）。
+    private var showsVolumeBoostedNotice: Bool {
+        playlistID == nil && selectedSound?.fileName == volumeBoostedFileName
+    }
+
+    private var volumeNoticeRow: some View {
+        Label("volume_notice", systemImage: "speaker.wave.3")
+            .font(.footnote)
+            .foregroundStyle(Color.textSecondary)
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityIdentifier("addAlarm.volumeNotice")
+    }
+
     private var soundRow: some View {
         NavigationLink {
             AlarmSoundChoiceView(
                 playlistID: $playlistID,
-                selectedSound: $selectedSound
+                selectedSound: $selectedSound,
+                volumeBoostedFileName: $volumeBoostedFileName
             )
         } label: {
             AdaptiveDetailRow {
@@ -921,7 +1002,14 @@ struct AlarmDetailView: View {
                     snoozeMinutes: snoozeMinutes,
                     backupMinutes: backupMinutes ?? 0,
                     soundMode: AlarmSoundModeResolver.soundMode(for: entry),
-                    fadeIn: fadeIn
+                    fadeIn: fadeIn,
+                    timeSuggestionUsed: timeSuggestionUsed,
+                    carriedOver: AlarmCarryOverLogic.carriedOver(
+                        initial: carryOver,
+                        snoozeMinutes: snoozeMinutes,
+                        playlistID: playlistID,
+                        fadeIn: fadeIn
+                    )
                 ),
                 properties: hoursUntilProperties(for: entry)
             )
@@ -967,6 +1055,9 @@ struct AlarmDetailView: View {
             }
             savedEntry = updated
         }
+
+        // 次に新規作成するときの初期値（#206）
+        AlarmCarryOverStore.save(from: savedEntry)
 
         if BackupAlarmAccess.shouldGrantEarlyAccess(isEnabled: backupMinutes != nil) {
             AppGroup.backupEarlyAccessGranted = true

@@ -177,6 +177,15 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: 小さい音声の取り込み（#224）
+    static var isUITestQuietCrop: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-quiet-crop")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: 取り込んだ音が2つある状態（#207 の提案行）
     static var isUITestSeedSuggestion: Bool {
     #if DEBUG
@@ -295,7 +304,8 @@ enum AppGroup {
     #endif
     }
 
-    /// UIテスト用: オンのアラームを1本入れる（DEBUGのみ・#230）
+    /// UIテスト用: オンのアラームを入れる（DEBUGのみ・#206 / #230）。
+    /// 時刻の候補と許可バナーの確認に使う。実際の登録は `isUITestSkipAlarmSync` で止める。
     static var isUITestSeedEnabledAlarms: Bool {
     #if DEBUG
         CommandLine.arguments.contains("-uitest-seed-enabled-alarms")
@@ -304,7 +314,7 @@ enum AppGroup {
     #endif
     }
 
-    /// UIテスト用: AlarmKit への登録を止める（DEBUGのみ・#230）
+    /// UIテスト用: AlarmKit への登録を止める（DEBUGのみ・#206 / #230）
     static var isUITestSkipAlarmSync: Bool {
     #if DEBUG
         CommandLine.arguments.contains("-uitest-seed-enabled-alarms")

@@ -26,6 +26,7 @@ struct AudioCropView: View {
     var onUserClosed: (() -> Void)?
     /// 破棄したときに元ファイルを消すか。共有シートの staging は残す（#222）
     var deletesSourceOnDiscard = true
+    @Binding var volumeBoostedFileName: String?
     @Environment(\.dismiss) private var dismiss
     @State private var soundStore = SoundStore.shared
 
@@ -299,6 +300,12 @@ struct AudioCropView: View {
                 let sound = AlarmSound(name: soundName, fileName: fileName, thumbnailFileName: thumbnailFileName)
                 soundStore.add(sound)
                 selectedSound = sound
+                let showsVolumeNotice = LoudnessNormalizer.shouldShowVolumeNotice(
+                    gainDb: result.gainDb
+                )
+                if showsVolumeNotice {
+                    volumeBoostedFileName = fileName
+                }
 
                 onSaved?()
                 AnalyticsService.shared.capture(.customSoundImported(
@@ -306,7 +313,8 @@ struct AudioCropView: View {
                     peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
                     gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
                     lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore),
-                    shareMedia: shareMedia
+                    shareMedia: shareMedia,
+                    volumeNoticeShown: showsVolumeNotice
                 ))
                 await AdPresenter.presentInterstitialIfAllowed(after: .importSaved)
 
