@@ -16,6 +16,16 @@ struct PendingAudioImport: Identifiable {
 struct AudioCropView: View {
     let source: PendingAudioImport
     @Binding var selectedSound: AlarmSound?
+    /// 計測用の取り込み経路（共有シートは .share・#222）
+    var customSoundSource: SoundImportSource = .audio
+    /// 共有経路の種類（#222）
+    var shareMedia: ShareImportMedia?
+    /// 保存できたとき（共有シートの staging を消す・#222）
+    var onSaved: (() -> Void)?
+    /// ユーザーが × で閉じたとき（共有シートの staging を消す・#222）
+    var onUserClosed: (() -> Void)?
+    /// 破棄したときに元ファイルを消すか。共有シートの staging は残す（#222）
+    var deletesSourceOnDiscard = true
     @Binding var volumeBoostedFileName: String?
     @Environment(\.dismiss) private var dismiss
     @State private var soundStore = SoundStore.shared
@@ -174,12 +184,14 @@ struct AudioCropView: View {
                     if duration > 0 {
                         showingDiscardConfirm = true
                     } else {
+                        onUserClosed?()
                         dismiss()
                     }
                 } label: {
                     Image(systemName: "xmark")
                 }
                 .accessibilityLabel(String(localized: "close"))
+                .accessibilityIdentifier("audioCrop.close")
             }
         }
         // 編集内容の破棄確認（#82-2）
@@ -190,8 +202,11 @@ struct AudioCropView: View {
         ) {
             Button(String(localized: "discard"), role: .destructive) {
                 previewer.stop()
-                // 一時コピーを破棄して閉じる
-                try? FileManager.default.removeItem(at: source.url)
+                onUserClosed?()
+                // 通常の一時コピーは破棄。共有の staging は onUserClosed 側で消す（#222）
+                if deletesSourceOnDiscard {
+                    try? FileManager.default.removeItem(at: source.url)
+                }
                 dismiss()
             }
             Button("cancel", role: .cancel) {}
@@ -292,17 +307,21 @@ struct AudioCropView: View {
                     volumeBoostedFileName = fileName
                 }
 
+                onSaved?()
                 AnalyticsService.shared.capture(.customSoundImported(
-                    source: .audio,
+                    source: customSoundSource,
                     peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
                     gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
                     lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore),
+                    shareMedia: shareMedia,
                     volumeNoticeShown: showsVolumeNotice
                 ))
                 await AdPresenter.presentInterstitialIfAllowed(after: .importSaved)
 
-                // 一時コピーを破棄して閉じる
-                try? FileManager.default.removeItem(at: source.url)
+                // 一時コピーを破棄して閉じる（共有の staging は残す・#222）
+                if deletesSourceOnDiscard {
+                    try? FileManager.default.removeItem(at: source.url)
+                }
                 dismiss()
             } catch {
                 errorMessage = error.localizedDescription

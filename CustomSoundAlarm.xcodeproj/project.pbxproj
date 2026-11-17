@@ -61,6 +61,7 @@
 		357AE4A4448E50A66E43F0EC /* OnboardingUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEF5EC40C9684D9E09E745BF /* OnboardingUITests.swift */; };
 		3A1DC325DF036AB52A36EA0B /* TimeWheelPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30491830A359CEF7B05E485B /* TimeWheelPicker.swift */; };
 		3A3BA3D6788E8B8C4CCBF7BA /* AddAlarmRedesignUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60E74C9E35F8009FAF9BFF30 /* AddAlarmRedesignUITests.swift */; };
+		AB0000000000000000000003 /* ShareImportUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000013 /* ShareImportUITests.swift */; };
 		A3B4C5D6E7F80718293A4B5C /* PlaylistUnlockUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3C4D5E6F7A80718293A4B5C /* PlaylistUnlockUITests.swift */; };
 		B8C9D0E1F2A30718293A4B5C /* PermissionBannerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D0E1F2A3B40718293A4B5C /* PermissionBannerUITests.swift */; };
 		3A6E302E4D885A46C64EA98A /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E62C58F84E3B37BAF9FC14C /* AppGroup.swift */; };
@@ -181,6 +182,7 @@
 		B675F49EDB4253D0354AB107 /* TestAlarmRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 924A94F913D4A7C3786E27E0 /* TestAlarmRecord.swift */; };
 		B7610B8D77CD495C34C05018 /* UpdateGateUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA717F0CF5CFC185B565A5B7 /* UpdateGateUITests.swift */; };
 		B7DAB2844E9AC708219EA785 /* PlaylistSuggestionLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946551ED910B50A8B66B0830 /* PlaylistSuggestionLogicTests.swift */; };
+		AB0000000000000000000002 /* ShareImportQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000012 /* ShareImportQueueTests.swift */; };
 		C2D3E4F5A6B60718293A4B5C /* PlaylistUnlockLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2E3F4A5B6C60718293A4B5C /* PlaylistUnlockLogicTests.swift */; };
 		F6A7B8C9D0E10718293A4B5C /* PermissionBannerLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7B8C9D0E1F20718293A4B5C /* PermissionBannerLogicTests.swift */; };
 		B7DBFE11F40076771B8230DF /* AlarmScheduleSignature.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6486F8829563B6E46853BEC /* AlarmScheduleSignature.swift */; };
@@ -235,6 +237,7 @@
 		E0E42D2892CB93B1953EC10A /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 69B7A661B212236384ECBE05 /* Localizable.strings */; };
 		E17F8A2662BF0D60BC3DBB3E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA13D117730C6D5910D58FD4 /* InfoPlist.strings */; };
 		E2BB9F1A074C071DF1A5AC92 /* PlaylistSuggestionLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0DD008E6FB33DB60396D37 /* PlaylistSuggestionLogic.swift */; };
+		AB0000000000000000000001 /* ShareImportQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0000000000000000000011 /* ShareImportQueue.swift */; };
 		C1D2E3F4A5B60718293A4B5C /* PlaylistUnlockLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C60718293A4B5C /* PlaylistUnlockLogic.swift */; };
 		D4E5F6A7B8C90718293A4B5C /* PermissionBannerLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5F6A7B8C9D00718293A4B5C /* PermissionBannerLogic.swift */; };
 		E30958483AC7255DECF60F65 /* CustomAlarmMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08EAAA2A211BCB98598A3FB2 /* CustomAlarmMetadataTests.swift */; };
@@ -383,6 +386,7 @@
 		39CEFD6CAD362010B0DDCD66 /* AlarmRowAccessibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmRowAccessibility.swift; sourceTree = "<group>"; };
 		3BDFFB8A52095E586A02A96D /* AlarmManaging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmManaging.swift; sourceTree = "<group>"; };
 		3D0DD008E6FB33DB60396D37 /* PlaylistSuggestionLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistSuggestionLogic.swift; sourceTree = "<group>"; };
+		AB0000000000000000000011 /* ShareImportQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareImportQueue.swift; sourceTree = "<group>"; };
 		D1E2F3A4B5C60718293A4B5C /* PlaylistUnlockLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistUnlockLogic.swift; sourceTree = "<group>"; };
 		E5F6A7B8C9D00718293A4B5C /* PermissionBannerLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionBannerLogic.swift; sourceTree = "<group>"; };
 		3D3E7D2ACD756BF6236CA208 /* BackupAlarmSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupAlarmSound.swift; sourceTree = "<group>"; };
@@ -425,6 +429,7 @@
 		60B3C6E7CE7ADCA9E3A20299 /* BackupAlarmFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupAlarmFactory.swift; sourceTree = "<group>"; };
 		60BC23AB1265EEF1A9956BD0 /* LoudVariantGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoudVariantGenerator.swift; sourceTree = "<group>"; };
 		60E74C9E35F8009FAF9BFF30 /* AddAlarmRedesignUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAlarmRedesignUITests.swift; sourceTree = "<group>"; };
+		AB0000000000000000000013 /* ShareImportUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareImportUITests.swift; sourceTree = "<group>"; };
 		B3C4D5E6F7A80718293A4B5C /* PlaylistUnlockUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistUnlockUITests.swift; sourceTree = "<group>"; };
 		C9D0E1F2A3B40718293A4B5C /* PermissionBannerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionBannerUITests.swift; sourceTree = "<group>"; };
 		61412132E1633195A9AF83D5 /* UnmappedAlarmSweep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnmappedAlarmSweep.swift; sourceTree = "<group>"; };
@@ -482,6 +487,7 @@
 		9388CDF77D14405C3A712EB1 /* AudioConverterPeakTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioConverterPeakTests.swift; sourceTree = "<group>"; };
 		93DE9488BAAC2252B4E6513D /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		946551ED910B50A8B66B0830 /* PlaylistSuggestionLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistSuggestionLogicTests.swift; sourceTree = "<group>"; };
+		AB0000000000000000000012 /* ShareImportQueueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareImportQueueTests.swift; sourceTree = "<group>"; };
 		D2E3F4A5B6C60718293A4B5C /* PlaylistUnlockLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistUnlockLogicTests.swift; sourceTree = "<group>"; };
 		A7B8C9D0E1F20718293A4B5C /* PermissionBannerLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionBannerLogicTests.swift; sourceTree = "<group>"; };
 		94E10DA64FE9792F8E216743 /* VideoAudioExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoAudioExtractor.swift; sourceTree = "<group>"; };
@@ -571,6 +577,17 @@
 		EB873111EF75B337EF1F06BF /* AlarmSchedulerOrphanTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSchedulerOrphanTests.swift; sourceTree = "<group>"; };
 		EB945E440D779CA36034EF9D /* AudioSizeEstimate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSizeEstimate.swift; sourceTree = "<group>"; };
 		ECFB5D72956BEF5074D1BB4B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		AA0000000000000000000011 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh-Hans; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		AA0000000000000000000010 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt-BR; path = "pt-BR.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		AA0000000000000000000009 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = "pl.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		AA0000000000000000000008 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = "nl.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		AA0000000000000000000007 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = "ko.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		AA0000000000000000000006 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = "it.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		AA0000000000000000000005 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = "fr.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		AA0000000000000000000004 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = "es.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		AA0000000000000000000003 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = "de.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		AA0000000000000000000002 /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = cs; path = "cs.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		AA0000000000000000000001 /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = "ar.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		ED421E1D1A41D08C28E8F62C /* SyncLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncLogView.swift; sourceTree = "<group>"; };
 		EE105D13EE2FE60FAE50F6C7 /* AlarmScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmScheduler.swift; sourceTree = "<group>"; };
 		EE318506FD295B6BA88B884A /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = pl; path = pl.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
@@ -646,6 +663,7 @@
 				F836EEE4D8292F2335D70D73 /* OnboardingLogicTests.swift */,
 				9B8729BF3CEBACB08F2782F0 /* PendingAlarmEventTests.swift */,
 				946551ED910B50A8B66B0830 /* PlaylistSuggestionLogicTests.swift */,
+		AB0000000000000000000012 /* ShareImportQueueTests.swift */,
 		D2E3F4A5B6C60718293A4B5C /* PlaylistUnlockLogicTests.swift */,
 		A7B8C9D0E1F20718293A4B5C /* PermissionBannerLogicTests.swift */,
 				AF480CAF8CB3085A8C64FC4A /* PlaylistTests.swift */,
@@ -722,6 +740,7 @@
 			isa = PBXGroup;
 			children = (
 				60E74C9E35F8009FAF9BFF30 /* AddAlarmRedesignUITests.swift */,
+		AB0000000000000000000013 /* ShareImportUITests.swift */,
 		B3C4D5E6F7A80718293A4B5C /* PlaylistUnlockUITests.swift */,
 		C9D0E1F2A3B40718293A4B5C /* PermissionBannerUITests.swift */,
 				F9BAB7FB702291B470B1E0B2 /* AlarmListUITests.swift */,
@@ -909,6 +928,7 @@
 				C1A2D25582E5891BFB320CC1 /* PlaylistRenderLogic.swift */,
 				8267931ECD28007465925431 /* PlaylistResyncLogic.swift */,
 				3D0DD008E6FB33DB60396D37 /* PlaylistSuggestionLogic.swift */,
+		AB0000000000000000000011 /* ShareImportQueue.swift */,
 		D1E2F3A4B5C60718293A4B5C /* PlaylistUnlockLogic.swift */,
 		E5F6A7B8C9D00718293A4B5C /* PermissionBannerLogic.swift */,
 				BA17D126F33619A4E3697AF3 /* PostSaveFeedback.swift */,
@@ -1281,6 +1301,7 @@
 				D7FAB91619BA070D83185B82 /* PlaylistRowLabel.swift in Sources */,
 				9AB8CE5853F70F472C9FF0FE /* PlaylistStore.swift in Sources */,
 				E2BB9F1A074C071DF1A5AC92 /* PlaylistSuggestionLogic.swift in Sources */,
+		AB0000000000000000000001 /* ShareImportQueue.swift in Sources */,
 		C1D2E3F4A5B60718293A4B5C /* PlaylistUnlockLogic.swift in Sources */,
 		D4E5F6A7B8C90718293A4B5C /* PermissionBannerLogic.swift in Sources */,
 				09591C8F94E7D65C2407B130 /* PostSaveFeedback.swift in Sources */,
@@ -1414,6 +1435,7 @@
 				7EB344595B81A4E5C79EBF83 /* PlaylistRendererTests.swift in Sources */,
 				103F9E66006264E7A26DEB14 /* PlaylistStoreTests.swift in Sources */,
 				B7DAB2844E9AC708219EA785 /* PlaylistSuggestionLogicTests.swift in Sources */,
+		AB0000000000000000000002 /* ShareImportQueueTests.swift in Sources */,
 		C2D3E4F5A6B60718293A4B5C /* PlaylistUnlockLogicTests.swift in Sources */,
 		F6A7B8C9D0E10718293A4B5C /* PermissionBannerLogicTests.swift in Sources */,
 				EC8E115717C972D224027030 /* PlaylistTests.swift in Sources */,
@@ -1452,6 +1474,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3A3BA3D6788E8B8C4CCBF7BA /* AddAlarmRedesignUITests.swift in Sources */,
+		AB0000000000000000000003 /* ShareImportUITests.swift in Sources */,
 		A3B4C5D6E7F80718293A4B5C /* PlaylistUnlockUITests.swift in Sources */,
 		B8C9D0E1F2A30718293A4B5C /* PermissionBannerUITests.swift in Sources */,
 				76AA8590EB7C475474F3D115 /* AlarmListUITests.swift in Sources */,
@@ -1521,6 +1544,17 @@
 			children = (
 				ECFB5D72956BEF5074D1BB4B /* en */,
 				BD1878E5099FBE066AAAE7F3 /* ja */,
+				AA0000000000000000000001 /* ar */,
+				AA0000000000000000000002 /* cs */,
+				AA0000000000000000000003 /* de */,
+				AA0000000000000000000004 /* es */,
+				AA0000000000000000000005 /* fr */,
+				AA0000000000000000000006 /* it */,
+				AA0000000000000000000007 /* ko */,
+				AA0000000000000000000008 /* nl */,
+				AA0000000000000000000009 /* pl */,
+				AA0000000000000000000010 /* pt-BR */,
+				AA0000000000000000000011 /* zh-Hans */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";

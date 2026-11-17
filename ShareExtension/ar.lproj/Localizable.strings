@@ -1,0 +1,6 @@
+"saving" = "جارٍ الحفظ…";
+"no_data_received" = "لم يتم استلام بيانات";
+"no_audio_found" = "لم يتم العثور على ملف صوتي متوافق";
+"file_load_failed" = "تعذر تحميل الملف";
+"saved_format" = "تم حفظ \"%@\"";
+"received" = "تم الاستلام. افتح My Sound Alarm لاختيار الجزء الذي يرن.";

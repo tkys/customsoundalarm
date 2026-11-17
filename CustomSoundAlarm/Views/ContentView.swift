@@ -22,6 +22,12 @@ struct ContentView: View {
     @State private var addAlarmRequest: AddAlarmRequest?
     /// アップデート案内（#116）
     @State private var updateChecker = UpdateChecker.shared
+    /// 共有シートから受け取った音の切り取り（#222）
+    @State private var shareImportItem: ShareImportItem?
+    @State private var shareImportSelectedSound: AlarmSound?
+    @State private var shareImportDidFinish = false
+    /// 共有経路の音量の1行（#224 / #222）
+    @State private var shareImportVolumeBoostedFileName: String?
     /// プレイリストの解放（#216）
     @State private var unlock = PlaylistUnlockCoordinator.shared
     /// 許可状態（#230）
@@ -90,6 +96,7 @@ struct ContentView: View {
                     refreshGlobalSkip()
                     syncSkipTimeZoneIfNeeded()
                     evaluateOnboarding()
+                    presentNextShareImportIfNeeded()
                     scheduler.refreshPermissionStatus()
                     reportPermissionBannerIfNeeded()
                     #if DEBUG
@@ -169,6 +176,24 @@ struct ContentView: View {
             }) {
                 SettingsView()
             }
+            .sheet(item: $shareImportItem, onDismiss: {
+                let finished = shareImportDidFinish
+                shareImportItem = nil
+                shareImportSelectedSound = nil
+                shareImportDidFinish = false
+                if finished {
+                    // 複数を共有したときは、1つずつ順に開く（#222）
+                    Task {
+                        try? await Task.sleep(for: .milliseconds(400))
+                        presentNextShareImportIfNeeded()
+                    }
+                }
+            }) { item in
+                NavigationStack {
+                    shareImportContent(item)
+                }
+                .interactiveDismissDisabled()
+            }
             .fullScreenCover(item: requiredPromptBinding) { prompt in
                 UpdatePromptView(
                     prompt: prompt,
@@ -192,6 +217,7 @@ struct ContentView: View {
             guard phase == .active else { return }
             syncSkipTimeZoneIfNeeded()
             refreshGlobalSkip()
+            presentNextShareImportIfNeeded()
             let wasAuthorized = scheduler.permissionStatus == .authorized
             scheduler.refreshPermissionStatus()
             if !wasAuthorized, scheduler.permissionStatus == .authorized {
@@ -225,11 +251,84 @@ struct ContentView: View {
             if !isVisible { schedulePlaylistUnlockAttempt() }
         }
         .onChange(of: showingSettings) { _, isShowing in
-            if !isShowing { schedulePlaylistUnlockAttempt() }
+            if !isShowing {
+                schedulePlaylistUnlockAttempt()
+                presentNextShareImportIfNeeded()
+            }
         }
         .onChange(of: scheduler.isAlarmRinging) { _, isRinging in
-            if !isRinging { schedulePlaylistUnlockAttempt() }
+            if !isRinging {
+                schedulePlaylistUnlockAttempt()
+                presentNextShareImportIfNeeded()
+            }
         }
+        .onChange(of: showingOnboarding) { _, isShowing in
+            if !isShowing { presentNextShareImportIfNeeded() }
+        }
+        .onChange(of: addAlarmRequest == nil) { _, isClosed in
+            if isClosed { presentNextShareImportIfNeeded() }
+        }
+        .onChange(of: selectedAlarm == nil) { _, isClosed in
+            if isClosed { presentNextShareImportIfNeeded() }
+        }
+        .onChange(of: updateChecker.prompt == nil) { _, isClosed in
+            if isClosed { presentNextShareImportIfNeeded() }
+        }
+    }
+
+    // MARK: - Shared Imports (#222)
+
+    @ViewBuilder
+    private func shareImportContent(_ item: ShareImportItem) -> some View {
+        switch item.mediaKind {
+        case .audio:
+            AudioCropView(
+                source: PendingAudioImport(url: item.mediaURL, name: item.displayName),
+                selectedSound: $shareImportSelectedSound,
+                customSoundSource: .share,
+                shareMedia: .audio,
+                onSaved: {
+                    ShareImportQueue.complete(item)
+                    shareImportDidFinish = true
+                },
+                onUserClosed: {
+                    ShareImportQueue.complete(item)
+                    shareImportDidFinish = true
+                },
+                deletesSourceOnDiscard: false,
+                volumeBoostedFileName: $shareImportVolumeBoostedFileName
+            )
+        case .video:
+            VideoImportFlow(
+                selectedSound: $shareImportSelectedSound,
+                initialFileURL: item.mediaURL,
+                customSoundSource: .share,
+                shareMedia: .video,
+                onSaved: {
+                    ShareImportQueue.complete(item)
+                    shareImportDidFinish = true
+                },
+                onUserClosed: {
+                    ShareImportQueue.complete(item)
+                    shareImportDidFinish = true
+                },
+                volumeBoostedFileName: $shareImportVolumeBoostedFileName
+            )
+        }
+    }
+
+    /// 共有された音の切り取り画面を、落ち着いているときだけ1件ずつ開く（#222）。
+    private func presentNextShareImportIfNeeded() {
+        guard shareImportItem == nil,
+              addAlarmRequest == nil,
+              selectedAlarm == nil,
+              !showingSettings,
+              !showingOnboarding,
+              updateChecker.prompt == nil,
+              !scheduler.isAlarmRinging else { return }
+        guard let item = ShareImportQueue.pendingItems().first else { return }
+        shareImportDidFinish = false
+        shareImportItem = item
     }
 
     /// 追加・編集・設定などのシートが閉じてから解放シートを出す（#216）。

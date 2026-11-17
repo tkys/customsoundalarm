@@ -286,6 +286,24 @@ enum AppGroup {
 #endif
     }
 
+    /// UIテスト用: 共有シートの受け取りを1件 staging に置く（DEBUGのみ・#222）
+    static var isUITestSeedShareImportAudio: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-share-import-audio")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: staging を消さずに起動する（DEBUGのみ・#222）
+    static var isUITestKeepShareImport: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-keep-share-import")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: オンのアラームを入れる（DEBUGのみ・#206 / #230）。
     /// 時刻の候補と許可バナーの確認に使う。実際の登録は `isUITestSkipAlarmSync` で止める。
     static var isUITestSeedEnabledAlarms: Bool {

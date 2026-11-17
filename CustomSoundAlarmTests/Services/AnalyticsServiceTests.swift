@@ -208,10 +208,21 @@ struct AnalyticsEventTests {
     }
 
     @Test
+    func customSoundImportedProperties_shareMedia() {
+        let props = AnalyticsEvent.customSoundImported(
+            source: .share,
+            shareMedia: .video
+        ).properties
+        #expect(props["source"] as? String == "share")
+        #expect(props["share_media"] as? String == "video")
+    }
+
+    @Test
     func soundSourceRawValuesAreStable() {
         // PostHog 側のダッシュボード定義と一致することが前提
         #expect(SoundImportSource.video.rawValue == "video")
         #expect(SoundImportSource.audio.rawValue == "audio")
+        #expect(SoundImportSource.share.rawValue == "share")
     }
 
     // MARK: feature_unlock (#216)

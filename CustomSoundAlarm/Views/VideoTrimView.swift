@@ -7,6 +7,16 @@ import UniformTypeIdentifiers
 /// ソース選択（写真ライブラリ / ファイル）→ トリム → 抽出 → CAF変換
 struct VideoImportFlow: View {
     @Binding var selectedSound: AlarmSound?
+    /// 共有シートから渡された動画（#222）。指定時はソース選択を飛ばす。
+    var initialFileURL: URL?
+    /// 計測用の取り込み経路（共有シートは .share・#222）
+    var customSoundSource: SoundImportSource = .video
+    /// 共有経路の種類（#222）
+    var shareMedia: ShareImportMedia?
+    /// 保存できたとき（共有シートの staging を消す・#222）
+    var onSaved: (() -> Void)?
+    /// ユーザーが × で閉じたとき（共有シートの staging を消す・#222）
+    var onUserClosed: (() -> Void)?
     @Binding var volumeBoostedFileName: String?
     @Environment(\.dismiss) private var dismiss
     @State private var soundStore = SoundStore.shared
@@ -28,6 +38,8 @@ struct VideoImportFlow: View {
     /// 波形描画・試聴・切り出しの元になる音声（動画から抽出済みの一時m4a）。
     /// 抽出完了までクロップUIはプレースホルダを表示する（#77）
     @State private var extractedAudioURL: URL?
+    /// 共有で渡された動画を一度だけ読む（#222）
+    @State private var didLoadInitialFile = false
 
     // インポートソース（計測用）
     @State private var importSource: VideoImportSource = .photoLibrary
@@ -63,6 +75,7 @@ struct VideoImportFlow: View {
                     if videoURL != nil {
                         showingDiscardConfirm = true
                     } else {
+                        onUserClosed?()
                         dismiss()
                     }
                 } label: {
@@ -79,11 +92,17 @@ struct VideoImportFlow: View {
         ) {
             Button(String(localized: "discard"), role: .destructive) {
                 previewer.stop()
+                onUserClosed?()
                 dismiss()
             }
             Button("cancel", role: .cancel) {}
         } message: {
             Text("discard_edits_message")
+        }
+        .task {
+            guard !didLoadInitialFile, let initialFileURL else { return }
+            didLoadInitialFile = true
+            loadVideoFromFile(url: initialFileURL)
         }
         .onDisappear { previewer.stop() }
         // 写真ライブラリ
@@ -398,10 +417,8 @@ struct VideoImportFlow: View {
     /// 選択直後に temp へコピー → 即解放する（罠1 対策）。
     /// iCloud Drive の未ダウンロードファイルは NSFileCoordinator が待機する（罠2 対策）。
     private func loadVideoFromFile(url: URL) {
-        guard url.startAccessingSecurityScopedResource() else {
-            errorMessage = String(localized: "error_file_access_denied")
-            return
-        }
+        // 共有シートの staging はアプリ所有なので security scope は不要（#222）
+        let didStartSecurityScope = url.startAccessingSecurityScopedResource()
 
         // temp コピー前に元ファイル名を控える（temp URL は UUID になるため）
         let originalName = VideoFileImporter.defaultSoundName(from: url)
@@ -416,14 +433,14 @@ struct VideoImportFlow: View {
             do {
                 tempURL = try await VideoFileImporter.copyToTemp(from: url)
             } catch {
-                url.stopAccessingSecurityScopedResource()
+                if didStartSecurityScope { url.stopAccessingSecurityScopedResource() }
                 await MainActor.run {
                     isProcessing = false
                     errorMessage = error.localizedDescription
                 }
                 return
             }
-            url.stopAccessingSecurityScopedResource()
+            if didStartSecurityScope { url.stopAccessingSecurityScopedResource() }
 
             do {
                 let duration = try await VideoAudioExtractor.shared.getDuration(from: tempURL)
@@ -492,11 +509,13 @@ struct VideoImportFlow: View {
                     volumeBoostedFileName = cafName
                 }
 
+                onSaved?()
                 AnalyticsService.shared.capture(.customSoundImported(
-                    source: .video,
+                    source: customSoundSource,
                     peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
                     gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
                     lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore),
+                    shareMedia: shareMedia,
                     volumeNoticeShown: showsVolumeNotice
                 ))
                 await AdPresenter.presentInterstitialIfAllowed(after: .importSaved)

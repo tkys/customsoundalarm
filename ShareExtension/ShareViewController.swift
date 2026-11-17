@@ -82,9 +82,11 @@ class ShareViewController: UIViewController {
                 do {
                     try FileManager.default.copyItem(at: url, to: destURL)
 
+                    let mediaKind = uti == UTType.movie.identifier ? "video" : "audio"
                     let pending = PendingSoundImport(
                         displayName: originalName,
-                        stagedFileName: stagedFileName
+                        stagedFileName: stagedFileName,
+                        mediaKind: mediaKind
                     )
                     let metadataURL = staging.appendingPathComponent("\(UUID().uuidString).json")
                     let data = try JSONEncoder().encode(pending)
@@ -114,7 +116,7 @@ class ShareViewController: UIViewController {
 
     private func finish(success name: String) {
         spinner.stopAnimating()
-        statusLabel.text = String(format: NSLocalizedString("saved_format", comment: ""), name)
+        statusLabel.text = NSLocalizedString("received", comment: "")
 
         let checkmark = UIImageView(image: UIImage(systemName: "checkmark.circle.fill"))
         checkmark.tintColor = .systemGreen

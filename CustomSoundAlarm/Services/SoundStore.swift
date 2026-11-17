@@ -123,92 +123,9 @@ final class SoundStore {
             ?? String(localized: "sound_missing")
     }
 
-    /// Share Extensionが追加したサウンドを取り込む
-    func importFromStaging() {
-        let staging = AppGroup.stagingDirectory
-        let fm = FileManager.default
-
-        guard let files = try? fm.contentsOfDirectory(at: staging, includingPropertiesForKeys: nil) else {
-            return
-        }
-
-        let jsonFiles = files.filter { $0.pathExtension == "json" }
-        guard !jsonFiles.isEmpty else { return }
-
-        logger.info("Found \(jsonFiles.count) pending imports in staging")
-
-        for file in jsonFiles {
-            guard let data = try? Data(contentsOf: file),
-                  let pending = try? JSONDecoder().decode(PendingSoundImport.self, from: data) else {
-                continue
-            }
-
-            let audioFile = staging.appendingPathComponent(pending.stagedFileName)
-            guard fm.fileExists(atPath: audioFile.path) else { continue }
-
-            // 動画の場合は先に音声抽出、その後CAF変換
-            let videoExtensions: Set<String> = ["mov", "mp4", "m4v", "avi"]
-            let isVideo = videoExtensions.contains(audioFile.pathExtension.lowercased())
-
-            Task {
-                do {
-                    var sourceForCAF = audioFile
-                    var tempAudioURL: URL?
-
-                    if isVideo {
-                        let extracted = try await VideoAudioExtractor.shared.extractAudio(from: audioFile)
-                        sourceForCAF = extracted
-                        tempAudioURL = extracted
-                    }
-
-                    let result = try await AudioConverter.shared.convertToCAF(
-                        from: sourceForCAF,
-                        outputName: UUID().uuidString
-                    )
-                    let cafName = result.fileName
-
-                    // サムネイル生成（#86）: 動画はフレーム、音声はアートワーク
-                    let thumbnailFileName: String?
-                    if isVideo, let frame = await SoundThumbnailStore.shared.bestVideoFrame(from: audioFile) {
-                        thumbnailFileName = SoundThumbnailStore.shared.save(frame)
-                    } else if let artwork = await SoundThumbnailStore.shared.artwork(from: audioFile) {
-                        thumbnailFileName = SoundThumbnailStore.shared.save(artwork)
-                    } else {
-                        thumbnailFileName = nil
-                    }
-
-                    // #93-2a: ShareExtension 由来のファイル名も取り込み時に整形する。
-                    // （ShareExtension ターゲットに依存を追加せず、取り込み側で整える）
-                    let sound = AlarmSound(
-                        name: SoundNameFormatter.sanitizedFileName(pending.displayName),
-                        fileName: cafName,
-                        thumbnailFileName: thumbnailFileName
-                    )
-                    add(sound)
-                    AnalyticsService.shared.capture(.customSoundImported(
-                        source: isVideo ? .video : .audio,
-                        peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
-                        gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
-                        lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore),
-                        volumeNoticeShown: false
-                    ))
-                    try? fm.removeItem(at: file)
-                    try? fm.removeItem(at: audioFile)
-                    if let tempAudioURL {
-                        try? fm.removeItem(at: tempAudioURL)
-                    }
-                    logger.info("Imported from share: \(pending.displayName)")
-                } catch {
-                    logger.error("Import failed for \(pending.displayName): \(error.localizedDescription)")
-                }
-            }
-        }
-    }
-
     /// フォアグラウンド復帰時に再読み込み
     func reload() {
         load()
-        importFromStaging()
     }
 
 #if DEBUG
