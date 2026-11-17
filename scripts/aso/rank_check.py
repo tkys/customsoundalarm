@@ -14,6 +14,7 @@ CSV に1日1回追記する。App Store アプリの検索結果と完全には�
 """
 import argparse
 import csv
+import http.client
 import datetime as dt
 import json
 import os
@@ -42,7 +43,7 @@ def search_rank(term: str, country: str) -> tuple[int | None, int]:
             ids = [r.get("trackId") for r in data.get("results", [])]
             rank = ids.index(APP_ID) + 1 if APP_ID in ids else None
             return rank, len(ids)
-        except (urllib.error.URLError, json.JSONDecodeError, TimeoutError) as error:
+        except (urllib.error.URLError, http.client.HTTPException, OSError, json.JSONDecodeError) as error:
             if attempt == 2:
                 raise RuntimeError(f"{country} {term!r}: {error}") from error
             time.sleep(10 * (attempt + 1))
@@ -70,7 +71,8 @@ def main() -> int:
 
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     done = existing_keys(args.out)
-    new_file = not os.path.exists(args.out)
+    # 途中で止まって空のまま残ったファイルにも見出し行を書く
+    new_file = not os.path.exists(args.out) or os.path.getsize(args.out) == 0
     written = failed = 0
 
     with open(args.out, "a", newline="", encoding="utf-8") as f:

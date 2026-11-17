@@ -38,6 +38,19 @@ class SearchRankTests(unittest.TestCase):
             self.assertEqual(rank_check.search_rank("alarm", "us"), (None, 2))
 
 
+class RetryTests(unittest.TestCase):
+    def test_incomplete_read_is_retried(self):
+        import http.client
+        responses = [http.client.IncompleteRead(b"x"), FakeResponse([rank_check.APP_ID])]
+        def fake(*args, **kwargs):
+            r = responses.pop(0)
+            if isinstance(r, Exception):
+                raise r
+            return r
+        with mock.patch("urllib.request.urlopen", side_effect=fake), mock.patch.object(rank_check.time, "sleep"):
+            self.assertEqual(rank_check.search_rank("alarm", "us"), (1, 1))
+
+
 class MainTests(unittest.TestCase):
     def run_main(self, keywords, out, date="2026-11-17"):
         argv = ["rank_check.py", "--keywords", keywords, "--out", out, "--date", date]
@@ -70,6 +83,19 @@ class MainTests(unittest.TestCase):
             self.assertEqual(search.call_count, 2)
             with open(out, newline="", encoding="utf-8") as f:
                 self.assertEqual(len(list(csv.DictReader(f))), 4)
+
+
+    def test_empty_file_gets_header(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            kw = os.path.join(tmp, "k.json")
+            out = os.path.join(tmp, "ranks.csv")
+            with open(kw, "w", encoding="utf-8") as f:
+                json.dump({"us": {"big": ["a"]}}, f)
+            open(out, "w").close()
+            self.run_main(kw, out)
+            with open(out, newline="", encoding="utf-8") as f:
+                rows = list(csv.DictReader(f))
+            self.assertEqual([r["term"] for r in rows], ["a"])
 
 
 if __name__ == "__main__":
