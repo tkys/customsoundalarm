@@ -280,6 +280,18 @@ struct CustomSoundAlarmApp: App {
                     if AppGroup.isUITestOpenLibrary {
                         AppGroup.hasCompletedOnboarding = true
                     }
+                    // UIテスト用: 許可バナーの確認用にオンのアラームを1本入れる（#230）
+                    if AppGroup.isUITestSeedEnabledAlarms {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        AlarmStore.shared.add(AlarmEntry(
+                            hour: 23,
+                            minute: 44,
+                            isEnabled: true,
+                            label: String(localized: "alarm_placeholder")
+                        ))
+                    }
+
                     // UIテスト用: アラーム一覧を時刻順で検証するためのシード
                     if AppGroup.isUITestSeedAlarms {
                         AppGroup.hasCompletedOnboarding = true

@@ -383,3 +383,5 @@
 "skip_result_footer" = "Zobrazujeme jen svátky připadající na den zvonění.";
 "skip_row_toast_skipped_fmt" = "%@ nezazvoní";
 "skip_row_toast_undone_fmt" = "%@ zazvoní";
+"permission_banner_title" = "Budíky nezazvoní";
+"permission_banner_allow" = "Povolit";
