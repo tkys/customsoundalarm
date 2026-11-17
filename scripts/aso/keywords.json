@@ -1,0 +1,33 @@
+{
+  "_note": "検索順位を毎日記録するキーワード。big = 一語の大きな検索語（今は圏外が多い）、mid = 組み合わせ・機能、long = 悩み・方法。推し・曲名・アーティスト名は入れない。足すときは国ごとに big/mid/long のどれかに入れる。",
+  "jp": {
+    "big": ["アラーム", "目覚まし", "目覚まし時計", "アラームアプリ", "着信音", "時計", "目覚ましアプリ"],
+    "mid": ["アラーム 曲", "目覚まし 曲", "アラーム 音楽", "目覚まし 音楽", "アラーム 好きな曲", "目覚まし 好きな曲", "アラーム 好きな音", "アラーム サビ", "目覚まし サビ", "アラーム 動画", "目覚まし 動画", "アラーム 声", "アラーム 録音", "アラーム 音声", "アラーム mp3", "アラーム カスタム", "アラーム 長い", "アラーム ループ", "アラーム 大音量", "目覚まし 大音量", "アラーム マナーモード", "アラーム プレイリスト", "着信音 作成", "着信音 長い", "着信音 mp3", "音楽 切り取り"],
+    "long": ["起きれない", "二度寝 防止", "寝坊 防止", "GarageBand 着信音", "アラーム 音 変更", "好きな曲で起きる"]
+  },
+  "us": {
+    "big": ["alarm", "alarm clock", "alarm app", "wake up", "ringtone", "ringtones", "clock"],
+    "mid": ["custom alarm", "custom alarm sound", "alarm custom sound", "music alarm", "music alarm clock", "song alarm", "alarm song", "alarm sound", "alarm sounds", "alarm mp3", "alarm from video", "video to alarm", "voice alarm", "record alarm", "alarm loop", "loud alarm", "alarm silent mode", "alarm playlist", "chorus alarm", "ringtone maker", "ringtone mp3", "long ringtone"],
+    "long": ["wake up song", "heavy sleeper alarm", "oversleep", "garageband ringtone", "alarmkit", "wake up to music"]
+  },
+  "gb": {
+    "big": ["alarm", "alarm clock", "ringtone"],
+    "mid": ["custom alarm sound", "music alarm", "song alarm", "alarm mp3", "ringtone maker", "loud alarm"],
+    "long": ["wake up song", "heavy sleeper alarm"]
+  },
+  "de": {
+    "big": ["wecker", "wecker app", "klingelton", "alarm"],
+    "mid": ["wecker lied", "wecker musik", "alarm musik", "eigener weckton", "weckton", "wecker laut", "wecker video", "klingelton erstellen"],
+    "long": ["mit musik aufwachen", "verschlafen"]
+  },
+  "fr": {
+    "big": ["réveil", "alarme", "sonnerie"],
+    "mid": ["réveil musique", "alarme musique", "réveil chanson", "sonnerie personnalisée", "alarme personnalisée", "réveil fort", "créer sonnerie"],
+    "long": ["se réveiller en musique"]
+  },
+  "br": {
+    "big": ["alarme", "despertador", "toque"],
+    "mid": ["despertador música", "alarme música", "alarme personalizado", "toque personalizado", "despertador alto", "alarme com música"],
+    "long": ["acordar com música"]
+  }
+}
