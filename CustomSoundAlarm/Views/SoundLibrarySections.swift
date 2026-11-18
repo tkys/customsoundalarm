@@ -19,6 +19,10 @@ struct SoundLibrarySections: View {
     var showVolumeNoticeRow: Bool = false
     /// 取り込み画面（切り取り・動画）が閉じたとき（#216）
     var onImportFlowDismissed: (() -> Void)?
+    /// 共有から保存したあとに一瞬ハイライトする音（#246）
+    var highlightedFileName: String?
+    /// ライブラリから取り込みを保存したとき（#246）
+    var onImportedSound: ((AlarmSound) -> Void)?
 
     @State private var soundStore = SoundStore.shared
     @State private var audioPlayer = AudioPlayer.shared
@@ -88,7 +92,8 @@ struct SoundLibrarySections: View {
                 showingVideoImport: $showingVideoImport,
                 errorMessage: $errorMessage,
                 volumeBoostedFileName: $volumeBoostedFileName,
-                onImportFlowDismissed: onImportFlowDismissed
+                onImportFlowDismissed: onImportFlowDismissed,
+                onImportSaved: { sound in onImportedSound?(sound) }
             )
             .alert(String(localized: "rename"), isPresented: Binding(
                 get: { renamingSound != nil },
@@ -152,6 +157,14 @@ struct SoundLibrarySections: View {
                         selectionActive: selectionActive,
                         selectedSound: $selectedSound,
                         onSelect: onSelect
+                    )
+                    .id("library.sound.\(sound.fileName)")
+                    // 普段はリスト標準の背景のまま（nil）。取り込んだ直後だけ、標準の背景の上に色を重ねる（#246）
+                    .listRowBackground(
+                        highlightedFileName == sound.fileName
+                            ? Color(.secondarySystemGroupedBackground)
+                                .overlay(Color.actionFillEnd.opacity(0.15))
+                            : nil
                     )
                     .contextMenu {
                         if !isSelecting {

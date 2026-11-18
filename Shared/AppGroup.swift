@@ -323,6 +323,24 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: ライブラリ取り込みの着地を再現する（DEBUGのみ・#246）
+    static var isUITestLibraryImportLanding: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-library-import-landing")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: アラームを空にする（DEBUGのみ・#246）
+    static var isUITestClearAlarms: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-clear-alarms")
+    #else
+        false
+    #endif
+    }
+
     /// スクリーンショット用: 共有直後の受け取り画面を出す（DEBUGのみ・#239）
     static var isUITestShowShareReceipt: Bool {
     #if DEBUG

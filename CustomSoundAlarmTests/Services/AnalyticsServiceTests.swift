@@ -286,6 +286,26 @@ struct AnalyticsEventTests {
         #expect(settings["step"] as? String == "settings_opened")
     }
 
+    // MARK: share import landing (#246)
+
+    @Test
+    func shareImportLandedProperties() {
+        let props = AnalyticsEvent.importLanded(
+            source: .share,
+            destination: .library
+        ).properties
+        #expect(props.count == 2)
+        #expect(props["source"] as? String == "share")
+        #expect(props["destination"] as? String == "library")
+
+        let library = AnalyticsEvent.importLanded(
+            source: .library,
+            destination: .addAlarm
+        ).properties
+        #expect(library["source"] as? String == "library")
+        #expect(library["destination"] as? String == "add_alarm")
+    }
+
     // MARK: alarm history (#241)
 
     @Test

@@ -19,6 +19,7 @@ struct RootTabView: View {
     @State private var showingUnlock = false
     /// 解放から作ったプレイリストの詳細（#216）
     @State private var unlockPlaylist: Playlist?
+    @State private var shareLanding = ShareImportLanding.shared
     /// スクリーンショット用（DEBUGのみ・#239）
     @State private var showingShareReceipt = false
 
@@ -54,6 +55,12 @@ struct RootTabView: View {
         }
         .onChange(of: unlock.isPresented) { _, isPresented in
             showingUnlock = isPresented
+        }
+        .onChange(of: shareLanding.librarySoundFileName) { _, fileName in
+            if fileName != nil { selection = .library }
+        }
+        .onChange(of: shareLanding.addAlarmSound) { _, sound in
+            if sound != nil { selection = .alarms }
         }
         .sheet(isPresented: $showingUnlock, onDismiss: {
             if unlock.isPresented {

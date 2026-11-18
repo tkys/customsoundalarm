@@ -82,6 +82,7 @@ struct AlarmDetailView: View {
     init(
         mode: AlarmDetailMode,
         initialImport: OnboardingSource? = nil,
+        initialSound: AlarmSound? = nil,
         onClose: (() -> Void)? = nil
     ) {
         self.mode = mode
@@ -120,10 +121,10 @@ struct AlarmDetailView: View {
             _selectedTime = State(initialValue: Date())
             _label = State(initialValue: String(localized: "alarm_placeholder"))
             // 前回保存時に使った音をデフォルト選択（存在しない/削除済みなら nil）
-            let initialSound = SoundUsageHistory.lastUsedFileName.flatMap { fileName in
+            let lastUsedSound = SoundUsageHistory.lastUsedFileName.flatMap { fileName in
                 SoundStore.shared.sounds.first { $0.fileName == fileName }
             }
-            _selectedSound = State(initialValue: initialSound)
+            _selectedSound = State(initialValue: initialSound ?? lastUsedSound)
             _repeatWeekdays = State(initialValue: [])
             _snoozeMinutes = State(initialValue: carryOver.snoozeMinutes)
             _backupMinutes = State(initialValue: nil)

@@ -7,6 +7,12 @@ import Accessibility
 struct AddAlarmRequest: Identifiable {
     let id = UUID()
     let source: OnboardingSource?
+    let initialSound: AlarmSound?
+
+    init(source: OnboardingSource?, initialSound: AlarmSound? = nil) {
+        self.source = source
+        self.initialSound = initialSound
+    }
 }
 
 /// メイン画面：アラーム一覧
@@ -26,6 +32,7 @@ struct ContentView: View {
     @State private var shareImportItem: ShareImportItem?
     @State private var shareImportSelectedSound: AlarmSound?
     @State private var shareImportDidFinish = false
+    @State private var shareLanding = ShareImportLanding.shared
     /// 共有経路の音量の1行（#224 / #222）
     @State private var shareImportVolumeBoostedFileName: String?
     /// プレイリストの解放（#216）
@@ -144,6 +151,7 @@ struct ContentView: View {
                 AlarmDetailView(
                     mode: .add,
                     initialImport: request.source,
+                    initialSound: request.initialSound,
                     onClose: {
                         addScreenVisible = false
                         addAlarmRequest = nil
@@ -182,14 +190,19 @@ struct ContentView: View {
             }
             .sheet(item: $shareImportItem, onDismiss: {
                 let finished = shareImportDidFinish
+                let savedSound = shareImportSelectedSound
                 shareImportItem = nil
                 shareImportSelectedSound = nil
                 shareImportDidFinish = false
                 if finished {
-                    // 複数を共有したときは、1つずつ順に開く（#222）
                     Task {
                         try? await Task.sleep(for: .milliseconds(400))
-                        presentNextShareImportIfNeeded()
+                        if !ShareImportQueue.pendingItems().isEmpty {
+                            // 複数を共有したときは、1つずつ順に開く（#222）
+                            presentNextShareImportIfNeeded()
+                        } else if let savedSound {
+                            landShareImport(savedSound)
+                        }
                     }
                 }
             }) { item in
@@ -295,6 +308,15 @@ struct ContentView: View {
         .onChange(of: updateChecker.prompt == nil) { _, isClosed in
             if isClosed { presentNextShareImportIfNeeded() }
         }
+        .onChange(of: shareLanding.addAlarmSound) { _, sound in
+            guard let sound else { return }
+            Task {
+                try? await Task.sleep(for: .milliseconds(300))
+                addScreenVisible = true
+                addAlarmRequest = AddAlarmRequest(source: nil, initialSound: sound)
+                shareLanding.addAlarmSound = nil
+            }
+        }
     }
 
     // MARK: - Shared Imports (#222)
@@ -337,6 +359,23 @@ struct ContentView: View {
                 volumeBoostedFileName: $shareImportVolumeBoostedFileName
             )
         }
+    }
+
+    /// 最後の1件を保存したあとの着地先（#246）。
+    private func landShareImport(_ sound: AlarmSound) {
+        let destination: ShareImportDestination
+        if alarmStore.alarms.isEmpty {
+            destination = .addAlarm
+            addScreenVisible = true
+            addAlarmRequest = AddAlarmRequest(source: nil, initialSound: sound)
+        } else {
+            destination = .library
+            ShareImportLanding.shared.librarySoundFileName = sound.fileName
+        }
+        AnalyticsService.shared.capture(.importLanded(
+            source: .share,
+            destination: destination
+        ))
     }
 
     /// 共有された音の切り取り画面を、落ち着いているときだけ1件ずつ開く（#222）。

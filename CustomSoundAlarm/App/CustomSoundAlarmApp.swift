@@ -20,6 +20,11 @@ struct CustomSoundAlarmApp: App {
                     hasLaunched = true
 
 #if DEBUG
+                    if AppGroup.isUITestClearAlarms {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                    }
+
                     // UIテスト用: 共有の staging を分離する（#222）
                     if AppGroup.isUITestRun
                         && !AppGroup.isUITestSeedShareImportAudio

@@ -14,6 +14,8 @@ struct SoundImportModifier: ViewModifier {
     @Binding var volumeBoostedFileName: String?
     /// 取り込み画面（切り取り・動画）が閉じたとき（#216）
     var onImportFlowDismissed: (() -> Void)?
+    /// 取り込みを保存できたとき（#246）
+    var onImportSaved: ((AlarmSound) -> Void)?
 
     func body(content: Content) -> some View {
         content
@@ -29,6 +31,11 @@ struct SoundImportModifier: ViewModifier {
                     AudioCropView(
                         source: pending,
                         selectedSound: $selectedSound,
+                        onSaved: {
+                            if let sound = selectedSound {
+                                onImportSaved?(sound)
+                            }
+                        },
                         volumeBoostedFileName: $volumeBoostedFileName
                     )
                 }
@@ -38,6 +45,11 @@ struct SoundImportModifier: ViewModifier {
                 NavigationStack {
                     VideoImportFlow(
                         selectedSound: $selectedSound,
+                        onSaved: {
+                            if let sound = selectedSound {
+                                onImportSaved?(sound)
+                            }
+                        },
                         volumeBoostedFileName: $volumeBoostedFileName
                     )
                 }
@@ -97,7 +109,8 @@ extension View {
         showingVideoImport: Binding<Bool>,
         errorMessage: Binding<String?>,
         volumeBoostedFileName: Binding<String?>,
-        onImportFlowDismissed: (() -> Void)? = nil
+        onImportFlowDismissed: (() -> Void)? = nil,
+        onImportSaved: ((AlarmSound) -> Void)? = nil
     ) -> some View {
         modifier(SoundImportModifier(
             selectedSound: selectedSound,
@@ -106,7 +119,8 @@ extension View {
             showingVideoImport: showingVideoImport,
             errorMessage: errorMessage,
             volumeBoostedFileName: volumeBoostedFileName,
-            onImportFlowDismissed: onImportFlowDismissed
+            onImportFlowDismissed: onImportFlowDismissed,
+            onImportSaved: onImportSaved
         ))
     }
 }

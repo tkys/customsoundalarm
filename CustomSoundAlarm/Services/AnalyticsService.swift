@@ -102,6 +102,9 @@ enum AnalyticsEvent: Sendable {
     /// アラーム一覧の許可バナーのボタンを押した（#230 / #239）
     case permissionBannerTapped(status: AlarmPermissionStatus, step: PermissionBannerStep? = nil)
 
+    /// 取り込みを保存したあとの着地先（#246）
+    case importLanded(source: ImportLandingSource, destination: ShareImportDestination)
+
     /// 動画からの音声抽出・変換フローの開始
     /// - source: 取得元（photo_library / file）
     case videoImportStarted(source: VideoImportSource)
@@ -366,6 +369,7 @@ enum AnalyticsEvent: Sendable {
         case .alarmPermission: return "alarm_permission"
         case .permissionBannerShown: return "permission_banner_shown"
         case .permissionBannerTapped: return "permission_banner_tapped"
+        case .importLanded: return "import_landed"
         case .videoImportStarted: return "video_import_started"
         case .videoImportFailed: return "video_import_failed"
         case .alarmDuplicated: return "alarm_duplicated"
@@ -515,6 +519,11 @@ enum AnalyticsEvent: Sendable {
             var d: [String: Any] = ["status": status.rawValue]
             if let step { d["step"] = step.rawValue }
             return d
+        case let .importLanded(source, destination):
+            return [
+                "source": source.rawValue,
+                "destination": destination.rawValue
+            ]
         case let .videoImportStarted(source):
             return ["source": source.rawValue]
         case let .videoImportFailed(reason):
