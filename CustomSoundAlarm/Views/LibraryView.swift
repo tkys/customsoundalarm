@@ -17,6 +17,7 @@ struct LibraryView: View {
     @State private var volumeBoostedFileName: String?
     @State private var shareLanding = ShareImportLanding.shared
     @State private var highlightedFileName: String?
+    @State private var didRunLibraryLandingUITest = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -29,7 +30,8 @@ struct LibraryView: View {
                     volumeBoostedFileName: $volumeBoostedFileName,
                     showVolumeNoticeRow: true,
                     onImportFlowDismissed: { schedulePlaylistUnlockAttempt() },
-                    highlightedFileName: highlightedFileName
+                    highlightedFileName: highlightedFileName,
+                    onImportedSound: { handleLibraryImportSaved($0) }
                 )
 
                 #if DEBUG
@@ -46,6 +48,17 @@ struct LibraryView: View {
                 #endif
             }
             .accessibilityIdentifier("library.root")
+            .task {
+                #if DEBUG
+                guard AppGroup.isUITestLibraryImportLanding,
+                      !didRunLibraryLandingUITest,
+                      let sound = soundStore.sounds.first(where: { !$0.isPreset })
+                else { return }
+                didRunLibraryLandingUITest = true
+                try? await Task.sleep(for: .milliseconds(700))
+                handleLibraryImportSaved(sound)
+                #endif
+            }
             .onChange(of: soundStore.hasPendingPlaylistUnlock) { _, hasPending in
                 if hasPending { schedulePlaylistUnlockAttempt() }
             }
@@ -168,6 +181,22 @@ struct LibraryView: View {
             path.removeLast()
         }
         pendingDelete = nil
+    }
+
+    /// ライブラリから取り込みを保存したあとの着地先（#246）。
+    private func handleLibraryImportSaved(_ sound: AlarmSound) {
+        let destination: ShareImportDestination
+        if alarmStore.alarms.isEmpty {
+            destination = .addAlarm
+            shareLanding.addAlarmSound = sound
+        } else {
+            destination = .library
+            shareLanding.librarySoundFileName = sound.fileName
+        }
+        AnalyticsService.shared.capture(.importLanded(
+            source: .library,
+            destination: destination
+        ))
     }
 
     /// 共有から保存した音の行までスクロールして、約1.2秒ハイライトする（#246）。

@@ -5,6 +5,11 @@ enum ShareImportDestination: String, Sendable, CaseIterable {
     case library
 }
 
+enum ImportLandingSource: String, Sendable, CaseIterable {
+    case share
+    case library
+}
+
 /// 共有から保存したあとの着地先を、タブをまたいで伝える（#246）。
 @Observable
 @MainActor
@@ -13,6 +18,8 @@ final class ShareImportLanding {
 
     /// ライブラリでスクロール＆ハイライトする音のファイル名。
     var librarySoundFileName: String?
+    /// アラームが無いときに開く追加画面へ渡す音。
+    var addAlarmSound: AlarmSound?
 
     private init() {}
 }

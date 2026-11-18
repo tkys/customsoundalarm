@@ -59,6 +59,9 @@ struct RootTabView: View {
         .onChange(of: shareLanding.librarySoundFileName) { _, fileName in
             if fileName != nil { selection = .library }
         }
+        .onChange(of: shareLanding.addAlarmSound) { _, sound in
+            if sound != nil { selection = .alarms }
+        }
         .sheet(isPresented: $showingUnlock, onDismiss: {
             if unlock.isPresented {
                 unlock.isPresented = false

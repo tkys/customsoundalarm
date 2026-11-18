@@ -21,6 +21,8 @@ struct SoundLibrarySections: View {
     var onImportFlowDismissed: (() -> Void)?
     /// 共有から保存したあとに一瞬ハイライトする音（#246）
     var highlightedFileName: String?
+    /// ライブラリから取り込みを保存したとき（#246）
+    var onImportedSound: ((AlarmSound) -> Void)?
 
     @State private var soundStore = SoundStore.shared
     @State private var audioPlayer = AudioPlayer.shared
@@ -90,7 +92,8 @@ struct SoundLibrarySections: View {
                 showingVideoImport: $showingVideoImport,
                 errorMessage: $errorMessage,
                 volumeBoostedFileName: $volumeBoostedFileName,
-                onImportFlowDismissed: onImportFlowDismissed
+                onImportFlowDismissed: onImportFlowDismissed,
+                onImportSaved: { sound in onImportedSound?(sound) }
             )
             .alert(String(localized: "rename"), isPresented: Binding(
                 get: { renamingSound != nil },
@@ -156,13 +159,11 @@ struct SoundLibrarySections: View {
                         onSelect: onSelect
                     )
                     .id("library.sound.\(sound.fileName)")
-                    .overlay {
-                        if highlightedFileName == sound.fileName {
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(Color.actionFillEnd.opacity(0.15))
-                                .allowsHitTesting(false)
-                        }
-                    }
+                    .listRowBackground(
+                        highlightedFileName == sound.fileName
+                            ? Color.actionFillEnd.opacity(0.15)
+                            : Color.clear
+                    )
                     .contextMenu {
                         if !isSelecting {
                             Button {

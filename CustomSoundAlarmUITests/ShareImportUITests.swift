@@ -93,6 +93,7 @@ final class ShareImportUITests: XCTestCase {
         app.launchArguments = [
             "-uitest-seed-share-import-audio",
             "-uitest-clear-alarms",
+            "-uitest-reset-sounds",
             "-uitest-force-light"
         ]
         app.launch()
@@ -118,6 +119,7 @@ final class ShareImportUITests: XCTestCase {
         app.launchArguments = [
             "-uitest-seed-share-import-audio",
             "-uitest-seed-alarms",
+            "-uitest-reset-sounds",
             "-uitest-force-light"
         ]
         app.launch()
@@ -131,8 +133,52 @@ final class ShareImportUITests: XCTestCase {
             "library should open after saving the shared sound: \(app.debugDescription)"
         )
         XCTAssertTrue(
-            findElement("library.sound.SharedTest.caf").waitForExistence(timeout: 10),
+            app.buttons["Shared Sound"].firstMatch.waitForExistence(timeout: 10),
             "shared sound row should be visible: \(app.debugDescription)"
+        )
+    }
+
+    /// ライブラリから取り込んだときも、アラームが無ければ追加画面に着地する（#246）。
+    func testLibraryImportWithNoAlarmsLandsOnAddAlarm() {
+        app.launchArguments = [
+            "-uitest-seed-suggestion",
+            "-uitest-clear-alarms",
+            "-uitest-open-library",
+            "-uitest-library-import-landing",
+            "-uitest-force-light"
+        ]
+        app.launch()
+
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 20),
+            "add alarm should open after a library import: \(app.debugDescription)"
+        )
+        let sound = findElement("addAlarm.soundName")
+        XCTAssertTrue(sound.waitForExistence(timeout: 10), app.debugDescription)
+        XCTAssertTrue(
+            sound.label.contains("Suggestion Bell") || sound.label.contains("Suggestion Marimba"),
+            "imported sound should be selected: \(sound.label)"
+        )
+    }
+
+    /// アラームがあるライブラリ取り込みは、ライブラリのまま（#246）。
+    func testLibraryImportWithAlarmsStaysInLibrary() {
+        app.launchArguments = [
+            "-uitest-seed-suggestion",
+            "-uitest-seed-alarms",
+            "-uitest-open-library",
+            "-uitest-library-import-landing",
+            "-uitest-force-light"
+        ]
+        app.launch()
+
+        XCTAssertTrue(
+            app.collectionViews["library.root"].waitForExistence(timeout: 20),
+            app.debugDescription
+        )
+        XCTAssertTrue(
+            app.buttons["Suggestion Bell"].waitForExistence(timeout: 10),
+            app.debugDescription
         )
     }
 }

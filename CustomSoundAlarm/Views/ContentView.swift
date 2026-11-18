@@ -32,6 +32,7 @@ struct ContentView: View {
     @State private var shareImportItem: ShareImportItem?
     @State private var shareImportSelectedSound: AlarmSound?
     @State private var shareImportDidFinish = false
+    @State private var shareLanding = ShareImportLanding.shared
     /// 共有経路の音量の1行（#224 / #222）
     @State private var shareImportVolumeBoostedFileName: String?
     /// プレイリストの解放（#216）
@@ -307,6 +308,15 @@ struct ContentView: View {
         .onChange(of: updateChecker.prompt == nil) { _, isClosed in
             if isClosed { presentNextShareImportIfNeeded() }
         }
+        .onChange(of: shareLanding.addAlarmSound) { _, sound in
+            guard let sound else { return }
+            Task {
+                try? await Task.sleep(for: .milliseconds(300))
+                addScreenVisible = true
+                addAlarmRequest = AddAlarmRequest(source: nil, initialSound: sound)
+                shareLanding.addAlarmSound = nil
+            }
+        }
     }
 
     // MARK: - Shared Imports (#222)
@@ -362,7 +372,10 @@ struct ContentView: View {
             destination = .library
             ShareImportLanding.shared.librarySoundFileName = sound.fileName
         }
-        AnalyticsService.shared.capture(.shareImportLanded(destination: destination))
+        AnalyticsService.shared.capture(.importLanded(
+            source: .share,
+            destination: destination
+        ))
     }
 
     /// 共有された音の切り取り画面を、落ち着いているときだけ1件ずつ開く（#222）。
