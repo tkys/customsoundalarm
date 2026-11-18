@@ -159,10 +159,12 @@ struct SoundLibrarySections: View {
                         onSelect: onSelect
                     )
                     .id("library.sound.\(sound.fileName)")
+                    // 普段はリスト標準の背景のまま（nil）。取り込んだ直後だけ、標準の背景の上に色を重ねる（#246）
                     .listRowBackground(
                         highlightedFileName == sound.fileName
-                            ? Color.actionFillEnd.opacity(0.15)
-                            : Color.clear
+                            ? Color(.secondarySystemGroupedBackground)
+                                .overlay(Color.actionFillEnd.opacity(0.15))
+                            : nil
                     )
                     .contextMenu {
                         if !isSelecting {
