@@ -13,10 +13,13 @@ struct PermissionSettingsSheet: View {
                     .accessibilityHidden(true)
                 Text("alarm_title")
                     .font(.body)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                 Spacer()
                 Toggle("", isOn: .constant(true))
                     .labelsHidden()
-                    .disabled(true)
+                    // disabled にすると色が薄くなり「オン」に見えないため、操作だけ止める
+                    .allowsHitTesting(false)
                     .tint(.green)
                     .accessibilityHidden(true)
             }
@@ -26,6 +29,8 @@ struct PermissionSettingsSheet: View {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .fill(Color(.secondarySystemGroupedBackground))
             )
+            // 設定アプリの1行の見本なので、文字サイズ最大でも行の形を保つ
+            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
             .accessibilityIdentifier("permissionSettings.row")
 
             Text("permission_settings_hint")
@@ -45,6 +50,8 @@ struct PermissionSettingsSheet: View {
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 20)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        // 設定アプリと同じ灰色の地にして、見本の行が白い枠として浮くようにする
+        .background(Color(.systemGroupedBackground).ignoresSafeArea())
     }
 }
