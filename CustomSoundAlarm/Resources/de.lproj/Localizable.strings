@@ -393,3 +393,5 @@
 "permission_settings_open" = "Einstellungen öffnen";
 "received_title" = "Empfangen";
 "received_detail" = "Öffne My Sound Alarm und wähle den Teil, der klingeln soll.";
+"empty_quick_title" = "Wann stehst du auf?";
+"empty_quick_other" = "Andere Zeit";

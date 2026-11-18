@@ -393,3 +393,5 @@
 "permission_settings_open" = "Ouvrir Réglages";
 "received_title" = "Reçu";
 "received_detail" = "Ouvrez My Sound Alarm pour choisir la partie qui sonne.";
+"empty_quick_title" = "À quelle heure vous levez-vous ?";
+"empty_quick_other" = "Autre heure";

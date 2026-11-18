@@ -25,6 +25,11 @@ enum UnlockAction: String, Sendable, CaseIterable {
     case later
 }
 
+/// アラーム作成の入口（#231）
+enum AlarmCreatedSource: String, Sendable, CaseIterable {
+    case emptyQuick = "empty_quick"
+}
+
 /// 許可バナーの行動の段階（#239）
 enum PermissionBannerStep: String, Sendable, CaseIterable {
     case sheetShown = "sheet_shown"
@@ -52,7 +57,8 @@ enum AnalyticsEvent: Sendable {
         fadeIn: PlaylistFadeIn = .off,
         timeSuggestionUsed: Bool = false,
         carriedOver: Bool = false,
-        context: AlarmEventContext? = nil
+        context: AlarmEventContext? = nil,
+        source: AlarmCreatedSource? = nil
     )
 
     /// カスタムサウンドのインポート成功
@@ -453,7 +459,8 @@ enum AnalyticsEvent: Sendable {
             fadeIn,
             timeSuggestionUsed,
             carriedOver,
-            context
+            context,
+            source
         ):
             var d: [String: Any] = [
                 "has_custom_sound": hasCustomSound,
@@ -466,6 +473,7 @@ enum AnalyticsEvent: Sendable {
                 "carried_over": carriedOver
             ]
             if let context { d.merge(context.properties) { _, new in new } }
+            if let source { d["source"] = source.rawValue }
             return d
         case let .customSoundImported(
             source,

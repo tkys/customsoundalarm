@@ -318,6 +318,7 @@ enum AppGroup {
     static var isUITestSkipAlarmSync: Bool {
     #if DEBUG
         CommandLine.arguments.contains("-uitest-seed-enabled-alarms")
+            || CommandLine.arguments.contains("-uitest-skip-alarm-sync")
     #else
         false
     #endif

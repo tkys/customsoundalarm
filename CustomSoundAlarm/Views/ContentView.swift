@@ -53,6 +53,10 @@ struct ContentView: View {
     @State private var permissionFeedbackTrigger = 0
     @State private var skipToast: String?
     @State private var skipToastTask: Task<Void, Never>?
+    /// 空の一覧から作ったときの保存後の一言（#231）
+    @State private var quickSaveToast: String?
+    @State private var quickSaveToastTask: Task<Void, Never>?
+    @State private var quickSaveFeedbackTrigger = 0
     @ScaledMetric(relativeTo: .body) private var skipActionIconSize: CGFloat = 17
 
     @Environment(\.scenePhase) private var scenePhase
@@ -273,8 +277,19 @@ struct ContentView: View {
                     .accessibilityIdentifier("skip.row.toast")
             }
         }
+        .overlay(alignment: .bottom) {
+            if let quickSaveToast {
+                SaveConfirmationToast(text: quickSaveToast)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, dynamicTypeSize.isAccessibilitySize ? 100 : 12)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .accessibilityIdentifier("emptyState.toast")
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: quickSaveToast)
         .animation(.easeInOut(duration: 0.25), value: skipToast)
         .sensoryFeedback(.success, trigger: permissionFeedbackTrigger)
+        .sensoryFeedback(.success, trigger: quickSaveFeedbackTrigger)
         .onChange(of: soundStore.hasPendingPlaylistUnlock) { _, hasPending in
             if hasPending { schedulePlaylistUnlockAttempt() }
         }
@@ -467,26 +482,127 @@ struct ContentView: View {
     // MARK: - Empty State
 
     private var emptyState: some View {
-        ContentUnavailableView {
-            Label {
-                Text("empty_title")
-            } icon: {
-                SoundWaveDecoration()
-                    .padding(.bottom, 4)
+        ScrollView {
+            VStack(spacing: 20) {
+                Image("onboarding_hero")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: dynamicTypeSize.isAccessibilitySize ? 110 : 160)
+                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    .accessibilityHidden(true)
+
+                Text("empty_quick_title")
+                    .font(.title2.weight(.semibold))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                timeButtons
+
+                Button("empty_quick_other") {
+                    addScreenVisible = true
+                    addAlarmRequest = AddAlarmRequest(source: nil)
+                }
+                .buttonStyle(.borderless)
+                .font(.subheadline.weight(.medium))
+                .tint(Color.actionText)
+                .accessibilityIdentifier("emptyState.other")
             }
-        } description: {
-            Text("empty_description")
-        } actions: {
-            Button {
-                addScreenVisible = true
-                addAlarmRequest = AddAlarmRequest(source: nil)
-            } label: {
-                Text("add_alarm")
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(Color.actionFillEnd)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 24)
+            .frame(maxWidth: .infinity)
         }
-        .accessibilityIdentifier("empty.title")
+        .accessibilityIdentifier("emptyState.root")
+    }
+
+    @ViewBuilder
+    private var timeButtons: some View {
+        let times = EmptyStateQuickAlarmLogic.times
+        if dynamicTypeSize.isAccessibilitySize {
+            LazyVGrid(
+                columns: [GridItem(.flexible()), GridItem(.flexible())],
+                spacing: 10
+            ) {
+                ForEach(times) { time in
+                    quickTimeButton(time)
+                }
+            }
+            .frame(maxWidth: 360)
+        } else {
+            HStack(spacing: 8) {
+                ForEach(times) { time in
+                    quickTimeButton(time)
+                }
+            }
+        }
+    }
+
+    private func quickTimeButton(_ time: QuickAlarmTime) -> some View {
+        Button {
+            createQuickAlarm(time)
+        } label: {
+            Text(time.label)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.large)
+        .accessibilityIdentifier("emptyState.quick.\(time.id)")
+    }
+
+    /// 時刻を1回押して、明日の朝の一回限りのアラームを作る（#231）。
+    private func createQuickAlarm(_ time: QuickAlarmTime) {
+        let soundFileName = EmptyStateQuickAlarmLogic.soundFileName(
+            imported: soundStore.sounds,
+            lastUsedFileName: SoundUsageHistory.lastUsedFileName
+        )
+        let entry = EmptyStateQuickAlarmLogic.makeEntry(
+            time: time,
+            soundFileName: soundFileName,
+            label: String(localized: "alarm_placeholder")
+        )
+        AlarmUIDStore.recordCreation(entry.id)
+        alarmStore.add(entry)
+
+        var context = AlarmHistoryLogic.context(for: entry)
+        context.list = AlarmHistoryLogic.listSnapshot([])
+        let isCustomSound = soundStore.sounds
+            .first { $0.fileName == soundFileName }?
+            .isPreset == false
+        AnalyticsService.shared.capture(.alarmCreated(
+            hasCustomSound: isCustomSound,
+            isRepeating: false,
+            snoozeMinutes: entry.snoozeMinutes,
+            backupMinutes: 0,
+            soundMode: .single,
+            fadeIn: .off,
+            context: context,
+            source: .emptyQuick
+        ))
+
+        AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
+        quickSaveFeedbackTrigger += 1
+
+        if let message = PostSaveFeedback.resolve(for: entry, currentDate: Date())
+            .localizedMessage(entry: entry, currentDate: Date()) {
+            quickSaveToastTask?.cancel()
+            quickSaveToast = message
+            quickSaveToastTask = Task {
+                try? await Task.sleep(for: .seconds(2))
+                quickSaveToast = nil
+            }
+        }
+
+        Task {
+            if scheduler.permissionStatus == .notDetermined {
+                _ = await scheduler.requestAuthorization()
+                scheduler.refreshPermissionStatus()
+                if scheduler.permissionStatus == .authorized {
+                    AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .foreground)
+                }
+            }
+            reportPermissionBannerIfNeeded()
+        }
     }
 
     // MARK: - Skip (#197)

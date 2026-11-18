@@ -393,3 +393,5 @@
 "permission_settings_open" = "설정 열기";
 "received_title" = "받았습니다";
 "received_detail" = "My Sound Alarm을 열어 울릴 부분을 선택하세요.";
+"empty_quick_title" = "몇 시에 일어나시나요?";
+"empty_quick_other" = "다른 시간";

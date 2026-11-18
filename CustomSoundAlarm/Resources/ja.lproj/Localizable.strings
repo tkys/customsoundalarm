@@ -393,3 +393,5 @@
 "permission_settings_open" = "設定を開く";
 "received_title" = "受け取りました";
 "received_detail" = "My Sound Alarm を開くと、鳴らす部分を選べます";
+"empty_quick_title" = "何時に起きる？";
+"empty_quick_other" = "ほかの時刻";
