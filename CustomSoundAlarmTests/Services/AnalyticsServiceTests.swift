@@ -271,6 +271,19 @@ struct AnalyticsEventTests {
             status: .notDetermined
         ).properties
         #expect(tapped["status"] as? String == "not_determined")
+        #expect(tapped["step"] == nil)
+
+        let sheet = AnalyticsEvent.permissionBannerTapped(
+            status: .denied,
+            step: .sheetShown
+        ).properties
+        #expect(sheet["step"] as? String == "sheet_shown")
+
+        let settings = AnalyticsEvent.permissionBannerTapped(
+            status: .denied,
+            step: .settingsOpened
+        ).properties
+        #expect(settings["step"] as? String == "settings_opened")
     }
 
     // MARK: alarm history (#241)

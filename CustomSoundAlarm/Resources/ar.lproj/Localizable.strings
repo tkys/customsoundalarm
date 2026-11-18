@@ -386,6 +386,10 @@
 "playlist_unlock_title" = "تم تفعيل قوائم التشغيل";
 "playlist_unlock_create" = "إنشاء قائمة تشغيل بهذين الصوتين";
 "playlist_unlock_later" = "لاحقًا";
-"volume_notice" = "كان الصوت منخفضًا، لذا رفعناه إلى مستوى مسموع.";
-"permission_banner_title" = "لن ترن المنبهات";
-"permission_banner_allow" = "السماح";
+"volume_notice" = "رفعنا مستوى الصوت ليسهل سماعه.";
+"permission_banner_title" = "إذن المنبهات غير مفعّل";
+"permission_banner_allow" = "تفعيل";
+"permission_settings_hint" = "فعّل «المنبهات»";
+"permission_settings_open" = "فتح الإعدادات";
+"received_title" = "تم الاستلام";
+"received_detail" = "افتح My Sound Alarm لاختيار الجزء الذي يرن.";

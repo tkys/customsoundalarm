@@ -25,6 +25,12 @@ enum UnlockAction: String, Sendable, CaseIterable {
     case later
 }
 
+/// 許可バナーの行動の段階（#239）
+enum PermissionBannerStep: String, Sendable, CaseIterable {
+    case sheetShown = "sheet_shown"
+    case settingsOpened = "settings_opened"
+}
+
 // MARK: - AnalyticsEvent
 
 /// 型安全なアナリティクスイベント定義。
@@ -93,8 +99,8 @@ enum AnalyticsEvent: Sendable {
     /// アラーム一覧の許可バナーを出した（#230）
     case permissionBannerShown(status: AlarmPermissionStatus)
 
-    /// アラーム一覧の許可バナーのボタンを押した（#230）
-    case permissionBannerTapped(status: AlarmPermissionStatus)
+    /// アラーム一覧の許可バナーのボタンを押した（#230 / #239）
+    case permissionBannerTapped(status: AlarmPermissionStatus, step: PermissionBannerStep? = nil)
 
     /// 動画からの音声抽出・変換フローの開始
     /// - source: 取得元（photo_library / file）
@@ -505,8 +511,10 @@ enum AnalyticsEvent: Sendable {
             return ["status": status.rawValue]
         case let .permissionBannerShown(status):
             return ["status": status.rawValue]
-        case let .permissionBannerTapped(status):
-            return ["status": status.rawValue]
+        case let .permissionBannerTapped(status, step):
+            var d: [String: Any] = ["status": status.rawValue]
+            if let step { d["step"] = step.rawValue }
+            return d
         case let .videoImportStarted(source):
             return ["source": source.rawValue]
         case let .videoImportFailed(reason):

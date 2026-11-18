@@ -386,6 +386,10 @@
 "playlist_unlock_title" = "Playlist sbloccate";
 "playlist_unlock_create" = "Crea una playlist con questi due";
 "playlist_unlock_later" = "Non ora";
-"volume_notice" = "Il suono era basso, quindi l’abbiamo reso più udibile.";
-"permission_banner_title" = "Le sveglie non suoneranno";
-"permission_banner_allow" = "Consenti";
+"volume_notice" = "Alziamo il volume per farlo sentire meglio.";
+"permission_banner_title" = "L’autorizzazione alle sveglie è disattivata";
+"permission_banner_allow" = "Attiva";
+"permission_settings_hint" = "Attiva “Sveglie”";
+"permission_settings_open" = "Apri Impostazioni";
+"received_title" = "Ricevuto";
+"received_detail" = "Apri My Sound Alarm per scegliere la parte da far suonare.";

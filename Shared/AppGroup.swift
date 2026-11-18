@@ -323,6 +323,15 @@ enum AppGroup {
     #endif
     }
 
+    /// スクリーンショット用: 共有直後の受け取り画面を出す（DEBUGのみ・#239）
+    static var isUITestShowShareReceipt: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-show-share-receipt")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: 同梱のプリセット音で波形クロップ画面を直接開く（DEBUGのみ・#149）
     static var isUITestOpenWaveformCrop: Bool {
     #if DEBUG
