@@ -68,7 +68,8 @@ struct AlarmHistoryTests {
                 now: date(2026, 11, 18, 9, 0),
                 fileURL: url,
                 calendar: calendar,
-                timeZone: timeZone
+                timeZone: timeZone,
+                trimThresholdBytes: 1
             )
         }
 
@@ -95,6 +96,29 @@ struct AlarmHistoryTests {
         )
         let text = try String(contentsOf: url, encoding: .utf8)
         #expect(text.contains("\"local_time\":\"10:07\""))
+        // 日付まで入った時刻（オフセット付き）が残る
+        #expect(text.contains("\"ts\":\"2026-11-18T10:07:00"))
+    }
+
+    @Test
+    func localHistoryAppendsWithoutRewritingBelowThreshold() throws {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("alarm-history-\(UUID().uuidString).jsonl")
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        for index in 0..<3 {
+            AlarmLocalHistoryStore.append(
+                event: "alarm_toggled",
+                properties: ["index": index],
+                now: date(2026, 11, 18, 9, index),
+                fileURL: url,
+                calendar: calendar,
+                timeZone: timeZone
+            )
+        }
+        let lines = try String(contentsOf: url, encoding: .utf8).split(separator: "\n")
+        #expect(lines.count == 3)
+        #expect(lines.last?.contains("\"index\":2") == true)
     }
 
     private func date(
