@@ -19,6 +19,8 @@ struct RootTabView: View {
     @State private var showingUnlock = false
     /// 解放から作ったプレイリストの詳細（#216）
     @State private var unlockPlaylist: Playlist?
+    /// スクリーンショット用（DEBUGのみ・#239）
+    @State private var showingShareReceipt = false
 
     var body: some View {
         TabView(selection: $selection) {
@@ -41,6 +43,9 @@ struct RootTabView: View {
         .preferredColorScheme(uiTestColorScheme)
         .task {
             #if DEBUG
+            if AppGroup.isUITestShowShareReceipt {
+                showingShareReceipt = true
+            }
             if AppGroup.isUITestShowPlaylistUnlock {
                 try? await Task.sleep(for: .milliseconds(500))
                 unlock.presentForUITest()
@@ -73,6 +78,11 @@ struct RootTabView: View {
                 PlaylistEditorView(playlist: playlist, onSave: { _ in })
             }
         }
+        #if DEBUG
+        .fullScreenCover(isPresented: $showingShareReceipt) {
+            ShareReceiptPreviewView()
+        }
+        #endif
     }
 
     private var uiTestColorScheme: ColorScheme? {

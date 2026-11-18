@@ -239,6 +239,8 @@
 		E0E42D2892CB93B1953EC10A /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 69B7A661B212236384ECBE05 /* Localizable.strings */; };
 		E17F8A2662BF0D60BC3DBB3E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA13D117730C6D5910D58FD4 /* InfoPlist.strings */; };
 		E2BB9F1A074C071DF1A5AC92 /* PlaylistSuggestionLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0DD008E6FB33DB60396D37 /* PlaylistSuggestionLogic.swift */; };
+		AD0000000000000000000001 /* PermissionSettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000000000000000000011 /* PermissionSettingsSheet.swift */; };
+		AC0000000000000000000001 /* ShareReceiptPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0000000000000000000011 /* ShareReceiptPreviewView.swift */; };
 		E30958483AC7255DECF60F65 /* CustomAlarmMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08EAAA2A211BCB98598A3FB2 /* CustomAlarmMetadataTests.swift */; };
 		E3D9000FAA6E9A9FB0EE6E9F /* StopActionPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C27A2CC78C9B9184B31B7A2 /* StopActionPlanner.swift */; };
 		E49876489CFF78962B42165F /* PresetRegistration.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF87781AE69B861793B5363A /* PresetRegistration.swift */; };
@@ -390,6 +392,8 @@
 		39CEFD6CAD362010B0DDCD66 /* AlarmRowAccessibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmRowAccessibility.swift; sourceTree = "<group>"; };
 		3BDFFB8A52095E586A02A96D /* AlarmManaging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmManaging.swift; sourceTree = "<group>"; };
 		3D0DD008E6FB33DB60396D37 /* PlaylistSuggestionLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistSuggestionLogic.swift; sourceTree = "<group>"; };
+		AD0000000000000000000011 /* PermissionSettingsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionSettingsSheet.swift; sourceTree = "<group>"; };
+		AC0000000000000000000011 /* ShareReceiptPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareReceiptPreviewView.swift; sourceTree = "<group>"; };
 		3D3E7D2ACD756BF6236CA208 /* BackupAlarmSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupAlarmSound.swift; sourceTree = "<group>"; };
 		3DDAA4ACE3FD77A7583E7E5C /* LocalizationCompletenessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationCompletenessTests.swift; sourceTree = "<group>"; };
 		3EA8725281F675AB31653C95 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
@@ -865,6 +869,8 @@
 				8CB35836AA202B969CE7437A /* EarlyAccessBadge.swift */,
 				7070484DAE7EA0EEC071F6AF /* FilmstripView.swift */,
 				FDF83A50CB608D370A449CB1 /* LibraryView.swift */,
+				AD0000000000000000000011 /* PermissionSettingsSheet.swift */,
+				AC0000000000000000000011 /* ShareReceiptPreviewView.swift */,
 				E5E338088DF544D7FBE2B2E3 /* OnboardingView.swift */,
 				1916C23CC467044DFBB09DC4 /* PlaylistEditorView.swift */,
 				6829F73FFAAD54C10C494B10 /* PlaylistRowLabel.swift */,
@@ -929,6 +935,7 @@
 				C1A2D25582E5891BFB320CC1 /* PlaylistRenderLogic.swift */,
 				8267931ECD28007465925431 /* PlaylistResyncLogic.swift */,
 				3D0DD008E6FB33DB60396D37 /* PlaylistSuggestionLogic.swift */,
+		AC0000000000000000000011 /* ShareReceiptPreviewView.swift */,
 				1D0C49BA519F2BBEFB759DD6 /* PlaylistUnlockLogic.swift */,
 				BA17D126F33619A4E3697AF3 /* PostSaveFeedback.swift */,
 				BF87781AE69B861793B5363A /* PresetRegistration.swift */,
@@ -1300,6 +1307,8 @@
 				D7FAB91619BA070D83185B82 /* PlaylistRowLabel.swift in Sources */,
 				9AB8CE5853F70F472C9FF0FE /* PlaylistStore.swift in Sources */,
 				E2BB9F1A074C071DF1A5AC92 /* PlaylistSuggestionLogic.swift in Sources */,
+		AD0000000000000000000001 /* PermissionSettingsSheet.swift in Sources */,
+		AC0000000000000000000001 /* ShareReceiptPreviewView.swift in Sources */,
 				868C4FE950F01B92AC44F785 /* PlaylistUnlockCoordinator.swift in Sources */,
 				EB7F71FDFD55B0850A1E85EA /* PlaylistUnlockLogic.swift in Sources */,
 				D1080D89C89A2EC1477ED882 /* PlaylistUnlockSheet.swift in Sources */,

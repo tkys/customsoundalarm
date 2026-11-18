@@ -386,6 +386,10 @@
 "playlist_unlock_title" = "Playlists ontgrendeld";
 "playlist_unlock_create" = "Maak een playlist met deze twee";
 "playlist_unlock_later" = "Niet nu";
-"volume_notice" = "Het geluid was zacht, dus we hebben het luider gemaakt.";
-"permission_banner_title" = "Wekkers gaan niet af";
-"permission_banner_allow" = "Toestaan";
+"volume_notice" = "Volume verhoogd zodat je het beter hoort.";
+"permission_banner_title" = "Alarmtoestemming staat uit";
+"permission_banner_allow" = "Aanzetten";
+"permission_settings_hint" = "Zet “Wekkers” aan";
+"permission_settings_open" = "Instellingen openen";
+"received_title" = "Ontvangen";
+"received_detail" = "Open My Sound Alarm om het deel te kiezen dat klinkt.";

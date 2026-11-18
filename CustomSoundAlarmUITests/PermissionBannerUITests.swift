@@ -15,7 +15,8 @@ final class PermissionBannerUITests: XCTestCase {
     func testDeniedShowsBannerAtTop() {
         app.launchArguments = [
             "-uitest-seed-enabled-alarms",
-            "-uitest-alarm-permission-denied"
+            "-uitest-alarm-permission-denied",
+            "-AppleLanguages", "(ja)", "-AppleLocale", "ja_JP"
         ]
         app.launch()
 
@@ -29,8 +30,11 @@ final class PermissionBannerUITests: XCTestCase {
             "allow button should appear: \(app.debugDescription)"
         )
 
-        let alarmTime = app.staticTexts["23:44"]
-        XCTAssertTrue(alarmTime.waitForExistence(timeout: 10))
+        let alarmTime = app.staticTexts["06:24"]
+        XCTAssertTrue(
+            alarmTime.waitForExistence(timeout: 10),
+            app.debugDescription
+        )
         XCTAssertLessThan(
             banner.frame.origin.y,
             alarmTime.frame.origin.y,
@@ -42,14 +46,34 @@ final class PermissionBannerUITests: XCTestCase {
     func testAuthorizedHidesBanner() {
         app.launchArguments = [
             "-uitest-seed-enabled-alarms",
-            "-uitest-alarm-permission-authorized"
+            "-uitest-alarm-permission-authorized",
+            "-AppleLanguages", "(ja)", "-AppleLocale", "ja_JP"
         ]
         app.launch()
 
-        XCTAssertTrue(app.staticTexts["23:44"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.staticTexts["06:24"].waitForExistence(timeout: 15))
         XCTAssertFalse(
             app.staticTexts["alarmList.permissionBanner"].waitForExistence(timeout: 3),
             "banner should be hidden when authorized: \(app.debugDescription)"
         )
+    }
+
+    /// denied のときは、設定アプリの前にシートを1枚はさむ（#239）。
+    func testDeniedShowsSettingsSheetBeforeOpeningSettings() {
+        app.launchArguments = [
+            "-uitest-seed-enabled-alarms",
+            "-uitest-alarm-permission-denied"
+        ]
+        app.launch()
+
+        let allow = app.buttons["alarmList.permissionAllow"]
+        XCTAssertTrue(allow.waitForExistence(timeout: 15), app.debugDescription)
+        allow.tap()
+
+        XCTAssertTrue(
+            app.staticTexts["permissionSettings.hint"].waitForExistence(timeout: 10),
+            "settings sheet should appear: \(app.debugDescription)"
+        )
+        XCTAssertTrue(app.buttons["permissionSettings.open"].exists)
     }
 }

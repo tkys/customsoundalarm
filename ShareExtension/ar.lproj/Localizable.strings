@@ -3,4 +3,5 @@
 "no_audio_found" = "لم يتم العثور على ملف صوتي متوافق";
 "file_load_failed" = "تعذر تحميل الملف";
 "saved_format" = "تم حفظ \"%@\"";
-"received" = "تم الاستلام. افتح My Sound Alarm لاختيار الجزء الذي يرن.";
+"received_title" = "تم الاستلام";
+"received_detail" = "افتح My Sound Alarm لاختيار الجزء الذي يرن.";
