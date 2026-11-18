@@ -7,6 +7,12 @@ import Accessibility
 struct AddAlarmRequest: Identifiable {
     let id = UUID()
     let source: OnboardingSource?
+    let initialSound: AlarmSound?
+
+    init(source: OnboardingSource?, initialSound: AlarmSound? = nil) {
+        self.source = source
+        self.initialSound = initialSound
+    }
 }
 
 /// メイン画面：アラーム一覧
@@ -144,6 +150,7 @@ struct ContentView: View {
                 AlarmDetailView(
                     mode: .add,
                     initialImport: request.source,
+                    initialSound: request.initialSound,
                     onClose: {
                         addScreenVisible = false
                         addAlarmRequest = nil
@@ -182,14 +189,19 @@ struct ContentView: View {
             }
             .sheet(item: $shareImportItem, onDismiss: {
                 let finished = shareImportDidFinish
+                let savedSound = shareImportSelectedSound
                 shareImportItem = nil
                 shareImportSelectedSound = nil
                 shareImportDidFinish = false
                 if finished {
-                    // 複数を共有したときは、1つずつ順に開く（#222）
                     Task {
                         try? await Task.sleep(for: .milliseconds(400))
-                        presentNextShareImportIfNeeded()
+                        if !ShareImportQueue.pendingItems().isEmpty {
+                            // 複数を共有したときは、1つずつ順に開く（#222）
+                            presentNextShareImportIfNeeded()
+                        } else if let savedSound {
+                            landShareImport(savedSound)
+                        }
                     }
                 }
             }) { item in
@@ -337,6 +349,20 @@ struct ContentView: View {
                 volumeBoostedFileName: $shareImportVolumeBoostedFileName
             )
         }
+    }
+
+    /// 最後の1件を保存したあとの着地先（#246）。
+    private func landShareImport(_ sound: AlarmSound) {
+        let destination: ShareImportDestination
+        if alarmStore.alarms.isEmpty {
+            destination = .addAlarm
+            addScreenVisible = true
+            addAlarmRequest = AddAlarmRequest(source: nil, initialSound: sound)
+        } else {
+            destination = .library
+            ShareImportLanding.shared.librarySoundFileName = sound.fileName
+        }
+        AnalyticsService.shared.capture(.shareImportLanded(destination: destination))
     }
 
     /// 共有された音の切り取り画面を、落ち着いているときだけ1件ずつ開く（#222）。

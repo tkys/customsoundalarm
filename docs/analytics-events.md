@@ -18,6 +18,7 @@
 | `alarm_permission` | `status` string（authorized/denied/not_determined/request_failed/unknown） | 権限状態が変わったとき（永続化比較） | 許可率・拒否の影響 | アプリ動作中のみ | 既存 |
 | `permission_banner_shown` | `status` string（denied/not_determined） | アラーム一覧の許可バナーを出した | 拒否済みユーザーへの気づき | アプリ動作中のみ | 1.8.3 |
 | `permission_banner_tapped` | `status` string（denied/not_determined）, `step` string（sheet_shown/settings_opened・denied のみ） | 許可バナーのボタンを押した | 許可への転換 | アプリ動作中のみ | 1.8.3（`step` は1.8.3） |
+| `share_import_landed` | `destination` string（add_alarm/library） | 共有から保存したあとの着地先 | 取り込み後の導線 | アプリ動作中のみ | 1.8.3 |
 | `alarm_fired` | `was_app_foreground` bool, `hour` int, `is_repeating` bool, `detection` string（observer/reconcile）, `sound_mode` string | アラーム発火検知 | 実際に鳴ったか・プレイリストで鳴ったか | アプリ動作中／起動時にも補完 | 既存（`sound_mode` は1.8.2） |
 | `alarm_stopped` | `hour` int, `sound_mode` string | 本体アラームの停止（Intent） | 停止行動・プレイリストの継続 | **届く** | 既存（`sound_mode` は1.8.2） |
 | `alarm_snoozed` | `from` string（observer/reconcile） | スヌーズ待機への遷移 | スヌーズ行動 | アプリ動作中／起動時にも補完 | 既存 |

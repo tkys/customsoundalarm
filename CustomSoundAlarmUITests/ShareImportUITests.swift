@@ -87,4 +87,52 @@ final class ShareImportUITests: XCTestCase {
         )
         XCTAssertEqual(XCTWaiter.wait(for: [gone], timeout: 20), .completed)
     }
+
+    /// アラームが無いときは、保存後に追加画面で取り込んだ音が選ばれている（#246）。
+    func testSharedImportWithNoAlarmsLandsOnAddAlarm() {
+        app.launchArguments = [
+            "-uitest-seed-share-import-audio",
+            "-uitest-clear-alarms",
+            "-uitest-force-light"
+        ]
+        app.launch()
+
+        let crop = findElement("audioCrop.cropAndSave")
+        XCTAssertTrue(crop.waitForExistence(timeout: 20), app.debugDescription)
+        crop.tap()
+
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 20),
+            "add alarm should open after saving the shared sound: \(app.debugDescription)"
+        )
+        let sound = findElement("addAlarm.soundName")
+        XCTAssertTrue(sound.waitForExistence(timeout: 10), app.debugDescription)
+        XCTAssertTrue(
+            sound.label.contains("Shared Sound"),
+            "shared sound should be selected: \(sound.label)"
+        )
+    }
+
+    /// アラームがあるときは、保存後にライブラリで取り込んだ音が見える（#246）。
+    func testSharedImportWithAlarmsLandsInLibrary() {
+        app.launchArguments = [
+            "-uitest-seed-share-import-audio",
+            "-uitest-seed-alarms",
+            "-uitest-force-light"
+        ]
+        app.launch()
+
+        let crop = findElement("audioCrop.cropAndSave")
+        XCTAssertTrue(crop.waitForExistence(timeout: 20), app.debugDescription)
+        crop.tap()
+
+        XCTAssertTrue(
+            app.collectionViews["library.root"].waitForExistence(timeout: 20),
+            "library should open after saving the shared sound: \(app.debugDescription)"
+        )
+        XCTAssertTrue(
+            findElement("library.sound.SharedTest.caf").waitForExistence(timeout: 10),
+            "shared sound row should be visible: \(app.debugDescription)"
+        )
+    }
 }

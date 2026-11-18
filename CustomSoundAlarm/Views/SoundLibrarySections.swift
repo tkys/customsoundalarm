@@ -19,6 +19,8 @@ struct SoundLibrarySections: View {
     var showVolumeNoticeRow: Bool = false
     /// 取り込み画面（切り取り・動画）が閉じたとき（#216）
     var onImportFlowDismissed: (() -> Void)?
+    /// 共有から保存したあとに一瞬ハイライトする音（#246）
+    var highlightedFileName: String?
 
     @State private var soundStore = SoundStore.shared
     @State private var audioPlayer = AudioPlayer.shared
@@ -153,6 +155,14 @@ struct SoundLibrarySections: View {
                         selectedSound: $selectedSound,
                         onSelect: onSelect
                     )
+                    .id("library.sound.\(sound.fileName)")
+                    .overlay {
+                        if highlightedFileName == sound.fileName {
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .fill(Color.actionFillEnd.opacity(0.15))
+                                .allowsHitTesting(false)
+                        }
+                    }
                     .contextMenu {
                         if !isSelecting {
                             Button {

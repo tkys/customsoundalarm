@@ -15,9 +15,12 @@ struct LibraryView: View {
     @State private var unlock = PlaylistUnlockCoordinator.shared
     @State private var scheduler = AlarmScheduler.shared
     @State private var volumeBoostedFileName: String?
+    @State private var shareLanding = ShareImportLanding.shared
+    @State private var highlightedFileName: String?
 
     var body: some View {
         NavigationStack(path: $path) {
+            ScrollViewReader { proxy in
             List {
                 SoundLibrarySections(
                     isSelecting: false,
@@ -25,7 +28,8 @@ struct LibraryView: View {
                     middle: AnyView(playlistSection),
                     volumeBoostedFileName: $volumeBoostedFileName,
                     showVolumeNoticeRow: true,
-                    onImportFlowDismissed: { schedulePlaylistUnlockAttempt() }
+                    onImportFlowDismissed: { schedulePlaylistUnlockAttempt() },
+                    highlightedFileName: highlightedFileName
                 )
 
                 #if DEBUG
@@ -44,6 +48,11 @@ struct LibraryView: View {
             .accessibilityIdentifier("library.root")
             .onChange(of: soundStore.hasPendingPlaylistUnlock) { _, hasPending in
                 if hasPending { schedulePlaylistUnlockAttempt() }
+            }
+            .onChange(of: shareLanding.librarySoundFileName) { _, fileName in
+                guard let fileName else { return }
+                highlightSharedSound(fileName, proxy: proxy)
+            }
             }
             .warmListBackground()
             .navigationTitle(String(localized: "library_title"))
@@ -159,6 +168,24 @@ struct LibraryView: View {
             path.removeLast()
         }
         pendingDelete = nil
+    }
+
+    /// 共有から保存した音の行までスクロールして、約1.2秒ハイライトする（#246）。
+    private func highlightSharedSound(_ fileName: String, proxy: ScrollViewProxy?) {
+        highlightedFileName = fileName
+        Task {
+            try? await Task.sleep(for: .milliseconds(150))
+            if let proxy {
+                withAnimation {
+                    proxy.scrollTo("library.sound.\(fileName)", anchor: .center)
+                }
+            }
+            try? await Task.sleep(for: .milliseconds(900))
+            withAnimation(.easeOut(duration: 0.25)) {
+                highlightedFileName = nil
+            }
+            shareLanding.librarySoundFileName = nil
+        }
     }
 
     /// 取り込み画面が閉じてから解放シートを出す（#216）。
