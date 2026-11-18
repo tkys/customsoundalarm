@@ -148,6 +148,9 @@ struct SoundLibrarySections: View {
                 .padding(.vertical, 12)
             } else {
                 ForEach(Array(imported.enumerated()), id: \.element.id) { index, sound in
+                    // 1要素 = 1行を保つ。要素ごとに行数が変わると、取り込み直後の List の差分更新で
+                    // UICollectionView の「行数が合わない」例外になりうる（1.8.1 のクラッシュ調査、11/18）
+                    VStack(alignment: .leading, spacing: 4) {
                     SoundSelectionRow(
                         name: sound.name,
                         sound: sound,
@@ -158,6 +161,14 @@ struct SoundLibrarySections: View {
                         selectedSound: $selectedSound,
                         onSelect: onSelect
                     )
+                    if showVolumeNoticeRow,
+                       sound.fileName == volumeBoostedFileName {
+                        Label("volume_notice", systemImage: "speaker.wave.3")
+                            .font(.footnote)
+                            .foregroundStyle(Color.textSecondary)
+                            .accessibilityIdentifier("library.volumeNotice")
+                    }
+                    }
                     .id("library.sound.\(sound.fileName)")
                     // 普段はリスト標準の背景のまま（nil）。取り込んだ直後だけ、標準の背景の上に色を重ねる（#246）
                     .listRowBackground(
@@ -180,13 +191,6 @@ struct SoundLibrarySections: View {
                                 Label("delete", systemImage: "trash")
                             }
                         }
-                    }
-                    if showVolumeNoticeRow,
-                       sound.fileName == volumeBoostedFileName {
-                        Label("volume_notice", systemImage: "speaker.wave.3")
-                            .font(.footnote)
-                            .foregroundStyle(Color.textSecondary)
-                            .accessibilityIdentifier("library.volumeNotice")
                     }
                 }
                 .onDelete { indexSet in
