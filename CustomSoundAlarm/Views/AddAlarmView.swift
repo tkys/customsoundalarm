@@ -74,6 +74,10 @@ struct AlarmDetailView: View {
     @State private var showingBackupInfo = false
     /// 時刻の候補を使った（#206）
     @State private var timeSuggestionUsed = false
+    /// 履歴計測（#241）
+    @State private var openedAt = Date()
+    @State private var timeSuggestionIndex = -1
+    @State private var didReportTimeSuggestion = false
 
     init(
         mode: AlarmDetailMode,
@@ -224,6 +228,7 @@ struct AlarmDetailView: View {
                 // 追加画面のシート提示完了後に取り込みを開く（約0.35秒待つ）
                 try? await Task.sleep(for: .milliseconds(500))
                 applyInitialImportOnce()
+                reportTimeSuggestionsIfNeeded()
                 // 親シートの提示が終わってから開く（#149）
                 openUITestWaveformCropIfNeeded()
             }
@@ -333,6 +338,18 @@ struct AlarmDetailView: View {
         guard let date = Calendar.current.date(from: components) else { return }
         selectedTime = date
         timeSuggestionUsed = true
+        timeSuggestionIndex = timeSuggestions.firstIndex(of: suggestion) ?? -1
+    }
+
+    /// 候補を出したことを1画面1回だけ記録する（#241）。
+    private func reportTimeSuggestionsIfNeeded() {
+        guard !isEditing, !didReportTimeSuggestion else { return }
+        let suggestions = timeSuggestions
+        guard !suggestions.isEmpty else { return }
+        didReportTimeSuggestion = true
+        AnalyticsService.shared.capture(.timeSuggestionShown(
+            suggestions: suggestions.map(\.label).joined(separator: ",")
+        ))
     }
 
     private var timeSection: some View {
@@ -959,6 +976,7 @@ struct AlarmDetailView: View {
     @State private var saveConfirmation: String?
 
     private func save() {
+        let listBeforeSave = alarmStore.alarms
         // 試し聴きが残っていれば止める（#196）
         if SoundPreviewLogic.shouldStop(playingFileName: AudioPlayer.shared.playingFileName) {
             AudioPlayer.shared.stop()
@@ -1021,6 +1039,13 @@ struct AlarmDetailView: View {
                         snoozeMinutes: snoozeMinutes,
                         playlistID: playlistID,
                         fadeIn: fadeIn
+                    ),
+                    context: makeHistoryContext(
+                        entry: entry,
+                        list: listBeforeSave,
+                        suggestionIndex: timeSuggestionIndex,
+                        secondsToSave: max(0, Int(Date().timeIntervalSince(openedAt))),
+                        prevAlarmTime: nil
                     )
                 ),
                 properties: hoursUntilProperties(for: entry)
@@ -1054,7 +1079,14 @@ struct AlarmDetailView: View {
                     backupMinutes: backupMinutes ?? 0,
                     wasEnabled: existing.isEnabled,
                     soundMode: AlarmSoundModeResolver.soundMode(for: updated),
-                    fadeIn: fadeIn
+                    fadeIn: fadeIn,
+                    context: makeHistoryContext(
+                        entry: updated,
+                        list: listBeforeSave,
+                        suggestionIndex: nil,
+                        secondsToSave: nil,
+                        prevAlarmTime: existing.timeString
+                    )
                 ),
                 properties: hoursUntilProperties(for: updated)
             )
@@ -1115,6 +1147,25 @@ struct AlarmDetailView: View {
             onClose?()
             dismiss()
         }
+    }
+
+    /// アラーム履歴の共通プロパティを作る（#241）。
+    private func makeHistoryContext(
+        entry: AlarmEntry,
+        list: [AlarmEntry],
+        suggestionIndex: Int?,
+        secondsToSave: Int?,
+        prevAlarmTime: String?
+    ) -> AlarmEventContext {
+        if case .add = mode {
+            AlarmUIDStore.recordCreation(entry.id)
+        }
+        var context = AlarmHistoryLogic.context(for: entry)
+        context.list = AlarmHistoryLogic.listSnapshot(list)
+        context.suggestionIndex = suggestionIndex
+        context.secondsToSave = secondsToSave
+        context.prevAlarmTime = prevAlarmTime
+        return context
     }
 
     /// 保存したアラームの次回発火までの時間（整数時間）をアナリティクス用に返す。

@@ -69,6 +69,7 @@ struct DismissAlarmIntent: LiveActivityIntent {
         let backup = AlarmIDMaps.loadBackup()
         let coverage = AlarmIDMaps.loadSkipCoverage()
         var stoppedSoundMode: PlaylistSoundMode = .single
+        var stoppedEntry: AlarmEntry?
         var needsSkipResync = false
 
         if let stoppedID {
@@ -81,6 +82,7 @@ struct DismissAlarmIntent: LiveActivityIntent {
             )
             let entryID = action.entryID
             let entry = entryID.flatMap { id in entries.first { $0.id == id } }
+            stoppedEntry = entry
             let playOrder = await MainActor.run {
                 PlaylistStore.shared.playlist(id: entry?.playlistID)?.playOrder
             }
@@ -261,12 +263,36 @@ struct DismissAlarmIntent: LiveActivityIntent {
             }
         }
 
+        let stoppedContext = stoppedEntry.map {
+            AlarmHistoryLogic.context(for: $0, now: now)
+        }
+        var stoppedProperties: [String: String] = [
+            "sound_mode": stoppedSoundMode.analyticsValue
+        ]
+        var stoppedInts: [String: Int] = [:]
+        if let stoppedContext {
+            for (key, value) in stoppedContext.properties {
+                if let int = value as? Int {
+                    stoppedInts[key] = int
+                } else {
+                    stoppedProperties[key] = String(describing: value)
+                }
+            }
+            var local = stoppedContext.properties
+            local["sound_mode"] = stoppedSoundMode.analyticsValue
+            AlarmLocalHistoryStore.append(
+                event: AnalyticsEvent.alarmStopped(hour: hour).name,
+                properties: local,
+                now: now
+            )
+        }
         AlarmEventBuffer.enqueue(PendingAlarmEvent(
             name: AnalyticsEvent.alarmStopped(
                 hour: hour,
                 soundMode: stoppedSoundMode
             ).name,
-            properties: ["sound_mode": stoppedSoundMode.analyticsValue],
+            properties: stoppedProperties,
+            intProperties: stoppedInts.isEmpty ? nil : stoppedInts,
             hour: hour,
             timestamp: now
         ))
