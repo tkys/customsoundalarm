@@ -40,6 +40,10 @@ struct ContentView: View {
     @State private var globalSkip: GlobalSkip?
     /// 許可バナーの表示済み計測（#230）
     @State private var reportedPermissionBannerStatus: AlarmPermissionStatus?
+    /// 設定アプリへ移る前のシート（#239）
+    @State private var showingPermissionSettings = false
+    /// 許可がオンになったときの触覚（#239）
+    @State private var permissionFeedbackTrigger = 0
     @State private var skipToast: String?
     @State private var skipToastTask: Task<Void, Never>?
     @ScaledMetric(relativeTo: .body) private var skipActionIconSize: CGFloat = 17
@@ -209,6 +213,21 @@ struct ContentView: View {
                 )
                 .presentationDetents([.medium])
             }
+            .sheet(isPresented: $showingPermissionSettings) {
+                PermissionSettingsSheet {
+                    AnalyticsService.shared.capture(.permissionBannerTapped(
+                        status: .denied,
+                        step: .settingsOpened
+                    ))
+                    showingPermissionSettings = false
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        openURL(url)
+                    }
+                }
+                .presentationDetents(
+                    dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium]
+                )
+            }
         }
         .onChange(of: scenePhase) { _, phase in
             // ユーザーが自ら落ち着いてアプリを前面に出したタイミングで、
@@ -222,6 +241,7 @@ struct ContentView: View {
             scheduler.refreshPermissionStatus()
             if !wasAuthorized, scheduler.permissionStatus == .authorized {
                 scheduler.syncAlarms(alarmStore.alarms, trigger: .foreground)
+                permissionFeedbackTrigger += 1
             }
             reportPermissionBannerIfNeeded()
             ReviewRequestManager.shared.requestReviewIfAppropriate {
@@ -241,6 +261,7 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: skipToast)
+        .sensoryFeedback(.success, trigger: permissionFeedbackTrigger)
         .onChange(of: soundStore.hasPendingPlaylistUnlock) { _, hasPending in
             if hasPending { schedulePlaylistUnlockAttempt() }
         }
@@ -302,6 +323,7 @@ struct ContentView: View {
             VideoImportFlow(
                 selectedSound: $shareImportSelectedSound,
                 initialFileURL: item.mediaURL,
+                initialSoundName: item.displayName,
                 customSoundSource: .share,
                 shareMedia: .video,
                 onSaved: {
@@ -585,18 +607,21 @@ struct ContentView: View {
     }
 
     private func handlePermissionBannerTap(_ status: AlarmPermissionStatus) {
-        AnalyticsService.shared.capture(.permissionBannerTapped(status: status))
         switch PermissionBannerLogic.action(for: status) {
         case .openSettings:
-            if let url = URL(string: UIApplication.openSettingsURLString) {
-                openURL(url)
-            }
+            AnalyticsService.shared.capture(.permissionBannerTapped(
+                status: status,
+                step: .sheetShown
+            ))
+            showingPermissionSettings = true
         case .requestAuthorization:
+            AnalyticsService.shared.capture(.permissionBannerTapped(status: status))
             Task {
                 let granted = await scheduler.requestAuthorization()
                 scheduler.refreshPermissionStatus()
                 if granted {
                     scheduler.syncAlarms(alarmStore.alarms, trigger: .foreground)
+                    permissionFeedbackTrigger += 1
                 }
                 reportPermissionBannerIfNeeded()
             }

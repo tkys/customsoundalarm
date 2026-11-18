@@ -3,4 +3,5 @@
 "no_audio_found" = "No compatible audio file found";
 "file_load_failed" = "Failed to load file";
 "saved_format" = "Saved \"%@\"";
-"received" = "Received. Open My Sound Alarm to choose the part that plays.";
+"received_title" = "Received";
+"received_detail" = "Open My Sound Alarm to choose the part to ring.";

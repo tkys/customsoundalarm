@@ -386,6 +386,10 @@
 "playlist_unlock_title" = "Playlists freigeschaltet";
 "playlist_unlock_create" = "Playlist aus diesen beiden erstellen";
 "playlist_unlock_later" = "Später";
-"volume_notice" = "Der Ton war leise, deshalb haben wir ihn lauter gemacht.";
-"permission_banner_title" = "Wecker klingeln nicht";
-"permission_banner_allow" = "Erlauben";
+"volume_notice" = "Lauter gemacht, damit du es gut hörst.";
+"permission_banner_title" = "Alarm-Berechtigung ist aus";
+"permission_banner_allow" = "Einschalten";
+"permission_settings_hint" = "„Wecker“ einschalten";
+"permission_settings_open" = "Einstellungen öffnen";
+"received_title" = "Empfangen";
+"received_detail" = "Öffne My Sound Alarm und wähle den Teil, der klingeln soll.";

@@ -9,6 +9,8 @@ struct VideoImportFlow: View {
     @Binding var selectedSound: AlarmSound?
     /// 共有シートから渡された動画（#222）。指定時はソース選択を飛ばす。
     var initialFileURL: URL?
+    /// 共有シートが控えた表示名（#239）
+    var initialSoundName: String?
     /// 計測用の取り込み経路（共有シートは .share・#222）
     var customSoundSource: SoundImportSource = .video
     /// 共有経路の種類（#222）
@@ -421,7 +423,10 @@ struct VideoImportFlow: View {
         let didStartSecurityScope = url.startAccessingSecurityScopedResource()
 
         // temp コピー前に元ファイル名を控える（temp URL は UUID になるため）
-        let originalName = VideoFileImporter.defaultSoundName(from: url)
+        let originalName = VideoFileImporter.initialSoundName(
+            sharedDisplayName: initialSoundName,
+            fileURL: url
+        )
 
         isProcessing = true
         errorMessage = nil

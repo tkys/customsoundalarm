@@ -386,6 +386,10 @@
 "playlist_unlock_title" = "已解锁播放列表";
 "playlist_unlock_create" = "用这两首创建播放列表";
 "playlist_unlock_later" = "稍后";
-"volume_notice" = "声音偏小，已调整为清晰可听的音量。";
-"permission_banner_title" = "闹钟不会响";
-"permission_banner_allow" = "允许";
+"volume_notice" = "已调高音量，让声音更容易听清。";
+"permission_banner_title" = "闹钟权限已关闭";
+"permission_banner_allow" = "开启";
+"permission_settings_hint" = "打开“闹钟”";
+"permission_settings_open" = "打开设置";
+"received_title" = "已收到";
+"received_detail" = "打开 My Sound Alarm 选择要响的部分。";

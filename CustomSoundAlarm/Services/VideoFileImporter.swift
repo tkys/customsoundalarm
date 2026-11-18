@@ -52,6 +52,21 @@ enum VideoFileImporter {
         SoundNameFormatter.sanitizedFileName(url.lastPathComponent)
     }
 
+    /// 共有シートが控えた表示名を優先し、空なら URL から既定名を導出する（#239）。
+    static func initialSoundName(
+        sharedDisplayName: String?,
+        fileURL: URL
+    ) -> String {
+        if let sharedDisplayName {
+            let sanitized = SoundNameFormatter.sanitizedFileName(
+                sharedDisplayName,
+                fallback: ""
+            )
+            if !sanitized.isEmpty { return sanitized }
+        }
+        return defaultSoundName(from: fileURL)
+    }
+
     // MARK: - File Copy（I/O）
 
     /// security-scoped URL から temp へコピーする。

@@ -386,6 +386,10 @@
 "playlist_unlock_title" = "Playlists desbloqueadas";
 "playlist_unlock_create" = "Crear una playlist con estos dos";
 "playlist_unlock_later" = "Ahora no";
-"volume_notice" = "El sonido era bajo, así que lo hemos hecho más audible.";
-"permission_banner_title" = "Las alarmas no sonarán";
-"permission_banner_allow" = "Permitir";
+"volume_notice" = "Subimos el volumen para que se oiga mejor.";
+"permission_banner_title" = "El permiso de alarmas está desactivado";
+"permission_banner_allow" = "Activar";
+"permission_settings_hint" = "Activa «Alarmas»";
+"permission_settings_open" = "Abrir Ajustes";
+"received_title" = "Recibido";
+"received_detail" = "Abre My Sound Alarm para elegir la parte que suena.";

@@ -268,7 +268,11 @@ struct AudioCropView: View {
         }
         #endif
         if soundName.isEmpty {
-            soundName = source.name
+            // 共有の表示名も取り込み時に整える（#239）
+            soundName = SoundNameFormatter.sanitizedFileName(
+                source.name,
+                fallback: String(localized: "imported_sound_default")
+            )
         }
     }
 

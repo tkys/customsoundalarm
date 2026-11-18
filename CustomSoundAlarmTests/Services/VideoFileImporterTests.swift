@@ -175,6 +175,48 @@ struct VideoFileImporterTests {
         #expect(name == "IMG 1234")
     }
 
+    // MARK: - initialSoundName (#239)
+
+    @Test
+    func initialSoundName_usesSharedDisplayName() {
+        let url = URL(fileURLWithPath: "/tmp/\(UUID().uuidString).mov")
+        let name = VideoFileImporter.initialSoundName(
+            sharedDisplayName: "Morning clip",
+            fileURL: url
+        )
+        #expect(name == "Morning clip")
+    }
+
+    @Test
+    func initialSoundName_sanitizesSharedDisplayName() {
+        let url = URL(fileURLWithPath: "/tmp/\(UUID().uuidString).mov")
+        let name = VideoFileImporter.initialSoundName(
+            sharedDisplayName: "Morning_clip",
+            fileURL: url
+        )
+        #expect(name == "Morning clip")
+    }
+
+    @Test
+    func initialSoundName_emptySharedNameFallsBack() {
+        let url = URL(fileURLWithPath: "/tmp/\(UUID().uuidString).mov")
+        let name = VideoFileImporter.initialSoundName(
+            sharedDisplayName: " ",
+            fileURL: url
+        )
+        #expect(name == SoundNameFormatter.defaultName)
+    }
+
+    @Test
+    func initialSoundName_withoutSharedNameUsesURL() {
+        let url = URL(fileURLWithPath: "/Movies/vacation.mov")
+        let name = VideoFileImporter.initialSoundName(
+            sharedDisplayName: nil,
+            fileURL: url
+        )
+        #expect(name == "vacation")
+    }
+
     @Test
     func defaultSoundName_japaneseFilename() {
         let url = URL(fileURLWithPath: "/Videos/演奏録画.m4v")

@@ -3,4 +3,5 @@
 "no_audio_found" = "No se encontró un archivo de audio compatible";
 "file_load_failed" = "No se pudo cargar el archivo";
 "saved_format" = "«%@» guardado";
-"received" = "Recibido. Abre My Sound Alarm para elegir la parte que suena.";
+"received_title" = "Recibido";
+"received_detail" = "Abre My Sound Alarm para elegir la parte que suena.";

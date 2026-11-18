@@ -386,6 +386,10 @@
 "playlist_unlock_title" = "Playlisty odemčené";
 "playlist_unlock_create" = "Vytvořit playlist z těchto dvou";
 "playlist_unlock_later" = "Teď ne";
-"volume_notice" = "Zvuk byl tichý, tak jsme ho upravili na slyšitelnou úroveň.";
-"permission_banner_title" = "Budíky nezazvoní";
-"permission_banner_allow" = "Povolit";
+"volume_notice" = "Zvýšili jsme hlasitost, aby to bylo lépe slyšet.";
+"permission_banner_title" = "Oprávnění k budíkům je vypnuté";
+"permission_banner_allow" = "Zapnout";
+"permission_settings_hint" = "Zapněte „Budíky“";
+"permission_settings_open" = "Otevřít nastavení";
+"received_title" = "Přijato";
+"received_detail" = "Otevřete My Sound Alarm a vyberte část, která má znít.";
