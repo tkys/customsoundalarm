@@ -37,6 +37,7 @@ final class AlarmStore {
     }
 
     func remove(_ alarm: AlarmEntry) {
+        let context = AlarmHistoryLogic.context(for: alarm)
         alarms.removeAll { $0.id == alarm.id }
         save()
         // 全体の休みの対象からも外す（#197 画面作り直し）
@@ -46,20 +47,24 @@ final class AlarmStore {
             AppGroup.globalSkip = skip.entryIDs.isEmpty ? nil : skip
         }
 
-        AnalyticsService.shared.capture(.alarmDeleted)
+        AnalyticsService.shared.capture(.alarmDeletedWithContext(context: context))
     }
 
     /// アラームを複製する。新しい id・`isEnabled = true` で追加し、
     /// 元のアラームの設定（時刻/ラベル/繰り返し/サウンド）を引き継ぐ。
     func duplicate(_ alarm: AlarmEntry) {
-        alarms.append(alarm.duplicated())
+        let copy = alarm.duplicated()
+        AlarmUIDStore.recordCreation(copy.id)
+        let context = AlarmHistoryLogic.context(for: copy)
+        alarms.append(copy)
         save()
 
-        AnalyticsService.shared.capture(.alarmDuplicated)
+        AnalyticsService.shared.capture(.alarmDuplicatedWithContext(context: context))
     }
 
-    func toggleEnabled(_ alarm: AlarmEntry) {
+    func toggleEnabled(_ alarm: AlarmEntry, recordEvent: Bool = true) {
         guard let index = alarms.firstIndex(where: { $0.id == alarm.id }) else { return }
+        let listBefore = alarms
         alarms[index].isEnabled.toggle()
         if alarms[index].isEnabled {
             // 休みで止めた1回だけのアラームを、手動でオンに戻した（#197 レビュー）
@@ -72,6 +77,15 @@ final class AlarmStore {
             }
         }
         save()
+        if recordEvent {
+            var context = AlarmHistoryLogic.context(for: alarms[index])
+            context.list = AlarmHistoryLogic.listSnapshot(listBefore)
+            AnalyticsService.shared.capture(.alarmToggled(
+                enabled: alarms[index].isEnabled,
+                daysSinceCreated: AlarmHistoryLogic.daysSinceCreated(alarmID: alarm.id),
+                context: context
+            ))
+        }
     }
 
     /// 外部変更（Share Extension等）後にデータを再読み込み

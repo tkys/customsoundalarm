@@ -232,10 +232,11 @@ final class AlarmScheduler {
                     hour: alarm.hour,
                     isRepeating: false,
                     detection: "reconcile",
-                    soundMode: AlarmSoundModeResolver.soundMode(for: alarm)
+                    soundMode: AlarmSoundModeResolver.soundMode(for: alarm),
+                    context: AlarmHistoryLogic.context(for: alarm)
                 ))
                 markPendingShuffleRefresh(for: alarm)
-                store.toggleEnabled(alarm)
+                store.toggleEnabled(alarm, recordEvent: false)
                 alarmIDMap.removeValue(forKey: alarm.id)
                 var primaryNames = AppGroup.primarySoundNames
                 primaryNames.removeValue(forKey: alarm.id)
@@ -273,7 +274,11 @@ final class AlarmScheduler {
             var counts = AppGroup.snoozeCounts
             counts[entryID, default: 0] += 1
             AppGroup.snoozeCounts = counts
-            AnalyticsService.shared.capture(.alarmSnoozed(from: "reconcile"))
+            let entry = AlarmStore.shared.alarms.first { $0.id == entryID }
+            AnalyticsService.shared.capture(.alarmSnoozed(
+                from: "reconcile",
+                context: entry.map { AlarmHistoryLogic.context(for: $0) }
+            ))
             logger.info("Reconcile: detected snoozing alarm: \(alarm.id)")
         }
         // .countdown でなくなったアラームをクリーンアップ
@@ -1368,7 +1373,11 @@ final class AlarmScheduler {
                         counts[entryID, default: 0] += 1
                         AppGroup.snoozeCounts = counts
                         logger.info("Alarm snoozed: \(alarm.id)")
-                        AnalyticsService.shared.capture(.alarmSnoozed(from: "observer"))
+                        let entry = AlarmStore.shared.alarms.first { $0.id == entryID }
+                AnalyticsService.shared.capture(.alarmSnoozed(
+                    from: "observer",
+                    context: entry.map { AlarmHistoryLogic.context(for: $0) }
+                ))
                     default:
                         // スヌーズ解除の検知: .countdown でなくなったアラームをクリーンアップ
                         guard let entryID = alarmIDMap.first(where: { $0.value == alarm.id })?.key else { continue }
@@ -1417,13 +1426,14 @@ final class AlarmScheduler {
                 hour: alarm.hour,
                 isRepeating: !alarm.repeatWeekdays.isEmpty,
                 detection: "observer",
-                soundMode: AlarmSoundModeResolver.soundMode(for: alarm)
+                soundMode: AlarmSoundModeResolver.soundMode(for: alarm),
+                context: AlarmHistoryLogic.context(for: alarm)
             ))
         }
 
         if alarm.repeatWeekdays.isEmpty && alarm.isEnabled {
             markPendingShuffleRefresh(for: alarm)
-            store.toggleEnabled(alarm)
+            store.toggleEnabled(alarm, recordEvent: false)
             alarmIDMap.removeValue(forKey: entryID)
             saveIDMap()
             logger.info("One-time alarm fired, auto-disabled: \(alarm.label)")

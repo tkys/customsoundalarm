@@ -67,6 +67,13 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.alarmFired(wasAppForeground: true, hour: 8, isRepeating: false, detection: "observer").name == "alarm_fired")
         #expect(AnalyticsEvent.alarmStopped(hour: 8).name == "alarm_stopped")
         #expect(AnalyticsEvent.alarmSnoozed(from: "observer").name == "alarm_snoozed")
+        #expect(AnalyticsEvent.alarmToggled(
+            enabled: true,
+            daysSinceCreated: 2
+        ).name == "alarm_toggled")
+        #expect(AnalyticsEvent.timeSuggestionShown(
+            suggestions: "6:35,6:40"
+        ).name == "time_suggestion_shown")
         // Phase 4（ベッドサイドモード・#68）
         #expect(AnalyticsEvent.bedsideEntered(layout: "digital_large", theme: "white", hour: 23, entry: .settings).name == "bedside_entered")
         #expect(AnalyticsEvent.settingsOpened.name == "settings_opened")
@@ -264,6 +271,54 @@ struct AnalyticsEventTests {
             status: .notDetermined
         ).properties
         #expect(tapped["status"] as? String == "not_determined")
+    }
+
+    // MARK: alarm history (#241)
+
+    @Test
+    func alarmToggledMergesCommonHistory() {
+        let context = AlarmEventContext(
+            alarmUID: "uid",
+            alarmTime: "07:30",
+            repeatDays: "1,2",
+            localTime: "10:05",
+            localWeekday: 4,
+            tzOffsetMin: 540,
+            list: AlarmListSnapshot(onTimes: ["07:30"], offTimes: [])
+        )
+        let props = AnalyticsEvent.alarmToggled(
+            enabled: true,
+            daysSinceCreated: 3,
+            context: context
+        ).properties
+        #expect(props["enabled"] as? Bool == true)
+        #expect(props["days_since_created"] as? Int == 3)
+        #expect(props["alarm_uid"] as? String == "uid")
+        #expect(props["list_on_count"] as? Int == 1)
+        #expect(props["history_schema"] as? Int == 1)
+    }
+
+    @Test
+    func alarmCreatedMergesSuggestionAndSaveTime() {
+        var context = AlarmEventContext(
+            alarmUID: "uid",
+            alarmTime: "07:30",
+            repeatDays: "",
+            localTime: "10:05",
+            localWeekday: 4,
+            tzOffsetMin: 540
+        )
+        context.suggestionIndex = 1
+        context.secondsToSave = 12
+        let props = AnalyticsEvent.alarmCreated(
+            hasCustomSound: false,
+            isRepeating: false,
+            snoozeMinutes: 9,
+            context: context
+        ).properties
+        #expect(props["suggestion_index"] as? Int == 1)
+        #expect(props["seconds_to_save"] as? Int == 12)
+        #expect(props["alarm_uid"] as? String == "uid")
     }
 
     // MARK: test_ring_scheduled / test_ring_stopped (#109)
