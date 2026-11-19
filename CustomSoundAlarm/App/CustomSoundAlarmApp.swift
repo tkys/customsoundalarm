@@ -362,6 +362,48 @@ struct CustomSoundAlarmApp: App {
                         }
                     }
 
+                    // UIテスト用: 初めての1回きりアラームが鳴って止まった状態（#247）
+                    if AppGroup.isUITestSeedFirstAlarmFollowup {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        SoundStore.shared.resetForUITest()
+                        SoundStore.shared.resetPresetNamesForUITest()
+                        AppGroup.firstAlarmFollowupHandled = false
+                        AppGroup.firstAlarmFollowupShown = false
+                        AppGroup.firstInstallVersion = "1.8.4"
+                        AppGroup.playlistUnlockShown = true
+                        SoundStore.shared.clearPendingPlaylistUnlock()
+
+                        let alarm = AlarmEntry(
+                            hour: 7,
+                            minute: 0,
+                            isEnabled: false,
+                            repeatWeekdays: [],
+                            soundFileName: "PresetMarimba.caf"
+                        )
+                        AlarmStore.shared.add(alarm)
+
+                        let uid = AlarmUIDStore.uid(for: alarm.id)
+                        try? FileManager.default.removeItem(at: AlarmLocalHistoryStore.fileURL)
+                        AlarmLocalHistoryStore.append(
+                            event: "alarm_fired",
+                            properties: [
+                                "alarm_uid": uid,
+                                "alarm_time": "07:00",
+                                "repeat_days": "",
+                                "is_repeating": false
+                            ]
+                        )
+                        AlarmLocalHistoryStore.append(
+                            event: "alarm_stopped",
+                            properties: [
+                                "alarm_uid": uid,
+                                "alarm_time": "07:00",
+                                "repeat_days": ""
+                            ]
+                        )
+                    }
+
                     // UIテスト用: 無音の音を使ったアラーム（#256）
                     if AppGroup.isUITestSeedSilentAlarm {
                         AppGroup.hasCompletedOnboarding = true

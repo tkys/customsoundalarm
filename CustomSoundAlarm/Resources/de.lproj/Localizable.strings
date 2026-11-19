@@ -404,3 +404,6 @@
 "silent_sound_whole_file_message" = "Diese Audiodatei enthält keinen Ton. Wähle einen anderen Ton.";
 "settings_mail_diagnostics_notice" = "Zur Untersuchung ist der App-Status beigefügt (keine Songtitel oder Audiodateien enthalten). Du kannst den Anhang vor dem Senden entfernen.\n";
 "settings_support_page" = "Support-Seite";
+"followup_tomorrow" = "Morgen";
+"followup_weekdays" = "Werktags";
+"followup_everyday" = "Jeden Tag";

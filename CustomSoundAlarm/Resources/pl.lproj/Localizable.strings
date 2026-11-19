@@ -404,3 +404,6 @@
 "silent_sound_whole_file_message" = "Ten plik audio nie zawiera dźwięku. Wybierz inny dźwięk.";
 "settings_mail_diagnostics_notice" = "Aby pomóc nam w diagnozie, dołączono stan aplikacji (bez tytułów utworów i plików dźwiękowych). Załącznik możesz usunąć przed wysłaniem.\n";
 "settings_support_page" = "Strona pomocy";
+"followup_tomorrow" = "Jutro";
+"followup_weekdays" = "Dni robocze";
+"followup_everyday" = "Codziennie";

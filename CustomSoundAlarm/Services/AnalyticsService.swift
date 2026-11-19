@@ -346,6 +346,12 @@ enum AnalyticsEvent: Sendable {
     /// レビューを書くリンクを開いた
     case reviewLinkOpened
 
+    /// 初めての1回きりアラームのあとに、行の中の提案を表示した（#247）
+    case firstAlarmFollowupShown
+
+    /// 初めての1回きりアラームの提案を押した／無視した（#247）
+    case firstAlarmFollowupAction(action: FirstAlarmFollowupAction)
+
     // MARK: オンボーディング（#98）
 
     /// オンボの場面が表示された
@@ -433,6 +439,8 @@ enum AnalyticsEvent: Sendable {
         case .settingsOpened: return "settings_opened"
         case .supportContactOpened: return "support_contact_opened"
         case .reviewLinkOpened: return "review_link_opened"
+        case .firstAlarmFollowupShown: return "first_alarm_followup_shown"
+        case .firstAlarmFollowupAction: return "first_alarm_followup_action"
         case .bedsideExited: return "bedside_exited"
         case .bedsideSettingChanged: return "bedside_setting_changed"
         case .onboardingStepViewed: return "onboarding_step_viewed"
@@ -733,6 +741,10 @@ enum AnalyticsEvent: Sendable {
                 "method": method.rawValue,
                 "diagnostics_attached": diagnosticsAttached
             ]
+        case .firstAlarmFollowupShown:
+            return [:]
+        case let .firstAlarmFollowupAction(action):
+            return ["action": action.rawValue]
         case let .bedsideExited(durationBucket, exitMethod):
             return [
                 "duration_bucket": durationBucket,

@@ -404,3 +404,6 @@
 "silent_sound_whole_file_message" = "Cet audio ne contient aucun son. Choisissez un autre son.";
 "settings_mail_diagnostics_notice" = "Pour nous aider à enquêter, l’état de l’application est joint (aucun titre de chanson ni fichier audio n’est inclus). Vous pouvez supprimer la pièce jointe avant l’envoi.\n";
 "settings_support_page" = "Page d’aide";
+"followup_tomorrow" = "Demain";
+"followup_weekdays" = "En semaine";
+"followup_everyday" = "Tous les jours";

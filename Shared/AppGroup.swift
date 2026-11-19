@@ -195,6 +195,15 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: 初めての1回きりアラームが鳴って止まった状態を作る（#247）
+    static var isUITestSeedFirstAlarmFollowup: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-first-followup")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: 無音の音を使ったアラームを1本入れる（#256）
     static var isUITestSeedSilentAlarm: Bool {
     #if DEBUG
@@ -413,6 +422,18 @@ enum AppGroup {
     static var playlistUnlockShown: Bool {
         get { userDefaults.bool(forKey: "playlistUnlockShown") }
         set { userDefaults.set(newValue, forKey: "playlistUnlockShown") }
+    }
+
+    /// 初めての1回きりアラームの提案を出し終えたか（#247）。
+    static var firstAlarmFollowupHandled: Bool {
+        get { userDefaults.bool(forKey: "firstAlarmFollowupHandled") }
+        set { userDefaults.set(newValue, forKey: "firstAlarmFollowupHandled") }
+    }
+
+    /// 提案を一度でも表示したか（強制終了で「無視」を取りこぼさないため・#247）。
+    static var firstAlarmFollowupShown: Bool {
+        get { userDefaults.bool(forKey: "firstAlarmFollowupShown") }
+        set { userDefaults.set(newValue, forKey: "firstAlarmFollowupShown") }
     }
 
     /// UIテスト用: プレイリストの解放条件を有効にする（DEBUGのみ・#216）

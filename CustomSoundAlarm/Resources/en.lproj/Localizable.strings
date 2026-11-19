@@ -404,3 +404,6 @@
 "silent_sound_whole_file_message" = "This audio has no sound. Choose another sound.";
 "settings_mail_diagnostics_notice" = "To help us investigate, the app's status is attached (song titles and sound files are not included). You can remove the attachment before sending.\n";
 "settings_support_page" = "Support page";
+"followup_tomorrow" = "Tomorrow";
+"followup_weekdays" = "Weekdays";
+"followup_everyday" = "Every day";

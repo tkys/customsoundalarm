@@ -404,3 +404,6 @@
 "silent_sound_whole_file_message" = "Deze audio bevat geen geluid. Kies een ander geluid.";
 "settings_mail_diagnostics_notice" = "Om ons te helpen onderzoeken is de status van de app bijgevoegd (geen songtitels of audiobestanden). Je kunt de bijlage verwijderen voordat je verzendt.\n";
 "settings_support_page" = "Supportpagina";
+"followup_tomorrow" = "Morgen";
+"followup_weekdays" = "Werkdagen";
+"followup_everyday" = "Elke dag";
