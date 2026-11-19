@@ -77,6 +77,9 @@ enum AnalyticsEvent: Sendable {
     /// - source: 鳴らした入口（#196）
     case soundPreviewPlayed(source: SoundPreviewSource)
 
+    /// ミュージックライブラリで曲を選んだが、取り込めなかった（#245）
+    case musicLibraryUnavailable
+
     // MARK: Phase 2（リテンション/運用拡張）
 
     /// アラーム編集（既存アラームの更新）
@@ -383,6 +386,7 @@ enum AnalyticsEvent: Sendable {
         case .alarmCreated: return "alarm_created"
         case .customSoundImported: return "custom_sound_imported"
         case .soundPreviewPlayed: return "sound_preview_played"
+        case .musicLibraryUnavailable: return "music_library_unavailable"
         case .alarmEdited: return "alarm_edited"
         case .alarmDeleted: return "alarm_deleted"
         case .alarmDeletedWithContext: return "alarm_deleted"
@@ -511,6 +515,8 @@ enum AnalyticsEvent: Sendable {
             return d
         case let .soundPreviewPlayed(source):
             return ["source": source.rawValue]
+        case .musicLibraryUnavailable:
+            return [:]
         case let .alarmEdited(
             hasCustomSound,
             isRepeating,
@@ -879,6 +885,8 @@ enum SoundImportSource: String, Sendable, CaseIterable {
     case share
     /// 既存アラームの音を差し替えた（#256 レビュー）
     case existing
+    /// ミュージックアプリのライブラリから（#245）
+    case musicLibrary = "music_library"
 }
 
 /// 共有シートで受け取った種類（#222）

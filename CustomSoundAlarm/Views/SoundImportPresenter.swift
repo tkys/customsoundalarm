@@ -33,6 +33,7 @@ struct SoundImportModifier: ViewModifier {
                     AudioCropView(
                         source: pending,
                         selectedSound: $selectedSound,
+                        customSoundSource: pending.source,
                         onSaved: {
                             if let sound = selectedSound {
                                 onImportSaved?(sound)

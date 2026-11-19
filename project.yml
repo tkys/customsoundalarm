@@ -68,6 +68,7 @@ targets:
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         NSAlarmKitUsageDescription: "お気に入りの音でアラームを鳴らすために使用します。"
+        NSAppleMusicUsageDescription: "Used to choose a song from your Music library as an alarm sound."
         NSMicrophoneUsageDescription: "アラーム音を録音するためにマイクを使用します。"
         NSPhotoLibraryUsageDescription: "動画から音声を抽出するためにフォトライブラリを使用します。"
         UIBackgroundModes:

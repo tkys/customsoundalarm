@@ -407,3 +407,6 @@
 "followup_tomorrow" = "غدًا";
 "followup_weekdays" = "أيام الأسبوع";
 "followup_everyday" = "كل يوم";
+"add_from_music" = "من الموسيقى";
+"music_library_unavailable" = "لا يمكن استيراد هذه الأغنية.";
+"music_library_permission_denied" = "اسمح بالوصول إلى الموسيقى في الإعدادات.";

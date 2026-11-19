@@ -407,3 +407,6 @@
 "followup_tomorrow" = "Jutro";
 "followup_weekdays" = "Dni robocze";
 "followup_everyday" = "Codziennie";
+"add_from_music" = "Z Muzyki";
+"music_library_unavailable" = "Nie można zaimportować tego utworu.";
+"music_library_permission_denied" = "Zezwól na dostęp do Muzyki w Ustawieniach.";

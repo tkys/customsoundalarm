@@ -407,3 +407,6 @@
 "followup_tomorrow" = "Tomorrow";
 "followup_weekdays" = "Weekdays";
 "followup_everyday" = "Every day";
+"add_from_music" = "From Music";
+"music_library_unavailable" = "This song can't be imported.";
+"music_library_permission_denied" = "Allow access to Music in Settings.";

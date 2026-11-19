@@ -407,3 +407,6 @@
 "followup_tomorrow" = "Amanhã";
 "followup_weekdays" = "Dias úteis";
 "followup_everyday" = "Todos os dias";
+"add_from_music" = "Do Música";
+"music_library_unavailable" = "Esta música não pode ser importada.";
+"music_library_permission_denied" = "Permita o acesso ao Música nos Ajustes.";

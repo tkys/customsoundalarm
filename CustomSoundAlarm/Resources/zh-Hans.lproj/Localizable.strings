@@ -407,3 +407,6 @@
 "followup_tomorrow" = "明天";
 "followup_weekdays" = "工作日";
 "followup_everyday" = "每天";
+"add_from_music" = "从“音乐”";
+"music_library_unavailable" = "无法导入这首歌曲。";
+"music_library_permission_denied" = "请在“设置”中允许访问“音乐”。";

@@ -19,7 +19,7 @@
 | `permission_banner_shown` | `status` string（denied/not_determined） | アラーム一覧の許可バナーを出した | 拒否済みユーザーへの気づき | アプリ動作中のみ | 1.8.3 |
 | `permission_banner_tapped` | `status` string（denied/not_determined）, `step` string（sheet_shown/settings_opened・denied のみ） | 許可バナーのボタンを押した | 許可への転換 | アプリ動作中のみ | 1.8.3（`step` は1.8.3） |
 | `import_landed` | `source` string（share/library）, `destination` string（add_alarm/library） | 取り込みを保存したあとの着地先 | 取り込み後の導線 | アプリ動作中のみ | 1.8.3 |
-| `silent_sound_blocked` | `level` string（silent/very_quiet）, `source` string（video/audio/share/existing）, `action` string（reselect/other_sound/use_anyway/fixed_existing） | 無音・ほぼ無音で保存を止めた／既存アラームを直した | 無音の取り込み | アプリ動作中のみ | 1.8.4 |
+| `silent_sound_blocked` | `level` string（silent/very_quiet）, `source` string（video/audio/share/existing/music_library）, `action` string（reselect/other_sound/use_anyway/fixed_existing） | 無音・ほぼ無音で保存を止めた／既存アラームを直した | 無音の取り込み | アプリ動作中のみ | 1.8.4（`source=music_library` は1.8.4） |
 | `alarm_fired` | `was_app_foreground` bool, `hour` int, `is_repeating` bool, `detection` string（observer/reconcile）, `sound_mode` string | アラーム発火検知 | 実際に鳴ったか・プレイリストで鳴ったか | アプリ動作中／起動時にも補完 | 既存（`sound_mode` は1.8.2） |
 | `alarm_stopped` | `hour` int, `sound_mode` string | 本体アラームの停止（Intent） | 停止行動・プレイリストの継続 | **届く** | 既存（`sound_mode` は1.8.2） |
 | `alarm_snoozed` | `from` string（observer/reconcile） | スヌーズ待機への遷移 | スヌーズ行動 | アプリ動作中／起動時にも補完 | 既存 |
@@ -59,13 +59,14 @@
 | `first_alarm_followup_action` | `action` string（tomorrow/weekdays/everyday/ignored） | 提案を押した／無視した | 提案の効果測定 | アプリ動作中のみ | 1.8.4 |
 | `ad_slot_eligible` | `slot` string（banner_sounds/banner_import/banner_alarm_list/interstitial_import_saved）, `allowed` bool, `reason` string（eligible/existing_user/version_unavailable/pro/first_week/quiet_hours/frequency_cap/forbidden_context/wrong_context）, `region` string（standard/limited） | 広告枠の判定時（`AdsConfig.isEnabled = false` でも送る） | 1.9.0 前に実際の表示機会を測る | アプリ動作中のみ | 1.9.0 |
 | `sound_preview_played` | `source` string（select_tap/play_button/library） | サウンドの試聴（行タップ・再生ボタン・ライブラリ） | 試聴の入口ごとの使われ方 | アプリ動作中のみ | 既存（`source` は1.8.2） |
+| `music_library_unavailable` | — | ミュージックライブラリで曲を選んだが取り込めなかった | 取り込めない曲の頻度 | アプリ動作中のみ | 1.8.4 |
 | `alarm_skip_set` | `scope` string（day/selected/range）, `days` int, `alarm_count` int | 日付でアラームを休んだ（休みを付けたアラーム数） | 休みの使われ方（日・選択・期間） | アプリ動作中のみ | 1.8.2 |
 | `alarm_skip_undone` | — | 休みを取り消した | 取り消しの頻度 | アプリ動作中のみ | 1.8.2 |
 | `skip_all_set` | `preset` string（24h/3d/7d/custom）, `alarm_count` int | すべてのアラームを休んだ | 全体の休みの使われ方 | アプリ動作中のみ | 1.8.2 |
 | `skip_all_undone` | — | 全体の休みを取り消した | 取り消しの頻度 | アプリ動作中のみ | 1.8.2 |
 | `holiday_skip_toggled` | `enabled` bool | 「祝日は鳴らさない」を切り替えた | 祝日スキップの利用率 | アプリ動作中のみ | 1.8.2 |
 | `holiday_ring_override` | — | 「この祝日は鳴らす」を切り替えた | 祝日に出勤する人の利用 | アプリ動作中のみ | 1.8.2 |
-| `custom_sound_imported` | `source` string（video/audio/share）, `peak_db_bucket` string, `gain_db_bucket` string, `lufs_bucket` string（取り込み前のLUFS区分）, `share_media` string（audio/video・共有経路のみ）, `volume_notice_shown` bool（+3dB以上上げたか） | カスタムサウンド取り込み成功 | 取り込み経路・音量 | アプリ動作中のみ | 既存（`lufs_bucket` は1.8.0、`volume_notice_shown` は1.8.3、`source=share` と `share_media` は1.8.3） |
+| `custom_sound_imported` | `source` string（video/audio/share/music_library）, `peak_db_bucket` string, `gain_db_bucket` string, `lufs_bucket` string（取り込み前のLUFS区分）, `share_media` string（audio/video・共有経路のみ）, `volume_notice_shown` bool（+3dB以上上げたか） | カスタムサウンド取り込み成功 | 取り込み経路・音量 | アプリ動作中のみ | 既存（`lufs_bucket` は1.8.0、`volume_notice_shown` は1.8.3、`source=share` と `share_media` は1.8.3） |
 | `video_import_started` | `source` string（photo_library/file） | 動画取り込み開始 | 動画経路 | アプリ動作中のみ | 既存 |
 | `video_import_failed` | `reason` string（安定識別子） | 動画取り込み失敗 | 失敗原因 | アプリ動作中のみ | 既存 |
 | `sound_picker_recent_used` | — | **送られなくなった**（#123 で「最近使った」を削除） | （過去データのみ） | — | 既存・1.8.0で停止 |

@@ -231,6 +231,7 @@ struct AnalyticsEventTests {
         #expect(SoundImportSource.audio.rawValue == "audio")
         #expect(SoundImportSource.share.rawValue == "share")
         #expect(SoundImportSource.existing.rawValue == "existing")
+        #expect(SoundImportSource.musicLibrary.rawValue == "music_library")
     }
 
     // MARK: feature_unlock (#216)
@@ -679,6 +680,7 @@ struct AnalyticsEventTests {
             .bedsideEntered(layout: "digital_large", theme: "white", hour: 23, entry: .settings),
             .settingsOpened,
             .supportContactOpened(method: .web, diagnosticsAttached: false),
+            .musicLibraryUnavailable,
             .reviewLinkOpened,
             .bedsideExited(durationBucket: "1_5min", exitMethod: "exit_button"),
             .bedsideSettingChanged(setting: .layout, value: .string("minimal")),
