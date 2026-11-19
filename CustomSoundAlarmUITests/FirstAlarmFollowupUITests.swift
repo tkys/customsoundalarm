@@ -55,6 +55,12 @@ final class FirstAlarmFollowupUITests: XCTestCase {
             "the alarm should become a weekday repeat: \(app.debugDescription)"
         )
         XCTAssertEqual(app.switches["alarm.toggle"].value as? String, "1")
+        // 提案のボタンが行のタップに伝わって編集画面が開いていない
+        XCTAssertFalse(
+            find("addAlarm.root").waitForExistence(timeout: 2),
+            "tapping the follow-up must not open the editor: \(app.debugDescription)"
+        )
+        XCTAssertFalse(app.navigationBars["Edit Alarm"].exists)
 
         // 2回目以降は出ない
         app.terminate()

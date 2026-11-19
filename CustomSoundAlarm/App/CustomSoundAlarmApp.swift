@@ -370,6 +370,7 @@ struct CustomSoundAlarmApp: App {
                         SoundStore.shared.resetPresetNamesForUITest()
                         AppGroup.firstAlarmFollowupHandled = false
                         AppGroup.firstAlarmFollowupShown = false
+                        AppGroup.firstInstallVersion = "1.8.4"
                         AppGroup.playlistUnlockShown = true
                         SoundStore.shared.clearPendingPlaylistUnlock()
 

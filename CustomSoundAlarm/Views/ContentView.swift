@@ -950,18 +950,34 @@ struct ContentView: View {
               shareImportItem == nil,
               updateChecker.prompt == nil else { return }
 
+        // 履歴（1.8.3 以降）が入れたときから揃っている人だけ（#247 レビュー）
+        guard FirstAlarmFollowupLogic.isFirstInstallVersionEligible(
+            AppGroup.firstInstallVersion
+        ) else { return }
+
         let history = AlarmLocalHistoryStore.recentLines(
             limit: AlarmLocalHistoryStore.maxLines
         )
-        guard let alarmID = FirstAlarmFollowupLogic.candidateAlarmID(
+        let candidate = FirstAlarmFollowupLogic.candidate(
             historyLines: history,
             alarms: alarmStore.alarms,
             uidForAlarm: { AlarmUIDStore.uid(for: $0) }
-        ) else { return }
-
-        firstAlarmFollowupAlarmID = alarmID
-        AppGroup.firstAlarmFollowupShown = true
-        AnalyticsService.shared.capture(.firstAlarmFollowupShown)
+        )
+        switch FirstAlarmFollowupLogic.eligibility(
+            candidate: candidate,
+            alarms: alarmStore.alarms
+        ) {
+        case let .offer(alarmID):
+            firstAlarmFollowupAlarmID = alarmID
+            AppGroup.firstAlarmFollowupShown = true
+            AnalyticsService.shared.capture(.firstAlarmFollowupShown)
+        case .changedOrRemoved, .tooOld:
+            // 自分でオン・繰り返しにした／古すぎる。提案は出さず、以後も出さない。
+            // ユーザーの操作を「無視」として送らない。
+            AppGroup.firstAlarmFollowupHandled = true
+        case .none:
+            break
+        }
     }
 
     private func applyFirstAlarmFollowup(
