@@ -15,6 +15,7 @@ struct AlarmSoundChoiceView: View {
     @State private var audioPlayer = AudioPlayer.shared
     @State private var editingPlaylist: Playlist?
     @State private var showingNewPlaylist = false
+    @State private var musicLibrary = MusicLibraryImportController()
 
     private var importedCount: Int {
         SoundPickerLogic.mySounds(in: soundStore.sounds).count
@@ -25,6 +26,7 @@ struct AlarmSoundChoiceView: View {
             SoundLibrarySections(
                 isSelecting: true,
                 selectedSound: $selectedSound,
+                musicLibrary: musicLibrary,
                 selectionActive: playlistID == nil,
                 onSelect: { sound in
                     // 選んでも画面は閉じない。タップで鳴らした音を確かめてから戻れる（#196）
@@ -38,6 +40,7 @@ struct AlarmSoundChoiceView: View {
         }
         .accessibilityIdentifier("alarmSoundChoice.root")
         .warmListBackground()
+        .musicLibraryImport(musicLibrary)
         .navigationTitle(String(localized: "sound"))
         .navigationBarTitleDisplayMode(.inline)
         .onDisappear {

@@ -85,6 +85,35 @@ final class MusicLibraryUITests: XCTestCase {
         XCTAssertEqual(message.label, "This song can't be imported.")
     }
 
+    /// 許可がないときの1行は、押すと設定アプリを開く（#245 レビュー）。
+    func testPermissionDeniedLineOpensSettings() {
+        launch(["-uitest-open-add-alarm", "-uitest-music-permission-denied"])
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15),
+            app.debugDescription
+        )
+        find("addAlarm.soundRow").tap()
+        XCTAssertTrue(
+            app.collectionViews["alarmSoundChoice.root"].waitForExistence(timeout: 10),
+            app.debugDescription
+        )
+        let message = find("soundPicker.musicMessage")
+        XCTAssertTrue(message.waitForExistence(timeout: 10), app.debugDescription)
+        XCTAssertEqual(
+            message.label,
+            "Allow access to Music in Settings."
+        )
+        XCTAssertTrue(message.isHittable)
+        message.tap()
+
+        let settings = XCUIApplication(bundleIdentifier: "com.apple.Preferences")
+        XCTAssertTrue(
+            settings.wait(for: .runningForeground, timeout: 10),
+            "Tapping the permission line should open the Settings app"
+        )
+        settings.terminate()
+    }
+
     // MARK: - PR 用スクリーンショット（#245）
 
     /// 撮るときだけ `TEST_RUNNER_MUSIC_SCREENSHOTS=1 xcodebuild test ...` で有効にする。
@@ -197,6 +226,18 @@ final class MusicLibraryUITests: XCTestCase {
     /// 取り込めない1行（#245）。理由の長い説明は出さない。
     func testScreenshotUnavailableLine() throws {
         try skipUnlessScreenshotRun()
+        launchJapaneseWithNotice("-uitest-music-unavailable")
+        snap("ja-music-unavailable")
+    }
+
+    /// 許可がないときの1行（#245 レビュー）。押すと設定アプリを開く。
+    func testScreenshotPermissionDeniedLine() throws {
+        try skipUnlessScreenshotRun()
+        launchJapaneseWithNotice("-uitest-music-permission-denied")
+        snap("ja-music-permission-denied")
+    }
+
+    private func launchJapaneseWithNotice(_ flag: String) {
         app?.terminate()
         app = XCUIApplication()
         app.launchArguments = [
@@ -205,7 +246,7 @@ final class MusicLibraryUITests: XCTestCase {
             "-uitest-skip-alarm-sync",
             "-uitest-force-light",
             "-uitest-open-add-alarm",
-            "-uitest-music-unavailable"
+            flag
         ]
         app.launch()
         allowAlarmPermissionIfNeeded()
@@ -215,6 +256,5 @@ final class MusicLibraryUITests: XCTestCase {
             app.debugDescription
         )
         Thread.sleep(forTimeInterval: 0.5)
-        snap("ja-music-unavailable")
     }
 }

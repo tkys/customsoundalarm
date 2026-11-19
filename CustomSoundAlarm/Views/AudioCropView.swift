@@ -183,6 +183,10 @@ struct AudioCropView: View {
             previewer.stop()
             // 無音の知らせを出したまま閉じたときの取りこぼしを消す（#256）
             deletePendingFile()
+            // 一時コピー（ファイルから・ミュージックから）は画面を閉じたら必ず消す（#245 レビュー）
+            if deletesSourceOnDiscard {
+                try? FileManager.default.removeItem(at: source.url)
+            }
         }
     }
 

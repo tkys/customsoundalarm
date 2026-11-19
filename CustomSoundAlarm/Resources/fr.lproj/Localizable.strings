@@ -407,6 +407,6 @@
 "followup_tomorrow" = "Demain";
 "followup_weekdays" = "En semaine";
 "followup_everyday" = "Tous les jours";
-"add_from_music" = "Depuis Musique";
+"add_from_music" = "Ajouter depuis Musique";
 "music_library_unavailable" = "Ce morceau ne peut pas être importé.";
 "music_library_permission_denied" = "Autorisez l’accès à Musique dans Réglages.";

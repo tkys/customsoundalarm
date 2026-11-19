@@ -213,6 +213,15 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト・スクショ用: ミュージックの許可がないときの1行を出す（#245 レビュー）
+    static var isUITestMusicPermissionDenied: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-music-permission-denied")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: 初めての1回きりアラームが鳴って止まった状態を作る（#247）
     static var isUITestSeedFirstAlarmFollowup: Bool {
     #if DEBUG

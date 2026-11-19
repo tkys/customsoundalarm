@@ -1,5 +1,4 @@
 import SwiftUI
-import MediaPlayer
 
 /// ライブラリとアラームの音選択で共通の「自分の音」「標準の音」（#160 PR-2 / #207）。
 ///
@@ -9,6 +8,8 @@ struct SoundLibrarySections: View {
     /// true = アラームの音を選ぶ / false = ライブラリで管理する
     let isSelecting: Bool
     @Binding var selectedSound: AlarmSound?
+    /// ミュージックライブラリ取り込みの進行状態（#245）。親画面の List がシートを持つ。
+    let musicLibrary: MusicLibraryImportController
     /// 選択モードで1つ選ばれたとき（プレイリスト選択中はチェックを出さない）
     var selectionActive: Bool = true
     var onSelect: ((AlarmSound?) -> Void)?
@@ -30,13 +31,11 @@ struct SoundLibrarySections: View {
     @State private var isImporting = false
     @State private var pendingAudio: PendingAudioImport?
     @State private var showingVideoImport = false
-    @State private var showingMusicPicker = false
-    @State private var isExportingMusic = false
-    @State private var musicLibraryNotice: String?
     @State private var showingStandardSounds = false
     @State private var errorMessage: String?
     @State private var renamingSound: AlarmSound?
     @State private var renameText = ""
+    @Environment(\.openURL) private var openURL
 
     private var importedSounds: [AlarmSound] {
         let existing = Set(soundStore.sounds.map(\.fileName))
@@ -61,11 +60,20 @@ struct SoundLibrarySections: View {
         importedSection
             .onAppear {
                 #if DEBUG
-                // スクショ用: 取り込めない1行を出す（#245）
+                // スクショ用: 取り込めない1行・許可がない1行を出す（#245）
                 if AppGroup.isUITestMusicUnavailable {
-                    musicLibraryNotice = String(localized: "music_library_unavailable")
+                    musicLibrary.showUnavailableForUITest()
+                }
+                if AppGroup.isUITestMusicPermissionDenied {
+                    musicLibrary.showPermissionDeniedForUITest()
                 }
                 #endif
+            }
+            // ピッカーが閉じきってから切り取り画面を開く（#245 レビュー）
+            .onChange(of: musicLibrary.pendingImport?.id) { _, _ in
+                if let pending = musicLibrary.consumePendingImport() {
+                    pendingAudio = pending
+                }
             }
         if let middle { middle }
         standardSection
@@ -145,7 +153,10 @@ struct SoundLibrarySections: View {
             .accessibilityIdentifier("soundPicker.addAudio")
 
             Button {
-                openMusicLibrary()
+                if SoundPreviewLogic.shouldStop(playingFileName: audioPlayer.playingFileName) {
+                    audioPlayer.stop()
+                }
+                musicLibrary.requestAndOpen()
             } label: {
                 HStack(spacing: 8) {
                     Label {
@@ -159,27 +170,38 @@ struct SoundLibrarySections: View {
                                     .fill(Color.actionText.opacity(0.12))
                             )
                     }
-                    if isExportingMusic {
+                    if musicLibrary.isExporting {
                         Spacer(minLength: 8)
                         ProgressView()
                     }
                 }
             }
-            .disabled(isExportingMusic)
+            .disabled(musicLibrary.isExporting)
             .accessibilityIdentifier("soundPicker.addMusic")
-            .sheet(isPresented: $showingMusicPicker) {
-                MusicLibraryPickerView(
-                    onPick: handleMusicPick,
-                    onCancel: { showingMusicPicker = false }
-                )
-            }
 
-            if let musicLibraryNotice {
-                Text(musicLibraryNotice)
-                    .font(.caption)
-                    .foregroundStyle(Color.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
+            if let notice = musicLibrary.notice {
+                if notice.opensSettings {
+                    // 押すと設定アプリを開く（#245 レビュー）
+                    Button {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            openURL(url)
+                        }
+                    } label: {
+                        Text(notice.text)
+                            .font(.caption)
+                            .foregroundStyle(Color.actionText)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .buttonStyle(.plain)
                     .accessibilityIdentifier("soundPicker.musicMessage")
+                } else {
+                    Text(notice.text)
+                        .font(.caption)
+                        .foregroundStyle(Color.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityIdentifier("soundPicker.musicMessage")
+                }
             }
 
             if imported.isEmpty {
@@ -309,63 +331,6 @@ struct SoundLibrarySections: View {
     }
 
     // MARK: - Error
-
-    // MARK: - Music Library (#245)
-
-    /// 「ミュージックから」を押したときだけ許可を求める。
-    private func openMusicLibrary() {
-        if SoundPreviewLogic.shouldStop(playingFileName: audioPlayer.playingFileName) {
-            audioPlayer.stop()
-        }
-        musicLibraryNotice = nil
-        switch MPMediaLibrary.authorizationStatus() {
-        case .authorized:
-            showingMusicPicker = true
-        case .notDetermined:
-            MPMediaLibrary.requestAuthorization { status in
-                Task { @MainActor in
-                    if status == .authorized {
-                        showingMusicPicker = true
-                    } else {
-                        musicLibraryNotice = String(localized: "music_library_permission_denied")
-                    }
-                }
-            }
-        case .denied, .restricted:
-            musicLibraryNotice = String(localized: "music_library_permission_denied")
-        @unknown default:
-            musicLibraryNotice = String(localized: "music_library_permission_denied")
-        }
-    }
-
-    private func handleMusicPick(_ item: MPMediaItem) {
-        showingMusicPicker = false
-        musicLibraryNotice = nil
-        let name = MusicLibraryImporter.initialName(for: item)
-        guard let assetURL = item.assetURL else {
-            musicLibraryNotice = String(localized: "music_library_unavailable")
-            AnalyticsService.shared.capture(.musicLibraryUnavailable)
-            return
-        }
-
-        isExportingMusic = true
-        Task {
-            let exportedURL = await MusicLibraryImporter.export(assetURL: assetURL)
-            await MainActor.run {
-                isExportingMusic = false
-                guard let exportedURL else {
-                    musicLibraryNotice = String(localized: "music_library_unavailable")
-                    AnalyticsService.shared.capture(.musicLibraryUnavailable)
-                    return
-                }
-                pendingAudio = PendingAudioImport(
-                    url: exportedURL,
-                    name: name,
-                    source: .musicLibrary
-                )
-            }
-        }
-    }
 
     @ViewBuilder
     private var errorSection: some View {
