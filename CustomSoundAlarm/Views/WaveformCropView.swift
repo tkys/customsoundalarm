@@ -468,6 +468,8 @@ struct WaveformCropView: View {
                         .accessibilityIdentifier("crop.ruler.\(WaveformCropMath.formatTime(t))")
                 }
             }
+            // 画面の端にラベルがくっつかないよう、最大文字のときだけ少し内側に置く（#237）
+            .padding(.horizontal, 4)
             .offset(y: 6)
         }
         .frame(width: width, height: rulerHeight, alignment: .topLeading)
