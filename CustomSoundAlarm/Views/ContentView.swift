@@ -511,7 +511,8 @@ struct ContentView: View {
                 .accessibilityIdentifier("emptyState.other")
             }
             .padding(.horizontal, 24)
-            .padding(.vertical, 24)
+            .padding(.top, 24)
+            .padding(.bottom, 100)
             .frame(maxWidth: .infinity)
         }
         .accessibilityIdentifier("emptyState.root")
@@ -521,7 +522,14 @@ struct ContentView: View {
     private var timeButtons: some View {
         let times = EmptyStateQuickAlarmLogic.times
         if dynamicTypeSize.isAccessibilitySize {
-            timeGrid(times)
+            LazyVGrid(
+                columns: [GridItem(.flexible())],
+                spacing: 10
+            ) {
+                ForEach(times) { time in
+                    quickTimeButton(time)
+                }
+            }
         } else {
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: 8) {
@@ -552,7 +560,6 @@ struct ContentView: View {
         } label: {
             Text(time.label)
                 .lineLimit(1)
-                .minimumScaleFactor(0.6)
                 .frame(maxWidth: .infinity)
         }
         .buttonStyle(.bordered)
