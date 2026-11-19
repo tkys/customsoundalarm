@@ -396,3 +396,8 @@
 "empty_quick_title" = "V kolik vstáváte?";
 "empty_quick_other" = "Jiný čas";
 "empty_quick_hint" = "Vytvoří budík.";
+"silent_sound_message" = "Tato část je téměř tichá. Vyberte jinou část nebo jiný zvuk.";
+"silent_sound_reselect" = "Vybrat jinou část";
+"silent_sound_other" = "Vybrat jiný zvuk";
+"silent_sound_use_anyway" = "Přesto použít";
+"silent_alarm_warning" = "Zvuk je sotva slyšet";

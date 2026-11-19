@@ -295,6 +295,14 @@ struct AlarmDetailView: View {
         #if DEBUG
         guard AppGroup.isUITestOpenWaveformCrop, pendingAudio == nil else { return }
         // ストアのスクショ用: -uitestCropPath <音声ファイル> -uitestCropName <表示名> で差し替える。
+        if AppGroup.isUITestSilentCrop,
+           let source = Bundle.main.url(forResource: "SilentTest", withExtension: "caf") {
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent("SilentCrop-\(UUID().uuidString).caf")
+            try? FileManager.default.copyItem(at: source, to: url)
+            pendingAudio = PendingAudioImport(url: url, name: "Silent")
+            return
+        }
         if AppGroup.isUITestQuietCrop,
            let source = Bundle.main.url(forResource: "PresetMarimba", withExtension: "caf") {
             let url = FileManager.default.temporaryDirectory

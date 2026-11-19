@@ -396,3 +396,8 @@
 "empty_quick_title" = "몇 시에 일어나시나요?";
 "empty_quick_other" = "다른 시간";
 "empty_quick_hint" = "알람을 만듭니다.";
+"silent_sound_message" = "이 부분은 거의 무음입니다. 다른 부분이나 다른 소리를 선택하세요.";
+"silent_sound_reselect" = "다른 부분 선택";
+"silent_sound_other" = "다른 소리 선택";
+"silent_sound_use_anyway" = "그대로 사용";
+"silent_alarm_warning" = "소리가 거의 들리지 않습니다";

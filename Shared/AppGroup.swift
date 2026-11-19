@@ -186,6 +186,24 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: 無音の音を使ったアラームを1本入れる（#256）
+    static var isUITestSeedSilentAlarm: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-silent-alarm")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: 無音の音声の取り込み（#256）
+    static var isUITestSilentCrop: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-silent-crop")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: 取り込んだ音が2つある状態（#207 の提案行）
     static var isUITestSeedSuggestion: Bool {
     #if DEBUG

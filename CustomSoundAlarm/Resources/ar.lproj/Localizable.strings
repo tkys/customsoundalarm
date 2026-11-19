@@ -396,3 +396,8 @@
 "empty_quick_title" = "في أي ساعة تستيقظ؟";
 "empty_quick_other" = "وقت آخر";
 "empty_quick_hint" = "ينشئ منبهًا.";
+"silent_sound_message" = "هذا الجزء شبه صامت. اختر جزءًا آخر أو صوتًا آخر.";
+"silent_sound_reselect" = "اختيار جزء آخر";
+"silent_sound_other" = "اختيار صوت آخر";
+"silent_sound_use_anyway" = "استخدامه على أي حال";
+"silent_alarm_warning" = "الصوت بالكاد يُسمع";

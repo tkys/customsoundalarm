@@ -362,6 +362,36 @@ struct CustomSoundAlarmApp: App {
                         }
                     }
 
+                    // UIテスト用: 無音の音を使ったアラーム（#256）
+                    if AppGroup.isUITestSeedSilentAlarm {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        SoundStore.shared.resetForUITest()
+                        SoundStore.shared.resetPresetNamesForUITest()
+                        let fileName = "SilentAlarm.caf"
+                        let url = AudioConverter.shared.soundsDirectory
+                            .appendingPathComponent(fileName)
+                        try? FileManager.default.removeItem(at: url)
+                        if let source = Bundle.main.url(
+                            forResource: "SilentTest",
+                            withExtension: "caf"
+                        ) {
+                            try? FileManager.default.copyItem(at: source, to: url)
+                            SoundStore.shared.add(AlarmSound(
+                                name: "Silent alarm",
+                                fileName: fileName,
+                                isPreset: false
+                            ))
+                            AlarmStore.shared.add(AlarmEntry(
+                                hour: 7,
+                                minute: 0,
+                                isEnabled: true,
+                                label: String(localized: "alarm_placeholder"),
+                                soundFileName: fileName
+                            ))
+                        }
+                    }
+
                     // UIテスト用: アラーム一覧を時刻順で検証するためのシード
                     if AppGroup.isUITestSeedEnabledAlarms {
                         AppGroup.hasCompletedOnboarding = true

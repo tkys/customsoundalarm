@@ -14,6 +14,7 @@ struct AnalyticsEventsDocTests {
         "permission_banner_shown",
         "permission_banner_tapped",
         "import_landed",
+        "silent_sound_blocked",
         "alarm_fired",
         "alarm_stopped",
         "alarm_snoozed",

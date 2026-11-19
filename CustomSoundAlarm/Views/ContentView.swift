@@ -57,6 +57,10 @@ struct ContentView: View {
     @State private var quickSaveToast: String?
     @State private var quickSaveToastTask: Task<Void, Never>?
     @State private var quickSaveFeedbackTrigger = 0
+    /// 無音の音を使っている既存アラーム（#256）
+    @State private var silentAlarmIDs: Set<UUID> = []
+    @State private var fixingSilentAlarm: AlarmEntry?
+    @State private var didScanSilentAlarms = false
     @ScaledMetric(relativeTo: .body) private var skipActionIconSize: CGFloat = 17
 
     @Environment(\.scenePhase) private var scenePhase
@@ -115,6 +119,7 @@ struct ContentView: View {
                     presentNextShareImportIfNeeded()
                     scheduler.refreshPermissionStatus()
                     reportPermissionBannerIfNeeded()
+                    scanSilentAlarms()
                     #if DEBUG
                     if AppGroup.isUITestOpenAddAlarm {
                         addScreenVisible = true
@@ -230,6 +235,29 @@ struct ContentView: View {
                     onLater: { updateChecker.dismissRecommended() }
                 )
                 .presentationDetents([.medium])
+            }
+            .sheet(item: $fixingSilentAlarm) { alarm in
+                NavigationStack {
+                    AlarmSoundChoiceView(
+                        playlistID: Binding(
+                            get: { alarmStore.alarms.first { $0.id == alarm.id }?.playlistID },
+                            set: { _ in }
+                        ),
+                        selectedSound: Binding(
+                            get: {
+                                guard let fileName = alarmStore.alarms
+                                    .first(where: { $0.id == alarm.id })?.soundFileName
+                                else { return nil }
+                                return soundStore.sounds.first { $0.fileName == fileName }
+                            },
+                            set: { _ in }
+                        ),
+                        volumeBoostedFileName: .constant(nil),
+                        onSelection: { sound, playlistID in
+                            repairSilentAlarm(alarm, sound: sound, playlistID: playlistID)
+                        }
+                    )
+                }
             }
             .sheet(isPresented: $showingPermissionSettings) {
                 PermissionSettingsSheet {
@@ -686,6 +714,8 @@ struct ContentView: View {
                     alarm: alarm,
                     soundName: AlarmSoundDisplay.name(for: alarm),
                     sound: AlarmSoundDisplay.representativeSound(for: alarm),
+                    hasSilentSound: silentAlarmIDs.contains(alarm.id),
+                    onFixSilentSound: { fixingSilentAlarm = alarm },
                     onToggle: {
                         alarmStore.toggleEnabled(alarm)
                         AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
@@ -810,6 +840,46 @@ struct ContentView: View {
         case nil:
             break
         }
+    }
+
+    /// 起動時に一度だけ、既存アラームの音を調べる（#256）。
+    private func scanSilentAlarms() {
+        guard !didScanSilentAlarms else { return }
+        didScanSilentAlarms = true
+        let entries = alarmStore.alarms
+        let directory = AudioConverter.shared.soundsDirectory
+        Task.detached {
+            let ids = SilentAlarmScanner.silentAlarmIDs(
+                entries: entries,
+                soundsDirectory: directory,
+                measure: { LoudnessMeter.measure(fileURL: $0) }
+            )
+            await MainActor.run {
+                silentAlarmIDs = ids
+            }
+        }
+    }
+
+    private func repairSilentAlarm(
+        _ alarm: AlarmEntry,
+        sound: AlarmSound?,
+        playlistID: UUID?
+    ) {
+        guard var updated = alarmStore.alarms.first(where: { $0.id == alarm.id }) else {
+            fixingSilentAlarm = nil
+            return
+        }
+        if let sound {
+            updated.soundFileName = sound.fileName
+            updated.playlistID = nil
+        } else if let playlistID {
+            updated.soundFileName = ""
+            updated.playlistID = playlistID
+        }
+        alarmStore.update(updated)
+        AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
+        silentAlarmIDs.remove(alarm.id)
+        fixingSilentAlarm = nil
     }
 
     private func reportPermissionBannerIfNeeded() {
@@ -938,13 +1008,15 @@ struct AlarmRow: View {
     let alarm: AlarmEntry
     let soundName: String
     let sound: AlarmSound?
+    let hasSilentSound: Bool
+    let onFixSilentSound: () -> Void
     let onToggle: () -> Void
     let onTap: () -> Void
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        Button(action: onTap) {
+        Button(action: hasSilentSound ? onFixSilentSound : onTap) {
             Group {
                 if dynamicTypeSize.isAccessibilitySize {
                     accessibilityLayout
@@ -988,6 +1060,7 @@ struct AlarmRow: View {
                         .lineLimit(1)
                 }
                 metadataLine(vertical: false)
+                if hasSilentSound { silentSoundWarning }
                 if let holidaySummary {
                     Text(holidaySummary)
                         .font(.caption)
@@ -1036,6 +1109,7 @@ struct AlarmRow: View {
             }
 
             metadataLine(vertical: true)
+            if hasSilentSound { silentSoundWarning }
             if let holidaySummary {
                 Text(holidaySummary)
                     .font(.caption)
@@ -1044,6 +1118,14 @@ struct AlarmRow: View {
                     .accessibilityIdentifier("holiday.summary")
             }
         }
+    }
+
+    private var silentSoundWarning: some View {
+        Text("silent_alarm_warning")
+            .font(.caption)
+            .foregroundStyle(.orange)
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityIdentifier("alarm.silentSoundWarning")
     }
 
     private var timeText: some View {

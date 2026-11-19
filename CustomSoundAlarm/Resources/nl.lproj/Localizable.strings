@@ -396,3 +396,8 @@
 "empty_quick_title" = "Hoe laat word je wakker?";
 "empty_quick_other" = "Andere tijd";
 "empty_quick_hint" = "Maakt een wekker.";
+"silent_sound_message" = "Dit deel is bijna stil. Kies een ander deel of een ander geluid.";
+"silent_sound_reselect" = "Ander deel kiezen";
+"silent_sound_other" = "Ander geluid kiezen";
+"silent_sound_use_anyway" = "Toch gebruiken";
+"silent_alarm_warning" = "Geluid is nauwelijks hoorbaar";

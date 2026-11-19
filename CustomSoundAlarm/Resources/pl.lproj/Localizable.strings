@@ -396,3 +396,8 @@
 "empty_quick_title" = "O której wstajesz?";
 "empty_quick_other" = "Inna godzina";
 "empty_quick_hint" = "Tworzy budzik.";
+"silent_sound_message" = "Ta część jest prawie cicha. Wybierz inną część lub inny dźwięk.";
+"silent_sound_reselect" = "Wybierz inną część";
+"silent_sound_other" = "Wybierz inny dźwięk";
+"silent_sound_use_anyway" = "Użyj mimo to";
+"silent_alarm_warning" = "Dźwięk jest ledwo słyszalny";

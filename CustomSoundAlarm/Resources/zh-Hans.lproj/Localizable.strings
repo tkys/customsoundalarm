@@ -396,3 +396,8 @@
 "empty_quick_title" = "几点起床？";
 "empty_quick_other" = "其他时间";
 "empty_quick_hint" = "创建闹钟。";
+"silent_sound_message" = "这部分几乎没有声音。请选择其他部分或其他声音。";
+"silent_sound_reselect" = "重新选择部分";
+"silent_sound_other" = "选择其他声音";
+"silent_sound_use_anyway" = "仍然使用";
+"silent_alarm_warning" = "声音几乎听不到";

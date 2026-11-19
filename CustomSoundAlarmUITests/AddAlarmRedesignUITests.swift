@@ -537,4 +537,57 @@ final class AddAlarmRedesignUITests: XCTestCase {
             "normal import should not show the volume notice"
         )
     }
+
+    /// #256: 無音の音は保存せず、切り取り画面の中で知らせる。
+    func testSilentCropShowsNoticeAndDoesNotSave() {
+        app.launchArguments = [
+            "-uitest-open-add-alarm",
+            "-uitest-open-waveform-crop",
+            "-uitest-silent-crop",
+            "-uitest-force-light"
+        ]
+        app.launch()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
+
+        let crop = findElement("audioCrop.cropAndSave")
+        XCTAssertTrue(crop.waitForExistence(timeout: 20), app.debugDescription)
+        crop.tap()
+
+        let notice = findElement("silentSound.message")
+        XCTAssertTrue(
+            notice.waitForExistence(timeout: 15),
+            "silent notice should appear: \(app.debugDescription)"
+        )
+        XCTAssertTrue(findElement("silentSound.reselect").exists)
+        XCTAssertTrue(findElement("silentSound.other").exists)
+        XCTAssertFalse(findElement("silentSound.useAnyway").exists)
+
+        findElement("silentSound.reselect").tap()
+        XCTAssertFalse(notice.waitForExistence(timeout: 3))
+        XCTAssertTrue(
+            crop.waitForExistence(timeout: 5),
+            "crop actions should return after choosing another part"
+        )
+    }
+
+    /// #256: 既存の無音アラームは一覧で気づけ、押すと音を選べる。
+    func testExistingSilentAlarmShowsWarningAndOpensSoundPicker() {
+        app.launchArguments = [
+            "-uitest-seed-silent-alarm",
+            "-uitest-skip-alarm-sync",
+            "-uitest-force-light"
+        ]
+        app.launch()
+
+        let warning = findElement("alarm.silentSoundWarning")
+        XCTAssertTrue(
+            warning.waitForExistence(timeout: 15),
+            "silent alarm warning should appear: \(app.debugDescription)"
+        )
+        findElement("alarm.row").tap()
+        XCTAssertTrue(
+            app.collectionViews["alarmSoundChoice.root"].waitForExistence(timeout: 10),
+            "sound picker should open: \(app.debugDescription)"
+        )
+    }
 }

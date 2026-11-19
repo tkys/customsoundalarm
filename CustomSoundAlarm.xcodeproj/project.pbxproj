@@ -8,10 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		002FF3F985D5C3176A63C781 /* PresetMarimba.caf in Resources */ = {isa = PBXBuildFile; fileRef = AD1A801C9CCCD498540109ED /* PresetMarimba.caf */; };
+		B70000000000000000000001 /* SilentTest.caf in Resources */ = {isa = PBXBuildFile; fileRef = B70000000000000000000011 /* SilentTest.caf */; };
 		00826992D978945FB8E00376 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30144856E697293FF8124FFB /* Theme.swift */; };
 		01D8AE3D8239E9167B1713F2 /* LoudnessNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDF3BC4964F024CADE907CD6 /* LoudnessNormalizer.swift */; };
 		02F994FB6922008DE5AD6E34 /* SnoozeDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 909CC0BDDAC75CCB1B88CB13 /* SnoozeDebug.swift */; };
 		03542F21B77DCECBAF0EBB57 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDF83A50CB608D370A449CB1 /* LibraryView.swift */; };
+		B50000000000000000000001 /* SilentSoundNoticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50000000000000000000011 /* SilentSoundNoticeView.swift */; };
 		039DFCF8FECC7EDAE85815C2 /* BedsideClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0DC1BEE7AD4F2604D84B47 /* BedsideClockView.swift */; };
 		03D4C1AB3FBE783938DCBB61 /* ShareImportQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 663BA8FF5816C40B7EE32A8B /* ShareImportQueueTests.swift */; };
 		043932BFD53396C1BC14D7E2 /* BedsideSessionLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF6178AF1CDD5BAE8BDB8213 /* BedsideSessionLogicTests.swift */; };
@@ -187,6 +189,7 @@
 		B675F49EDB4253D0354AB107 /* TestAlarmRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 924A94F913D4A7C3786E27E0 /* TestAlarmRecord.swift */; };
 		B7610B8D77CD495C34C05018 /* UpdateGateUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA717F0CF5CFC185B565A5B7 /* UpdateGateUITests.swift */; };
 		B7DAB2844E9AC708219EA785 /* PlaylistSuggestionLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946551ED910B50A8B66B0830 /* PlaylistSuggestionLogicTests.swift */; };
+		B80000000000000000000001 /* SilentSoundLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80000000000000000000011 /* SilentSoundLogicTests.swift */; };
 		B20000000000000000000001 /* EmptyStateQuickAlarmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000011 /* EmptyStateQuickAlarmTests.swift */; };
 		B7DBFE11F40076771B8230DF /* AlarmScheduleSignature.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6486F8829563B6E46853BEC /* AlarmScheduleSignature.swift */; };
 		B870DC3743B1E92F43B5E614 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 93DE9488BAAC2252B4E6513D /* PrivacyInfo.xcprivacy */; };
@@ -245,6 +248,8 @@
 		E0E42D2892CB93B1953EC10A /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 69B7A661B212236384ECBE05 /* Localizable.strings */; };
 		E17F8A2662BF0D60BC3DBB3E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA13D117730C6D5910D58FD4 /* InfoPlist.strings */; };
 		E2BB9F1A074C071DF1A5AC92 /* PlaylistSuggestionLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0DD008E6FB33DB60396D37 /* PlaylistSuggestionLogic.swift */; };
+		B60000000000000000000001 /* SilentAlarmScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = B60000000000000000000011 /* SilentAlarmScanner.swift */; };
+		B40000000000000000000001 /* SilentSoundLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = B40000000000000000000011 /* SilentSoundLogic.swift */; };
 		B10000000000000000000001 /* EmptyStateQuickAlarmLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* EmptyStateQuickAlarmLogic.swift */; };
 		B00000000000000000000001 /* ShareImportLanding.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000011 /* ShareImportLanding.swift */; };
 		E30958483AC7255DECF60F65 /* CustomAlarmMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08EAAA2A211BCB98598A3FB2 /* CustomAlarmMetadataTests.swift */; };
@@ -399,6 +404,8 @@
 		39CEFD6CAD362010B0DDCD66 /* AlarmRowAccessibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmRowAccessibility.swift; sourceTree = "<group>"; };
 		3BDFFB8A52095E586A02A96D /* AlarmManaging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmManaging.swift; sourceTree = "<group>"; };
 		3D0DD008E6FB33DB60396D37 /* PlaylistSuggestionLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistSuggestionLogic.swift; sourceTree = "<group>"; };
+		B60000000000000000000011 /* SilentAlarmScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilentAlarmScanner.swift; sourceTree = "<group>"; };
+		B40000000000000000000011 /* SilentSoundLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilentSoundLogic.swift; sourceTree = "<group>"; };
 		B10000000000000000000011 /* EmptyStateQuickAlarmLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateQuickAlarmLogic.swift; sourceTree = "<group>"; };
 		B00000000000000000000011 /* ShareImportLanding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareImportLanding.swift; sourceTree = "<group>"; };
 		3D3E7D2ACD756BF6236CA208 /* BackupAlarmSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupAlarmSound.swift; sourceTree = "<group>"; };
@@ -503,6 +510,7 @@
 		9388CDF77D14405C3A712EB1 /* AudioConverterPeakTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioConverterPeakTests.swift; sourceTree = "<group>"; };
 		93DE9488BAAC2252B4E6513D /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		946551ED910B50A8B66B0830 /* PlaylistSuggestionLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistSuggestionLogicTests.swift; sourceTree = "<group>"; };
+		B80000000000000000000011 /* SilentSoundLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilentSoundLogicTests.swift; sourceTree = "<group>"; };
 		B20000000000000000000011 /* EmptyStateQuickAlarmTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateQuickAlarmTests.swift; sourceTree = "<group>"; };
 		94E10DA64FE9792F8E216743 /* VideoAudioExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoAudioExtractor.swift; sourceTree = "<group>"; };
 		96C841BF0C39CBE4E786A3F0 /* SettingsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsUITests.swift; sourceTree = "<group>"; };
@@ -530,6 +538,7 @@
 		AB8F6ECD0741897B6CF0234E /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		AC338ED8471E751D239A8A4E /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = cs; path = cs.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		AD1A801C9CCCD498540109ED /* PresetMarimba.caf */ = {isa = PBXFileReference; path = PresetMarimba.caf; sourceTree = "<group>"; };
+		B70000000000000000000011 /* SilentTest.caf */ = {isa = PBXFileReference; path = SilentTest.caf; sourceTree = "<group>"; };
 		ADB04AB60EF40DA254175443 /* BackupSoundResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupSoundResolver.swift; sourceTree = "<group>"; };
 		AEEBEBF4DB690A293B406484 /* AddAlarmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAlarmView.swift; sourceTree = "<group>"; };
 		AF480CAF8CB3085A8C64FC4A /* PlaylistTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistTests.swift; sourceTree = "<group>"; };
@@ -625,6 +634,7 @@
 		FB65D02618898ACF54202398 /* Entitlements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entitlements.swift; sourceTree = "<group>"; };
 		FD1E788DE59D639CD662D601 /* PlaylistRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistRendererTests.swift; sourceTree = "<group>"; };
 		FDF83A50CB608D370A449CB1 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
+		B50000000000000000000011 /* SilentSoundNoticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilentSoundNoticeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -681,6 +691,7 @@
 				9B8729BF3CEBACB08F2782F0 /* PendingAlarmEventTests.swift */,
 				85C3C9D3104F1C5ABC72B61F /* PermissionBannerLogicTests.swift */,
 				946551ED910B50A8B66B0830 /* PlaylistSuggestionLogicTests.swift */,
+		B80000000000000000000011 /* SilentSoundLogicTests.swift */,
 		B20000000000000000000011 /* EmptyStateQuickAlarmTests.swift */,
 				AF480CAF8CB3085A8C64FC4A /* PlaylistTests.swift */,
 				535DA3D6F894B98B663B1F5C /* PlaylistUnlockLogicTests.swift */,
@@ -884,6 +895,7 @@
 				8CB35836AA202B969CE7437A /* EarlyAccessBadge.swift */,
 				7070484DAE7EA0EEC071F6AF /* FilmstripView.swift */,
 				FDF83A50CB608D370A449CB1 /* LibraryView.swift */,
+		B50000000000000000000011 /* SilentSoundNoticeView.swift */,
 				E5E338088DF544D7FBE2B2E3 /* OnboardingView.swift */,
 				E5186F390ED73A803CB4B45F /* PermissionSettingsSheet.swift */,
 				1916C23CC467044DFBB09DC4 /* PlaylistEditorView.swift */,
@@ -951,6 +963,8 @@
 				C1A2D25582E5891BFB320CC1 /* PlaylistRenderLogic.swift */,
 				8267931ECD28007465925431 /* PlaylistResyncLogic.swift */,
 				3D0DD008E6FB33DB60396D37 /* PlaylistSuggestionLogic.swift */,
+		B60000000000000000000011 /* SilentAlarmScanner.swift */,
+		B40000000000000000000011 /* SilentSoundLogic.swift */,
 		B10000000000000000000011 /* EmptyStateQuickAlarmLogic.swift */,
 				B00000000000000000000011 /* ShareImportLanding.swift */,
 				1D0C49BA519F2BBEFB759DD6 /* PlaylistUnlockLogic.swift */,
@@ -1030,6 +1044,7 @@
 				8CDCD4DBBDF46DDC920E75C1 /* PresetCrescendo.caf */,
 				90EB1FBBC383A618E21AEE11 /* PresetDualTone.caf */,
 				AD1A801C9CCCD498540109ED /* PresetMarimba.caf */,
+		B70000000000000000000011 /* SilentTest.caf */,
 				AAA02B1AE43B835B2A27D6CF /* PresetMusicBox.caf */,
 			);
 			path = Sounds;
@@ -1218,6 +1233,7 @@
 				C280DD997F519388BF6F63EA /* PresetCrescendo.caf in Resources */,
 				AAC00440A7C1344159F25F74 /* PresetDualTone.caf in Resources */,
 				002FF3F985D5C3176A63C781 /* PresetMarimba.caf in Resources */,
+		B70000000000000000000001 /* SilentTest.caf in Resources */,
 				BF9B0277F257A5780994AA1D /* PresetMusicBox.caf in Resources */,
 				B870DC3743B1E92F43B5E614 /* PrivacyInfo.xcprivacy in Resources */,
 			);
@@ -1304,6 +1320,7 @@
 				0FC81C95AFD84CD57AF0D6E2 /* FirstInstallBuild.swift in Sources */,
 				ABCBDC44A7F699C499976C2D /* JapaneseHolidays.swift in Sources */,
 				03542F21B77DCECBAF0EBB57 /* LibraryView.swift in Sources */,
+		B50000000000000000000001 /* SilentSoundNoticeView.swift in Sources */,
 				868DC630FC1E03ECD9D22660 /* LookaheadLimiter.swift in Sources */,
 				D1FD508447D62062146C66A8 /* LoudVariantGenerator.swift in Sources */,
 				A978182355AC4CB61FF384AF /* LoudVariantMetadata.swift in Sources */,
@@ -1326,6 +1343,8 @@
 				D7FAB91619BA070D83185B82 /* PlaylistRowLabel.swift in Sources */,
 				9AB8CE5853F70F472C9FF0FE /* PlaylistStore.swift in Sources */,
 				E2BB9F1A074C071DF1A5AC92 /* PlaylistSuggestionLogic.swift in Sources */,
+		B60000000000000000000001 /* SilentAlarmScanner.swift in Sources */,
+		B40000000000000000000001 /* SilentSoundLogic.swift in Sources */,
 		B10000000000000000000001 /* EmptyStateQuickAlarmLogic.swift in Sources */,
 				B00000000000000000000001 /* ShareImportLanding.swift in Sources */,
 				868C4FE950F01B92AC44F785 /* PlaylistUnlockCoordinator.swift in Sources */,
@@ -1466,6 +1485,7 @@
 				7EB344595B81A4E5C79EBF83 /* PlaylistRendererTests.swift in Sources */,
 				103F9E66006264E7A26DEB14 /* PlaylistStoreTests.swift in Sources */,
 				B7DAB2844E9AC708219EA785 /* PlaylistSuggestionLogicTests.swift in Sources */,
+		B80000000000000000000001 /* SilentSoundLogicTests.swift in Sources */,
 		B20000000000000000000001 /* EmptyStateQuickAlarmTests.swift in Sources */,
 				EC8E115717C972D224027030 /* PlaylistTests.swift in Sources */,
 				133D75BE318B8FB322869891 /* PlaylistUnlockLogicTests.swift in Sources */,
