@@ -17,8 +17,7 @@ struct SilentSoundNoticeView: View {
                 .accessibilityIdentifier("silentSound.message")
 
             if isWholeFileSilent {
-                otherSoundButton(lineLimit: nil)
-                    .frame(maxWidth: .infinity)
+                otherSoundButton(lineLimit: nil, fullWidth: true)
             } else {
                 // 両方が1行で横に収まるときだけ横並び。収まらなければ縦に積む（#256 レビュー）。
                 ViewThatFits(in: .horizontal) {
@@ -27,10 +26,8 @@ struct SilentSoundNoticeView: View {
                         otherSoundButton(lineLimit: 1)
                     }
                     VStack(spacing: 8) {
-                        reselectButton(lineLimit: nil)
-                            .frame(maxWidth: .infinity)
-                        otherSoundButton(lineLimit: nil)
-                            .frame(maxWidth: .infinity)
+                        reselectButton(lineLimit: nil, fullWidth: true)
+                        otherSoundButton(lineLimit: nil, fullWidth: true)
                     }
                 }
             }
@@ -51,23 +48,27 @@ struct SilentSoundNoticeView: View {
         )
     }
 
-    private func reselectButton(lineLimit: Int?) -> some View {
+    private func reselectButton(lineLimit: Int?, fullWidth: Bool = false) -> some View {
         Button(action: onReselect) {
+            // 背景は label の大きさで決まるので、横幅いっぱいは label 側で広げる
             Text("silent_sound_reselect")
                 .lineLimit(lineLimit)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: fullWidth ? .infinity : nil)
         }
         .buttonStyle(.bordered)
         .accessibilityIdentifier("silentSound.reselect")
     }
 
-    private func otherSoundButton(lineLimit: Int?) -> some View {
+    private func otherSoundButton(lineLimit: Int?, fullWidth: Bool = false) -> some View {
         Button(action: onOtherSound) {
+            // 背景は label の大きさで決まるので、横幅いっぱいは label 側で広げる
             Text("silent_sound_other")
                 .lineLimit(lineLimit)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: fullWidth ? .infinity : nil)
         }
         .buttonStyle(.bordered)
         .accessibilityIdentifier("silentSound.other")
