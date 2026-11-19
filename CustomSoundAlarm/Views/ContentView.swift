@@ -61,6 +61,8 @@ struct ContentView: View {
     @State private var silentAlarmLevels: [UUID: SilentSoundLevel] = [:]
     @State private var fixingSilentAlarm: AlarmEntry?
     @State private var didScanSilentAlarms = false
+    /// 初めての1回きりアラームの提案を出す行（#247）
+    @State private var firstAlarmFollowupAlarmID: UUID?
     @ScaledMetric(relativeTo: .body) private var skipActionIconSize: CGFloat = 17
 
     @Environment(\.scenePhase) private var scenePhase
@@ -84,6 +86,7 @@ struct ContentView: View {
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         Button {
+                            ignoreFirstAlarmFollowupIfNeeded()
                             showingSettings = true
                         } label: {
                             Image(systemName: "gearshape")
@@ -103,6 +106,7 @@ struct ContentView: View {
                         .accessibilityIdentifier("alarmList.skipAll")
                     }
                     Button {
+                        ignoreFirstAlarmFollowupIfNeeded()
                         addScreenVisible = true
                         addAlarmRequest = AddAlarmRequest(source: nil)
                     } label: {
@@ -120,6 +124,7 @@ struct ContentView: View {
                     scheduler.refreshPermissionStatus()
                     reportPermissionBannerIfNeeded()
                     scanSilentAlarms()
+                    evaluateFirstAlarmFollowup()
                     #if DEBUG
                     if AppGroup.isUITestOpenAddAlarm {
                         addScreenVisible = true
@@ -276,6 +281,11 @@ struct ContentView: View {
             }
         }
         .onChange(of: scenePhase) { _, phase in
+            if phase == .background {
+                // 提案を見たまま一覧を離れたら、二度と出さない（#247）
+                ignoreFirstAlarmFollowupIfNeeded()
+                return
+            }
             // ユーザーが自ら落ち着いてアプリを前面に出したタイミングで、
             // 定着ユーザー（発火実績あり・同一バージョン未依頼・当セッションで発火なし）にのみ
             // App Store レビューを依頼する。実際に表示するか否かは OS が最終判断する。
@@ -360,6 +370,10 @@ struct ContentView: View {
                 addAlarmRequest = AddAlarmRequest(source: nil, initialSound: sound)
                 shareLanding.addAlarmSound = nil
             }
+        }
+        .onDisappear {
+            // タブ移動などで一覧を離れたら、押されなかった提案は終わり（#247）
+            ignoreFirstAlarmFollowupIfNeeded()
         }
     }
 
@@ -715,13 +729,24 @@ struct ContentView: View {
                     soundName: AlarmSoundDisplay.name(for: alarm),
                     sound: AlarmSoundDisplay.representativeSound(for: alarm),
                     hasSilentSound: silentAlarmLevels[alarm.id] != nil,
-                    onFixSilentSound: { fixingSilentAlarm = alarm },
+                    showsFirstAlarmFollowup: firstAlarmFollowupAlarmID == alarm.id,
+                    onFixSilentSound: {
+                        ignoreFirstAlarmFollowupIfNeeded()
+                        fixingSilentAlarm = alarm
+                    },
+                    onFirstAlarmFollowup: { action in
+                        applyFirstAlarmFollowup(action, to: alarm)
+                    },
                     onToggle: {
+                        if firstAlarmFollowupAlarmID == alarm.id {
+                            ignoreFirstAlarmFollowupIfNeeded()
+                        }
                         alarmStore.toggleEnabled(alarm)
                         AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
                         refreshGlobalSkip()
                     },
                     onTap: {
+                        ignoreFirstAlarmFollowupIfNeeded()
                         editScreenVisible = true
                         selectedAlarm = alarm
                     }
@@ -892,6 +917,80 @@ struct ContentView: View {
         fixingSilentAlarm = nil
     }
 
+    // MARK: - First alarm follow-up (#247)
+
+    /// 起動時に一度だけ、初めての1回きりアラームの提案を出すか決める。
+    /// 許可の行 → プレイリストの解放 → この提案、の順で1つだけ出す。
+    private func evaluateFirstAlarmFollowup() {
+        guard !AppGroup.firstAlarmFollowupHandled else { return }
+
+        // 前回の起動で表示したまま閉じられた（強制終了を含む）＝無視。
+        if AppGroup.firstAlarmFollowupShown {
+            AppGroup.firstAlarmFollowupHandled = true
+            AppGroup.firstAlarmFollowupShown = false
+            AnalyticsService.shared.capture(.firstAlarmFollowupAction(action: .ignored))
+            return
+        }
+
+        let unlockWouldShow = PlaylistUnlockLogic.canPresent(
+            hasPending: soundStore.hasPendingPlaylistUnlock,
+            hasShown: AppGroup.playlistUnlockShown,
+            isRinging: scheduler.isAlarmRinging,
+            isNightMode: BedsideModeTracker.shared.isActive,
+            hasAnotherSheet: false
+        )
+        guard FirstAlarmFollowupLogic.shouldShow(
+            hasPermissionBanner: permissionBannerStatus != nil,
+            unlockWouldShow: unlockWouldShow
+        ) else { return }
+        guard !addScreenVisible,
+              !editScreenVisible,
+              !showingSettings,
+              !showingOnboarding,
+              shareImportItem == nil,
+              updateChecker.prompt == nil else { return }
+
+        let history = AlarmLocalHistoryStore.recentLines(
+            limit: AlarmLocalHistoryStore.maxLines
+        )
+        guard let alarmID = FirstAlarmFollowupLogic.candidateAlarmID(
+            historyLines: history,
+            alarms: alarmStore.alarms,
+            uidForAlarm: { AlarmUIDStore.uid(for: $0) }
+        ) else { return }
+
+        firstAlarmFollowupAlarmID = alarmID
+        AppGroup.firstAlarmFollowupShown = true
+        AnalyticsService.shared.capture(.firstAlarmFollowupShown)
+    }
+
+    private func applyFirstAlarmFollowup(
+        _ action: FirstAlarmFollowupAction,
+        to alarm: AlarmEntry
+    ) {
+        guard var updated = alarmStore.alarms.first(where: { $0.id == alarm.id }),
+              let changed = FirstAlarmFollowupLogic.updatedAlarm(updated, for: action)
+        else { return }
+        updated = changed
+        alarmStore.update(updated)
+        AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
+        refreshGlobalSkip()
+
+        firstAlarmFollowupAlarmID = nil
+        AppGroup.firstAlarmFollowupHandled = true
+        AppGroup.firstAlarmFollowupShown = false
+        AnalyticsService.shared.capture(.firstAlarmFollowupAction(action: action))
+    }
+
+    /// 押さずに一覧を離れたとき（設定・追加・編集・バックグラウンド）。
+    private func ignoreFirstAlarmFollowupIfNeeded() {
+        guard firstAlarmFollowupAlarmID != nil else { return }
+        firstAlarmFollowupAlarmID = nil
+        AppGroup.firstAlarmFollowupHandled = true
+        AppGroup.firstAlarmFollowupShown = false
+        AnalyticsService.shared.capture(.firstAlarmFollowupAction(action: .ignored))
+    }
+
     private func reportPermissionBannerIfNeeded() {
         guard let status = permissionBannerStatus else {
             reportedPermissionBannerStatus = nil
@@ -1019,25 +1118,76 @@ struct AlarmRow: View {
     let soundName: String
     let sound: AlarmSound?
     let hasSilentSound: Bool
+    let showsFirstAlarmFollowup: Bool
     let onFixSilentSound: () -> Void
+    let onFirstAlarmFollowup: (FirstAlarmFollowupAction) -> Void
     let onToggle: () -> Void
     let onTap: () -> Void
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        Button(action: hasSilentSound ? onFixSilentSound : onTap) {
-            Group {
-                if dynamicTypeSize.isAccessibilitySize {
-                    accessibilityLayout
-                } else {
-                    regularLayout
+        VStack(alignment: .leading, spacing: 10) {
+            Button(action: hasSilentSound ? onFixSilentSound : onTap) {
+                Group {
+                    if dynamicTypeSize.isAccessibilitySize {
+                        accessibilityLayout
+                    } else {
+                        regularLayout
+                    }
                 }
+                .padding(.vertical, dynamicTypeSize.isAccessibilitySize ? 8 : 4)
             }
-            .padding(.vertical, dynamicTypeSize.isAccessibilitySize ? 8 : 4)
+            .foregroundStyle(.primary)
+            .accessibilityIdentifier("alarm.row")
+
+            // 初めての1回きりアラームのあとの提案（#247）。押すまで何も変えない。
+            if showsFirstAlarmFollowup {
+                followupButtons
+            }
         }
-        .foregroundStyle(.primary)
-        .accessibilityIdentifier("alarm.row")
+    }
+
+    // MARK: - First alarm follow-up (#247)
+
+    @ViewBuilder
+    private var followupButtons: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(spacing: 8) {
+                followupButton(.tomorrow)
+                followupButton(.weekdays)
+                followupButton(.everyday)
+            }
+        } else {
+            HStack(spacing: 8) {
+                followupButton(.tomorrow)
+                followupButton(.weekdays)
+                followupButton(.everyday)
+            }
+        }
+    }
+
+    private func followupButton(_ action: FirstAlarmFollowupAction) -> some View {
+        Button {
+            onFirstAlarmFollowup(action)
+        } label: {
+            Text(followupTitle(action))
+                .font(.subheadline.weight(.medium))
+                .frame(maxWidth: .infinity)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .buttonStyle(.bordered)
+        .tint(Color.actionText)
+        .accessibilityIdentifier("alarm.followup.\(action.rawValue)")
+    }
+
+    private func followupTitle(_ action: FirstAlarmFollowupAction) -> LocalizedStringKey {
+        switch action {
+        case .tomorrow: "followup_tomorrow"
+        case .weekdays: "followup_weekdays"
+        case .everyday: "followup_everyday"
+        case .ignored: "followup_tomorrow"
+        }
     }
 
     // MARK: - Layouts
@@ -1205,6 +1355,7 @@ struct AlarmRow: View {
             time: alarm.timeString,
             label: alarm.label
         )))
+        .accessibilityIdentifier("alarm.toggle")
     }
 
     private var timeColor: Color {

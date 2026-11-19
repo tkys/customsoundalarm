@@ -404,3 +404,6 @@
 "silent_sound_whole_file_message" = "هذا الملف الصوتي لا يحتوي على صوت. اختر صوتًا آخر.";
 "settings_mail_diagnostics_notice" = "لمساعدتنا في التحقيق، تم إرفاق حالة التطبيق (لا يتضمن عناوين الأغاني أو ملفات الصوت). يمكنك إزالة المرفق قبل الإرسال.\n";
 "settings_support_page" = "صفحة الدعم";
+"followup_tomorrow" = "غدًا";
+"followup_weekdays" = "أيام الأسبوع";
+"followup_everyday" = "كل يوم";

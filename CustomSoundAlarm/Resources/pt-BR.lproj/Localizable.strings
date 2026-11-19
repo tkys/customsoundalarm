@@ -404,3 +404,6 @@
 "silent_sound_whole_file_message" = "Este áudio não tem som. Escolha outro som.";
 "settings_mail_diagnostics_notice" = "Para nos ajudar a investigar, o estado do app está anexado (não inclui títulos de músicas nem arquivos de som). Você pode remover o anexo antes de enviar.\n";
 "settings_support_page" = "Página de suporte";
+"followup_tomorrow" = "Amanhã";
+"followup_weekdays" = "Dias úteis";
+"followup_everyday" = "Todos os dias";

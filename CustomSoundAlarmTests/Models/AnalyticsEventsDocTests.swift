@@ -54,6 +54,8 @@ struct AnalyticsEventsDocTests {
         "settings_opened",
         "support_contact_opened",
         "review_link_opened",
+        "first_alarm_followup_shown",
+        "first_alarm_followup_action",
         "bedside_exited",
         "bedside_setting_changed",
         "onboarding_step_viewed",

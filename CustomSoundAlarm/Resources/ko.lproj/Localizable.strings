@@ -404,3 +404,6 @@
 "silent_sound_whole_file_message" = "이 오디오에는 소리가 없습니다. 다른 소리를 선택하세요.";
 "settings_mail_diagnostics_notice" = "조사를 위해 앱 상태를 첨부했습니다(곡 제목이나 음원 파일은 포함되지 않습니다). 보내기 전에 첨부를 삭제할 수 있습니다.\n";
 "settings_support_page" = "지원 페이지";
+"followup_tomorrow" = "내일도";
+"followup_weekdays" = "평일";
+"followup_everyday" = "매일";

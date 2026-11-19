@@ -55,6 +55,8 @@
 | `settings_opened` | — | 設定画面を開いた | 設定の利用 | アプリ動作中のみ | 1.8.2 |
 | `support_contact_opened` | `method` string（mail/share/web）, `diagnostics_attached` bool | 問い合わせを開いた | 連絡手段の使われ方 | アプリ動作中のみ | 1.8.2 |
 | `review_link_opened` | — | レビューを書くリンクを開いた | レビュー導線の利用 | アプリ動作中のみ | 1.8.2 |
+| `first_alarm_followup_shown` | — | 初めての1回きりアラームのあとの提案を表示した | 提案の利用率 | アプリ動作中のみ | 1.8.4 |
+| `first_alarm_followup_action` | `action` string（tomorrow/weekdays/everyday/ignored） | 提案を押した／無視した | 提案の効果測定 | アプリ動作中のみ | 1.8.4 |
 | `ad_slot_eligible` | `slot` string（banner_sounds/banner_import/banner_alarm_list/interstitial_import_saved）, `allowed` bool, `reason` string（eligible/existing_user/version_unavailable/pro/first_week/quiet_hours/frequency_cap/forbidden_context/wrong_context）, `region` string（standard/limited） | 広告枠の判定時（`AdsConfig.isEnabled = false` でも送る） | 1.9.0 前に実際の表示機会を測る | アプリ動作中のみ | 1.9.0 |
 | `sound_preview_played` | `source` string（select_tap/play_button/library） | サウンドの試聴（行タップ・再生ボタン・ライブラリ） | 試聴の入口ごとの使われ方 | アプリ動作中のみ | 既存（`source` は1.8.2） |
 | `alarm_skip_set` | `scope` string（day/selected/range）, `days` int, `alarm_count` int | 日付でアラームを休んだ（休みを付けたアラーム数） | 休みの使われ方（日・選択・期間） | アプリ動作中のみ | 1.8.2 |
