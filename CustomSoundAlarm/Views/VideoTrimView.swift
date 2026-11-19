@@ -531,7 +531,9 @@ struct VideoImportFlow: View {
                 ? videoURL.deletingPathExtension().lastPathComponent
                 : soundName,
             fileName: cafName,
-            thumbnailFileName: thumbnailFileName
+            thumbnailFileName: thumbnailFileName,
+            lufsAtImport: result.lufsBefore,
+            gainDbAtImport: result.gainDb
         )
         soundStore.add(sound)
         selectedSound = sound

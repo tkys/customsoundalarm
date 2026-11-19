@@ -402,3 +402,5 @@
 "silent_sound_use_anyway" = "그대로 사용";
 "silent_alarm_warning" = "소리가 거의 들리지 않습니다";
 "silent_sound_whole_file_message" = "이 오디오에는 소리가 없습니다. 다른 소리를 선택하세요.";
+"settings_mail_diagnostics_notice" = "조사를 위해 앱 상태를 첨부했습니다(곡 제목이나 음원 파일은 포함되지 않습니다). 보내기 전에 첨부를 삭제할 수 있습니다.\n";
+"settings_support_page" = "지원 페이지";

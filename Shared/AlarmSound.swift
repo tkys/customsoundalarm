@@ -19,8 +19,21 @@ struct AlarmSound: Identifiable, Codable, Hashable, Sendable {
     /// nil = サムネイルなし（プリセットは固定アイコン、素の音声は波形で代替表示）。
     /// Optional は #17 罠1（既存データの欠落キー）対策。decodeIfPresent になり安全。
     var thumbnailFileName: String?
+    /// 取り込み時（ゲイン適用前）の LUFS。診断用（#255）。
+    var lufsAtImport: Double?
+    /// 取り込み時に適用したゲイン dB。診断用（#255）。
+    var gainDbAtImport: Double?
 
-    init(id: UUID = UUID(), name: String, fileName: String, isPreset: Bool = false, durationSeconds: Double? = nil, thumbnailFileName: String? = nil) {
+    init(
+        id: UUID = UUID(),
+        name: String,
+        fileName: String,
+        isPreset: Bool = false,
+        durationSeconds: Double? = nil,
+        thumbnailFileName: String? = nil,
+        lufsAtImport: Double? = nil,
+        gainDbAtImport: Double? = nil
+    ) {
         self.id = id
         self.name = name
         self.fileName = fileName
@@ -28,5 +41,7 @@ struct AlarmSound: Identifiable, Codable, Hashable, Sendable {
         self.isPreset = isPreset
         self.durationSeconds = durationSeconds
         self.thumbnailFileName = thumbnailFileName
+        self.lufsAtImport = lufsAtImport
+        self.gainDbAtImport = gainDbAtImport
     }
 }

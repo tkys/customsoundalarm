@@ -177,6 +177,15 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: メールが使えない端末として共有シートを開く（#255）
+    static var isUITestContactNoMail: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-contact-no-mail")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: 小さい音声の取り込み（#224）
     static var isUITestQuietCrop: Bool {
     #if DEBUG

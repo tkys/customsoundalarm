@@ -402,3 +402,5 @@
 "silent_sound_use_anyway" = "仍然使用";
 "silent_alarm_warning" = "声音几乎听不到";
 "silent_sound_whole_file_message" = "这段音频没有声音。请选择其他声音。";
+"settings_mail_diagnostics_notice" = "为帮助我们调查，已附加应用状态（不包含歌曲名称或声音文件）。发送前可删除附件。\n";
+"settings_support_page" = "支持页面";

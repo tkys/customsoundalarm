@@ -303,7 +303,9 @@ struct AudioCropView: View {
         let sound = AlarmSound(
             name: soundName,
             fileName: fileName,
-            thumbnailFileName: thumbnailFileName
+            thumbnailFileName: thumbnailFileName,
+            lufsAtImport: result.lufsBefore,
+            gainDbAtImport: result.gainDb
         )
         soundStore.add(sound)
         selectedSound = sound

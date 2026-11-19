@@ -53,7 +53,7 @@
 | `alarm_orphan_cancelled` | `trigger` string, `count` int | 対応表に無いのに AlarmKit に残っていたアラーム（アプリに出ない・削除できない）を取り消したとき。停止直後と `intent` の同期では行わない | 「設定していないのに鳴る」不具合の影響と、修正の効果の確認 | アプリ動作中／起動時にも送る | 1.8.1 |
 | `alarm_sync_deferred` | `trigger` string, `count` int | 発火した分の中なので次の同期まで延期したとき | 安全柵が効いた回数の確認 | アプリ動作中／起動時にも送る | 1.8.1 |
 | `settings_opened` | — | 設定画面を開いた | 設定の利用 | アプリ動作中のみ | 1.8.2 |
-| `support_contact_opened` | `method` string（mail/web） | 問い合わせを開いた | 連絡手段の使われ方 | アプリ動作中のみ | 1.8.2 |
+| `support_contact_opened` | `method` string（mail/share/web）, `diagnostics_attached` bool | 問い合わせを開いた | 連絡手段の使われ方 | アプリ動作中のみ | 1.8.2 |
 | `review_link_opened` | — | レビューを書くリンクを開いた | レビュー導線の利用 | アプリ動作中のみ | 1.8.2 |
 | `ad_slot_eligible` | `slot` string（banner_sounds/banner_import/banner_alarm_list/interstitial_import_saved）, `allowed` bool, `reason` string（eligible/existing_user/version_unavailable/pro/first_week/quiet_hours/frequency_cap/forbidden_context/wrong_context）, `region` string（standard/limited） | 広告枠の判定時（`AdsConfig.isEnabled = false` でも送る） | 1.9.0 前に実際の表示機会を測る | アプリ動作中のみ | 1.9.0 |
 | `sound_preview_played` | `source` string（select_tap/play_button/library） | サウンドの試聴（行タップ・再生ボタン・ライブラリ） | 試聴の入口ごとの使われ方 | アプリ動作中のみ | 既存（`source` は1.8.2） |
