@@ -401,3 +401,4 @@
 "silent_sound_other" = "选择其他声音";
 "silent_sound_use_anyway" = "仍然使用";
 "silent_alarm_warning" = "声音几乎听不到";
+"silent_sound_whole_file_message" = "这段音频没有声音。请选择其他声音。";

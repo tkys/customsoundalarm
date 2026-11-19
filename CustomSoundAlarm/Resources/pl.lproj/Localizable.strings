@@ -401,3 +401,4 @@
 "silent_sound_other" = "Wybierz inny dźwięk";
 "silent_sound_use_anyway" = "Użyj mimo to";
 "silent_alarm_warning" = "Dźwięk jest ledwo słyszalny";
+"silent_sound_whole_file_message" = "Ten plik audio nie zawiera dźwięku. Wybierz inny dźwięk.";

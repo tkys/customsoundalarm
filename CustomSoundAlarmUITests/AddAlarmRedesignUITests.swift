@@ -558,16 +558,47 @@ final class AddAlarmRedesignUITests: XCTestCase {
             notice.waitForExistence(timeout: 15),
             "silent notice should appear: \(app.debugDescription)"
         )
+        // ファイル全体が無音なので、範囲を選び直すボタンは出さない（#256 レビュー）
+        XCTAssertFalse(findElement("silentSound.reselect").exists)
+        XCTAssertTrue(findElement("silentSound.other").exists)
+        XCTAssertFalse(findElement("silentSound.useAnyway").exists)
+
+        findElement("silentSound.other").tap()
+        XCTAssertFalse(
+            crop.waitForExistence(timeout: 3),
+            "choosing another sound should close the crop screen"
+        )
+    }
+
+    /// #256 レビュー: 一部だけ無音のときは範囲の選び直しと別の音の両方を出す。
+    func testPartialSilentCropShowsReselectAndOtherSound() {
+        app.launchArguments = [
+            "-uitest-open-add-alarm",
+            "-uitest-open-waveform-crop",
+            "-uitest-partial-silent-crop",
+            "-uitestCropStart", "1.5",
+            "-uitestCropEnd", "3.0",
+            "-uitest-force-light"
+        ]
+        app.launch()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
+
+        let crop = findElement("audioCrop.cropAndSave")
+        XCTAssertTrue(crop.waitForExistence(timeout: 20), app.debugDescription)
+        crop.tap()
+
+        let notice = findElement("silentSound.message")
+        XCTAssertTrue(
+            notice.waitForExistence(timeout: 15),
+            "partial silent notice should appear: \(app.debugDescription)"
+        )
         XCTAssertTrue(findElement("silentSound.reselect").exists)
         XCTAssertTrue(findElement("silentSound.other").exists)
         XCTAssertFalse(findElement("silentSound.useAnyway").exists)
 
         findElement("silentSound.reselect").tap()
         XCTAssertFalse(notice.waitForExistence(timeout: 3))
-        XCTAssertTrue(
-            crop.waitForExistence(timeout: 5),
-            "crop actions should return after choosing another part"
-        )
+        XCTAssertTrue(crop.waitForExistence(timeout: 5))
     }
 
     /// #256: 既存の無音アラームは一覧で気づけ、押すと音を選べる。

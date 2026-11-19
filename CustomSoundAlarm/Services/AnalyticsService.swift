@@ -860,6 +860,8 @@ enum SoundImportSource: String, Sendable, CaseIterable {
     case audio
     /// 共有シートから受け取った音（#222）
     case share
+    /// 既存アラームの音を差し替えた（#256 レビュー）
+    case existing
 }
 
 /// 共有シートで受け取った種類（#222）

@@ -401,3 +401,4 @@
 "silent_sound_other" = "اختيار صوت آخر";
 "silent_sound_use_anyway" = "استخدامه على أي حال";
 "silent_alarm_warning" = "الصوت بالكاد يُسمع";
+"silent_sound_whole_file_message" = "هذا الملف الصوتي لا يحتوي على صوت. اختر صوتًا آخر.";

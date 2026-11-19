@@ -401,3 +401,4 @@
 "silent_sound_other" = "Ander geluid kiezen";
 "silent_sound_use_anyway" = "Toch gebruiken";
 "silent_alarm_warning" = "Geluid is nauwelijks hoorbaar";
+"silent_sound_whole_file_message" = "Deze audio bevat geen geluid. Kies een ander geluid.";

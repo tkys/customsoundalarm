@@ -32,6 +32,7 @@ struct VideoImportFlow: View {
     @State private var isProcessing = false
     @State private var errorMessage: String?
     @State private var silentLevel: SilentSoundLevel?
+    @State private var silentCoversWholeFile = false
     @State private var pendingSilentSave: PendingVideoSave?
 
     private struct PendingVideoSave {
@@ -314,6 +315,7 @@ struct VideoImportFlow: View {
                 if let silentLevel {
                     SilentSoundNoticeView(
                         level: silentLevel,
+                        isWholeFileSilent: silentCoversWholeFile,
                         onReselect: { handleSilentAction(.reselect) },
                         onOtherSound: { handleSilentAction(.otherSound) },
                         onUseAnyway: { handleSilentAction(.useAnyway) }
@@ -479,12 +481,21 @@ struct VideoImportFlow: View {
                     gainDb: result.gainDb
                 )
                 if level != .ok {
+                    // 抽出した音声全体が無音なら、範囲を選び直しても無音（#256 レビュー）。
+                    let wholeFileSilent = await Task.detached {
+                        let buffer = AudioSampleLoader.loadMono44k(fileURL: audioURL)
+                        return SilentSoundLogic.isWholeFileSilent(
+                            measurement: buffer.flatMap { LoudnessMeter.measure(buffer: $0) },
+                            isReadable: buffer != nil
+                        )
+                    }.value
                     pendingSilentSave = PendingVideoSave(
                         result: result,
                         cafName: cafName,
                         thumbnailFileName: thumbnailFileName,
                         audioURL: audioURL
                     )
+                    silentCoversWholeFile = wholeFileSilent
                     silentLevel = level
                     return
                 }
@@ -557,6 +568,7 @@ struct VideoImportFlow: View {
             deletePendingFile()
             pendingSilentSave = nil
             silentLevel = nil
+            silentCoversWholeFile = false
         case .otherSound:
             deletePendingFile()
             if let pending = pendingSilentSave {
@@ -565,12 +577,14 @@ struct VideoImportFlow: View {
             pendingSilentSave = nil
             extractedAudioURL = nil
             silentLevel = nil
+            silentCoversWholeFile = false
             onUserClosed?()
             dismiss()
         case .useAnyway:
             guard let pending = pendingSilentSave else { return }
             pendingSilentSave = nil
             silentLevel = nil
+            silentCoversWholeFile = false
             Task {
                 await completeSave(
                     result: pending.result,
@@ -580,6 +594,8 @@ struct VideoImportFlow: View {
                     videoURL: videoURL ?? pending.audioURL
                 )
             }
+        case .fixedExisting:
+            break
         }
     }
 

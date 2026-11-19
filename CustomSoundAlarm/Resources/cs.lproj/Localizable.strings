@@ -401,3 +401,4 @@
 "silent_sound_other" = "Vybrat jiný zvuk";
 "silent_sound_use_anyway" = "Přesto použít";
 "silent_alarm_warning" = "Zvuk je sotva slyšet";
+"silent_sound_whole_file_message" = "Toto audio neobsahuje žádný zvuk. Vyberte jiný zvuk.";

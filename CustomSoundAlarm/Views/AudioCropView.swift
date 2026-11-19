@@ -37,6 +37,7 @@ struct AudioCropView: View {
     @State private var isProcessing = false
     @State private var errorMessage: String?
     @State private var silentLevel: SilentSoundLevel?
+    @State private var silentCoversWholeFile = false
     @State private var pendingSilentSave: PendingCropSave?
 
     private struct PendingCropSave {
@@ -118,6 +119,7 @@ struct AudioCropView: View {
                 if let silentLevel {
                     SilentSoundNoticeView(
                         level: silentLevel,
+                        isWholeFileSilent: silentCoversWholeFile,
                         onReselect: { handleSilentAction(.reselect) },
                         onOtherSound: { handleSilentAction(.otherSound) },
                         onUseAnyway: { handleSilentAction(.useAnyway) }
@@ -268,10 +270,20 @@ struct AudioCropView: View {
                     gainDb: result.gainDb
                 )
                 if level != .ok {
+                    // 元ファイル全体が無音なら、範囲を選び直しても無音（#256 レビュー）。
+                    let fullURL = source.url
+                    let wholeFileSilent = await Task.detached {
+                        let buffer = AudioSampleLoader.loadMono44k(fileURL: fullURL)
+                        return SilentSoundLogic.isWholeFileSilent(
+                            measurement: buffer.flatMap { LoudnessMeter.measure(buffer: $0) },
+                            isReadable: buffer != nil
+                        )
+                    }.value
                     pendingSilentSave = PendingCropSave(
                         result: result,
                         thumbnailFileName: thumbnailFileName
                     )
+                    silentCoversWholeFile = wholeFileSilent
                     silentLevel = level
                     return
                 }
@@ -334,22 +346,27 @@ struct AudioCropView: View {
             deletePendingFile()
             pendingSilentSave = nil
             silentLevel = nil
+            silentCoversWholeFile = false
         case .otherSound:
             deletePendingFile()
             pendingSilentSave = nil
             silentLevel = nil
+            silentCoversWholeFile = false
             onUserClosed?()
             dismiss()
         case .useAnyway:
             guard let pending = pendingSilentSave else { return }
             pendingSilentSave = nil
             silentLevel = nil
+            silentCoversWholeFile = false
             Task {
                 try? await completeSave(
                     pending.result,
                     thumbnailFileName: pending.thumbnailFileName
                 )
             }
+        case .fixedExisting:
+            break
         }
     }
 

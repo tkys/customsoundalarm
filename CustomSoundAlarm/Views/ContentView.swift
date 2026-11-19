@@ -58,7 +58,7 @@ struct ContentView: View {
     @State private var quickSaveToastTask: Task<Void, Never>?
     @State private var quickSaveFeedbackTrigger = 0
     /// 無音の音を使っている既存アラーム（#256）
-    @State private var silentAlarmIDs: Set<UUID> = []
+    @State private var silentAlarmLevels: [UUID: SilentSoundLevel] = [:]
     @State private var fixingSilentAlarm: AlarmEntry?
     @State private var didScanSilentAlarms = false
     @ScaledMetric(relativeTo: .body) private var skipActionIconSize: CGFloat = 17
@@ -714,7 +714,7 @@ struct ContentView: View {
                     alarm: alarm,
                     soundName: AlarmSoundDisplay.name(for: alarm),
                     sound: AlarmSoundDisplay.representativeSound(for: alarm),
-                    hasSilentSound: silentAlarmIDs.contains(alarm.id),
+                    hasSilentSound: silentAlarmLevels[alarm.id] != nil,
                     onFixSilentSound: { fixingSilentAlarm = alarm },
                     onToggle: {
                         alarmStore.toggleEnabled(alarm)
@@ -848,14 +848,18 @@ struct ContentView: View {
         didScanSilentAlarms = true
         let entries = alarmStore.alarms
         let directory = AudioConverter.shared.soundsDirectory
+        let cached = AppGroup.silentAlarmScanCache
         Task.detached {
-            let ids = SilentAlarmScanner.silentAlarmIDs(
+            let result = SilentAlarmScanner.scan(
                 entries: entries,
                 soundsDirectory: directory,
+                cached: cached,
                 measure: { LoudnessMeter.measure(fileURL: $0) }
             )
             await MainActor.run {
-                silentAlarmIDs = ids
+                // 測った結果は次回起動のために残す（#256 レビュー）
+                AppGroup.silentAlarmScanCache = result.cache
+                silentAlarmLevels = result.levels
             }
         }
     }
@@ -878,7 +882,13 @@ struct ContentView: View {
         }
         alarmStore.update(updated)
         AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
-        silentAlarmIDs.remove(alarm.id)
+        if let level = silentAlarmLevels.removeValue(forKey: alarm.id) {
+            AnalyticsService.shared.capture(.silentSoundBlocked(
+                level: level,
+                source: .existing,
+                action: .fixedExisting
+            ))
+        }
         fixingSilentAlarm = nil
     }
 

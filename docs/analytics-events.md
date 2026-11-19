@@ -19,7 +19,7 @@
 | `permission_banner_shown` | `status` string（denied/not_determined） | アラーム一覧の許可バナーを出した | 拒否済みユーザーへの気づき | アプリ動作中のみ | 1.8.3 |
 | `permission_banner_tapped` | `status` string（denied/not_determined）, `step` string（sheet_shown/settings_opened・denied のみ） | 許可バナーのボタンを押した | 許可への転換 | アプリ動作中のみ | 1.8.3（`step` は1.8.3） |
 | `import_landed` | `source` string（share/library）, `destination` string（add_alarm/library） | 取り込みを保存したあとの着地先 | 取り込み後の導線 | アプリ動作中のみ | 1.8.3 |
-| `silent_sound_blocked` | `level` string（silent/very_quiet）, `source` string（video/audio/share）, `action` string（reselect/other_sound/use_anyway） | 無音・ほぼ無音で保存を止めた | 無音の取り込み | アプリ動作中のみ | 1.8.4 |
+| `silent_sound_blocked` | `level` string（silent/very_quiet）, `source` string（video/audio/share/existing）, `action` string（reselect/other_sound/use_anyway/fixed_existing） | 無音・ほぼ無音で保存を止めた／既存アラームを直した | 無音の取り込み | アプリ動作中のみ | 1.8.4 |
 | `alarm_fired` | `was_app_foreground` bool, `hour` int, `is_repeating` bool, `detection` string（observer/reconcile）, `sound_mode` string | アラーム発火検知 | 実際に鳴ったか・プレイリストで鳴ったか | アプリ動作中／起動時にも補完 | 既存（`sound_mode` は1.8.2） |
 | `alarm_stopped` | `hour` int, `sound_mode` string | 本体アラームの停止（Intent） | 停止行動・プレイリストの継続 | **届く** | 既存（`sound_mode` は1.8.2） |
 | `alarm_snoozed` | `from` string（observer/reconcile） | スヌーズ待機への遷移 | スヌーズ行動 | アプリ動作中／起動時にも補完 | 既存 |

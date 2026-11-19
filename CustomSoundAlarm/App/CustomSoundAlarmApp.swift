@@ -372,11 +372,9 @@ struct CustomSoundAlarmApp: App {
                         let url = AudioConverter.shared.soundsDirectory
                             .appendingPathComponent(fileName)
                         try? FileManager.default.removeItem(at: url)
-                        if let source = Bundle.main.url(
-                            forResource: "SilentTest",
-                            withExtension: "caf"
-                        ) {
-                            try? FileManager.default.copyItem(at: source, to: url)
+                        // ファイル名が同じなので、前回の判定キャッシュを消してから測る
+                        AppGroup.silentAlarmScanCache = [:]
+                        if (try? SilentTestAudioFactory.makeQuietFile(at: url)) != nil {
                             SoundStore.shared.add(AlarmSound(
                                 name: "Silent alarm",
                                 fileName: fileName,

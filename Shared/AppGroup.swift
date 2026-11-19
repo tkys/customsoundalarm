@@ -204,6 +204,28 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: 一部だけ無音の音声の取り込み（#256 レビュー）
+    static var isUITestPartialSilentCrop: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-partial-silent-crop")
+    #else
+        false
+    #endif
+    }
+
+    /// 既存アラームの無音判定キャッシュ（ファイル名 → level）。#256 レビュー
+    private static let silentAlarmScanCacheKey = "silent_alarm_scan_cache_v1"
+
+    static var silentAlarmScanCache: [String: String] {
+        get {
+            UserDefaults.standard.dictionary(forKey: silentAlarmScanCacheKey)
+                as? [String: String] ?? [:]
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: silentAlarmScanCacheKey)
+        }
+    }
+
     /// UIテスト用: 取り込んだ音が2つある状態（#207 の提案行）
     static var isUITestSeedSuggestion: Bool {
     #if DEBUG

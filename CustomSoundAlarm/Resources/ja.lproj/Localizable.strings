@@ -401,3 +401,4 @@
 "silent_sound_other" = "別の音を選ぶ";
 "silent_sound_use_anyway" = "このまま使う";
 "silent_alarm_warning" = "音がほとんど出ません";
+"silent_sound_whole_file_message" = "この音声には音が入っていません。別の音を選んでください";

@@ -10,6 +10,8 @@ enum SilentSoundAction: String, Equatable, Sendable {
     case reselect
     case otherSound = "other_sound"
     case useAnyway = "use_anyway"
+    /// 既存アラームの音を差し替えた（#256 レビュー）
+    case fixedExisting = "fixed_existing"
 }
 
 /// 無音・ほぼ無音の判定（#256）。
@@ -38,5 +40,19 @@ enum SilentSoundLogic {
         peakDb: Double?
     ) -> SilentSoundLevel {
         judge(lufsBefore: lufs, peakDb: peakDb, gainDb: 0)
+    }
+
+    /// 元ファイル全体が無音か。範囲を選び直しても無音のままなので、
+    /// 知らせの文言とボタンを変える（#256 レビュー）。
+    ///
+    /// - `isReadable == false`: 読み込み自体に失敗。無音とは断定しない。
+    /// - `measurement == nil` かつ読み込める: 無音（LoudnessMeter は無音で nil を返す）。
+    static func isWholeFileSilent(
+        measurement: LoudnessMeter.Measurement?,
+        isReadable: Bool
+    ) -> Bool {
+        guard isReadable else { return false }
+        guard let measurement else { return true }
+        return warningLevel(lufs: measurement.lufs, peakDb: measurement.peakDb) == .silent
     }
 }
