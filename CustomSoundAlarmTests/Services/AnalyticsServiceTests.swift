@@ -354,6 +354,20 @@ struct AnalyticsEventTests {
         #expect(props["alarm_uid"] as? String == "uid")
     }
 
+    // MARK: empty quick alarm (#231)
+
+    @Test
+    func emptyQuickAlarmSourceIsStable() {
+        #expect(AlarmCreatedSource.emptyQuick.rawValue == "empty_quick")
+        let props = AnalyticsEvent.alarmCreated(
+            hasCustomSound: false,
+            isRepeating: false,
+            snoozeMinutes: 9,
+            source: .emptyQuick
+        ).properties
+        #expect(props["source"] as? String == "empty_quick")
+    }
+
     // MARK: test_ring_scheduled / test_ring_stopped (#109)
 
     @Test

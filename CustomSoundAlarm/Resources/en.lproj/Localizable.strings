@@ -393,3 +393,6 @@
 "permission_settings_open" = "Open Settings";
 "received_title" = "Received";
 "received_detail" = "Open My Sound Alarm to choose the part to ring.";
+"empty_quick_title" = "What time do you wake up?";
+"empty_quick_other" = "Other time";
+"empty_quick_hint" = "Creates an alarm.";

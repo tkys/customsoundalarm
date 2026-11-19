@@ -393,3 +393,6 @@
 "permission_settings_open" = "فتح الإعدادات";
 "received_title" = "تم الاستلام";
 "received_detail" = "افتح My Sound Alarm لاختيار الجزء الذي يرن.";
+"empty_quick_title" = "في أي ساعة تستيقظ؟";
+"empty_quick_other" = "وقت آخر";
+"empty_quick_hint" = "ينشئ منبهًا.";

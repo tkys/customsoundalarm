@@ -393,3 +393,6 @@
 "permission_settings_open" = "Instellingen openen";
 "received_title" = "Ontvangen";
 "received_detail" = "Open My Sound Alarm om het deel te kiezen dat klinkt.";
+"empty_quick_title" = "Hoe laat word je wakker?";
+"empty_quick_other" = "Andere tijd";
+"empty_quick_hint" = "Maakt een wekker.";

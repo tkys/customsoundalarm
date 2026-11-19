@@ -393,3 +393,6 @@
 "permission_settings_open" = "打开设置";
 "received_title" = "已收到";
 "received_detail" = "打开 My Sound Alarm 选择要响的部分。";
+"empty_quick_title" = "几点起床？";
+"empty_quick_other" = "其他时间";
+"empty_quick_hint" = "创建闹钟。";
