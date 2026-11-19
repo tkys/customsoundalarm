@@ -396,3 +396,9 @@
 "empty_quick_title" = "A che ora ti svegli?";
 "empty_quick_other" = "Altro orario";
 "empty_quick_hint" = "Crea una sveglia.";
+"silent_sound_message" = "Questa parte è quasi silenziosa. Scegli un’altra parte o un altro suono.";
+"silent_sound_reselect" = "Scegli un’altra parte";
+"silent_sound_other" = "Scegli un altro suono";
+"silent_sound_use_anyway" = "Usa comunque";
+"silent_alarm_warning" = "Il suono si sente a malapena";
+"silent_sound_whole_file_message" = "Questo audio non contiene suoni. Scegli un altro suono.";

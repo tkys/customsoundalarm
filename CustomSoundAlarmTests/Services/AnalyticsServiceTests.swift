@@ -230,6 +230,7 @@ struct AnalyticsEventTests {
         #expect(SoundImportSource.video.rawValue == "video")
         #expect(SoundImportSource.audio.rawValue == "audio")
         #expect(SoundImportSource.share.rawValue == "share")
+        #expect(SoundImportSource.existing.rawValue == "existing")
     }
 
     // MARK: feature_unlock (#216)

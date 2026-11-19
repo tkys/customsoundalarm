@@ -396,3 +396,9 @@
 "empty_quick_title" = "A que horas você acorda?";
 "empty_quick_other" = "Outro horário";
 "empty_quick_hint" = "Cria um alarme.";
+"silent_sound_message" = "Esta parte está quase silenciosa. Escolha outra parte ou outro som.";
+"silent_sound_reselect" = "Escolher outra parte";
+"silent_sound_other" = "Escolher outro som";
+"silent_sound_use_anyway" = "Usar mesmo assim";
+"silent_alarm_warning" = "O som quase não se ouve";
+"silent_sound_whole_file_message" = "Este áudio não tem som. Escolha outro som.";

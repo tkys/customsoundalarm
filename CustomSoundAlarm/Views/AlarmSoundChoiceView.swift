@@ -6,6 +6,8 @@ struct AlarmSoundChoiceView: View {
     @Binding var playlistID: UUID?
     @Binding var selectedSound: AlarmSound?
     @Binding var volumeBoostedFileName: String?
+    /// 無音のアラームを直すときなど、選んだ瞬間に閉じたい画面用（#256）
+    var onSelection: ((AlarmSound?, UUID?) -> Void)?
 
     @Environment(\.dismiss) private var dismiss
     @State private var store = PlaylistStore.shared
@@ -28,6 +30,7 @@ struct AlarmSoundChoiceView: View {
                     // 選んでも画面は閉じない。タップで鳴らした音を確かめてから戻れる（#196）
                     playlistID = nil
                     selectedSound = sound
+                    onSelection?(sound, nil)
                 },
                 middle: AnyView(playlistSectionView),
                 volumeBoostedFileName: $volumeBoostedFileName
@@ -55,6 +58,7 @@ struct AlarmSoundChoiceView: View {
                 ) { playlist in
                     playlistID = playlist.id
                     selectedSound = nil
+                    onSelection?(nil, playlist.id)
                 }
             }
         }
@@ -130,6 +134,7 @@ struct AlarmSoundChoiceView: View {
         if let playlist = PlaylistSuggestionService.create() {
             playlistID = playlist.id
             selectedSound = nil
+            onSelection?(nil, playlist.id)
             dismiss()
         }
     }
@@ -137,6 +142,7 @@ struct AlarmSoundChoiceView: View {
     private func select(_ playlist: Playlist) {
         playlistID = playlist.id
         selectedSound = nil
+        onSelection?(nil, playlist.id)
         dismiss()
     }
 }

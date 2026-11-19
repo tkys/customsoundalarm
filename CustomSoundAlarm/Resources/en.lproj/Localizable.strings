@@ -396,3 +396,9 @@
 "empty_quick_title" = "What time do you wake up?";
 "empty_quick_other" = "Other time";
 "empty_quick_hint" = "Creates an alarm.";
+"silent_sound_message" = "This part is nearly silent. Choose another part or another sound.";
+"silent_sound_reselect" = "Choose another part";
+"silent_sound_other" = "Choose another sound";
+"silent_sound_use_anyway" = "Use anyway";
+"silent_alarm_warning" = "Sound is hard to hear";
+"silent_sound_whole_file_message" = "This audio has no sound. Choose another sound.";

@@ -111,6 +111,13 @@ enum AnalyticsEvent: Sendable {
     /// 取り込みを保存したあとの着地先（#246）
     case importLanded(source: ImportLandingSource, destination: ShareImportDestination)
 
+    /// 無音・ほぼ無音のため保存を止めた／選び直した（#256）
+    case silentSoundBlocked(
+        level: SilentSoundLevel,
+        source: SoundImportSource,
+        action: SilentSoundAction
+    )
+
     /// 動画からの音声抽出・変換フローの開始
     /// - source: 取得元（photo_library / file）
     case videoImportStarted(source: VideoImportSource)
@@ -376,6 +383,7 @@ enum AnalyticsEvent: Sendable {
         case .permissionBannerShown: return "permission_banner_shown"
         case .permissionBannerTapped: return "permission_banner_tapped"
         case .importLanded: return "import_landed"
+        case .silentSoundBlocked: return "silent_sound_blocked"
         case .videoImportStarted: return "video_import_started"
         case .videoImportFailed: return "video_import_failed"
         case .alarmDuplicated: return "alarm_duplicated"
@@ -531,6 +539,12 @@ enum AnalyticsEvent: Sendable {
             return [
                 "source": source.rawValue,
                 "destination": destination.rawValue
+            ]
+        case let .silentSoundBlocked(level, source, action):
+            return [
+                "level": level.rawValue,
+                "source": source.rawValue,
+                "action": action.rawValue
             ]
         case let .videoImportStarted(source):
             return ["source": source.rawValue]
@@ -846,6 +860,8 @@ enum SoundImportSource: String, Sendable, CaseIterable {
     case audio
     /// 共有シートから受け取った音（#222）
     case share
+    /// 既存アラームの音を差し替えた（#256 レビュー）
+    case existing
 }
 
 /// 共有シートで受け取った種類（#222）

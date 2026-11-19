@@ -396,3 +396,9 @@
 "empty_quick_title" = "Wann stehst du auf?";
 "empty_quick_other" = "Andere Zeit";
 "empty_quick_hint" = "Erstellt einen Wecker.";
+"silent_sound_message" = "Dieser Teil ist fast still. Wähle einen anderen Teil oder einen anderen Ton.";
+"silent_sound_reselect" = "Anderen Teil wählen";
+"silent_sound_other" = "Anderen Ton wählen";
+"silent_sound_use_anyway" = "Trotzdem verwenden";
+"silent_alarm_warning" = "Ton ist kaum hörbar";
+"silent_sound_whole_file_message" = "Diese Audiodatei enthält keinen Ton. Wähle einen anderen Ton.";

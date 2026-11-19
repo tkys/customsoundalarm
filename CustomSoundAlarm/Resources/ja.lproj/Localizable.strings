@@ -396,3 +396,9 @@
 "empty_quick_title" = "何時に起きる？";
 "empty_quick_other" = "ほかの時刻";
 "empty_quick_hint" = "アラームを作成します";
+"silent_sound_message" = "この部分はほとんど音がありません。別の部分か、別の音を選んでください";
+"silent_sound_reselect" = "範囲を選び直す";
+"silent_sound_other" = "別の音を選ぶ";
+"silent_sound_use_anyway" = "このまま使う";
+"silent_alarm_warning" = "音がほとんど出ません";
+"silent_sound_whole_file_message" = "この音声には音が入っていません。別の音を選んでください";
