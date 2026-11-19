@@ -196,7 +196,6 @@
 		B80000000000000000000001 /* SilentSoundLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80000000000000000000011 /* SilentSoundLogicTests.swift */; };
 		BC0000000000000000000001 /* DiagnosticsReportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0000000000000000000011 /* DiagnosticsReportTests.swift */; };
 		BE0000000000000000000001 /* FirstAlarmFollowupLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE0000000000000000000011 /* FirstAlarmFollowupLogicTests.swift */; };
-		CD0000000000000000000001 /* MusicLibraryImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD0000000000000000000011 /* MusicLibraryImporterTests.swift */; };
 		B20000000000000000000001 /* EmptyStateQuickAlarmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000011 /* EmptyStateQuickAlarmTests.swift */; };
 		B7DBFE11F40076771B8230DF /* AlarmScheduleSignature.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6486F8829563B6E46853BEC /* AlarmScheduleSignature.swift */; };
 		B870DC3743B1E92F43B5E614 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 93DE9488BAAC2252B4E6513D /* PrivacyInfo.xcprivacy */; };
@@ -527,7 +526,6 @@
 		B80000000000000000000011 /* SilentSoundLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilentSoundLogicTests.swift; sourceTree = "<group>"; };
 		BC0000000000000000000011 /* DiagnosticsReportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsReportTests.swift; sourceTree = "<group>"; };
 		BE0000000000000000000011 /* FirstAlarmFollowupLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstAlarmFollowupLogicTests.swift; sourceTree = "<group>"; };
-		CD0000000000000000000011 /* MusicLibraryImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicLibraryImporterTests.swift; sourceTree = "<group>"; };
 		B20000000000000000000011 /* EmptyStateQuickAlarmTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateQuickAlarmTests.swift; sourceTree = "<group>"; };
 		94E10DA64FE9792F8E216743 /* VideoAudioExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoAudioExtractor.swift; sourceTree = "<group>"; };
 		96C841BF0C39CBE4E786A3F0 /* SettingsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsUITests.swift; sourceTree = "<group>"; };
@@ -715,7 +713,6 @@
 		B80000000000000000000011 /* SilentSoundLogicTests.swift */,
 		BC0000000000000000000011 /* DiagnosticsReportTests.swift */,
 		BE0000000000000000000011 /* FirstAlarmFollowupLogicTests.swift */,
-		CD0000000000000000000011 /* MusicLibraryImporterTests.swift */,
 		B20000000000000000000011 /* EmptyStateQuickAlarmTests.swift */,
 				AF480CAF8CB3085A8C64FC4A /* PlaylistTests.swift */,
 				535DA3D6F894B98B663B1F5C /* PlaylistUnlockLogicTests.swift */,
@@ -1523,7 +1520,6 @@
 		B80000000000000000000001 /* SilentSoundLogicTests.swift in Sources */,
 		BC0000000000000000000001 /* DiagnosticsReportTests.swift in Sources */,
 		BE0000000000000000000001 /* FirstAlarmFollowupLogicTests.swift in Sources */,
-		CD0000000000000000000001 /* MusicLibraryImporterTests.swift in Sources */,
 		B20000000000000000000001 /* EmptyStateQuickAlarmTests.swift in Sources */,
 				EC8E115717C972D224027030 /* PlaylistTests.swift in Sources */,
 				133D75BE318B8FB322869891 /* PlaylistUnlockLogicTests.swift in Sources */,
