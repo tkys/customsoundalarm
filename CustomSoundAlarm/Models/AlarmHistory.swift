@@ -145,6 +145,16 @@ enum AlarmLocalHistoryStore {
         AppGroup.containerURL.appendingPathComponent(fileName)
     }
 
+    /// 診断ファイル用に、新しい方から最大 `limit` 行を返す（#255）。
+    static func recentLines(limit: Int = 200, fileURL: URL? = nil) -> [String] {
+        let url = fileURL ?? Self.fileURL
+        guard let text = try? String(contentsOf: url, encoding: .utf8) else { return [] }
+        return text
+            .split(separator: "\n", omittingEmptySubsequences: true)
+            .suffix(max(0, limit))
+            .map(String.init)
+    }
+
     static func append(
         event: String,
         properties: [String: Any],

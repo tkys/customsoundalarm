@@ -51,18 +51,26 @@ enum SettingsLogic {
         return URL(string: siteBase + path + "howto.html")!
     }
 
-    /// メール本文。端末情報を末尾に足し、アラームや音の情報は入れない。
+    /// メール本文。先頭に診断ファイルの説明（#255）、末尾に端末情報を足す。
+    /// アラームや音の情報（ラベル・ファイル名・表示名）は入れない。
     static func mailBody(
         appVersion: String,
         osVersion: String,
         deviceModel: String
     ) -> String {
-        String(
+        let notice = String(localized: "settings_mail_diagnostics_notice")
+        let details = String(
             format: String(localized: "settings_mail_body"),
             appVersion,
             osVersion,
             deviceModel
         )
+        return notice + details
+    }
+
+    /// 共有シートで渡す文面。宛先が分かるようにアドレスを書く（#255）。
+    static func shareText(body: String) -> String {
+        "\(supportEmail)\n\n\(body)"
     }
 
     /// 「iPhone (iPhone18,1)」の形。機種名とハードウェア識別子だけ。

@@ -60,8 +60,9 @@ struct SettingsLogicTests {
             osVersion: "26.5",
             deviceModel: "iPhone (iPhone18,1)"
         )
-        // お礼の定型文は入れず、空行2つのあとに区切りと端末情報だけ
-        #expect(body.hasPrefix("\n\n---\n"))
+        // 先頭に診断ファイルの説明、そのあとに区切りと端末情報
+        #expect(body.hasPrefix(String(localized: "settings_mail_diagnostics_notice")))
+        #expect(body.contains("\n\n---\n"))
         #expect(!body.contains("Thanks"))
         #expect(!body.lowercased().contains("please write"))
         #expect(body.contains("1.8.2 (14)"))
@@ -71,6 +72,13 @@ struct SettingsLogicTests {
         #expect(!body.contains("07:00"))
         #expect(!body.contains("PresetMarimba.caf"))
         #expect(!body.contains("朝"))
+    }
+
+    @Test
+    func shareTextIncludesTheSupportAddress() {
+        let text = SettingsLogic.shareText(body: "Body")
+        #expect(text.contains(SettingsLogic.supportEmail))
+        #expect(text.contains("Body"))
     }
 
     @Test

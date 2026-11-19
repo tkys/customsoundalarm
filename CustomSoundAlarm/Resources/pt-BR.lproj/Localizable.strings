@@ -402,3 +402,5 @@
 "silent_sound_use_anyway" = "Usar mesmo assim";
 "silent_alarm_warning" = "O som quase não se ouve";
 "silent_sound_whole_file_message" = "Este áudio não tem som. Escolha outro som.";
+"settings_mail_diagnostics_notice" = "Para nos ajudar a investigar, o estado do app está anexado (não inclui títulos de músicas nem arquivos de som). Você pode remover o anexo antes de enviar.\n";
+"settings_support_page" = "Página de suporte";

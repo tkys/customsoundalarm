@@ -340,8 +340,9 @@ enum AnalyticsEvent: Sendable {
     /// 設定画面を開いた
     case settingsOpened
     /// 問い合わせを開いた
-    /// - method: mail（メール作成）/ web（サポートページ）
-    case supportContactOpened(method: SupportContactMethod)
+    /// - method: mail（メール作成）/ share（共有シート）/ web（サポートページ）
+    /// - diagnosticsAttached: 診断ファイルを添付したか（#255）
+    case supportContactOpened(method: SupportContactMethod, diagnosticsAttached: Bool)
     /// レビューを書くリンクを開いた
     case reviewLinkOpened
 
@@ -727,8 +728,11 @@ enum AnalyticsEvent: Sendable {
             ]
         case .settingsOpened, .reviewLinkOpened:
             return [:]
-        case let .supportContactOpened(method):
-            return ["method": method.rawValue]
+        case let .supportContactOpened(method, diagnosticsAttached):
+            return [
+                "method": method.rawValue,
+                "diagnostics_attached": diagnosticsAttached
+            ]
         case let .bedsideExited(durationBucket, exitMethod):
             return [
                 "duration_bucket": durationBucket,
@@ -850,6 +854,7 @@ enum BedsideEntry: String, Sendable {
 /// 問い合わせの方法（#204）。
 enum SupportContactMethod: String, Sendable {
     case mail
+    case share
     case web
 }
 

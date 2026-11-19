@@ -8,7 +8,7 @@ App UI names are quoted in English outside Japanese; Settings paths use Apple's 
 """
 
 EMAIL = "support@mysoundalarm.com"
-UPDATED = "2026-11-04"
+UPDATED = "2026-11-19"
 
 SUPPORT = {
     "en": {
@@ -402,6 +402,7 @@ PRIVACY = {
             "The App uses anonymous analytics via PostHog to improve the App. The App does not use advertising trackers and does not track you across other companies’ apps or websites. PostHog receives the anonymous data described above at https://us.i.posthog.com.",
             "This website also uses PostHog to count page views and taps on the App Store link. It sets no cookies and stores nothing on your device: an anonymous ID is kept in memory only for the visit and is gone when you close the page. Session recording is off.",
             "For both the App and this website, PostHog uses the IP address of your connection to estimate an approximate location (country and city) when the data arrives. The IP address itself is then discarded and is not stored.",
+            "When you contact us from the App, a file describing the App's state is attached to your message: the app and iOS versions, device model, your alarm settings, loudness measurements of your sounds, recent alarm history and the anonymous analytics ID. It does not include sound files, song titles or file names. If you send it, we can match the anonymous usage data with your message to investigate the problem. You can remove the attachment before sending.",
         ],
         "perms_intro": "The App asks for access to these device features:",
         "perms": [
@@ -422,6 +423,7 @@ PRIVACY = {
             "本アプリはアプリの改善を目的として、PostHog 経由で匿名の分析を行います。広告トラッカーは使用せず、他社のアプリやウェブサイトにまたがるトラッキングも行いません。PostHog は上記の匿名データを https://us.i.posthog.com で受信します。",
             "このウェブサイトでも、ページの表示回数と App Store へのリンクのタップ数を数えるために PostHog を使っています。Cookie は使わず、端末にも何も保存しません。匿名の ID はページを開いている間だけメモリに置かれ、閉じると消えます。画面の録画は行いません。",
             "アプリとこのウェブサイトのどちらでも、PostHog はデータを受け取るときに、通信元の IP アドレスからおおよその位置（国・都市）を推定します。IP アドレスそのものはその後に破棄され、保存されません。",
+            "アプリからお問い合わせいただくと、アプリの状態を記したファイルがメッセージに添付されます。内容は、アプリと iOS のバージョン、機種、アラームの設定、音の大きさ（LUFS）の測定値、最近のアラーム履歴、匿名の分析 ID です。音声ファイル、曲名、ファイル名は含まれません。送信していただくと、匿名の利用データとメッセージを照らし合わせて問題を調査できます。送信前に添付を削除できます。",
         ],
         "perms_intro": "本アプリは次のデバイス機能へのアクセスを求めます：",
         "perms": [
@@ -442,6 +444,7 @@ PRIVACY = {
             "L’App utilise ces analyses anonymes via PostHog pour s’améliorer. Elle n’utilise pas de traceurs publicitaires et ne te suit pas à travers les apps ou sites web d’autres entreprises. PostHog reçoit les données anonymes décrites ci-dessus à l’adresse https://us.i.posthog.com.",
             "Ce site web utilise aussi PostHog pour compter les pages vues et les touches sur le lien App Store. Il ne dépose aucun cookie et ne stocke rien sur ton appareil : un identifiant anonyme reste en mémoire le temps de la visite et disparaît quand tu fermes la page. L’enregistrement des sessions est désactivé.",
             "Pour l’App comme pour ce site, PostHog utilise l’adresse IP de votre connexion pour estimer une localisation approximative (pays et ville) à la réception des données. L’adresse IP elle-même est ensuite supprimée et n’est pas conservée.",
+            "Lorsque vous nous contactez depuis l’app, un fichier décrivant l’état de l’app est joint à votre message : versions de l’app et d’iOS, modèle de l’appareil, réglages de vos alarmes, mesures de volume sonore (LUFS) de vos sons, historique récent des alarmes et ID d’analyse anonyme. Il ne contient ni fichiers audio, ni titres de chansons, ni noms de fichiers. Si vous l’envoyez, nous pouvons rapprocher les données d’utilisation anonymes de votre message pour étudier le problème. Vous pouvez supprimer la pièce jointe avant l’envoi.",
         ],
         "perms_intro": "L’App demande l’accès à ces fonctions de l’appareil :",
         "perms": [
@@ -462,6 +465,7 @@ PRIVACY = {
             "Die App nutzt anonyme Analysen über PostHog, um die App zu verbessern. Sie verwendet keine Werbetracker und verfolgt dich nicht über Apps oder Websites anderer Unternehmen hinweg. PostHog empfängt die oben beschriebenen anonymen Daten unter https://us.i.posthog.com.",
             "Auch diese Website nutzt PostHog, um Seitenaufrufe und Tipps auf den App-Store-Link zu zählen. Sie setzt keine Cookies und speichert nichts auf deinem Gerät: Eine anonyme ID wird nur für die Dauer des Besuchs im Arbeitsspeicher gehalten und verschwindet beim Schließen der Seite. Sitzungsaufzeichnung ist aus.",
             "Sowohl für die App als auch für diese Website verwendet PostHog beim Empfang der Daten die IP-Adresse deiner Verbindung, um einen ungefähren Standort (Land und Stadt) zu bestimmen. Die IP-Adresse selbst wird danach verworfen und nicht gespeichert.",
+            "Wenn du uns über die App kontaktierst, wird deiner Nachricht eine Datei mit dem Status der App beigefügt: App- und iOS-Version, Gerätemodell, deine Weckereinstellungen, Lautheitsmessungen (LUFS) deiner Töne, der letzte Wecker-Verlauf und die anonyme Analyse-ID. Sie enthält keine Audiodateien, Songtitel oder Dateinamen. Wenn du sie sendest, können wir die anonymen Nutzungsdaten mit deiner Nachricht abgleichen, um das Problem zu untersuchen. Du kannst den Anhang vor dem Senden entfernen.",
         ],
         "perms_intro": "Die App bittet um Zugriff auf diese Gerätefunktionen:",
         "perms": [
@@ -482,6 +486,7 @@ PRIVACY = {
             "La App usa análisis anónimos mediante PostHog para mejorar. No utiliza rastreadores publicitarios ni te rastrea a través de apps o sitios web de otras empresas. PostHog recibe los datos anónimos descritos en https://us.i.posthog.com.",
             "Este sitio web también usa PostHog para contar visitas y toques en el enlace del App Store. No usa cookies ni guarda nada en tu dispositivo: un identificador anónimo se mantiene en memoria solo durante la visita y desaparece al cerrar la página. La grabación de sesiones está desactivada.",
             "Tanto en la App como en este sitio web, PostHog usa la dirección IP de tu conexión para estimar una ubicación aproximada (país y ciudad) al recibir los datos. Después, la dirección IP se descarta y no se guarda.",
+            "Cuando nos contactas desde la app, se adjunta a tu mensaje un archivo que describe el estado de la app: versiones de la app y de iOS, modelo del dispositivo, ajustes de tus alarmas, mediciones de sonoridad (LUFS) de tus sonidos, historial reciente de alarmas e ID de análisis anónimo. No incluye archivos de audio, títulos de canciones ni nombres de archivos. Si lo envías, podemos relacionar los datos de uso anónimos con tu mensaje para investigar el problema. Puedes quitar el archivo adjunto antes de enviar.",
         ],
         "perms_intro": "La App pide acceso a estas funciones del dispositivo:",
         "perms": [
@@ -502,6 +507,7 @@ PRIVACY = {
             "O App usa análises anônimas via PostHog para melhorar. Ele não usa rastreadores de publicidade e não rastreia você em apps ou sites de outras empresas. O PostHog recebe os dados anônimos descritos acima em https://us.i.posthog.com.",
             "Este site também usa o PostHog para contar visualizações de página e toques no link da App Store. Ele não usa cookies e não armazena nada no seu dispositivo: um ID anônimo fica na memória só durante a visita e some quando você fecha a página. A gravação de sessão está desativada.",
             "Tanto no App quanto neste site, o PostHog usa o endereço IP da sua conexão para estimar uma localização aproximada (país e cidade) ao receber os dados. Em seguida, o endereço IP é descartado e não é armazenado.",
+            "Quando você entra em contato conosco pelo app, um arquivo que descreve o estado do app é anexado à sua mensagem: versões do app e do iOS, modelo do dispositivo, ajustes dos seus alarmes, medições de volume sonoro (LUFS) dos seus sons, histórico recente de alarmes e ID de análise anônimo. Ele não inclui arquivos de som, títulos de músicas nem nomes de arquivos. Se você enviá-lo, podemos relacionar os dados de uso anônimos à sua mensagem para investigar o problema. Você pode remover o anexo antes de enviar.",
         ],
         "perms_intro": "O App pede acesso a estes recursos do dispositivo:",
         "perms": [
@@ -522,6 +528,7 @@ PRIVACY = {
             "L’App utilizza analisi anonime tramite PostHog per migliorarsi. Non usa tracker pubblicitari e non ti traccia attraverso app o siti web di altre aziende. PostHog riceve i dati anonimi descritti sopra all’indirizzo https://us.i.posthog.com.",
             "Anche questo sito web usa PostHog per contare le visualizzazioni di pagina e i tocchi sul link di App Store. Non usa cookie e non salva nulla sul tuo dispositivo: un ID anonimo resta in memoria solo per la durata della visita e sparisce quando chiudi la pagina. La registrazione delle sessioni è disattivata.",
             "Sia per l’App sia per questo sito, PostHog usa l’indirizzo IP della tua connessione per stimare una posizione approssimativa (paese e città) quando riceve i dati. L’indirizzo IP viene poi eliminato e non viene conservato.",
+            "Quando ci contatti dall’app, alla tua richiesta viene allegato un file che descrive lo stato dell’app: versioni dell’app e di iOS, modello del dispositivo, impostazioni delle tue sveglie, misurazioni della sonorità (LUFS) dei tuoi suoni, cronologia recente delle sveglie e ID di analisi anonimo. Non include file audio, titoli di brani né nomi di file. Se lo invii, possiamo collegare i dati di utilizzo anonimi alla tua richiesta per indagare sul problema. Puoi rimuovere l’allegato prima di inviare.",
         ],
         "perms_intro": "L’App chiede l’accesso a queste funzioni del dispositivo:",
         "perms": [
@@ -542,6 +549,7 @@ PRIVACY = {
             "De app gebruikt anonieme analyses via PostHog om de app te verbeteren. Hij gebruikt geen advertentietrackers en volgt je niet via apps of websites van andere bedrijven. PostHog ontvangt de hierboven beschreven anonieme gegevens op https://us.i.posthog.com.",
             "Deze website gebruikt ook PostHog om paginaweergaven en tikken op de App Store-link te tellen. Er worden geen cookies gebruikt en er wordt niets op je apparaat opgeslagen: een anonieme ID blijft alleen tijdens het bezoek in het geheugen en verdwijnt als je de pagina sluit. Sessie-opname staat uit.",
             "Voor zowel de App als deze website gebruikt PostHog het IP-adres van je verbinding om bij ontvangst van de gegevens een globale locatie (land en stad) te bepalen. Het IP-adres zelf wordt daarna verwijderd en niet opgeslagen.",
+            "Wanneer je vanuit de app contact met ons opneemt, wordt een bestand met de status van de app aan je bericht toegevoegd: app- en iOS-versies, apparaatmodel, je wekkerinstellingen, luidheidsmetingen (LUFS) van je geluiden, recente wekkergeschiedenis en de anonieme analyse-ID. Het bevat geen audiobestanden, songtitels of bestandsnamen. Als je het verstuurt, kunnen we de anonieme gebruiksgegevens aan je bericht koppelen om het probleem te onderzoeken. Je kunt de bijlage vóór het verzenden verwijderen.",
         ],
         "perms_intro": "De app vraagt toegang tot deze apparaatfuncties:",
         "perms": [
@@ -562,6 +570,7 @@ PRIVACY = {
             "앱은 개선을 위해 PostHog를 통한 익명 분석을 사용합니다. 광고 추적기를 사용하지 않으며 다른 회사의 앱이나 웹사이트에 걸쳐 사용자를 추적하지 않습니다. PostHog는 위에서 설명한 익명 데이터를 https://us.i.posthog.com에서 받습니다.",
             "이 웹사이트도 페이지 조회 수와 App Store 링크 탭 수를 세기 위해 PostHog를 사용합니다. 쿠키를 사용하지 않고 기기에 아무것도 저장하지 않습니다. 익명 ID는 방문하는 동안에만 메모리에 있다가 페이지를 닫으면 사라집니다. 세션 녹화는 꺼져 있습니다.",
             "앱과 이 웹사이트 모두에서 PostHog는 데이터를 받을 때 연결의 IP 주소로 대략적인 위치(국가와 도시)를 추정합니다. IP 주소 자체는 그 후 폐기되며 저장되지 않습니다.",
+            "앱에서 문의하시면 앱 상태를 기록한 파일이 메시지에 첨부됩니다. 여기에는 앱 및 iOS 버전, 기기 모델, 알람 설정, 소리의 음량(LUFS) 측정값, 최근 알람 기록, 익명 분석 ID가 포함됩니다. 음원 파일, 곡 제목, 파일 이름은 포함되지 않습니다. 보내주시면 익명 사용 데이터와 메시지를 연결하여 문제를 조사할 수 있습니다. 보내기 전에 첨부를 삭제할 수 있습니다.",
         ],
         "perms_intro": "앱은 다음 기기 기능에 대한 접근을 요청합니다:",
         "perms": [
@@ -582,6 +591,7 @@ PRIVACY = {
             "本 App 通过 PostHog 进行匿名分析以改进 App。本 App 不使用广告跟踪器，也不会在其他公司的 App 或网站之间跟踪你。PostHog 在 https://us.i.posthog.com 接收上述匿名数据。",
             "本网站也使用 PostHog 统计页面浏览次数和 App Store 链接的点按次数。本网站不使用 Cookie，也不会在你的设备上存储任何内容：匿名 ID 只在访问期间保存在内存中，关闭页面后即消失。会话录制已关闭。",
             "无论是 App 还是本网站，PostHog 在接收数据时都会根据您连接的 IP 地址估算大致位置（国家和城市）。IP 地址本身随后会被丢弃，不会被保存。",
+            "当您从应用中联系我们时，消息中会附加一份描述应用状态的文件：应用和 iOS 版本、设备型号、您的闹钟设置、声音响度（LUFS）测量值、最近的闹钟历史记录以及匿名分析 ID。该文件不包含声音文件、歌曲名称或文件名。如果您发送该文件，我们可以将匿名使用数据与您的消息关联，以便调查问题。发送前您可以删除附件。",
         ],
         "perms_intro": "本 App 会请求访问以下设备功能：",
         "perms": [
@@ -602,6 +612,7 @@ PRIVACY = {
             "Aplikacja korzysta z anonimowej analityki przez PostHog, aby się ulepszać. Nie używa trackerów reklamowych i nie śledzi Cię w aplikacjach ani witrynach innych firm. PostHog odbiera opisane wyżej anonimowe dane pod adresem https://us.i.posthog.com.",
             "Ta witryna również używa PostHog do liczenia wyświetleń stron i stuknięć w link do App Store. Nie używa plików cookie i niczego nie zapisuje na Twoim urządzeniu: anonimowy identyfikator jest przechowywany w pamięci tylko podczas wizyty i znika po zamknięciu strony. Nagrywanie sesji jest wyłączone.",
             "Zarówno w Aplikacji, jak i na tej stronie PostHog przy odbiorze danych używa adresu IP Twojego połączenia, aby oszacować przybliżoną lokalizację (kraj i miasto). Sam adres IP jest następnie odrzucany i nie jest przechowywany.",
+            "Gdy kontaktujesz się z nami z aplikacji, do wiadomości dołączany jest plik opisujący stan aplikacji: wersje aplikacji i iOS, model urządzenia, ustawienia budzików, pomiary głośności (LUFS) dźwięków, ostatnia historia budzików oraz anonimowy identyfikator analityczny. Nie zawiera plików dźwiękowych, tytułów utworów ani nazw plików. Jeśli go wyślesz, możemy powiązać anonimowe dane o użytkowaniu z Twoją wiadomością, aby zbadać problem. Załącznik możesz usunąć przed wysłaniem.",
         ],
         "perms_intro": "Aplikacja prosi o dostęp do tych funkcji urządzenia:",
         "perms": [
@@ -622,6 +633,7 @@ PRIVACY = {
             "Aplikace používá anonymní analýzu přes PostHog ke svému zlepšování. Nepoužívá reklamní sledovače a nesleduje tě napříč aplikacemi ani weby jiných společností. PostHog přijímá výše popsané anonymní údaje na adrese https://us.i.posthog.com.",
             "Tento web také používá PostHog k počítání zobrazení stránek a klepnutí na odkaz do App Storu. Nepoužívá cookies a nic neukládá do tvého zařízení: anonymní ID je v paměti jen po dobu návštěvy a po zavření stránky zmizí. Nahrávání relací je vypnuté.",
             "V aplikaci i na tomto webu používá PostHog při přijetí dat IP adresu vašeho připojení k odhadu přibližné polohy (země a města). Samotná IP adresa je poté zahozena a neukládá se.",
+            "Když nás kontaktujete z aplikace, je k vaší zprávě přiložen soubor popisující stav aplikace: verze aplikace a iOS, model zařízení, nastavení budíků, měření hlasitosti (LUFS) vašich zvuků, nedávná historie budíků a anonymní analytický identifikátor. Neobsahuje zvukové soubory, názvy skladeb ani názvy souborů. Pokud jej odešlete, můžeme anonymní údaje o používání propojit s vaší zprávou a problém prošetřit. Přílohu můžete před odesláním odstranit.",
         ],
         "perms_intro": "Aplikace žádá o přístup k těmto funkcím zařízení:",
         "perms": [
@@ -642,6 +654,7 @@ PRIVACY = {
             "يستخدم التطبيق تحليلات مجهولة الهوية عبر PostHog لتحسين التطبيق. لا يستخدم أدوات تتبع إعلانية ولا يتتبعك عبر تطبيقات أو مواقع شركات أخرى. يستقبل PostHog البيانات المجهولة الموضحة أعلاه على https://us.i.posthog.com.",
             "يستخدم هذا الموقع أيضًا PostHog لعدّ مشاهدات الصفحات والنقرات على رابط App Store. لا يستخدم ملفات تعريف الارتباط ولا يحفظ أي شيء على جهازك: يبقى معرّف مجهول في الذاكرة فقط أثناء الزيارة ويختفي عند إغلاق الصفحة. تسجيل الجلسات متوقف.",
             "في التطبيق وفي هذا الموقع كليهما، يستخدم PostHog عنوان IP الخاص باتصالك لتقدير موقع تقريبي (البلد والمدينة) عند استلام البيانات. ثم يُحذف عنوان IP نفسه ولا يُخزَّن.",
+            "عند تواصلك معنا من التطبيق، يُرفق برسالتك ملف يوضح حالة التطبيق: إصدارا التطبيق وiOS، وطراز الجهاز، وإعدادات المنبهات، وقياسات الجهارة (LUFS) لأصواتك، وسجل المنبهات الأخير، ومعرّف التحليلات المجهول. لا يتضمن ملفات صوتية أو عناوين أغانٍ أو أسماء ملفات. وإذا أرسلته، يمكننا ربط بيانات الاستخدام المجهولة برسالتك لفحص المشكلة. يمكنك إزالة المرفق قبل الإرسال.",
         ],
         "perms_intro": "يطلب التطبيق الوصول إلى ميزات الجهاز التالية:",
         "perms": [

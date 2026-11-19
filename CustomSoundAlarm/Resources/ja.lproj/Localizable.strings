@@ -402,3 +402,5 @@
 "silent_sound_use_anyway" = "このまま使う";
 "silent_alarm_warning" = "音がほとんど出ません";
 "silent_sound_whole_file_message" = "この音声には音が入っていません。別の音を選んでください";
+"settings_mail_diagnostics_notice" = "調査のため、アプリの状態を添付しています（曲名・音のファイルは含みません）。不要なら添付を消して送れます\n";
+"settings_support_page" = "サポートページ";

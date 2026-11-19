@@ -402,3 +402,5 @@
 "silent_sound_use_anyway" = "Trotzdem verwenden";
 "silent_alarm_warning" = "Ton ist kaum hörbar";
 "silent_sound_whole_file_message" = "Diese Audiodatei enthält keinen Ton. Wähle einen anderen Ton.";
+"settings_mail_diagnostics_notice" = "Zur Untersuchung ist der App-Status beigefügt (keine Songtitel oder Audiodateien enthalten). Du kannst den Anhang vor dem Senden entfernen.\n";
+"settings_support_page" = "Support-Seite";

@@ -402,3 +402,5 @@
 "silent_sound_use_anyway" = "استخدامه على أي حال";
 "silent_alarm_warning" = "الصوت بالكاد يُسمع";
 "silent_sound_whole_file_message" = "هذا الملف الصوتي لا يحتوي على صوت. اختر صوتًا آخر.";
+"settings_mail_diagnostics_notice" = "لمساعدتنا في التحقيق، تم إرفاق حالة التطبيق (لا يتضمن عناوين الأغاني أو ملفات الصوت). يمكنك إزالة المرفق قبل الإرسال.\n";
+"settings_support_page" = "صفحة الدعم";

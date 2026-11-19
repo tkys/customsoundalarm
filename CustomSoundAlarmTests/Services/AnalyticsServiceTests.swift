@@ -77,7 +77,7 @@ struct AnalyticsEventTests {
         // Phase 4（ベッドサイドモード・#68）
         #expect(AnalyticsEvent.bedsideEntered(layout: "digital_large", theme: "white", hour: 23, entry: .settings).name == "bedside_entered")
         #expect(AnalyticsEvent.settingsOpened.name == "settings_opened")
-        #expect(AnalyticsEvent.supportContactOpened(method: .mail).name == "support_contact_opened")
+        #expect(AnalyticsEvent.supportContactOpened(method: .mail, diagnosticsAttached: true).name == "support_contact_opened")
         #expect(AnalyticsEvent.reviewLinkOpened.name == "review_link_opened")
         #expect(AnalyticsEvent.bedsideExited(durationBucket: "over_2h", exitMethod: "long_press").name == "bedside_exited")
         #expect(AnalyticsEvent.bedsideSettingChanged(setting: .layout, value: .string("minimal")).name == "bedside_setting_changed")
@@ -678,7 +678,7 @@ struct AnalyticsEventTests {
             .alarmSnoozed(from: "observer"),
             .bedsideEntered(layout: "digital_large", theme: "white", hour: 23, entry: .settings),
             .settingsOpened,
-            .supportContactOpened(method: .web),
+            .supportContactOpened(method: .web, diagnosticsAttached: false),
             .reviewLinkOpened,
             .bedsideExited(durationBucket: "1_5min", exitMethod: "exit_button"),
             .bedsideSettingChanged(setting: .layout, value: .string("minimal")),
