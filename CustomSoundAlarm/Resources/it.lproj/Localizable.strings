@@ -395,3 +395,4 @@
 "received_detail" = "Apri My Sound Alarm per scegliere la parte da far suonare.";
 "empty_quick_title" = "A che ora ti svegli?";
 "empty_quick_other" = "Altro orario";
+"empty_quick_hint" = "Crea una sveglia.";

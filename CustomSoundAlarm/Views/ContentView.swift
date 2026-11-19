@@ -63,6 +63,7 @@ struct ContentView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.requestReview) private var requestReview
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         NavigationStack {
@@ -484,12 +485,14 @@ struct ContentView: View {
     private var emptyState: some View {
         ScrollView {
             VStack(spacing: 20) {
-                Image("onboarding_hero")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: dynamicTypeSize.isAccessibilitySize ? 110 : 160)
-                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                    .accessibilityHidden(true)
+                if colorScheme != .dark {
+                    Image("onboarding_hero")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: dynamicTypeSize.isAccessibilitySize ? 110 : 160)
+                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .accessibilityHidden(true)
+                }
 
                 Text("empty_quick_title")
                     .font(.title2.weight(.semibold))
@@ -518,22 +521,29 @@ struct ContentView: View {
     private var timeButtons: some View {
         let times = EmptyStateQuickAlarmLogic.times
         if dynamicTypeSize.isAccessibilitySize {
-            LazyVGrid(
-                columns: [GridItem(.flexible()), GridItem(.flexible())],
-                spacing: 10
-            ) {
-                ForEach(times) { time in
-                    quickTimeButton(time)
-                }
-            }
-            .frame(maxWidth: 360)
+            timeGrid(times)
         } else {
-            HStack(spacing: 8) {
-                ForEach(times) { time in
-                    quickTimeButton(time)
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 8) {
+                    ForEach(times) { time in
+                        quickTimeButton(time)
+                    }
                 }
+                timeGrid(times)
             }
         }
+    }
+
+    private func timeGrid(_ times: [QuickAlarmTime]) -> some View {
+        LazyVGrid(
+            columns: [GridItem(.flexible()), GridItem(.flexible())],
+            spacing: 10
+        ) {
+            ForEach(times) { time in
+                quickTimeButton(time)
+            }
+        }
+        .frame(maxWidth: 360)
     }
 
     private func quickTimeButton(_ time: QuickAlarmTime) -> some View {
@@ -547,6 +557,7 @@ struct ContentView: View {
         }
         .buttonStyle(.bordered)
         .controlSize(.large)
+        .accessibilityHint(Text("empty_quick_hint"))
         .accessibilityIdentifier("emptyState.quick.\(time.id)")
     }
 
@@ -554,15 +565,24 @@ struct ContentView: View {
     private func createQuickAlarm(_ time: QuickAlarmTime) {
         let soundFileName = EmptyStateQuickAlarmLogic.soundFileName(
             imported: soundStore.sounds,
-            lastUsedFileName: SoundUsageHistory.lastUsedFileName
+            lastUsedFileName: SoundUsageHistory.lastUsedFileName,
+            availableFileNames: Set(soundStore.sounds.map(\.fileName))
+        )
+        let carryOver = AlarmCarryOverLogic.carryOver(
+            from: AlarmCarryOverStore.last,
+            playlistExists: { PlaylistStore.shared.playlist(id: $0) != nil }
         )
         let entry = EmptyStateQuickAlarmLogic.makeEntry(
             time: time,
             soundFileName: soundFileName,
-            label: String(localized: "alarm_placeholder")
+            label: String(localized: "alarm_placeholder"),
+            snoozeMinutes: carryOver.snoozeMinutes,
+            fadeIn: carryOver.fadeIn
         )
         AlarmUIDStore.recordCreation(entry.id)
         alarmStore.add(entry)
+        SoundUsageHistory.recordUsage(soundFileName)
+        AlarmCarryOverStore.save(from: entry)
 
         var context = AlarmHistoryLogic.context(for: entry)
         context.list = AlarmHistoryLogic.listSnapshot([])

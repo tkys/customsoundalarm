@@ -36,17 +36,50 @@ struct EmptyStateQuickAlarmTests {
         ]
         #expect(EmptyStateQuickAlarmLogic.soundFileName(
             imported: imported,
-            lastUsedFileName: "used.caf"
+            lastUsedFileName: "used.caf",
+            availableFileNames: ["old.caf", "new.caf", "preset.caf", "used.caf"]
         ) == "new.caf")
 
         #expect(EmptyStateQuickAlarmLogic.soundFileName(
             imported: [AlarmSound(name: "Preset", fileName: "preset.caf", isPreset: true)],
-            lastUsedFileName: "used.caf"
+            lastUsedFileName: "used.caf",
+            availableFileNames: ["preset.caf", "used.caf"]
         ) == "used.caf")
 
         #expect(EmptyStateQuickAlarmLogic.soundFileName(
             imported: [],
-            lastUsedFileName: nil
+            lastUsedFileName: "deleted.caf",
+            availableFileNames: ["preset.caf"]
         ) == "")
+
+        #expect(EmptyStateQuickAlarmLogic.soundFileName(
+            imported: [],
+            lastUsedFileName: nil,
+            availableFileNames: []
+        ) == "")
+    }
+
+    @Test
+    func quickAlarmUsesCarriedSnoozeAndFade() {
+        let entry = EmptyStateQuickAlarmLogic.makeEntry(
+            time: QuickAlarmTime(hour: 6, minute: 30),
+            soundFileName: "",
+            label: "Alarm",
+            snoozeMinutes: 5,
+            fadeIn: .fifteen
+        )
+        #expect(entry.snoozeMinutes == 5)
+        #expect(entry.fadeIn == .fifteen)
+    }
+
+    @Test
+    func quickTimeLabelFollowsLocale() {
+        let time = QuickAlarmTime(hour: 6, minute: 0)
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Asia/Tokyo")!
+        #expect(time.label(locale: Locale(identifier: "ja_JP"), calendar: calendar) == "6:00")
+        let english = time.label(locale: Locale(identifier: "en_US"), calendar: calendar)
+        #expect(english.contains("6:00"))
+        #expect(english.contains("AM"))
     }
 }

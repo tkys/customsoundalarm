@@ -395,3 +395,4 @@
 "received_detail" = "My Sound Alarm を開くと、鳴らす部分を選べます";
 "empty_quick_title" = "何時に起きる？";
 "empty_quick_other" = "ほかの時刻";
+"empty_quick_hint" = "アラームを作成します";

@@ -395,3 +395,4 @@
 "received_detail" = "Otevřete My Sound Alarm a vyberte část, která má znít.";
 "empty_quick_title" = "V kolik vstáváte?";
 "empty_quick_other" = "Jiný čas";
+"empty_quick_hint" = "Vytvoří budík.";

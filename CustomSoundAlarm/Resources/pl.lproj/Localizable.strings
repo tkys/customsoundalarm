@@ -395,3 +395,4 @@
 "received_detail" = "Otwórz My Sound Alarm i wybierz część, która ma grać.";
 "empty_quick_title" = "O której wstajesz?";
 "empty_quick_other" = "Inna godzina";
+"empty_quick_hint" = "Tworzy budzik.";
