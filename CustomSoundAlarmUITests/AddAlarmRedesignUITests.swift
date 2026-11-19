@@ -621,4 +621,33 @@ final class AddAlarmRedesignUITests: XCTestCase {
             "sound picker should open: \(app.debugDescription)"
         )
     }
+
+    /// #237: 最大の文字サイズでも、時間の目盛りと開始・終了の行が重ならない。
+    func testCropTimeRulerDoesNotOverlapLabelsAtAccessibilitySize() {
+        app.launchArguments = [
+            "-uitest-open-add-alarm",
+            "-uitest-open-waveform-crop",
+            "-uitest-force-light",
+            "-AppleLanguages", "(en)",
+            "-AppleLocale", "en_US",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"
+        ]
+        app.launch()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
+
+        let start = findElement("crop.time.start")
+        XCTAssertTrue(start.waitForExistence(timeout: 30), app.debugDescription)
+
+        let rulers = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "crop.ruler.")
+        )
+        XCTAssertGreaterThan(rulers.count, 0, app.debugDescription)
+        for index in 0..<rulers.count {
+            let ruler = rulers.element(boundBy: index)
+            XCTAssertFalse(
+                ruler.frame.intersects(start.frame),
+                "ruler \(ruler.identifier) must not overlap the time labels: \(app.debugDescription)"
+            )
+        }
+    }
 }

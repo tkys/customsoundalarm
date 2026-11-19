@@ -61,6 +61,8 @@ struct AlarmDetailView: View {
     @State private var pendingAudio: PendingAudioImport?
     @State private var showingVideoImport = false
     @State private var importErrorMessage: String?
+    /// UIテスト用: 動画の切り取り画面を直接開くパス（#237）
+    @State private var videoCropTestURL: URL?
     /// 取り込みで音量を上げた音のファイル名（#224）
     @State private var volumeBoostedFileName: String?
 
@@ -222,13 +224,23 @@ struct AlarmDetailView: View {
                 pendingAudio: $pendingAudio,
                 showingVideoImport: $showingVideoImport,
                 errorMessage: $importErrorMessage,
-                volumeBoostedFileName: $volumeBoostedFileName
+                volumeBoostedFileName: $volumeBoostedFileName,
+                initialVideoURL: videoCropTestURL
             )
             .task {
                 scheduler.refreshTestRingPermission()
                 // 追加画面のシート提示完了後に取り込みを開く（約0.35秒待つ）
                 try? await Task.sleep(for: .milliseconds(500))
                 applyInitialImportOnce()
+                #if DEBUG
+                // UIテスト用: -uitestVideoCropPath <動画> で動画の切り取り画面を開く（#237）
+                if videoCropTestURL == nil,
+                   let path = UserDefaults.standard.string(forKey: "uitestVideoCropPath"),
+                   FileManager.default.fileExists(atPath: path) {
+                    videoCropTestURL = URL(fileURLWithPath: path)
+                    showingVideoImport = true
+                }
+                #endif
                 reportTimeSuggestionsIfNeeded()
                 // 親シートの提示が終わってから開く（#149）
                 openUITestWaveformCropIfNeeded()

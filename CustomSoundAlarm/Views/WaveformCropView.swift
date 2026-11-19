@@ -44,10 +44,16 @@ struct WaveformCropView: View {
 
     /// アクセント色のアセット解決に使う（#81-2）
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    private let overviewHeight: CGFloat = 64
-    private let zoomHeight: CGFloat = 140
-    private let rulerHeight: CGFloat = 20
+    /// 目盛りラベルの幅と高さ（#237）。標準サイズでは従来と同じ 34 / 20。
+    /// アクセシビリティサイズでは文字に合わせて広げ、下の開始・終了の行と重ねない。
+    @ScaledMetric(relativeTo: .caption) private var rulerLabelWidth: CGFloat = 34
+    @ScaledMetric(relativeTo: .caption) private var rulerHeight: CGFloat = 20
+
+    // 最大の文字サイズでは、下の目盛りと時刻の行に高さを譲る（#237）
+    private var overviewHeight: CGFloat { dynamicTypeSize.isAccessibilitySize ? 48 : 64 }
+    private var zoomHeight: CGFloat { dynamicTypeSize.isAccessibilitySize ? 100 : 140 }
     private let handleWidth: CGFloat = 6
     private let overviewSpace = "waveOverviewSpace"
     private let zoomSpace = "waveZoomSpace"
@@ -421,9 +427,56 @@ struct WaveformCropView: View {
     /// - ティックは時刻位置（tickX）に正確に置き、ラベルはティックの下に中心合わせで
     ///   置きつつ両端で内側にクランプする（clampedRulerX）。以前はティックも
     ///   ラベル幅のフレーム中央に置かれ半分ずれていた
+    @ViewBuilder
     private func ruler(width: CGFloat) -> some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            accessibilityRuler(width: width)
+        } else {
+            standardRuler(width: width)
+        }
+    }
+
+    /// 最大の文字サイズ用: 窓の両端と中央の3つだけを等間隔に置く（#237）。
+    /// 時刻の間引き計算に頼らず、ラベル同士が重ならないことを優先する。
+    private func accessibilityRuler(width: CGFloat) -> some View {
+        let times = [
+            zoomWindow.start,
+            zoomWindow.start + zoomWindow.width / 2,
+            zoomWindow.end
+        ]
+        return ZStack(alignment: .topLeading) {
+            ForEach(Array(times.enumerated()), id: \.offset) { index, t in
+                let x = index == 0 ? 0 : (index == 1 ? width / 2 : width)
+                Rectangle()
+                    .fill(Color.secondary.opacity(0.6))
+                    .frame(width: 1, height: 4)
+                    .offset(x: x)
+                    .allowsHitTesting(false)
+            }
+            HStack(spacing: 8) {
+                ForEach(Array(times.enumerated()), id: \.offset) { index, t in
+                    Text(WaveformCropMath.formatTime(t))
+                        .font(.caption)
+                        .monospacedDigit()
+                        .foregroundStyle(Color.textSecondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .frame(
+                            maxWidth: .infinity,
+                            alignment: index == 0 ? .leading : (index == 2 ? .trailing : .center)
+                        )
+                        .accessibilityIdentifier("crop.ruler.\(WaveformCropMath.formatTime(t))")
+                }
+            }
+            .offset(y: 6)
+        }
+        .frame(width: width, height: rulerHeight, alignment: .topLeading)
+        .allowsHitTesting(false)
+    }
+
+    private func standardRuler(width: CGFloat) -> some View {
         let span = zoomWindow.width
-        let labelWidth: Double = 34
+        let labelWidth = Double(rulerLabelWidth)
         let step = WaveformCropMath.rulerStep(
             forSpan: span,
             barWidth: width,
@@ -455,6 +508,7 @@ struct WaveformCropView: View {
                         .fixedSize()
                         .frame(width: labelWidth, alignment: .center)
                         .offset(x: labelCenter - labelWidth / 2, y: 6)
+                        .accessibilityIdentifier("crop.ruler.\(WaveformCropMath.formatTime(t))")
                 }
             }
         }
@@ -553,20 +607,44 @@ struct WaveformCropView: View {
     }
 
     /// 4つの値をラベル付きで明示（#79-6: どれが何か分からない状態を解消する）
+    @ViewBuilder
     private func timeLabels(range: TrimRange) -> some View {
-        HStack(spacing: 8) {
-            labeledTime("time_start", value: range.start)
-            Spacer(minLength: 0)
-            labeledTime("time_end", value: range.end)
-            Spacer(minLength: 0)
-            labeledTime("time_length", value: range.width)
-            Spacer(minLength: 0)
-            labeledTime("time_total", value: duration)
+        if dynamicTypeSize.isAccessibilitySize {
+            // 最大の文字サイズでは2×2に分け、1列あたりの幅を確保する（#237）
+            Grid(alignment: .leading, horizontalSpacing: 20, verticalSpacing: 8) {
+                GridRow {
+                    labeledTime("time_start", value: range.start, identifier: "crop.time.start")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    labeledTime("time_end", value: range.end, identifier: "crop.time.end")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                GridRow {
+                    labeledTime("time_length", value: range.width, identifier: "crop.time.length")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    labeledTime("time_total", value: duration, identifier: "crop.time.total")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        } else {
+            HStack(spacing: 8) {
+                labeledTime("time_start", value: range.start, identifier: "crop.time.start")
+                Spacer(minLength: 0)
+                labeledTime("time_end", value: range.end, identifier: "crop.time.end")
+                Spacer(minLength: 0)
+                labeledTime("time_length", value: range.width, identifier: "crop.time.length")
+                Spacer(minLength: 0)
+                labeledTime("time_total", value: duration, identifier: "crop.time.total")
+            }
         }
     }
 
-    private func labeledTime(_ key: LocalizedStringKey, value: Double) -> some View {
-        VStack(spacing: 2) {
+    private func labeledTime(
+        _ key: LocalizedStringKey,
+        value: Double,
+        identifier: String
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
             Text(key)
                 .font(.footnote)
                 .foregroundStyle(Color.textSecondary)
@@ -574,6 +652,9 @@ struct WaveformCropView: View {
                 .font(.caption.weight(.medium))
                 .monospacedDigit()
         }
+        .fixedSize(horizontal: false, vertical: true)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier(identifier)
     }
 
     private func handleShape(isActive: Bool) -> some View {
