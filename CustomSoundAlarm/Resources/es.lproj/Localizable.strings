@@ -412,3 +412,5 @@
 "more_no_label" = "Sin etiqueta";
 "more_separator" = " · ";
 "more_accessibility_fmt" = "%1$@, %2$@";
+
+"control_open_list" = "My Sound Alarm";

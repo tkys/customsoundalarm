@@ -18,12 +18,16 @@ struct AddAlarmRequest: Identifiable {
 /// メイン画面：アラーム一覧
 /// OOUIの原則に従い、主オブジェクト（アラーム）のみを表示
 struct ContentView: View {
+    /// コントロールセンターから開く要求（#272）。RootTabView が設定する。
+    @Binding var controlOpenKind: ControlOpenKind?
     @State private var alarmStore = AlarmStore.shared
     @State private var soundStore = SoundStore.shared
     @State private var selectedAlarm: AlarmEntry?
     @State private var showingSettings = false
     /// オンボの表示（#98）。初回評価は .task で1回だけ
     @State private var showingOnboarding = false
+    /// オンボーディング判定が終わったか（コントロールの着地先を決めるため・#272）
+    @State private var didEvaluateOnboarding = false
     /// オンボ場面4で選ばれた取り込み入口（追加画面に伝える・#98 Phase 4）
     @State private var addAlarmRequest: AddAlarmRequest?
     /// アップデート案内（#116）
@@ -120,6 +124,8 @@ struct ContentView: View {
                     refreshGlobalSkip()
                     syncSkipTimeZoneIfNeeded()
                     evaluateOnboarding()
+                    didEvaluateOnboarding = true
+                    applyControlOpenIfNeeded()
                     presentNextShareImportIfNeeded()
                     scheduler.refreshPermissionStatus()
                     reportPermissionBannerIfNeeded()
@@ -139,6 +145,9 @@ struct ContentView: View {
                 }
                 .safeAreaInset(edge: .bottom) {
                     AdSlot(slot: .bannerAlarmList)
+                }
+                .onChange(of: controlOpenKind) { _, _ in
+                    applyControlOpenIfNeeded()
                 }
 
                 if showingOnboarding {
@@ -523,6 +532,22 @@ struct ContentView: View {
     }
 
     // MARK: - Empty State
+
+    /// コントロールからの要求を、オンボーディング判定後に反映する（#272）。
+    private func applyControlOpenIfNeeded() {
+        guard didEvaluateOnboarding, let kind = controlOpenKind else { return }
+        controlOpenKind = nil
+        switch ControlOpenLogic.destination(
+            kind: kind,
+            isOnboardingVisible: showingOnboarding
+        ) {
+        case .onboarding, .list:
+            break
+        case .add:
+            addScreenVisible = true
+            addAlarmRequest = AddAlarmRequest(source: nil)
+        }
+    }
 
     private var emptyState: some View {
         ScrollView {

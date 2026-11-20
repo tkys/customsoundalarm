@@ -83,6 +83,10 @@ enum AnalyticsEvent: Sendable {
     /// アラーム編集画面の「その他」を開いた（#211）
     case alarmEditorMoreOpened
 
+    /// コントロールセンターから起動した（#272）
+    /// - kind: list（アラーム一覧）/ add（アラームを追加）
+    case controlOpened(kind: ControlOpenKind)
+
     // MARK: Phase 2（リテンション/運用拡張）
 
     /// アラーム編集（既存アラームの更新）
@@ -391,6 +395,7 @@ enum AnalyticsEvent: Sendable {
         case .soundPreviewPlayed: return "sound_preview_played"
         case .musicLibraryUnavailable: return "music_library_unavailable"
         case .alarmEditorMoreOpened: return "alarm_editor_more_opened"
+        case .controlOpened: return "control_opened"
         case .alarmEdited: return "alarm_edited"
         case .alarmDeleted: return "alarm_deleted"
         case .alarmDeletedWithContext: return "alarm_deleted"
@@ -523,6 +528,8 @@ enum AnalyticsEvent: Sendable {
             return [:]
         case .alarmEditorMoreOpened:
             return [:]
+        case let .controlOpened(kind):
+            return ["kind": kind.rawValue]
         case let .alarmEdited(
             hasCustomSound,
             isRepeating,

@@ -61,6 +61,7 @@
 | `ad_slot_eligible` | `slot` string（banner_sounds/banner_import/banner_alarm_list/interstitial_import_saved）, `allowed` bool, `reason` string（eligible/existing_user/version_unavailable/pro/first_week/quiet_hours/frequency_cap/forbidden_context/wrong_context）, `region` string（standard/limited） | 広告枠の判定時（`AdsConfig.isEnabled = false` でも送る） | 1.9.0 前に実際の表示機会を測る | アプリ動作中のみ | 1.9.0 |
 | `sound_preview_played` | `source` string（select_tap/play_button/library） | サウンドの試聴（行タップ・再生ボタン・ライブラリ） | 試聴の入口ごとの使われ方 | アプリ動作中のみ | 既存（`source` は1.8.2） |
 | `music_library_unavailable` | — | ミュージックライブラリで曲を選んだが取り込めなかった | 取り込めない曲の頻度 | アプリ動作中のみ | 1.8.4 |
+| `control_opened` | `kind` string（list/add） | コントロールセンターのボタンから起動した | コントロール経由の利用 | アプリ動作中のみ | 1.8.4 |
 | `alarm_editor_more_opened` | — | アラーム編集画面の「その他」を開いた | まとめた設定（スヌーズ・ラベル・やさしく鳴り始める）の利用 | アプリ動作中のみ | 1.8.4 |
 | `alarm_skip_set` | `scope` string（day/selected/range）, `days` int, `alarm_count` int | 日付でアラームを休んだ（休みを付けたアラーム数） | 休みの使われ方（日・選択・期間） | アプリ動作中のみ | 1.8.2 |
 | `alarm_skip_undone` | — | 休みを取り消した | 取り消しの頻度 | アプリ動作中のみ | 1.8.2 |

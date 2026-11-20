@@ -579,6 +579,14 @@ struct AnalyticsEventTests {
         #expect(props["rank_bucket"] as? String == "4-10")
     }
 
+    @Test
+    func controlOpenedProperties_includeKind() {
+        let list = AnalyticsEvent.controlOpened(kind: .list).properties
+        let add = AnalyticsEvent.controlOpened(kind: .add).properties
+        #expect(list["kind"] as? String == "list")
+        #expect(add["kind"] as? String == "add")
+    }
+
     // MARK: ad_slot_eligible (#111)
 
     @Test
@@ -682,6 +690,7 @@ struct AnalyticsEventTests {
             .supportContactOpened(method: .web, diagnosticsAttached: false),
             .musicLibraryUnavailable,
             .alarmEditorMoreOpened,
+            .controlOpened(kind: .list),
             .reviewLinkOpened,
             .bedsideExited(durationBucket: "1_5min", exitMethod: "exit_button"),
             .bedsideSettingChanged(setting: .layout, value: .string("minimal")),

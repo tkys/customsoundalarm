@@ -118,7 +118,7 @@ targets:
       properties:
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
-        CFBundleDisplayName: My Sound Alarm Widget
+        CFBundleDisplayName: My Sound Alarm
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:

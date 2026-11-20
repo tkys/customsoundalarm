@@ -362,6 +362,24 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: コントロールセンターの「一覧」から起動した状態（#272）
+    static var isUITestControlList: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-control-list")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: コントロールセンターの「追加」から起動した状態（#272）
+    static var isUITestControlAdd: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-control-add")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: 編集画面を直接開く（DEBUGのみ・#122）
     static var isUITestOpenEditAlarm: Bool {
     #if DEBUG
