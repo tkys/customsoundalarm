@@ -407,3 +407,6 @@
 "followup_tomorrow" = "Zítra";
 "followup_weekdays" = "Všední dny";
 "followup_everyday" = "Každý den";
+"add_from_music" = "Přidat z Hudby";
+"music_library_unavailable" = "Tuto skladbu nelze importovat.";
+"music_library_permission_denied" = "Povolte přístup k Hudbě v Nastavení.";

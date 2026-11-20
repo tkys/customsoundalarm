@@ -407,3 +407,6 @@
 "followup_tomorrow" = "Morgen";
 "followup_weekdays" = "Werkdagen";
 "followup_everyday" = "Elke dag";
+"add_from_music" = "Toevoegen uit Muziek";
+"music_library_unavailable" = "Dit nummer kan niet worden geïmporteerd.";
+"music_library_permission_denied" = "Sta toegang tot Muziek toe in Instellingen.";

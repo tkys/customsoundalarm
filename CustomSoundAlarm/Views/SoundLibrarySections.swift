@@ -8,6 +8,8 @@ struct SoundLibrarySections: View {
     /// true = アラームの音を選ぶ / false = ライブラリで管理する
     let isSelecting: Bool
     @Binding var selectedSound: AlarmSound?
+    /// ミュージックライブラリ取り込みの進行状態（#245）。親画面の List がシートを持つ。
+    let musicLibrary: MusicLibraryImportController
     /// 選択モードで1つ選ばれたとき（プレイリスト選択中はチェックを出さない）
     var selectionActive: Bool = true
     var onSelect: ((AlarmSound?) -> Void)?
@@ -33,6 +35,7 @@ struct SoundLibrarySections: View {
     @State private var errorMessage: String?
     @State private var renamingSound: AlarmSound?
     @State private var renameText = ""
+    @Environment(\.openURL) private var openURL
 
     private var importedSounds: [AlarmSound] {
         let existing = Set(soundStore.sounds.map(\.fileName))
@@ -55,6 +58,23 @@ struct SoundLibrarySections: View {
         // Group や Section に付けると、List の中では各セクション・各行に複製され、
         // 同じシートを何度も開こうとして失敗し、アラームの追加画面ごと閉じてしまう（1.8.1・実機で再現）。
         importedSection
+            .onAppear {
+                #if DEBUG
+                // スクショ用: 取り込めない1行・許可がない1行を出す（#245）
+                if AppGroup.isUITestMusicUnavailable {
+                    musicLibrary.showUnavailableForUITest()
+                }
+                if AppGroup.isUITestMusicPermissionDenied {
+                    musicLibrary.showPermissionDeniedForUITest()
+                }
+                #endif
+            }
+            // ピッカーが閉じきってから切り取り画面を開く（#245 レビュー）
+            .onChange(of: musicLibrary.pendingImport?.id) { _, _ in
+                if let pending = musicLibrary.consumePendingImport() {
+                    pendingAudio = pending
+                }
+            }
         if let middle { middle }
         standardSection
         errorSection
@@ -131,6 +151,58 @@ struct SoundLibrarySections: View {
                 }
             }
             .accessibilityIdentifier("soundPicker.addAudio")
+
+            Button {
+                if SoundPreviewLogic.shouldStop(playingFileName: audioPlayer.playingFileName) {
+                    audioPlayer.stop()
+                }
+                musicLibrary.requestAndOpen()
+            } label: {
+                HStack(spacing: 8) {
+                    Label {
+                        Text("add_from_music")
+                    } icon: {
+                        Image(systemName: "music.note.list")
+                            .foregroundStyle(Color.actionText)
+                            .padding(4)
+                            .background(
+                                Circle()
+                                    .fill(Color.actionText.opacity(0.12))
+                            )
+                    }
+                    if musicLibrary.isExporting {
+                        Spacer(minLength: 8)
+                        ProgressView()
+                    }
+                }
+            }
+            .disabled(musicLibrary.isExporting)
+            .accessibilityIdentifier("soundPicker.addMusic")
+
+            if let notice = musicLibrary.notice {
+                if notice.opensSettings {
+                    // 押すと設定アプリを開く（#245 レビュー）
+                    Button {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            openURL(url)
+                        }
+                    } label: {
+                        Text(notice.text)
+                            .font(.caption)
+                            .foregroundStyle(Color.actionText)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("soundPicker.musicMessage")
+                } else {
+                    Text(notice.text)
+                        .font(.caption)
+                        .foregroundStyle(Color.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityIdentifier("soundPicker.musicMessage")
+                }
+            }
 
             if imported.isEmpty {
                 VStack(spacing: 8) {

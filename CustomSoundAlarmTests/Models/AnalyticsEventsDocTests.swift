@@ -38,6 +38,7 @@ struct AnalyticsEventsDocTests {
         "sound_selected",
         "ad_slot_eligible",
         "sound_preview_played",
+        "music_library_unavailable",
         "alarm_skip_set",
         "alarm_skip_undone",
         "skip_all_set",

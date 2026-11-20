@@ -407,3 +407,6 @@
 "followup_tomorrow" = "Domani";
 "followup_weekdays" = "Feriali";
 "followup_everyday" = "Ogni giorno";
+"add_from_music" = "Aggiungi da Musica";
+"music_library_unavailable" = "Questo brano non può essere importato.";
+"music_library_permission_denied" = "Consenti l’accesso a Musica nelle Impostazioni.";

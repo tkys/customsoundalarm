@@ -18,6 +18,7 @@ struct LibraryView: View {
     @State private var shareLanding = ShareImportLanding.shared
     @State private var highlightedFileName: String?
     @State private var didRunLibraryLandingUITest = false
+    @State private var musicLibrary = MusicLibraryImportController()
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -26,6 +27,7 @@ struct LibraryView: View {
                 SoundLibrarySections(
                     isSelecting: false,
                     selectedSound: $selectedSound,
+                    musicLibrary: musicLibrary,
                     middle: AnyView(playlistSection),
                     volumeBoostedFileName: $volumeBoostedFileName,
                     showVolumeNoticeRow: true,
@@ -66,6 +68,7 @@ struct LibraryView: View {
                 guard let fileName else { return }
                 highlightSharedSound(fileName, proxy: proxy)
             }
+            .musicLibraryImport(musicLibrary)
             }
             .warmListBackground()
             .navigationTitle(String(localized: "library_title"))

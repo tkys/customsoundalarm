@@ -195,6 +195,33 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: ミュージックライブラリの曲を選んだあとの切り取り画面（#245）
+    static var isUITestMusicCrop: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-music-crop")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト・スクショ用: ミュージックの「取り込めません」1行を出す（#245）
+    static var isUITestMusicUnavailable: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-music-unavailable")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト・スクショ用: ミュージックの許可がないときの1行を出す（#245 レビュー）
+    static var isUITestMusicPermissionDenied: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-music-permission-denied")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: 初めての1回きりアラームが鳴って止まった状態を作る（#247）
     static var isUITestSeedFirstAlarmFollowup: Bool {
     #if DEBUG

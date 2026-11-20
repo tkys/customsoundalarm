@@ -306,6 +306,18 @@ struct AlarmDetailView: View {
     private func openUITestWaveformCropIfNeeded() {
         #if DEBUG
         guard AppGroup.isUITestOpenWaveformCrop, pendingAudio == nil else { return }
+        // UIテスト用: ミュージックライブラリから選んだあとの流れ（#245）
+        if AppGroup.isUITestMusicCrop {
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent("MusicCrop-\(UUID().uuidString).caf")
+            try? SilentTestAudioFactory.makeToneFile(at: url)
+            pendingAudio = PendingAudioImport(
+                url: url,
+                name: "Test Song",
+                source: .musicLibrary
+            )
+            return
+        }
         // ストアのスクショ用: -uitestCropPath <音声ファイル> -uitestCropName <表示名> で差し替える。
         if AppGroup.isUITestSilentCrop {
             let url = FileManager.default.temporaryDirectory

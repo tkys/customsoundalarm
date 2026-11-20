@@ -407,3 +407,6 @@
 "followup_tomorrow" = "明日も";
 "followup_weekdays" = "平日";
 "followup_everyday" = "毎日";
+"add_from_music" = "ミュージックから追加";
+"music_library_unavailable" = "この曲は取り込めません";
+"music_library_permission_denied" = "設定アプリでミュージックへのアクセスを許可してください";

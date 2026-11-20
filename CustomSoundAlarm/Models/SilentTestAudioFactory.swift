@@ -11,6 +11,11 @@ enum SilentTestAudioFactory {
         try write(at: url, seconds: seconds, toneSeconds: 0)
     }
 
+    /// 全体に音がある CAF（ミュージック取り込み後の切り取り画面用・#245）。
+    static func makeToneFile(at url: URL, seconds: Double = 30) throws {
+        try write(at: url, seconds: seconds, toneSeconds: seconds, amplitude: 0.2)
+    }
+
     /// 全体がごく小さい音の CAF。既存アラームの警告テスト用（計測は成功する）。
     static func makeQuietFile(at url: URL, seconds: Double = 3) throws {
         try write(at: url, seconds: seconds, toneSeconds: seconds, amplitude: 0.0008)

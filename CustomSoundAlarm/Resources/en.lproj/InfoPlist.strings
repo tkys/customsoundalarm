@@ -2,3 +2,4 @@ CFBundleDisplayName = "My Sound Alarm";
 NSAlarmKitUsageDescription = "Used to ring alarms with your favorite sounds.";
 NSMicrophoneUsageDescription = "Used to record alarm sounds with the microphone.";
 NSPhotoLibraryUsageDescription = "Used to access the photo library to extract audio from videos.";
+NSAppleMusicUsageDescription = "Used to choose a song from your Music library as an alarm sound.";

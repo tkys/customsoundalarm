@@ -407,3 +407,6 @@
 "followup_tomorrow" = "내일도";
 "followup_weekdays" = "평일";
 "followup_everyday" = "매일";
+"add_from_music" = "음악에서 추가";
+"music_library_unavailable" = "이 곡은 가져올 수 없습니다.";
+"music_library_permission_denied" = "설정에서 음악 접근을 허용하세요.";

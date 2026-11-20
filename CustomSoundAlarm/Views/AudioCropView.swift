@@ -7,6 +7,8 @@ struct PendingAudioImport: Identifiable {
     /// security scope を解放済みの一時コピー
     let url: URL
     let name: String
+    /// 計測用の取り込み経路（ミュージックライブラリは .musicLibrary・#245）
+    var source: SoundImportSource = .audio
 }
 
 /// 音声ファイル用の波形クロップ画面（#77）。
@@ -181,6 +183,10 @@ struct AudioCropView: View {
             previewer.stop()
             // 無音の知らせを出したまま閉じたときの取りこぼしを消す（#256）
             deletePendingFile()
+            // 一時コピー（ファイルから・ミュージックから）は画面を閉じたら必ず消す（#245 レビュー）
+            if deletesSourceOnDiscard {
+                try? FileManager.default.removeItem(at: source.url)
+            }
         }
     }
 
@@ -392,6 +398,7 @@ struct AudioCropView: View {
             TextField("sound_name_placeholder", text: $soundName)
                 .textFieldStyle(.plain)
                 .submitLabel(.done)
+                .accessibilityIdentifier("audioCrop.name")
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
