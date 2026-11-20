@@ -207,7 +207,6 @@
 "backup_alarm_minutes" = "다시 울릴 시간";
 "backup_alarm_minutes_fmt" = "%d분 후";
 "backup_alarm_before_snooze" = "다시 알림이 끝나기 전에 울립니다.";
-"backup_alarm_early_access_note" = "사전 공개 기간에 사용하기 시작하면 정식 출시 후에도 계속 사용할 수 있습니다.";
 "backup_alarm_row_badge" = "늦잠 방지 켜짐";
 
 /* Update gate (#116) */
@@ -265,8 +264,6 @@
 "end_fade_footer" = "반복 연결부의 끝을 짧게 페이드아웃합니다.";
 "fade_backup_note" = "부드럽게 시작은 과수면 방지에 적용되지 않습니다.";
 "playlist_backup_note" = "재생목록 알람의 과수면 방지는 첫 곡을 더 크게 재생합니다.";
-"pro_early_access" = "PRO · 사전 공개";
-"playlist_early_access_note" = "사전 공개 중에 사용을 시작하면 정식 출시 후에도 계속 사용할 수 있습니다.";
 "playlist_title" = "재생목록";
 "playlist_new" = "새 재생목록";
 "playlist_new_default_name" = "새 재생목록";

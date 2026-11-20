@@ -207,7 +207,6 @@
 "backup_alarm_minutes" = "Sonner à nouveau après";
 "backup_alarm_minutes_fmt" = "Après %d min";
 "backup_alarm_before_snooze" = "Elle sonne avant la fin de votre rappel.";
-"backup_alarm_early_access_note" = "Si vous l’utilisez pendant l’accès anticipé, elle reste disponible après la version finale.";
 "backup_alarm_row_badge" = "Anti-grasse matinée activée";
 
 /* Update gate (#116) */
@@ -265,8 +264,6 @@
 "end_fade_footer" = "Court fondu à la fin de la boucle.";
 "fade_backup_note" = "Le démarrage en douceur ne s'applique pas au garde-fou anti-grasse matinée.";
 "playlist_backup_note" = "Pour les alarmes avec playlist, le garde-fou anti-grasse matinée joue le premier titre plus fort.";
-"pro_early_access" = "PRO · Accès anticipé";
-"playlist_early_access_note" = "Si vous commencez à l'utiliser pendant l'accès anticipé, vous pourrez continuer à l'utiliser après la sortie.";
 "playlist_title" = "Playlists";
 "playlist_new" = "Nouvelle playlist";
 "playlist_new_default_name" = "Nouvelle playlist";

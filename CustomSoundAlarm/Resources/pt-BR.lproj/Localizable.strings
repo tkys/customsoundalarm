@@ -207,7 +207,6 @@
 "backup_alarm_minutes" = "Tocar de novo depois de";
 "backup_alarm_minutes_fmt" = "%d min depois";
 "backup_alarm_before_snooze" = "Toca antes de a soneca terminar.";
-"backup_alarm_early_access_note" = "Se você começar a usar durante o acesso antecipado, continua disponível após o lançamento.";
 "backup_alarm_row_badge" = "Proteção ativada";
 
 /* Update gate (#116) */
@@ -265,8 +264,6 @@
 "end_fade_footer" = "Fade curto no fim do loop.";
 "fade_backup_note" = "O início suave não se aplica ao alerta de sono.";
 "playlist_backup_note" = "Nos alarmes com playlist, o alerta de sono reproduz mais alto a primeira faixa.";
-"pro_early_access" = "PRO · Acesso antecipado";
-"playlist_early_access_note" = "Se começar a usar durante o acesso antecipado, poderá continuar usando após o lançamento completo.";
 "playlist_title" = "Playlists";
 "playlist_new" = "Nova playlist";
 "playlist_new_default_name" = "Nova playlist";

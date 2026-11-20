@@ -207,7 +207,6 @@
 "backup_alarm_minutes" = "Erneut klingeln nach";
 "backup_alarm_minutes_fmt" = "%d Min. später";
 "backup_alarm_before_snooze" = "Er klingelt, bevor dein Schlummern endet.";
-"backup_alarm_early_access_note" = "Wenn du ihn während des Vorabzugangs nutzt, bleibt er nach der finalen Version verfügbar.";
 "backup_alarm_row_badge" = "Verschlafschutz an";
 
 /* Update gate (#116) */
@@ -265,8 +264,6 @@
 "end_fade_footer" = "Kurzes Ausblenden am Ende der Schleife.";
 "fade_backup_note" = "Der sanfte Start gilt nicht für die Überschlaf-Erinnerung.";
 "playlist_backup_note" = "Bei Playlist-Weckern spielt die Überschlaf-Erinnerung den ersten Titel lauter ab.";
-"pro_early_access" = "PRO · Vorabzugang";
-"playlist_early_access_note" = "Wenn du es während des Vorabzugangs verwendest, kannst du es nach der Veröffentlichung weiter nutzen.";
 "playlist_title" = "Playlists";
 "playlist_new" = "Neue Playlist";
 "playlist_new_default_name" = "Neue Playlist";

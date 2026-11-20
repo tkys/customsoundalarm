@@ -617,7 +617,8 @@ enum AppGroup {
 
     /// 通常アラームの登録内容の署名（entryID → signature・#163）。
     /// 同じ署名の `.scheduled` アラームは同期で作り直さない。
-    static var primaryAlarmSignatures: [UUID: AlarmScheduleSignature] {        get {
+    static var primaryAlarmSignatures: [UUID: AlarmScheduleSignature] {
+        get {
             guard let data = userDefaults.data(forKey: "primary_alarm_signatures"),
                   let map = try? JSONDecoder().decode(
                       [UUID: AlarmScheduleSignature].self,

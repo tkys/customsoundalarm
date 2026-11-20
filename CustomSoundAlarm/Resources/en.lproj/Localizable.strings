@@ -207,7 +207,6 @@
 "backup_alarm_minutes" = "Ring again after";
 "backup_alarm_minutes_fmt" = "%d min after";
 "backup_alarm_before_snooze" = "This rings before your snooze ends.";
-"backup_alarm_early_access_note" = "If you start using it during early access, you keep it after the full release.";
 "backup_alarm_row_badge" = "Oversleep guard on";
 
 /* Update gate (#116) */
@@ -265,8 +264,6 @@
 "end_fade_footer" = "Short fade at the end of the loop.";
 "fade_backup_note" = "Gentle start is not applied to the oversleep guard.";
 "playlist_backup_note" = "For playlist alarms, the oversleep guard plays the first track made louder.";
-"pro_early_access" = "PRO · Early access";
-"playlist_early_access_note" = "If you start using it during early access, you can keep using it after the full release.";
 "playlist_title" = "Playlists";
 "playlist_new" = "New playlist";
 "playlist_new_default_name" = "New playlist";

@@ -509,21 +509,7 @@ struct AlarmDetailView: View {
 
     private var fadeInRow: some View {
         AdaptiveDetailRow {
-            if dynamicTypeSize.isAccessibilitySize {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("fade_in")
-                    if fadeIn != .off {
-                        EarlyAccessBadge()
-                    }
-                }
-            } else {
-                HStack(spacing: 8) {
-                    Text("fade_in")
-                    if fadeIn != .off {
-                        EarlyAccessBadge()
-                    }
-                }
-            }
+            Text("fade_in")
         } content: {
             Picker("", selection: $fadeIn) {
                 Text("fade_off").tag(PlaylistFadeIn.off)
@@ -630,7 +616,8 @@ struct AlarmDetailView: View {
         return options
     }
 
-    private var backupToggle: Binding<Bool> {        Binding(
+    private var backupToggle: Binding<Bool> {
+        Binding(
             get: { backupMinutes != nil },
             set: { isOn in
                 if isOn {
@@ -648,20 +635,9 @@ struct AlarmDetailView: View {
     private var backupAlarmRows: some View {
         Group {
             AdaptiveDetailRow {
-                if dynamicTypeSize.isAccessibilitySize {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("backup_alarm_toggle")
-                        HStack(spacing: 8) {
-                            badge("PRO")
-                            backupInfoButton
-                        }
-                    }
-                } else {
-                    HStack(spacing: 8) {
-                        Text("backup_alarm_toggle")
-                        badge("PRO")
-                        backupInfoButton
-                    }
+                HStack(spacing: 8) {
+                    Text("backup_alarm_toggle")
+                    backupInfoButton
                 }
             } content: {
                 Toggle("", isOn: backupToggle)
@@ -761,15 +737,6 @@ struct AlarmDetailView: View {
             originalDate.formatted(style),
             backupDate.formatted(style)
         )
-    }
-
-    private func badge(_ text: String) -> some View {
-        Text(text)
-            .font(.caption2.weight(.bold))
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .background(Capsule().fill(Color.actionFillEnd))
-            .foregroundStyle(.white)
     }
 
     private var backupInfoButton: some View {
@@ -1327,9 +1294,6 @@ struct BackupAlarmInfoView: View {
                             .font(.subheadline)
                             .foregroundStyle(Color.textSecondary)
                     }
-                    Text("backup_alarm_early_access_note")
-                        .font(.footnote)
-                        .foregroundStyle(Color.textSecondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(20)

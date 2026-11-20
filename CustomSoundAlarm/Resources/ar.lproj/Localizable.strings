@@ -207,7 +207,6 @@
 "backup_alarm_minutes" = "الرنين مرة أخرى بعد";
 "backup_alarm_minutes_fmt" = "بعد %d د";
 "backup_alarm_before_snooze" = "يرن قبل انتهاء الغفوة.";
-"backup_alarm_early_access_note" = "إذا بدأت استخدامها خلال الوصول المبكر، فستحتفظ بها بعد الإصدار الرسمي.";
 "backup_alarm_row_badge" = "الحماية من النوم الزائد مفعّلة";
 
 /* Update gate (#116) */
@@ -265,8 +264,6 @@
 "end_fade_footer" = "تلاشٍ قصير عند نهاية التكرار.";
 "fade_backup_note" = "لا يتم تطبيق البداية الهادئة على حارس النوم الزائد.";
 "playlist_backup_note" = "في ألبومات تشغيل الألارم، يشغّل حارس النوم الزائد المقطع الأول بصوت أعلى.";
-"pro_early_access" = "PRO · وصول مبكر";
-"playlist_early_access_note" = "إذا بدأت باستخدامه أثناء الوصول المبكر، يمكنك الاستمرار في استخدامه بعد الإصدار الكامل.";
 "playlist_title" = "قوائم التشغيل";
 "playlist_new" = "قائمة تشغيل جديدة";
 "playlist_new_default_name" = "قائمة تشغيل جديدة";
