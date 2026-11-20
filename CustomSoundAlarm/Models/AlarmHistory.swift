@@ -1,4 +1,5 @@
 import Foundation
+import AlarmKit
 
 /// アラームの履歴計測（#241）。
 ///
@@ -207,5 +208,157 @@ enum AlarmLocalHistoryStore {
             lines.removeFirst(lines.count - maxLines)
         }
         try? (lines.joined(separator: "\n") + "\n").write(to: url, atomically: true, encoding: .utf8)
+    }
+}
+
+// MARK: - 発火の重複防止と「止めた＝鳴った」の補完（#263）
+
+/// AlarmKit のスケジュールから、いま鳴っている回の発火予定時刻を求める。
+enum AlarmFireOccurrence {
+    /// - `.fixed`: その日時。
+    /// - `.relative(.never)`: 直近の時刻（今日まだなら昨日）。
+    /// - `.relative(.weekly)`: 曜日が合う直近の時刻。スヌーズ後の再停止でも同じ値になる。
+    static func date(
+        for schedule: Alarm.Schedule?,
+        now: Date,
+        calendar: Calendar = .current
+    ) -> Date? {
+        guard let schedule else { return nil }
+        switch schedule {
+        case .fixed(let date):
+            return date
+        case .relative(let relative):
+            let hour = relative.time.hour
+            let minute = relative.time.minute
+            switch relative.repeats {
+            case .never:
+                return mostRecent(hour: hour, minute: minute, now: now, calendar: calendar)
+            case .weekly(let weekdays):
+                let allowed = Set(weekdays.map(weekdayNumber))
+                for offset in 0...7 {
+                    guard let day = calendar.date(byAdding: .day, value: -offset, to: now) else {
+                        continue
+                    }
+                    guard allowed.contains(calendar.component(.weekday, from: day)) else {
+                        continue
+                    }
+                    if let candidate = calendar.date(
+                        bySettingHour: hour,
+                        minute: minute,
+                        second: 0,
+                        of: day
+                    ), candidate <= now {
+                        return candidate
+                    }
+                }
+                return nil
+            @unknown default:
+                return nil
+            }
+        @unknown default:
+            return nil
+        }
+    }
+
+    private static func mostRecent(
+        hour: Int,
+        minute: Int,
+        now: Date,
+        calendar: Calendar
+    ) -> Date? {
+        if let today = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: now),
+           today <= now {
+            return today
+        }
+        guard let yesterday = calendar.date(byAdding: .day, value: -1, to: now) else {
+            return nil
+        }
+        return calendar.date(bySettingHour: hour, minute: minute, second: 0, of: yesterday)
+    }
+
+    private static func weekdayNumber(_ weekday: Locale.Weekday) -> Int {
+        switch weekday {
+        case .sunday: 1
+        case .monday: 2
+        case .tuesday: 3
+        case .wednesday: 4
+        case .thursday: 5
+        case .friday: 6
+        case .saturday: 7
+        @unknown default: 0
+        }
+    }
+}
+
+/// 「このアラームのこの回はもう alarm_fired を送った」を App Group に残す（#263）。
+/// 分単位に丸めた発生時刻と alarm_uid の組で1回だけ。
+/// observer（起動中）・reconcile（起動時）・stopped（Intent）をまたいで重複を防ぐ。
+enum AlarmFireTracker {
+    private static let storageKey = "reported_alarm_fire_occurrences"
+    private static let maxCount = 300
+
+    static func hasReported(
+        alarmUID: String,
+        occurrence: Date,
+        defaults: UserDefaults = AppGroup.userDefaults
+    ) -> Bool {
+        read(defaults).contains(key(alarmUID: alarmUID, occurrence: occurrence))
+    }
+
+    /// まだ送っていなければ記録して true。既に送っていれば false。
+    @discardableResult
+    static func markIfNeeded(
+        alarmUID: String,
+        occurrence: Date,
+        defaults: UserDefaults = AppGroup.userDefaults
+    ) -> Bool {
+        let key = key(alarmUID: alarmUID, occurrence: occurrence)
+        var keys = read(defaults)
+        guard !keys.contains(key) else { return false }
+        keys.append(key)
+        if keys.count > maxCount {
+            keys = Array(keys.suffix(maxCount))
+        }
+        defaults.set(keys, forKey: storageKey)
+        return true
+    }
+
+    private static func key(alarmUID: String, occurrence: Date) -> String {
+        let rounded = (occurrence.timeIntervalSince1970 / 60).rounded(.down) * 60
+        return "\(alarmUID)|\(Int(rounded))"
+    }
+
+    private static func read(_ defaults: UserDefaults) -> [String] {
+        defaults.stringArray(forKey: storageKey) ?? []
+    }
+}
+
+/// 停止 Intent から「鳴った」を補うイベントを作る（#263）。
+enum AlarmFiredBackfill {
+    static func event(
+        entry: AlarmEntry,
+        soundMode: PlaylistSoundMode,
+        context: AlarmEventContext
+    ) -> AnalyticsEvent {
+        .alarmFired(
+            wasAppForeground: false,
+            hour: entry.hour,
+            isRepeating: !entry.repeatWeekdays.isEmpty,
+            detection: "stopped",
+            soundMode: soundMode,
+            context: context
+        )
+    }
+
+    static func pendingEvent(
+        entry: AlarmEntry,
+        stoppedAt: Date,
+        soundMode: PlaylistSoundMode,
+        context: AlarmEventContext
+    ) -> PendingAlarmEvent {
+        PendingAlarmEvent(
+            event: event(entry: entry, soundMode: soundMode, context: context),
+            timestamp: stoppedAt
+        )
     }
 }

@@ -94,6 +94,27 @@ struct AnalyticsEventsDocTests {
     }
 
     @Test
+    func alarmFiredDetectionValuesAreDocumented() throws {
+        let doc = try String(contentsOf: docURL, encoding: .utf8)
+        let row = try #require(
+            doc.split(separator: "\n").first { $0.hasPrefix("| `alarm_fired` |") }
+        )
+        for detection in ["observer", "reconcile", "stopped"] {
+            #expect(
+                row.contains(detection),
+                "docs/analytics-events.md の alarm_fired に detection=\(detection) がありません"
+            )
+        }
+    }
+
+    @Test
+    func bufferedEventTimestampIsDocumented() throws {
+        let doc = try String(contentsOf: docURL, encoding: .utf8)
+        #expect(doc.contains("実際の発生時刻"))
+        #expect(doc.contains("properties.timestamp"))
+    }
+
+    @Test
     func soundPreviewSourcesAreDocumented() throws {
         let doc = try String(contentsOf: docURL, encoding: .utf8)
         let row = try #require(

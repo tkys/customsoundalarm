@@ -218,6 +218,12 @@ final class AlarmScheduler {
         let store = AlarmStore.shared
         var didChange = false
 
+        // 計測用の発火予定日時は、有効なアラームの分だけ残す（#263）
+        var scheduledFireDates = AppGroup.primaryScheduledFireDates
+        let enabledEntryIDs = Set(store.alarms.filter(\.isEnabled).map(\.id))
+        scheduledFireDates = scheduledFireDates.filter { enabledEntryIDs.contains($0.key) }
+        AppGroup.primaryScheduledFireDates = scheduledFireDates
+
         let reconcileNow = Date()
         let todayKey = AlarmSkipLogic.dateKey(reconcileNow)
         for alarm in store.alarms where alarm.isEnabled && alarm.repeatWeekdays.isEmpty {
@@ -227,14 +233,34 @@ final class AlarmScheduler {
             }
             if let mappedID = alarmIDMap[alarm.id], !activeAlarmIDs.contains(mappedID) {
                 // 発火済みの一回限りアラーム → 遡及記録してから無効化
-                AnalyticsService.shared.capture(.alarmFired(
-                    wasAppForeground: false,
-                    hour: alarm.hour,
-                    isRepeating: false,
-                    detection: "reconcile",
-                    soundMode: AlarmSoundModeResolver.soundMode(for: alarm),
-                    context: AlarmHistoryLogic.context(for: alarm)
-                ))
+                let scheduledAt = AppGroup.primaryScheduledFireDates[alarm.id]
+                let shouldReport: Bool
+                if let scheduledAt {
+                    shouldReport = AlarmFireTracker.markIfNeeded(
+                        alarmUID: AlarmUIDStore.uid(for: alarm.id),
+                        occurrence: scheduledAt
+                    )
+                } else {
+                    shouldReport = true
+                }
+                if shouldReport {
+                    AnalyticsService.shared.capture(
+                        .alarmFired(
+                            wasAppForeground: false,
+                            hour: alarm.hour,
+                            isRepeating: false,
+                            detection: "reconcile",
+                            soundMode: AlarmSoundModeResolver.soundMode(for: alarm),
+                            context: AlarmHistoryLogic.context(for: alarm)
+                        ),
+                        timestamp: scheduledAt
+                    )
+                }
+                if scheduledAt != nil {
+                    var dates = AppGroup.primaryScheduledFireDates
+                    dates.removeValue(forKey: alarm.id)
+                    AppGroup.primaryScheduledFireDates = dates
+                }
                 markPendingShuffleRefresh(for: alarm)
                 store.toggleEnabled(alarm, recordEvent: false)
                 alarmIDMap.removeValue(forKey: alarm.id)
@@ -715,6 +741,14 @@ final class AlarmScheduler {
                 displayName: soundDisplayName(for: entry)
             )
             AppGroup.primaryAlarmSignatures = signatures
+            // 1回きりの reconcile で発火予定時刻を使うための計測用メタデータ（#263）
+            var fireDates = AppGroup.primaryScheduledFireDates
+            if let nextFireDate = entry.nextFireDate(from: Date()) {
+                fireDates[entry.id] = nextFireDate
+            } else {
+                fireDates.removeValue(forKey: entry.id)
+            }
+            AppGroup.primaryScheduledFireDates = fireDates
             // 新しい発火サイクルなのでスヌーズ回数をリセット（#110）
             var counts = AppGroup.snoozeCounts
             if counts.removeValue(forKey: entry.id) != nil {
@@ -955,6 +989,13 @@ final class AlarmScheduler {
                 displayName: soundDisplayName(for: entry)
             )
             AppGroup.primaryAlarmSignatures = signatures
+            var fireDates = AppGroup.primaryScheduledFireDates
+            if let nextFireDate = entry.nextFireDate(from: Date()) {
+                fireDates[entry.id] = nextFireDate
+            } else {
+                fireDates.removeValue(forKey: entry.id)
+            }
+            AppGroup.primaryScheduledFireDates = fireDates
             logger.info("Rescheduled playlist alarm for next occurrence: \(entry.label)")
         } catch {
             logger.error("Failed to reschedule playlist alarm \(entry.label): \(error.localizedDescription)")
@@ -1361,7 +1402,7 @@ final class AlarmScheduler {
                     switch alarm.state {
                     case .alerting:
                         logger.info("Alarm alerting: \(alarm.id)")
-                        handleAlarmFired(alarmKitID: alarm.id)
+                        handleAlarmFired(alarm: alarm)
                     case .countdown:
                         // スヌーズ待機中への遷移を検知（App Group 永続化で二重計上防止）
                         guard let entryID = alarmIDMap.first(where: { $0.value == alarm.id })?.key else { continue }
@@ -1392,7 +1433,8 @@ final class AlarmScheduler {
     }
 
     /// 一回限りアラーム発火後に isEnabled を false にする
-    private func handleAlarmFired(alarmKitID: Alarm.ID) {
+    private func handleAlarmFired(alarm alarmKitAlarm: Alarm) {
+        let alarmKitID = alarmKitAlarm.id
         // 定着ユーザー判定用に発火実績を記録（同一日は1回、鳴動中は毎tick呼ばれるが日単位で冪等）
         // マッピング欠落時（オーファン）でも呼び出す
         ReviewRequestManager.shared.recordAlarmFired()
@@ -1418,8 +1460,18 @@ final class AlarmScheduler {
             return
         }
 
-        // alarm_fired 計測（同一 Alarm.ID につきセッション中1回のみ）
-        if !firedReportedThisSession.contains(alarmKitID) {
+        // alarm_fired 計測（同じ発火のスヌーズ後の再停止でも1回・#263）
+        let occurrence = AlarmFireOccurrence.date(for: alarmKitAlarm.schedule, now: Date())
+        let shouldReport: Bool
+        if let occurrence {
+            shouldReport = AlarmFireTracker.markIfNeeded(
+                alarmUID: AlarmUIDStore.uid(for: entryID),
+                occurrence: occurrence
+            )
+        } else {
+            shouldReport = !firedReportedThisSession.contains(alarmKitID)
+        }
+        if shouldReport {
             firedReportedThisSession.insert(alarmKitID)
             AnalyticsService.shared.capture(.alarmFired(
                 wasAppForeground: true,

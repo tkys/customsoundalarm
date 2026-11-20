@@ -231,6 +231,42 @@ struct DismissAlarmIntent: LiveActivityIntent {
                 break
             }
 
+            // アプリ停止中に鳴った分を、止めた記録から alarm_fired で補う（#263）。
+            // observer / reconcile で送信済み、またはスヌーズ後の再停止なら送らない。
+            switch action.role {
+            case .primary, .coverage:
+                if let entry = stoppedEntry,
+                   let stoppedAlarm = alarms.first(where: { $0.id == stoppedID }),
+                   let occurrence = AlarmFireOccurrence.date(
+                       for: stoppedAlarm.schedule,
+                       now: now
+                   ) {
+                    let uid = AlarmUIDStore.uid(for: entry.id, now: now)
+                    if AlarmFireTracker.markIfNeeded(
+                        alarmUID: uid,
+                        occurrence: occurrence
+                    ) {
+                        let context = AlarmHistoryLogic.context(for: entry, now: now)
+                        let firedEvent = AlarmFiredBackfill.event(
+                            entry: entry,
+                            soundMode: stoppedSoundMode,
+                            context: context
+                        )
+                        AlarmLocalHistoryStore.append(
+                            event: firedEvent.name,
+                            properties: firedEvent.properties,
+                            now: now
+                        )
+                        AlarmEventBuffer.enqueue(PendingAlarmEvent(
+                            event: firedEvent,
+                            timestamp: now
+                        ))
+                    }
+                }
+            case .backup, .unknown:
+                break
+            }
+
             // シャッフル／1曲ランダムは、停止した次の回に向けて順番を作り直す（#151）。
             if case .primary = action.role,
                let entry,

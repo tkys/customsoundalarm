@@ -983,7 +983,7 @@ enum VideoImportFailureReason: String, Sendable {
 /// ユニットテストではこのプロトコルをモックし、PostHog SDK に依存せずに
 /// 「正しいイベント名・プロパティが渡されるか」を検証できる。
 protocol AnalyticsBackend: AnyObject, Sendable {
-    func capture(_ event: String, properties: [String: Any]?)
+    func capture(_ event: String, properties: [String: Any]?, timestamp: Date?)
     /// ユーザープロパティを設定する（identify）。PII は絶対に含めないこと。
     func setUserProperties(_ properties: [String: Any])
 }
@@ -1055,8 +1055,16 @@ struct AnalyticsGate: Equatable, Sendable {
 /// PostHog SDK を実際に呼び出すバックエンド実装。
 /// `import PostHog` を使用する唯一の実装。将来差し替え可能にするためプロトコル背後で隠す。
 final class PostHogAnalyticsBackend: AnalyticsBackend {
-    func capture(_ event: String, properties: [String: Any]?) {
-        PostHogSDK.shared.capture(event, properties: properties)
+    func capture(_ event: String, properties: [String: Any]?, timestamp: Date?) {
+        PostHogSDK.shared.capture(
+            event,
+            distinctId: nil,
+            properties: properties,
+            userProperties: nil,
+            userPropertiesSetOnce: nil,
+            groups: nil,
+            timestamp: timestamp
+        )
     }
 
     func setUserProperties(_ properties: [String: Any]) {
@@ -1182,7 +1190,7 @@ final class AnalyticsService: @unchecked Sendable {
     /// - Parameters:
     ///   - event: 型安全なイベント定義
     ///   - properties: 追加プロパティ（任意）。同名キーは追加側で上書き。
-    func capture(_ event: AnalyticsEvent, properties: [String: Any]? = nil) {
+    func capture(_ event: AnalyticsEvent, properties: [String: Any]? = nil, timestamp: Date? = nil) {
         let payload: [String: Any]?
         if let extra = properties, !extra.isEmpty {
             var merged = event.properties
@@ -1197,7 +1205,8 @@ final class AnalyticsService: @unchecked Sendable {
         if event.recordsAlarmHistory {
             AlarmLocalHistoryStore.append(
                 event: event.name,
-                properties: payload ?? event.properties
+                properties: payload ?? event.properties,
+                now: timestamp ?? Date()
             )
         }
 
@@ -1210,7 +1219,7 @@ final class AnalyticsService: @unchecked Sendable {
             return
         }
 
-        backend.capture(event.name, properties: payload)
+        backend.capture(event.name, properties: payload, timestamp: timestamp)
     }
 
     /// PostHog ユーザープロパティを設定する（identify）。
@@ -1226,12 +1235,50 @@ final class AnalyticsService: @unchecked Sendable {
 
     /// PendingAlarmEvent キューをフラッシュする。configure() 完了後に自動で呼ばれる。
     /// Intent 実行時にバッファされたイベント（alarm_stopped 等）を PostHog へ送信する。
-    func flushPendingAlarmEvents() {
-        let events = AlarmEventBuffer.dequeueAll()
+    func flushPendingAlarmEvents(defaults: UserDefaults = AppGroup.userDefaults) {
+        let events = AlarmEventBuffer.dequeueAll(defaults: defaults)
         guard !events.isEmpty else { return }
         for event in events {
-            backend?.capture(event.name, properties: event.postHogProperties)
+            // 保存した発生時刻で送る（PostHog 上の時刻が「開いた時刻」にならないように・#263）
+            backend?.capture(
+                event.name,
+                properties: event.postHogProperties,
+                timestamp: event.timestamp
+            )
         }
         logger.info("Flushed \(events.count) pending alarm events")
+    }
+}
+
+// MARK: - PendingAlarmEvent from AnalyticsEvent (#263)
+
+extension PendingAlarmEvent {
+    /// Intent からバッファするとき用。Bool も型を変えずに保持する。
+    init(event: AnalyticsEvent, timestamp: Date) {
+        var strings: [String: String] = [:]
+        var ints: [String: Int] = [:]
+        var bools: [String: Bool] = [:]
+        for (key, value) in event.properties {
+            switch value {
+            case let value as String:
+                strings[key] = value
+            case let value as Int:
+                ints[key] = value
+            case let value as Bool:
+                bools[key] = value
+            case let value as Double:
+                ints[key] = Int(value)
+            default:
+                strings[key] = String(describing: value)
+            }
+        }
+        self.init(
+            name: event.name,
+            properties: strings,
+            intProperties: ints.isEmpty ? nil : ints,
+            boolProperties: bools.isEmpty ? nil : bools,
+            hour: ints["hour"],
+            timestamp: timestamp
+        )
     }
 }

@@ -599,10 +599,25 @@ enum AppGroup {
         }
     }
 
+    /// 通常アラームの次回発火予定日時（entryID → fireDate・#263）。
+    /// 1回きりの reconcile で「発火予定時刻」を使うためだけの計測用メタデータ。
+    /// スケジュールの判定には使わない。
+    static var primaryScheduledFireDates: [UUID: Date] {
+        get {
+            guard let data = userDefaults.data(forKey: "primary_scheduled_fire_dates"),
+                  let map = try? JSONDecoder().decode([UUID: Date].self, from: data)
+            else { return [:] }
+            return map
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else { return }
+            userDefaults.set(data, forKey: "primary_scheduled_fire_dates")
+        }
+    }
+
     /// 通常アラームの登録内容の署名（entryID → signature・#163）。
     /// 同じ署名の `.scheduled` アラームは同期で作り直さない。
-    static var primaryAlarmSignatures: [UUID: AlarmScheduleSignature] {
-        get {
+    static var primaryAlarmSignatures: [UUID: AlarmScheduleSignature] {        get {
             guard let data = userDefaults.data(forKey: "primary_alarm_signatures"),
                   let map = try? JSONDecoder().decode(
                       [UUID: AlarmScheduleSignature].self,
