@@ -10,8 +10,7 @@ struct BackupInfoCopyTests {
         let keys = [
             "backup_alarm_info_mechanism",
             "backup_alarm_info_louder",
-            "backup_alarm_info_volume",
-            "backup_alarm_early_access_note"
+            "backup_alarm_info_volume"
         ]
         for language in ["en", "ja"] {
             let path = try #require(

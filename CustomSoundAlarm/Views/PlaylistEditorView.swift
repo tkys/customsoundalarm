@@ -182,12 +182,6 @@ struct PlaylistEditorView: View {
                 Text("transition_footer")
             }
 
-            Section {
-                Text("playlist_early_access_note")
-                    .font(.footnote)
-                    .foregroundStyle(Color.textSecondary)
-            }
-
         }
         .warmListBackground()
         // 常にドラッグハンドルを出す（削除は標準の − ボタン・#169）。

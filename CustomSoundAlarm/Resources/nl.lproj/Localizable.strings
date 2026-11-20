@@ -207,7 +207,6 @@
 "backup_alarm_minutes" = "Opnieuw afgaan na";
 "backup_alarm_minutes_fmt" = "%d min later";
 "backup_alarm_before_snooze" = "Hij gaat af voordat je sluimeren eindigt.";
-"backup_alarm_early_access_note" = "Als je hem tijdens de vroege toegang gaat gebruiken, houd je hem na de definitieve versie.";
 "backup_alarm_row_badge" = "Verslaapbeveiliging aan";
 
 /* Update gate (#116) */
@@ -265,8 +264,6 @@
 "end_fade_footer" = "Korte fade aan het einde van de herhaling.";
 "fade_backup_note" = "Zachte start geldt niet voor de overslaapbeveiliging.";
 "playlist_backup_note" = "Bij afspeellijstalarmen speelt de overslaapbeveiliging het eerste nummer harder af.";
-"pro_early_access" = "PRO · Nu inbegrepen";
-"playlist_early_access_note" = "Als je het tijdens de vroege toegang gaat gebruiken, kun je het na de volledige release blijven gebruiken.";
 "playlist_title" = "Afspeellijsten";
 "playlist_new" = "Nieuwe afspeellijst";
 "playlist_new_default_name" = "Nieuwe afspeellijst";

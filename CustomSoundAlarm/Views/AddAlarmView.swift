@@ -509,21 +509,7 @@ struct AlarmDetailView: View {
 
     private var fadeInRow: some View {
         AdaptiveDetailRow {
-            if dynamicTypeSize.isAccessibilitySize {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("fade_in")
-                    if fadeIn != .off {
-                        EarlyAccessBadge()
-                    }
-                }
-            } else {
-                HStack(spacing: 8) {
-                    Text("fade_in")
-                    if fadeIn != .off {
-                        EarlyAccessBadge()
-                    }
-                }
-            }
+            Text("fade_in")
         } content: {
             Picker("", selection: $fadeIn) {
                 Text("fade_off").tag(PlaylistFadeIn.off)
@@ -649,16 +635,9 @@ struct AlarmDetailView: View {
     private var backupAlarmRows: some View {
         Group {
             AdaptiveDetailRow {
-                // バッジをラベルの隣に置くと、長い言語でラベルが不自然に改行されるため
-                // タイトルの下に置く（#262・標準/AX5 共通）。
-                VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
                     Text("backup_alarm_toggle")
-                    HStack(spacing: 8) {
-                        EarlyAccessBadge(
-                            accessibilityIdentifier: "addAlarm.backupBadge"
-                        )
-                        backupInfoButton
-                    }
+                    backupInfoButton
                 }
             } content: {
                 Toggle("", isOn: backupToggle)
@@ -1315,9 +1294,6 @@ struct BackupAlarmInfoView: View {
                             .font(.subheadline)
                             .foregroundStyle(Color.textSecondary)
                     }
-                    Text("backup_alarm_early_access_note")
-                        .font(.footnote)
-                        .foregroundStyle(Color.textSecondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(20)
