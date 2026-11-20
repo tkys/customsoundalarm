@@ -410,3 +410,8 @@
 "add_from_music" = "음악에서 추가";
 "music_library_unavailable" = "이 곡은 가져올 수 없습니다.";
 "music_library_permission_denied" = "설정에서 음악 접근을 허용하세요.";
+"more" = "더 보기";
+"more_label_fmt" = "레이블: %@";
+"more_no_label" = "레이블 없음";
+"more_separator" = " · ";
+"more_accessibility_fmt" = "%1$@, %2$@";

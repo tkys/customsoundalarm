@@ -410,3 +410,8 @@
 "add_from_music" = "Add from Music";
 "music_library_unavailable" = "This song can't be imported.";
 "music_library_permission_denied" = "Allow access to Music in Settings.";
+"more" = "More";
+"more_label_fmt" = "Label: %@";
+"more_no_label" = "No label";
+"more_separator" = " · ";
+"more_accessibility_fmt" = "%1$@, %2$@";

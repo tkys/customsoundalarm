@@ -136,6 +136,8 @@ final class OnboardingUITests: XCTestCase {
     }
 
     func testOnboardingLaterGoesToList() {
+        // このテストは「まだアラームが無い」状態を見るので、明示的に空にする。
+        app.launchArguments = ["-uitest-fresh-onboarding"]
         app.launch()
         XCTAssertTrue(app.buttons["onboarding.next"].waitForExistence(timeout: 10))
         app.buttons["onboarding.next"].tap()
@@ -147,7 +149,7 @@ final class OnboardingUITests: XCTestCase {
         let laterButton = app.buttons["onboarding.later"]
         XCTAssertTrue(laterButton.waitForExistence(timeout: 5))
         laterButton.tap()
-        let empty = findElement(identifier: "empty.title")
+        let empty = findElement(identifier: "emptyState.root")
         XCTAssertTrue(empty.waitForExistence(timeout: 5), "empty list should be visible after Later")
     }
 }

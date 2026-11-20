@@ -410,3 +410,8 @@
 "add_from_music" = "Aus Musik hinzufügen";
 "music_library_unavailable" = "Dieser Titel kann nicht importiert werden.";
 "music_library_permission_denied" = "Erlaube den Zugriff auf Musik in den Einstellungen.";
+"more" = "Mehr";
+"more_label_fmt" = "Bezeichnung: %@";
+"more_no_label" = "Keine Bezeichnung";
+"more_separator" = " · ";
+"more_accessibility_fmt" = "%1$@, %2$@";

@@ -494,16 +494,31 @@ struct CustomSoundAlarmApp: App {
                     }
                     if AppGroup.isUITestOpenEditAlarm {
                         AlarmStore.shared.resetForUITest()
-                        AlarmStore.shared.add(AlarmEntry(
-                            hour: 7,
-                            minute: 0,
-                            isEnabled: false,
-                            label: "UITest Alarm",
-                            repeatWeekdays: [],
-                            soundFileName: "",
-                            snoozeMinutes: 9,
-                            backupMinutes: nil
-                        ))
+                        if AppGroup.isUITestSeedBackupWarning {
+                            // 寝過ごし防止がスヌーズより先に鳴るアラーム（#211 レビュー）
+                            let japanese = Locale.current.language.languageCode?.identifier == "ja"
+                            AlarmStore.shared.add(AlarmEntry(
+                                hour: 7,
+                                minute: 0,
+                                isEnabled: false,
+                                label: japanese ? "朝" : "Morning",
+                                repeatWeekdays: [],
+                                soundFileName: "PresetBell.caf",
+                                snoozeMinutes: 9,
+                                backupMinutes: 5
+                            ))
+                        } else {
+                            AlarmStore.shared.add(AlarmEntry(
+                                hour: 7,
+                                minute: 0,
+                                isEnabled: false,
+                                label: "UITest Alarm",
+                                repeatWeekdays: [],
+                                soundFileName: "",
+                                snoozeMinutes: 9,
+                                backupMinutes: nil
+                            ))
+                        }
                     }
                     #endif
 

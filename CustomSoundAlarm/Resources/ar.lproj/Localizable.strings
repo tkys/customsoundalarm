@@ -410,3 +410,8 @@
 "add_from_music" = "إضافة من الموسيقى";
 "music_library_unavailable" = "لا يمكن استيراد هذه الأغنية.";
 "music_library_permission_denied" = "اسمح بالوصول إلى الموسيقى في الإعدادات.";
+"more" = "المزيد";
+"more_label_fmt" = "التسمية: %@";
+"more_no_label" = "بلا تسمية";
+"more_separator" = "، ";
+"more_accessibility_fmt" = "%1$@، %2$@";

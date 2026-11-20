@@ -681,6 +681,7 @@ struct AnalyticsEventTests {
             .settingsOpened,
             .supportContactOpened(method: .web, diagnosticsAttached: false),
             .musicLibraryUnavailable,
+            .alarmEditorMoreOpened,
             .reviewLinkOpened,
             .bedsideExited(durationBucket: "1_5min", exitMethod: "exit_button"),
             .bedsideSettingChanged(setting: .layout, value: .string("minimal")),

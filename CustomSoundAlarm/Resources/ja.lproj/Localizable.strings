@@ -410,3 +410,8 @@
 "add_from_music" = "ミュージックから追加";
 "music_library_unavailable" = "この曲は取り込めません";
 "music_library_permission_denied" = "設定アプリでミュージックへのアクセスを許可してください";
+"more" = "その他";
+"more_label_fmt" = "ラベル：%@";
+"more_no_label" = "ラベルなし";
+"more_separator" = "・";
+"more_accessibility_fmt" = "%1$@、%2$@";

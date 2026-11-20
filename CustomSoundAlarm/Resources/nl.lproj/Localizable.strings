@@ -410,3 +410,8 @@
 "add_from_music" = "Toevoegen uit Muziek";
 "music_library_unavailable" = "Dit nummer kan niet worden geïmporteerd.";
 "music_library_permission_denied" = "Sta toegang tot Muziek toe in Instellingen.";
+"more" = "Meer";
+"more_label_fmt" = "Label: %@";
+"more_no_label" = "Geen label";
+"more_separator" = " · ";
+"more_accessibility_fmt" = "%1$@, %2$@";

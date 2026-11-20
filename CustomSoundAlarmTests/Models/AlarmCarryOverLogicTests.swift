@@ -229,3 +229,84 @@ struct AlarmCarryOverLogicTests {
         ))!
     }
 }
+
+/// 「その他」1行の要約（#211）。
+struct AlarmEditorMoreSummaryTests {
+
+    private let strings = AlarmEditorMoreSummary.Strings(
+        labelFormat: "Label: %@",
+        noLabel: "No label",
+        snoozeTitle: "Snooze",
+        fadeTitle: "Gentle start",
+        separator: " · ",
+        accessibilityFormat: "%1$@, %2$@",
+        moreTitle: "More"
+    )
+
+    private func make(
+        label: String = "Alarm",
+        snooze: Int = 9,
+        fadeIn: PlaylistFadeIn = .off
+    ) -> AlarmEditorMoreSummary.Result {
+        AlarmEditorMoreSummary.make(
+            label: label,
+            defaultLabel: "Alarm",
+            snoozeMinutes: snooze,
+            snoozeValue: "\(snooze) min",
+            fadeIn: fadeIn,
+            fadeValue: fadeIn == .off ? "Off" : "\(fadeIn.rawValue) sec",
+            strings: strings
+        )
+    }
+
+    @Test
+    func untouchedShowsSnoozeDefaultOnly() {
+        let result = make()
+        #expect(result.displayItems == ["Snooze 9 min"])
+        #expect(result.accessibilityText == "More, Snooze 9 min · No label")
+    }
+
+    @Test
+    func customLabelComesFirst() {
+        let result = make(label: "Gym")
+        #expect(result.displayItems == ["Label: Gym", "Snooze 9 min"])
+        #expect(result.accessibilityText == "More, Snooze 9 min · Label: Gym")
+    }
+
+    @Test
+    func changedLabelAndSnoozeKeepChangedOrder() {
+        let result = make(label: "Gym", snooze: 5)
+        #expect(result.displayItems == ["Label: Gym", "Snooze 5 min"])
+        #expect(result.accessibilityText == "More, Snooze 5 min · Label: Gym")
+    }
+
+    @Test
+    func changedSnoozeOnlyIsNotDuplicated() {
+        let result = make(snooze: 5)
+        #expect(result.displayItems == ["Snooze 5 min"])
+    }
+
+    @Test
+    func gentleStartIsSecondWhenLabelChanged() {
+        let result = make(label: "Gym", fadeIn: .five)
+        #expect(result.displayItems == ["Label: Gym", "Gentle start 5 sec"])
+        #expect(
+            result.accessibilityText
+                == "More, Snooze 9 min · Label: Gym · Gentle start 5 sec"
+        )
+    }
+
+    @Test
+    func summaryKeepsAtMostTwoItems() {
+        let result = make(label: "Gym", snooze: 5, fadeIn: .thirty)
+        #expect(result.displayItems.count == 2)
+        #expect(result.displayItems == ["Label: Gym", "Snooze 5 min"])
+    }
+
+    @Test
+    func whitespaceOnlyLabelIsTreatedAsNoLabel() {
+        let result = make(label: "  \n")
+        #expect(result.displayItems == ["Snooze 9 min"])
+        #expect(result.accessibilityText == "More, Snooze 9 min · No label")
+    }
+}

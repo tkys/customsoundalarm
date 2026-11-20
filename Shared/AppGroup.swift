@@ -240,6 +240,15 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト・スクショ用: 寝過ごし防止がスヌーズより先に鳴るアラーム（#211 レビュー）
+    static var isUITestSeedBackupWarning: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-backup-warning")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: 無音の音声の取り込み（#256）
     static var isUITestSilentCrop: Bool {
     #if DEBUG

@@ -77,7 +77,8 @@ final class AlarmSkipUITests: XCTestCase {
     func testLeadingSwipeSkipsNextAndShowsRowSummary() {
         let app = launchSkipSeed()
 
-        let row = app.cells.firstMatch
+        // 許可バナーがあると先頭の cell はバナーになるので、アラーム行を直接選ぶ。
+        let row = app.switches["alarm.row"].firstMatch
         XCTAssertTrue(
             row.waitForExistence(timeout: 15),
             "alarm row should appear: \(app.debugDescription)"
@@ -250,15 +251,22 @@ final class AlarmSkipUITests: XCTestCase {
     }
 
     private func openFirstAlarmRepeatScreen(_ app: XCUIApplication) {
-        let firstRow = app.cells.firstMatch
+        // 許可バナーがあると先頭の cell はバナーになるので、アラーム行を直接選ぶ。
+        let firstRow = app.switches["alarm.row"].firstMatch
         XCTAssertTrue(firstRow.waitForExistence(timeout: 10))
-        firstRow.tap()
+        // スイッチ本体ではなく行の左側を押して編集画面を開く
+        firstRow.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.5)).tap()
         XCTAssertTrue(
             app.collectionViews["addAlarm.root"].waitForExistence(timeout: 20),
             "edit screen should open: \(app.debugDescription)"
         )
         let repeatRow = app.buttons["addAlarm.repeatRow"]
         XCTAssertTrue(repeatRow.waitForExistence(timeout: 10))
+        var swipes = 0
+        while !repeatRow.isHittable && swipes < 8 {
+            app.collectionViews["addAlarm.root"].swipeUp()
+            swipes += 1
+        }
         repeatRow.tap()
         XCTAssertTrue(
             app.buttons["repeat.day.1"].waitForExistence(timeout: 10),
