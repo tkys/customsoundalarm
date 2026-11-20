@@ -38,6 +38,7 @@ final class AlarmEditorScreenshotUITests: XCTestCase {
         for context in contexts {
             captureAdd(context)
             captureEditBackup(context)
+            captureEditBackupWarning(context)
         }
     }
 
@@ -123,8 +124,31 @@ final class AlarmEditorScreenshotUITests: XCTestCase {
         app.terminate()
     }
 
-    // MARK: - Helpers
+    // MARK: - Edit with oversleep warning
 
+    private func captureEditBackupWarning(_ context: Context) {
+        let app = launch(
+            context,
+            arguments: ["-uitest-seed-backup-warning", "-uitest-open-edit-alarm"]
+        )
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 25),
+            "edit screen did not appear: \(app.debugDescription)"
+        )
+        allowPermissionIfAsked()
+
+        let warning = app.descendants(matching: .any)["addAlarm.backupBeforeSnooze"]
+        scrollTo(warning, in: app)
+        XCTAssertTrue(
+            warning.waitForExistence(timeout: 5),
+            "backup warning did not appear: \(app.debugDescription)"
+        )
+        settle()
+        attach(app, "alarm-editor-edit-backup-warning-\(context.name)")
+        app.terminate()
+    }
+
+    // MARK: - Helpers
     private func launch(_ context: Context, arguments: [String]) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [

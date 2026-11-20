@@ -344,6 +344,35 @@ final class AddAlarmRedesignUITests: XCTestCase {
         XCTAssertTrue(backupTestRing.waitForExistence(timeout: 3))
     }
 
+    /// #211 レビュー: 寝過ごし防止がスヌーズより先に鳴るときは、画面に警告を出す。
+    func testOversleepWarningShowsWhenBackupBeforeSnooze() {
+        app.launchArguments = [
+            "-uitest-seed-backup-warning",
+            "-uitest-open-edit-alarm",
+            "-AppleLanguages", "(en)",
+            "-AppleLocale", "en_US"
+        ]
+        app.launch()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15),
+            app.debugDescription
+        )
+
+        let warning = findElement("addAlarm.backupBeforeSnooze")
+        var swipes = 0
+        while (!warning.exists || !warning.isHittable) && swipes < 12 {
+            app.collectionViews["addAlarm.root"].swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(warning.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertEqual(warning.label, "This rings before your snooze ends.")
+        // 5分後の実時刻（7:00 → 7:05）が出ている＝旧データの5分も表示できている
+        XCTAssertTrue(
+            findElement("addAlarm.backupDescription").label.contains("7:05"),
+            findElement("addAlarm.backupDescription").label
+        )
+    }
+
     func testOnlyOneTestRingButton() {
         launchAdd()
         XCTAssertEqual(

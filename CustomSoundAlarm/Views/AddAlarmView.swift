@@ -246,7 +246,6 @@ struct AlarmDetailView: View {
             }
             .sheet(isPresented: $showingBackupInfo) {
                 BackupAlarmInfoView(
-                    showsBeforeSnoozeNote: backupMinutes.map { $0 <= snoozeMinutes } ?? false,
                     showsPlaylistNote: backupMinutes != nil && playlistID != nil,
                     showsFadeNote: backupMinutes != nil && fadeIn != .off
                 )
@@ -621,8 +620,17 @@ struct AlarmDetailView: View {
         )
     }
 
-    private var backupToggle: Binding<Bool> {
-        Binding(
+    /// 保存済みの値が選択肢に無い場合（例: 旧データの5分）も表示できるようにする。
+    private var backupMinuteOptions: [Int] {
+        var options = BackupAlarmLogic.minuteOptions
+        if let minutes = backupMinutes, !options.contains(minutes) {
+            options.append(minutes)
+            options.sort()
+        }
+        return options
+    }
+
+    private var backupToggle: Binding<Bool> {        Binding(
             get: { backupMinutes != nil },
             set: { isOn in
                 if isOn {
@@ -673,6 +681,15 @@ struct AlarmDetailView: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("addAlarm.backupDescription")
 
+                // 設定が食い違うときだけ出す、直すべき警告（#211 レビュー）
+                if let minutes = backupMinutes, minutes <= snoozeMinutes {
+                    Text("backup_alarm_before_snooze")
+                        .font(.footnote)
+                        .foregroundStyle(Color.actionText)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityIdentifier("addAlarm.backupBeforeSnooze")
+                }
+
                 AdaptiveDetailRow {
                     Text("backup_alarm_minutes")
                 } content: {
@@ -680,7 +697,7 @@ struct AlarmDetailView: View {
                         get: { backupMinutes ?? BackupAlarmLogic.defaultMinutes },
                         set: { backupMinutes = $0 }
                     )) {
-                        ForEach(BackupAlarmLogic.minuteOptions, id: \.self) { option in
+                        ForEach(backupMinuteOptions, id: \.self) { option in
                             Text(String(format: String(localized: "backup_alarm_minutes_fmt"), option))
                                 .tag(option)
                         }
@@ -1002,9 +1019,8 @@ struct AlarmDetailView: View {
                         Text(snoozeSummaryText)
                         Image(systemName: "chevron.up.chevron.down")
                             .font(.caption2)
-                            .foregroundStyle(Color.textSecondary)
                     }
-                    .foregroundStyle(Color.textSecondary)
+                    .foregroundStyle(Color.actionText)
                 }
                 .accessibilityIdentifier("addAlarm.snoozeMenu")
             }
@@ -1286,7 +1302,6 @@ struct AlarmDetailView: View {
 struct BackupAlarmInfoView: View {
     @Environment(\.dismiss) private var dismiss
     /// 今の設定で当てはまる補足だけを出す（#211: 画面の長い説明をこちらへ）
-    var showsBeforeSnoozeNote = false
     var showsPlaylistNote = false
     var showsFadeNote = false
 
@@ -1302,11 +1317,6 @@ struct BackupAlarmInfoView: View {
                     Text("backup_alarm_info_volume")
                         .font(.subheadline)
                         .foregroundStyle(Color.textSecondary)
-                    if showsBeforeSnoozeNote {
-                        Text("backup_alarm_before_snooze")
-                            .font(.subheadline)
-                            .foregroundStyle(Color.actionText)
-                    }
                     if showsPlaylistNote {
                         Text("playlist_backup_note")
                             .font(.subheadline)
