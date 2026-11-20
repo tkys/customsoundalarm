@@ -8,10 +8,10 @@ import Foundation
 /// 最後に capture されたイベント名とプロパティを記録する。
 private final class MockBackend: AnalyticsBackend, @unchecked Sendable {
     private let lock = NSLock()
-    private var _captures: [(event: String, properties: [String: Any]?)] = []
+    private var _captures: [(event: String, properties: [String: Any]?, timestamp: Date?)] = []
     private var _userProperties: [String: Any] = [:]
 
-    var captures: [(event: String, properties: [String: Any]?)] {
+    var captures: [(event: String, properties: [String: Any]?, timestamp: Date?)] {
         lock.withLock { _captures }
     }
 
@@ -23,9 +23,9 @@ private final class MockBackend: AnalyticsBackend, @unchecked Sendable {
         lock.withLock { _userProperties }
     }
 
-    func capture(_ event: String, properties: [String: Any]?) {
+    func capture(_ event: String, properties: [String: Any]?, timestamp: Date?) {
         lock.withLock {
-            _captures.append((event, properties))
+            _captures.append((event, properties, timestamp))
         }
     }
 
@@ -1095,6 +1095,17 @@ struct AnalyticsServiceCaptureTests {
         #expect(captured.event == "alarm_created")
         #expect(captured.properties?["has_custom_sound"] as? Bool == true)
         #expect(captured.properties?["is_repeating"] as? Bool == false)
+    }
+
+    @Test
+    func captureForwardsExplicitTimestamp() {
+        let mock = MockBackend()
+        let service = AnalyticsService(backend: mock)
+        let timestamp = Date(timeIntervalSince1970: 1_700_000_000)
+
+        service.capture(.alarmDeleted, timestamp: timestamp)
+
+        #expect(mock.captures[0].timestamp == timestamp)
     }
 
     @Test

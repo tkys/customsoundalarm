@@ -6,6 +6,7 @@
 - `App closed?` = **届く** は、アプリが閉じていても `AlarmEventBuffer`（App Group）に積まれ、次回起動時に送信されるもの。
 - `アプリ動作中のみ` は、画面操作・状態監視（`AlarmKit` の `alarmUpdates`）で送られるもの。
 - `起動時にも補完` は、監視に加えて `reconcileOnLaunch` でも検出するもの。
+- バッファ経由のイベントは、PostHog のイベント時刻にも保存した `timestamp`（実際の発生時刻）を使います（1.8.4・#263）。`properties.timestamp` は互換のため残します。
 
 ## イベント
 
@@ -20,8 +21,8 @@
 | `permission_banner_tapped` | `status` string（denied/not_determined）, `step` string（sheet_shown/settings_opened・denied のみ） | 許可バナーのボタンを押した | 許可への転換 | アプリ動作中のみ | 1.8.3（`step` は1.8.3） |
 | `import_landed` | `source` string（share/library）, `destination` string（add_alarm/library） | 取り込みを保存したあとの着地先 | 取り込み後の導線 | アプリ動作中のみ | 1.8.3 |
 | `silent_sound_blocked` | `level` string（silent/very_quiet）, `source` string（video/audio/share/existing/music_library）, `action` string（reselect/other_sound/use_anyway/fixed_existing） | 無音・ほぼ無音で保存を止めた／既存アラームを直した | 無音の取り込み | アプリ動作中のみ | 1.8.4（`source=music_library` は1.8.4） |
-| `alarm_fired` | `was_app_foreground` bool, `hour` int, `is_repeating` bool, `detection` string（observer/reconcile）, `sound_mode` string | アラーム発火検知 | 実際に鳴ったか・プレイリストで鳴ったか | アプリ動作中／起動時にも補完 | 既存（`sound_mode` は1.8.2） |
-| `alarm_stopped` | `hour` int, `sound_mode` string | 本体アラームの停止（Intent） | 停止行動・プレイリストの継続 | **届く** | 既存（`sound_mode` は1.8.2） |
+| `alarm_fired` | `was_app_foreground` bool, `hour` int, `is_repeating` bool, `detection` string（observer/reconcile/stopped）, `sound_mode` string | アラーム発火検知 | 実際に鳴ったか・プレイリストで鳴ったか・止めた記録から補った分 | アプリ動作中／起動時にも補完／停止時に補完 | 既存（`sound_mode` は1.8.2、`detection=stopped` と時刻は1.8.4） |
+| `alarm_stopped` | `hour` int, `sound_mode` string | 本体アラームの停止（Intent） | 停止行動・プレイリストの継続 | **届く** | 既存（`sound_mode` は1.8.2、バッファ送信の時刻は1.8.4） |
 | `alarm_snoozed` | `from` string（observer/reconcile） | スヌーズ待機への遷移 | スヌーズ行動 | アプリ動作中／起動時にも補完 | 既存 |
 | `alarm_toggled` | `enabled` bool, `days_since_created` int + 共通プロパティ + 一覧の要約 | 一覧でオン・オフを切り替えた | オンオフの使われ方 | アプリ動作中のみ | 1.8.3 |
 | `time_suggestion_shown` | `suggestions` string（HH:mm カンマ区切り） | 追加画面で時刻の候補を出した（1画面1回） | 候補の効果 | アプリ動作中のみ | 1.8.3 |
