@@ -74,5 +74,8 @@ final class SettingsUITests: XCTestCase {
             attachment.waitForExistence(timeout: 10),
             "diagnostics file should be attached: \(app.debugDescription)"
         )
+
+        // 次のテストに共有シートを残さない（#270）
+        app.terminate()
     }
 }

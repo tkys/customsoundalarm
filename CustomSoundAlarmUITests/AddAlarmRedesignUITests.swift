@@ -375,6 +375,12 @@ final class AddAlarmRedesignUITests: XCTestCase {
 
     func testOnlyOneTestRingButton() {
         launchAdd()
+        let testRing = findElement("addAlarm.testRing")
+        scrollTo(testRing, in: app.collectionViews["addAlarm.root"])
+        XCTAssertTrue(
+            testRing.waitForExistence(timeout: 10),
+            "ring now row should appear: \(app.debugDescription)"
+        )
         XCTAssertEqual(
             app.buttons.matching(identifier: "addAlarm.testRing").count,
             1,
