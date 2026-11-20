@@ -22,10 +22,12 @@ struct RootTabView: View {
     @State private var shareLanding = ShareImportLanding.shared
     /// スクリーンショット用（DEBUGのみ・#239）
     @State private var showingShareReceipt = false
+    /// コントロールセンターから開く要求（#272）
+    @State private var controlOpenKind: ControlOpenKind?
 
     var body: some View {
         TabView(selection: $selection) {
-            ContentView()
+            ContentView(controlOpenKind: $controlOpenKind)
                 .tabItem {
                     Label(String(localized: "alarm_title"), systemImage: "alarm.fill")
                 }
@@ -44,6 +46,11 @@ struct RootTabView: View {
         .preferredColorScheme(uiTestColorScheme)
         .task {
             #if DEBUG
+            if AppGroup.isUITestControlList {
+                handleControlOpen(.list)
+            } else if AppGroup.isUITestControlAdd {
+                handleControlOpen(.add)
+            }
             if AppGroup.isUITestShowShareReceipt {
                 showingShareReceipt = true
             }
@@ -61,6 +68,11 @@ struct RootTabView: View {
         }
         .onChange(of: shareLanding.addAlarmSound) { _, sound in
             if sound != nil { selection = .alarms }
+        }
+        .onOpenURL { url in
+            if let kind = ControlOpenLogic.kind(from: url) {
+                handleControlOpen(kind)
+            }
         }
         .sheet(isPresented: $showingUnlock, onDismiss: {
             if unlock.isPresented {
@@ -90,6 +102,14 @@ struct RootTabView: View {
             ShareReceiptPreviewView()
         }
         #endif
+    }
+
+    /// コントロールから起動したときの入口（#272）。
+    /// 一覧はアラームタブ、追加は ContentView が追加画面を出す。
+    private func handleControlOpen(_ kind: ControlOpenKind) {
+        selection = .alarms
+        AnalyticsService.shared.capture(.controlOpened(kind: kind))
+        controlOpenKind = kind
     }
 
     private var uiTestColorScheme: ColorScheme? {

@@ -5,5 +5,7 @@ import SwiftUI
 struct CustomSoundAlarmWidgetBundle: WidgetBundle {
     var body: some Widget {
         AlarmLiveActivity()
+        OpenAlarmListControl()
+        AddAlarmControl()
     }
 }

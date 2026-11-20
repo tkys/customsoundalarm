@@ -40,6 +40,7 @@ struct AnalyticsEventsDocTests {
         "sound_preview_played",
         "music_library_unavailable",
         "alarm_editor_more_opened",
+        "control_opened",
         "alarm_skip_set",
         "alarm_skip_undone",
         "skip_all_set",
