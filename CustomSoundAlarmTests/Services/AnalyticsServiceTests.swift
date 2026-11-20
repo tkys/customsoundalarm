@@ -1109,6 +1109,27 @@ struct AnalyticsServiceCaptureTests {
     }
 
     @Test
+    @MainActor
+    func adReporting_bannerSoundsSendsAdSlotEligible() {
+        let mock = MockBackend()
+        let service = AnalyticsService(backend: mock)
+        let decision = AdDecision(
+            allowed: false,
+            reason: .versionUnavailable,
+            region: .limitedOnly
+        )
+
+        AdReporting.report(slot: .bannerSounds, decision: decision, analytics: service)
+
+        #expect(mock.captures.count == 1)
+        #expect(mock.captures[0].event == "ad_slot_eligible")
+        #expect(mock.captures[0].properties?["slot"] as? String == "banner_sounds")
+        #expect(mock.captures[0].properties?["allowed"] as? Bool == false)
+        #expect(mock.captures[0].properties?["reason"] as? String == "version_unavailable")
+        #expect(mock.captures[0].properties?["region"] as? String == "limited")
+    }
+
+    @Test
     func captureMergesExtraPropertiesOverridingExistingKeys() {
         let mock = MockBackend()
         let service = AnalyticsService(backend: mock)

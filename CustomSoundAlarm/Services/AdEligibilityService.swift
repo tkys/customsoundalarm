@@ -76,8 +76,12 @@ final class AdEligibilityService {
 /// `ad_slot_eligible` の送信を一元化する（#111）。
 @MainActor
 enum AdReporting {
-    static func report(slot: AdSlotKind, decision: AdDecision) {
-        AnalyticsService.shared.capture(.adSlotEligible(
+    static func report(
+        slot: AdSlotKind,
+        decision: AdDecision,
+        analytics: AnalyticsService = .shared
+    ) {
+        analytics.capture(.adSlotEligible(
             slot: slot,
             allowed: decision.allowed,
             reason: decision.reason,
