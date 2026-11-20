@@ -141,26 +141,19 @@ struct AlarmDetailView: View {
     var body: some View {
         NavigationStack {
             Form {
-                // 3つのまとまり（#174 PR-2）:
+                // #211: よく触るものを上に、たまに触るものは「その他」へ
                 // 1. 時刻
-                // 2. 繰り返し・ラベル・サウンド・やさしく鳴り始める・スヌーズ
-                // 3. 今すぐ鳴らす（＋音が小さいときは）・寝過ごし防止
+                // 2. サウンド・繰り返し・寝過ごし防止・今すぐ鳴らす・その他
                 timeSection
                 Section {
-                    repeatSection
-                    labelSection
                     soundRow
                     if showsVolumeBoostedNotice {
                         volumeNoticeRow
                     }
-                    fadeInRow
-                    snoozeSection
-                }
-                Section {
-                    testRingSection
+                    repeatSection
                     backupAlarmRows
-                } footer: {
-                    backupAlarmFooter
+                    testRingSection
+                    moreRow
                 }
                 if case .edit = mode {
                     deleteSection
@@ -252,8 +245,12 @@ struct AlarmDetailView: View {
                 AlarmVolumeGuideView(source: .testRing)
             }
             .sheet(isPresented: $showingBackupInfo) {
-                BackupAlarmInfoView()
-                    .presentationDetents([.medium])
+                BackupAlarmInfoView(
+                    showsBeforeSnoozeNote: backupMinutes.map { $0 <= snoozeMinutes } ?? false,
+                    showsPlaylistNote: backupMinutes != nil && playlistID != nil,
+                    showsFadeNote: backupMinutes != nil && fadeIn != .off
+                )
+                .presentationDetents([.medium])
             }
             .alert("playlist_required_title", isPresented: $showingPlaylistRequired) {
                 Button("ok", role: .cancel) {}
@@ -433,7 +430,8 @@ struct AlarmDetailView: View {
 
     /// 1行は、いま選んでいる音が「大きくした音」のときだけ出す（#224 レビュー）。
     private var showsVolumeBoostedNotice: Bool {
-        playlistID == nil && selectedSound?.fileName == volumeBoostedFileName
+        guard let volumeBoostedFileName else { return false }
+        return playlistID == nil && selectedSound?.fileName == volumeBoostedFileName
     }
 
     private var volumeNoticeRow: some View {
@@ -539,6 +537,81 @@ struct AlarmDetailView: View {
         }
     }
 
+    // MARK: - More (#211)
+
+    /// スヌーズ・ラベル・やさしく鳴り始めるをまとめた1行。要約は変えたものを先頭に2つまで。
+    private var moreRow: some View {
+        NavigationLink {
+            moreScreen
+        } label: {
+            AdaptiveDetailRow {
+                Text("more")
+            } content: {
+                Text(moreSummaryText)
+                    .foregroundStyle(Color.textSecondary)
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: moreAccessibilityText))
+        .accessibilityIdentifier("addAlarm.moreRow")
+    }
+
+    private var moreScreen: some View {
+        Form {
+            Section {
+                snoozeSection
+                labelSection
+                fadeInRow
+            }
+        }
+        .accessibilityIdentifier("addAlarm.more.root")
+        .warmListBackground()
+        .navigationTitle(String(localized: "more"))
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            AnalyticsService.shared.capture(.alarmEditorMoreOpened)
+        }
+    }
+
+    private var fadeInSummaryValue: String {
+        switch fadeIn {
+        case .off: String(localized: "fade_off")
+        case .five: String(localized: "fade_in_5")
+        case .fifteen: String(localized: "fade_in_15")
+        case .thirty: String(localized: "fade_in_30")
+        }
+    }
+
+    private var moreSummary: AlarmEditorMoreSummary.Result {
+        AlarmEditorMoreSummary.make(
+            label: label,
+            defaultLabel: String(localized: "alarm_placeholder"),
+            snoozeMinutes: snoozeMinutes,
+            snoozeValue: SnoozeDisplay.text(for: snoozeMinutes),
+            fadeIn: fadeIn,
+            fadeValue: fadeInSummaryValue,
+            strings: AlarmEditorMoreSummary.Strings(
+                labelFormat: String(localized: "more_label_fmt"),
+                noLabel: String(localized: "more_no_label"),
+                snoozeTitle: String(localized: "snooze"),
+                fadeTitle: String(localized: "fade_in"),
+                separator: String(localized: "more_separator"),
+                accessibilityFormat: String(localized: "more_accessibility_fmt"),
+                moreTitle: String(localized: "more")
+            )
+        )
+    }
+
+    private var moreSummaryText: String {
+        moreSummary.displayItems.joined(separator: String(localized: "more_separator"))
+    }
+
+    private var moreAccessibilityText: String {
+        moreSummary.accessibilityText
+    }
+
     // MARK: - Oversleep guard (#110 / #122)
 
     private var isBackupAvailable: Bool {
@@ -593,6 +666,13 @@ struct AlarmDetailView: View {
             }
 
             if backupMinutes != nil {
+                // #211: 長い説明はやめ、トグル直下に実時刻の1行だけ
+                Text(backupDescriptionText)
+                    .font(.footnote)
+                    .foregroundStyle(Color.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("addAlarm.backupDescription")
+
                 AdaptiveDetailRow {
                     Text("backup_alarm_minutes")
                 } content: {
@@ -632,29 +712,6 @@ struct AlarmDetailView: View {
                         .foregroundStyle(Color.textSecondary)
                 }
             }
-        }
-    }
-
-    @ViewBuilder
-    private var backupAlarmFooter: some View {
-        if let minutes = backupMinutes {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(backupDescriptionText)
-                if minutes <= snoozeMinutes {
-                    Text("backup_alarm_before_snooze")
-                        .foregroundStyle(Color.actionText)
-                }
-                if playlistID != nil {
-                    Text("playlist_backup_note")
-                        .foregroundStyle(Color.textSecondary)
-                }
-                if fadeIn != .off {
-                    Text("fade_backup_note")
-                        .foregroundStyle(Color.textSecondary)
-                }
-            }
-            .font(.footnote)
-            .foregroundStyle(Color.textSecondary)
         }
     }
 
@@ -1228,6 +1285,10 @@ struct AlarmDetailView: View {
 /// 寝過ごし防止の仕組みと先行公開の説明（#122）
 struct BackupAlarmInfoView: View {
     @Environment(\.dismiss) private var dismiss
+    /// 今の設定で当てはまる補足だけを出す（#211: 画面の長い説明をこちらへ）
+    var showsBeforeSnoozeNote = false
+    var showsPlaylistNote = false
+    var showsFadeNote = false
 
     var body: some View {
         NavigationStack {
@@ -1241,6 +1302,21 @@ struct BackupAlarmInfoView: View {
                     Text("backup_alarm_info_volume")
                         .font(.subheadline)
                         .foregroundStyle(Color.textSecondary)
+                    if showsBeforeSnoozeNote {
+                        Text("backup_alarm_before_snooze")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.actionText)
+                    }
+                    if showsPlaylistNote {
+                        Text("playlist_backup_note")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.textSecondary)
+                    }
+                    if showsFadeNote {
+                        Text("fade_backup_note")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.textSecondary)
+                    }
                     Text("backup_alarm_early_access_note")
                         .font(.footnote)
                         .foregroundStyle(Color.textSecondary)
@@ -1523,6 +1599,82 @@ enum SnoozeDisplay {
     static func text(for minutes: Int) -> String {
         if minutes == 0 { return String(localized: "snooze_off") }
         return String(format: String(localized: "snooze_minutes_fmt"), minutes)
+    }
+}
+
+// MARK: - AlarmEditorMoreSummary (#211)
+
+/// 「その他」1行の要約（#211・単体テスト対象）。
+/// 変えたものを先頭に2つまで。何も変えていなければスヌーズの初期値を1つ。
+enum AlarmEditorMoreSummary {
+
+    struct Strings {
+        let labelFormat: String
+        let noLabel: String
+        let snoozeTitle: String
+        let fadeTitle: String
+        let separator: String
+        let accessibilityFormat: String
+        let moreTitle: String
+    }
+
+    struct Result: Equatable {
+        let displayItems: [String]
+        let accessibilityText: String
+    }
+
+    static func make(
+        label: String,
+        defaultLabel: String,
+        snoozeMinutes: Int,
+        snoozeValue: String,
+        fadeIn: PlaylistFadeIn,
+        fadeValue: String,
+        strings: Strings
+    ) -> Result {
+        let trimmedLabel = label.trimmingCharacters(in: .whitespacesAndNewlines)
+        let hasCustomLabel = !trimmedLabel.isEmpty && trimmedLabel != defaultLabel
+        let labelItem = hasCustomLabel
+            ? String(format: strings.labelFormat, trimmedLabel)
+            : strings.noLabel
+        let snoozeItem = "\(strings.snoozeTitle) \(snoozeValue)"
+        let fadeItem = "\(strings.fadeTitle) \(fadeValue)"
+
+        var changed: [String] = []
+        if hasCustomLabel {
+            changed.append(labelItem)
+        }
+        if snoozeMinutes != AlarmCarryOver.defaults.snoozeMinutes {
+            changed.append(snoozeItem)
+        }
+        if fadeIn != .off {
+            changed.append(fadeItem)
+        }
+
+        let display: [String]
+        if changed.isEmpty {
+            display = [snoozeItem]
+        } else if changed.count == 1, changed[0] != snoozeItem {
+            display = [changed[0], snoozeItem]
+        } else {
+            display = changed
+        }
+
+        // VoiceOver は「その他、スヌーズ 9分・ラベルなし」の順で読む（#211 レビュー）。
+        var accessibilityItems = [snoozeItem, labelItem]
+        if fadeIn != .off {
+            accessibilityItems.append(fadeItem)
+        }
+        let accessibilityText = String(
+            format: strings.accessibilityFormat,
+            strings.moreTitle,
+            accessibilityItems.joined(separator: strings.separator)
+        )
+
+        return Result(
+            displayItems: Array(display.prefix(2)),
+            accessibilityText: accessibilityText
+        )
     }
 }
 

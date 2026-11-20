@@ -323,9 +323,16 @@ final class AddAlarmRedesignUITests: XCTestCase {
         XCTAssertTrue(toggle.waitForExistence(timeout: 5), "backup toggle should exist")
         XCTAssertFalse(findElement("addAlarm.backupMinutes").exists, "off: minutes must be hidden")
         XCTAssertFalse(findElement("addAlarm.backupTestRing").exists, "off: trial must be hidden")
+        XCTAssertFalse(
+            findElement("addAlarm.backupDescription").exists,
+            "off: the time line must be hidden"
+        )
 
         toggle.tap()
 
+        // #211: トグル直下に実時刻の1行（長い説明はⓘへ）
+        let description = findElement("addAlarm.backupDescription")
+        XCTAssertTrue(description.waitForExistence(timeout: 3))
         XCTAssertTrue(findElement("addAlarm.backupMinutes").waitForExistence(timeout: 3))
 
         let backupTestRing = findElement("addAlarm.backupTestRing")
@@ -343,6 +350,15 @@ final class AddAlarmRedesignUITests: XCTestCase {
             app.buttons.matching(identifier: "addAlarm.testRing").count,
             1,
             "今すぐ鳴らすは1つだけ"
+        )
+    }
+
+    /// 音をまだ選んでいない新規作成画面に、音量を上げたお知らせを出さない（#224 / #211）。
+    func testFreshAddScreenHasNoVolumeNotice() {
+        launchAdd()
+        XCTAssertFalse(
+            findElement("addAlarm.volumeNotice").exists,
+            "nothing is selected yet, so the volume notice must stay hidden"
         )
     }
 
@@ -376,81 +392,101 @@ final class AddAlarmRedesignUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
 
-        let identifiers = [
-            "addAlarm.repeatRow",
-            "addAlarm.labelRow",
+        // #211: ラベル・やさしく鳴り始める・スヌーズは「その他」の中へ移った
+        let mainIdentifiers = [
             "addAlarm.soundRow",
-            "addAlarm.fadeIn",
-            "addAlarm.snoozeRow",
+            "addAlarm.repeatRow",
+            "addAlarm.backupToggle",
             "addAlarm.testRing",
-            "addAlarm.backupToggle"
+            "addAlarm.moreRow"
         ]
 
         // 上から下まで少しずつスクロールし、見つかった識別子を記録する。
         // 1回のスクロールを画面の半分に抑え、LazyVStack のセルを
         // 通り過ぎて消してしまわないようにする（#174 PR-2 レビュー）。
-        let start = app.coordinate(
-            withNormalizedOffset: CGVector(dx: 0.5, dy: 0.8)
-        )
-        let end = app.coordinate(
-            withNormalizedOffset: CGVector(dx: 0.5, dy: 0.3)
-        )
+        func collect(_ identifiers: [String]) -> Set<String> {
+            let start = app.coordinate(
+                withNormalizedOffset: CGVector(dx: 0.5, dy: 0.8)
+            )
+            let end = app.coordinate(
+                withNormalizedOffset: CGVector(dx: 0.5, dy: 0.3)
+            )
 
-        var found = Set<String>()
-        for _ in 0..<20 {
+            var found = Set<String>()
+            for _ in 0..<20 {
+                for identifier in identifiers where findElement(identifier).exists {
+                    found.insert(identifier)
+                }
+                if found.count == identifiers.count { break }
+
+                start.press(
+                    forDuration: 0.1,
+                    thenDragTo: end,
+                    withVelocity: .slow,
+                    thenHoldForDuration: 0.1
+                )
+                Thread.sleep(forTimeInterval: 0.3)
+            }
             for identifier in identifiers where findElement(identifier).exists {
                 found.insert(identifier)
             }
-            if found.count == identifiers.count { break }
-
-            start.press(
-                forDuration: 0.1,
-                thenDragTo: end,
-                withVelocity: .slow,
-                thenHoldForDuration: 0.1
-            )
-            Thread.sleep(forTimeInterval: 0.3)
+            return found
         }
 
-        for identifier in identifiers where findElement(identifier).exists {
-            found.insert(identifier)
+        let mainFound = collect(mainIdentifiers)
+        for identifier in mainIdentifiers {
+            XCTAssertTrue(mainFound.contains(identifier), "AX5: missing \(identifier)")
         }
-        for identifier in identifiers {
-            XCTAssertTrue(
-                found.contains(identifier),
-                "AX5: missing \(identifier)"
-            )
+
+        // 「その他」の中にも3行すべてがある
+        let moreRow = findElement("addAlarm.moreRow")
+        XCTAssertTrue(moreRow.waitForExistence(timeout: 5))
+        moreRow.tap()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.more.root"].waitForExistence(timeout: 10),
+            "more screen should open: \(app.debugDescription)"
+        )
+
+        let moreIdentifiers = [
+            "addAlarm.snoozeRow",
+            "addAlarm.labelRow",
+            "addAlarm.fadeIn"
+        ]
+        let moreFound = collect(moreIdentifiers)
+        for identifier in moreIdentifiers {
+            XCTAssertTrue(moreFound.contains(identifier), "AX5 more: missing \(identifier)")
         }
     }
 
     func testSectionOrder() {
         launchAdd()
-        app.swipeUp()
 
         let identifiers = [
-            "addAlarm.repeatRow",
-            "addAlarm.labelRow",
             "addAlarm.soundRow",
-            "addAlarm.fadeIn",
-            "addAlarm.snoozeRow",
+            "addAlarm.repeatRow",
+            "addAlarm.backupToggle",
             "addAlarm.testRing",
-            "addAlarm.backupToggle"
+            "addAlarm.moreRow"
         ]
 
-        var positions: [CGFloat] = []
-        for identifier in identifiers {
-            let element = findElement(identifier)
-            XCTAssertTrue(element.waitForExistence(timeout: 5), "missing \(identifier)")
-            positions.append(element.frame.origin.y)
+        // 上から順にスクロールして見つかった順番を確認する。
+        // すべてを同時に画面へ出す必要はない（Lazy のセルが消えるため）。
+        var found: [String] = []
+        for _ in 0..<20 {
+            for identifier in identifiers
+            where !found.contains(identifier) && findElement(identifier).exists {
+                found.append(identifier)
+            }
+            if found == identifiers { break }
+            app.collectionViews["addAlarm.root"].swipeUp()
+            Thread.sleep(forTimeInterval: 0.2)
         }
 
-        for index in 1..<positions.count {
-            XCTAssertLessThan(
-                positions[index - 1],
-                positions[index],
-                "\(identifiers[index - 1]) should be above \(identifiers[index])"
-            )
-        }
+        XCTAssertEqual(
+            found,
+            identifiers,
+            "rows should be in the order used by the editor: \(app.debugDescription)"
+        )
     }
 
     /// #206: 時刻の候補を押すと、その時刻で保存される。
@@ -482,6 +518,86 @@ final class AddAlarmRedesignUITests: XCTestCase {
         XCTAssertTrue(
             app.staticTexts["06:35"].waitForExistence(timeout: 15),
             "saved alarm should use the suggested time: \(app.debugDescription)"
+        )
+    }
+
+    /// #211: 「その他」の行は、初期値ならスヌーズだけを要約し、
+    /// VoiceOver は「その他、スヌーズ 9分・ラベルなし」と読む。
+    func testMoreRowAccessibilityLabel() {
+        app.launchArguments = [
+            "-uitest-open-add-alarm",
+            "-AppleLanguages", "(ja)",
+            "-AppleLocale", "ja_JP"
+        ]
+        app.launch()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10))
+
+        let more = findElement("addAlarm.moreRow")
+        scrollTo(more, in: app.collectionViews["addAlarm.root"])
+        XCTAssertTrue(more.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertEqual(more.label, "その他、スヌーズ 9分・ラベルなし")
+    }
+
+    /// #211: 「その他」の中でスヌーズ・ラベル・やさしく鳴り始めるを変えて保存できる。
+    func testMoreScreenChangesAllThreeAndSaves() {
+        app.launchArguments = [
+            "-uitest-open-add-alarm",
+            "-AppleLanguages", "(en)",
+            "-AppleLocale", "en_US"
+        ]
+        app.launch()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10),
+            app.debugDescription
+        )
+        let list = app.collectionViews["addAlarm.root"]
+        let more = findElement("addAlarm.moreRow")
+        scrollTo(more, in: list)
+        more.tap()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.more.root"].waitForExistence(timeout: 10),
+            "more screen should open: \(app.debugDescription)"
+        )
+
+        // ラベル
+        let label = findElement("addAlarm.labelRow")
+        XCTAssertTrue(label.waitForExistence(timeout: 5), app.debugDescription)
+        // 末尾にカーソルを置いてから消す（先頭タップだと削除キーが効かない）
+        label.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+        label.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 20))
+        label.typeText("Gym")
+        if app.keyboards.buttons["Done"].exists {
+            app.keyboards.buttons["Done"].tap()
+        }
+
+        // スヌーズ 5分
+        let snooze = app.buttons["addAlarm.snoozeRow"]
+        XCTAssertTrue(snooze.waitForExistence(timeout: 5), app.debugDescription)
+        snooze.tap()
+        let fiveMinutes = app.buttons["5 min"]
+        XCTAssertTrue(fiveMinutes.waitForExistence(timeout: 5), app.debugDescription)
+        fiveMinutes.tap()
+
+        // やさしく鳴り始める 5秒
+        let fade = findElement("addAlarm.fadeIn")
+        XCTAssertTrue(fade.waitForExistence(timeout: 5), app.debugDescription)
+        fade.tap()
+        let fiveSeconds = app.buttons["5 seconds"]
+        XCTAssertTrue(fiveSeconds.waitForExistence(timeout: 5), app.debugDescription)
+        fiveSeconds.tap()
+
+        // 戻ると要約が「変えたもの」に変わる
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(list.waitForExistence(timeout: 10))
+        XCTAssertTrue(more.waitForExistence(timeout: 5))
+        XCTAssertTrue(more.label.contains("Label: Gym"), more.label)
+        XCTAssertTrue(more.label.contains("Snooze 5 min"), more.label)
+
+        // 保存できる
+        app.buttons["addAlarm.save"].tap()
+        XCTAssertTrue(
+            app.staticTexts["Gym"].waitForExistence(timeout: 15),
+            "saved alarm should show the label: \(app.debugDescription)"
         )
     }
 

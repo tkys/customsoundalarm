@@ -80,6 +80,9 @@ enum AnalyticsEvent: Sendable {
     /// ミュージックライブラリで曲を選んだが、取り込めなかった（#245）
     case musicLibraryUnavailable
 
+    /// アラーム編集画面の「その他」を開いた（#211）
+    case alarmEditorMoreOpened
+
     // MARK: Phase 2（リテンション/運用拡張）
 
     /// アラーム編集（既存アラームの更新）
@@ -387,6 +390,7 @@ enum AnalyticsEvent: Sendable {
         case .customSoundImported: return "custom_sound_imported"
         case .soundPreviewPlayed: return "sound_preview_played"
         case .musicLibraryUnavailable: return "music_library_unavailable"
+        case .alarmEditorMoreOpened: return "alarm_editor_more_opened"
         case .alarmEdited: return "alarm_edited"
         case .alarmDeleted: return "alarm_deleted"
         case .alarmDeletedWithContext: return "alarm_deleted"
@@ -516,6 +520,8 @@ enum AnalyticsEvent: Sendable {
         case let .soundPreviewPlayed(source):
             return ["source": source.rawValue]
         case .musicLibraryUnavailable:
+            return [:]
+        case .alarmEditorMoreOpened:
             return [:]
         case let .alarmEdited(
             hasCustomSound,

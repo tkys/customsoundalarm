@@ -410,3 +410,8 @@
 "add_from_music" = "Přidat z Hudby";
 "music_library_unavailable" = "Tuto skladbu nelze importovat.";
 "music_library_permission_denied" = "Povolte přístup k Hudbě v Nastavení.";
+"more" = "Další";
+"more_label_fmt" = "Popisek: %@";
+"more_no_label" = "Bez popisku";
+"more_separator" = " · ";
+"more_accessibility_fmt" = "%1$@, %2$@";

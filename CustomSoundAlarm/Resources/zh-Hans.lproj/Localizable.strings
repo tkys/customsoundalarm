@@ -410,3 +410,8 @@
 "add_from_music" = "从“音乐”添加";
 "music_library_unavailable" = "无法导入这首歌曲。";
 "music_library_permission_denied" = "请在“设置”中允许访问“音乐”。";
+"more" = "更多";
+"more_label_fmt" = "标签：%@";
+"more_no_label" = "无标签";
+"more_separator" = "・";
+"more_accessibility_fmt" = "%1$@，%2$@";
