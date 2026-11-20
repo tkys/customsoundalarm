@@ -444,4 +444,24 @@ final class LibraryUITests: XCTestCase {
             "plural message should be used: \(app.debugDescription)"
         )
     }
+
+    /// #266: サウンド一覧のバナー枠は置かれているが、AdsConfig.isEnabled == false の間は高さ0。
+    func testSoundListBannerSlotIsPresentButHidden() {
+        let app = launch(["-uitest-seed-design-audit", "-uitest-open-library"])
+        XCTAssertTrue(
+            app.collectionViews["library.root"].waitForExistence(timeout: 15),
+            "library should open: \(app.debugDescription)"
+        )
+
+        let slot = app.descendants(matching: .any)["adSlot.banner_sounds"]
+        XCTAssertTrue(
+            slot.waitForExistence(timeout: 5),
+            "banner_sounds slot should be attached to the sound list: \(app.debugDescription)"
+        )
+        XCTAssertEqual(slot.frame.height, 0, "the slot must be invisible while ads are disabled")
+
+        // 既存の行はそのまま操作できる
+        XCTAssertTrue(app.buttons["library.standardSounds"].exists)
+        XCTAssertTrue(app.buttons["library.addPlaylist"].exists)
+    }
 }
