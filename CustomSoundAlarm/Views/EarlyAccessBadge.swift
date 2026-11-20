@@ -1,7 +1,9 @@
 import SwiftUI
 
-/// 「PRO・先行公開中」の小さなバッジ（#151 / #160）。
+/// 「PRO・いまは使えます」の小さなバッジ（#151 / #160 / #262）。
 struct EarlyAccessBadge: View {
+    var accessibilityIdentifier: String = "playlist.earlyAccessBadge"
+
     var body: some View {
         Text("pro_early_access")
             .font(.caption2)
@@ -12,6 +14,6 @@ struct EarlyAccessBadge: View {
                 Capsule().fill(Color.actionFillEnd)
             )
             .foregroundStyle(.white)
-            .accessibilityIdentifier("playlist.earlyAccessBadge")
+            .accessibilityIdentifier(accessibilityIdentifier)
     }
 }

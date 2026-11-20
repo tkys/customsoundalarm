@@ -630,7 +630,8 @@ struct AlarmDetailView: View {
         return options
     }
 
-    private var backupToggle: Binding<Bool> {        Binding(
+    private var backupToggle: Binding<Bool> {
+        Binding(
             get: { backupMinutes != nil },
             set: { isOn in
                 if isOn {
@@ -648,18 +649,14 @@ struct AlarmDetailView: View {
     private var backupAlarmRows: some View {
         Group {
             AdaptiveDetailRow {
-                if dynamicTypeSize.isAccessibilitySize {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("backup_alarm_toggle")
-                        HStack(spacing: 8) {
-                            badge("PRO")
-                            backupInfoButton
-                        }
-                    }
-                } else {
+                // バッジをラベルの隣に置くと、長い言語でラベルが不自然に改行されるため
+                // タイトルの下に置く（#262・標準/AX5 共通）。
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("backup_alarm_toggle")
                     HStack(spacing: 8) {
-                        Text("backup_alarm_toggle")
-                        badge("PRO")
+                        EarlyAccessBadge(
+                            accessibilityIdentifier: "addAlarm.backupBadge"
+                        )
                         backupInfoButton
                     }
                 }
@@ -761,15 +758,6 @@ struct AlarmDetailView: View {
             originalDate.formatted(style),
             backupDate.formatted(style)
         )
-    }
-
-    private func badge(_ text: String) -> some View {
-        Text(text)
-            .font(.caption2.weight(.bold))
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .background(Capsule().fill(Color.actionFillEnd))
-            .foregroundStyle(.white)
     }
 
     private var backupInfoButton: some View {

@@ -265,7 +265,7 @@
 "end_fade_footer" = "Korte fade aan het einde van de herhaling.";
 "fade_backup_note" = "Zachte start geldt niet voor de overslaapbeveiliging.";
 "playlist_backup_note" = "Bij afspeellijstalarmen speelt de overslaapbeveiliging het eerste nummer harder af.";
-"pro_early_access" = "PRO · Vroege toegang";
+"pro_early_access" = "PRO · Nu inbegrepen";
 "playlist_early_access_note" = "Als je het tijdens de vroege toegang gaat gebruiken, kun je het na de volledige release blijven gebruiken.";
 "playlist_title" = "Afspeellijsten";
 "playlist_new" = "Nieuwe afspeellijst";

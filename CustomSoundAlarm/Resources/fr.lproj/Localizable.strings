@@ -265,7 +265,7 @@
 "end_fade_footer" = "Court fondu à la fin de la boucle.";
 "fade_backup_note" = "Le démarrage en douceur ne s'applique pas au garde-fou anti-grasse matinée.";
 "playlist_backup_note" = "Pour les alarmes avec playlist, le garde-fou anti-grasse matinée joue le premier titre plus fort.";
-"pro_early_access" = "PRO · Accès anticipé";
+"pro_early_access" = "PRO · Inclus maintenant";
 "playlist_early_access_note" = "Si vous commencez à l'utiliser pendant l'accès anticipé, vous pourrez continuer à l'utiliser après la sortie.";
 "playlist_title" = "Playlists";
 "playlist_new" = "Nouvelle playlist";

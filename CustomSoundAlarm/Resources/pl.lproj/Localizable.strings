@@ -265,7 +265,7 @@
 "end_fade_footer" = "Krótkie wyciszenie na końcu pętli.";
 "fade_backup_note" = "Łagodny start nie dotyczy zabezpieczenia przed zaspaniem.";
 "playlist_backup_note" = "W alarmach z playlistą zabezpieczenie przed zaspaniem odtwarza pierwszy utwór głośniej.";
-"pro_early_access" = "PRO · Wczesny dostęp";
+"pro_early_access" = "PRO · Teraz w zestawie";
 "playlist_early_access_note" = "Jeśli zaczniesz używać podczas wczesnego dostępu, możesz używać go po pełnej premierze.";
 "playlist_title" = "Playlisty";
 "playlist_new" = "Nowa playlista";

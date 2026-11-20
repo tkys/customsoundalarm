@@ -265,7 +265,7 @@
 "end_fade_footer" = "Fundido corto al final del bucle.";
 "fade_backup_note" = "El inicio suave no se aplica al aviso de sueño.";
 "playlist_backup_note" = "En las alarmas con lista, el aviso de sueño reproduce la primera pista más alta.";
-"pro_early_access" = "PRO · Acceso anticipado";
+"pro_early_access" = "PRO · Incluido ahora";
 "playlist_early_access_note" = "Si empiezas a usarlo durante el acceso anticipado, podrás seguir usándolo después del lanzamiento.";
 "playlist_title" = "Listas";
 "playlist_new" = "Nueva lista";

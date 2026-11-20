@@ -265,7 +265,7 @@
 "end_fade_footer" = "Fade curto no fim do loop.";
 "fade_backup_note" = "O início suave não se aplica ao alerta de sono.";
 "playlist_backup_note" = "Nos alarmes com playlist, o alerta de sono reproduz mais alto a primeira faixa.";
-"pro_early_access" = "PRO · Acesso antecipado";
+"pro_early_access" = "PRO · Incluído agora";
 "playlist_early_access_note" = "Se começar a usar durante o acesso antecipado, poderá continuar usando após o lançamento completo.";
 "playlist_title" = "Playlists";
 "playlist_new" = "Nova playlist";

@@ -265,7 +265,7 @@
 "end_fade_footer" = "Kurzes Ausblenden am Ende der Schleife.";
 "fade_backup_note" = "Der sanfte Start gilt nicht für die Überschlaf-Erinnerung.";
 "playlist_backup_note" = "Bei Playlist-Weckern spielt die Überschlaf-Erinnerung den ersten Titel lauter ab.";
-"pro_early_access" = "PRO · Vorabzugang";
+"pro_early_access" = "PRO · Jetzt inklusive";
 "playlist_early_access_note" = "Wenn du es während des Vorabzugangs verwendest, kannst du es nach der Veröffentlichung weiter nutzen.";
 "playlist_title" = "Playlists";
 "playlist_new" = "Neue Playlist";

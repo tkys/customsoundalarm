@@ -265,7 +265,7 @@
 "end_fade_footer" = "Krátké prolnutí na konci smyčky.";
 "fade_backup_note" = "Jemný start se na hlídání přespání nepoužívá.";
 "playlist_backup_note" = "U playlistových budíků přehrává hlídání přespání první skladbu zesílenou.";
-"pro_early_access" = "PRO · Předběžný přístup";
+"pro_early_access" = "PRO · Nyní zahrnuto";
 "playlist_early_access_note" = "Pokud jej začnete používat během předběžného přístupu, můžete jej používat i po plném vydání.";
 "playlist_title" = "Playlisty";
 "playlist_new" = "Nový playlist";

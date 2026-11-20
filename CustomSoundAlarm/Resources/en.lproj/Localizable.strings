@@ -265,7 +265,7 @@
 "end_fade_footer" = "Short fade at the end of the loop.";
 "fade_backup_note" = "Gentle start is not applied to the oversleep guard.";
 "playlist_backup_note" = "For playlist alarms, the oversleep guard plays the first track made louder.";
-"pro_early_access" = "PRO · Early access";
+"pro_early_access" = "PRO · Included for now";
 "playlist_early_access_note" = "If you start using it during early access, you can keep using it after the full release.";
 "playlist_title" = "Playlists";
 "playlist_new" = "New playlist";

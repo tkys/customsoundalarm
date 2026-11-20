@@ -265,7 +265,7 @@
 "end_fade_footer" = "在循环末尾短暂淡出。";
 "fade_backup_note" = "“轻柔开始”不适用于防赖床提醒。";
 "playlist_backup_note" = "播放列表闹钟的防赖床提醒会把第一首曲目放大播放。";
-"pro_early_access" = "PRO · 抢先体验";
+"pro_early_access" = "PRO · 现在可用";
 "playlist_early_access_note" = "如果在抢先体验期间开始使用，正式发布后仍可继续使用。";
 "playlist_title" = "播放列表";
 "playlist_new" = "新建播放列表";

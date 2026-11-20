@@ -265,7 +265,7 @@
 "end_fade_footer" = "ループのつなぎ目を短くフェードアウトします。";
 "fade_backup_note" = "寝過ごし防止には「やさしく鳴り始める」を適用しません。";
 "playlist_backup_note" = "プレイリストのアラームの寝過ごし防止は、1曲目を大きくして鳴らします。";
-"pro_early_access" = "PRO・先行公開中";
+"pro_early_access" = "PRO・いまは使えます";
 "playlist_early_access_note" = "先行公開中に使い始めた方は、正式版以降もそのまま使えます。";
 "playlist_title" = "プレイリスト";
 "playlist_new" = "新しいプレイリスト";
