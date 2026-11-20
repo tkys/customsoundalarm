@@ -6,21 +6,6 @@ import Foundation
 struct ControlOpenLogicTests {
 
     @Test
-    func urlRoundTripsForEachKind() {
-        for kind in ControlOpenKind.allCases {
-            #expect(ControlOpenLogic.kind(from: ControlOpenLogic.url(for: kind)) == kind)
-        }
-    }
-
-    @Test
-    func urlRejectsOtherSchemeHostOrPath() {
-        #expect(ControlOpenLogic.kind(from: URL(string: "https://control/list")!) == nil)
-        #expect(ControlOpenLogic.kind(from: URL(string: "customsoundalarm://other/list")!) == nil)
-        #expect(ControlOpenLogic.kind(from: URL(string: "customsoundalarm://control/unknown")!) == nil)
-        #expect(ControlOpenLogic.kind(from: URL(string: "customsoundalarm://control")!) == nil)
-    }
-
-    @Test
     func destinationWhileOnboardingIsOnboarding() {
         #expect(
             ControlOpenLogic.destination(kind: .list, isOnboardingVisible: true)

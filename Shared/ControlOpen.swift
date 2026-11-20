@@ -1,4 +1,6 @@
 import Foundation
+import AppIntents
+import Observation
 
 /// コントロールセンターのボタンから開く先（#272）。
 enum ControlOpenKind: String, Codable, Sendable, CaseIterable {
@@ -16,20 +18,8 @@ enum ControlOpenDestination: Equatable, Sendable {
     case onboarding
 }
 
-/// コントロールの URL と着地先の判定（純ロジック・#272）。
+/// コントロールの着地先の判定（純ロジック・#272）。
 enum ControlOpenLogic {
-    static let scheme = "customsoundalarm"
-
-    static func url(for kind: ControlOpenKind) -> URL {
-        URL(string: "\(scheme)://control/\(kind.rawValue)")!
-    }
-
-    static func kind(from url: URL) -> ControlOpenKind? {
-        guard url.scheme == scheme, url.host == "control" else { return nil }
-        let path = url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-        return ControlOpenKind(rawValue: path)
-    }
-
     static func destination(
         kind: ControlOpenKind,
         isOnboardingVisible: Bool
@@ -39,5 +29,43 @@ enum ControlOpenLogic {
         case .list: return .list
         case .add: return .add
         }
+    }
+}
+
+/// App Intent の perform からアプリの UI へ要求を渡す受け口（#272）。
+/// Intent はアプリのプロセスで動くため、この共有インスタンスを RootTabView が監視する。
+@MainActor
+@Observable
+final class ControlOpenRouter {
+    static let shared = ControlOpenRouter()
+
+    var pending: ControlOpenKind?
+
+    private init() {}
+}
+
+/// コントロールセンターからアラーム一覧を開く（#272）。
+struct OpenAlarmListFromControlIntent: AppIntent {
+    static let title: LocalizedStringResource = "control_open_list"
+    static let supportedModes: IntentModes = .foreground
+
+    func perform() async throws -> some IntentResult {
+        await MainActor.run {
+            ControlOpenRouter.shared.pending = .list
+        }
+        return .result()
+    }
+}
+
+/// コントロールセンターからアラーム追加画面を開く（#272）。
+struct AddAlarmFromControlIntent: AppIntent {
+    static let title: LocalizedStringResource = "add_alarm"
+    static let supportedModes: IntentModes = .foreground
+
+    func perform() async throws -> some IntentResult {
+        await MainActor.run {
+            ControlOpenRouter.shared.pending = .add
+        }
+        return .result()
     }
 }

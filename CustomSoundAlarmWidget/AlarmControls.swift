@@ -7,7 +7,7 @@ struct OpenAlarmListControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(kind: "OpenAlarmListControl") {
             ControlWidgetButton(
-                action: OpenURLIntent(ControlOpenLogic.url(for: .list))
+                action: OpenAlarmListFromControlIntent()
             ) {
                 Label("control_open_list", systemImage: "alarm.waves.left.and.right")
             }
@@ -21,7 +21,7 @@ struct AddAlarmControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(kind: "AddAlarmControl") {
             ControlWidgetButton(
-                action: OpenURLIntent(ControlOpenLogic.url(for: .add))
+                action: AddAlarmFromControlIntent()
             ) {
                 Label("add_alarm", systemImage: "alarm.waves.left.and.right")
             }

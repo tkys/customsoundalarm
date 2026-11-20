@@ -24,6 +24,7 @@ struct RootTabView: View {
     @State private var showingShareReceipt = false
     /// コントロールセンターから開く要求（#272）
     @State private var controlOpenKind: ControlOpenKind?
+    @State private var controlRouter = ControlOpenRouter.shared
 
     var body: some View {
         TabView(selection: $selection) {
@@ -45,6 +46,10 @@ struct RootTabView: View {
         // スクリーンショット撮影用の外観固定（DEBUGのみ・#173）。
         .preferredColorScheme(uiTestColorScheme)
         .task {
+            if let kind = controlRouter.pending {
+                controlRouter.pending = nil
+                handleControlOpen(kind)
+            }
             #if DEBUG
             if AppGroup.isUITestControlList {
                 handleControlOpen(.list)
@@ -69,10 +74,10 @@ struct RootTabView: View {
         .onChange(of: shareLanding.addAlarmSound) { _, sound in
             if sound != nil { selection = .alarms }
         }
-        .onOpenURL { url in
-            if let kind = ControlOpenLogic.kind(from: url) {
-                handleControlOpen(kind)
-            }
+        .onChange(of: controlRouter.pending) { _, kind in
+            guard let kind else { return }
+            controlRouter.pending = nil
+            handleControlOpen(kind)
         }
         .sheet(isPresented: $showingUnlock, onDismiss: {
             if unlock.isPresented {

@@ -58,6 +58,20 @@ final class ControlOpenUITests: XCTestCase {
         app.launchArguments = ["-uitest-seed-alarms"]
         app.launch()
         XCTAssertTrue(app.buttons["alarmList.add"].waitForExistence(timeout: 15))
+        // 初回起動のアラーム許可ダイアログを閉じる（#272 スクショ用）
+        let springboardForPermission = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        for _ in 0..<5 {
+            var tapped = false
+            for label in ["許可", "Allow"] {
+                if springboardForPermission.buttons[label].exists {
+                    springboardForPermission.buttons[label].tap()
+                    tapped = true
+                    break
+                }
+            }
+            if tapped { break }
+            Thread.sleep(forTimeInterval: 0.5)
+        }
         Thread.sleep(forTimeInterval: 1.0)
         XCUIDevice.shared.press(.home)
         Thread.sleep(forTimeInterval: 1.0)
@@ -86,23 +100,54 @@ final class ControlOpenUITests: XCTestCase {
         let addControl = springboard.buttons["Add a Control"]
         XCTAssertTrue(addControl.waitForExistence(timeout: 5), springboard.debugDescription)
         addControl.tap()
-        Thread.sleep(forTimeInterval: 2.0)
+        Thread.sleep(forTimeInterval: 3.0)
         attach("control-gallery-opened")
 
-        let search = springboard.searchFields.firstMatch
-        if search.waitForExistence(timeout: 5) {
-            search.tap()
-            search.typeText("Alarm")
-            Thread.sleep(forTimeInterval: 2.0)
-            attach("control-gallery-search")
+        // 検索バーをタップして「Alarm」で絞り込む
+        springboard.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.5, dy: 0.145)
+        ).tap()
+        Thread.sleep(forTimeInterval: 0.8)
+        springboard.typeText("Alarm")
+        Thread.sleep(forTimeInterval: 2.0)
+        attach("control-gallery-search")
 
-            // 検索結果の「My Sound Alarm」をタップして Control Center に追加する
-            springboard.coordinate(
-                withNormalizedOffset: CGVector(dx: 0.15, dy: 0.315)
-            ).tap()
-            Thread.sleep(forTimeInterval: 2.0)
-            attach("control-center-after-add")
-        }
+        // 検索結果の「My Sound Alarm」をタップして Control Center に追加する
+        springboard.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.15, dy: 0.33)
+        ).tap()
+        Thread.sleep(forTimeInterval: 2.0)
+        attach("control-center-after-add")
+
+        // 編集モードを抜けて、実際にコントロールを押してアプリが開くか確認する
+        XCUIDevice.shared.press(.home)
+        Thread.sleep(forTimeInterval: 2.0)
+        let springboard2 = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let start2 = springboard2.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.95, dy: 0.01)
+        )
+        let end2 = springboard2.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.95, dy: 0.6)
+        )
+        start2.press(
+            forDuration: 0.3,
+            thenDragTo: end2,
+            withVelocity: .fast,
+            thenHoldForDuration: 0.2
+        )
+        Thread.sleep(forTimeInterval: 2.0)
+        attach("control-center-reopened")
+        // マイナスバッジではなく、コントロールの中央を押す
+        springboard2.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.17, dy: 0.20)
+        ).tap()
+        Thread.sleep(forTimeInterval: 2.0)
+        attach("control-pressed")
+        XCTAssertTrue(
+            app.wait(for: .runningForeground, timeout: 15),
+            "control should open the app: \(springboard2.debugDescription)"
+        )
+        attach("control-opened-app")
     }
 
     private func attach(_ name: String) {
@@ -110,5 +155,93 @@ final class ControlOpenUITests: XCTestCase {
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)
+    }
+
+    /// 追加コントロールを押して追加画面が開くことのスクショ（手動実行用・#272）。
+    func testCaptureAddControlPress() throws {
+        try XCTSkipUnless(
+            ProcessInfo.processInfo.environment["CONTROL_CENTER_SCREENSHOTS"] == "1",
+            "Control Center screenshots run only with TEST_RUNNER_CONTROL_CENTER_SCREENSHOTS=1"
+        )
+        app.launchArguments = ["-uitest-seed-alarms"]
+        app.launch()
+        XCTAssertTrue(app.buttons["alarmList.add"].waitForExistence(timeout: 15))
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        for _ in 0..<5 {
+            var tapped = false
+            for label in ["許可", "Allow"] {
+                if springboard.buttons[label].exists {
+                    springboard.buttons[label].tap()
+                    tapped = true
+                    break
+                }
+            }
+            if tapped { break }
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+        Thread.sleep(forTimeInterval: 1.0)
+        XCUIDevice.shared.press(.home)
+        Thread.sleep(forTimeInterval: 2.0)
+
+        let start = springboard.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.95, dy: 0.01)
+        )
+        let end = springboard.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.95, dy: 0.6)
+        )
+        start.press(
+            forDuration: 0.3,
+            thenDragTo: end,
+            withVelocity: .fast,
+            thenHoldForDuration: 0.2
+        )
+        Thread.sleep(forTimeInterval: 2.0)
+        springboard.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.12, dy: 0.045)
+        ).tap()
+        Thread.sleep(forTimeInterval: 1.5)
+        let addControl = springboard.buttons["Add a Control"]
+        XCTAssertTrue(addControl.waitForExistence(timeout: 5), springboard.debugDescription)
+        addControl.tap()
+        Thread.sleep(forTimeInterval: 3.0)
+        springboard.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.5, dy: 0.145)
+        ).tap()
+        Thread.sleep(forTimeInterval: 0.8)
+        springboard.typeText("Alarm")
+        Thread.sleep(forTimeInterval: 2.0)
+        // 2つ目の「Add Alarm」を追加
+        springboard.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.38, dy: 0.33)
+        ).tap()
+        Thread.sleep(forTimeInterval: 2.0)
+
+        XCUIDevice.shared.press(.home)
+        Thread.sleep(forTimeInterval: 2.0)
+        let springboard2 = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let start2 = springboard2.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.95, dy: 0.01)
+        )
+        let end2 = springboard2.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.95, dy: 0.6)
+        )
+        start2.press(
+            forDuration: 0.3,
+            thenDragTo: end2,
+            withVelocity: .fast,
+            thenHoldForDuration: 0.2
+        )
+        Thread.sleep(forTimeInterval: 2.0)
+        attach("add-control-center")
+        springboard2.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.17, dy: 0.20)
+        ).tap()
+        Thread.sleep(forTimeInterval: 2.0)
+        attach("add-control-pressed")
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15),
+            "add control should open the add screen: \(springboard2.debugDescription)"
+        )
+        attach("add-control-opened-app")
     }
 }
