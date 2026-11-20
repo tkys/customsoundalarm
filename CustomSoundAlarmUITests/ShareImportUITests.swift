@@ -65,6 +65,8 @@ final class ShareImportUITests: XCTestCase {
                 "-uitest-keep-share-import",
                 "-uitest-force-light"
             ]
+        // 前のテストの共有シート・プロセスを残さない（#270）
+        app.terminate()
         app.launch()
     }
 

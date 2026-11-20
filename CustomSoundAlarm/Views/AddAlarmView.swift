@@ -347,8 +347,13 @@ struct AlarmDetailView: View {
             )
             return
         }
-        guard let url = Bundle.main.url(forResource: "PresetMarimba", withExtension: "caf")
+        guard let source = Bundle.main.url(forResource: "PresetMarimba", withExtension: "caf")
         else { return }
+        // AudioCropView は一時ファイルを閉じるときに削除する（#245）。
+        // バンドルのプリセットを直接渡すとバンドルから消えてしまうため、必ずコピーを渡す。
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("PresetCrop-\(UUID().uuidString).caf")
+        guard (try? FileManager.default.copyItem(at: source, to: url)) != nil else { return }
         pendingAudio = PendingAudioImport(url: url, name: String(localized: "preset_marimba"))
         #endif
     }

@@ -4,8 +4,11 @@ import XCTest
 @MainActor
 final class LibraryScreenshotUITests: XCTestCase {
 
-    override func setUp() {
-        super.setUp()
+    override func setUpWithError() throws {
+        try XCTSkipUnless(
+            ProcessInfo.processInfo.environment["LIBRARY_SCREENSHOTS"] == "1",
+            "Library screenshots run only with TEST_RUNNER_LIBRARY_SCREENSHOTS=1"
+        )
         continueAfterFailure = false
     }
 
