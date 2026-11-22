@@ -20,6 +20,15 @@ struct AddAlarmRequest: Identifiable {
 struct ContentView: View {
     /// コントロールセンターから開く要求（#272）。RootTabView が設定する。
     @Binding var controlOpenKind: ControlOpenKind?
+    /// 作った・時刻を変えた行のスポットライト（#282）
+    @State private var spotlightStore = RowSpotlightStore()
+    @State private var alarmFrameStore = RowFrameStore<UUID>()
+    @State private var spotlightViewport: CGRect = .zero
+    /// 保存はされたが、シートが閉じきるまで待っている行（#282）
+    @State private var pendingSpotlightAlarmID: UUID?
+    /// 一覧の準備ができてから処理するスポットライト要求（#282）
+    @State private var spotlightRequest: UUID?
+    @AccessibilityFocusState private var spotlightFocusedAlarmID: UUID?
     @State private var alarmStore = AlarmStore.shared
     @State private var soundStore = SoundStore.shared
     @State private var selectedAlarm: AlarmEntry?
@@ -74,6 +83,7 @@ struct ContentView: View {
     @Environment(\.requestReview) private var requestReview
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         NavigationStack {
@@ -171,6 +181,7 @@ struct ContentView: View {
                 addScreenVisible = false
                 addAlarmRequest = nil
                 schedulePlaylistUnlockAttempt()
+                requestSpotlightIfPending()
             }) { request in
                 AlarmDetailView(
                     mode: .add,
@@ -180,6 +191,9 @@ struct ContentView: View {
                         addScreenVisible = false
                         addAlarmRequest = nil
                         schedulePlaylistUnlockAttempt()
+                    },
+                    onSaved: { saved in
+                        pendingSpotlightAlarmID = saved.id
                     }
                 )
                     .onDisappear {
@@ -192,6 +206,7 @@ struct ContentView: View {
                 editScreenVisible = false
                 selectedAlarm = nil
                 schedulePlaylistUnlockAttempt()
+                requestSpotlightIfPending()
             }) { alarm in
                 AlarmDetailView(
                     mode: .edit(alarm),
@@ -199,6 +214,9 @@ struct ContentView: View {
                         editScreenVisible = false
                         selectedAlarm = nil
                         schedulePlaylistUnlockAttempt()
+                    },
+                    onSaved: { saved in
+                        pendingSpotlightAlarmID = saved.id
                     }
                 )
                     .onDisappear {
@@ -733,82 +751,160 @@ struct ContentView: View {
 
     private var alarmList: some View {
         let displayed = AlarmListOrdering.sortedForDisplay(alarmStore.alarms)
-        return List {
-            if let permissionStatus = permissionBannerStatus {
-                permissionBannerRow(permissionStatus)
-            }
-            if let skip = activeGlobalSkip {
-                GlobalSkipNoticeRow(
-                    skip: skip,
-                    entries: alarmStore.alarms,
-                    onUndo: {
-                        AlarmSkipService.undoAll()
-                        refreshGlobalSkip()
-                    }
-                )
-                .warmCard()
-            }
-            ForEach(displayed, id: \.id) { alarm in
-                AlarmRow(
-                    alarm: alarm,
-                    soundName: AlarmSoundDisplay.name(for: alarm),
-                    sound: AlarmSoundDisplay.representativeSound(for: alarm),
-                    hasSilentSound: silentAlarmLevels[alarm.id] != nil,
-                    showsFirstAlarmFollowup: firstAlarmFollowupAlarmID == alarm.id,
-                    onFixSilentSound: {
-                        ignoreFirstAlarmFollowupIfNeeded()
-                        fixingSilentAlarm = alarm
-                    },
-                    onFirstAlarmFollowup: { action in
-                        applyFirstAlarmFollowup(action, to: alarm)
-                    },
-                    onToggle: {
-                        if firstAlarmFollowupAlarmID == alarm.id {
-                            ignoreFirstAlarmFollowupIfNeeded()
+        return ScrollViewReader { proxy in
+            List {
+                if let permissionStatus = permissionBannerStatus {
+                    permissionBannerRow(permissionStatus)
+                }
+                if let skip = activeGlobalSkip {
+                    GlobalSkipNoticeRow(
+                        skip: skip,
+                        entries: alarmStore.alarms,
+                        onUndo: {
+                            AlarmSkipService.undoAll()
+                            refreshGlobalSkip()
                         }
-                        alarmStore.toggleEnabled(alarm)
-                        AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
-                        refreshGlobalSkip()
-                    },
-                    onTap: {
-                        ignoreFirstAlarmFollowupIfNeeded()
-                        editScreenVisible = true
-                        selectedAlarm = alarm
+                    )
+                    .warmCard()
+                }
+                ForEach(displayed, id: \.id) { alarm in
+                    AlarmRow(
+                        alarm: alarm,
+                        soundName: AlarmSoundDisplay.name(for: alarm),
+                        sound: AlarmSoundDisplay.representativeSound(for: alarm),
+                        hasSilentSound: silentAlarmLevels[alarm.id] != nil,
+                        showsFirstAlarmFollowup: firstAlarmFollowupAlarmID == alarm.id,
+                        spotlight: spotlightStore.controller(for: alarm.id),
+                        spotlightFocus: $spotlightFocusedAlarmID,
+                        onFixSilentSound: {
+                            ignoreFirstAlarmFollowupIfNeeded()
+                            fixingSilentAlarm = alarm
+                        },
+                        onFirstAlarmFollowup: { action in
+                            applyFirstAlarmFollowup(action, to: alarm)
+                        },
+                        onToggle: {
+                            if firstAlarmFollowupAlarmID == alarm.id {
+                                ignoreFirstAlarmFollowupIfNeeded()
+                            }
+                            alarmStore.toggleEnabled(alarm)
+                            AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
+                            refreshGlobalSkip()
+                        },
+                        onTap: {
+                            ignoreFirstAlarmFollowupIfNeeded()
+                            editScreenVisible = true
+                            selectedAlarm = alarm
+                        }
+                    )
+                    .rowSpotlightFrame(alarm.id, into: alarmFrameStore)
+                    .warmCard(spotlight: spotlightStore.controller(for: alarm.id))
+                    .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                        if !alarm.repeatWeekdays.isEmpty {
+                            skipSwipeAction(for: alarm)
+                        }
                     }
-                )
-                .warmCard()
-                .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                    if !alarm.repeatWeekdays.isEmpty {
-                        skipSwipeAction(for: alarm)
+                    .contextMenu {
+                        if !alarm.repeatWeekdays.isEmpty {
+                            skipMenuButton(for: alarm)
+                        }
+                        Button {
+                            alarmStore.duplicate(alarm)
+                            AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
+                        } label: {
+                            Label("duplicate_alarm", systemImage: "plus.square.on.square")
+                        }
                     }
                 }
-                .contextMenu {
-                    if !alarm.repeatWeekdays.isEmpty {
-                        skipMenuButton(for: alarm)
+                .onDelete { indexSet in
+                    let idsToDelete = indexSet.map { displayed[$0].id }
+                    for id in idsToDelete {
+                        if let alarm = alarmStore.alarms.first(where: { $0.id == id }) {
+                            alarmStore.remove(alarm)
+                        }
                     }
-                    Button {
-                        alarmStore.duplicate(alarm)
-                        AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
-                    } label: {
-                        Label("duplicate_alarm", systemImage: "plus.square.on.square")
-                    }
+                    AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
+                    refreshGlobalSkip()
                 }
+
+                // 最後の行でも画面の中ほどまで寄せられるための余白（#282）。
+                // 通常は一覧の背景と同じで見えない。
+                Color.clear
+                    .frame(height: max(0, spotlightViewport.height * 0.5))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+                    .accessibilityHidden(true)
             }
-            .onDelete { indexSet in
-                let idsToDelete = indexSet.map { displayed[$0].id }
-                for id in idsToDelete {
-                    if let alarm = alarmStore.alarms.first(where: { $0.id == id }) {
-                        alarmStore.remove(alarm)
-                    }
-                }
-                AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
-                refreshGlobalSkip()
+            .animation(.default, value: alarmStore.alarms)
+            .warmListBackground()
+            .onGeometryChange(for: CGRect.self) { geometry in
+                // 一覧として実際に見えている範囲（画面座標）。下端の広告・タブを除く。
+                let frame = geometry.frame(in: .global)
+                let insets = geometry.safeAreaInsets
+                return CGRect(
+                    x: frame.minX + insets.leading,
+                    y: frame.minY + insets.top,
+                    width: max(0, frame.width - insets.leading - insets.trailing),
+                    height: max(0, frame.height - insets.top - insets.bottom)
+                )
+            } action: { viewport in
+                spotlightViewport = viewport
+            }
+            .onChange(of: spotlightRequest, initial: true) { _, alarmID in
+                guard let alarmID else { return }
+                spotlightRequest = nil
+                startSpotlight(for: alarmID, proxy: proxy)
+            }
+            .sheet(isPresented: $showingSkipAll, onDismiss: refreshGlobalSkip) {
+                SkipAllSheet(entries: alarmStore.alarms.filter(\.isEnabled))
             }
         }
-        .animation(.default, value: alarmStore.alarms)
-        .warmListBackground()
-        .sheet(isPresented: $showingSkipAll, onDismiss: refreshGlobalSkip) {
-            SkipAllSheet(entries: alarmStore.alarms.filter(\.isEnabled))
+    }
+
+    // MARK: - Row spotlight (#282)
+
+    /// シートが閉じきったあと、作った・時刻を変えた行を見える位置に出す（#282）。
+    private func requestSpotlightIfPending() {
+        guard let alarmID = pendingSpotlightAlarmID else { return }
+        pendingSpotlightAlarmID = nil
+        Task {
+            // シートの閉じる動きと重ねない。行が並び直るのを1フレーム待つ。
+            try? await Task.sleep(for: .milliseconds(120))
+            spotlightRequest = alarmID
+        }
+    }
+
+    private func startSpotlight(for alarmID: UUID, proxy: ScrollViewProxy) {
+        let displayed = AlarmListOrdering.sortedForDisplay(alarmStore.alarms)
+        guard displayed.contains(where: { $0.id == alarmID }) else { return }
+
+        let needsScroll = RowSpotlightLogic.shouldScroll(
+            rowFrame: alarmFrameStore.frame(for: alarmID),
+            viewport: spotlightViewport
+        )
+
+        if needsScroll {
+            if reduceMotion {
+                // 動きを減らす設定では位置だけ合わせる（#282）
+                proxy.scrollTo(alarmID, anchor: RowSpotlightTiming.scrollAnchor)
+            } else {
+                withAnimation(RowSpotlightTiming.scrollAnimation) {
+                    proxy.scrollTo(alarmID, anchor: RowSpotlightTiming.scrollAnchor)
+                }
+            }
+        }
+
+        let startDelay = (needsScroll && !reduceMotion)
+            ? RowSpotlightTiming.riseDelayWhenScrolling
+            : 0
+        spotlightStore.play([alarmID], startDelay: startDelay)
+
+        guard UIAccessibility.isVoiceOverRunning else { return }
+        Task {
+            if needsScroll, !reduceMotion {
+                try? await Task.sleep(for: .seconds(RowSpotlightTiming.scroll))
+            }
+            spotlightFocusedAlarmID = alarmID
         }
     }
 
@@ -1160,6 +1256,10 @@ struct AlarmRow: View {
     let sound: AlarmSound?
     let hasSilentSound: Bool
     let showsFirstAlarmFollowup: Bool
+    /// 作った・時刻を変えた行を一度だけ光らせる（#282）
+    let spotlight: RowSpotlightController
+    /// VoiceOver のフォーカスを移す（#282）
+    let spotlightFocus: AccessibilityFocusState<UUID?>.Binding
     let onFixSilentSound: () -> Void
     let onFirstAlarmFollowup: (FirstAlarmFollowupAction) -> Void
     let onToggle: () -> Void
@@ -1181,6 +1281,7 @@ struct AlarmRow: View {
             }
             .foregroundStyle(.primary)
             .accessibilityIdentifier("alarm.row")
+            .accessibilityFocused(spotlightFocus, equals: alarm.id)
 
             // 初めての1回きりアラームのあとの提案（#247）。押すまで何も変えない。
             if showsFirstAlarmFollowup {

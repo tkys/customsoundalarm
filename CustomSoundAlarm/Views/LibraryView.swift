@@ -16,9 +16,14 @@ struct LibraryView: View {
     @State private var scheduler = AlarmScheduler.shared
     @State private var volumeBoostedFileName: String?
     @State private var shareLanding = ShareImportLanding.shared
-    @State private var highlightedFileName: String?
+    /// 共有から保存した行を一度だけ光らせる（#282 / #246）
+    @State private var spotlight = RowSpotlightController()
+    @State private var spotlightFileName: String?
+    @State private var soundFrameStore = RowFrameStore<String>()
+    @State private var listViewport: CGRect = .zero
     @State private var didRunLibraryLandingUITest = false
     @State private var musicLibrary = MusicLibraryImportController()
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// サウンド一覧のバナー枠（#266）。試聴中は出さない。
     private var isPreviewingSound: Bool {
@@ -37,7 +42,9 @@ struct LibraryView: View {
                     volumeBoostedFileName: $volumeBoostedFileName,
                     showVolumeNoticeRow: true,
                     onImportFlowDismissed: { schedulePlaylistUnlockAttempt() },
-                    highlightedFileName: highlightedFileName,
+                    spotlight: spotlight,
+                    spotlightFileName: spotlightFileName,
+                    spotlightFrameStore: soundFrameStore,
                     onImportedSound: { handleLibraryImportSaved($0) }
                 )
 
@@ -76,7 +83,22 @@ struct LibraryView: View {
             }
             .onChange(of: shareLanding.librarySoundFileName) { _, fileName in
                 guard let fileName else { return }
-                highlightSharedSound(fileName, proxy: proxy)
+                spotlightSharedSound(fileName, proxy: proxy)
+            }
+            .onChange(of: spotlight.isActive) { _, isActive in
+                if !isActive { spotlightFileName = nil }
+            }
+            .onGeometryChange(for: CGRect.self) { geometry in
+                let frame = geometry.frame(in: .global)
+                let insets = geometry.safeAreaInsets
+                return CGRect(
+                    x: frame.minX + insets.leading,
+                    y: frame.minY + insets.top,
+                    width: max(0, frame.width - insets.leading - insets.trailing),
+                    height: max(0, frame.height - insets.top - insets.bottom)
+                )
+            } action: { viewport in
+                listViewport = viewport
             }
             .musicLibraryImport(musicLibrary)
             }
@@ -212,22 +234,33 @@ struct LibraryView: View {
         ))
     }
 
-    /// 共有から保存した音の行までスクロールして、約1.2秒ハイライトする（#246）。
-    private func highlightSharedSound(_ fileName: String, proxy: ScrollViewProxy?) {
-        highlightedFileName = fileName
-        Task {
-            try? await Task.sleep(for: .milliseconds(150))
-            if let proxy {
-                withAnimation {
-                    proxy.scrollTo("library.sound.\(fileName)", anchor: .center)
+    /// 共有から保存した音の行を見える位置に出して、一度だけ光らせる（#282 / #246）。
+    private func spotlightSharedSound(_ fileName: String, proxy: ScrollViewProxy?) {
+        let needsScroll = RowSpotlightLogic.shouldScroll(
+            rowFrame: soundFrameStore.frame(for: fileName),
+            viewport: listViewport
+        )
+
+        spotlightFileName = fileName
+        if needsScroll, let proxy {
+            if reduceMotion {
+                // 動きを減らす設定では位置だけ合わせる（#282）
+                proxy.scrollTo("library.sound.\(fileName)", anchor: RowSpotlightTiming.scrollAnchor)
+            } else {
+                withAnimation(RowSpotlightTiming.scrollAnimation) {
+                    proxy.scrollTo(
+                        "library.sound.\(fileName)",
+                        anchor: RowSpotlightTiming.scrollAnchor
+                    )
                 }
             }
-            try? await Task.sleep(for: .milliseconds(900))
-            withAnimation(.easeOut(duration: 0.25)) {
-                highlightedFileName = nil
-            }
-            shareLanding.librarySoundFileName = nil
         }
+
+        let startDelay = (needsScroll && !reduceMotion)
+            ? RowSpotlightTiming.riseDelayWhenScrolling
+            : 0
+        spotlight.play(startDelay: startDelay)
+        shareLanding.librarySoundFileName = nil
     }
 
     /// 取り込み画面が閉じてから解放シートを出す（#216）。

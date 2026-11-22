@@ -31,6 +31,8 @@ struct AlarmDetailView: View {
     let mode: AlarmDetailMode
     /// 画面を閉じる直前（#216: 戻った先で解放を出すため）
     var onClose: (() -> Void)?
+    /// 保存したアラーム（#282: 一覧でその行に寄せるため）
+    var onSaved: ((AlarmEntry) -> Void)?
     /// 新規作成時に引き継いだ値（#206）
     private let carryOver: AlarmCarryOver
     /// オンボ場面4からの指定（#98 Phase 4）。
@@ -85,11 +87,13 @@ struct AlarmDetailView: View {
         mode: AlarmDetailMode,
         initialImport: OnboardingSource? = nil,
         initialSound: AlarmSound? = nil,
-        onClose: (() -> Void)? = nil
+        onClose: (() -> Void)? = nil,
+        onSaved: ((AlarmEntry) -> Void)? = nil
     ) {
         self.mode = mode
         self.initialImport = initialImport
         self.onClose = onClose
+        self.onSaved = onSaved
 
         let carryOver: AlarmCarryOver
         if case .edit = mode {
@@ -120,7 +124,10 @@ struct AlarmDetailView: View {
             _holidayRingOverrides = State(initialValue: Set(entry.holidayRingOverrides))
             _skipDates = State(initialValue: Set(entry.skipDates))
         } else {
-            _selectedTime = State(initialValue: Date())
+            // UIテスト・録画用: 追加画面の初期時刻を固定する（DEBUGのみ・#282）
+            let presetTime = AppGroup.uitestAddAlarmTime
+                .flatMap { Calendar.current.date(from: $0) }
+            _selectedTime = State(initialValue: presetTime ?? Date())
             _label = State(initialValue: String(localized: "alarm_placeholder"))
             // 前回保存時に使った音をデフォルト選択（存在しない/削除済みなら nil）
             let lastUsedSound = SoundUsageHistory.lastUsedFileName.flatMap { fileName in
@@ -1186,6 +1193,9 @@ struct AlarmDetailView: View {
 
         // 次に新規作成するときの初期値（#206）
         AlarmCarryOverStore.save(from: savedEntry)
+
+        // 一覧に戻ったあと、この行に寄せて一度だけ光らせる（#282）
+        onSaved?(savedEntry)
 
         if BackupAlarmAccess.shouldGrantEarlyAccess(isEnabled: backupMinutes != nil) {
             AppGroup.backupEarlyAccessGranted = true

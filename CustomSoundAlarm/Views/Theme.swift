@@ -80,12 +80,21 @@ extension Color {
 /// Warm card-style row background
 struct WarmCardModifier: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
+    /// 作った行を一度だけ光らせる（#282）。nil なら通常のカード。
+    var spotlight: RowSpotlightController?
 
     func body(content: Content) -> some View {
         content
             .listRowBackground(
                 RoundedRectangle(cornerRadius: 14)
                     .fill(Color.warmCardBackground)
+                    .overlay {
+                        if let spotlight {
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(RowSpotlightStyle.accent)
+                                .opacity(spotlight.isLit ? 1 : 0)
+                        }
+                    }
                     .shadow(
                         color: colorScheme == .dark
                             ? Color.black.opacity(0.3)
@@ -108,8 +117,8 @@ struct WarmListBackgroundModifier: ViewModifier {
 }
 
 extension View {
-    func warmCard() -> some View {
-        modifier(WarmCardModifier())
+    func warmCard(spotlight: RowSpotlightController? = nil) -> some View {
+        modifier(WarmCardModifier(spotlight: spotlight))
     }
 
     func warmListBackground() -> some View {

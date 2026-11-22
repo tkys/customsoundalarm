@@ -398,6 +398,35 @@ enum AppGroup {
 #endif
     }
 
+    /// UIテスト用: 朝のアラームを10本並べる（DEBUGのみ・#282）
+    static var isUITestSeedMorningAlarms: Bool {
+#if DEBUG
+        return CommandLine.arguments.contains("-uitest-seed-morning-alarms")
+#else
+        return false
+#endif
+    }
+
+    /// UIテスト・録画用: 追加画面の初期時刻（DEBUGのみ・#282）。
+    /// 例: `-uitest-add-time=11:00`
+    static var uitestAddAlarmTime: DateComponents? {
+#if DEBUG
+        guard let argument = CommandLine.arguments.first(where: {
+            $0.hasPrefix("-uitest-add-time=")
+        }) else { return nil }
+        let value = argument.dropFirst("-uitest-add-time=".count)
+        let parts = value.split(separator: ":")
+        guard parts.count == 2,
+              let hour = Int(parts[0]),
+              let minute = Int(parts[1]),
+              (0...23).contains(hour),
+              (0...59).contains(minute) else { return nil }
+        return DateComponents(hour: hour, minute: minute)
+#else
+        return nil
+#endif
+    }
+
     /// UIテスト用: 共有シートの受け取りを1件 staging に置く（DEBUGのみ・#222）
     static var isUITestSeedShareImportAudio: Bool {
     #if DEBUG

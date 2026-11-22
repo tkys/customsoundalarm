@@ -463,6 +463,25 @@ struct CustomSoundAlarmApp: App {
                             AlarmStore.shared.add(alarm)
                         }
                     }
+
+                    // UIテスト・録画用: 朝のアラームを10本並べる（#282）
+                    if AppGroup.isUITestSeedMorningAlarms {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        let seeds: [(Int, Int)] = [
+                            (5, 0), (5, 30), (6, 0), (6, 30), (7, 0),
+                            (7, 30), (8, 0), (8, 30), (9, 0), (9, 30)
+                        ]
+                        for (h, m) in seeds {
+                            // OFF で入れる（上の isUITestSeedAlarms と同じ理由）
+                            AlarmStore.shared.add(AlarmEntry(
+                                hour: h,
+                                minute: m,
+                                isEnabled: false,
+                                label: String(localized: "alarm_placeholder")
+                            ))
+                        }
+                    }
 #endif
 
                     // 広告の7日間猶予用に初回起動日を記録（#111）

@@ -21,8 +21,10 @@ struct SoundLibrarySections: View {
     var showVolumeNoticeRow: Bool = false
     /// 取り込み画面（切り取り・動画）が閉じたとき（#216）
     var onImportFlowDismissed: (() -> Void)?
-    /// 共有から保存したあとに一瞬ハイライトする音（#246）
-    var highlightedFileName: String?
+    /// 共有から保存したあとに一度だけ光らせる（#282 / #246）
+    var spotlight: RowSpotlightController?
+    var spotlightFileName: String?
+    var spotlightFrameStore: RowFrameStore<String>?
     /// ライブラリから取り込みを保存したとき（#246）
     var onImportedSound: ((AlarmSound) -> Void)?
 
@@ -231,11 +233,16 @@ struct SoundLibrarySections: View {
                         onSelect: onSelect
                     )
                     .id("library.sound.\(sound.fileName)")
-                    // 普段はリスト標準の背景のまま（nil）。取り込んだ直後だけ、標準の背景の上に色を重ねる（#246）
+                    .rowSpotlightFrame(sound.fileName, into: spotlightFrameStore)
+                    // 普段はリスト標準の背景のまま（nil）。共有から着地したときだけ、
+                    // 標準の背景の上にアクセント色を重ねる（#282 / #246）。
                     .listRowBackground(
-                        highlightedFileName == sound.fileName
+                        spotlightFileName == sound.fileName
                             ? Color(.secondarySystemGroupedBackground)
-                                .overlay(Color.actionFillEnd.opacity(0.15))
+                                .overlay(
+                                    RowSpotlightStyle.accent
+                                        .opacity(spotlight?.isLit == true ? 1 : 0)
+                                )
                             : nil
                     )
                     .contextMenu {
