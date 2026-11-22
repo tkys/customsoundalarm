@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// 行を一度だけ静かに光らせる共通部品（#282）。
 ///
@@ -36,6 +37,8 @@ enum RowSpotlightTiming {
 
     /// スクロール後の行の位置（画面の中ほど・やや上）
     static let scrollAnchor = UnitPoint(x: 0.5, y: 0.45)
+    /// 最後の行も45%まで送れるようにする、一覧の下端の余白（#282）
+    static let bottomScrollSpace: CGFloat = 400
 
     /// 距離からスクロール時間を求める（0.5〜1.0秒）。
     static func scrollDuration(for distance: CGFloat) -> TimeInterval {
@@ -287,6 +290,237 @@ extension View {
             }
         } else {
             self
+        }
+    }
+}
+
+// MARK: - List の UIScrollView を自分で動かす（#282 レビュー）
+
+/// SwiftUI の `scrollTo` は指定した時間・カーブを使わないため、
+/// `List` の下の `UIScrollView` を CADisplayLink で直接動かす。
+@MainActor
+final class SpotlightScrollAnimator: NSObject {
+    private var displayLink: CADisplayLink?
+    private var continuation: CheckedContinuation<Void, Never>?
+    private weak var scrollView: UIScrollView?
+    private var from: CGFloat = 0
+    private var to: CGFloat = 0
+    private var duration: TimeInterval = 0
+    private var startTime: CFTimeInterval = 0
+    private var lastOffset: CGFloat = 0
+    private var frameIndex = 0
+    private var firstDeltas: [CGFloat] = []
+    private var recentDeltas: [CGFloat] = []
+
+    /// 指定した区間を、指定した時間とカーブで動かす。
+    func animate(
+        scrollView: UIScrollView,
+        from: CGFloat,
+        to: CGFloat,
+        duration: TimeInterval
+    ) async {
+        stop()
+        self.scrollView = scrollView
+        self.from = from
+        self.to = to
+        self.duration = max(0.01, duration)
+        // 最初のフレームを t=0 にする（シートの閉じる処理で最初のフレームが遅れても、急に動き出さない）
+        self.startTime = 0
+        self.lastOffset = from
+        self.frameIndex = 0
+        self.firstDeltas = []
+        self.recentDeltas = []
+
+        #if DEBUG
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightScroll] start from=%.1f to=%.1f distance=%.1f duration=%.3f",
+                Double(from),
+                Double(to),
+                Double(abs(to - from)),
+                duration
+            )
+        )
+        #endif
+
+        await withCheckedContinuation { continuation in
+            self.continuation = continuation
+            let link = CADisplayLink(target: self, selector: #selector(step(_:)))
+            link.add(to: .main, forMode: .common)
+            self.displayLink = link
+        }
+    }
+
+    /// 途中で止める（ユーザー操作・タスクのキャンセル）。
+    func stop() {
+        finish()
+    }
+
+    @objc private func step(_ link: CADisplayLink) {
+        guard let scrollView else {
+            finish()
+            return
+        }
+        // ユーザーが触ったら、その操作を優先してすぐやめる
+        if scrollView.isTracking || scrollView.isDragging {
+            finish()
+            return
+        }
+
+        if startTime == 0 {
+            startTime = link.timestamp
+        }
+        let elapsed = link.timestamp - startTime
+        let progress = min(1, max(0, elapsed / duration))
+        let eased = SpotlightBezier.value(
+            x: progress,
+            x1: 0.33, y1: 0,
+            x2: 0.15, y2: 1
+        )
+        let offset = from + (to - from) * CGFloat(eased)
+        let delta = offset - lastOffset
+
+        if frameIndex < 6 {
+            firstDeltas.append(delta)
+        }
+        recentDeltas.append(delta)
+        if recentDeltas.count > 6 {
+            recentDeltas.removeFirst()
+        }
+
+        scrollView.setContentOffset(
+            CGPoint(x: scrollView.contentOffset.x, y: offset),
+            animated: false
+        )
+
+        #if DEBUG
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightScroll] frame=%d t=%.3f offset=%.1f delta=%.2f",
+                frameIndex,
+                elapsed,
+                Double(offset),
+                Double(delta)
+            )
+        )
+        #endif
+
+        lastOffset = offset
+        frameIndex += 1
+
+        if progress >= 1 {
+            finish()
+        }
+    }
+
+    private func finish() {
+        let wasActive = displayLink != nil || continuation != nil
+        displayLink?.invalidate()
+        displayLink = nil
+        if let continuation {
+            self.continuation = nil
+            continuation.resume()
+        }
+        #if DEBUG
+        if wasActive, frameIndex > 0 {
+            let first = firstDeltas.map { String(format: "%.2f", Double($0)) }.joined(separator: ",")
+            let last = recentDeltas.map { String(format: "%.2f", Double($0)) }.joined(separator: ",")
+            NSLog(
+                "%@",
+                String(
+                    format: "[SpotlightScroll] done frames=%d elapsed=%.3f first=[%@] last=[%@]",
+                    frameIndex,
+                    CACurrentMediaTime() - startTime,
+                    first,
+                    last
+                )
+            )
+        }
+        #endif
+        scrollView = nil
+    }
+}
+
+/// cubic-bezier の x から y を求める（CSS の timingCurve と同じ）。
+enum SpotlightBezier {
+    static func value(
+        x: Double,
+        x1: Double,
+        y1: Double,
+        x2: Double,
+        y2: Double
+    ) -> Double {
+        let clampedX = min(1, max(0, x))
+        var low = 0.0
+        var high = 1.0
+        for _ in 0..<24 {
+            let mid = (low + high) / 2
+            if component(mid, p1: x1, p2: x2) < clampedX {
+                low = mid
+            } else {
+                high = mid
+            }
+        }
+        return component((low + high) / 2, p1: y1, p2: y2)
+    }
+
+    private static func component(_ t: Double, p1: Double, p2: Double) -> Double {
+        let mt = 1 - t
+        return 3 * mt * mt * t * p1 + 3 * mt * t * t * p2 + t * t * t
+    }
+}
+
+/// `List` の下にある `UIScrollView`（UICollectionView）を見つける（#282 レビュー）。
+struct ScrollViewResolver: UIViewRepresentable {
+    let onResolve: (UIScrollView?) -> Void
+
+    func makeUIView(context: Context) -> ResolverView {
+        let view = ResolverView()
+        view.onResolve = onResolve
+        return view
+    }
+
+    func updateUIView(_ uiView: ResolverView, context: Context) {
+        uiView.onResolve = onResolve
+        uiView.resolve()
+    }
+
+    final class ResolverView: UIView {
+        var onResolve: ((UIScrollView?) -> Void)?
+
+        override init(frame: CGRect) {
+            super.init(frame: frame)
+            isUserInteractionEnabled = false
+            backgroundColor = .clear
+        }
+
+        required init?(coder: NSCoder) {
+            super.init(coder: coder)
+            isUserInteractionEnabled = false
+            backgroundColor = .clear
+        }
+
+        override func didMoveToSuperview() {
+            super.didMoveToSuperview()
+            resolve()
+        }
+
+        override func didMoveToWindow() {
+            super.didMoveToWindow()
+            resolve()
+        }
+
+        func resolve() {
+            var view = superview
+            while let current = view {
+                if let scrollView = current as? UIScrollView {
+                    onResolve?(scrollView)
+                    return
+                }
+                view = current.superview
+            }
         }
     }
 }

@@ -21,6 +21,13 @@ private struct AlarmSpotlightRequest: Equatable {
     let alarmIDs: [UUID]
 }
 
+/// 自分で動かすスクロールの開始・終了位置（#282 レビュー）。
+private struct SpotlightScrollTarget {
+    let from: CGFloat
+    let to: CGFloat
+    let isVisible: Bool
+}
+
 /// メイン画面：アラーム一覧
 /// OOUIの原則に従い、主オブジェクト（アラーム）のみを表示
 struct ContentView: View {
@@ -38,6 +45,9 @@ struct ContentView: View {
     @State private var revealedAlarmIDs: Set<UUID> = []
     /// 一覧の準備ができてから処理する演出要求（#282）
     @State private var spotlightRequest: AlarmSpotlightRequest?
+    /// `List` の下の UIScrollView（#282 レビュー）
+    @State private var listScrollView: UIScrollView?
+    @State private var scrollAnimator = SpotlightScrollAnimator()
     @AccessibilityFocusState private var spotlightFocusedAlarmID: UUID?
     @State private var alarmStore = AlarmStore.shared
     @State private var soundStore = SoundStore.shared
@@ -853,14 +863,13 @@ struct ContentView: View {
                     refreshGlobalSkip()
                 }
 
-                // 最後の行でも画面の中ほどまで寄せられるための余白（#282）。
-                // 通常は一覧の背景と同じで見えない。
-                Color.clear
-                    .frame(height: max(0, spotlightViewport.height * 0.5))
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-                    .accessibilityHidden(true)
             }
+            // 最後の行でも45%まで送れるよう、スクロール内容の下端に余白を持たせる（#282）
+            .contentMargins(
+                .bottom,
+                RowSpotlightTiming.bottomScrollSpace,
+                for: .scrollContent
+            )
             .warmListBackground()
             .onGeometryChange(for: CGRect.self) { geometry in
                 // 一覧として実際に見えている範囲（画面座標）。下端の広告・タブを除く。
@@ -919,6 +928,14 @@ struct ContentView: View {
             }
         )
         .rowSpotlightFrame(alarm.id, into: alarmFrameStore)
+        .background {
+            // 行の下にある List の UIScrollView を取得する（#282 レビュー）
+            ScrollViewResolver { scrollView in
+                if listScrollView !== scrollView {
+                    listScrollView = scrollView
+                }
+            }
+        }
     }
 
     /// 保存された行を、スクロールが止まるまで高さ0で待たせる（#282）。
@@ -936,6 +953,83 @@ struct ContentView: View {
         spotlightRequest = AlarmSpotlightRequest(alarmIDs: [alarm.id])
     }
 
+    /// 行の位置から、自分で動かすスクロールの開始・終了位置を求める（#282 レビュー）。
+    private func spotlightScrollTarget(
+        for alarmID: UUID,
+        scrollView: UIScrollView
+    ) -> SpotlightScrollTarget? {
+        guard spotlightViewport.height > 0,
+              let collectionView = scrollView as? UICollectionView,
+              let index = displayedAlarms.firstIndex(where: { $0.id == alarmID })
+        else { return nil }
+
+        // 上に許可バナー・全体の休みの行があれば、その分だけ indexPath をずらす
+        let leadingRows = (permissionBannerStatus != nil ? 1 : 0)
+            + (activeGlobalSkip != nil ? 1 : 0)
+        let indexPath = IndexPath(row: leadingRows + index, section: 0)
+        // 追加直後は行のレイアウトが古いことがあるため、一度整えてから読む
+        collectionView.collectionViewLayout.invalidateLayout()
+        collectionView.layoutIfNeeded()
+        #if DEBUG
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightScroll] collection sections=%d rows0=%d index=%d indexPath=%@ offset=%.1f size=%.1fx%.1f bounds=%.1fx%.1f",
+                collectionView.numberOfSections,
+                collectionView.numberOfItems(inSection: 0),
+                index,
+                indexPath.description,
+                Double(collectionView.contentOffset.y),
+                Double(collectionView.contentSize.width),
+                Double(collectionView.contentSize.height),
+                Double(collectionView.bounds.width),
+                Double(collectionView.bounds.height)
+            )
+        )
+        #endif
+        guard let attributes = collectionView.layoutAttributesForItem(at: indexPath)
+            ?? collectionView.collectionViewLayout.layoutAttributesForItem(at: indexPath)
+        else { return nil }
+        #if DEBUG
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightScroll] attributes frame=%@ midY=%.1f",
+                NSCoder.string(for: attributes.frame),
+                Double(attributes.frame.midY)
+            )
+        )
+        #endif
+
+        let from = scrollView.contentOffset.y
+        let naturalHeight = alarmFrameStore.frame(for: alarmID)?.height
+            ?? max(attributes.frame.height, 96)
+        let rowTop = attributes.frame.minY - from
+        let rowBottom = rowTop + naturalHeight
+
+        let scrollFrame = scrollView.convert(
+            CGRect(origin: .zero, size: scrollView.bounds.size),
+            to: nil
+        )
+        let viewportTop = spotlightViewport.minY - scrollFrame.minY
+        let viewportBottom = spotlightViewport.maxY - scrollFrame.minY
+        let isVisible = rowTop >= viewportTop && rowBottom <= viewportBottom
+
+        let viewportHeight = max(1, viewportBottom - viewportTop)
+        let targetScreenY = viewportTop + viewportHeight * 0.45
+        let targetOffset = attributes.frame.midY - targetScreenY
+
+        let minOffset = -scrollView.adjustedContentInset.top
+        let maxOffset = max(
+            minOffset,
+            scrollView.contentSize.height
+                - scrollView.bounds.height
+                + scrollView.adjustedContentInset.bottom
+        )
+        let clamped = min(max(targetOffset, minOffset), maxOffset)
+        return SpotlightScrollTarget(from: from, to: clamped, isVisible: isVisible)
+    }
+
     /// シートが閉じる動きにつなげて、止まってから行を入れて光らせる（#282）。
     private func runSpotlight(
         _ request: AlarmSpotlightRequest,
@@ -946,38 +1040,80 @@ struct ContentView: View {
         guard !Task.isCancelled else { return }
 
         let ids = request.alarmIDs
-        let frames = ids.compactMap { alarmFrameStore.frame(for: $0) }
-        let rowFrame: CGRect? = {
-            guard let first = frames.first else { return nil }
-            let minY = frames.map(\.minY).min() ?? first.minY
-            let maxY = frames.map(\.maxY).max() ?? first.maxY
-            return CGRect(x: first.minX, y: minY, width: first.width, height: maxY - minY)
-        }()
+        guard let first = ids.first else { return }
 
-        let needsScroll = RowSpotlightLogic.shouldScroll(
-            rowFrame: rowFrame,
+        // List の scrollTo は指定した時間・カーブを使わないため、
+        // UIScrollView を CADisplayLink で自分で動かす（#282 レビュー）
+        #if DEBUG
+        NSLog(
+            "%@",
+            "[SpotlightScroll] resolve scrollView=\(listScrollView == nil ? "nil" : "ok")"
+        )
+        #endif
+        let measuredFrame = alarmFrameStore.frame(for: first)
+        let shouldScroll = RowSpotlightLogic.shouldScroll(
+            rowFrame: measuredFrame,
             viewport: spotlightViewport
         )
-
-        if needsScroll {
-            if reduceMotion {
-                // 動きを減らす設定では位置だけ合わせる（#282）
-                if let first = ids.first {
-                    proxy.scrollTo(first, anchor: RowSpotlightTiming.scrollAnchor)
-                }
-            } else {
-                let distance = RowSpotlightLogic.scrollDistance(
-                    rowFrame: rowFrame,
-                    viewport: spotlightViewport
+        var handledByCustomScroll = false
+        if let scrollView = listScrollView,
+           let target = spotlightScrollTarget(for: first, scrollView: scrollView) {
+            handledByCustomScroll = true
+            #if DEBUG
+            NSLog(
+                "%@",
+                String(
+                    format: "[SpotlightScroll] target from=%.1f to=%.1f visible=%d shouldScroll=%d",
+                    Double(target.from),
+                    Double(target.to),
+                    target.isVisible ? 1 : 0,
+                    shouldScroll ? 1 : 0
                 )
-                let duration = RowSpotlightTiming.scrollDuration(for: distance)
-                withAnimation(RowSpotlightTiming.scrollAnimation(duration: duration)) {
-                    if let first = ids.first {
-                        proxy.scrollTo(first, anchor: RowSpotlightTiming.scrollAnchor)
+            )
+            #endif
+            if shouldScroll {
+                let distance = abs(target.to - target.from)
+                if reduceMotion {
+                    scrollView.setContentOffset(
+                        CGPoint(x: scrollView.contentOffset.x, y: target.to),
+                        animated: false
+                    )
+                } else {
+                    let duration = RowSpotlightTiming.scrollDuration(for: distance)
+                    await withTaskCancellationHandler {
+                        await scrollAnimator.animate(
+                            scrollView: scrollView,
+                            from: target.from,
+                            to: target.to,
+                            duration: duration
+                        )
+                    } onCancel: {
+                        Task { @MainActor in
+                            scrollAnimator.stop()
+                        }
                     }
+                    guard !Task.isCancelled else { return }
                 }
-                try? await Task.sleep(for: .seconds(duration))
-                guard !Task.isCancelled else { return }
+            }
+        }
+
+        if !handledByCustomScroll {
+            #if DEBUG
+            NSLog("%@", "[SpotlightScroll] custom unavailable -> fallback")
+            #endif
+            // スクロールビューが取れないときだけのフォールバック（位置合わせのみ）
+            let frames = ids.compactMap { alarmFrameStore.frame(for: $0) }
+            let rowFrame: CGRect? = {
+                guard let frame = frames.first else { return nil }
+                let minY = frames.map(\.minY).min() ?? frame.minY
+                let maxY = frames.map(\.maxY).max() ?? frame.maxY
+                return CGRect(x: frame.minX, y: minY, width: frame.width, height: maxY - minY)
+            }()
+            if RowSpotlightLogic.shouldScroll(
+                rowFrame: rowFrame,
+                viewport: spotlightViewport
+            ) {
+                proxy.scrollTo(first, anchor: RowSpotlightTiming.scrollAnchor)
             }
         }
 

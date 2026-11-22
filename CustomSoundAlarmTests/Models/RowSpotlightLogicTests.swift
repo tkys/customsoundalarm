@@ -71,6 +71,23 @@ struct RowSpotlightLogicTests {
         #expect(RowSpotlightLogic.scrollDistance(rowFrame: row, viewport: viewport) == 30)
     }
 
+
+    @Test
+    func bezierStartsAndEndsAtTheEndpoints() {
+        let start = SpotlightBezier.value(x: 0, x1: 0.33, y1: 0, x2: 0.15, y2: 1)
+        let end = SpotlightBezier.value(x: 1, x1: 0.33, y1: 0, x2: 0.15, y2: 1)
+        #expect(abs(start - 0) < 0.0001)
+        #expect(abs(end - 1) < 0.0001)
+    }
+
+    @Test
+    func bezierSlowsAtTheStartAndTheEnd() {
+        let early = SpotlightBezier.value(x: 0.1, x1: 0.33, y1: 0, x2: 0.15, y2: 1)
+        let late = SpotlightBezier.value(x: 0.9, x1: 0.33, y1: 0, x2: 0.15, y2: 1)
+        #expect(early < 0.1)
+        #expect(1 - late < 0.1)
+    }
+
     @Test
     func newAlarmAlwaysSpotlights() {
         #expect(AlarmSpotlightLogic.shouldSpotlight(
