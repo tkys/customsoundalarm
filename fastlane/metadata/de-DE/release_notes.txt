@@ -4,14 +4,10 @@ Wähle beim Hinzufügen eines Tons „Aus Musik hinzufügen“ und such dir den 
 ■ Aus dem Kontrollzentrum öffnen
 Füge „My Sound Alarm“ und „Wecker hinzufügen“ zum Kontrollzentrum hinzu. Ein Tippen öffnet die Weckerliste oder den Bildschirm zum Hinzufügen.
 
-■ Den ersten Wecker mit einem Tippen stellen
-Ohne Wecker siehst du „Wann stehst du auf?“ und einige Uhrzeiten. Tippe auf eine, um den Wecker zu erstellen.
-
-■ Einmalige Wecker weiter nutzen
-Nachdem dein erster einmaliger Wecker geklingelt hat, zeigt er in der Liste [Morgen] [Werktags] [Jeden Tag].
+■ Aufgeräumter Wecker-Editor
+Schlummern, Bezeichnung und Sanfter Start findest du jetzt unter „Mehr“.
 
 ■ Außerdem
-• Der Wecker-Editor ist aufgeräumter. Schlummern, Bezeichnung und Sanfter Start findest du jetzt unter „Mehr“.
 • Wählst du einen fast stillen Teil, weist dich die App darauf hin.
 • Die E-Mail über „Problem melden oder Frage stellen“ in den Einstellungen hängt jetzt den App-Status an, damit wir Probleme untersuchen können. Songnamen und Tondateien sind nicht enthalten. Du kannst den Anhang vor dem Senden entfernen.
 • Überlappender Text im Zuschneide-Bildschirm bei größter Schrift behoben.

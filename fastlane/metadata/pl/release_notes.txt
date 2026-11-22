@@ -4,14 +4,10 @@ Dodając dźwięk, wybierz „Dodaj z Muzyki”, aby wybrać fragment budzika z 
 ■ Otwieraj z centrum sterowania
 Dodaj „My Sound Alarm” i „Dodaj budzik” do centrum sterowania. Stuknij, aby otworzyć listę budzików lub ekran dodawania.
 
-■ Pierwszy budzik jednym stuknięciem
-Gdy nie masz jeszcze budzików, zobaczysz „O której wstajesz?” i kilka godzin. Stuknij jedną, aby utworzyć budzik.
-
-■ Korzystaj dalej z jednorazowego budzika
-Po pierwszym dzwonieniu jednorazowego budzika na liście pojawią się przy nim przyciski [Jutro] [Dni robocze] [Codziennie].
+■ Prostszy edytor budzika
+Drzemka, Etykieta i Łagodny start są teraz w sekcji „Więcej”.
 
 ■ Poza tym
-• Edytor budzika jest prostszy. Drzemka, Etykieta i Łagodny start są teraz w sekcji „Więcej”.
 • Jeśli wybierzesz prawie cichy fragment, aplikacja Cię o tym poinformuje.
 • E-mail z opcji „Zgłoś problem lub zapytaj” w Ustawieniach dołącza teraz stan aplikacji, aby pomóc nam zbadać problemy. Nie zawiera nazw utworów ani plików dźwiękowych. Możesz usunąć załącznik przed wysłaniem.
 • Naprawiono nakładający się tekst na ekranie przycinania przy największym rozmiarze tekstu.

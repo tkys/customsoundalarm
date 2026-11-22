@@ -4,14 +4,10 @@ When adding a sound, choose "Add from Music" to pick the part to ring from songs
 ■ Open from Control Center
 Add "My Sound Alarm" and "Add Alarm" to Control Center. Tap to open your alarm list or the add screen.
 
-■ Set your first alarm in one tap
-With no alarms yet, you'll see "What time do you wake up?" and a few times. Tap one to create the alarm.
-
-■ Keep using a one-time alarm
-After your first one-time alarm rings, that alarm in the list shows [Tomorrow] [Weekdays] [Every day].
+■ A simpler alarm editor
+Snooze, Label and Gentle start are now under "More".
 
 ■ Also
-• The alarm editor is simpler. Snooze, Label and Gentle start are now under "More".
 • If you pick a part that is nearly silent, the app tells you.
 • The email from "Report a bug or ask a question" in Settings now attaches the app's status to help us look into problems. It does not include song names or sound files. You can remove it before sending.
 • Fixed overlapping text on the trim screen at the largest text size.

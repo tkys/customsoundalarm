@@ -4,14 +4,10 @@ Quando aggiungi un suono, scegli "Aggiungi da Musica" per scegliere la parte che
 ■ Apri dal Centro di Controllo
 Aggiungi "My Sound Alarm" e "Aggiungi sveglia" al Centro di Controllo. Toccali per aprire l'elenco delle sveglie o la schermata per aggiungerne una.
 
-■ La prima sveglia con un tocco
-Se non hai ancora sveglie, vedrai "A che ora ti svegli?" e alcuni orari. Toccane uno per creare la sveglia.
-
-■ Continua a usare una sveglia singola
-Dopo che la tua prima sveglia singola ha suonato, nell'elenco mostra [Domani] [Feriali] [Ogni giorno].
+■ Un editor delle sveglie più semplice
+Posticipa, Etichetta e Avvio delicato ora sono in "Altro".
 
 ■ Inoltre
-• L'editor delle sveglie è più semplice. Posticipa, Etichetta e Avvio delicato ora sono in "Altro".
 • Se scegli una parte quasi silenziosa, l'app te lo segnala.
 • L'e-mail di "Segnala un problema o fai una domanda" nelle Impostazioni ora allega lo stato dell'app per aiutarci a esaminare i problemi. Non include nomi dei brani né file audio. Puoi rimuovere l'allegato prima di inviare.
 • Corretto il testo sovrapposto nella schermata di taglio con la dimensione del testo più grande.

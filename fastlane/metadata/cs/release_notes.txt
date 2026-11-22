@@ -4,14 +4,10 @@ Při přidávání zvuku zvol „Přidat z Hudby“ a vyber část, která bude 
 ■ Otevírej z ovládacího centra
 Přidej „My Sound Alarm“ a „Přidat budík“ do ovládacího centra. Klepnutím otevřeš seznam budíků nebo obrazovku pro přidání.
 
-■ První budík jedním klepnutím
-Když ještě nemáš žádný budík, uvidíš „V kolik vstáváte?“ a několik časů. Klepnutím na jeden budík vytvoříš.
-
-■ Používej dál jednorázový budík
-Po prvním zazvonění jednorázového budíku se u něj v seznamu objeví [Zítra] [Všední dny] [Každý den].
+■ Jednodušší editor budíku
+Odložit, Popisek a Jemný start najdeš teď v části „Další“.
 
 ■ Dále
-• Editor budíku je jednodušší. Odložit, Popisek a Jemný start najdeš teď v části „Další“.
 • Když vybereš téměř tichou část, aplikace tě upozorní.
 • E-mail z volby „Nahlásit problém nebo se zeptat“ v Nastavení teď přikládá stav aplikace, abychom mohli problémy prošetřit. Neobsahuje názvy skladeb ani zvukové soubory. Přílohu můžeš před odesláním odebrat.
 • Opraven překrývající se text na obrazovce střihu při největší velikosti písma.

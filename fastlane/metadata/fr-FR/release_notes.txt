@@ -4,14 +4,10 @@ En ajoutant un son, choisissez « Ajouter depuis Musique » pour choisir le pass
 ■ Ouvrir depuis le Centre de contrôle
 Ajoutez « My Sound Alarm » et « Ajouter une alarme » au Centre de contrôle. Touchez pour ouvrir la liste des alarmes ou l'écran d'ajout.
 
-■ Votre première alarme en un geste
-Sans alarme, vous voyez « À quelle heure vous levez-vous ? » et quelques heures. Touchez-en une pour créer l'alarme.
-
-■ Réutiliser une alarme ponctuelle
-Après la première sonnerie d'une alarme ponctuelle, elle affiche dans la liste [Demain] [En semaine] [Tous les jours].
+■ Un éditeur d'alarme plus simple
+Rappel, Étiquette et Démarrage en douceur sont désormais sous « Plus ».
 
 ■ Aussi
-• L'éditeur d'alarme est plus simple. Rappel, Étiquette et Démarrage en douceur sont désormais sous « Plus ».
 • Si vous choisissez un passage presque silencieux, l'app vous le signale.
 • L'e-mail envoyé depuis « Signaler un problème ou poser une question » dans les Réglages joint maintenant l'état de l'app pour nous aider à analyser les problèmes. Il ne contient ni noms de morceaux ni fichiers audio. Vous pouvez retirer la pièce jointe avant l'envoi.
 • Correction du texte qui se chevauchait sur l'écran de découpe avec la plus grande taille de texte.

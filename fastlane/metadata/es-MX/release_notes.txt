@@ -4,14 +4,10 @@ Al añadir un sonido, elige "Añadir desde Música" para escoger la parte que so
 ■ Ábrela desde el centro de control
 Añade "My Sound Alarm" y "Añadir alarma" al centro de control. Al tocarlos se abre la lista de alarmas o la pantalla para añadir.
 
-■ Tu primera alarma con un toque
-Si aún no tienes alarmas, verás "¿A qué hora te levantas?" y algunas horas. Toca una para crear la alarma.
-
-■ Sigue usando una alarma de una sola vez
-Después de que suene tu primera alarma de una sola vez, esa alarma muestra en la lista [Mañana] [Entre semana] [Todos los días].
+■ Un editor de alarmas más sencillo
+Posponer, Etiqueta e Inicio suave ahora están en "Más".
 
 ■ Además
-• El editor de alarmas es más sencillo. Posponer, Etiqueta e Inicio suave ahora están en "Más".
 • Si eliges una parte casi en silencio, la app te avisa.
 • El correo de "Informar de un problema o preguntar" en Ajustes ahora adjunta el estado de la app para ayudarnos a revisar problemas. No incluye nombres de canciones ni archivos de sonido. Puedes quitar el adjunto antes de enviarlo.
 • Corregido el texto que se superponía en la pantalla de recorte con el tamaño de texto más grande.

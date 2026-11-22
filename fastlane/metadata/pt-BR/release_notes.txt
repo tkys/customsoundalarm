@@ -4,14 +4,10 @@ Ao adicionar um som, escolha "Adicionar da Música" para escolher o trecho que v
 ■ Abra pela Central de Controle
 Adicione "My Sound Alarm" e "Adicionar alarme" à Central de Controle. Toque para abrir a lista de alarmes ou a tela de adicionar.
 
-■ Seu primeiro alarme com um toque
-Sem alarmes, você verá "A que horas você acorda?" e alguns horários. Toque em um para criar o alarme.
-
-■ Continue usando um alarme de uma vez
-Depois que seu primeiro alarme de uma vez tocar, ele mostra na lista [Amanhã] [Dias úteis] [Todos os dias].
+■ Um editor de alarmes mais simples
+Soneca, Etiqueta e Início suave agora estão em "Mais".
 
 ■ Além disso
-• O editor de alarmes ficou mais simples. Soneca, Etiqueta e Início suave agora estão em "Mais".
 • Se você escolher um trecho quase sem som, o app avisa.
 • O e-mail de "Relatar um problema ou perguntar" nos Ajustes agora anexa o estado do app para nos ajudar a investigar problemas. Ele não inclui nomes de músicas nem arquivos de som. Você pode remover o anexo antes de enviar.
 • Corrigido o texto sobreposto na tela de corte com o maior tamanho de texto.

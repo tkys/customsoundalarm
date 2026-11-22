@@ -4,14 +4,10 @@ Ses eklerken Müzik'ten eklemeyi seçin ve Müzik uygulamanızdaki şarkılardan
 ■ Denetim Merkezi'nden açın
 Alarm listesi ve alarm ekleme düğmelerini Denetim Merkezi'ne ekleyebilirsiniz. Dokununca ilgili ekran açılır.
 
-■ İlk alarmınızı tek dokunuşla kurun
-Henüz alarmınız yoksa birkaç saat seçeneği görünür. Birine dokunarak alarmı oluşturun.
-
-■ Tek seferlik alarmı kullanmaya devam edin
-İlk tek seferlik alarmınız çaldıktan sonra listede o alarmın yanında yarın, hafta içi ve her gün düğmeleri görünür.
+■ Daha sade alarm düzenleme ekranı
+Az kullanılan ayarlar tek bir yerde toplandı.
 
 ■ Ayrıca
-• Alarm düzenleme ekranı sadeleşti; az kullanılan ayarlar tek bir yerde toplandı.
 • Neredeyse sessiz bir bölüm seçerseniz uygulama sizi uyarır.
 • Ayarlardaki destek e-postası artık sorunları incelememize yardımcı olmak için uygulamanın durumunu ekler. Şarkı adları ve ses dosyaları dahil değildir; eki göndermeden önce kaldırabilirsiniz.
 • En büyük yazı boyutunda kırpma ekranında üst üste binen metin düzeltildi.
