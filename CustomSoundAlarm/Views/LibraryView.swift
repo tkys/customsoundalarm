@@ -242,12 +242,18 @@ struct LibraryView: View {
         )
 
         spotlightFileName = fileName
+        var scrollDuration: TimeInterval = 0
         if needsScroll, let proxy {
             if reduceMotion {
                 // 動きを減らす設定では位置だけ合わせる（#282）
                 proxy.scrollTo("library.sound.\(fileName)", anchor: RowSpotlightTiming.scrollAnchor)
             } else {
-                withAnimation(RowSpotlightTiming.scrollAnimation) {
+                let distance = RowSpotlightLogic.scrollDistance(
+                    rowFrame: soundFrameStore.frame(for: fileName),
+                    viewport: listViewport
+                )
+                scrollDuration = RowSpotlightTiming.scrollDuration(for: distance)
+                withAnimation(RowSpotlightTiming.scrollAnimation(duration: scrollDuration)) {
                     proxy.scrollTo(
                         "library.sound.\(fileName)",
                         anchor: RowSpotlightTiming.scrollAnchor
@@ -256,8 +262,9 @@ struct LibraryView: View {
             }
         }
 
-        let startDelay = (needsScroll && !reduceMotion)
-            ? RowSpotlightTiming.riseDelayWhenScrolling
+        // 行はすでにあるので、止まってから光らせる（#282 / #246）
+        let startDelay = scrollDuration > 0
+            ? scrollDuration + RowSpotlightTiming.glowDelayAfterReveal
             : 0
         spotlight.play(startDelay: startDelay)
         shareLanding.librarySoundFileName = nil

@@ -36,18 +36,27 @@ final class AlarmStore {
         save()
     }
 
-    func remove(_ alarm: AlarmEntry) {
-        let context = AlarmHistoryLogic.context(for: alarm)
-        alarms.removeAll { $0.id == alarm.id }
+    /// 複数件をまとめて削除する（#282 レビュー）。
+    /// 一覧のスワイプ削除で、保存と `alarms` の変更を1回にまとめる。
+    func remove(_ targets: [AlarmEntry]) {
+        guard !targets.isEmpty else { return }
+        let ids = Set(targets.map(\.id))
+        for alarm in targets {
+            let context = AlarmHistoryLogic.context(for: alarm)
+            AnalyticsService.shared.capture(.alarmDeletedWithContext(context: context))
+        }
+        alarms.removeAll { ids.contains($0.id) }
         save()
         // 全体の休みの対象からも外す（#197 画面作り直し）
         if var skip = AppGroup.globalSkip {
-            skip.entryIDs.removeAll { $0 == alarm.id }
-            skip.disabledOneTimeIDs.removeAll { $0 == alarm.id }
+            skip.entryIDs.removeAll { ids.contains($0) }
+            skip.disabledOneTimeIDs.removeAll { ids.contains($0) }
             AppGroup.globalSkip = skip.entryIDs.isEmpty ? nil : skip
         }
+    }
 
-        AnalyticsService.shared.capture(.alarmDeletedWithContext(context: context))
+    func remove(_ alarm: AlarmEntry) {
+        remove([alarm])
     }
 
     /// アラームを複製する。新しい id・`isEnabled = true` で追加し、

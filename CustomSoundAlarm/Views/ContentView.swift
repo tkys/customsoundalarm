@@ -15,6 +15,12 @@ struct AddAlarmRequest: Identifiable {
     }
 }
 
+/// 一覧で行を入れて光らせる要求（#282 / #198）。
+private struct AlarmSpotlightRequest: Equatable {
+    let token = UUID()
+    let alarmIDs: [UUID]
+}
+
 /// メイン画面：アラーム一覧
 /// OOUIの原則に従い、主オブジェクト（アラーム）のみを表示
 struct ContentView: View {
@@ -24,10 +30,14 @@ struct ContentView: View {
     @State private var spotlightStore = RowSpotlightStore()
     @State private var alarmFrameStore = RowFrameStore<UUID>()
     @State private var spotlightViewport: CGRect = .zero
-    /// 保存はされたが、シートが閉じきるまで待っている行（#282）
-    @State private var pendingSpotlightAlarmID: UUID?
-    /// 一覧の準備ができてから処理するスポットライト要求（#282）
-    @State private var spotlightRequest: UUID?
+    /// 一覧に出す配列（#282 レビュー）。ForEach はこの1か所だけを見る。
+    @State private var displayedAlarms: [AlarmEntry] = []
+    /// スクロール中は高さ0にしておく行（#282 / #198）
+    @State private var pendingRevealAlarmIDs: Set<UUID> = []
+    /// 高さを開いた行（#282 / #198）
+    @State private var revealedAlarmIDs: Set<UUID> = []
+    /// 一覧の準備ができてから処理する演出要求（#282）
+    @State private var spotlightRequest: AlarmSpotlightRequest?
     @AccessibilityFocusState private var spotlightFocusedAlarmID: UUID?
     @State private var alarmStore = AlarmStore.shared
     @State private var soundStore = SoundStore.shared
@@ -85,6 +95,15 @@ struct ContentView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    @MainActor
+    init(controlOpenKind: Binding<ControlOpenKind?>) {
+        _controlOpenKind = controlOpenKind
+        // 起動直後に一覧が空で描画されないよう、今の保存内容から始める（#282 レビュー）
+        _displayedAlarms = State(
+            initialValue: AlarmListOrdering.sortedForDisplay(AlarmStore.shared.alarms)
+        )
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -133,6 +152,7 @@ struct ContentView: View {
                 .task {
                     refreshGlobalSkip()
                     syncSkipTimeZoneIfNeeded()
+                    syncDisplayedAlarms()
                     evaluateOnboarding()
                     didEvaluateOnboarding = true
                     applyControlOpenIfNeeded()
@@ -181,7 +201,6 @@ struct ContentView: View {
                 addScreenVisible = false
                 addAlarmRequest = nil
                 schedulePlaylistUnlockAttempt()
-                requestSpotlightIfPending()
             }) { request in
                 AlarmDetailView(
                     mode: .add,
@@ -192,8 +211,8 @@ struct ContentView: View {
                         addAlarmRequest = nil
                         schedulePlaylistUnlockAttempt()
                     },
-                    onSaved: { saved in
-                        pendingSpotlightAlarmID = saved.id
+                    onSaved: { saved, shouldSpotlight in
+                        handleAlarmSaved(saved, shouldSpotlight: shouldSpotlight)
                     }
                 )
                     .onDisappear {
@@ -206,7 +225,6 @@ struct ContentView: View {
                 editScreenVisible = false
                 selectedAlarm = nil
                 schedulePlaylistUnlockAttempt()
-                requestSpotlightIfPending()
             }) { alarm in
                 AlarmDetailView(
                     mode: .edit(alarm),
@@ -215,8 +233,8 @@ struct ContentView: View {
                         selectedAlarm = nil
                         schedulePlaylistUnlockAttempt()
                     },
-                    onSaved: { saved in
-                        pendingSpotlightAlarmID = saved.id
+                    onSaved: { saved, shouldSpotlight in
+                        handleAlarmSaved(saved, shouldSpotlight: shouldSpotlight)
                     }
                 )
                     .onDisappear {
@@ -306,6 +324,10 @@ struct ContentView: View {
                     dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium]
                 )
             }
+        }
+        .onChange(of: alarmStore.alarms) { _, _ in
+            // ForEach に渡す配列は1か所でだけ更新する（#282 レビュー）
+            syncDisplayedAlarms(animated: true)
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .background {
@@ -749,9 +771,21 @@ struct ContentView: View {
 
     // MARK: - Alarm List
 
+    /// 一覧に出す配列を1か所で更新する（#282 レビュー）。
+    private func syncDisplayedAlarms(animated: Bool = false) {
+        let sorted = AlarmListOrdering.sortedForDisplay(alarmStore.alarms)
+        guard sorted != displayedAlarms else { return }
+        if animated {
+            withAnimation(.default) {
+                displayedAlarms = sorted
+            }
+        } else {
+            displayedAlarms = sorted
+        }
+    }
+
     private var alarmList: some View {
-        let displayed = AlarmListOrdering.sortedForDisplay(alarmStore.alarms)
-        return ScrollViewReader { proxy in
+        ScrollViewReader { proxy in
             List {
                 if let permissionStatus = permissionBannerStatus {
                     permissionBannerRow(permissionStatus)
@@ -767,37 +801,19 @@ struct ContentView: View {
                     )
                     .warmCard()
                 }
-                ForEach(displayed, id: \.id) { alarm in
-                    AlarmRow(
-                        alarm: alarm,
-                        soundName: AlarmSoundDisplay.name(for: alarm),
-                        sound: AlarmSoundDisplay.representativeSound(for: alarm),
-                        hasSilentSound: silentAlarmLevels[alarm.id] != nil,
-                        showsFirstAlarmFollowup: firstAlarmFollowupAlarmID == alarm.id,
-                        spotlight: spotlightStore.controller(for: alarm.id),
-                        spotlightFocus: $spotlightFocusedAlarmID,
-                        onFixSilentSound: {
-                            ignoreFirstAlarmFollowupIfNeeded()
-                            fixingSilentAlarm = alarm
-                        },
-                        onFirstAlarmFollowup: { action in
-                            applyFirstAlarmFollowup(action, to: alarm)
-                        },
-                        onToggle: {
-                            if firstAlarmFollowupAlarmID == alarm.id {
-                                ignoreFirstAlarmFollowupIfNeeded()
+                ForEach(displayedAlarms, id: \.id) { alarm in
+                    Group {
+                        if pendingRevealAlarmIDs.contains(alarm.id) {
+                            SpotlightRevealRow(
+                                isRevealed: revealedAlarmIDs.contains(alarm.id),
+                                reduceMotion: reduceMotion
+                            ) {
+                                alarmRowContent(alarm)
                             }
-                            alarmStore.toggleEnabled(alarm)
-                            AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
-                            refreshGlobalSkip()
-                        },
-                        onTap: {
-                            ignoreFirstAlarmFollowupIfNeeded()
-                            editScreenVisible = true
-                            selectedAlarm = alarm
+                        } else {
+                            alarmRowContent(alarm)
                         }
-                    )
-                    .rowSpotlightFrame(alarm.id, into: alarmFrameStore)
+                    }
                     .warmCard(spotlight: spotlightStore.controller(for: alarm.id))
                     .swipeActions(edge: .leading, allowsFullSwipe: false) {
                         if !alarm.repeatWeekdays.isEmpty {
@@ -817,11 +833,25 @@ struct ContentView: View {
                     }
                 }
                 .onDelete { indexSet in
-                    let idsToDelete = indexSet.map { displayed[$0].id }
-                    for id in idsToDelete {
-                        if let alarm = alarmStore.alarms.first(where: { $0.id == id }) {
-                            alarmStore.remove(alarm)
-                        }
+                    // ForEach と同じ配列から対象を取り、変更は1回の withAnimation で行う（#282 レビュー）
+                    let targets = indexSet.compactMap { index in
+                        displayedAlarms.indices.contains(index)
+                            ? displayedAlarms[index]
+                            : nil
+                    }
+                    guard !targets.isEmpty else { return }
+                    let ids = Set(targets.map(\.id))
+                    // 演出中の行が消されたら、その演出は止める（#282 レビュー）
+                    if !pendingRevealAlarmIDs.isDisjoint(with: ids) {
+                        spotlightRequest = nil
+                        pendingRevealAlarmIDs.subtract(ids)
+                        revealedAlarmIDs.subtract(ids)
+                    }
+                    withAnimation(.default) {
+                        alarmStore.remove(targets)
+                        displayedAlarms = AlarmListOrdering.sortedForDisplay(
+                            alarmStore.alarms
+                        )
                     }
                     AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
                     refreshGlobalSkip()
@@ -835,7 +865,6 @@ struct ContentView: View {
                     .listRowBackground(Color.clear)
                     .accessibilityHidden(true)
             }
-            .animation(.default, value: alarmStore.alarms)
             .warmListBackground()
             .onGeometryChange(for: CGRect.self) { geometry in
                 // 一覧として実際に見えている範囲（画面座標）。下端の広告・タブを除く。
@@ -850,10 +879,9 @@ struct ContentView: View {
             } action: { viewport in
                 spotlightViewport = viewport
             }
-            .onChange(of: spotlightRequest, initial: true) { _, alarmID in
-                guard let alarmID else { return }
-                spotlightRequest = nil
-                startSpotlight(for: alarmID, proxy: proxy)
+            .task(id: spotlightRequest) {
+                guard let request = spotlightRequest else { return }
+                await runSpotlight(request, proxy: proxy)
             }
             .sheet(isPresented: $showingSkipAll, onDismiss: refreshGlobalSkip) {
                 SkipAllSheet(entries: alarmStore.alarms.filter(\.isEnabled))
@@ -863,49 +891,125 @@ struct ContentView: View {
 
     // MARK: - Row spotlight (#282)
 
-    /// シートが閉じきったあと、作った・時刻を変えた行を見える位置に出す（#282）。
-    private func requestSpotlightIfPending() {
-        guard let alarmID = pendingSpotlightAlarmID else { return }
-        pendingSpotlightAlarmID = nil
-        Task {
-            // シートの閉じる動きと重ねない。行が並び直るのを1フレーム待つ。
-            try? await Task.sleep(for: .milliseconds(120))
-            spotlightRequest = alarmID
-        }
+    /// 一覧の1行（スポットライトの対象でも同じ中身を使う）。
+    private func alarmRowContent(_ alarm: AlarmEntry) -> some View {
+        AlarmRow(
+            alarm: alarm,
+            soundName: AlarmSoundDisplay.name(for: alarm),
+            sound: AlarmSoundDisplay.representativeSound(for: alarm),
+            hasSilentSound: silentAlarmLevels[alarm.id] != nil,
+            showsFirstAlarmFollowup: firstAlarmFollowupAlarmID == alarm.id,
+            spotlight: spotlightStore.controller(for: alarm.id),
+            spotlightFocus: $spotlightFocusedAlarmID,
+            onFixSilentSound: {
+                ignoreFirstAlarmFollowupIfNeeded()
+                fixingSilentAlarm = alarm
+            },
+            onFirstAlarmFollowup: { action in
+                applyFirstAlarmFollowup(action, to: alarm)
+            },
+            onToggle: {
+                if firstAlarmFollowupAlarmID == alarm.id {
+                    ignoreFirstAlarmFollowupIfNeeded()
+                }
+                alarmStore.toggleEnabled(alarm)
+                AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
+                refreshGlobalSkip()
+            },
+            onTap: {
+                ignoreFirstAlarmFollowupIfNeeded()
+                editScreenVisible = true
+                selectedAlarm = alarm
+            }
+        )
+        .rowSpotlightFrame(alarm.id, into: alarmFrameStore)
     }
 
-    private func startSpotlight(for alarmID: UUID, proxy: ScrollViewProxy) {
-        let displayed = AlarmListOrdering.sortedForDisplay(alarmStore.alarms)
-        guard displayed.contains(where: { $0.id == alarmID }) else { return }
+    /// 保存された行を、スクロールが止まるまで高さ0で待たせる（#282）。
+    private func handleAlarmSaved(_ alarm: AlarmEntry, shouldSpotlight: Bool) {
+        guard shouldSpotlight else { return }
+
+        // 前の演出が残っていたら、その行は出し切ってから次へ
+        if !pendingRevealAlarmIDs.isEmpty {
+            revealedAlarmIDs.formUnion(pendingRevealAlarmIDs)
+            pendingRevealAlarmIDs.removeAll()
+        }
+
+        pendingRevealAlarmIDs.insert(alarm.id)
+        revealedAlarmIDs.remove(alarm.id)
+        spotlightRequest = AlarmSpotlightRequest(alarmIDs: [alarm.id])
+    }
+
+    /// シートが閉じる動きにつなげて、止まってから行を入れて光らせる（#282）。
+    private func runSpotlight(
+        _ request: AlarmSpotlightRequest,
+        proxy: ScrollViewProxy
+    ) async {
+        // シートが閉じきる約0.12秒前から動き出す
+        try? await Task.sleep(for: .seconds(RowSpotlightTiming.sheetCloseDelay))
+        guard !Task.isCancelled else { return }
+
+        let ids = request.alarmIDs
+        let frames = ids.compactMap { alarmFrameStore.frame(for: $0) }
+        let rowFrame: CGRect? = {
+            guard let first = frames.first else { return nil }
+            let minY = frames.map(\.minY).min() ?? first.minY
+            let maxY = frames.map(\.maxY).max() ?? first.maxY
+            return CGRect(x: first.minX, y: minY, width: first.width, height: maxY - minY)
+        }()
 
         let needsScroll = RowSpotlightLogic.shouldScroll(
-            rowFrame: alarmFrameStore.frame(for: alarmID),
+            rowFrame: rowFrame,
             viewport: spotlightViewport
         )
 
         if needsScroll {
             if reduceMotion {
                 // 動きを減らす設定では位置だけ合わせる（#282）
-                proxy.scrollTo(alarmID, anchor: RowSpotlightTiming.scrollAnchor)
-            } else {
-                withAnimation(RowSpotlightTiming.scrollAnimation) {
-                    proxy.scrollTo(alarmID, anchor: RowSpotlightTiming.scrollAnchor)
+                if let first = ids.first {
+                    proxy.scrollTo(first, anchor: RowSpotlightTiming.scrollAnchor)
                 }
+            } else {
+                let distance = RowSpotlightLogic.scrollDistance(
+                    rowFrame: rowFrame,
+                    viewport: spotlightViewport
+                )
+                let duration = RowSpotlightTiming.scrollDuration(for: distance)
+                withAnimation(RowSpotlightTiming.scrollAnimation(duration: duration)) {
+                    if let first = ids.first {
+                        proxy.scrollTo(first, anchor: RowSpotlightTiming.scrollAnchor)
+                    }
+                }
+                try? await Task.sleep(for: .seconds(duration))
+                guard !Task.isCancelled else { return }
             }
         }
 
-        let startDelay = (needsScroll && !reduceMotion)
-            ? RowSpotlightTiming.riseDelayWhenScrolling
-            : 0
-        spotlightStore.play([alarmID], startDelay: startDelay)
+        // スクロールが止まってから行を入れる
+        revealedAlarmIDs.formUnion(ids)
+        let revealWait = reduceMotion
+            ? RowSpotlightTiming.revealOpacity
+            : RowSpotlightTiming.revealHeight
+        try? await Task.sleep(for: .seconds(revealWait))
+        guard !Task.isCancelled else { return }
 
-        guard UIAccessibility.isVoiceOverRunning else { return }
-        Task {
-            if needsScroll, !reduceMotion {
-                try? await Task.sleep(for: .seconds(RowSpotlightTiming.scroll))
-            }
-            spotlightFocusedAlarmID = alarmID
+        // 入り終わってから約0.08秒後に光らせる
+        try? await Task.sleep(for: .seconds(RowSpotlightTiming.glowDelayAfterReveal))
+        guard !Task.isCancelled else { return }
+        spotlightStore.play(ids)
+
+        if let first = ids.first, UIAccessibility.isVoiceOverRunning {
+            spotlightFocusedAlarmID = first
         }
+
+        // 光り終わったら、通常の行に戻す
+        let glowDuration = RowSpotlightTiming.rise
+            + RowSpotlightTiming.hold
+            + RowSpotlightTiming.fade
+        try? await Task.sleep(for: .seconds(glowDuration + 0.1))
+        guard !Task.isCancelled else { return }
+        pendingRevealAlarmIDs.subtract(ids)
+        revealedAlarmIDs.subtract(ids)
     }
 
     // MARK: - Permission Banner (#230)

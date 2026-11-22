@@ -57,12 +57,57 @@ struct RowSpotlightLogicTests {
     }
 
     @Test
-    func riseStartsNearTheEndOfTheScroll() {
-        #expect(
-            RowSpotlightTiming.riseDelayWhenScrolling
-                == RowSpotlightTiming.scroll * RowSpotlightTiming.riseDuringScroll
-        )
-        #expect(RowSpotlightTiming.riseDelayWhenScrolling > RowSpotlightTiming.scroll * 0.7)
-        #expect(RowSpotlightTiming.riseDelayWhenScrolling < RowSpotlightTiming.scroll)
+    func scrollDurationUsesDistanceAndClamps() {
+        #expect(RowSpotlightTiming.scrollDuration(for: 0) == 0.5)
+        #expect(abs(RowSpotlightTiming.scrollDuration(for: 140) - 0.55) < 0.0001)
+        #expect(RowSpotlightTiming.scrollDuration(for: 770) == 1.0)
+        #expect(RowSpotlightTiming.scrollDuration(for: 2000) == 1.0)
+    }
+
+    @Test
+    func scrollDistanceTargetsTheMiddle() {
+        // target = 100 + 600 * 0.45 = 370
+        let row = CGRect(x: 16, y: 400, width: 358, height: 86)
+        #expect(RowSpotlightLogic.scrollDistance(rowFrame: row, viewport: viewport) == 30)
+    }
+
+    @Test
+    func newAlarmAlwaysSpotlights() {
+        #expect(AlarmSpotlightLogic.shouldSpotlight(
+            isNew: true,
+            oldHour: nil,
+            oldMinute: nil,
+            newHour: 11,
+            newMinute: 0
+        ))
+    }
+
+    @Test
+    func editingTheSameTimeDoesNotSpotlight() {
+        #expect(!AlarmSpotlightLogic.shouldSpotlight(
+            isNew: false,
+            oldHour: 6,
+            oldMinute: 24,
+            newHour: 6,
+            newMinute: 24
+        ))
+    }
+
+    @Test
+    func editingTheTimeSpotlights() {
+        #expect(AlarmSpotlightLogic.shouldSpotlight(
+            isNew: false,
+            oldHour: 6,
+            oldMinute: 24,
+            newHour: 7,
+            newMinute: 24
+        ))
+        #expect(AlarmSpotlightLogic.shouldSpotlight(
+            isNew: false,
+            oldHour: 6,
+            oldMinute: 24,
+            newHour: 6,
+            newMinute: 25
+        ))
     }
 }

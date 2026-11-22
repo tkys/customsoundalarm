@@ -31,8 +31,9 @@ struct AlarmDetailView: View {
     let mode: AlarmDetailMode
     /// 画面を閉じる直前（#216: 戻った先で解放を出すため）
     var onClose: (() -> Void)?
-    /// 保存したアラーム（#282: 一覧でその行に寄せるため）
-    var onSaved: ((AlarmEntry) -> Void)?
+    /// 保存したアラーム（#282: 一覧でその行に寄せるため）。
+    /// 第2引数は光らせるか（新規作成、または時刻を変えた編集だけ true）。
+    var onSaved: ((AlarmEntry, Bool) -> Void)?
     /// 新規作成時に引き継いだ値（#206）
     private let carryOver: AlarmCarryOver
     /// オンボ場面4からの指定（#98 Phase 4）。
@@ -88,7 +89,7 @@ struct AlarmDetailView: View {
         initialImport: OnboardingSource? = nil,
         initialSound: AlarmSound? = nil,
         onClose: (() -> Void)? = nil,
-        onSaved: ((AlarmEntry) -> Void)? = nil
+        onSaved: ((AlarmEntry, Bool) -> Void)? = nil
     ) {
         self.mode = mode
         self.initialImport = initialImport
@@ -1194,8 +1195,19 @@ struct AlarmDetailView: View {
         // 次に新規作成するときの初期値（#206）
         AlarmCarryOverStore.save(from: savedEntry)
 
-        // 一覧に戻ったあと、この行に寄せて一度だけ光らせる（#282）
-        onSaved?(savedEntry)
+        // 光らせるのは新規作成と、時刻を変えた編集だけ（#282）
+        let shouldSpotlight: Bool
+        if case .edit(let existing) = mode {
+            shouldSpotlight = AlarmSpotlightLogic.shouldSpotlight(
+                isNew: false,
+                oldHour: existing.hour,
+                oldMinute: existing.minute,
+                newHour: savedEntry.hour,
+                newMinute: savedEntry.minute
+            )
+        } else {
+            shouldSpotlight = true
+        }
 
         if BackupAlarmAccess.shouldGrantEarlyAccess(isEnabled: backupMinutes != nil) {
             AppGroup.backupEarlyAccessGranted = true
@@ -1234,10 +1246,13 @@ struct AlarmDetailView: View {
             Task {
                 try? await Task.sleep(for: .seconds(1.6))
                 saveConfirmation = nil
+                // 閉じ始めに合わせて一覧の演出を始める（#282）
+                onSaved?(savedEntry, shouldSpotlight)
                 onClose?()
                 dismiss()
             }
         } else {
+            onSaved?(savedEntry, shouldSpotlight)
             onClose?()
             dismiss()
         }

@@ -141,6 +141,93 @@ final class AlarmSpotlightUITests: XCTestCase {
         attach("spotlight-04-list")
     }
 
+
+    /// 連続で3本追加しても落ちない（#282 レビュー）。
+    func testAddingThreeAlarmsInARowDoesNotCrash() {
+        launch([
+            "-uitest-seed-morning-alarms",
+            "-uitest-add-time=11:00",
+            "-uitest-save-alarm-disabled"
+        ])
+        XCTAssertTrue(
+            app.buttons["alarmList.add"].waitForExistence(timeout: 15),
+            app.debugDescription
+        )
+
+        for _ in 0..<3 {
+            app.buttons["alarmList.add"].tap()
+            XCTAssertTrue(
+                app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10),
+                app.debugDescription
+            )
+            app.buttons["addAlarm.save"].tap()
+            XCTAssertTrue(
+                app.collectionViews["addAlarm.root"].waitForNonExistence(timeout: 10),
+                app.debugDescription
+            )
+        }
+
+        XCTAssertTrue(
+            app.staticTexts["11:00"].waitForExistence(timeout: 15),
+            app.debugDescription
+        )
+        XCTAssertTrue(app.wait(for: .runningForeground, timeout: 5))
+    }
+
+    /// 追加直後（光っている間）に削除しても落ちない（#282 レビュー）。
+    func testDeletingImmediatelyAfterAddingDoesNotCrash() {
+        launch([
+            "-uitest-seed-alarms",
+            "-uitest-add-time=23:50",
+            "-uitest-save-alarm-disabled"
+        ])
+        XCTAssertTrue(
+            app.buttons["alarmList.add"].waitForExistence(timeout: 15),
+            app.debugDescription
+        )
+        app.buttons["alarmList.add"].tap()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10),
+            app.debugDescription
+        )
+        app.buttons["addAlarm.save"].tap()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForNonExistence(timeout: 10),
+            app.debugDescription
+        )
+
+        let newTime = app.staticTexts["23:50"]
+        XCTAssertTrue(newTime.waitForExistence(timeout: 15), app.debugDescription)
+        let deadline = Date().addingTimeInterval(5)
+        while !newTime.isHittable && Date() < deadline {
+            Thread.sleep(forTimeInterval: 0.05)
+        }
+        XCTAssertTrue(newTime.isHittable, "new row should be inserted: \(app.debugDescription)")
+
+        let cell = app.cells.containing(.staticText, identifier: "23:50").firstMatch
+        let target = cell.exists
+            ? cell
+            : app.buttons.containing(.staticText, identifier: "23:50").firstMatch
+        XCTAssertTrue(target.waitForExistence(timeout: 5), app.debugDescription)
+        target.swipeLeft()
+
+        let delete = app.buttons["削除"].firstMatch
+        let deleteEn = app.buttons["Delete"].firstMatch
+        if delete.waitForExistence(timeout: 2) {
+            delete.tap()
+        } else if deleteEn.waitForExistence(timeout: 2) {
+            deleteEn.tap()
+        } else {
+            XCTFail("Delete button should appear: \(app.debugDescription)")
+        }
+
+        XCTAssertFalse(
+            app.staticTexts["23:50"].waitForExistence(timeout: 3),
+            "deleted row should disappear"
+        )
+        XCTAssertTrue(app.wait(for: .runningForeground, timeout: 5))
+    }
+
     private func attach(_ name: String) {
         let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         attachment.name = name

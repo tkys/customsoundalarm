@@ -5,27 +5,56 @@ import SwiftUI
 /// アラームの新規作成・時刻の編集・共有後の着地（#246）・連続作成（#198）で使う。
 /// 時間とカーブはここにまとめ、行には光らせる部品を付けるだけで使える。
 enum RowSpotlightTiming {
-    /// 立ち上がり（ease-out）
-    static let rise: TimeInterval = 0.2
+    // MARK: 光り方（オーナー決定・2）
+
+    /// 立ち上がり
+    static let rise: TimeInterval = 0.35
     /// 光ったまま保つ
-    static let hold: TimeInterval = 0.6
-    /// 消え方（ease-in-out）
-    static let fade: TimeInterval = 0.9
-    /// スクロールの所要時間。距離が長くても同じ時間でゆっくり止まる
-    static let scroll: TimeInterval = 0.45
-    /// スクロールがあるときは、止まり際（8割）から立ち上がりを始める
-    static let riseDuringScroll: Double = 0.8
+    static let hold: TimeInterval = 0.4
+    /// 消え方
+    static let fade: TimeInterval = 1.6
 
-    static var riseDelayWhenScrolling: TimeInterval { scroll * riseDuringScroll }
+    /// 行の背景に重ねるアクセントの濃さ
+    static let accentOpacity: Double = 0.11
 
-    /// 行の背景に重ねるアクセントの濃さ（約15%）
-    static let accentOpacity: Double = 0.15
+    /// 行が入り終わってから点け始めるまでの間
+    static let glowDelayAfterReveal: TimeInterval = 0.08
+
+    static let riseAnimation: Animation = .timingCurve(0.05, 0.7, 0.1, 1, duration: rise)
+    static let fadeAnimation: Animation = .timingCurve(0.4, 0, 0.2, 1, duration: fade)
+
+    // MARK: スクロール（オーナー決定・D）
+
+    /// 保存して閉じ始めてから動き出すまで（閉じきる約0.12秒前）
+    static let sheetCloseDelay: TimeInterval = 0.25
+    /// 距離に関係なく足す基本の時間
+    static let scrollBase: TimeInterval = 0.45
+    /// 距離1ptあたりに足す時間の分母
+    static let scrollDistanceFactor: CGFloat = 1400
+    static let scrollMinimum: TimeInterval = 0.5
+    static let scrollMaximum: TimeInterval = 1.0
+
     /// スクロール後の行の位置（画面の中ほど・やや上）
     static let scrollAnchor = UnitPoint(x: 0.5, y: 0.45)
 
-    static let riseAnimation: Animation = .easeOut(duration: rise)
-    static let fadeAnimation: Animation = .easeInOut(duration: fade)
-    static let scrollAnimation: Animation = .smooth(duration: scroll)
+    /// 距離からスクロール時間を求める（0.5〜1.0秒）。
+    static func scrollDuration(for distance: CGFloat) -> TimeInterval {
+        let extra = TimeInterval(max(0, distance) / scrollDistanceFactor)
+        return min(scrollMaximum, max(scrollMinimum, scrollBase + extra))
+    }
+
+    /// 動き出しはゆっくり、止まり際は長く減速するカーブ。
+    static func scrollAnimation(duration: TimeInterval) -> Animation {
+        .timingCurve(0.33, 0, 0.15, 1, duration: duration)
+    }
+
+    // MARK: 行の入り方
+
+    static let revealHeight: TimeInterval = 0.35
+    static let revealOpacity: TimeInterval = 0.3
+    static let revealHeightAnimation: Animation =
+        .timingCurve(0.05, 0.7, 0.1, 1, duration: revealHeight)
+    static let revealOpacityAnimation: Animation = .easeOut(duration: revealOpacity)
 }
 
 /// 行が一覧の見えている範囲に対してどこにあるか（#282）。
@@ -51,6 +80,28 @@ enum RowSpotlightLogic {
     static func shouldScroll(rowFrame: CGRect?, viewport: CGRect) -> Bool {
         position(rowFrame: rowFrame, viewport: viewport) != .fullyVisible
     }
+
+    /// 行を 45% の位置へ送るために動かす距離（pt）。
+    static func scrollDistance(rowFrame: CGRect?, viewport: CGRect) -> CGFloat {
+        guard let rowFrame else { return 0 }
+        let targetY = viewport.minY + viewport.height * 0.45
+        return abs(rowFrame.minY - targetY)
+    }
+}
+
+/// 光らせる場面かどうか（#282）。新規作成と、時刻を変えた編集だけ。
+enum AlarmSpotlightLogic {
+    static func shouldSpotlight(
+        isNew: Bool,
+        oldHour: Int?,
+        oldMinute: Int?,
+        newHour: Int,
+        newMinute: Int
+    ) -> Bool {
+        if isNew { return true }
+        guard let oldHour, let oldMinute else { return true }
+        return oldHour != newHour || oldMinute != newMinute
+    }
 }
 
 /// 1行分の光り方を進める（#282）。行ごとに1つ持つ。
@@ -65,7 +116,7 @@ final class RowSpotlightController {
     private var task: Task<Void, Never>?
 
     /// 1回だけ光らせる。
-    /// - Parameter startDelay: スクロールがあるときに止まり際まで待つ秒数。
+    /// - Parameter startDelay: 行が入り終わるまでの待ち時間。
     func play(startDelay: TimeInterval = 0) {
         task?.cancel()
         isActive = true
@@ -159,6 +210,57 @@ struct RowSpotlightModifier: ViewModifier {
             .opacity(controller.isLit ? 1 : 0)
             .allowsHitTesting(false)
         }
+    }
+}
+
+/// スクロールが止まってから、高さ0から行を開く（#282）。
+///
+/// 閉じている間も中身は自然な高さで組み立てておき、入る瞬間に
+/// 高さと不透明度だけを動かす。Reduce Motion では高さを動かさない。
+struct SpotlightRevealRow<Content: View>: View {
+    let isRevealed: Bool
+    let reduceMotion: Bool
+    let content: () -> Content
+
+    @State private var naturalHeight: CGFloat = 0
+
+    init(
+        isRevealed: Bool,
+        reduceMotion: Bool,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.isRevealed = isRevealed
+        self.reduceMotion = reduceMotion
+        self.content = content
+    }
+
+    var body: some View {
+        Color.clear
+            .frame(height: displayedHeight, alignment: .top)
+            .overlay(alignment: .top) {
+                content()
+                    .fixedSize(horizontal: false, vertical: true)
+                    .background {
+                        GeometryReader { proxy in
+                            Color.clear
+                                .onAppear { naturalHeight = proxy.size.height }
+                                .onChange(of: proxy.size.height) { _, height in
+                                    naturalHeight = height
+                                }
+                        }
+                    }
+                    .opacity(isRevealed ? 1 : 0)
+                    .animation(RowSpotlightTiming.revealOpacityAnimation, value: isRevealed)
+            }
+            .clipped()
+            .animation(
+                reduceMotion ? nil : RowSpotlightTiming.revealHeightAnimation,
+                value: isRevealed
+            )
+    }
+
+    private var displayedHeight: CGFloat {
+        isRevealed ? naturalHeight : 0
     }
 }
 
