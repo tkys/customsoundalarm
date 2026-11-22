@@ -1,15 +1,15 @@
-■ Elige la parte que sonará, desde Compartir
-Comparte un video o un audio desde Fotos o Archivos y elige My Sound Alarm. Al abrir la app se abre la pantalla de recorte.
+■ Usa canciones de la app Música
+Al añadir un sonido, elige "Añadir desde Música" para escoger la parte que sonará entre las canciones de tu app Música.
 
-■ Crea alarmas más rápido
-• Las alarmas nuevas mantienen tus últimos ajustes de Posponer, Lista de reproducción e Inicio suave.
-• Arriba de la hora verás 5 y 10 minutos después de tu alarma más tardía. Tócalos para elegirlos.
+■ Ábrela desde el centro de control
+Añade "My Sound Alarm" y "Añadir alarma" al centro de control. Al tocarlos se abre la lista de alarmas o la pantalla para añadir.
 
-■ Sabrás cuando una alarma no puede sonar
-Si el permiso de alarmas está desactivado, arriba de la lista aparece «Las alarmas no sonarán». Toca «Permitir» para solucionarlo.
+■ Un editor de alarmas más sencillo
+Posponer, Etiqueta e Inicio suave ahora están en "Más".
 
 ■ Además
-• Cuando un sonido bajo se sube a un volumen normal, aparece una nota corta debajo.
-• Cuando tengas dos sonidos propios, la app te avisará de que puedes crear una lista de reproducción.
+• Si eliges una parte casi en silencio, la app te avisa.
+• El correo de "Informar de un problema o preguntar" en Ajustes ahora adjunta el estado de la app para ayudarnos a revisar problemas. No incluye nombres de canciones ni archivos de sonido. Puedes quitar el adjunto antes de enviarlo.
+• Corregido el texto que se superponía en la pantalla de recorte con el tamaño de texto más grande.
 
 Gracias por usar My Sound Alarm.

@@ -1,15 +1,15 @@
-■ Vyber část, která bude zvonit, přímo ze Sdílení
-Sdílej video nebo zvukový soubor z Fotek nebo Souborů a vyber My Sound Alarm. Po otevření aplikace se otevře obrazovka pro střih.
+■ Používej skladby z aplikace Hudba
+Při přidávání zvuku zvol „Přidat z Hudby“ a vyber část, která bude zvonit, ze skladeb v aplikaci Hudba.
 
-■ Rychlejší vytváření budíků
-• Nové budíky převezmou tvá poslední nastavení Odložení, Playlistu a Jemného startu.
-• Nad časem uvidíš 5 a 10 minut po tvém nejpozdějším budíku. Klepnutím je vybereš.
+■ Otevírej z ovládacího centra
+Přidej „My Sound Alarm“ a „Přidat budík“ do ovládacího centra. Klepnutím otevřeš seznam budíků nebo obrazovku pro přidání.
 
-■ Poznáš, kdy budík nemůže zazvonit
-Když je oprávnění pro budíky vypnuté, nahoře v seznamu se zobrazí „Budíky nezazvoní“. Klepni na „Povolit“ a oprav to.
+■ Jednodušší editor budíku
+Odložit, Popisek a Jemný start najdeš teď v části „Další“.
 
 ■ Dále
-• Když se tichý zvuk zesílí na běžnou hlasitost, zobrazí se pod ním krátká poznámka.
-• Jakmile budeš mít dva vlastní zvuky, aplikace ti dá vědět, že můžeš vytvořit playlist.
+• Když vybereš téměř tichou část, aplikace tě upozorní.
+• E-mail z volby „Nahlásit problém nebo se zeptat“ v Nastavení teď přikládá stav aplikace, abychom mohli problémy prošetřit. Neobsahuje názvy skladeb ani zvukové soubory. Přílohu můžeš před odesláním odebrat.
+• Opraven překrývající se text na obrazovce střihu při největší velikosti písma.
 
 Díky, že používáš My Sound Alarm.
