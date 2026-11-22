@@ -841,18 +841,14 @@ struct ContentView: View {
                     }
                     guard !targets.isEmpty else { return }
                     let ids = Set(targets.map(\.id))
-                    // 演出中の行が消されたら、その演出は止める（#282 レビュー）
-                    if !pendingRevealAlarmIDs.isDisjoint(with: ids) {
-                        spotlightRequest = nil
-                        pendingRevealAlarmIDs.subtract(ids)
-                        revealedAlarmIDs.subtract(ids)
-                    }
+                    // 先に一覧の配列を1回だけ更新し、List の削除更新と重ねない（#282 レビュー）
+                    let remaining = AlarmListOrdering.sortedForDisplay(
+                        alarmStore.alarms.filter { !ids.contains($0.id) }
+                    )
                     withAnimation(.default) {
-                        alarmStore.remove(targets)
-                        displayedAlarms = AlarmListOrdering.sortedForDisplay(
-                            alarmStore.alarms
-                        )
+                        displayedAlarms = remaining
                     }
+                    alarmStore.remove(targets)
                     AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
                     refreshGlobalSkip()
                 }
