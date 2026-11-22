@@ -7,6 +7,10 @@ struct FirstAlarmFollowupLogicTests {
 
     private let alarmID = UUID()
     private let defaultTS = "2026-11-19T07:00:00+09:00"
+    /// defaultTS の1時間後。実行日に左右されないよう「今」を固定する。
+    private var defaultNow: Date {
+        ISO8601DateFormatter().date(from: defaultTS)!.addingTimeInterval(3600)
+    }
 
     private func line(
         _ event: String,
@@ -41,7 +45,7 @@ struct FirstAlarmFollowupLogicTests {
     private func eligibility(
         _ lines: [String],
         alarms: [AlarmEntry]? = nil,
-        now: Date = Date()
+        now: Date? = nil
     ) -> FirstAlarmFollowupEligibility {
         let entries = alarms ?? [
             AlarmEntry(id: alarmID, hour: 7, minute: 0, isEnabled: false)
@@ -54,7 +58,7 @@ struct FirstAlarmFollowupLogicTests {
         return FirstAlarmFollowupLogic.eligibility(
             candidate: candidate,
             alarms: entries,
-            now: now
+            now: now ?? defaultNow
         )
     }
 
@@ -131,7 +135,7 @@ struct FirstAlarmFollowupLogicTests {
         #expect(FirstAlarmFollowupLogic.eligibility(
             candidate: result,
             alarms: [other],
-            now: Date()
+            now: defaultNow
         ) == .changedOrRemoved)
     }
 
@@ -152,7 +156,7 @@ struct FirstAlarmFollowupLogicTests {
             line("alarm_fired", uid: "uid-1"),
             line("alarm_stopped", uid: "uid-1")
         ]
-        let now = Date()
+        let now = defaultNow
         #expect(eligibility(
             lines,
             alarms: [AlarmEntry(id: alarmID, hour: 7, minute: 0, isEnabled: true)],
