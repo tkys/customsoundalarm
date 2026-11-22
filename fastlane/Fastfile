@@ -76,7 +76,7 @@ platform :ios do
       # v1.8.1: スクショは変えない（新バージョンは前の版の画像を引き継ぐ）。
       # 手元の screenshots は 3 言語分だけなので、上書きすると他の言語に影響しうる。
       # スクショを差し替える版だけ false / overwrite true にする。PPO 実行中は必ず true。
-      skip_screenshots: true,  # v1.8.3: 1.8.2 のスクショを引き継ぐ
+      skip_screenshots: true,  # ASC のスクショを引き継ぐ（fastlane/screenshots は ASC と同じ内容に保つ）
       overwrite_screenshots: false,
       skip_metadata: false,
       force: true,
