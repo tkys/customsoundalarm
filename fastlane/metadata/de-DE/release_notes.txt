@@ -1,15 +1,19 @@
-■ Den Weckteil direkt beim Teilen wählen
-Teile ein Video oder eine Audiodatei aus Fotos oder Dateien mit My Sound Alarm. Beim Öffnen der App erscheint direkt der Zuschneide-Bildschirm.
+■ Songs aus der Musik-App verwenden
+Wähle beim Hinzufügen eines Tons „Aus Musik hinzufügen“ und such dir den Weckteil aus Songs in deiner Musik-App aus.
 
-■ Wecker schneller erstellen
-• Neue Wecker übernehmen deine letzten Einstellungen für Schlummern, Playlist und Sanfter Start.
-• Über der Uhrzeit siehst du 5 und 10 Minuten nach deinem spätesten Wecker. Tippe darauf, um sie zu übernehmen.
+■ Aus dem Kontrollzentrum öffnen
+Füge „My Sound Alarm“ und „Wecker hinzufügen“ zum Kontrollzentrum hinzu. Ein Tippen öffnet die Weckerliste oder den Bildschirm zum Hinzufügen.
 
-■ Merken, wenn Wecker nicht klingeln können
-Ist die Wecker-Berechtigung aus, steht oben in der Liste „Wecker klingeln nicht“. Tippe auf „Erlauben“, um das zu ändern.
+■ Den ersten Wecker mit einem Tippen stellen
+Ohne Wecker siehst du „Wann stehst du auf?“ und einige Uhrzeiten. Tippe auf eine, um den Wecker zu erstellen.
+
+■ Einmalige Wecker weiter nutzen
+Nachdem dein erster einmaliger Wecker geklingelt hat, zeigt er in der Liste [Morgen] [Werktags] [Jeden Tag].
 
 ■ Außerdem
-• Wird ein leiser Ton auf normale Lautstärke angehoben, erscheint darunter ein kurzer Hinweis.
-• Sobald du zwei eigene Töne hast, zeigt dir die App, dass du eine Playlist erstellen kannst.
+• Der Wecker-Editor ist aufgeräumter. Schlummern, Bezeichnung und Sanfter Start findest du jetzt unter „Mehr“.
+• Wählst du einen fast stillen Teil, weist dich die App darauf hin.
+• Die E-Mail über „Problem melden oder Frage stellen“ in den Einstellungen hängt jetzt den App-Status an, damit wir Probleme untersuchen können. Songnamen und Tondateien sind nicht enthalten. Du kannst den Anhang vor dem Senden entfernen.
+• Überlappender Text im Zuschneide-Bildschirm bei größter Schrift behoben.
 
 Danke, dass du My Sound Alarm nutzt.

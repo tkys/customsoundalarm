@@ -1,15 +1,19 @@
-■ Çalacak bölümü doğrudan Paylaş'tan seçin
-Fotoğraflar veya Dosyalar'dan bir video ya da ses dosyası paylaşıp My Sound Alarm'ı seçin. Uygulamayı açtığınızda kırpma ekranı açılır.
+■ Müzik uygulamasındaki şarkıları kullanın
+Ses eklerken Müzik'ten eklemeyi seçin ve Müzik uygulamanızdaki şarkılardan çalacak bölümü belirleyin.
 
-■ Alarm kurmak daha hızlı
-• Yeni alarmlar son erteleme, çalma listesi ve yumuşak başlangıç ayarlarınızı korur.
-• Saatin üstünde, en geç alarmınızdan 5 ve 10 dakika sonrası görünür. Seçmek için dokunun.
+■ Denetim Merkezi'nden açın
+Alarm listesi ve alarm ekleme düğmelerini Denetim Merkezi'ne ekleyebilirsiniz. Dokununca ilgili ekran açılır.
 
-■ Alarm çalamayacaksa fark edin
-Alarm izni kapalıysa listenin en üstünde, izni açmanıza yardımcı olan bir satır görünür.
+■ İlk alarmınızı tek dokunuşla kurun
+Henüz alarmınız yoksa birkaç saat seçeneği görünür. Birine dokunarak alarmı oluşturun.
+
+■ Tek seferlik alarmı kullanmaya devam edin
+İlk tek seferlik alarmınız çaldıktan sonra listede o alarmın yanında yarın, hafta içi ve her gün düğmeleri görünür.
 
 ■ Ayrıca
-• Sessiz bir ses yükseltildiğinde altında kısa bir not görünür.
-• İki kendi sesiniz olduğunda uygulama, çalma listesi oluşturabileceğinizi gösterir.
+• Alarm düzenleme ekranı sadeleşti; az kullanılan ayarlar tek bir yerde toplandı.
+• Neredeyse sessiz bir bölüm seçerseniz uygulama sizi uyarır.
+• Ayarlardaki destek e-postası artık sorunları incelememize yardımcı olmak için uygulamanın durumunu ekler. Şarkı adları ve ses dosyaları dahil değildir; eki göndermeden önce kaldırabilirsiniz.
+• En büyük yazı boyutunda kırpma ekranında üst üste binen metin düzeltildi.
 
 My Sound Alarm'ı kullandığınız için teşekkürler.

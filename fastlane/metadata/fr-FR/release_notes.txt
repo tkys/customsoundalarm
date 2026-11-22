@@ -1,15 +1,19 @@
-■ Choisissez le passage qui sonnera, depuis Partager
-Partagez une vidéo ou un fichier audio depuis Photos ou Fichiers et choisissez My Sound Alarm. L'écran de découpe s'ouvre à l'ouverture de l'app.
+■ Utilisez les morceaux de l'app Musique
+En ajoutant un son, choisissez « Ajouter depuis Musique » pour choisir le passage qui sonnera parmi les morceaux de votre app Musique.
 
-■ Créer une alarme plus vite
-• Les nouvelles alarmes reprennent vos derniers réglages de Rappel, Playlist et Démarrage en douceur.
-• Au-dessus de l'heure, vous voyez 5 et 10 minutes après votre alarme la plus tardive. Touchez-en une pour la choisir.
+■ Ouvrir depuis le Centre de contrôle
+Ajoutez « My Sound Alarm » et « Ajouter une alarme » au Centre de contrôle. Touchez pour ouvrir la liste des alarmes ou l'écran d'ajout.
 
-■ Savoir quand les alarmes ne peuvent pas sonner
-Si l'autorisation des alarmes est désactivée, « Les alarmes ne sonneront pas » s'affiche en haut de la liste. Touchez « Autoriser » pour corriger.
+■ Votre première alarme en un geste
+Sans alarme, vous voyez « À quelle heure vous levez-vous ? » et quelques heures. Touchez-en une pour créer l'alarme.
+
+■ Réutiliser une alarme ponctuelle
+Après la première sonnerie d'une alarme ponctuelle, elle affiche dans la liste [Demain] [En semaine] [Tous les jours].
 
 ■ Aussi
-• Quand un son trop faible est remonté à un volume normal, une courte note s'affiche dessous.
-• Dès que vous avez deux sons à vous, l'app vous indique que vous pouvez créer une playlist.
+• L'éditeur d'alarme est plus simple. Rappel, Étiquette et Démarrage en douceur sont désormais sous « Plus ».
+• Si vous choisissez un passage presque silencieux, l'app vous le signale.
+• L'e-mail envoyé depuis « Signaler un problème ou poser une question » dans les Réglages joint maintenant l'état de l'app pour nous aider à analyser les problèmes. Il ne contient ni noms de morceaux ni fichiers audio. Vous pouvez retirer la pièce jointe avant l'envoi.
+• Correction du texte qui se chevauchait sur l'écran de découpe avec la plus grande taille de texte.
 
 Merci d'utiliser My Sound Alarm.

@@ -1,15 +1,19 @@
-■ Scegli la parte da far suonare, direttamente da Condividi
-Condividi un video o un file audio da Foto o File e scegli My Sound Alarm. All'apertura dell'app si apre la schermata di taglio.
+■ Usa i brani dell'app Musica
+Quando aggiungi un suono, scegli "Aggiungi da Musica" per scegliere la parte che suonerà tra i brani della tua app Musica.
 
-■ Sveglie più veloci da creare
-• Le nuove sveglie mantengono le ultime impostazioni di Posticipa, Playlist e Avvio delicato.
-• Sopra l'orario vedi 5 e 10 minuti dopo la tua sveglia più tardi. Tocca per sceglierli.
+■ Apri dal Centro di Controllo
+Aggiungi "My Sound Alarm" e "Aggiungi sveglia" al Centro di Controllo. Toccali per aprire l'elenco delle sveglie o la schermata per aggiungerne una.
 
-■ Sai quando le sveglie non possono suonare
-Se il permesso per le sveglie è disattivato, in cima all'elenco compare «Le sveglie non suoneranno». Tocca «Consenti» per risolvere.
+■ La prima sveglia con un tocco
+Se non hai ancora sveglie, vedrai "A che ora ti svegli?" e alcuni orari. Toccane uno per creare la sveglia.
+
+■ Continua a usare una sveglia singola
+Dopo che la tua prima sveglia singola ha suonato, nell'elenco mostra [Domani] [Feriali] [Ogni giorno].
 
 ■ Inoltre
-• Quando un suono basso viene portato a un volume normale, sotto compare una breve nota.
-• Quando hai due suoni tuoi, l'app ti avvisa che puoi creare una playlist.
+• L'editor delle sveglie è più semplice. Posticipa, Etichetta e Avvio delicato ora sono in "Altro".
+• Se scegli una parte quasi silenziosa, l'app te lo segnala.
+• L'e-mail di "Segnala un problema o fai una domanda" nelle Impostazioni ora allega lo stato dell'app per aiutarci a esaminare i problemi. Non include nomi dei brani né file audio. Puoi rimuovere l'allegato prima di inviare.
+• Corretto il testo sovrapposto nella schermata di taglio con la dimensione del testo più grande.
 
 Grazie per usare My Sound Alarm.
