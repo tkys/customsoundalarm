@@ -383,3 +383,13 @@
 "skip_result_footer" = "Pokazujemy tylko święta przypadające w dzień dzwonienia.";
 "skip_row_toast_skipped_fmt" = "%@ nie zadzwoni";
 "skip_row_toast_undone_fmt" = "%@ zadzwoni";
+"playlist_unlock_title" = "Playlisty odblokowane";
+"playlist_unlock_create" = "Utwórz playlistę z tych dwóch";
+"playlist_unlock_later" = "Nie teraz";
+"volume_notice" = "Zwiększyliśmy głośność, żeby było lepiej słychać.";
+"permission_banner_title" = "Uprawnienie do alarmów jest wyłączone";
+"permission_banner_allow" = "Włącz";
+"permission_settings_hint" = "Włącz „Budziki”";
+"permission_settings_open" = "Otwórz Ustawienia";
+"received_title" = "Odebrano";
+"received_detail" = "Otwórz My Sound Alarm i wybierz część, która ma grać.";

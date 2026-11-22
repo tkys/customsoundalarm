@@ -383,3 +383,13 @@
 "skip_result_footer" = "Solo se muestran los festivos que caen en un día que suena.";
 "skip_row_toast_skipped_fmt" = "%@ no sonará";
 "skip_row_toast_undone_fmt" = "%@ sonará";
+"playlist_unlock_title" = "Playlists desbloqueadas";
+"playlist_unlock_create" = "Crear una playlist con estos dos";
+"playlist_unlock_later" = "Ahora no";
+"volume_notice" = "Subimos el volumen para que se oiga mejor.";
+"permission_banner_title" = "El permiso de alarmas está desactivado";
+"permission_banner_allow" = "Activar";
+"permission_settings_hint" = "Activa «Alarmas»";
+"permission_settings_open" = "Abrir Ajustes";
+"received_title" = "Recibido";
+"received_detail" = "Abre My Sound Alarm para elegir la parte que suena.";

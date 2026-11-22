@@ -383,3 +383,13 @@
 "skip_result_footer" = "Alleen feestdagen op een dag dat de wekker afgaat worden getoond.";
 "skip_row_toast_skipped_fmt" = "%@ gaat niet af";
 "skip_row_toast_undone_fmt" = "%@ gaat af";
+"playlist_unlock_title" = "Playlists ontgrendeld";
+"playlist_unlock_create" = "Maak een playlist met deze twee";
+"playlist_unlock_later" = "Niet nu";
+"volume_notice" = "Volume verhoogd zodat je het beter hoort.";
+"permission_banner_title" = "Alarmtoestemming staat uit";
+"permission_banner_allow" = "Aanzetten";
+"permission_settings_hint" = "Zet “Wekkers” aan";
+"permission_settings_open" = "Instellingen openen";
+"received_title" = "Ontvangen";
+"received_detail" = "Open My Sound Alarm om het deel te kiezen dat klinkt.";

@@ -1,17 +1,15 @@
-■ Tage ohne Wecker
-• Wische einen Wecker nach rechts oder halte ihn gedrückt und wähle „Pausieren“, um nur das nächste Klingeln auszulassen.
-• Wiederholte Wecker können ausgewählte Tage auslassen.
-• Mit der Taste oben rechts pausierst du alle Wecker für eine Weile.
+■ Den Weckteil direkt beim Teilen wählen
+Teile ein Video oder eine Audiodatei aus Fotos oder Dateien mit My Sound Alarm. Beim Öffnen der App erscheint direkt der Zuschneide-Bildschirm.
 
-■ Playlist mit einem Tipp
-Sobald du mindestens zwei eigene Sounds hast, schlagen die Bibliothek und die Sound-Auswahl eine Playlist vor, die jedes Mal ein anderes Lied spielt. Tippe darauf, um sie zu erstellen.
+■ Wecker schneller erstellen
+• Neue Wecker übernehmen deine letzten Einstellungen für Schlummern, Playlist und Sanfter Start.
+• Über der Uhrzeit siehst du 5 und 10 Minuten nach deinem spätesten Wecker. Tippe darauf, um sie zu übernehmen.
 
-■ Einstellungen
-Über das Zahnrad oben links erreichst du Nachtmodus, Anleitung, Kontakt und Bewertung.
+■ Merken, wenn Wecker nicht klingeln können
+Ist die Wecker-Berechtigung aus, steht oben in der Liste „Wecker klingeln nicht“. Tippe auf „Erlauben“, um das zu ändern.
 
 ■ Außerdem
-• In der Sound-Auswahl hörst du einen Sound, wenn du auf seine Zeile tippst.
-• Die Quelle für Videos wählst du jetzt direkt auf dem Bildschirm.
-• Behoben: Ein einmaliger Wecker mit Playlist spielte jedes Mal dasselbe Lied.
+• Wird ein leiser Ton auf normale Lautstärke angehoben, erscheint darunter ein kurzer Hinweis.
+• Sobald du zwei eigene Töne hast, zeigt dir die App, dass du eine Playlist erstellen kannst.
 
-Danke, dass du My Sound Alarm verwendest.
+Danke, dass du My Sound Alarm nutzt.

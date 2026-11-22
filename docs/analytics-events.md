@@ -11,14 +11,19 @@
 
 | イベント名 | プロパティ（型） | 送るタイミング | 答えたい問い | App closed? | 追加版 |
 | --- | --- | --- | --- | --- | --- |
-| `alarm_created` | `has_custom_sound` bool, `is_repeating` bool, `snooze_minutes` int, `backup_minutes` int（オフは0）, `sound_mode` string（single/playlist_order/playlist_shuffle/playlist_random）, `fade_in` string（off/5/15/30）, `hours_until` int（任意） | アラーム新規作成時 | 作成行動・寝過ごし防止・プレイリストの利用率 | アプリ動作中のみ | 既存（`sound_mode` は1.8.2） |
+| `alarm_created` | `has_custom_sound` bool, `is_repeating` bool, `snooze_minutes` int, `backup_minutes` int（オフは0）, `sound_mode` string（single/playlist_order/playlist_shuffle/playlist_random）, `fade_in` string（off/5/15/30）, `time_suggestion_used` bool, `carried_over` bool, `hours_until` int（任意） | アラーム新規作成時 | 作成行動・寝過ごし防止・プレイリストの利用率 | アプリ動作中のみ | 既存（`sound_mode` は1.8.2、`time_suggestion_used`/`carried_over` は1.8.3） |
 | `alarm_edited` | `has_custom_sound` bool, `is_repeating` bool, `snooze_minutes` int, `backup_minutes` int（オフは0）, `was_enabled` bool, `sound_mode` string, `fade_in` string, `hours_until` int（任意） | アラーム編集保存時 | 編集で自動オンにした割合・プレイリスト設定 | アプリ動作中のみ | 既存（`sound_mode` は1.8.2） |
 | `alarm_deleted` | — | アラーム削除時 | 離脱・整理行動 | アプリ動作中のみ | 既存 |
 | `alarm_duplicated` | — | アラーム複製時 | 複製の利用 | アプリ動作中のみ | 既存 |
 | `alarm_permission` | `status` string（authorized/denied/not_determined/request_failed/unknown） | 権限状態が変わったとき（永続化比較） | 許可率・拒否の影響 | アプリ動作中のみ | 既存 |
+| `permission_banner_shown` | `status` string（denied/not_determined） | アラーム一覧の許可バナーを出した | 拒否済みユーザーへの気づき | アプリ動作中のみ | 1.8.3 |
+| `permission_banner_tapped` | `status` string（denied/not_determined）, `step` string（sheet_shown/settings_opened・denied のみ） | 許可バナーのボタンを押した | 許可への転換 | アプリ動作中のみ | 1.8.3（`step` は1.8.3） |
+| `import_landed` | `source` string（share/library）, `destination` string（add_alarm/library） | 取り込みを保存したあとの着地先 | 取り込み後の導線 | アプリ動作中のみ | 1.8.3 |
 | `alarm_fired` | `was_app_foreground` bool, `hour` int, `is_repeating` bool, `detection` string（observer/reconcile）, `sound_mode` string | アラーム発火検知 | 実際に鳴ったか・プレイリストで鳴ったか | アプリ動作中／起動時にも補完 | 既存（`sound_mode` は1.8.2） |
 | `alarm_stopped` | `hour` int, `sound_mode` string | 本体アラームの停止（Intent） | 停止行動・プレイリストの継続 | **届く** | 既存（`sound_mode` は1.8.2） |
 | `alarm_snoozed` | `from` string（observer/reconcile） | スヌーズ待機への遷移 | スヌーズ行動 | アプリ動作中／起動時にも補完 | 既存 |
+| `alarm_toggled` | `enabled` bool, `days_since_created` int + 共通プロパティ + 一覧の要約 | 一覧でオン・オフを切り替えた | オンオフの使われ方 | アプリ動作中のみ | 1.8.3 |
+| `time_suggestion_shown` | `suggestions` string（HH:mm カンマ区切り） | 追加画面で時刻の候補を出した（1画面1回） | 候補の効果 | アプリ動作中のみ | 1.8.3 |
 | `test_ring_scheduled` | `kind` string（own/backup）, `has_backup` bool | 「今すぐ鳴らす」「寝過ごし防止の音を試す」の登録成功時 | 試し鳴らしの利用率 | アプリ動作中のみ | 1.8.0（`has_backup` も1.8.0） |
 | `test_ring_stopped` | `hour` int | 試し鳴らしの停止（Intent） | 試し鳴らしの完了率 | **届く** | 1.8.0 |
 | `test_ring_failed` | `reason` string（not_authorized/denied/schedule_error/simulator）, `kind` string（own/backup） | 「今すぐ鳴らす」「寝過ごし防止の音を試す」の失敗時 | 鳴らせない理由（許可・拒否・登録失敗・シミュレータ） | アプリ動作中のみ | 1.8.1 |
@@ -34,8 +39,10 @@
 | `update_prompt_tapped` | `kind` string | 「App Store で更新」タップ | 更新への遷移 | アプリ動作中のみ | 1.8.0 |
 | `update_prompt_dismissed` | `kind` string（recommended） | おすすめを「あとで」/スワイプで閉じた | おすすめの受容 | アプリ動作中のみ | 1.8.0 |
 | `sound_selected` | `kind` string（imported/preset/default）, `rank_bucket` string（1/2-3/4-10/11+） | サウンド選択で音を選んだ | 音の種類・並び順の影響 | アプリ動作中のみ | 1.8.0 |
-| `playlist_created` | `track_count` int, `total_seconds_bucket` string（under_1min/1_5min/5_10min/10min）, `play_order` string（in_order/shuffle/one_random）, `transition` string（off/short/long/crossfade）, `source` string（library/sound_choice/suggestion） | プレイリストを新規作成 | プレイリスト作成者の割合・規模・再生設定・作成導線 | アプリ動作中のみ | 1.8.2（`play_order`/`transition` は1.8.1、`source` は1.8.1） |
+| `playlist_created` | `track_count` int, `total_seconds_bucket` string（under_1min/1_5min/5_10min/10min）, `play_order` string（in_order/shuffle/one_random）, `transition` string（off/short/long/crossfade）, `source` string（library/sound_choice/suggestion/unlock） | プレイリストを新規作成 | プレイリスト作成者の割合・規模・再生設定・作成導線 | アプリ動作中のみ | 1.8.2（`play_order`/`transition` は1.8.1、`source` は1.8.1） |
 | `playlist_suggestion_shown` | — | プレイリストの「作る1行」を出した | 提案の表示回数 | アプリ動作中のみ | 1.8.2 |
+| `feature_unlock_shown` | `feature` string（playlist） | 機能の解放シートを出した | 解放の表示回数 | アプリ動作中のみ | 1.8.3 |
+| `feature_unlock_action` | `feature` string（playlist）, `action` string（create/later） | 解放シートで選んだ行動 | 解放からの作成率 | アプリ動作中のみ | 1.8.3 |
 | `playlist_empty_viewed` | `source` string（library/sound_choice/suggestion）, `has_own_sounds` bool | 空のプレイリスト状態が表示されたとき（起動ごと・source ごと1回） | 空状態の到達と作成転換 | アプリ動作中のみ | 1.8.1 |
 | `playlist_edited` | `play_order` string, `transition` string | プレイリストを編集 | 編集の利用・再生設定 | アプリ動作中のみ | 1.8.2（`play_order`/`transition` は1.8.1） |
 | `playlist_render_failed` | `reason` string（no_tracks/too_long/render_failed/write_failed/missing_playlist） | プレイリストの書き出し失敗 | 失敗原因 | アプリ動作中のみ | 1.8.2 |
@@ -55,7 +62,7 @@
 | `skip_all_undone` | — | 全体の休みを取り消した | 取り消しの頻度 | アプリ動作中のみ | 1.8.2 |
 | `holiday_skip_toggled` | `enabled` bool | 「祝日は鳴らさない」を切り替えた | 祝日スキップの利用率 | アプリ動作中のみ | 1.8.2 |
 | `holiday_ring_override` | — | 「この祝日は鳴らす」を切り替えた | 祝日に出勤する人の利用 | アプリ動作中のみ | 1.8.2 |
-| `custom_sound_imported` | `source` string（video/audio）, `peak_db_bucket` string, `gain_db_bucket` string, `lufs_bucket` string（取り込み前のLUFS区分） | カスタムサウンド取り込み成功 | 取り込み経路・音量 | アプリ動作中のみ | 既存（`lufs_bucket` は1.8.0） |
+| `custom_sound_imported` | `source` string（video/audio/share）, `peak_db_bucket` string, `gain_db_bucket` string, `lufs_bucket` string（取り込み前のLUFS区分）, `share_media` string（audio/video・共有経路のみ）, `volume_notice_shown` bool（+3dB以上上げたか） | カスタムサウンド取り込み成功 | 取り込み経路・音量 | アプリ動作中のみ | 既存（`lufs_bucket` は1.8.0、`volume_notice_shown` は1.8.3、`source=share` と `share_media` は1.8.3） |
 | `video_import_started` | `source` string（photo_library/file） | 動画取り込み開始 | 動画経路 | アプリ動作中のみ | 既存 |
 | `video_import_failed` | `reason` string（安定識別子） | 動画取り込み失敗 | 失敗原因 | アプリ動作中のみ | 既存 |
 | `sound_picker_recent_used` | — | **送られなくなった**（#123 で「最近使った」を削除） | （過去データのみ） | — | 既存・1.8.0で停止 |
@@ -67,6 +74,24 @@
 | `onboarding_completed` | `source` string, `permission_granted` bool | オンボ完了 | 完了率 | アプリ動作中のみ | 既存 |
 | `review_requested` | — | OS のレビュー依頼を実行 | レビュー依頼の効果 | アプリ動作中のみ | 既存 |
 | `review_request_blocked` | `reason` string（below_threshold/already_requested_version/post_fire） | 依頼が抑制された | 抑制理由 | アプリ動作中のみ | 既存 |
+
+## アラーム履歴（#241）
+
+`alarm_created` / `alarm_edited` / `alarm_deleted` / `alarm_duplicated` / `alarm_fired` / `alarm_stopped` / `alarm_snoozed` / `alarm_toggled` には、分かる経路で次の共通プロパティを付けます。
+
+| プロパティ | 型 | 中身 |
+|---|---|---|
+| `alarm_uid` | string | アラームごとのランダム UUID（端末内で発行、ユーザー・端末 ID とは無関係） |
+| `alarm_time` | string | アラームの時刻（HH:mm・24時間） |
+| `repeat_days` | string | 繰り返し曜日（例 `1,2,3,4,5`、一回きりは空） |
+| `local_time` | string | 出来事の現地時刻（HH:mm・5分切り捨て） |
+| `local_weekday` | int | 出来事の曜日（1=日〜7=土） |
+| `tz_offset_min` | int | タイムゾーンオフセット（分） |
+| `history_schema` | int | 形式の版（今回は1） |
+
+`alarm_created` / `alarm_edited` / `alarm_toggled` には、操作前の一覧要約（`list_on_count` / `list_off_count` / `list_on_times` / `list_off_times`、時刻は整列済み・最大20件）も付けます。`alarm_created` は `suggestion_index` / `seconds_to_save`、`alarm_edited` は `prev_alarm_time` も付けます。ラベル・音の名前・プレイリスト名は送りません。
+
+同じ内容を App Group の `alarm_history.jsonl` にも残します（`local_time` は分単位、最大5,000行、古い順に削除）。このファイルは送信しません。
 
 ## 音量の基準（#134）
 

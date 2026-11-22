@@ -11,9 +11,14 @@ struct AnalyticsEventsDocTests {
         "alarm_deleted",
         "alarm_duplicated",
         "alarm_permission",
+        "permission_banner_shown",
+        "permission_banner_tapped",
+        "import_landed",
         "alarm_fired",
         "alarm_stopped",
         "alarm_snoozed",
+        "alarm_toggled",
+        "time_suggestion_shown",
         "alarm_orphan_cancelled",
         "test_ring_scheduled",
         "test_ring_stopped",
@@ -39,6 +44,8 @@ struct AnalyticsEventsDocTests {
         "holiday_skip_toggled",
         "holiday_ring_override",
         "custom_sound_imported",
+        "feature_unlock_shown",
+        "feature_unlock_action",
         "video_import_started",
         "video_import_failed",
         "sound_picker_recent_used",
@@ -69,6 +76,16 @@ struct AnalyticsEventsDocTests {
         for name in Self.allEventNames {
             #expect(doc.contains("| `\(name)` |"), "docs/analytics-events.md の表に `\(name)` がありません")
         }
+    }
+
+    @Test
+    func alarmCreatedCarryOverPropertiesAreDocumented() throws {
+        let doc = try String(contentsOf: docURL, encoding: .utf8)
+        let row = try #require(
+            doc.split(separator: "\n").first { $0.hasPrefix("| `alarm_created` |") }
+        )
+        #expect(row.contains("time_suggestion_used"))
+        #expect(row.contains("carried_over"))
     }
 
     @Test

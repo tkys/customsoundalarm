@@ -13,6 +13,16 @@ struct SoundLibrarySections: View {
     var onSelect: ((AlarmSound?) -> Void)?
     /// 取り込んだ音と標準の音の間に置く Section（プレイリスト・#207）
     var middle: AnyView?
+    /// 取り込みで音量を上げた音のファイル名（#224）
+    @Binding var volumeBoostedFileName: String?
+    /// ライブラリではこの画面の行として出す。音を選ぶ画面ではアラーム編集画面側で出す。
+    var showVolumeNoticeRow: Bool = false
+    /// 取り込み画面（切り取り・動画）が閉じたとき（#216）
+    var onImportFlowDismissed: (() -> Void)?
+    /// 共有から保存したあとに一瞬ハイライトする音（#246）
+    var highlightedFileName: String?
+    /// ライブラリから取り込みを保存したとき（#246）
+    var onImportedSound: ((AlarmSound) -> Void)?
 
     @State private var soundStore = SoundStore.shared
     @State private var audioPlayer = AudioPlayer.shared
@@ -80,7 +90,10 @@ struct SoundLibrarySections: View {
                 isImporting: $isImporting,
                 pendingAudio: $pendingAudio,
                 showingVideoImport: $showingVideoImport,
-                errorMessage: $errorMessage
+                errorMessage: $errorMessage,
+                volumeBoostedFileName: $volumeBoostedFileName,
+                onImportFlowDismissed: onImportFlowDismissed,
+                onImportSaved: { sound in onImportedSound?(sound) }
             )
             .alert(String(localized: "rename"), isPresented: Binding(
                 get: { renamingSound != nil },
@@ -145,6 +158,14 @@ struct SoundLibrarySections: View {
                         selectedSound: $selectedSound,
                         onSelect: onSelect
                     )
+                    .id("library.sound.\(sound.fileName)")
+                    // 普段はリスト標準の背景のまま（nil）。取り込んだ直後だけ、標準の背景の上に色を重ねる（#246）
+                    .listRowBackground(
+                        highlightedFileName == sound.fileName
+                            ? Color(.secondarySystemGroupedBackground)
+                                .overlay(Color.actionFillEnd.opacity(0.15))
+                            : nil
+                    )
                     .contextMenu {
                         if !isSelecting {
                             Button {
@@ -159,6 +180,13 @@ struct SoundLibrarySections: View {
                                 Label("delete", systemImage: "trash")
                             }
                         }
+                    }
+                    if showVolumeNoticeRow,
+                       sound.fileName == volumeBoostedFileName {
+                        Label("volume_notice", systemImage: "speaker.wave.3")
+                            .font(.footnote)
+                            .foregroundStyle(Color.textSecondary)
+                            .accessibilityIdentifier("library.volumeNotice")
                     }
                 }
                 .onDelete { indexSet in

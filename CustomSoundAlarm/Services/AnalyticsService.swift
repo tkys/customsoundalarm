@@ -10,6 +10,25 @@ enum PlaylistSource: String, Sendable, CaseIterable, Hashable {
     case soundChoice = "sound_choice"
     /// 「作る1行」から作成（#207）
     case suggestion
+    /// プレイリストの解放シートから作成（#216）
+    case unlock
+}
+
+/// 解放シートで知らせる機能（#216）
+enum UnlockFeature: String, Sendable, CaseIterable {
+    case playlist
+}
+
+/// 解放シートの行動（#216）
+enum UnlockAction: String, Sendable, CaseIterable {
+    case create
+    case later
+}
+
+/// 許可バナーの行動の段階（#239）
+enum PermissionBannerStep: String, Sendable, CaseIterable {
+    case sheetShown = "sheet_shown"
+    case settingsOpened = "settings_opened"
 }
 
 // MARK: - AnalyticsEvent
@@ -30,7 +49,10 @@ enum AnalyticsEvent: Sendable {
         snoozeMinutes: Int,
         backupMinutes: Int = 0,
         soundMode: PlaylistSoundMode = .single,
-        fadeIn: PlaylistFadeIn = .off
+        fadeIn: PlaylistFadeIn = .off,
+        timeSuggestionUsed: Bool = false,
+        carriedOver: Bool = false,
+        context: AlarmEventContext? = nil
     )
 
     /// カスタムサウンドのインポート成功
@@ -40,7 +62,9 @@ enum AnalyticsEvent: Sendable {
         source: SoundImportSource,
         peakDbBucket: String? = nil,
         gainDbBucket: String? = nil,
-        lufsBucket: String? = nil
+        lufsBucket: String? = nil,
+        shareMedia: ShareImportMedia? = nil,
+        volumeNoticeShown: Bool = false
     )
 
     /// サウンドプレビュー再生
@@ -58,15 +82,28 @@ enum AnalyticsEvent: Sendable {
         backupMinutes: Int = 0,
         wasEnabled: Bool = true,
         soundMode: PlaylistSoundMode = .single,
-        fadeIn: PlaylistFadeIn = .off
+        fadeIn: PlaylistFadeIn = .off,
+        context: AlarmEventContext? = nil
     )
 
     /// アラーム削除
     case alarmDeleted
 
+    /// アラーム削除（履歴付き・#241）
+    case alarmDeletedWithContext(context: AlarmEventContext)
+
     /// AlarmKit 権限要求の結果
     /// - status: 安定識別子（authorized / denied / notDetermined / requestFailed / unknown）
     case alarmPermission(status: AlarmPermissionStatus)
+
+    /// アラーム一覧の許可バナーを出した（#230）
+    case permissionBannerShown(status: AlarmPermissionStatus)
+
+    /// アラーム一覧の許可バナーのボタンを押した（#230 / #239）
+    case permissionBannerTapped(status: AlarmPermissionStatus, step: PermissionBannerStep? = nil)
+
+    /// 取り込みを保存したあとの着地先（#246）
+    case importLanded(source: ImportLandingSource, destination: ShareImportDestination)
 
     /// 動画からの音声抽出・変換フローの開始
     /// - source: 取得元（photo_library / file）
@@ -78,6 +115,9 @@ enum AnalyticsEvent: Sendable {
 
     /// アラーム複製
     case alarmDuplicated
+
+    /// アラーム複製（履歴付き・#241）
+    case alarmDuplicatedWithContext(context: AlarmEventContext)
 
     /// サウンドピッカーの「最近使った」セクションから音を選択した
     case soundPickerRecentUsed
@@ -94,17 +134,32 @@ enum AnalyticsEvent: Sendable {
         hour: Int,
         isRepeating: Bool,
         detection: String,
-        soundMode: PlaylistSoundMode = .single
+        soundMode: PlaylistSoundMode = .single,
+        context: AlarmEventContext? = nil
     )
 
     /// アラーム停止（DismissAlarmIntent の buffer 経由）
     /// - hour: 停止時刻の「時」（PII なし・時刻帯のみ）。アプリ起動時にフラッシュされるため
     ///   PostHog のイベント時刻は信頼できない、明示的に送出する
-    case alarmStopped(hour: Int, soundMode: PlaylistSoundMode = .single)
+    case alarmStopped(
+        hour: Int,
+        soundMode: PlaylistSoundMode = .single,
+        context: AlarmEventContext? = nil
+    )
 
     /// アラームスヌーズ（状態遷移 .alerting → .countdown を検知）
     /// - from: "observer" または "reconcile"
-    case alarmSnoozed(from: String)
+    case alarmSnoozed(from: String, context: AlarmEventContext? = nil)
+
+    /// 一覧でアラームのオン・オフを切り替えた（#241）
+    case alarmToggled(
+        enabled: Bool,
+        daysSinceCreated: Int,
+        context: AlarmEventContext? = nil
+    )
+
+    /// 追加画面で時刻の候補を出した（#241・1画面1回）
+    case timeSuggestionShown(suggestions: String)
 
     /// 試しに鳴らすアラームを登録した（#109）
     /// - kind: own（選択中の音）/ backup（最終アラーム用の音）
@@ -168,6 +223,12 @@ enum AnalyticsEvent: Sendable {
 
     /// プレイリストの「作る1行」を出した（#207）
     case playlistSuggestionShown
+
+    /// 機能の解放シートを出した（#216）
+    case featureUnlockShown(feature: UnlockFeature)
+
+    /// 機能の解放シートで選んだ行動（#216）
+    case featureUnlockAction(feature: UnlockFeature, action: UnlockAction)
 
     /// プレイリストが空の状態を見た（#183）
     /// 起動ごと・source ごとに1回だけ送る（PlaylistEmptyViewTracker が制御）。
@@ -304,14 +365,21 @@ enum AnalyticsEvent: Sendable {
         case .soundPreviewPlayed: return "sound_preview_played"
         case .alarmEdited: return "alarm_edited"
         case .alarmDeleted: return "alarm_deleted"
+        case .alarmDeletedWithContext: return "alarm_deleted"
         case .alarmPermission: return "alarm_permission"
+        case .permissionBannerShown: return "permission_banner_shown"
+        case .permissionBannerTapped: return "permission_banner_tapped"
+        case .importLanded: return "import_landed"
         case .videoImportStarted: return "video_import_started"
         case .videoImportFailed: return "video_import_failed"
         case .alarmDuplicated: return "alarm_duplicated"
+        case .alarmDuplicatedWithContext: return "alarm_duplicated"
         case .soundPickerRecentUsed: return "sound_picker_recent_used"
         case .alarmFired: return "alarm_fired"
         case .alarmStopped: return "alarm_stopped"
         case .alarmSnoozed: return "alarm_snoozed"
+        case .alarmToggled: return "alarm_toggled"
+        case .timeSuggestionShown: return "time_suggestion_shown"
         case .testRingScheduled: return "test_ring_scheduled"
         case .testRingStopped: return "test_ring_stopped"
         case .testRingFailed: return "test_ring_failed"
@@ -329,6 +397,8 @@ enum AnalyticsEvent: Sendable {
         case .holidayRingOverride: return "holiday_ring_override"
         case .playlistCreated: return "playlist_created"
         case .playlistSuggestionShown: return "playlist_suggestion_shown"
+        case .featureUnlockShown: return "feature_unlock_shown"
+        case .featureUnlockAction: return "feature_unlock_action"
         case .playlistEmptyViewed: return "playlist_empty_viewed"
         case .playlistEdited: return "playlist_edited"
         case .playlistRenderFailed: return "playlist_render_failed"
@@ -358,6 +428,18 @@ enum AnalyticsEvent: Sendable {
         }
     }
 
+    /// 端末内のアラーム履歴にも残すイベントか（#241）。
+    var recordsAlarmHistory: Bool {
+        switch self {
+        case .alarmCreated, .alarmEdited, .alarmDeleted, .alarmDeletedWithContext,
+             .alarmDuplicated, .alarmDuplicatedWithContext, .alarmFired, .alarmStopped,
+             .alarmSnoozed, .alarmToggled, .timeSuggestionShown:
+            true
+        default:
+            false
+        }
+    }
+
     /// イベントに付与する構造化プロパティ。
     /// ここを単一情報源とすることで、送信内容のテストが SDK 非依存で可能。
     var properties: [String: Any] {
@@ -368,21 +450,39 @@ enum AnalyticsEvent: Sendable {
             snoozeMinutes,
             backupMinutes,
             soundMode,
-            fadeIn
+            fadeIn,
+            timeSuggestionUsed,
+            carriedOver,
+            context
         ):
-            return [
+            var d: [String: Any] = [
                 "has_custom_sound": hasCustomSound,
                 "is_repeating": isRepeating,
                 "snooze_minutes": snoozeMinutes,
                 "backup_minutes": backupMinutes,
                 "sound_mode": soundMode.analyticsValue,
-                "fade_in": fadeIn.analyticsValue
+                "fade_in": fadeIn.analyticsValue,
+                "time_suggestion_used": timeSuggestionUsed,
+                "carried_over": carriedOver
             ]
-        case let .customSoundImported(source, peakDbBucket, gainDbBucket, lufsBucket):
-            var d: [String: Any] = ["source": source.rawValue]
+            if let context { d.merge(context.properties) { _, new in new } }
+            return d
+        case let .customSoundImported(
+            source,
+            peakDbBucket,
+            gainDbBucket,
+            lufsBucket,
+            shareMedia,
+            volumeNoticeShown
+        ):
+            var d: [String: Any] = [
+                "source": source.rawValue,
+                "volume_notice_shown": volumeNoticeShown
+            ]
             if let peakDbBucket { d["peak_db_bucket"] = peakDbBucket }
             if let gainDbBucket { d["gain_db_bucket"] = gainDbBucket }
             if let lufsBucket { d["lufs_bucket"] = lufsBucket }
+            if let shareMedia { d["share_media"] = shareMedia.rawValue }
             return d
         case let .soundPreviewPlayed(source):
             return ["source": source.rawValue]
@@ -393,9 +493,10 @@ enum AnalyticsEvent: Sendable {
             backupMinutes,
             wasEnabled,
             soundMode,
-            fadeIn
+            fadeIn,
+            context
         ):
-            return [
+            var d: [String: Any] = [
                 "has_custom_sound": hasCustomSound,
                 "is_repeating": isRepeating,
                 "snooze_minutes": snoozeMinutes,
@@ -404,33 +505,65 @@ enum AnalyticsEvent: Sendable {
                 "sound_mode": soundMode.analyticsValue,
                 "fade_in": fadeIn.analyticsValue
             ]
+            if let context { d.merge(context.properties) { _, new in new } }
+            return d
         case .alarmDeleted:
             return [:]
+        case let .alarmDeletedWithContext(context):
+            return context.properties
         case let .alarmPermission(status):
             return ["status": status.rawValue]
+        case let .permissionBannerShown(status):
+            return ["status": status.rawValue]
+        case let .permissionBannerTapped(status, step):
+            var d: [String: Any] = ["status": status.rawValue]
+            if let step { d["step"] = step.rawValue }
+            return d
+        case let .importLanded(source, destination):
+            return [
+                "source": source.rawValue,
+                "destination": destination.rawValue
+            ]
         case let .videoImportStarted(source):
             return ["source": source.rawValue]
         case let .videoImportFailed(reason):
             return ["reason": reason.rawValue]
         case .alarmDuplicated:
             return [:]
+        case let .alarmDuplicatedWithContext(context):
+            return context.properties
         case .soundPickerRecentUsed:
             return [:]
-        case let .alarmFired(wasAppForeground, hour, isRepeating, detection, soundMode):
-            return [
+        case let .alarmFired(wasAppForeground, hour, isRepeating, detection, soundMode, context):
+            var d: [String: Any] = [
                 "was_app_foreground": wasAppForeground,
                 "hour": hour,
                 "is_repeating": isRepeating,
                 "detection": detection,
                 "sound_mode": soundMode.analyticsValue
             ]
-        case let .alarmStopped(hour, soundMode):
-            return [
+            if let context { d.merge(context.properties) { _, new in new } }
+            return d
+        case let .alarmStopped(hour, soundMode, context):
+            var d: [String: Any] = [
                 "hour": hour,
                 "sound_mode": soundMode.analyticsValue
             ]
-        case let .alarmSnoozed(from):
-            return ["from": from]
+            if let context { d.merge(context.properties) { _, new in new } }
+            return d
+        case let .alarmSnoozed(from, context):
+            var d: [String: Any] = ["from": from]
+            if let context { d.merge(context.properties) { _, new in new } }
+            return d
+        case let .alarmToggled(enabled, daysSinceCreated, context):
+            var d: [String: Any] = [
+                "enabled": enabled,
+                "days_since_created": daysSinceCreated
+            ]
+            if let context { d.merge(context.properties) { _, new in new } }
+            return d
+        case let .timeSuggestionShown(suggestions):
+            return ["suggestions": suggestions]
         case let .testRingScheduled(kind, hasBackup):
             return [
                 "kind": kind.rawValue,
@@ -470,6 +603,10 @@ enum AnalyticsEvent: Sendable {
             ]
         case .playlistSuggestionShown:
             return [:]
+        case let .featureUnlockShown(feature):
+            return ["feature": feature.rawValue]
+        case let .featureUnlockAction(feature, action):
+            return ["feature": feature.rawValue, "action": action.rawValue]
         case let .alarmSkipSet(scope, days, alarmCount):
             return [
                 "scope": scope.rawValue,
@@ -696,9 +833,17 @@ enum SupportContactMethod: String, Sendable {
 
 // MARK: - SoundImportSource
 
-enum SoundImportSource: String, Sendable {
+enum SoundImportSource: String, Sendable, CaseIterable {
     case video
     case audio
+    /// 共有シートから受け取った音（#222）
+    case share
+}
+
+/// 共有シートで受け取った種類（#222）
+enum ShareImportMedia: String, Sendable, CaseIterable {
+    case audio
+    case video
 }
 
 // MARK: - SoundPreviewSource
@@ -992,6 +1137,13 @@ final class AnalyticsService: @unchecked Sendable {
             payload = merged
         } else {
             payload = event.properties.isEmpty ? nil : event.properties
+        }
+
+        if event.recordsAlarmHistory {
+            AlarmLocalHistoryStore.append(
+                event: event.name,
+                properties: payload ?? event.properties
+            )
         }
 
         lock.lock()

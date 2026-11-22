@@ -1,17 +1,15 @@
-■ Dagen zonder wekker
-• Veeg een wekker naar rechts of houd hem ingedrukt en kies ‘Pauzeren’ om alleen de volgende over te slaan.
-• Herhalende wekkers kunnen datums overslaan die jij kiest.
-• Met de knop rechtsboven pauzeer je alle wekkers een tijdje.
+■ Kies het stuk dat afgaat, direct vanuit Delen
+Deel een video of audiobestand vanuit Foto's of Bestanden en kies My Sound Alarm. Als je de app opent, verschijnt het knipscherm.
 
-■ Playlist met één tik
-Heb je twee of meer eigen geluiden, dan stellen de Bibliotheek en de geluidskeuze een playlist voor die elke keer een ander nummer speelt. Tik erop om hem te maken.
+■ Sneller een wekker maken
+• Nieuwe wekkers nemen je laatste instellingen voor Sluimeren, Afspeellijst en Zachte start over.
+• Boven de tijd zie je 5 en 10 minuten na je laatste wekker. Tik erop om die tijd te kiezen.
 
-■ Instellingen
-Tik op het tandwiel linksboven voor de nachtmodus, uitleg, contact en beoordelingen.
+■ Zien wanneer wekkers niet kunnen afgaan
+Staat de toestemming voor wekkers uit, dan staat bovenaan de lijst "Wekkers gaan niet af". Tik op "Toestaan" om het op te lossen.
 
 ■ Verder
-• Tik in de geluidskeuze op een rij om dat geluid te horen.
-• Kies de bron van een video nu direct op het scherm.
-• Opgelost: een eenmalige wekker met een playlist speelde elke keer hetzelfde nummer.
+• Wordt een zacht geluid op normaal volume gebracht, dan verschijnt eronder een korte melding.
+• Zodra je twee eigen geluiden hebt, laat de app weten dat je een afspeellijst kunt maken.
 
 Bedankt voor het gebruiken van My Sound Alarm.

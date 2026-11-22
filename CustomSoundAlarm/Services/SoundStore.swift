@@ -13,6 +13,9 @@ final class SoundStore {
 
     private(set) var sounds: [AlarmSound] = []
 
+    /// 2つ目の取り込みで、プレイリストの解放を待っている（#216）。
+    private(set) var hasPendingPlaylistUnlock = false
+
     private init() {
         migrateFromStandard()
         load()
@@ -21,12 +24,44 @@ final class SoundStore {
 
     func add(_ sound: AlarmSound) {
         var sound = sound
+        let previousCustomCount = customSoundCount
         // 追加時に秒数を記録する（起動のたびに全ファイルを AVURLAsset で読まない・#68）
         if !sound.isPreset && sound.durationSeconds == nil {
             sound.durationSeconds = AudioConverter.shared.measureDurationSeconds(fileName: sound.fileName)
         }
         sounds.append(sound)
         save()
+
+        if shouldEvaluatePlaylistUnlock(for: sound) {
+            let shouldPend = PlaylistUnlockLogic.shouldPend(
+                previousCustomSoundCount: previousCustomCount,
+                newCustomSoundCount: customSoundCount,
+                playlistCount: PlaylistStore.shared.playlists.count,
+                hasShown: AppGroup.playlistUnlockShown
+            )
+            if shouldPend {
+                hasPendingPlaylistUnlock = true
+            }
+        }
+    }
+
+    /// 解放の待ち状態を消す（表示したとき・#216）。
+    func clearPendingPlaylistUnlock() {
+        hasPendingPlaylistUnlock = false
+    }
+
+    private var customSoundCount: Int {
+        sounds.filter { !$0.isPreset }.count
+    }
+
+    private func shouldEvaluatePlaylistUnlock(for sound: AlarmSound) -> Bool {
+        guard !sound.isPreset else { return false }
+        #if DEBUG
+        // UIテストでは、解放の確認をするテストだけ有効にする（#216）
+        return !AppGroup.isUITestRun || AppGroup.isUITestPlaylistUnlock
+        #else
+        return true
+        #endif
     }
 
     /// 既存のカスタム音源のうち秒数が未記録のものを一度だけ補完して永続化する。
@@ -88,97 +123,16 @@ final class SoundStore {
             ?? String(localized: "sound_missing")
     }
 
-    /// Share Extensionが追加したサウンドを取り込む
-    func importFromStaging() {
-        let staging = AppGroup.stagingDirectory
-        let fm = FileManager.default
-
-        guard let files = try? fm.contentsOfDirectory(at: staging, includingPropertiesForKeys: nil) else {
-            return
-        }
-
-        let jsonFiles = files.filter { $0.pathExtension == "json" }
-        guard !jsonFiles.isEmpty else { return }
-
-        logger.info("Found \(jsonFiles.count) pending imports in staging")
-
-        for file in jsonFiles {
-            guard let data = try? Data(contentsOf: file),
-                  let pending = try? JSONDecoder().decode(PendingSoundImport.self, from: data) else {
-                continue
-            }
-
-            let audioFile = staging.appendingPathComponent(pending.stagedFileName)
-            guard fm.fileExists(atPath: audioFile.path) else { continue }
-
-            // 動画の場合は先に音声抽出、その後CAF変換
-            let videoExtensions: Set<String> = ["mov", "mp4", "m4v", "avi"]
-            let isVideo = videoExtensions.contains(audioFile.pathExtension.lowercased())
-
-            Task {
-                do {
-                    var sourceForCAF = audioFile
-                    var tempAudioURL: URL?
-
-                    if isVideo {
-                        let extracted = try await VideoAudioExtractor.shared.extractAudio(from: audioFile)
-                        sourceForCAF = extracted
-                        tempAudioURL = extracted
-                    }
-
-                    let result = try await AudioConverter.shared.convertToCAF(
-                        from: sourceForCAF,
-                        outputName: UUID().uuidString
-                    )
-                    let cafName = result.fileName
-
-                    // サムネイル生成（#86）: 動画はフレーム、音声はアートワーク
-                    let thumbnailFileName: String?
-                    if isVideo, let frame = await SoundThumbnailStore.shared.bestVideoFrame(from: audioFile) {
-                        thumbnailFileName = SoundThumbnailStore.shared.save(frame)
-                    } else if let artwork = await SoundThumbnailStore.shared.artwork(from: audioFile) {
-                        thumbnailFileName = SoundThumbnailStore.shared.save(artwork)
-                    } else {
-                        thumbnailFileName = nil
-                    }
-
-                    // #93-2a: ShareExtension 由来のファイル名も取り込み時に整形する。
-                    // （ShareExtension ターゲットに依存を追加せず、取り込み側で整える）
-                    let sound = AlarmSound(
-                        name: SoundNameFormatter.sanitizedFileName(pending.displayName),
-                        fileName: cafName,
-                        thumbnailFileName: thumbnailFileName
-                    )
-                    add(sound)
-                    AnalyticsService.shared.capture(.customSoundImported(
-                        source: isVideo ? .video : .audio,
-                        peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
-                        gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
-                        lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore)
-                    ))
-                    try? fm.removeItem(at: file)
-                    try? fm.removeItem(at: audioFile)
-                    if let tempAudioURL {
-                        try? fm.removeItem(at: tempAudioURL)
-                    }
-                    logger.info("Imported from share: \(pending.displayName)")
-                } catch {
-                    logger.error("Import failed for \(pending.displayName): \(error.localizedDescription)")
-                }
-            }
-        }
-    }
-
     /// フォアグラウンド復帰時に再読み込み
     func reload() {
         load()
-        importFromStaging()
     }
 
 #if DEBUG
     /// UIテスト用: カスタム音をクリアして空状態にする（プリセットは残す）
     func resetForUITest() {
         sounds = sounds.filter(\.isPreset)
+        hasPendingPlaylistUnlock = false
         save()
     }
 

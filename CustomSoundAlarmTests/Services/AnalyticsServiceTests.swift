@@ -67,6 +67,13 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.alarmFired(wasAppForeground: true, hour: 8, isRepeating: false, detection: "observer").name == "alarm_fired")
         #expect(AnalyticsEvent.alarmStopped(hour: 8).name == "alarm_stopped")
         #expect(AnalyticsEvent.alarmSnoozed(from: "observer").name == "alarm_snoozed")
+        #expect(AnalyticsEvent.alarmToggled(
+            enabled: true,
+            daysSinceCreated: 2
+        ).name == "alarm_toggled")
+        #expect(AnalyticsEvent.timeSuggestionShown(
+            suggestions: "6:35,6:40"
+        ).name == "time_suggestion_shown")
         // Phase 4（ベッドサイドモード・#68）
         #expect(AnalyticsEvent.bedsideEntered(layout: "digital_large", theme: "white", hour: 23, entry: .settings).name == "bedside_entered")
         #expect(AnalyticsEvent.settingsOpened.name == "settings_opened")
@@ -112,6 +119,10 @@ struct AnalyticsEventTests {
             trackCount: 3, totalSecondsBucket: "5_10min"
         ).name == "playlist_created")
         #expect(AnalyticsEvent.playlistSuggestionShown.name == "playlist_suggestion_shown")
+        #expect(AnalyticsEvent.featureUnlockShown(feature: .playlist).name == "feature_unlock_shown")
+        #expect(AnalyticsEvent.featureUnlockAction(
+            feature: .playlist, action: .later
+        ).name == "feature_unlock_action")
         #expect(AnalyticsEvent.playlistEmptyViewed(
             source: .library,
             hasOwnSounds: false
@@ -137,13 +148,28 @@ struct AnalyticsEventTests {
     func alarmCreatedProperties_whenCustomAndRepeating() {
         let props = AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: true, snoozeMinutes: 9).properties
 
-        #expect(props.count == 6)
+        #expect(props.count == 8)
         #expect(props["has_custom_sound"] as? Bool == true)
         #expect(props["is_repeating"] as? Bool == true)
         #expect(props["snooze_minutes"] as? Int == 9)
         #expect(props["backup_minutes"] as? Int == 0)
         #expect(props["sound_mode"] as? String == "single")
         #expect(props["fade_in"] as? String == "off")
+        #expect(props["time_suggestion_used"] as? Bool == false)
+        #expect(props["carried_over"] as? Bool == false)
+    }
+
+    @Test
+    func alarmCreatedProperties_withCarryOverAndSuggestion() {
+        let props = AnalyticsEvent.alarmCreated(
+            hasCustomSound: false,
+            isRepeating: false,
+            snoozeMinutes: 9,
+            timeSuggestionUsed: true,
+            carriedOver: true
+        ).properties
+        #expect(props["time_suggestion_used"] as? Bool == true)
+        #expect(props["carried_over"] as? Bool == true)
     }
 
     @Test
@@ -174,16 +200,28 @@ struct AnalyticsEventTests {
     func customSoundImportedProperties_videoSource() {
         let props = AnalyticsEvent.customSoundImported(source: .video).properties
 
-        #expect(props.count == 1)
+        #expect(props.count == 2)
         #expect(props["source"] as? String == "video")
+        #expect(props["volume_notice_shown"] as? Bool == false)
     }
 
     @Test
     func customSoundImportedProperties_audioSource() {
         let props = AnalyticsEvent.customSoundImported(source: .audio).properties
 
-        #expect(props.count == 1)
+        #expect(props.count == 2)
         #expect(props["source"] as? String == "audio")
+        #expect(props["volume_notice_shown"] as? Bool == false)
+    }
+
+    @Test
+    func customSoundImportedProperties_shareMedia() {
+        let props = AnalyticsEvent.customSoundImported(
+            source: .share,
+            shareMedia: .video
+        ).properties
+        #expect(props["source"] as? String == "share")
+        #expect(props["share_media"] as? String == "video")
     }
 
     @Test
@@ -191,6 +229,129 @@ struct AnalyticsEventTests {
         // PostHog 側のダッシュボード定義と一致することが前提
         #expect(SoundImportSource.video.rawValue == "video")
         #expect(SoundImportSource.audio.rawValue == "audio")
+        #expect(SoundImportSource.share.rawValue == "share")
+    }
+
+    // MARK: feature_unlock (#216)
+
+    @Test
+    func featureUnlockProperties_areTyped() {
+        let shown = AnalyticsEvent.featureUnlockShown(feature: .playlist).properties
+        #expect(shown.count == 1)
+        #expect(shown["feature"] as? String == "playlist")
+
+        let created = AnalyticsEvent.featureUnlockAction(
+            feature: .playlist, action: .create
+        ).properties
+        #expect(created.count == 2)
+        #expect(created["feature"] as? String == "playlist")
+        #expect(created["action"] as? String == "create")
+
+        let later = AnalyticsEvent.featureUnlockAction(
+            feature: .playlist, action: .later
+        ).properties
+        #expect(later["action"] as? String == "later")
+    }
+
+    @Test
+    func playlistCreatedSourceIncludesUnlock() {
+        #expect(PlaylistSource.unlock.rawValue == "unlock")
+        #expect(PlaylistSource.allCases.contains(.unlock))
+    }
+
+    // MARK: permission_banner (#230)
+
+    @Test
+    func permissionBannerProperties_areTyped() {
+        let shown = AnalyticsEvent.permissionBannerShown(status: .denied).properties
+        #expect(shown.count == 1)
+        #expect(shown["status"] as? String == "denied")
+
+        let tapped = AnalyticsEvent.permissionBannerTapped(
+            status: .notDetermined
+        ).properties
+        #expect(tapped["status"] as? String == "not_determined")
+        #expect(tapped["step"] == nil)
+
+        let sheet = AnalyticsEvent.permissionBannerTapped(
+            status: .denied,
+            step: .sheetShown
+        ).properties
+        #expect(sheet["step"] as? String == "sheet_shown")
+
+        let settings = AnalyticsEvent.permissionBannerTapped(
+            status: .denied,
+            step: .settingsOpened
+        ).properties
+        #expect(settings["step"] as? String == "settings_opened")
+    }
+
+    // MARK: share import landing (#246)
+
+    @Test
+    func shareImportLandedProperties() {
+        let props = AnalyticsEvent.importLanded(
+            source: .share,
+            destination: .library
+        ).properties
+        #expect(props.count == 2)
+        #expect(props["source"] as? String == "share")
+        #expect(props["destination"] as? String == "library")
+
+        let library = AnalyticsEvent.importLanded(
+            source: .library,
+            destination: .addAlarm
+        ).properties
+        #expect(library["source"] as? String == "library")
+        #expect(library["destination"] as? String == "add_alarm")
+    }
+
+    // MARK: alarm history (#241)
+
+    @Test
+    func alarmToggledMergesCommonHistory() {
+        let context = AlarmEventContext(
+            alarmUID: "uid",
+            alarmTime: "07:30",
+            repeatDays: "1,2",
+            localTime: "10:05",
+            localWeekday: 4,
+            tzOffsetMin: 540,
+            list: AlarmListSnapshot(onTimes: ["07:30"], offTimes: [])
+        )
+        let props = AnalyticsEvent.alarmToggled(
+            enabled: true,
+            daysSinceCreated: 3,
+            context: context
+        ).properties
+        #expect(props["enabled"] as? Bool == true)
+        #expect(props["days_since_created"] as? Int == 3)
+        #expect(props["alarm_uid"] as? String == "uid")
+        #expect(props["list_on_count"] as? Int == 1)
+        #expect(props["history_schema"] as? Int == 1)
+    }
+
+    @Test
+    func alarmCreatedMergesSuggestionAndSaveTime() {
+        var context = AlarmEventContext(
+            alarmUID: "uid",
+            alarmTime: "07:30",
+            repeatDays: "",
+            localTime: "10:05",
+            localWeekday: 4,
+            tzOffsetMin: 540
+        )
+        context.suggestionIndex = 1
+        context.secondsToSave = 12
+        let props = AnalyticsEvent.alarmCreated(
+            hasCustomSound: false,
+            isRepeating: false,
+            snoozeMinutes: 9,
+            context: context
+        ).properties
+        #expect(props["suggestion_index"] as? Int == 1)
+        #expect(props["seconds_to_save"] as? Int == 12)
+        #expect(props["alarm_uid"] as? String == "uid")
     }
 
     // MARK: test_ring_scheduled / test_ring_stopped (#109)
@@ -328,6 +489,15 @@ struct AnalyticsEventTests {
 
         #expect(props.count == 4)
         #expect(props["output_lufs_bucket"] as? String == ">=-9")
+    }
+
+    @Test
+    func customSoundImportedProperties_volumeNotice() {
+        let props = AnalyticsEvent.customSoundImported(
+            source: .audio,
+            volumeNoticeShown: true
+        ).properties
+        #expect(props["volume_notice_shown"] as? Bool == true)
     }
 
     @Test
@@ -510,12 +680,16 @@ struct AnalyticsEventTests {
 
     @Test
     func alarmEditedProperties_matchAlarmCreatedShape() {
-        // alarm_created と共通の props + was_enabled（#124）
+        // alarm_created と共通の props + was_enabled（#124）。
+        // 時刻の候補と引き継ぎは新規作成だけの計測（#206）。
         let edited = AnalyticsEvent.alarmEdited(hasCustomSound: true, isRepeating: false, snoozeMinutes: 9).properties
         let created = AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: false, snoozeMinutes: 9).properties
 
         #expect(edited.count == 7)
-        #expect(Set(edited.keys).subtracting(["was_enabled"]) == Set(created.keys))
+        #expect(
+            Set(edited.keys).subtracting(["was_enabled"])
+                == Set(created.keys).subtracting(["time_suggestion_used", "carried_over"])
+        )
         #expect(edited["has_custom_sound"] as? Bool == true)
         #expect(edited["is_repeating"] as? Bool == false)
         #expect(edited["snooze_minutes"] as? Int == 9)

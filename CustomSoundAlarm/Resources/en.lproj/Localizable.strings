@@ -383,3 +383,13 @@
 "skip_result_footer" = "Only holidays that fall on a ringing weekday are shown.";
 "skip_row_toast_skipped_fmt" = "%@ won't ring";
 "skip_row_toast_undone_fmt" = "%@ will ring";
+"playlist_unlock_title" = "Playlists unlocked";
+"playlist_unlock_create" = "Make a playlist with these two";
+"playlist_unlock_later" = "Not now";
+"volume_notice" = "Made louder so it's easy to hear.";
+"permission_banner_title" = "Alarm permission is off";
+"permission_banner_allow" = "Turn On";
+"permission_settings_hint" = "Turn on “Alarms”";
+"permission_settings_open" = "Open Settings";
+"received_title" = "Received";
+"received_detail" = "Open My Sound Alarm to choose the part to ring.";

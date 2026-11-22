@@ -3,3 +3,5 @@
 "no_audio_found" = "対応する音声ファイルが見つかりませんでした";
 "file_load_failed" = "ファイルの読み込みに失敗しました";
 "saved_format" = "「%@」を保存しました";
+"received_title" = "受け取りました";
+"received_detail" = "My Sound Alarm を開くと、鳴らす部分を選べます";

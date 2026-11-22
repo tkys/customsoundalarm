@@ -177,6 +177,15 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: 小さい音声の取り込み（#224）
+    static var isUITestQuietCrop: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-quiet-crop")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: 取り込んだ音が2つある状態（#207 の提案行）
     static var isUITestSeedSuggestion: Bool {
     #if DEBUG
@@ -277,10 +286,107 @@ enum AppGroup {
 #endif
     }
 
+    /// UIテスト用: 共有シートの受け取りを1件 staging に置く（DEBUGのみ・#222）
+    static var isUITestSeedShareImportAudio: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-share-import-audio")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: staging を消さずに起動する（DEBUGのみ・#222）
+    static var isUITestKeepShareImport: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-keep-share-import")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: オンのアラームを入れる（DEBUGのみ・#206 / #230）。
+    /// 時刻の候補と許可バナーの確認に使う。実際の登録は `isUITestSkipAlarmSync` で止める。
+    static var isUITestSeedEnabledAlarms: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-enabled-alarms")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: AlarmKit への登録を止める（DEBUGのみ・#206 / #230）
+    static var isUITestSkipAlarmSync: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-enabled-alarms")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: ライブラリ取り込みの着地を再現する（DEBUGのみ・#246）
+    static var isUITestLibraryImportLanding: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-library-import-landing")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: アラームを空にする（DEBUGのみ・#246）
+    static var isUITestClearAlarms: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-clear-alarms")
+    #else
+        false
+    #endif
+    }
+
+    /// スクリーンショット用: 共有直後の受け取り画面を出す（DEBUGのみ・#239）
+    static var isUITestShowShareReceipt: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-show-share-receipt")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: 同梱のプリセット音で波形クロップ画面を直接開く（DEBUGのみ・#149）
     static var isUITestOpenWaveformCrop: Bool {
     #if DEBUG
         CommandLine.arguments.contains("-uitest-open-waveform-crop")
+    #else
+        false
+    #endif
+    }
+
+    /// プレイリストの解放を一度でも出したか（#216）。
+    static var playlistUnlockShown: Bool {
+        get { userDefaults.bool(forKey: "playlistUnlockShown") }
+        set { userDefaults.set(newValue, forKey: "playlistUnlockShown") }
+    }
+
+    /// UIテスト用: プレイリストの解放条件を有効にする（DEBUGのみ・#216）
+    static var isUITestPlaylistUnlock: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-playlist-unlock")
+    #else
+        false
+    #endif
+    }
+
+    /// スクリーンショット用: 解放シートを直接出す（DEBUGのみ・#216）
+    static var isUITestShowPlaylistUnlock: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-show-unlock")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: 取り込んだ音が1つある状態にする（DEBUGのみ・#216）
+    static var isUITestSeedOneSound: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-one-sound")
     #else
         false
     #endif

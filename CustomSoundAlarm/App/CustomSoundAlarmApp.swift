@@ -20,6 +20,61 @@ struct CustomSoundAlarmApp: App {
                     hasLaunched = true
 
 #if DEBUG
+                    if AppGroup.isUITestClearAlarms {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                    }
+
+                    // UIテスト用: 共有の staging を分離する（#222）
+                    if AppGroup.isUITestRun
+                        && !AppGroup.isUITestSeedShareImportAudio
+                        && !AppGroup.isUITestKeepShareImport {
+                        let staging = AppGroup.stagingDirectory
+                        if let files = try? FileManager.default.contentsOfDirectory(
+                            at: staging,
+                            includingPropertiesForKeys: nil
+                        ) {
+                            for file in files {
+                                try? FileManager.default.removeItem(at: file)
+                            }
+                        }
+                    }
+                    if AppGroup.isUITestSeedShareImportAudio {
+                        AppGroup.hasCompletedOnboarding = true
+                        let staging = AppGroup.stagingDirectory
+                        if let files = try? FileManager.default.contentsOfDirectory(
+                            at: staging,
+                            includingPropertiesForKeys: nil
+                        ) {
+                            for file in files {
+                                try? FileManager.default.removeItem(at: file)
+                            }
+                        }
+                        if let source = Bundle.main.url(
+                            forResource: "PresetMarimba",
+                            withExtension: "caf"
+                        ) {
+                            let stagedName = "SharedTest.caf"
+                            try? FileManager.default.copyItem(
+                                at: source,
+                                to: staging.appendingPathComponent(stagedName)
+                            )
+                            let pending = PendingSoundImport(
+                                displayName: "Shared Sound",
+                                stagedFileName: stagedName,
+                                mediaKind: "audio"
+                            )
+                            if let data = try? JSONEncoder().encode(pending) {
+                                try? data.write(to: staging.appendingPathComponent(
+                                    "SharedTest.json"
+                                ))
+                            }
+                        }
+                    }
+                    // UIテスト間で前回の設定を持ち越さない（#206）
+                    if AppGroup.isUITestRun {
+                        AlarmCarryOverStore.clear()
+                    }
                     // UIテスト用: fresh onboarding で起動されたら永続化をクリアして空状態にする
                     if AppGroup.isUITestFreshOnboarding {
                         AppGroup.hasCompletedOnboarding = false
@@ -280,7 +335,48 @@ struct CustomSoundAlarmApp: App {
                     if AppGroup.isUITestOpenLibrary {
                         AppGroup.hasCompletedOnboarding = true
                     }
+                    // UIテスト用: 取り込んだ音が1つある状態（#216）
+                    if AppGroup.isUITestSeedOneSound {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        PlaylistStore.shared.resetForUITest()
+                        AppGroup.dismissedPresetFileNames = []
+                        SoundStore.shared.resetForUITest()
+                        SoundStore.shared.resetPresetNamesForUITest()
+                        AppGroup.playlistUnlockShown = false
+
+                        let fileName = "UnlockFirst.caf"
+                        let url = AudioConverter.shared.soundsDirectory
+                            .appendingPathComponent(fileName)
+                        try? FileManager.default.removeItem(at: url)
+                        if let source = Bundle.main.url(
+                            forResource: "PresetBell",
+                            withExtension: "caf"
+                        ) {
+                            try? FileManager.default.copyItem(at: source, to: url)
+                            SoundStore.shared.add(AlarmSound(
+                                name: "First Sound",
+                                fileName: fileName,
+                                isPreset: false
+                            ))
+                        }
+                    }
+
                     // UIテスト用: アラーム一覧を時刻順で検証するためのシード
+                    if AppGroup.isUITestSeedEnabledAlarms {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        // 時刻の候補（#206）: 一番遅い 6:30 から +5/+10 分が出る。
+                        for (hour, minute) in [(6, 24), (6, 30)] {
+                            AlarmStore.shared.add(AlarmEntry(
+                                hour: hour,
+                                minute: minute,
+                                isEnabled: true,
+                                label: String(localized: "alarm_placeholder")
+                            ))
+                        }
+                    }
+
                     if AppGroup.isUITestSeedAlarms {
                         AppGroup.hasCompletedOnboarding = true
                         AlarmStore.shared.resetForUITest()

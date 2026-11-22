@@ -452,4 +452,89 @@ final class AddAlarmRedesignUITests: XCTestCase {
             )
         }
     }
+
+    /// #206: 時刻の候補を押すと、その時刻で保存される。
+    func testTimeSuggestionSetsSavedTime() {
+        app.launchArguments = [
+            "-uitest-seed-enabled-alarms",
+            "-uitest-open-add-alarm",
+            "-uitest-disable-new-alarm"
+        ]
+        app.launch()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15),
+            app.debugDescription
+        )
+
+        let suggestion = findElement("addAlarm.timeSuggestion.6_35")
+        XCTAssertTrue(
+            suggestion.waitForExistence(timeout: 10),
+            "time suggestion should appear: \(app.debugDescription)"
+        )
+        XCTAssertTrue(
+            findElement("addAlarm.timeSuggestion.6_40").exists,
+            "both suggestions should appear: \(app.debugDescription)"
+        )
+
+        suggestion.tap()
+        app.buttons["addAlarm.save"].tap()
+
+        XCTAssertTrue(
+            app.staticTexts["06:35"].waitForExistence(timeout: 15),
+            "saved alarm should use the suggested time: \(app.debugDescription)"
+        )
+    }
+
+    /// #224: 小さい音声を取り込んだときだけ、音量を上げた1行を出す。
+    func testVolumeNoticeOnlyForQuietImport() {
+        app.launchArguments = [
+            "-uitest-open-add-alarm",
+            "-uitest-open-waveform-crop",
+            "-uitest-quiet-crop"
+        ]
+        app.launch()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
+
+        let crop = findElement("audioCrop.cropAndSave")
+        XCTAssertTrue(crop.waitForExistence(timeout: 20), app.debugDescription)
+        crop.tap()
+
+        let notice = findElement("addAlarm.volumeNotice")
+        XCTAssertTrue(
+            notice.waitForExistence(timeout: 15),
+            "quiet import should show the volume notice: \(app.debugDescription)"
+        )
+
+        // 別の音を選ぶと、その音の話ではないので1行は消える（#224 レビュー）
+        _ = openSoundChoice()
+        let standard = app.buttons["library.standardSounds"]
+        XCTAssertTrue(standard.waitForExistence(timeout: 10))
+        standard.tap()
+        let preset = app.buttons["library.preset.PresetMarimba.caf"]
+        XCTAssertTrue(preset.waitForExistence(timeout: 10))
+        preset.tap()
+        closeStandardSoundsSheet()
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10))
+        XCTAssertFalse(
+            findElement("addAlarm.volumeNotice").waitForExistence(timeout: 3),
+            "notice should disappear when another sound is selected"
+        )
+
+        app.terminate()
+        app.launchArguments = [
+            "-uitest-open-add-alarm",
+            "-uitest-open-waveform-crop"
+        ]
+        app.launch()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
+        let normalCrop = findElement("audioCrop.cropAndSave")
+        XCTAssertTrue(normalCrop.waitForExistence(timeout: 20), app.debugDescription)
+        normalCrop.tap()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15))
+        XCTAssertFalse(
+            findElement("addAlarm.volumeNotice").waitForExistence(timeout: 3),
+            "normal import should not show the volume notice"
+        )
+    }
 }

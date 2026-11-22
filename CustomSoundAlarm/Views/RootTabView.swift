@@ -13,6 +13,15 @@ struct RootTabView: View {
         #endif
         return .alarms
     }()
+    @State private var unlock = PlaylistUnlockCoordinator.shared
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    /// 解放シートの表示（coordinator の変更をローカル状態に写す・#216）
+    @State private var showingUnlock = false
+    /// 解放から作ったプレイリストの詳細（#216）
+    @State private var unlockPlaylist: Playlist?
+    @State private var shareLanding = ShareImportLanding.shared
+    /// スクリーンショット用（DEBUGのみ・#239）
+    @State private var showingShareReceipt = false
 
     var body: some View {
         TabView(selection: $selection) {
@@ -33,6 +42,54 @@ struct RootTabView: View {
         .tint(Color.actionText)
         // スクリーンショット撮影用の外観固定（DEBUGのみ・#173）。
         .preferredColorScheme(uiTestColorScheme)
+        .task {
+            #if DEBUG
+            if AppGroup.isUITestShowShareReceipt {
+                showingShareReceipt = true
+            }
+            if AppGroup.isUITestShowPlaylistUnlock {
+                try? await Task.sleep(for: .milliseconds(500))
+                unlock.presentForUITest()
+            }
+            #endif
+        }
+        .onChange(of: unlock.isPresented) { _, isPresented in
+            showingUnlock = isPresented
+        }
+        .onChange(of: shareLanding.librarySoundFileName) { _, fileName in
+            if fileName != nil { selection = .library }
+        }
+        .onChange(of: shareLanding.addAlarmSound) { _, sound in
+            if sound != nil { selection = .alarms }
+        }
+        .sheet(isPresented: $showingUnlock, onDismiss: {
+            if unlock.isPresented {
+                unlock.isPresented = false
+            }
+            unlock.handleDismiss()
+            if let id = unlock.takeCreatedPlaylistID(),
+               let playlist = PlaylistStore.shared.playlist(id: id) {
+                unlockPlaylist = playlist
+            }
+        }) {
+            PlaylistUnlockSheet(
+                onCreate: { unlock.create() },
+                onLater: { unlock.later() }
+            )
+            .presentationDetents(
+                dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium]
+            )
+        }
+        .sheet(item: $unlockPlaylist) { playlist in
+            NavigationStack {
+                PlaylistEditorView(playlist: playlist, onSave: { _ in })
+            }
+        }
+        #if DEBUG
+        .fullScreenCover(isPresented: $showingShareReceipt) {
+            ShareReceiptPreviewView()
+        }
+        #endif
     }
 
     private var uiTestColorScheme: ColorScheme? {

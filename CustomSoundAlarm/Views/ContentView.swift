@@ -7,6 +7,12 @@ import Accessibility
 struct AddAlarmRequest: Identifiable {
     let id = UUID()
     let source: OnboardingSource?
+    let initialSound: AlarmSound?
+
+    init(source: OnboardingSource?, initialSound: AlarmSound? = nil) {
+        self.source = source
+        self.initialSound = initialSound
+    }
 }
 
 /// メイン画面：アラーム一覧
@@ -22,14 +28,35 @@ struct ContentView: View {
     @State private var addAlarmRequest: AddAlarmRequest?
     /// アップデート案内（#116）
     @State private var updateChecker = UpdateChecker.shared
+    /// 共有シートから受け取った音の切り取り（#222）
+    @State private var shareImportItem: ShareImportItem?
+    @State private var shareImportSelectedSound: AlarmSound?
+    @State private var shareImportDidFinish = false
+    @State private var shareLanding = ShareImportLanding.shared
+    /// 共有経路の音量の1行（#224 / #222）
+    @State private var shareImportVolumeBoostedFileName: String?
+    /// プレイリストの解放（#216）
+    @State private var unlock = PlaylistUnlockCoordinator.shared
+    /// 許可状態（#230）
+    @State private var scheduler = AlarmScheduler.shared
+    /// 追加・編集画面が実際に開いているか（sheet の item より確実・#216）
+    @State private var addScreenVisible = false
+    @State private var editScreenVisible = false
     /// すべてのアラームを休む（#197 画面作り直し）
     @State private var showingSkipAll = false
     @State private var globalSkip: GlobalSkip?
+    /// 許可バナーの表示済み計測（#230）
+    @State private var reportedPermissionBannerStatus: AlarmPermissionStatus?
+    /// 設定アプリへ移る前のシート（#239）
+    @State private var showingPermissionSettings = false
+    /// 許可がオンになったときの触覚（#239）
+    @State private var permissionFeedbackTrigger = 0
     @State private var skipToast: String?
     @State private var skipToastTask: Task<Void, Never>?
     @ScaledMetric(relativeTo: .body) private var skipActionIconSize: CGFloat = 17
 
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
     @Environment(\.requestReview) private var requestReview
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -67,6 +94,7 @@ struct ContentView: View {
                         .accessibilityIdentifier("alarmList.skipAll")
                     }
                     Button {
+                        addScreenVisible = true
                         addAlarmRequest = AddAlarmRequest(source: nil)
                     } label: {
                         Image(systemName: "plus")
@@ -79,11 +107,16 @@ struct ContentView: View {
                     refreshGlobalSkip()
                     syncSkipTimeZoneIfNeeded()
                     evaluateOnboarding()
+                    presentNextShareImportIfNeeded()
+                    scheduler.refreshPermissionStatus()
+                    reportPermissionBannerIfNeeded()
                     #if DEBUG
                     if AppGroup.isUITestOpenAddAlarm {
+                        addScreenVisible = true
                         addAlarmRequest = AddAlarmRequest(source: nil)
                     } else if AppGroup.isUITestOpenEditAlarm,
                               let alarm = alarmStore.alarms.first {
+                        editScreenVisible = true
                         selectedAlarm = alarm
                     }
                     #endif
@@ -98,6 +131,7 @@ struct ContentView: View {
                         AppGroup.hasCompletedOnboarding = true
                         withAnimation { showingOnboarding = false }
                         if source.opensAddScreen {
+                            addScreenVisible = true
                             addAlarmRequest = AddAlarmRequest(source: source)
                         }
                         Task {
@@ -109,14 +143,73 @@ struct ContentView: View {
                     .zIndex(1)
                 }
             }
-            .sheet(item: $addAlarmRequest) { request in
-                AlarmDetailView(mode: .add, initialImport: request.source)
+            .sheet(item: $addAlarmRequest, onDismiss: {
+                addScreenVisible = false
+                addAlarmRequest = nil
+                schedulePlaylistUnlockAttempt()
+            }) { request in
+                AlarmDetailView(
+                    mode: .add,
+                    initialImport: request.source,
+                    initialSound: request.initialSound,
+                    onClose: {
+                        addScreenVisible = false
+                        addAlarmRequest = nil
+                        schedulePlaylistUnlockAttempt()
+                    }
+                )
+                    .onDisappear {
+                        addScreenVisible = false
+                        addAlarmRequest = nil
+                        schedulePlaylistUnlockAttempt()
+                    }
             }
-            .sheet(item: $selectedAlarm) { alarm in
-                AlarmDetailView(mode: .edit(alarm))
+            .sheet(item: $selectedAlarm, onDismiss: {
+                editScreenVisible = false
+                selectedAlarm = nil
+                schedulePlaylistUnlockAttempt()
+            }) { alarm in
+                AlarmDetailView(
+                    mode: .edit(alarm),
+                    onClose: {
+                        editScreenVisible = false
+                        selectedAlarm = nil
+                        schedulePlaylistUnlockAttempt()
+                    }
+                )
+                    .onDisappear {
+                        editScreenVisible = false
+                        selectedAlarm = nil
+                        schedulePlaylistUnlockAttempt()
+                    }
             }
-            .sheet(isPresented: $showingSettings) {
+            .sheet(isPresented: $showingSettings, onDismiss: {
+                schedulePlaylistUnlockAttempt()
+            }) {
                 SettingsView()
+            }
+            .sheet(item: $shareImportItem, onDismiss: {
+                let finished = shareImportDidFinish
+                let savedSound = shareImportSelectedSound
+                shareImportItem = nil
+                shareImportSelectedSound = nil
+                shareImportDidFinish = false
+                if finished {
+                    Task {
+                        try? await Task.sleep(for: .milliseconds(400))
+                        if !ShareImportQueue.pendingItems().isEmpty {
+                            // 複数を共有したときは、1つずつ順に開く（#222）
+                            presentNextShareImportIfNeeded()
+                        } else if let savedSound {
+                            landShareImport(savedSound)
+                        }
+                    }
+                }
+            }) { item in
+                NavigationStack {
+                    shareImportContent(item)
+                }
+                .interactiveDismissDisabled()
             }
             .fullScreenCover(item: requiredPromptBinding) { prompt in
                 UpdatePromptView(
@@ -133,6 +226,21 @@ struct ContentView: View {
                 )
                 .presentationDetents([.medium])
             }
+            .sheet(isPresented: $showingPermissionSettings) {
+                PermissionSettingsSheet {
+                    AnalyticsService.shared.capture(.permissionBannerTapped(
+                        status: .denied,
+                        step: .settingsOpened
+                    ))
+                    showingPermissionSettings = false
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        openURL(url)
+                    }
+                }
+                .presentationDetents(
+                    dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium]
+                )
+            }
         }
         .onChange(of: scenePhase) { _, phase in
             // ユーザーが自ら落ち着いてアプリを前面に出したタイミングで、
@@ -141,6 +249,14 @@ struct ContentView: View {
             guard phase == .active else { return }
             syncSkipTimeZoneIfNeeded()
             refreshGlobalSkip()
+            presentNextShareImportIfNeeded()
+            let wasAuthorized = scheduler.permissionStatus == .authorized
+            scheduler.refreshPermissionStatus()
+            if !wasAuthorized, scheduler.permissionStatus == .authorized {
+                scheduler.syncAlarms(alarmStore.alarms, trigger: .foreground)
+                permissionFeedbackTrigger += 1
+            }
+            reportPermissionBannerIfNeeded()
             ReviewRequestManager.shared.requestReviewIfAppropriate {
                 requestReview()
             }
@@ -158,6 +274,142 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: skipToast)
+        .sensoryFeedback(.success, trigger: permissionFeedbackTrigger)
+        .onChange(of: soundStore.hasPendingPlaylistUnlock) { _, hasPending in
+            if hasPending { schedulePlaylistUnlockAttempt() }
+        }
+        .onChange(of: addScreenVisible) { _, isVisible in
+            if !isVisible { schedulePlaylistUnlockAttempt() }
+        }
+        .onChange(of: editScreenVisible) { _, isVisible in
+            if !isVisible { schedulePlaylistUnlockAttempt() }
+        }
+        .onChange(of: showingSettings) { _, isShowing in
+            if !isShowing {
+                schedulePlaylistUnlockAttempt()
+                presentNextShareImportIfNeeded()
+            }
+        }
+        .onChange(of: scheduler.isAlarmRinging) { _, isRinging in
+            if !isRinging {
+                schedulePlaylistUnlockAttempt()
+                presentNextShareImportIfNeeded()
+            }
+        }
+        .onChange(of: showingOnboarding) { _, isShowing in
+            if !isShowing { presentNextShareImportIfNeeded() }
+        }
+        .onChange(of: addAlarmRequest == nil) { _, isClosed in
+            if isClosed { presentNextShareImportIfNeeded() }
+        }
+        .onChange(of: selectedAlarm == nil) { _, isClosed in
+            if isClosed { presentNextShareImportIfNeeded() }
+        }
+        .onChange(of: updateChecker.prompt == nil) { _, isClosed in
+            if isClosed { presentNextShareImportIfNeeded() }
+        }
+        .onChange(of: shareLanding.addAlarmSound) { _, sound in
+            guard let sound else { return }
+            Task {
+                try? await Task.sleep(for: .milliseconds(300))
+                addScreenVisible = true
+                addAlarmRequest = AddAlarmRequest(source: nil, initialSound: sound)
+                shareLanding.addAlarmSound = nil
+            }
+        }
+    }
+
+    // MARK: - Shared Imports (#222)
+
+    @ViewBuilder
+    private func shareImportContent(_ item: ShareImportItem) -> some View {
+        switch item.mediaKind {
+        case .audio:
+            AudioCropView(
+                source: PendingAudioImport(url: item.mediaURL, name: item.displayName),
+                selectedSound: $shareImportSelectedSound,
+                customSoundSource: .share,
+                shareMedia: .audio,
+                onSaved: {
+                    ShareImportQueue.complete(item)
+                    shareImportDidFinish = true
+                },
+                onUserClosed: {
+                    ShareImportQueue.complete(item)
+                    shareImportDidFinish = true
+                },
+                deletesSourceOnDiscard: false,
+                volumeBoostedFileName: $shareImportVolumeBoostedFileName
+            )
+        case .video:
+            VideoImportFlow(
+                selectedSound: $shareImportSelectedSound,
+                initialFileURL: item.mediaURL,
+                initialSoundName: item.displayName,
+                customSoundSource: .share,
+                shareMedia: .video,
+                onSaved: {
+                    ShareImportQueue.complete(item)
+                    shareImportDidFinish = true
+                },
+                onUserClosed: {
+                    ShareImportQueue.complete(item)
+                    shareImportDidFinish = true
+                },
+                volumeBoostedFileName: $shareImportVolumeBoostedFileName
+            )
+        }
+    }
+
+    /// 最後の1件を保存したあとの着地先（#246）。
+    private func landShareImport(_ sound: AlarmSound) {
+        let destination: ShareImportDestination
+        if alarmStore.alarms.isEmpty {
+            destination = .addAlarm
+            addScreenVisible = true
+            addAlarmRequest = AddAlarmRequest(source: nil, initialSound: sound)
+        } else {
+            destination = .library
+            ShareImportLanding.shared.librarySoundFileName = sound.fileName
+        }
+        AnalyticsService.shared.capture(.importLanded(
+            source: .share,
+            destination: destination
+        ))
+    }
+
+    /// 共有された音の切り取り画面を、落ち着いているときだけ1件ずつ開く（#222）。
+    private func presentNextShareImportIfNeeded() {
+        guard shareImportItem == nil,
+              addAlarmRequest == nil,
+              selectedAlarm == nil,
+              !showingSettings,
+              !showingOnboarding,
+              updateChecker.prompt == nil,
+              !scheduler.isAlarmRinging else { return }
+        guard let item = ShareImportQueue.pendingItems().first else { return }
+        shareImportDidFinish = false
+        shareImportItem = item
+    }
+
+    /// 追加・編集・設定などのシートが閉じてから解放シートを出す（#216）。
+    private func schedulePlaylistUnlockAttempt() {
+        Task {
+            try? await Task.sleep(for: .milliseconds(350))
+            attemptPlaylistUnlock()
+        }
+    }
+
+    private func attemptPlaylistUnlock() {
+        guard !addScreenVisible,
+              !editScreenVisible,
+              !showingSettings,
+              !showingOnboarding,
+              updateChecker.prompt == nil else { return }
+        _ = unlock.presentIfNeeded(
+            isRinging: scheduler.isAlarmRinging,
+            isNightMode: BedsideModeTracker.shared.isActive
+        )
     }
 
     // MARK: - Update prompt bindings (#116)
@@ -226,6 +478,7 @@ struct ContentView: View {
             Text("empty_description")
         } actions: {
             Button {
+                addScreenVisible = true
                 addAlarmRequest = AddAlarmRequest(source: nil)
             } label: {
                 Text("add_alarm")
@@ -271,6 +524,9 @@ struct ContentView: View {
     private var alarmList: some View {
         let displayed = AlarmListOrdering.sortedForDisplay(alarmStore.alarms)
         return List {
+            if let permissionStatus = permissionBannerStatus {
+                permissionBannerRow(permissionStatus)
+            }
             if let skip = activeGlobalSkip {
                 GlobalSkipNoticeRow(
                     skip: skip,
@@ -293,6 +549,7 @@ struct ContentView: View {
                         refreshGlobalSkip()
                     },
                     onTap: {
+                        editScreenVisible = true
                         selectedAlarm = alarm
                     }
                 )
@@ -330,6 +587,96 @@ struct ContentView: View {
         .sheet(isPresented: $showingSkipAll, onDismiss: refreshGlobalSkip) {
             SkipAllSheet(entries: alarmStore.alarms.filter(\.isEnabled))
         }
+    }
+
+    // MARK: - Permission Banner (#230)
+
+    /// 許可が拒否済み／未確認で、オンのアラームがあるときだけ出す。
+    private var permissionBannerStatus: AlarmPermissionStatus? {
+        let enabledCount = alarmStore.alarms.filter(\.isEnabled).count
+        guard PermissionBannerLogic.shouldShow(
+            status: scheduler.permissionStatus,
+            enabledAlarmCount: enabledCount
+        ) else { return nil }
+        return scheduler.permissionStatus
+    }
+
+    @ViewBuilder
+    private func permissionBannerRow(_ status: AlarmPermissionStatus) -> some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .top, spacing: 8) {
+                    warningIcon
+                    permissionBannerTitle
+                }
+                Button("permission_banner_allow") {
+                    handlePermissionBannerTap(status)
+                }
+                .buttonStyle(.borderless)
+                .font(.subheadline.weight(.medium))
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .accessibilityIdentifier("alarmList.permissionAllow")
+            }
+            .warmCard()
+        } else {
+            HStack(spacing: 8) {
+                warningIcon
+                permissionBannerTitle
+                Spacer()
+                Button("permission_banner_allow") {
+                    handlePermissionBannerTap(status)
+                }
+                .buttonStyle(.borderless)
+                .font(.subheadline.weight(.medium))
+                .accessibilityIdentifier("alarmList.permissionAllow")
+            }
+            .warmCard()
+        }
+    }
+
+    private var warningIcon: some View {
+        Image(systemName: "exclamationmark.triangle.fill")
+            .foregroundStyle(.orange)
+    }
+
+    private var permissionBannerTitle: some View {
+        Text("permission_banner_title")
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityIdentifier("alarmList.permissionBanner")
+    }
+
+    private func handlePermissionBannerTap(_ status: AlarmPermissionStatus) {
+        switch PermissionBannerLogic.action(for: status) {
+        case .openSettings:
+            AnalyticsService.shared.capture(.permissionBannerTapped(
+                status: status,
+                step: .sheetShown
+            ))
+            showingPermissionSettings = true
+        case .requestAuthorization:
+            AnalyticsService.shared.capture(.permissionBannerTapped(status: status))
+            Task {
+                let granted = await scheduler.requestAuthorization()
+                scheduler.refreshPermissionStatus()
+                if granted {
+                    scheduler.syncAlarms(alarmStore.alarms, trigger: .foreground)
+                    permissionFeedbackTrigger += 1
+                }
+                reportPermissionBannerIfNeeded()
+            }
+        case nil:
+            break
+        }
+    }
+
+    private func reportPermissionBannerIfNeeded() {
+        guard let status = permissionBannerStatus else {
+            reportedPermissionBannerStatus = nil
+            return
+        }
+        guard reportedPermissionBannerStatus != status else { return }
+        reportedPermissionBannerStatus = status
+        AnalyticsService.shared.capture(.permissionBannerShown(status: status))
     }
 
     private func skipNextWithToast(_ alarm: AlarmEntry) {

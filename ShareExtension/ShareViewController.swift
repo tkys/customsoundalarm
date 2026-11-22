@@ -8,6 +8,7 @@ class ShareViewController: UIViewController {
 
     private let logger = Logger(subsystem: "com.tkysdev.customsoundalarm.share", category: "ShareExt")
     private let statusLabel = UILabel()
+    private let detailLabel = UILabel()
     private let spinner = UIActivityIndicatorView(style: .large)
 
     override func viewDidLoad() {
@@ -29,7 +30,18 @@ class ShareViewController: UIViewController {
         statusLabel.text = NSLocalizedString("saving", comment: "")
         statusLabel.textAlignment = .center
         statusLabel.font = .preferredFont(forTextStyle: .headline)
+        statusLabel.numberOfLines = 0
+        statusLabel.lineBreakMode = .byWordWrapping
         view.addSubview(statusLabel)
+
+        detailLabel.translatesAutoresizingMaskIntoConstraints = false
+        detailLabel.textAlignment = .center
+        detailLabel.font = .preferredFont(forTextStyle: .subheadline)
+        detailLabel.textColor = .secondaryLabel
+        detailLabel.numberOfLines = 0
+        detailLabel.lineBreakMode = .byWordWrapping
+        detailLabel.isHidden = true
+        view.addSubview(detailLabel)
 
         NSLayoutConstraint.activate([
             spinner.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -37,6 +49,9 @@ class ShareViewController: UIViewController {
             statusLabel.topAnchor.constraint(equalTo: spinner.bottomAnchor, constant: 16),
             statusLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             statusLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            detailLabel.topAnchor.constraint(equalTo: statusLabel.bottomAnchor, constant: 6),
+            detailLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            detailLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
         ])
     }
 
@@ -82,9 +97,11 @@ class ShareViewController: UIViewController {
                 do {
                     try FileManager.default.copyItem(at: url, to: destURL)
 
+                    let mediaKind = uti == UTType.movie.identifier ? "video" : "audio"
                     let pending = PendingSoundImport(
                         displayName: originalName,
-                        stagedFileName: stagedFileName
+                        stagedFileName: stagedFileName,
+                        mediaKind: mediaKind
                     )
                     let metadataURL = staging.appendingPathComponent("\(UUID().uuidString).json")
                     let data = try JSONEncoder().encode(pending)
@@ -114,7 +131,9 @@ class ShareViewController: UIViewController {
 
     private func finish(success name: String) {
         spinner.stopAnimating()
-        statusLabel.text = String(format: NSLocalizedString("saved_format", comment: ""), name)
+        statusLabel.text = NSLocalizedString("received_title", comment: "")
+        detailLabel.text = NSLocalizedString("received_detail", comment: "")
+        detailLabel.isHidden = false
 
         let checkmark = UIImageView(image: UIImage(systemName: "checkmark.circle.fill"))
         checkmark.tintColor = .systemGreen
@@ -135,6 +154,7 @@ class ShareViewController: UIViewController {
 
     private func finish(error message: String) {
         spinner.stopAnimating()
+        detailLabel.isHidden = true
         statusLabel.text = message
         statusLabel.textColor = .systemRed
 

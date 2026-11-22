@@ -383,3 +383,13 @@
 "skip_result_footer" = "نعرض فقط العطلات التي تقع في يوم رنين.";
 "skip_row_toast_skipped_fmt" = "لن يرن %@";
 "skip_row_toast_undone_fmt" = "سيرن %@";
+"playlist_unlock_title" = "تم تفعيل قوائم التشغيل";
+"playlist_unlock_create" = "إنشاء قائمة تشغيل بهذين الصوتين";
+"playlist_unlock_later" = "لاحقًا";
+"volume_notice" = "رفعنا مستوى الصوت ليسهل سماعه.";
+"permission_banner_title" = "إذن المنبهات غير مفعّل";
+"permission_banner_allow" = "تفعيل";
+"permission_settings_hint" = "فعّل «المنبهات»";
+"permission_settings_open" = "فتح الإعدادات";
+"received_title" = "تم الاستلام";
+"received_detail" = "افتح My Sound Alarm لاختيار الجزء الذي يرن.";

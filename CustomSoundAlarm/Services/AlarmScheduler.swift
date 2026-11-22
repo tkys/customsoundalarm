@@ -34,6 +34,9 @@ final class AlarmScheduler {
     /// 試しに鳴らすボタンの権限状態（#109）
     private(set) var testRingPermission: TestRingPermission = .unknown
 
+    /// AlarmKit の許可状態（#230）
+    private(set) var permissionStatus: AlarmPermissionStatus = .unknown
+
     /// いずれかのアラームが鳴動中か（アップデート案内の抑制・#116）
     private(set) var isAlarmRinging: Bool = false
 
@@ -81,6 +84,23 @@ final class AlarmScheduler {
         loadIDMap()
         loadBackupIDMap()
         refreshTestRingPermission()
+        refreshPermissionStatus()
+    }
+
+    /// アラーム一覧の許可バナー用に、現在の許可状態を更新する（#230）。
+    func refreshPermissionStatus() {
+        #if DEBUG
+        if let override = Self.uiTestAlarmPermissionOverride {
+            permissionStatus = override
+            return
+        }
+        #endif
+        switch manager.authorizationState {
+        case .authorized: permissionStatus = .authorized
+        case .denied: permissionStatus = .denied
+        case .notDetermined: permissionStatus = .notDetermined
+        @unknown default: permissionStatus = .unknown
+        }
     }
 
     /// 試しに鳴らすボタンの権限状態を更新する（#109）
@@ -100,6 +120,14 @@ final class AlarmScheduler {
     }
 
     #if DEBUG
+    /// UIテスト用: 許可バナーの状態を強制する（#230）。
+    static var uiTestAlarmPermissionOverride: AlarmPermissionStatus? {
+        if CommandLine.arguments.contains("-uitest-alarm-permission-denied") { return .denied }
+        if CommandLine.arguments.contains("-uitest-alarm-permission-not-determined") { return .notDetermined }
+        if CommandLine.arguments.contains("-uitest-alarm-permission-authorized") { return .authorized }
+        return nil
+    }
+
     /// UIテスト用: 「今すぐ鳴らす」の権限状態を強制する（#150）。
     /// 引数なしなら nil（実際の状態を使う）。
     static var uiTestPermissionOverride: TestRingPermission? {
@@ -204,10 +232,11 @@ final class AlarmScheduler {
                     hour: alarm.hour,
                     isRepeating: false,
                     detection: "reconcile",
-                    soundMode: AlarmSoundModeResolver.soundMode(for: alarm)
+                    soundMode: AlarmSoundModeResolver.soundMode(for: alarm),
+                    context: AlarmHistoryLogic.context(for: alarm)
                 ))
                 markPendingShuffleRefresh(for: alarm)
-                store.toggleEnabled(alarm)
+                store.toggleEnabled(alarm, recordEvent: false)
                 alarmIDMap.removeValue(forKey: alarm.id)
                 var primaryNames = AppGroup.primarySoundNames
                 primaryNames.removeValue(forKey: alarm.id)
@@ -245,7 +274,11 @@ final class AlarmScheduler {
             var counts = AppGroup.snoozeCounts
             counts[entryID, default: 0] += 1
             AppGroup.snoozeCounts = counts
-            AnalyticsService.shared.capture(.alarmSnoozed(from: "reconcile"))
+            let entry = AlarmStore.shared.alarms.first { $0.id == entryID }
+            AnalyticsService.shared.capture(.alarmSnoozed(
+                from: "reconcile",
+                context: entry.map { AlarmHistoryLogic.context(for: $0) }
+            ))
             logger.info("Reconcile: detected snoozing alarm: \(alarm.id)")
         }
         // .countdown でなくなったアラームをクリーンアップ
@@ -267,6 +300,11 @@ final class AlarmScheduler {
         editedEntryIDs: Set<UUID> = [],
         trigger: AlarmSyncTrigger
     ) {
+        #if DEBUG
+        // UIテストでオンのアラームを入れても、シミュレータで鳴らさない（#206 / #230）
+        if AppGroup.isUITestSkipAlarmSync { return }
+        #endif
+
         // 前の同期を止めずに、終わってから次を始める（取り残し防止）。
         // 途中で止めると、AlarmKit に登録済みなのに対応表に書かれないアラームが残り、
         // アプリに出ないまま毎日鳴り続ける（App Store レビュー・1.8.0）。
@@ -1335,7 +1373,11 @@ final class AlarmScheduler {
                         counts[entryID, default: 0] += 1
                         AppGroup.snoozeCounts = counts
                         logger.info("Alarm snoozed: \(alarm.id)")
-                        AnalyticsService.shared.capture(.alarmSnoozed(from: "observer"))
+                        let entry = AlarmStore.shared.alarms.first { $0.id == entryID }
+                AnalyticsService.shared.capture(.alarmSnoozed(
+                    from: "observer",
+                    context: entry.map { AlarmHistoryLogic.context(for: $0) }
+                ))
                     default:
                         // スヌーズ解除の検知: .countdown でなくなったアラームをクリーンアップ
                         guard let entryID = alarmIDMap.first(where: { $0.value == alarm.id })?.key else { continue }
@@ -1384,13 +1426,14 @@ final class AlarmScheduler {
                 hour: alarm.hour,
                 isRepeating: !alarm.repeatWeekdays.isEmpty,
                 detection: "observer",
-                soundMode: AlarmSoundModeResolver.soundMode(for: alarm)
+                soundMode: AlarmSoundModeResolver.soundMode(for: alarm),
+                context: AlarmHistoryLogic.context(for: alarm)
             ))
         }
 
         if alarm.repeatWeekdays.isEmpty && alarm.isEnabled {
             markPendingShuffleRefresh(for: alarm)
-            store.toggleEnabled(alarm)
+            store.toggleEnabled(alarm, recordEvent: false)
             alarmIDMap.removeValue(forKey: entryID)
             saveIDMap()
             logger.info("One-time alarm fired, auto-disabled: \(alarm.label)")
