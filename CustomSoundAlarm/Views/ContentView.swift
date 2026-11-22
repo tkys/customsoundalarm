@@ -1833,6 +1833,11 @@ struct AlarmRow: View {
     let onTap: () -> Void
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    #if DEBUG
+    /// 一覧の時刻の大きさの比較（DEBUGのみ・#283）
+    @AppStorage(AlarmTimeSizeOption.debugDefaultsKey)
+    private var alarmTimeSizeRaw = AlarmTimeSizeOption.current.rawValue
+    #endif
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -1998,17 +2003,24 @@ struct AlarmRow: View {
     }
 
     private var timeText: some View {
-        Text(alarm.timeString)
-            .font(
-                dynamicTypeSize.isAccessibilitySize
-                    ? .system(.largeTitle, design: .rounded).weight(.regular)
-                    : .system(size: 44, weight: .regular, design: .rounded)
-            )
-            .foregroundStyle(timeColor)
-            .lineLimit(1)
-            .minimumScaleFactor(dynamicTypeSize.isAccessibilitySize ? 0.7 : 1)
-            // 長い音名のキャプションが幅を奪っても時刻は必ず自然サイズで描画されるよう優先
-            .layoutPriority(1)
+        AlarmTimeText(
+            hour: alarm.hour,
+            minute: alarm.minute,
+            typography: timeSizeOption.typography(
+                isAccessibilitySize: dynamicTypeSize.isAccessibilitySize
+            ),
+            color: timeColor
+        )
+    }
+
+    /// 表示する時刻の大きさ（DEBUGでは比較用に切り替えられる・#283）。
+    private var timeSizeOption: AlarmTimeSizeOption {
+        #if DEBUG
+        if let launch = AlarmTimeSizeOption.launchSelection { return launch }
+        return AlarmTimeSizeOption(rawValue: alarmTimeSizeRaw) ?? .current
+        #else
+        return .current
+        #endif
     }
 
     /// 1行目＝ラベル、2行目＝「曜日・音」（#174 PR-2）。
@@ -2061,7 +2073,7 @@ struct AlarmRow: View {
         .labelsHidden()
         .tint(Brand.orange)
         .accessibilityLabel(Text(AlarmRowAccessibility.toggleLabel(
-            time: alarm.timeString,
+            time: alarm.displayTime,
             label: alarm.label
         )))
         .accessibilityIdentifier("alarm.toggle")

@@ -348,7 +348,7 @@ final class DesignAuditScreenshotUITests: XCTestCase {
         cancelModal(app, context: context)
 
         // 編集（1つの音）
-        let time = app.staticTexts["07:00"]
+        let time = app.staticTexts["7:00"]
         XCTAssertTrue(time.waitForExistence(timeout: 10))
         time.tap()
         XCTAssertTrue(

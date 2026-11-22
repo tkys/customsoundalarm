@@ -116,14 +116,6 @@ struct BedsideClockLogicTests {
         #expect(bothResult == earlyResult)
     }
 
-    // MARK: - is24HourFormat
-
-    @Test
-    func is24HourFormat_returnsBool() {
-        let result = BedsideClockLogic.is24HourFormat(for: Date())
-        #expect(result == true || result == false)
-    }
-
     // MARK: - countdownText
 
     @Test
@@ -365,24 +357,66 @@ struct BedsideClockLogicTests {
         #expect(rgb.g == 0.65)
     }
 
-    // MARK: - timeString
+    // MARK: - display (#283)
 
-    @Test
-    func timeString_withoutSeconds() {
-        let date = Date()
-        let result = BedsideClockLogic.timeString(for: date, is24Hour: true, showSeconds: false)
-        // HH:mm 形式であること（コロン1つ、秒なし）
-        #expect(result.count == 5)
-        #expect(result.filter { $0 == ":" }.count == 1)
+    private func locale(_ id: String, _ cycle: Locale.HourCycle? = nil) -> Locale {
+        let parts = id.split(separator: "_")
+        var components = Locale.Components(
+            languageCode: Locale.LanguageCode(String(parts[0]))
+        )
+        if parts.count > 1 {
+            components.region = Locale.Region(String(parts[1]))
+        }
+        components.hourCycle = cycle
+        return Locale(components: components)
+    }
+
+    private var fixedDate: Date {
+        Calendar(identifier: .gregorian).date(from: DateComponents(
+            year: 2001,
+            month: 1,
+            day: 1,
+            hour: 17,
+            minute: 5,
+            second: 9
+        ))!
     }
 
     @Test
-    func timeString_withSeconds() {
-        let date = Date()
-        let result = BedsideClockLogic.timeString(for: date, is24Hour: true, showSeconds: true)
-        // HH:mm:ss 形式であること（コロン2つ、秒あり）
-        #expect(result.count == 8)
-        #expect(result.filter { $0 == ":" }.count == 2)
+    func display_withoutSeconds_in24Hour() {
+        let parts = BedsideClockLogic.display(
+            for: fixedDate,
+            showSeconds: false,
+            locale: locale("ja_JP"),
+            calendar: Calendar(identifier: .gregorian)
+        )
+        #expect(parts.time == "17:05")
+        #expect(parts.period == nil)
+    }
+
+    @Test
+    func display_withSeconds_in24Hour() {
+        let parts = BedsideClockLogic.display(
+            for: fixedDate,
+            showSeconds: true,
+            locale: locale("en_GB"),
+            calendar: Calendar(identifier: .gregorian)
+        )
+        #expect(parts.time == "17:05:09")
+        #expect(parts.period == nil)
+    }
+
+    @Test
+    func display_in12Hour_splitsAMPM() {
+        let parts = BedsideClockLogic.display(
+            for: fixedDate,
+            showSeconds: false,
+            locale: locale("en_US"),
+            calendar: Calendar(identifier: .gregorian)
+        )
+        #expect(parts.time == "5:05")
+        #expect(parts.period == "PM")
+        #expect(parts.periodFirst == false)
     }
 
     // MARK: - ClockLayout
