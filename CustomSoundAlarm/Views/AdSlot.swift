@@ -11,17 +11,32 @@ struct AdSlot: View {
     @State private var service = AdEligibilityService.shared
     @State private var allowed = false
 
+    /// DEBUG: レイアウト確認用に広告枠を強制表示する（#282 レビュー）
+    private var isForced: Bool {
+        #if DEBUG
+        return AppGroup.isUITestForceAdSlot
+        #else
+        return false
+        #endif
+    }
+
     var body: some View {
         Group {
-            if !isSuppressed,
-               AdSlotLayout.shouldRender(isEnabled: AdsConfig.isEnabled, allowed: allowed) {
+            if isForced
+                || (!isSuppressed
+                    && AdSlotLayout.shouldRender(
+                        isEnabled: AdsConfig.isEnabled,
+                        allowed: allowed
+                    )) {
                 // 1.9.0 で Google Mobile Ads のバナーに差し替える
                 Color.clear
                     .frame(height: AdSlotLayout.height(isEnabled: true))
                     .accessibilityHidden(true)
             }
         }
-        .frame(height: isSuppressed ? 0 : AdSlotLayout.height(isEnabled: AdsConfig.isEnabled))
+        .frame(height: isSuppressed
+            ? 0
+            : AdSlotLayout.height(isEnabled: isForced || AdsConfig.isEnabled))
         .accessibilityIdentifier("adSlot.\(slot.rawValue)")
         .task {
             guard !isSuppressed else { return }

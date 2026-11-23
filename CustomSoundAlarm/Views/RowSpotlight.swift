@@ -36,7 +36,7 @@ enum RowSpotlightTiming {
     /// 共有後の着地（#246）で使うスクロール位置（アラームの追加は最小移動・#282）
     static let scrollAnchor = UnitPoint(x: 0.5, y: 0.45)
     /// 行を画面内に残すときの上下の余白（#282）
-    static let minimumVisibleInset: CGFloat = 16
+    static let minimumVisibleInset: CGFloat = 24
 
     /// 距離からスクロール時間を求める（0.5〜1.0秒）。
     static func scrollDuration(for distance: CGFloat) -> TimeInterval {

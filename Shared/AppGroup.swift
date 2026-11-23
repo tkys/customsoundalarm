@@ -407,6 +407,15 @@ enum AppGroup {
 #endif
     }
 
+    /// UIテスト用: 広告枠を強制表示する（DEBUGのみ・#282 レビュー）。
+    static var isUITestForceAdSlot: Bool {
+#if DEBUG
+        return CommandLine.arguments.contains("-uitest-force-ad-slot")
+#else
+        return false
+#endif
+    }
+
     /// UIテスト・録画用: 追加画面の初期時刻（DEBUGのみ・#282）。
     /// 例: `-uitest-add-time=11:00`
     static var uitestAddAlarmTime: DateComponents? {

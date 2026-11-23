@@ -880,6 +880,12 @@ struct ContentView: View {
 
             }
             .warmListBackground()
+            // 先頭の行がナビゲーションバーのぼかしに重ならないための上端の余白
+            .contentMargins(
+                .top,
+                RowSpotlightTiming.minimumVisibleInset,
+                for: .scrollContent
+            )
             .onGeometryChange(for: CGRect.self) { geometry in
                 // 一覧として実際に見えている範囲（画面座標）。下端の広告・タブを除く。
                 let frame = geometry.frame(in: .global)
@@ -996,9 +1002,10 @@ struct ContentView: View {
         if insertAfterScroll {
             // まだ一覧に足さない。スクロール後に insertRowsAfterScroll で入れる
         } else {
-            // 一番下に入る行は、下端の自然な位置まで送るため先に collapsed で入れる
+            // 一番下に入る行は、一覧の一番下まで送るため先に通常の行として入れる
+            // （画面外なので、開く動きは見えない。光りはスクロール後に付ける）
             hiddenUntilDismissAlarmIDs.subtract(ids)
-            pendingRevealAlarmIDs.formUnion(ids)
+            pendingRevealAlarmIDs.subtract(ids)
             revealedAlarmIDs.subtract(ids)
             syncDisplayedAlarms()
         }
@@ -1111,6 +1118,34 @@ struct ContentView: View {
         }
 
         let from = startOffset
+        let sorted = AlarmListOrdering.sortedForDisplay(alarmStore.alarms)
+        let fullIndex = sorted.firstIndex(where: { $0.id == alarmID }) ?? sorted.count
+        let fullCount = sorted.count
+
+        // 最後の行は一度だけ画面内まで送って高さを確定させ、contentSize を更新する。
+        // すぐ元の位置に戻すので、画面上には出ない（プローブ）。
+        if fullIndex == fullCount - 1,
+           rowIsInserted,
+           let index = displayedAlarms.firstIndex(where: { $0.id == alarmID }) {
+            let probeIndexPath = IndexPath(row: leadingRows + index, section: 0)
+            collectionView.scrollToItem(at: probeIndexPath, at: .bottom, animated: false)
+            collectionView.layoutIfNeeded()
+            #if DEBUG
+            NSLog(
+                "%@",
+                String(
+                    format: "[SpotlightScroll] probe offset=%.1f size=%.1f",
+                    Double(scrollView.contentOffset.y),
+                    Double(collectionView.contentSize.height)
+                )
+            )
+            #endif
+            scrollView.setContentOffset(
+                CGPoint(x: scrollView.contentOffset.x, y: startOffset),
+                animated: false
+            )
+        }
+
         let rowTop: CGFloat
         let rowHeight: CGFloat
 
@@ -1125,8 +1160,6 @@ struct ContentView: View {
                 ?? max(attributes.frame.height, 96)
         } else {
             // まだ足していない行の入る位置：次の可視行の上端、なければ最後の行の下端
-            let sorted = AlarmListOrdering.sortedForDisplay(alarmStore.alarms)
-            let fullIndex = sorted.firstIndex(where: { $0.id == alarmID }) ?? sorted.count
             let visibleBefore = sorted[..<fullIndex].filter {
                 !hiddenUntilDismissAlarmIDs.contains($0.id)
             }.count
@@ -1153,44 +1186,35 @@ struct ContentView: View {
         }
 
         let rowBottom = rowTop + rowHeight
-        let scrollFrame = scrollView.convert(
-            CGRect(origin: .zero, size: scrollView.bounds.size),
-            to: nil
-        )
-        #if DEBUG
-        NSLog(
-            "%@",
-            String(
-                format: "[SpotlightScroll] insets top=%.1f bottom=%.1f adjusted=%.1f/%.1f frame=%@ windowSafe=%.1f/%.1f",
-                Double(scrollView.contentInset.top),
-                Double(scrollView.contentInset.bottom),
-                Double(scrollView.adjustedContentInset.top),
-                Double(scrollView.adjustedContentInset.bottom),
-                NSCoder.string(for: scrollFrame),
-                Double(scrollView.window?.safeAreaInsets.top ?? -1),
-                Double(scrollView.window?.safeAreaInsets.bottom ?? -1)
-            )
-        )
-        #endif
-        // 画面に見えている範囲。下は調整済みインセット（タブバー・広告枠）を除く。
-        let screenBounds = scrollView.window?.bounds ?? scrollView.bounds
-        let visibleTopScreen = max(scrollFrame.minY, screenBounds.minY)
-        let visibleBottomScreen = min(scrollFrame.maxY, screenBounds.maxY)
+        // UIScrollView から見えている内容範囲を出す（バー・広告枠は adjustedContentInset）
+        let visibleTopContent = from + scrollView.adjustedContentInset.top
+        let visibleBottomContent = from + scrollView.bounds.height
             - scrollView.adjustedContentInset.bottom
-        let visibleTop = visibleTopScreen - scrollFrame.minY
-        let visibleBottom = visibleBottomScreen - scrollFrame.minY
         let rowTopScreen = rowTop - from
         let rowBottomScreen = rowBottom - from
         let inset = RowSpotlightTiming.minimumVisibleInset
 
         var reason = "visible"
         var targetOffset = from
-        if rowTopScreen < visibleTop + inset {
+        if fullIndex == 0 {
+            // 先頭の行は一覧の一番上（大見出しが出る自然な位置）まで
+            reason = "top-edge"
+            targetOffset = -scrollView.adjustedContentInset.top
+        } else if fullIndex == fullCount - 1 {
+            // 最後の行は一覧の一番下まで
+            reason = "bottom-edge"
+            targetOffset = scrollView.contentSize.height
+                + scrollView.adjustedContentInset.bottom
+                - scrollView.bounds.height
+        } else if rowTop < visibleTopContent + inset {
             reason = "above"
-            targetOffset = from - ((visibleTop + inset) - rowTopScreen)
-        } else if rowBottomScreen > visibleBottom - inset {
+            targetOffset = rowTop
+                - scrollView.adjustedContentInset.top
+                - inset
+        } else if rowBottom > visibleBottomContent - inset {
             reason = "below"
-            targetOffset = from + (rowBottomScreen - (visibleBottom - inset))
+            targetOffset = rowBottom
+                - (scrollView.bounds.height - scrollView.adjustedContentInset.bottom - inset)
         }
         let isVisible = reason == "visible"
 
@@ -1207,15 +1231,17 @@ struct ContentView: View {
         NSLog(
             "%@",
             String(
-                format: "[SpotlightScroll] target reason=%@ inserted=%d from=%.1f to=%.1f rowScreen=%.1f...%.1f visible=%.1f...%.1f size=%.1f bounds=%.1f",
+                format: "[SpotlightScroll] target reason=%@ inserted=%d from=%.1f to=%.1f rowScreen=%.1f...%.1f visibleContent=%.1f...%.1f inset=%.1f/%.1f size=%.1f bounds=%.1f",
                 reason,
                 rowIsInserted ? 1 : 0,
                 Double(from),
                 Double(clamped),
                 Double(rowTopScreen),
                 Double(rowBottomScreen),
-                Double(visibleTop),
-                Double(visibleBottom),
+                Double(visibleTopContent),
+                Double(visibleBottomContent),
+                Double(scrollView.adjustedContentInset.top),
+                Double(scrollView.adjustedContentInset.bottom),
                 Double(collectionView.contentSize.height),
                 Double(scrollView.bounds.height)
             )
@@ -1312,13 +1338,13 @@ struct ContentView: View {
         // スクロールが止まってから行を入れる
         if request.insertAfterScroll {
             insertRowsAfterScroll(ids)
+            revealedAlarmIDs.formUnion(ids)
+            let revealWait = reduceMotion
+                ? RowSpotlightTiming.revealOpacity
+                : RowSpotlightTiming.revealHeight
+            try? await Task.sleep(for: .seconds(revealWait))
+            guard !Task.isCancelled else { return }
         }
-        revealedAlarmIDs.formUnion(ids)
-        let revealWait = reduceMotion
-            ? RowSpotlightTiming.revealOpacity
-            : RowSpotlightTiming.revealHeight
-        try? await Task.sleep(for: .seconds(revealWait))
-        guard !Task.isCancelled else { return }
 
         // 入り終わってから約0.08秒後に光らせる
         try? await Task.sleep(for: .seconds(RowSpotlightTiming.glowDelayAfterReveal))
