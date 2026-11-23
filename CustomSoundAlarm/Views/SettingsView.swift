@@ -12,6 +12,9 @@ struct SettingsView: View {
     @State private var showingBedside = false
     @State private var showingMail = false
     @State private var mailBody = ""
+    @State private var mailAttachment: MailAttachment?
+    @State private var sharePayload: SharePayload?
+    @State private var isPreparingContact = false
 
     var body: some View {
         NavigationStack {
@@ -29,9 +32,27 @@ struct SettingsView: View {
                     Button {
                         openContact()
                     } label: {
-                        row(title: "settings_contact", systemImage: "envelope")
+                        HStack {
+                            row(title: "settings_contact", systemImage: "envelope")
+                            if isPreparingContact {
+                                Spacer(minLength: 8)
+                                ProgressView()
+                            }
+                        }
                     }
+                    .disabled(isPreparingContact)
                     .accessibilityIdentifier("settings.contact")
+
+                    Button {
+                        AnalyticsService.shared.capture(.supportContactOpened(
+                            method: .web,
+                            diagnosticsAttached: false
+                        ))
+                        openURL(SettingsLogic.supportURL)
+                    } label: {
+                        externalRow(title: "settings_support_page", systemImage: "questionmark.circle")
+                    }
+                    .accessibilityIdentifier("settings.support")
 
                     Button {
                         AnalyticsService.shared.capture(.reviewLinkOpened)
@@ -80,10 +101,16 @@ struct SettingsView: View {
                 MailComposeView(
                     recipients: [SettingsLogic.supportEmail],
                     subject: String(localized: "settings_mail_subject"),
-                    body: mailBody
+                    body: mailBody,
+                    attachment: mailAttachment
                 ) {
                     showingMail = false
                 }
+            }
+            .sheet(item: $sharePayload) { payload in
+                ShareSheetView(activityItems: payload.activityItems)
+                    .accessibilityIdentifier("settings.shareSheet")
+                    .presentationDetents([.medium, .large])
             }
         }
     }
@@ -129,30 +156,99 @@ struct SettingsView: View {
         }
     }
 
-    /// メールが使えればメール作成、使えなければサポートページを開く。
+    /// メールが使えればメール作成、使えなければ共有シートを開く（#255）。
+    /// どちらも診断 JSON を添付し、送るかどうかは本人に委ねる。
     private func openContact() {
-        if MFMailComposeViewController.canSendMail() {
-            AnalyticsService.shared.capture(.supportContactOpened(method: .mail))
-            mailBody = SettingsLogic.mailBody(
-                appVersion: SettingsLogic.appVersionString(),
-                osVersion: UIDevice.current.systemVersion,
-                deviceModel: SettingsLogic.deviceModelName()
-            )
-            showingMail = true
-        } else {
-            AnalyticsService.shared.capture(.supportContactOpened(method: .web))
-            openURL(SettingsLogic.supportURL)
+        guard !isPreparingContact else { return }
+        isPreparingContact = true
+
+        let body = SettingsLogic.mailBody(
+            appVersion: SettingsLogic.appVersionString(),
+            osVersion: UIDevice.current.systemVersion,
+            deviceModel: SettingsLogic.deviceModelName()
+        )
+
+        Task {
+            let reportURL = await DiagnosticsService.writeReport()
+            let attachment = reportURL.flatMap { url -> MailAttachment? in
+                guard let data = DiagnosticsService.reportData(at: url) else { return nil }
+                return MailAttachment(data: data, fileName: DiagnosticsService.fileName)
+            }
+            let attached = attachment != nil
+            let canMail = !AppGroup.isUITestContactNoMail
+                && MFMailComposeViewController.canSendMail()
+
+            await MainActor.run {
+                isPreparingContact = false
+                if canMail {
+                    AnalyticsService.shared.capture(.supportContactOpened(
+                        method: .mail,
+                        diagnosticsAttached: attached
+                    ))
+                    mailBody = body
+                    mailAttachment = attachment
+                    showingMail = true
+                } else {
+                    AnalyticsService.shared.capture(.supportContactOpened(
+                        method: .share,
+                        diagnosticsAttached: attached
+                    ))
+                    sharePayload = SharePayload(
+                        text: SettingsLogic.shareText(body: body),
+                        fileURL: reportURL
+                    )
+                }
+            }
         }
     }
+}
+
+// MARK: - Share
+
+/// 共有シートに渡す文面と診断ファイル。
+struct SharePayload: Identifiable {
+    let id = UUID()
+    let text: String
+    let fileURL: URL?
+
+    var activityItems: [Any] {
+        var items: [Any] = [text]
+        if let fileURL {
+            items.append(fileURL)
+        }
+        return items
+    }
+}
+
+/// メールが使えない端末向けの共有シート（#255）。
+struct ShareSheetView: UIViewControllerRepresentable {
+    let activityItems: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        let controller = UIActivityViewController(
+            activityItems: activityItems,
+            applicationActivities: nil
+        )
+        controller.view.accessibilityIdentifier = "settings.shareSheet"
+        return controller
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 // MARK: - Mail
 
 /// メール作成画面。本文は送る前に本人が編集・削除できる。
+struct MailAttachment {
+    let data: Data
+    let fileName: String
+}
+
 struct MailComposeView: UIViewControllerRepresentable {
     let recipients: [String]
     let subject: String
     let body: String
+    let attachment: MailAttachment?
     let onFinish: () -> Void
 
     func makeCoordinator() -> Coordinator {
@@ -164,6 +260,13 @@ struct MailComposeView: UIViewControllerRepresentable {
         controller.setToRecipients(recipients)
         controller.setSubject(subject)
         controller.setMessageBody(body, isHTML: false)
+        if let attachment {
+            controller.addAttachmentData(
+                attachment.data,
+                mimeType: "application/json",
+                fileName: attachment.fileName
+            )
+        }
         controller.mailComposeDelegate = context.coordinator
         return controller
     }

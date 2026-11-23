@@ -207,7 +207,6 @@
 "backup_alarm_minutes" = "Opnieuw afgaan na";
 "backup_alarm_minutes_fmt" = "%d min later";
 "backup_alarm_before_snooze" = "Hij gaat af voordat je sluimeren eindigt.";
-"backup_alarm_early_access_note" = "Als je hem tijdens de vroege toegang gaat gebruiken, houd je hem na de definitieve versie.";
 "backup_alarm_row_badge" = "Verslaapbeveiliging aan";
 
 /* Update gate (#116) */
@@ -265,8 +264,6 @@
 "end_fade_footer" = "Korte fade aan het einde van de herhaling.";
 "fade_backup_note" = "Zachte start geldt niet voor de overslaapbeveiliging.";
 "playlist_backup_note" = "Bij afspeellijstalarmen speelt de overslaapbeveiliging het eerste nummer harder af.";
-"pro_early_access" = "PRO · Vroege toegang";
-"playlist_early_access_note" = "Als je het tijdens de vroege toegang gaat gebruiken, kun je het na de volledige release blijven gebruiken.";
 "playlist_title" = "Afspeellijsten";
 "playlist_new" = "Nieuwe afspeellijst";
 "playlist_new_default_name" = "Nieuwe afspeellijst";
@@ -393,3 +390,27 @@
 "permission_settings_open" = "Instellingen openen";
 "received_title" = "Ontvangen";
 "received_detail" = "Open My Sound Alarm om het deel te kiezen dat klinkt.";
+"empty_quick_title" = "Hoe laat word je wakker?";
+"empty_quick_other" = "Andere tijd";
+"empty_quick_hint" = "Maakt een wekker.";
+"silent_sound_message" = "Dit deel is bijna stil. Kies een ander deel of een ander geluid.";
+"silent_sound_reselect" = "Ander deel kiezen";
+"silent_sound_other" = "Ander geluid kiezen";
+"silent_sound_use_anyway" = "Toch gebruiken";
+"silent_alarm_warning" = "Geluid is nauwelijks hoorbaar";
+"silent_sound_whole_file_message" = "Deze audio bevat geen geluid. Kies een ander geluid.";
+"settings_mail_diagnostics_notice" = "Om ons te helpen onderzoeken is de status van de app bijgevoegd (geen songtitels of audiobestanden). Je kunt de bijlage verwijderen voordat je verzendt.\n";
+"settings_support_page" = "Supportpagina";
+"followup_tomorrow" = "Morgen";
+"followup_weekdays" = "Werkdagen";
+"followup_everyday" = "Elke dag";
+"add_from_music" = "Toevoegen uit Muziek";
+"music_library_unavailable" = "Dit nummer kan niet worden geïmporteerd.";
+"music_library_permission_denied" = "Sta toegang tot Muziek toe in Instellingen.";
+"more" = "Meer";
+"more_label_fmt" = "Label: %@";
+"more_no_label" = "Geen label";
+"more_separator" = " · ";
+"more_accessibility_fmt" = "%1$@, %2$@";
+
+"control_open_list" = "My Sound Alarm";

@@ -14,6 +14,7 @@ struct AnalyticsEventsDocTests {
         "permission_banner_shown",
         "permission_banner_tapped",
         "import_landed",
+        "silent_sound_blocked",
         "alarm_fired",
         "alarm_stopped",
         "alarm_snoozed",
@@ -37,6 +38,9 @@ struct AnalyticsEventsDocTests {
         "sound_selected",
         "ad_slot_eligible",
         "sound_preview_played",
+        "music_library_unavailable",
+        "alarm_editor_more_opened",
+        "control_opened",
         "alarm_skip_set",
         "alarm_skip_undone",
         "skip_all_set",
@@ -53,6 +57,8 @@ struct AnalyticsEventsDocTests {
         "settings_opened",
         "support_contact_opened",
         "review_link_opened",
+        "first_alarm_followup_shown",
+        "first_alarm_followup_action",
         "bedside_exited",
         "bedside_setting_changed",
         "onboarding_step_viewed",
@@ -86,6 +92,27 @@ struct AnalyticsEventsDocTests {
         )
         #expect(row.contains("time_suggestion_used"))
         #expect(row.contains("carried_over"))
+    }
+
+    @Test
+    func alarmFiredDetectionValuesAreDocumented() throws {
+        let doc = try String(contentsOf: docURL, encoding: .utf8)
+        let row = try #require(
+            doc.split(separator: "\n").first { $0.hasPrefix("| `alarm_fired` |") }
+        )
+        for detection in ["observer", "reconcile", "stopped"] {
+            #expect(
+                row.contains(detection),
+                "docs/analytics-events.md の alarm_fired に detection=\(detection) がありません"
+            )
+        }
+    }
+
+    @Test
+    func bufferedEventTimestampIsDocumented() throws {
+        let doc = try String(contentsOf: docURL, encoding: .utf8)
+        #expect(doc.contains("実際の発生時刻"))
+        #expect(doc.contains("properties.timestamp"))
     }
 
     @Test

@@ -1,15 +1,15 @@
-■ Pick the part to ring, right from Share
-Share a video or audio file from Photos or Files and choose My Sound Alarm. The trim screen opens when you open the app.
+■ Use songs from the Music app
+When adding a sound, choose "Add from Music" to pick the part to ring from songs in your Music app.
 
-■ Faster alarm setup
-• New alarms keep your last Snooze, Playlist and Gentle start settings.
-• Above the time, you'll see 5 and 10 minutes after your latest alarm. Tap one to set it.
+■ Open from Control Center
+Add "My Sound Alarm" and "Add Alarm" to Control Center. Tap to open your alarm list or the add screen.
 
-■ Know when alarms can't ring
-If alarm permission is off, the top of the list shows "Alarms won't ring". Tap "Allow" to fix it.
+■ A simpler alarm editor
+Snooze, Label and Gentle start are now under "More".
 
 ■ Also
-• When a quiet sound is made louder to match the others, a short note appears under it.
-• When you have two of your own sounds, the app lets you know you can make a playlist.
+• If you pick a part that is nearly silent, the app tells you.
+• The email from "Report a bug or ask a question" in Settings now attaches the app's status to help us look into problems. It does not include song names or sound files. You can remove it before sending.
+• Fixed overlapping text on the trim screen at the largest text size.
 
 Thank you for using My Sound Alarm.

@@ -207,7 +207,6 @@
 "backup_alarm_minutes" = "Tocar de novo depois de";
 "backup_alarm_minutes_fmt" = "%d min depois";
 "backup_alarm_before_snooze" = "Toca antes de a soneca terminar.";
-"backup_alarm_early_access_note" = "Se você começar a usar durante o acesso antecipado, continua disponível após o lançamento.";
 "backup_alarm_row_badge" = "Proteção ativada";
 
 /* Update gate (#116) */
@@ -265,8 +264,6 @@
 "end_fade_footer" = "Fade curto no fim do loop.";
 "fade_backup_note" = "O início suave não se aplica ao alerta de sono.";
 "playlist_backup_note" = "Nos alarmes com playlist, o alerta de sono reproduz mais alto a primeira faixa.";
-"pro_early_access" = "PRO · Acesso antecipado";
-"playlist_early_access_note" = "Se começar a usar durante o acesso antecipado, poderá continuar usando após o lançamento completo.";
 "playlist_title" = "Playlists";
 "playlist_new" = "Nova playlist";
 "playlist_new_default_name" = "Nova playlist";
@@ -393,3 +390,27 @@
 "permission_settings_open" = "Abrir Ajustes";
 "received_title" = "Recebido";
 "received_detail" = "Abra o My Sound Alarm para escolher a parte que toca.";
+"empty_quick_title" = "A que horas você acorda?";
+"empty_quick_other" = "Outro horário";
+"empty_quick_hint" = "Cria um alarme.";
+"silent_sound_message" = "Esta parte está quase silenciosa. Escolha outra parte ou outro som.";
+"silent_sound_reselect" = "Escolher outra parte";
+"silent_sound_other" = "Escolher outro som";
+"silent_sound_use_anyway" = "Usar mesmo assim";
+"silent_alarm_warning" = "O som quase não se ouve";
+"silent_sound_whole_file_message" = "Este áudio não tem som. Escolha outro som.";
+"settings_mail_diagnostics_notice" = "Para nos ajudar a investigar, o estado do app está anexado (não inclui títulos de músicas nem arquivos de som). Você pode remover o anexo antes de enviar.\n";
+"settings_support_page" = "Página de suporte";
+"followup_tomorrow" = "Amanhã";
+"followup_weekdays" = "Dias úteis";
+"followup_everyday" = "Todos os dias";
+"add_from_music" = "Adicionar da Música";
+"music_library_unavailable" = "Esta música não pode ser importada.";
+"music_library_permission_denied" = "Permita o acesso ao Música nos Ajustes.";
+"more" = "Mais";
+"more_label_fmt" = "Rótulo: %@";
+"more_no_label" = "Sem rótulo";
+"more_separator" = " · ";
+"more_accessibility_fmt" = "%1$@, %2$@";
+
+"control_open_list" = "My Sound Alarm";

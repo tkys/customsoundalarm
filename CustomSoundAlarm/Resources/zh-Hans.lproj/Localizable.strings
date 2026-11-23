@@ -207,7 +207,6 @@
 "backup_alarm_minutes" = "再次响铃时间";
 "backup_alarm_minutes_fmt" = "%d 分钟后";
 "backup_alarm_before_snooze" = "它会在稍后提醒结束前响铃。";
-"backup_alarm_early_access_note" = "如果你在抢先体验期间开始使用，正式发布后仍可继续使用。";
 "backup_alarm_row_badge" = "防睡过头已开启";
 
 /* Update gate (#116) */
@@ -265,8 +264,6 @@
 "end_fade_footer" = "在循环末尾短暂淡出。";
 "fade_backup_note" = "“轻柔开始”不适用于防赖床提醒。";
 "playlist_backup_note" = "播放列表闹钟的防赖床提醒会把第一首曲目放大播放。";
-"pro_early_access" = "PRO · 抢先体验";
-"playlist_early_access_note" = "如果在抢先体验期间开始使用，正式发布后仍可继续使用。";
 "playlist_title" = "播放列表";
 "playlist_new" = "新建播放列表";
 "playlist_new_default_name" = "新建播放列表";
@@ -393,3 +390,27 @@
 "permission_settings_open" = "打开设置";
 "received_title" = "已收到";
 "received_detail" = "打开 My Sound Alarm 选择要响的部分。";
+"empty_quick_title" = "几点起床？";
+"empty_quick_other" = "其他时间";
+"empty_quick_hint" = "创建闹钟。";
+"silent_sound_message" = "这部分几乎没有声音。请选择其他部分或其他声音。";
+"silent_sound_reselect" = "重新选择部分";
+"silent_sound_other" = "选择其他声音";
+"silent_sound_use_anyway" = "仍然使用";
+"silent_alarm_warning" = "声音几乎听不到";
+"silent_sound_whole_file_message" = "这段音频没有声音。请选择其他声音。";
+"settings_mail_diagnostics_notice" = "为帮助我们调查，已附加应用状态（不包含歌曲名称或声音文件）。发送前可删除附件。\n";
+"settings_support_page" = "支持页面";
+"followup_tomorrow" = "明天";
+"followup_weekdays" = "工作日";
+"followup_everyday" = "每天";
+"add_from_music" = "从“音乐”添加";
+"music_library_unavailable" = "无法导入这首歌曲。";
+"music_library_permission_denied" = "请在“设置”中允许访问“音乐”。";
+"more" = "更多";
+"more_label_fmt" = "标签：%@";
+"more_no_label" = "无标签";
+"more_separator" = "・";
+"more_accessibility_fmt" = "%1$@，%2$@";
+
+"control_open_list" = "My Sound Alarm";

@@ -8,10 +8,10 @@ import Foundation
 /// 最後に capture されたイベント名とプロパティを記録する。
 private final class MockBackend: AnalyticsBackend, @unchecked Sendable {
     private let lock = NSLock()
-    private var _captures: [(event: String, properties: [String: Any]?)] = []
+    private var _captures: [(event: String, properties: [String: Any]?, timestamp: Date?)] = []
     private var _userProperties: [String: Any] = [:]
 
-    var captures: [(event: String, properties: [String: Any]?)] {
+    var captures: [(event: String, properties: [String: Any]?, timestamp: Date?)] {
         lock.withLock { _captures }
     }
 
@@ -23,9 +23,9 @@ private final class MockBackend: AnalyticsBackend, @unchecked Sendable {
         lock.withLock { _userProperties }
     }
 
-    func capture(_ event: String, properties: [String: Any]?) {
+    func capture(_ event: String, properties: [String: Any]?, timestamp: Date?) {
         lock.withLock {
-            _captures.append((event, properties))
+            _captures.append((event, properties, timestamp))
         }
     }
 
@@ -77,7 +77,7 @@ struct AnalyticsEventTests {
         // Phase 4（ベッドサイドモード・#68）
         #expect(AnalyticsEvent.bedsideEntered(layout: "digital_large", theme: "white", hour: 23, entry: .settings).name == "bedside_entered")
         #expect(AnalyticsEvent.settingsOpened.name == "settings_opened")
-        #expect(AnalyticsEvent.supportContactOpened(method: .mail).name == "support_contact_opened")
+        #expect(AnalyticsEvent.supportContactOpened(method: .mail, diagnosticsAttached: true).name == "support_contact_opened")
         #expect(AnalyticsEvent.reviewLinkOpened.name == "review_link_opened")
         #expect(AnalyticsEvent.bedsideExited(durationBucket: "over_2h", exitMethod: "long_press").name == "bedside_exited")
         #expect(AnalyticsEvent.bedsideSettingChanged(setting: .layout, value: .string("minimal")).name == "bedside_setting_changed")
@@ -230,6 +230,8 @@ struct AnalyticsEventTests {
         #expect(SoundImportSource.video.rawValue == "video")
         #expect(SoundImportSource.audio.rawValue == "audio")
         #expect(SoundImportSource.share.rawValue == "share")
+        #expect(SoundImportSource.existing.rawValue == "existing")
+        #expect(SoundImportSource.musicLibrary.rawValue == "music_library")
     }
 
     // MARK: feature_unlock (#216)
@@ -352,6 +354,20 @@ struct AnalyticsEventTests {
         #expect(props["suggestion_index"] as? Int == 1)
         #expect(props["seconds_to_save"] as? Int == 12)
         #expect(props["alarm_uid"] as? String == "uid")
+    }
+
+    // MARK: empty quick alarm (#231)
+
+    @Test
+    func emptyQuickAlarmSourceIsStable() {
+        #expect(AlarmCreatedSource.emptyQuick.rawValue == "empty_quick")
+        let props = AnalyticsEvent.alarmCreated(
+            hasCustomSound: false,
+            isRepeating: false,
+            snoozeMinutes: 9,
+            source: .emptyQuick
+        ).properties
+        #expect(props["source"] as? String == "empty_quick")
     }
 
     // MARK: test_ring_scheduled / test_ring_stopped (#109)
@@ -563,6 +579,14 @@ struct AnalyticsEventTests {
         #expect(props["rank_bucket"] as? String == "4-10")
     }
 
+    @Test
+    func controlOpenedProperties_includeKind() {
+        let list = AnalyticsEvent.controlOpened(kind: .list).properties
+        let add = AnalyticsEvent.controlOpened(kind: .add).properties
+        #expect(list["kind"] as? String == "list")
+        #expect(add["kind"] as? String == "add")
+    }
+
     // MARK: ad_slot_eligible (#111)
 
     @Test
@@ -663,7 +687,10 @@ struct AnalyticsEventTests {
             .alarmSnoozed(from: "observer"),
             .bedsideEntered(layout: "digital_large", theme: "white", hour: 23, entry: .settings),
             .settingsOpened,
-            .supportContactOpened(method: .web),
+            .supportContactOpened(method: .web, diagnosticsAttached: false),
+            .musicLibraryUnavailable,
+            .alarmEditorMoreOpened,
+            .controlOpened(kind: .list),
             .reviewLinkOpened,
             .bedsideExited(durationBucket: "1_5min", exitMethod: "exit_button"),
             .bedsideSettingChanged(setting: .layout, value: .string("minimal")),
@@ -1077,6 +1104,38 @@ struct AnalyticsServiceCaptureTests {
         #expect(captured.event == "alarm_created")
         #expect(captured.properties?["has_custom_sound"] as? Bool == true)
         #expect(captured.properties?["is_repeating"] as? Bool == false)
+    }
+
+    @Test
+    func captureForwardsExplicitTimestamp() {
+        let mock = MockBackend()
+        let service = AnalyticsService(backend: mock)
+        let timestamp = Date(timeIntervalSince1970: 1_700_000_000)
+
+        service.capture(.alarmDeleted, timestamp: timestamp)
+
+        #expect(mock.captures[0].timestamp == timestamp)
+    }
+
+    @Test
+    @MainActor
+    func adReporting_bannerSoundsSendsAdSlotEligible() {
+        let mock = MockBackend()
+        let service = AnalyticsService(backend: mock)
+        let decision = AdDecision(
+            allowed: false,
+            reason: .versionUnavailable,
+            region: .limitedOnly
+        )
+
+        AdReporting.report(slot: .bannerSounds, decision: decision, analytics: service)
+
+        #expect(mock.captures.count == 1)
+        #expect(mock.captures[0].event == "ad_slot_eligible")
+        #expect(mock.captures[0].properties?["slot"] as? String == "banner_sounds")
+        #expect(mock.captures[0].properties?["allowed"] as? Bool == false)
+        #expect(mock.captures[0].properties?["reason"] as? String == "version_unavailable")
+        #expect(mock.captures[0].properties?["region"] as? String == "limited")
     }
 
     @Test

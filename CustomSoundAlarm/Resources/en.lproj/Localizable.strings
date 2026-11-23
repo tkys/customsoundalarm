@@ -207,7 +207,6 @@
 "backup_alarm_minutes" = "Ring again after";
 "backup_alarm_minutes_fmt" = "%d min after";
 "backup_alarm_before_snooze" = "This rings before your snooze ends.";
-"backup_alarm_early_access_note" = "If you start using it during early access, you keep it after the full release.";
 "backup_alarm_row_badge" = "Oversleep guard on";
 
 /* Update gate (#116) */
@@ -265,8 +264,6 @@
 "end_fade_footer" = "Short fade at the end of the loop.";
 "fade_backup_note" = "Gentle start is not applied to the oversleep guard.";
 "playlist_backup_note" = "For playlist alarms, the oversleep guard plays the first track made louder.";
-"pro_early_access" = "PRO · Early access";
-"playlist_early_access_note" = "If you start using it during early access, you can keep using it after the full release.";
 "playlist_title" = "Playlists";
 "playlist_new" = "New playlist";
 "playlist_new_default_name" = "New playlist";
@@ -393,3 +390,27 @@
 "permission_settings_open" = "Open Settings";
 "received_title" = "Received";
 "received_detail" = "Open My Sound Alarm to choose the part to ring.";
+"empty_quick_title" = "What time do you wake up?";
+"empty_quick_other" = "Other time";
+"empty_quick_hint" = "Creates an alarm.";
+"silent_sound_message" = "This part is nearly silent. Choose another part or another sound.";
+"silent_sound_reselect" = "Choose another part";
+"silent_sound_other" = "Choose another sound";
+"silent_sound_use_anyway" = "Use anyway";
+"silent_alarm_warning" = "Sound is hard to hear";
+"silent_sound_whole_file_message" = "This audio has no sound. Choose another sound.";
+"settings_mail_diagnostics_notice" = "To help us investigate, the app's status is attached (song titles and sound files are not included). You can remove the attachment before sending.\n";
+"settings_support_page" = "Support page";
+"followup_tomorrow" = "Tomorrow";
+"followup_weekdays" = "Weekdays";
+"followup_everyday" = "Every day";
+"add_from_music" = "Add from Music";
+"music_library_unavailable" = "This song can't be imported.";
+"music_library_permission_denied" = "Allow access to Music in Settings.";
+"more" = "More";
+"more_label_fmt" = "Label: %@";
+"more_no_label" = "No label";
+"more_separator" = " · ";
+"more_accessibility_fmt" = "%1$@, %2$@";
+
+"control_open_list" = "My Sound Alarm";

@@ -18,6 +18,12 @@ struct LibraryView: View {
     @State private var shareLanding = ShareImportLanding.shared
     @State private var highlightedFileName: String?
     @State private var didRunLibraryLandingUITest = false
+    @State private var musicLibrary = MusicLibraryImportController()
+
+    /// サウンド一覧のバナー枠（#266）。試聴中は出さない。
+    private var isPreviewingSound: Bool {
+        AudioPlayer.shared.playingFileName != nil
+    }
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -26,6 +32,7 @@ struct LibraryView: View {
                 SoundLibrarySections(
                     isSelecting: false,
                     selectedSound: $selectedSound,
+                    musicLibrary: musicLibrary,
                     middle: AnyView(playlistSection),
                     volumeBoostedFileName: $volumeBoostedFileName,
                     showVolumeNoticeRow: true,
@@ -48,6 +55,11 @@ struct LibraryView: View {
                 #endif
             }
             .accessibilityIdentifier("library.root")
+            .safeAreaInset(edge: .bottom) {
+                // サウンド一覧の下部バナー枠（#266）。AdsConfig.isEnabled == false の間は
+                // 高さ0・非表示で、判定と計測だけ行う。
+                AdSlot(slot: .bannerSounds, isSuppressed: isPreviewingSound)
+            }
             .task {
                 #if DEBUG
                 guard AppGroup.isUITestLibraryImportLanding,
@@ -66,6 +78,7 @@ struct LibraryView: View {
                 guard let fileName else { return }
                 highlightSharedSound(fileName, proxy: proxy)
             }
+            .musicLibraryImport(musicLibrary)
             }
             .warmListBackground()
             .navigationTitle(String(localized: "library_title"))

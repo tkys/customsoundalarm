@@ -207,7 +207,6 @@
 "backup_alarm_minutes" = "다시 울릴 시간";
 "backup_alarm_minutes_fmt" = "%d분 후";
 "backup_alarm_before_snooze" = "다시 알림이 끝나기 전에 울립니다.";
-"backup_alarm_early_access_note" = "사전 공개 기간에 사용하기 시작하면 정식 출시 후에도 계속 사용할 수 있습니다.";
 "backup_alarm_row_badge" = "늦잠 방지 켜짐";
 
 /* Update gate (#116) */
@@ -265,8 +264,6 @@
 "end_fade_footer" = "반복 연결부의 끝을 짧게 페이드아웃합니다.";
 "fade_backup_note" = "부드럽게 시작은 과수면 방지에 적용되지 않습니다.";
 "playlist_backup_note" = "재생목록 알람의 과수면 방지는 첫 곡을 더 크게 재생합니다.";
-"pro_early_access" = "PRO · 사전 공개";
-"playlist_early_access_note" = "사전 공개 중에 사용을 시작하면 정식 출시 후에도 계속 사용할 수 있습니다.";
 "playlist_title" = "재생목록";
 "playlist_new" = "새 재생목록";
 "playlist_new_default_name" = "새 재생목록";
@@ -393,3 +390,27 @@
 "permission_settings_open" = "설정 열기";
 "received_title" = "받았습니다";
 "received_detail" = "My Sound Alarm을 열어 울릴 부분을 선택하세요.";
+"empty_quick_title" = "몇 시에 일어나시나요?";
+"empty_quick_other" = "다른 시간";
+"empty_quick_hint" = "알람을 만듭니다.";
+"silent_sound_message" = "이 부분은 거의 무음입니다. 다른 부분이나 다른 소리를 선택하세요.";
+"silent_sound_reselect" = "다른 부분 선택";
+"silent_sound_other" = "다른 소리 선택";
+"silent_sound_use_anyway" = "그대로 사용";
+"silent_alarm_warning" = "소리가 거의 들리지 않습니다";
+"silent_sound_whole_file_message" = "이 오디오에는 소리가 없습니다. 다른 소리를 선택하세요.";
+"settings_mail_diagnostics_notice" = "조사를 위해 앱 상태를 첨부했습니다(곡 제목이나 음원 파일은 포함되지 않습니다). 보내기 전에 첨부를 삭제할 수 있습니다.\n";
+"settings_support_page" = "지원 페이지";
+"followup_tomorrow" = "내일도";
+"followup_weekdays" = "평일";
+"followup_everyday" = "매일";
+"add_from_music" = "음악에서 추가";
+"music_library_unavailable" = "이 곡은 가져올 수 없습니다.";
+"music_library_permission_denied" = "설정에서 음악 접근을 허용하세요.";
+"more" = "더 보기";
+"more_label_fmt" = "레이블: %@";
+"more_no_label" = "레이블 없음";
+"more_separator" = " · ";
+"more_accessibility_fmt" = "%1$@, %2$@";
+
+"control_open_list" = "My Sound Alarm";

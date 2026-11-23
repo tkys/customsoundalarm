@@ -1,15 +1,15 @@
-■ Wybierz fragment budzika prosto z Udostępniania
-Udostępnij wideo lub plik audio ze Zdjęć albo z Plików i wybierz My Sound Alarm. Po otwarciu aplikacji pojawi się ekran przycinania.
+■ Używaj utworów z aplikacji Muzyka
+Dodając dźwięk, wybierz „Dodaj z Muzyki”, aby wybrać fragment budzika z utworów w aplikacji Muzyka.
 
-■ Szybsze tworzenie budzików
-• Nowe budziki zachowują Twoje ostatnie ustawienia Drzemki, Playlisty i Łagodnego startu.
-• Nad godziną zobaczysz 5 i 10 minut po Twoim najpóźniejszym budziku. Stuknij, aby wybrać.
+■ Otwieraj z centrum sterowania
+Dodaj „My Sound Alarm” i „Dodaj budzik” do centrum sterowania. Stuknij, aby otworzyć listę budzików lub ekran dodawania.
 
-■ Wiesz, kiedy budzik nie może zadzwonić
-Jeśli zgoda na budziki jest wyłączona, na górze listy pojawi się „Budziki nie zadzwonią”. Stuknij „Zezwól”, aby to naprawić.
+■ Prostszy edytor budzika
+Drzemka, Etykieta i Łagodny start są teraz w sekcji „Więcej”.
 
 ■ Poza tym
-• Gdy cichy dźwięk zostanie podgłośniony do normalnej głośności, pod nim pojawi się krótka informacja.
-• Gdy będziesz mieć dwa własne dźwięki, aplikacja podpowie, że możesz utworzyć playlistę.
+• Jeśli wybierzesz prawie cichy fragment, aplikacja Cię o tym poinformuje.
+• E-mail z opcji „Zgłoś problem lub zapytaj” w Ustawieniach dołącza teraz stan aplikacji, aby pomóc nam zbadać problemy. Nie zawiera nazw utworów ani plików dźwiękowych. Możesz usunąć załącznik przed wysłaniem.
+• Naprawiono nakładający się tekst na ekranie przycinania przy największym rozmiarze tekstu.
 
 Dziękujemy za korzystanie z My Sound Alarm.

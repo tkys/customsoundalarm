@@ -11,8 +11,11 @@ final class LocalizationScreenshotUITests: XCTestCase {
 
     private var app: XCUIApplication!
 
-    override func setUp() {
-        super.setUp()
+    override func setUpWithError() throws {
+        try XCTSkipUnless(
+            ProcessInfo.processInfo.environment["LOCALIZATION_SCREENSHOTS"] == "1",
+            "Localization screenshots run only with TEST_RUNNER_LOCALIZATION_SCREENSHOTS=1"
+        )
         continueAfterFailure = false
     }
 

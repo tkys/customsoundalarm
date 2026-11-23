@@ -177,6 +177,15 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: メールが使えない端末として共有シートを開く（#255）
+    static var isUITestContactNoMail: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-contact-no-mail")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: 小さい音声の取り込み（#224）
     static var isUITestQuietCrop: Bool {
     #if DEBUG
@@ -184,6 +193,91 @@ enum AppGroup {
     #else
         false
     #endif
+    }
+
+    /// UIテスト用: ミュージックライブラリの曲を選んだあとの切り取り画面（#245）
+    static var isUITestMusicCrop: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-music-crop")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト・スクショ用: ミュージックの「取り込めません」1行を出す（#245）
+    static var isUITestMusicUnavailable: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-music-unavailable")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト・スクショ用: ミュージックの許可がないときの1行を出す（#245 レビュー）
+    static var isUITestMusicPermissionDenied: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-music-permission-denied")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: 初めての1回きりアラームが鳴って止まった状態を作る（#247）
+    static var isUITestSeedFirstAlarmFollowup: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-first-followup")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: 無音の音を使ったアラームを1本入れる（#256）
+    static var isUITestSeedSilentAlarm: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-silent-alarm")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト・スクショ用: 寝過ごし防止がスヌーズより先に鳴るアラーム（#211 レビュー）
+    static var isUITestSeedBackupWarning: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-backup-warning")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: 無音の音声の取り込み（#256）
+    static var isUITestSilentCrop: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-silent-crop")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: 一部だけ無音の音声の取り込み（#256 レビュー）
+    static var isUITestPartialSilentCrop: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-partial-silent-crop")
+    #else
+        false
+    #endif
+    }
+
+    /// 既存アラームの無音判定キャッシュ（ファイル名 → level）。#256 レビュー
+    private static let silentAlarmScanCacheKey = "silent_alarm_scan_cache_v1"
+
+    static var silentAlarmScanCache: [String: String] {
+        get {
+            UserDefaults.standard.dictionary(forKey: silentAlarmScanCacheKey)
+                as? [String: String] ?? [:]
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: silentAlarmScanCacheKey)
+        }
     }
 
     /// UIテスト用: 取り込んだ音が2つある状態（#207 の提案行）
@@ -268,6 +362,24 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: コントロールセンターの「一覧」から起動した状態（#272）
+    static var isUITestControlList: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-control-list")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: コントロールセンターの「追加」から起動した状態（#272）
+    static var isUITestControlAdd: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-control-add")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: 編集画面を直接開く（DEBUGのみ・#122）
     static var isUITestOpenEditAlarm: Bool {
     #if DEBUG
@@ -318,6 +430,7 @@ enum AppGroup {
     static var isUITestSkipAlarmSync: Bool {
     #if DEBUG
         CommandLine.arguments.contains("-uitest-seed-enabled-alarms")
+            || CommandLine.arguments.contains("-uitest-skip-alarm-sync")
     #else
         false
     #endif
@@ -363,6 +476,18 @@ enum AppGroup {
     static var playlistUnlockShown: Bool {
         get { userDefaults.bool(forKey: "playlistUnlockShown") }
         set { userDefaults.set(newValue, forKey: "playlistUnlockShown") }
+    }
+
+    /// 初めての1回きりアラームの提案を出し終えたか（#247）。
+    static var firstAlarmFollowupHandled: Bool {
+        get { userDefaults.bool(forKey: "firstAlarmFollowupHandled") }
+        set { userDefaults.set(newValue, forKey: "firstAlarmFollowupHandled") }
+    }
+
+    /// 提案を一度でも表示したか（強制終了で「無視」を取りこぼさないため・#247）。
+    static var firstAlarmFollowupShown: Bool {
+        get { userDefaults.bool(forKey: "firstAlarmFollowupShown") }
+        set { userDefaults.set(newValue, forKey: "firstAlarmFollowupShown") }
     }
 
     /// UIテスト用: プレイリストの解放条件を有効にする（DEBUGのみ・#216）
@@ -489,6 +614,22 @@ enum AppGroup {
         set {
             guard let data = try? JSONEncoder().encode(newValue) else { return }
             userDefaults.set(data, forKey: "primary_sound_names")
+        }
+    }
+
+    /// 通常アラームの次回発火予定日時（entryID → fireDate・#263）。
+    /// 1回きりの reconcile で「発火予定時刻」を使うためだけの計測用メタデータ。
+    /// スケジュールの判定には使わない。
+    static var primaryScheduledFireDates: [UUID: Date] {
+        get {
+            guard let data = userDefaults.data(forKey: "primary_scheduled_fire_dates"),
+                  let map = try? JSONDecoder().decode([UUID: Date].self, from: data)
+            else { return [:] }
+            return map
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else { return }
+            userDefaults.set(data, forKey: "primary_scheduled_fire_dates")
         }
     }
 

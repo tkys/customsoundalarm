@@ -207,7 +207,6 @@
 "backup_alarm_minutes" = "Sonner à nouveau après";
 "backup_alarm_minutes_fmt" = "Après %d min";
 "backup_alarm_before_snooze" = "Elle sonne avant la fin de votre rappel.";
-"backup_alarm_early_access_note" = "Si vous l’utilisez pendant l’accès anticipé, elle reste disponible après la version finale.";
 "backup_alarm_row_badge" = "Anti-grasse matinée activée";
 
 /* Update gate (#116) */
@@ -265,8 +264,6 @@
 "end_fade_footer" = "Court fondu à la fin de la boucle.";
 "fade_backup_note" = "Le démarrage en douceur ne s'applique pas au garde-fou anti-grasse matinée.";
 "playlist_backup_note" = "Pour les alarmes avec playlist, le garde-fou anti-grasse matinée joue le premier titre plus fort.";
-"pro_early_access" = "PRO · Accès anticipé";
-"playlist_early_access_note" = "Si vous commencez à l'utiliser pendant l'accès anticipé, vous pourrez continuer à l'utiliser après la sortie.";
 "playlist_title" = "Playlists";
 "playlist_new" = "Nouvelle playlist";
 "playlist_new_default_name" = "Nouvelle playlist";
@@ -393,3 +390,27 @@
 "permission_settings_open" = "Ouvrir Réglages";
 "received_title" = "Reçu";
 "received_detail" = "Ouvrez My Sound Alarm pour choisir la partie qui sonne.";
+"empty_quick_title" = "À quelle heure vous levez-vous ?";
+"empty_quick_other" = "Autre heure";
+"empty_quick_hint" = "Crée une alarme.";
+"silent_sound_message" = "Cette partie est presque silencieuse. Choisissez une autre partie ou un autre son.";
+"silent_sound_reselect" = "Choisir une autre partie";
+"silent_sound_other" = "Choisir un autre son";
+"silent_sound_use_anyway" = "Utiliser quand même";
+"silent_alarm_warning" = "Le son est à peine audible";
+"silent_sound_whole_file_message" = "Cet audio ne contient aucun son. Choisissez un autre son.";
+"settings_mail_diagnostics_notice" = "Pour nous aider à enquêter, l’état de l’application est joint (aucun titre de chanson ni fichier audio n’est inclus). Vous pouvez supprimer la pièce jointe avant l’envoi.\n";
+"settings_support_page" = "Page d’aide";
+"followup_tomorrow" = "Demain";
+"followup_weekdays" = "En semaine";
+"followup_everyday" = "Tous les jours";
+"add_from_music" = "Ajouter depuis Musique";
+"music_library_unavailable" = "Ce morceau ne peut pas être importé.";
+"music_library_permission_denied" = "Autorisez l’accès à Musique dans Réglages.";
+"more" = "Plus";
+"more_label_fmt" = "Libellé : %@";
+"more_no_label" = "Sans libellé";
+"more_separator" = " · ";
+"more_accessibility_fmt" = "%1$@, %2$@";
+
+"control_open_list" = "My Sound Alarm";

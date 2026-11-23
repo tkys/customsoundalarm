@@ -207,7 +207,6 @@
 "backup_alarm_minutes" = "Zadzwoń ponownie po";
 "backup_alarm_minutes_fmt" = "po %d min";
 "backup_alarm_before_snooze" = "Dzwoni przed końcem drzemki.";
-"backup_alarm_early_access_note" = "Jeśli zaczniesz jej używać we wczesnym dostępie, zachowasz ją po pełnym wydaniu.";
 "backup_alarm_row_badge" = "Ochrona przed zaspaniem włączona";
 
 /* Update gate (#116) */
@@ -265,8 +264,6 @@
 "end_fade_footer" = "Krótkie wyciszenie na końcu pętli.";
 "fade_backup_note" = "Łagodny start nie dotyczy zabezpieczenia przed zaspaniem.";
 "playlist_backup_note" = "W alarmach z playlistą zabezpieczenie przed zaspaniem odtwarza pierwszy utwór głośniej.";
-"pro_early_access" = "PRO · Wczesny dostęp";
-"playlist_early_access_note" = "Jeśli zaczniesz używać podczas wczesnego dostępu, możesz używać go po pełnej premierze.";
 "playlist_title" = "Playlisty";
 "playlist_new" = "Nowa playlista";
 "playlist_new_default_name" = "Nowa playlista";
@@ -393,3 +390,27 @@
 "permission_settings_open" = "Otwórz Ustawienia";
 "received_title" = "Odebrano";
 "received_detail" = "Otwórz My Sound Alarm i wybierz część, która ma grać.";
+"empty_quick_title" = "O której wstajesz?";
+"empty_quick_other" = "Inna godzina";
+"empty_quick_hint" = "Tworzy budzik.";
+"silent_sound_message" = "Ta część jest prawie cicha. Wybierz inną część lub inny dźwięk.";
+"silent_sound_reselect" = "Wybierz inną część";
+"silent_sound_other" = "Wybierz inny dźwięk";
+"silent_sound_use_anyway" = "Użyj mimo to";
+"silent_alarm_warning" = "Dźwięk jest ledwo słyszalny";
+"silent_sound_whole_file_message" = "Ten plik audio nie zawiera dźwięku. Wybierz inny dźwięk.";
+"settings_mail_diagnostics_notice" = "Aby pomóc nam w diagnozie, dołączono stan aplikacji (bez tytułów utworów i plików dźwiękowych). Załącznik możesz usunąć przed wysłaniem.\n";
+"settings_support_page" = "Strona pomocy";
+"followup_tomorrow" = "Jutro";
+"followup_weekdays" = "Dni robocze";
+"followup_everyday" = "Codziennie";
+"add_from_music" = "Dodaj z Muzyki";
+"music_library_unavailable" = "Nie można zaimportować tego utworu.";
+"music_library_permission_denied" = "Zezwól na dostęp do Muzyki w Ustawieniach.";
+"more" = "Więcej";
+"more_label_fmt" = "Etykieta: %@";
+"more_no_label" = "Brak etykiety";
+"more_separator" = " · ";
+"more_accessibility_fmt" = "%1$@, %2$@";
+
+"control_open_list" = "My Sound Alarm";

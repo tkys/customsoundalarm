@@ -31,6 +31,16 @@ struct VideoImportFlow: View {
     @State private var soundName = ""
     @State private var isProcessing = false
     @State private var errorMessage: String?
+    @State private var silentLevel: SilentSoundLevel?
+    @State private var silentCoversWholeFile = false
+    @State private var pendingSilentSave: PendingVideoSave?
+
+    private struct PendingVideoSave {
+        let result: ConversionResult
+        let cafName: String
+        let thumbnailFileName: String?
+        let audioURL: URL
+    }
     @State private var showingPhotoPicker = false
     @State private var showingFilePicker = false
 
@@ -106,7 +116,11 @@ struct VideoImportFlow: View {
             didLoadInitialFile = true
             loadVideoFromFile(url: initialFileURL)
         }
-        .onDisappear { previewer.stop() }
+        .onDisappear {
+            previewer.stop()
+            // 無音の知らせを出したまま閉じたときの取りこぼしを消す（#256）
+            deletePendingFile()
+        }
         // 写真ライブラリ
         .photosPicker(
             isPresented: $showingPhotoPicker,
@@ -298,53 +312,17 @@ struct VideoImportFlow: View {
 
             // 下部: 名前入力 + アクション
             VStack(spacing: 10) {
-                if let errorMessage {
-                    Text(errorMessage)
-                        .foregroundStyle(.red)
-                        .font(.caption)
-                }
-
-                HStack(spacing: 8) {
-                    Image(systemName: "waveform")
-                        .foregroundStyle(Brand.orange)
-                    TextField("sound_name_placeholder", text: $soundName)
-                        .textFieldStyle(.plain)
-                        .submitLabel(.done)
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.warmCardBackground)
-                )
-
-                // 主アクション: 目立つ pill ボタン（#80-7）
-                Button {
-                    previewer.stop()
-                    extractAndConvert(from: url)
-                } label: {
-                    HStack(spacing: 8) {
-                        if isProcessing {
-                            ProgressView()
-                                .tint(.white)
-                        } else {
-                            Image(systemName: "waveform.badge.plus")
-                        }
-                        Text("crop_and_save")
-                            .fontWeight(.semibold)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(
-                        Capsule().fill(
-                            (isProcessing || !canSave)
-                                ? AnyShapeStyle(Color.gray.opacity(0.4))
-                                : AnyShapeStyle(Brand.saveButtonGradient)
-                        )
+                if let silentLevel {
+                    SilentSoundNoticeView(
+                        level: silentLevel,
+                        isWholeFileSilent: silentCoversWholeFile,
+                        onReselect: { handleSilentAction(.reselect) },
+                        onOtherSound: { handleSilentAction(.otherSound) },
+                        onUseAnyway: { handleSilentAction(.useAnyway) }
                     )
-                    .foregroundStyle(.white)
+                } else {
+                    nameAndSaveControls(url: url)
                 }
-                .disabled(isProcessing || !canSave)
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)
@@ -494,43 +472,138 @@ struct VideoImportFlow: View {
                 )
                 let cafName = result.fileName
 
-                try? FileManager.default.removeItem(at: audioURL)
-                extractedAudioURL = nil
-
                 // サムネイル: 元動画の12フレーム候補から輝度分散最大の1枚（#86）
                 let thumbnailFileName = await Self.generateThumbnail(videoURL: url)
 
-                let sound = AlarmSound(
-                    name: soundName.isEmpty ? url.deletingPathExtension().lastPathComponent : soundName,
-                    fileName: cafName,
-                    thumbnailFileName: thumbnailFileName
-                )
-                soundStore.add(sound)
-                selectedSound = sound
-                let showsVolumeNotice = LoudnessNormalizer.shouldShowVolumeNotice(
+                let level = SilentSoundLogic.judge(
+                    lufsBefore: result.lufsBefore,
+                    peakDb: result.peakDb,
                     gainDb: result.gainDb
                 )
-                if showsVolumeNotice {
-                    volumeBoostedFileName = cafName
+                if level != .ok {
+                    // 抽出した音声全体が無音なら、範囲を選び直しても無音（#256 レビュー）。
+                    let wholeFileSilent = await Task.detached {
+                        let buffer = AudioSampleLoader.loadMono44k(fileURL: audioURL)
+                        return SilentSoundLogic.isWholeFileSilent(
+                            measurement: buffer.flatMap { LoudnessMeter.measure(buffer: $0) },
+                            isReadable: buffer != nil
+                        )
+                    }.value
+                    pendingSilentSave = PendingVideoSave(
+                        result: result,
+                        cafName: cafName,
+                        thumbnailFileName: thumbnailFileName,
+                        audioURL: audioURL
+                    )
+                    silentCoversWholeFile = wholeFileSilent
+                    silentLevel = level
+                    return
                 }
 
-                onSaved?()
-                AnalyticsService.shared.capture(.customSoundImported(
-                    source: customSoundSource,
-                    peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
-                    gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
-                    lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore),
-                    shareMedia: shareMedia,
-                    volumeNoticeShown: showsVolumeNotice
-                ))
-                await AdPresenter.presentInterstitialIfAllowed(after: .importSaved)
-                dismiss()
+                await completeSave(
+                    result: result,
+                    cafName: cafName,
+                    thumbnailFileName: thumbnailFileName,
+                    audioURL: audioURL,
+                    videoURL: url
+                )
             } catch {
                 errorMessage = error.localizedDescription
                 // 計測: reason は安定識別子のみ（PII/パス混入を避けるため localizedDescription 不使用）
                 AnalyticsService.shared.capture(.videoImportFailed(reason: .from(error)))
             }
         }
+    }
+
+    /// 無音でないことを確認したあとの保存（#256）。
+    private func completeSave(
+        result: ConversionResult,
+        cafName: String,
+        thumbnailFileName: String?,
+        audioURL: URL,
+        videoURL: URL
+    ) async {
+        try? FileManager.default.removeItem(at: audioURL)
+        extractedAudioURL = nil
+
+        let sound = AlarmSound(
+            name: soundName.isEmpty
+                ? videoURL.deletingPathExtension().lastPathComponent
+                : soundName,
+            fileName: cafName,
+            thumbnailFileName: thumbnailFileName,
+            lufsAtImport: result.lufsBefore,
+            gainDbAtImport: result.gainDb
+        )
+        soundStore.add(sound)
+        selectedSound = sound
+        let showsVolumeNotice = LoudnessNormalizer.shouldShowVolumeNotice(
+            gainDb: result.gainDb
+        )
+        if showsVolumeNotice {
+            volumeBoostedFileName = cafName
+        }
+
+        onSaved?()
+        AnalyticsService.shared.capture(.customSoundImported(
+            source: customSoundSource,
+            peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
+            gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
+            lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore),
+            shareMedia: shareMedia,
+            volumeNoticeShown: showsVolumeNotice
+        ))
+        await AdPresenter.presentInterstitialIfAllowed(after: .importSaved)
+        dismiss()
+    }
+
+    private func handleSilentAction(_ action: SilentSoundAction) {
+        guard let level = silentLevel else { return }
+        AnalyticsService.shared.capture(.silentSoundBlocked(
+            level: level,
+            source: customSoundSource,
+            action: action
+        ))
+
+        switch action {
+        case .reselect:
+            deletePendingFile()
+            pendingSilentSave = nil
+            silentLevel = nil
+            silentCoversWholeFile = false
+        case .otherSound:
+            deletePendingFile()
+            if let pending = pendingSilentSave {
+                try? FileManager.default.removeItem(at: pending.audioURL)
+            }
+            pendingSilentSave = nil
+            extractedAudioURL = nil
+            silentLevel = nil
+            silentCoversWholeFile = false
+            onUserClosed?()
+            dismiss()
+        case .useAnyway:
+            guard let pending = pendingSilentSave else { return }
+            pendingSilentSave = nil
+            silentLevel = nil
+            silentCoversWholeFile = false
+            Task {
+                await completeSave(
+                    result: pending.result,
+                    cafName: pending.cafName,
+                    thumbnailFileName: pending.thumbnailFileName,
+                    audioURL: pending.audioURL,
+                    videoURL: videoURL ?? pending.audioURL
+                )
+            }
+        case .fixedExisting:
+            break
+        }
+    }
+
+    private func deletePendingFile() {
+        guard let pending = pendingSilentSave else { return }
+        try? AudioConverter.shared.deleteSound(fileName: pending.cafName)
     }
 
     /// 変換後のサイズ見積り。動画は600秒上限だが選択範囲に応じて表示する（#79-8）
@@ -547,6 +620,57 @@ struct VideoImportFlow: View {
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
         }
+    }
+    /// 名前入力と保存ボタン。無音の知らせが出ているあいだは隠す（#256）。
+    @ViewBuilder
+    private func nameAndSaveControls(url: URL) -> some View {
+        if let errorMessage {
+            Text(errorMessage)
+                .foregroundStyle(.red)
+                .font(.caption)
+        }
+
+        HStack(spacing: 8) {
+            Image(systemName: "waveform")
+                .foregroundStyle(Brand.orange)
+            TextField("sound_name_placeholder", text: $soundName)
+                .textFieldStyle(.plain)
+                .submitLabel(.done)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.warmCardBackground)
+        )
+
+        // 主アクション: 目立つ pill ボタン（#80-7）
+        Button {
+            previewer.stop()
+            extractAndConvert(from: url)
+        } label: {
+            HStack(spacing: 8) {
+                if isProcessing {
+                    ProgressView()
+                        .tint(.white)
+                } else {
+                    Image(systemName: "waveform.badge.plus")
+                }
+                Text("crop_and_save")
+                    .fontWeight(.semibold)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(
+                Capsule().fill(
+                    (isProcessing || !canSave)
+                        ? AnyShapeStyle(Color.gray.opacity(0.4))
+                        : AnyShapeStyle(Brand.saveButtonGradient)
+                )
+            )
+            .foregroundStyle(.white)
+        }
+        .disabled(isProcessing || !canSave)
     }
 }
 

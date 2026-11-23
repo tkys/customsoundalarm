@@ -16,6 +16,8 @@ struct SoundImportModifier: ViewModifier {
     var onImportFlowDismissed: (() -> Void)?
     /// 取り込みを保存できたとき（#246）
     var onImportSaved: ((AlarmSound) -> Void)?
+    /// UIテスト用: 動画の切り取り画面を直接開く（#237）
+    var initialVideoURL: URL?
 
     func body(content: Content) -> some View {
         content
@@ -31,6 +33,7 @@ struct SoundImportModifier: ViewModifier {
                     AudioCropView(
                         source: pending,
                         selectedSound: $selectedSound,
+                        customSoundSource: pending.source,
                         onSaved: {
                             if let sound = selectedSound {
                                 onImportSaved?(sound)
@@ -45,6 +48,7 @@ struct SoundImportModifier: ViewModifier {
                 NavigationStack {
                     VideoImportFlow(
                         selectedSound: $selectedSound,
+                        initialFileURL: initialVideoURL,
                         onSaved: {
                             if let sound = selectedSound {
                                 onImportSaved?(sound)
@@ -110,7 +114,8 @@ extension View {
         errorMessage: Binding<String?>,
         volumeBoostedFileName: Binding<String?>,
         onImportFlowDismissed: (() -> Void)? = nil,
-        onImportSaved: ((AlarmSound) -> Void)? = nil
+        onImportSaved: ((AlarmSound) -> Void)? = nil,
+        initialVideoURL: URL? = nil
     ) -> some View {
         modifier(SoundImportModifier(
             selectedSound: selectedSound,
@@ -120,7 +125,8 @@ extension View {
             errorMessage: errorMessage,
             volumeBoostedFileName: volumeBoostedFileName,
             onImportFlowDismissed: onImportFlowDismissed,
-            onImportSaved: onImportSaved
+            onImportSaved: onImportSaved,
+            initialVideoURL: initialVideoURL
         ))
     }
 }

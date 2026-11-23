@@ -207,7 +207,6 @@
 "backup_alarm_minutes" = "Volver a sonar después de";
 "backup_alarm_minutes_fmt" = "%d min después";
 "backup_alarm_before_snooze" = "Suena antes de que termine la posposición.";
-"backup_alarm_early_access_note" = "Si empiezas a usarla durante el acceso anticipado, la conservarás tras la versión final.";
 "backup_alarm_row_badge" = "Protección activada";
 
 /* Update gate (#116) */
@@ -265,8 +264,6 @@
 "end_fade_footer" = "Fundido corto al final del bucle.";
 "fade_backup_note" = "El inicio suave no se aplica al aviso de sueño.";
 "playlist_backup_note" = "En las alarmas con lista, el aviso de sueño reproduce la primera pista más alta.";
-"pro_early_access" = "PRO · Acceso anticipado";
-"playlist_early_access_note" = "Si empiezas a usarlo durante el acceso anticipado, podrás seguir usándolo después del lanzamiento.";
 "playlist_title" = "Listas";
 "playlist_new" = "Nueva lista";
 "playlist_new_default_name" = "Nueva lista";
@@ -393,3 +390,27 @@
 "permission_settings_open" = "Abrir Ajustes";
 "received_title" = "Recibido";
 "received_detail" = "Abre My Sound Alarm para elegir la parte que suena.";
+"empty_quick_title" = "¿A qué hora te levantas?";
+"empty_quick_other" = "Otra hora";
+"empty_quick_hint" = "Crea una alarma.";
+"silent_sound_message" = "Esta parte es casi silenciosa. Elige otra parte u otro sonido.";
+"silent_sound_reselect" = "Elegir otra parte";
+"silent_sound_other" = "Elegir otro sonido";
+"silent_sound_use_anyway" = "Usar igualmente";
+"silent_alarm_warning" = "El sonido apenas se oye";
+"silent_sound_whole_file_message" = "Este audio no tiene sonido. Elige otro sonido.";
+"settings_mail_diagnostics_notice" = "Para ayudarnos a investigar, se adjunta el estado de la app (no incluye títulos de canciones ni archivos de audio). Puedes quitar el archivo adjunto antes de enviar.\n";
+"settings_support_page" = "Página de soporte";
+"followup_tomorrow" = "Mañana";
+"followup_weekdays" = "Entre semana";
+"followup_everyday" = "Todos los días";
+"add_from_music" = "Añadir desde Música";
+"music_library_unavailable" = "Esta canción no se puede importar.";
+"music_library_permission_denied" = "Permite el acceso a Música en Ajustes.";
+"more" = "Más";
+"more_label_fmt" = "Etiqueta: %@";
+"more_no_label" = "Sin etiqueta";
+"more_separator" = " · ";
+"more_accessibility_fmt" = "%1$@, %2$@";
+
+"control_open_list" = "My Sound Alarm";

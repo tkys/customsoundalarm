@@ -362,6 +362,76 @@ struct CustomSoundAlarmApp: App {
                         }
                     }
 
+                    // UIテスト用: 初めての1回きりアラームが鳴って止まった状態（#247）
+                    if AppGroup.isUITestSeedFirstAlarmFollowup {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        SoundStore.shared.resetForUITest()
+                        SoundStore.shared.resetPresetNamesForUITest()
+                        AppGroup.firstAlarmFollowupHandled = false
+                        AppGroup.firstAlarmFollowupShown = false
+                        AppGroup.firstInstallVersion = "1.8.4"
+                        AppGroup.playlistUnlockShown = true
+                        SoundStore.shared.clearPendingPlaylistUnlock()
+
+                        let alarm = AlarmEntry(
+                            hour: 7,
+                            minute: 0,
+                            isEnabled: false,
+                            repeatWeekdays: [],
+                            soundFileName: "PresetMarimba.caf"
+                        )
+                        AlarmStore.shared.add(alarm)
+
+                        let uid = AlarmUIDStore.uid(for: alarm.id)
+                        try? FileManager.default.removeItem(at: AlarmLocalHistoryStore.fileURL)
+                        AlarmLocalHistoryStore.append(
+                            event: "alarm_fired",
+                            properties: [
+                                "alarm_uid": uid,
+                                "alarm_time": "07:00",
+                                "repeat_days": "",
+                                "is_repeating": false
+                            ]
+                        )
+                        AlarmLocalHistoryStore.append(
+                            event: "alarm_stopped",
+                            properties: [
+                                "alarm_uid": uid,
+                                "alarm_time": "07:00",
+                                "repeat_days": ""
+                            ]
+                        )
+                    }
+
+                    // UIテスト用: 無音の音を使ったアラーム（#256）
+                    if AppGroup.isUITestSeedSilentAlarm {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        SoundStore.shared.resetForUITest()
+                        SoundStore.shared.resetPresetNamesForUITest()
+                        let fileName = "SilentAlarm.caf"
+                        let url = AudioConverter.shared.soundsDirectory
+                            .appendingPathComponent(fileName)
+                        try? FileManager.default.removeItem(at: url)
+                        // ファイル名が同じなので、前回の判定キャッシュを消してから測る
+                        AppGroup.silentAlarmScanCache = [:]
+                        if (try? SilentTestAudioFactory.makeQuietFile(at: url)) != nil {
+                            SoundStore.shared.add(AlarmSound(
+                                name: "Silent alarm",
+                                fileName: fileName,
+                                isPreset: false
+                            ))
+                            AlarmStore.shared.add(AlarmEntry(
+                                hour: 7,
+                                minute: 0,
+                                isEnabled: true,
+                                label: String(localized: "alarm_placeholder"),
+                                soundFileName: fileName
+                            ))
+                        }
+                    }
+
                     // UIテスト用: アラーム一覧を時刻順で検証するためのシード
                     if AppGroup.isUITestSeedEnabledAlarms {
                         AppGroup.hasCompletedOnboarding = true
@@ -424,16 +494,31 @@ struct CustomSoundAlarmApp: App {
                     }
                     if AppGroup.isUITestOpenEditAlarm {
                         AlarmStore.shared.resetForUITest()
-                        AlarmStore.shared.add(AlarmEntry(
-                            hour: 7,
-                            minute: 0,
-                            isEnabled: false,
-                            label: "UITest Alarm",
-                            repeatWeekdays: [],
-                            soundFileName: "",
-                            snoozeMinutes: 9,
-                            backupMinutes: nil
-                        ))
+                        if AppGroup.isUITestSeedBackupWarning {
+                            // 寝過ごし防止がスヌーズより先に鳴るアラーム（#211 レビュー）
+                            let japanese = Locale.current.language.languageCode?.identifier == "ja"
+                            AlarmStore.shared.add(AlarmEntry(
+                                hour: 7,
+                                minute: 0,
+                                isEnabled: false,
+                                label: japanese ? "朝" : "Morning",
+                                repeatWeekdays: [],
+                                soundFileName: "PresetBell.caf",
+                                snoozeMinutes: 9,
+                                backupMinutes: 5
+                            ))
+                        } else {
+                            AlarmStore.shared.add(AlarmEntry(
+                                hour: 7,
+                                minute: 0,
+                                isEnabled: false,
+                                label: "UITest Alarm",
+                                repeatWeekdays: [],
+                                soundFileName: "",
+                                snoozeMinutes: 9,
+                                backupMinutes: nil
+                            ))
+                        }
                     }
                     #endif
 

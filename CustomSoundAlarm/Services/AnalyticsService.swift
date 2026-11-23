@@ -25,6 +25,11 @@ enum UnlockAction: String, Sendable, CaseIterable {
     case later
 }
 
+/// アラーム作成の入口（#231）
+enum AlarmCreatedSource: String, Sendable, CaseIterable {
+    case emptyQuick = "empty_quick"
+}
+
 /// 許可バナーの行動の段階（#239）
 enum PermissionBannerStep: String, Sendable, CaseIterable {
     case sheetShown = "sheet_shown"
@@ -52,7 +57,8 @@ enum AnalyticsEvent: Sendable {
         fadeIn: PlaylistFadeIn = .off,
         timeSuggestionUsed: Bool = false,
         carriedOver: Bool = false,
-        context: AlarmEventContext? = nil
+        context: AlarmEventContext? = nil,
+        source: AlarmCreatedSource? = nil
     )
 
     /// カスタムサウンドのインポート成功
@@ -70,6 +76,16 @@ enum AnalyticsEvent: Sendable {
     /// サウンドプレビュー再生
     /// - source: 鳴らした入口（#196）
     case soundPreviewPlayed(source: SoundPreviewSource)
+
+    /// ミュージックライブラリで曲を選んだが、取り込めなかった（#245）
+    case musicLibraryUnavailable
+
+    /// アラーム編集画面の「その他」を開いた（#211）
+    case alarmEditorMoreOpened
+
+    /// コントロールセンターから起動した（#272）
+    /// - kind: list（アラーム一覧）/ add（アラームを追加）
+    case controlOpened(kind: ControlOpenKind)
 
     // MARK: Phase 2（リテンション/運用拡張）
 
@@ -104,6 +120,13 @@ enum AnalyticsEvent: Sendable {
 
     /// 取り込みを保存したあとの着地先（#246）
     case importLanded(source: ImportLandingSource, destination: ShareImportDestination)
+
+    /// 無音・ほぼ無音のため保存を止めた／選び直した（#256）
+    case silentSoundBlocked(
+        level: SilentSoundLevel,
+        source: SoundImportSource,
+        action: SilentSoundAction
+    )
 
     /// 動画からの音声抽出・変換フローの開始
     /// - source: 取得元（photo_library / file）
@@ -327,10 +350,17 @@ enum AnalyticsEvent: Sendable {
     /// 設定画面を開いた
     case settingsOpened
     /// 問い合わせを開いた
-    /// - method: mail（メール作成）/ web（サポートページ）
-    case supportContactOpened(method: SupportContactMethod)
+    /// - method: mail（メール作成）/ share（共有シート）/ web（サポートページ）
+    /// - diagnosticsAttached: 診断ファイルを添付したか（#255）
+    case supportContactOpened(method: SupportContactMethod, diagnosticsAttached: Bool)
     /// レビューを書くリンクを開いた
     case reviewLinkOpened
+
+    /// 初めての1回きりアラームのあとに、行の中の提案を表示した（#247）
+    case firstAlarmFollowupShown
+
+    /// 初めての1回きりアラームの提案を押した／無視した（#247）
+    case firstAlarmFollowupAction(action: FirstAlarmFollowupAction)
 
     // MARK: オンボーディング（#98）
 
@@ -363,6 +393,9 @@ enum AnalyticsEvent: Sendable {
         case .alarmCreated: return "alarm_created"
         case .customSoundImported: return "custom_sound_imported"
         case .soundPreviewPlayed: return "sound_preview_played"
+        case .musicLibraryUnavailable: return "music_library_unavailable"
+        case .alarmEditorMoreOpened: return "alarm_editor_more_opened"
+        case .controlOpened: return "control_opened"
         case .alarmEdited: return "alarm_edited"
         case .alarmDeleted: return "alarm_deleted"
         case .alarmDeletedWithContext: return "alarm_deleted"
@@ -370,6 +403,7 @@ enum AnalyticsEvent: Sendable {
         case .permissionBannerShown: return "permission_banner_shown"
         case .permissionBannerTapped: return "permission_banner_tapped"
         case .importLanded: return "import_landed"
+        case .silentSoundBlocked: return "silent_sound_blocked"
         case .videoImportStarted: return "video_import_started"
         case .videoImportFailed: return "video_import_failed"
         case .alarmDuplicated: return "alarm_duplicated"
@@ -418,6 +452,8 @@ enum AnalyticsEvent: Sendable {
         case .settingsOpened: return "settings_opened"
         case .supportContactOpened: return "support_contact_opened"
         case .reviewLinkOpened: return "review_link_opened"
+        case .firstAlarmFollowupShown: return "first_alarm_followup_shown"
+        case .firstAlarmFollowupAction: return "first_alarm_followup_action"
         case .bedsideExited: return "bedside_exited"
         case .bedsideSettingChanged: return "bedside_setting_changed"
         case .onboardingStepViewed: return "onboarding_step_viewed"
@@ -453,7 +489,8 @@ enum AnalyticsEvent: Sendable {
             fadeIn,
             timeSuggestionUsed,
             carriedOver,
-            context
+            context,
+            source
         ):
             var d: [String: Any] = [
                 "has_custom_sound": hasCustomSound,
@@ -466,6 +503,7 @@ enum AnalyticsEvent: Sendable {
                 "carried_over": carriedOver
             ]
             if let context { d.merge(context.properties) { _, new in new } }
+            if let source { d["source"] = source.rawValue }
             return d
         case let .customSoundImported(
             source,
@@ -486,6 +524,12 @@ enum AnalyticsEvent: Sendable {
             return d
         case let .soundPreviewPlayed(source):
             return ["source": source.rawValue]
+        case .musicLibraryUnavailable:
+            return [:]
+        case .alarmEditorMoreOpened:
+            return [:]
+        case let .controlOpened(kind):
+            return ["kind": kind.rawValue]
         case let .alarmEdited(
             hasCustomSound,
             isRepeating,
@@ -523,6 +567,12 @@ enum AnalyticsEvent: Sendable {
             return [
                 "source": source.rawValue,
                 "destination": destination.rawValue
+            ]
+        case let .silentSoundBlocked(level, source, action):
+            return [
+                "level": level.rawValue,
+                "source": source.rawValue,
+                "action": action.rawValue
             ]
         case let .videoImportStarted(source):
             return ["source": source.rawValue]
@@ -705,8 +755,15 @@ enum AnalyticsEvent: Sendable {
             ]
         case .settingsOpened, .reviewLinkOpened:
             return [:]
-        case let .supportContactOpened(method):
-            return ["method": method.rawValue]
+        case let .supportContactOpened(method, diagnosticsAttached):
+            return [
+                "method": method.rawValue,
+                "diagnostics_attached": diagnosticsAttached
+            ]
+        case .firstAlarmFollowupShown:
+            return [:]
+        case let .firstAlarmFollowupAction(action):
+            return ["action": action.rawValue]
         case let .bedsideExited(durationBucket, exitMethod):
             return [
                 "duration_bucket": durationBucket,
@@ -828,6 +885,7 @@ enum BedsideEntry: String, Sendable {
 /// 問い合わせの方法（#204）。
 enum SupportContactMethod: String, Sendable {
     case mail
+    case share
     case web
 }
 
@@ -838,6 +896,10 @@ enum SoundImportSource: String, Sendable, CaseIterable {
     case audio
     /// 共有シートから受け取った音（#222）
     case share
+    /// 既存アラームの音を差し替えた（#256 レビュー）
+    case existing
+    /// ミュージックアプリのライブラリから（#245）
+    case musicLibrary = "music_library"
 }
 
 /// 共有シートで受け取った種類（#222）
@@ -928,7 +990,7 @@ enum VideoImportFailureReason: String, Sendable {
 /// ユニットテストではこのプロトコルをモックし、PostHog SDK に依存せずに
 /// 「正しいイベント名・プロパティが渡されるか」を検証できる。
 protocol AnalyticsBackend: AnyObject, Sendable {
-    func capture(_ event: String, properties: [String: Any]?)
+    func capture(_ event: String, properties: [String: Any]?, timestamp: Date?)
     /// ユーザープロパティを設定する（identify）。PII は絶対に含めないこと。
     func setUserProperties(_ properties: [String: Any])
 }
@@ -1000,8 +1062,16 @@ struct AnalyticsGate: Equatable, Sendable {
 /// PostHog SDK を実際に呼び出すバックエンド実装。
 /// `import PostHog` を使用する唯一の実装。将来差し替え可能にするためプロトコル背後で隠す。
 final class PostHogAnalyticsBackend: AnalyticsBackend {
-    func capture(_ event: String, properties: [String: Any]?) {
-        PostHogSDK.shared.capture(event, properties: properties)
+    func capture(_ event: String, properties: [String: Any]?, timestamp: Date?) {
+        PostHogSDK.shared.capture(
+            event,
+            distinctId: nil,
+            properties: properties,
+            userProperties: nil,
+            userPropertiesSetOnce: nil,
+            groups: nil,
+            timestamp: timestamp
+        )
     }
 
     func setUserProperties(_ properties: [String: Any]) {
@@ -1127,7 +1197,7 @@ final class AnalyticsService: @unchecked Sendable {
     /// - Parameters:
     ///   - event: 型安全なイベント定義
     ///   - properties: 追加プロパティ（任意）。同名キーは追加側で上書き。
-    func capture(_ event: AnalyticsEvent, properties: [String: Any]? = nil) {
+    func capture(_ event: AnalyticsEvent, properties: [String: Any]? = nil, timestamp: Date? = nil) {
         let payload: [String: Any]?
         if let extra = properties, !extra.isEmpty {
             var merged = event.properties
@@ -1142,7 +1212,8 @@ final class AnalyticsService: @unchecked Sendable {
         if event.recordsAlarmHistory {
             AlarmLocalHistoryStore.append(
                 event: event.name,
-                properties: payload ?? event.properties
+                properties: payload ?? event.properties,
+                now: timestamp ?? Date()
             )
         }
 
@@ -1155,7 +1226,7 @@ final class AnalyticsService: @unchecked Sendable {
             return
         }
 
-        backend.capture(event.name, properties: payload)
+        backend.capture(event.name, properties: payload, timestamp: timestamp)
     }
 
     /// PostHog ユーザープロパティを設定する（identify）。
@@ -1171,12 +1242,50 @@ final class AnalyticsService: @unchecked Sendable {
 
     /// PendingAlarmEvent キューをフラッシュする。configure() 完了後に自動で呼ばれる。
     /// Intent 実行時にバッファされたイベント（alarm_stopped 等）を PostHog へ送信する。
-    func flushPendingAlarmEvents() {
-        let events = AlarmEventBuffer.dequeueAll()
+    func flushPendingAlarmEvents(defaults: UserDefaults = AppGroup.userDefaults) {
+        let events = AlarmEventBuffer.dequeueAll(defaults: defaults)
         guard !events.isEmpty else { return }
         for event in events {
-            backend?.capture(event.name, properties: event.postHogProperties)
+            // 保存した発生時刻で送る（PostHog 上の時刻が「開いた時刻」にならないように・#263）
+            backend?.capture(
+                event.name,
+                properties: event.postHogProperties,
+                timestamp: event.timestamp
+            )
         }
         logger.info("Flushed \(events.count) pending alarm events")
+    }
+}
+
+// MARK: - PendingAlarmEvent from AnalyticsEvent (#263)
+
+extension PendingAlarmEvent {
+    /// Intent からバッファするとき用。Bool も型を変えずに保持する。
+    init(event: AnalyticsEvent, timestamp: Date) {
+        var strings: [String: String] = [:]
+        var ints: [String: Int] = [:]
+        var bools: [String: Bool] = [:]
+        for (key, value) in event.properties {
+            switch value {
+            case let value as String:
+                strings[key] = value
+            case let value as Int:
+                ints[key] = value
+            case let value as Bool:
+                bools[key] = value
+            case let value as Double:
+                ints[key] = Int(value)
+            default:
+                strings[key] = String(describing: value)
+            }
+        }
+        self.init(
+            name: event.name,
+            properties: strings,
+            intProperties: ints.isEmpty ? nil : ints,
+            boolProperties: bools.isEmpty ? nil : bools,
+            hour: ints["hour"],
+            timestamp: timestamp
+        )
     }
 }

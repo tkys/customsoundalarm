@@ -2,3 +2,4 @@ CFBundleDisplayName = "My Sound Alarm";
 NSAlarmKitUsageDescription = "Používá se ke zvonění budíků oblíbenými zvuky.";
 NSMicrophoneUsageDescription = "Používá se k nahrávání zvuků budíku mikrofonem.";
 NSPhotoLibraryUsageDescription = "Používá se pro přístup ke knihovně fotek a extrahování zvuku z videí.";
+NSAppleMusicUsageDescription = "Používá se k výběru skladby z knihovny Hudba jako zvuku budíku.";

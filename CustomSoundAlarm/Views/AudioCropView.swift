@@ -7,6 +7,8 @@ struct PendingAudioImport: Identifiable {
     /// security scope を解放済みの一時コピー
     let url: URL
     let name: String
+    /// 計測用の取り込み経路（ミュージックライブラリは .musicLibrary・#245）
+    var source: SoundImportSource = .audio
 }
 
 /// 音声ファイル用の波形クロップ画面（#77）。
@@ -36,6 +38,14 @@ struct AudioCropView: View {
     @State private var soundName = ""
     @State private var isProcessing = false
     @State private var errorMessage: String?
+    @State private var silentLevel: SilentSoundLevel?
+    @State private var silentCoversWholeFile = false
+    @State private var pendingSilentSave: PendingCropSave?
+
+    private struct PendingCropSave {
+        let result: ConversionResult
+        let thumbnailFileName: String?
+    }
 
     /// 編集内容の破棄確認（#82-2: 閉じる操作で黙って消えないようにする）
     @State private var showingDiscardConfirm = false
@@ -108,64 +118,17 @@ struct AudioCropView: View {
 
             // 下部: 名前入力 + アクション
             VStack(spacing: 10) {
-                if let errorMessage {
-                    Text(errorMessage)
-                        .foregroundStyle(.red)
-                        .font(.caption)
-                }
-
-                HStack(spacing: 8) {
-                    Image(systemName: "waveform")
-                        .foregroundStyle(Brand.orange)
-                    TextField("sound_name_placeholder", text: $soundName)
-                        .textFieldStyle(.plain)
-                        .submitLabel(.done)
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.warmCardBackground)
-                )
-
-                // 主アクション: 目立つ pill ボタン（#80-7）
-                Button {
-                    save(start: startTime, end: endTime)
-                } label: {
-                    HStack(spacing: 8) {
-                        if isProcessing {
-                            ProgressView()
-                                .tint(.white)
-                        } else {
-                            Image(systemName: "waveform.badge.plus")
-                        }
-                        Text("crop_and_save")
-                            .fontWeight(.semibold)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(
-                        Capsule().fill(
-                            (isProcessing || !canSave)
-                                ? AnyShapeStyle(Color.gray.opacity(0.4))
-                                : AnyShapeStyle(Brand.saveButtonGradient)
-                        )
+                if let silentLevel {
+                    SilentSoundNoticeView(
+                        level: silentLevel,
+                        isWholeFileSilent: silentCoversWholeFile,
+                        onReselect: { handleSilentAction(.reselect) },
+                        onOtherSound: { handleSilentAction(.otherSound) },
+                        onUseAnyway: { handleSilentAction(.useAnyway) }
                     )
-                    .foregroundStyle(.white)
+                } else {
+                    nameAndSaveControls
                 }
-                .disabled(isProcessing || !canSave)
-                .accessibilityIdentifier("audioCrop.cropAndSave")
-
-                // 副アクション: 格下のテキストボタン（クロップを強制しない・#77/#80-7）
-                Button {
-                    save(start: 0, end: duration)
-                } label: {
-                    Label("import_whole_audio", systemImage: "tray.and.arrow.down")
-                        .font(.footnote)
-                }
-                .buttonStyle(.borderless)
-                .tint(Color.actionText)
-                .disabled(isProcessing || !canSave)
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)
@@ -218,6 +181,12 @@ struct AudioCropView: View {
         }
         .onDisappear {
             previewer.stop()
+            // 無音の知らせを出したまま閉じたときの取りこぼしを消す（#256）
+            deletePendingFile()
+            // 一時コピー（ファイルから・ミュージックから）は画面を閉じたら必ず消す（#245 レビュー）
+            if deletesSourceOnDiscard {
+                try? FileManager.default.removeItem(at: source.url)
+            }
         }
     }
 
@@ -301,35 +270,180 @@ struct AudioCropView: View {
                     .artwork(from: source.url)
                     .flatMap { SoundThumbnailStore.shared.save($0) }
 
-                let sound = AlarmSound(name: soundName, fileName: fileName, thumbnailFileName: thumbnailFileName)
-                soundStore.add(sound)
-                selectedSound = sound
-                let showsVolumeNotice = LoudnessNormalizer.shouldShowVolumeNotice(
+                let level = SilentSoundLogic.judge(
+                    lufsBefore: result.lufsBefore,
+                    peakDb: result.peakDb,
                     gainDb: result.gainDb
                 )
-                if showsVolumeNotice {
-                    volumeBoostedFileName = fileName
+                if level != .ok {
+                    // 元ファイル全体が無音なら、範囲を選び直しても無音（#256 レビュー）。
+                    let fullURL = source.url
+                    let wholeFileSilent = await Task.detached {
+                        let buffer = AudioSampleLoader.loadMono44k(fileURL: fullURL)
+                        return SilentSoundLogic.isWholeFileSilent(
+                            measurement: buffer.flatMap { LoudnessMeter.measure(buffer: $0) },
+                            isReadable: buffer != nil
+                        )
+                    }.value
+                    pendingSilentSave = PendingCropSave(
+                        result: result,
+                        thumbnailFileName: thumbnailFileName
+                    )
+                    silentCoversWholeFile = wholeFileSilent
+                    silentLevel = level
+                    return
                 }
 
-                onSaved?()
-                AnalyticsService.shared.capture(.customSoundImported(
-                    source: customSoundSource,
-                    peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
-                    gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
-                    lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore),
-                    shareMedia: shareMedia,
-                    volumeNoticeShown: showsVolumeNotice
-                ))
-                await AdPresenter.presentInterstitialIfAllowed(after: .importSaved)
-
-                // 一時コピーを破棄して閉じる（共有の staging は残す・#222）
-                if deletesSourceOnDiscard {
-                    try? FileManager.default.removeItem(at: source.url)
-                }
-                dismiss()
+                try await completeSave(result, thumbnailFileName: thumbnailFileName)
             } catch {
                 errorMessage = error.localizedDescription
             }
         }
+    }
+
+    private func completeSave(
+        _ result: ConversionResult,
+        thumbnailFileName: String?
+    ) async throws {
+        let fileName = result.fileName
+        let sound = AlarmSound(
+            name: soundName,
+            fileName: fileName,
+            thumbnailFileName: thumbnailFileName,
+            lufsAtImport: result.lufsBefore,
+            gainDbAtImport: result.gainDb
+        )
+        soundStore.add(sound)
+        selectedSound = sound
+        let showsVolumeNotice = LoudnessNormalizer.shouldShowVolumeNotice(
+            gainDb: result.gainDb
+        )
+        if showsVolumeNotice {
+            volumeBoostedFileName = fileName
+        }
+
+        onSaved?()
+        AnalyticsService.shared.capture(.customSoundImported(
+            source: customSoundSource,
+            peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
+            gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
+            lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore),
+            shareMedia: shareMedia,
+            volumeNoticeShown: showsVolumeNotice
+        ))
+        await AdPresenter.presentInterstitialIfAllowed(after: .importSaved)
+
+        // 一時コピーを破棄して閉じる（共有の staging は残す・#222）
+        if deletesSourceOnDiscard {
+            try? FileManager.default.removeItem(at: source.url)
+        }
+        dismiss()
+    }
+
+    /// 無音の知らせから選んだ行動（#256）。
+    private func handleSilentAction(_ action: SilentSoundAction) {
+        guard let level = silentLevel else { return }
+        AnalyticsService.shared.capture(.silentSoundBlocked(
+            level: level,
+            source: customSoundSource,
+            action: action
+        ))
+
+        switch action {
+        case .reselect:
+            deletePendingFile()
+            pendingSilentSave = nil
+            silentLevel = nil
+            silentCoversWholeFile = false
+        case .otherSound:
+            deletePendingFile()
+            pendingSilentSave = nil
+            silentLevel = nil
+            silentCoversWholeFile = false
+            onUserClosed?()
+            dismiss()
+        case .useAnyway:
+            guard let pending = pendingSilentSave else { return }
+            pendingSilentSave = nil
+            silentLevel = nil
+            silentCoversWholeFile = false
+            Task {
+                try? await completeSave(
+                    pending.result,
+                    thumbnailFileName: pending.thumbnailFileName
+                )
+            }
+        case .fixedExisting:
+            break
+        }
+    }
+
+    private func deletePendingFile() {
+        guard let fileName = pendingSilentSave?.result.fileName else { return }
+        try? AudioConverter.shared.deleteSound(fileName: fileName)
+    }
+
+    /// 名前入力と保存ボタン。無音の知らせが出ているあいだは隠す（#256）。
+    @ViewBuilder
+    private var nameAndSaveControls: some View {
+        if let errorMessage {
+            Text(errorMessage)
+                .foregroundStyle(.red)
+                .font(.caption)
+        }
+
+        HStack(spacing: 8) {
+            Image(systemName: "waveform")
+                .foregroundStyle(Brand.orange)
+            TextField("sound_name_placeholder", text: $soundName)
+                .textFieldStyle(.plain)
+                .submitLabel(.done)
+                .accessibilityIdentifier("audioCrop.name")
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.warmCardBackground)
+        )
+
+        // 主アクション: 目立つ pill ボタン（#80-7）
+        Button {
+            save(start: startTime, end: endTime)
+        } label: {
+            HStack(spacing: 8) {
+                if isProcessing {
+                    ProgressView()
+                        .tint(.white)
+                } else {
+                    Image(systemName: "waveform.badge.plus")
+                }
+                Text("crop_and_save")
+                    .fontWeight(.semibold)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(
+                Capsule().fill(
+                    (isProcessing || !canSave)
+                        ? AnyShapeStyle(Color.gray.opacity(0.4))
+                        : AnyShapeStyle(Brand.saveButtonGradient)
+                )
+            )
+            .foregroundStyle(.white)
+        }
+        .disabled(isProcessing || !canSave)
+        .accessibilityIdentifier("audioCrop.cropAndSave")
+
+        // 副アクション: 格下のテキストボタン（クロップを強制しない・#77/#80-7）
+        Button {
+            save(start: 0, end: duration)
+        } label: {
+            Label("import_whole_audio", systemImage: "tray.and.arrow.down")
+                .font(.footnote)
+        }
+        .buttonStyle(.borderless)
+        .tint(Color.actionText)
+        .disabled(isProcessing || !canSave)
     }
 }

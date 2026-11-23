@@ -1,15 +1,15 @@
-■ Kies het stuk dat afgaat, direct vanuit Delen
-Deel een video of audiobestand vanuit Foto's of Bestanden en kies My Sound Alarm. Als je de app opent, verschijnt het knipscherm.
+■ Gebruik nummers uit de Muziek-app
+Kies bij het toevoegen van een geluid "Toevoegen uit Muziek" en kies het deel dat moet afgaan uit nummers in je Muziek-app.
 
-■ Sneller een wekker maken
-• Nieuwe wekkers nemen je laatste instellingen voor Sluimeren, Afspeellijst en Zachte start over.
-• Boven de tijd zie je 5 en 10 minuten na je laatste wekker. Tik erop om die tijd te kiezen.
+■ Openen vanuit het bedieningspaneel
+Voeg "My Sound Alarm" en "Wekker toevoegen" toe aan het bedieningspaneel. Tik om je wekkerlijst of het toevoegscherm te openen.
 
-■ Zien wanneer wekkers niet kunnen afgaan
-Staat de toestemming voor wekkers uit, dan staat bovenaan de lijst "Wekkers gaan niet af". Tik op "Toestaan" om het op te lossen.
+■ Een eenvoudigere wekkereditor
+Sluimeren, Label en Zachte start staan nu onder "Meer".
 
 ■ Verder
-• Wordt een zacht geluid op normaal volume gebracht, dan verschijnt eronder een korte melding.
-• Zodra je twee eigen geluiden hebt, laat de app weten dat je een afspeellijst kunt maken.
+• Kies je een deel dat bijna stil is, dan laat de app het je weten.
+• De e-mail via "Probleem melden of vraag stellen" in Instellingen voegt nu de status van de app toe, zodat we problemen kunnen onderzoeken. Namen van nummers en geluidsbestanden zitten er niet in. Je kunt de bijlage verwijderen voordat je verstuurt.
+• Overlappende tekst op het knipscherm bij de grootste tekstgrootte opgelost.
 
-Bedankt voor het gebruiken van My Sound Alarm.
+Bedankt voor het gebruik van My Sound Alarm.

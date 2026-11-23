@@ -18,12 +18,16 @@ struct AddAlarmRequest: Identifiable {
 /// メイン画面：アラーム一覧
 /// OOUIの原則に従い、主オブジェクト（アラーム）のみを表示
 struct ContentView: View {
+    /// コントロールセンターから開く要求（#272）。RootTabView が設定する。
+    @Binding var controlOpenKind: ControlOpenKind?
     @State private var alarmStore = AlarmStore.shared
     @State private var soundStore = SoundStore.shared
     @State private var selectedAlarm: AlarmEntry?
     @State private var showingSettings = false
     /// オンボの表示（#98）。初回評価は .task で1回だけ
     @State private var showingOnboarding = false
+    /// オンボーディング判定が終わったか（コントロールの着地先を決めるため・#272）
+    @State private var didEvaluateOnboarding = false
     /// オンボ場面4で選ばれた取り込み入口（追加画面に伝える・#98 Phase 4）
     @State private var addAlarmRequest: AddAlarmRequest?
     /// アップデート案内（#116）
@@ -53,12 +57,23 @@ struct ContentView: View {
     @State private var permissionFeedbackTrigger = 0
     @State private var skipToast: String?
     @State private var skipToastTask: Task<Void, Never>?
+    /// 空の一覧から作ったときの保存後の一言（#231）
+    @State private var quickSaveToast: String?
+    @State private var quickSaveToastTask: Task<Void, Never>?
+    @State private var quickSaveFeedbackTrigger = 0
+    /// 無音の音を使っている既存アラーム（#256）
+    @State private var silentAlarmLevels: [UUID: SilentSoundLevel] = [:]
+    @State private var fixingSilentAlarm: AlarmEntry?
+    @State private var didScanSilentAlarms = false
+    /// 初めての1回きりアラームの提案を出す行（#247）
+    @State private var firstAlarmFollowupAlarmID: UUID?
     @ScaledMetric(relativeTo: .body) private var skipActionIconSize: CGFloat = 17
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
     @Environment(\.requestReview) private var requestReview
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         NavigationStack {
@@ -75,6 +90,7 @@ struct ContentView: View {
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         Button {
+                            ignoreFirstAlarmFollowupIfNeeded()
                             showingSettings = true
                         } label: {
                             Image(systemName: "gearshape")
@@ -94,6 +110,7 @@ struct ContentView: View {
                         .accessibilityIdentifier("alarmList.skipAll")
                     }
                     Button {
+                        ignoreFirstAlarmFollowupIfNeeded()
                         addScreenVisible = true
                         addAlarmRequest = AddAlarmRequest(source: nil)
                     } label: {
@@ -107,9 +124,13 @@ struct ContentView: View {
                     refreshGlobalSkip()
                     syncSkipTimeZoneIfNeeded()
                     evaluateOnboarding()
+                    didEvaluateOnboarding = true
+                    applyControlOpenIfNeeded()
                     presentNextShareImportIfNeeded()
                     scheduler.refreshPermissionStatus()
                     reportPermissionBannerIfNeeded()
+                    scanSilentAlarms()
+                    evaluateFirstAlarmFollowup()
                     #if DEBUG
                     if AppGroup.isUITestOpenAddAlarm {
                         addScreenVisible = true
@@ -124,6 +145,9 @@ struct ContentView: View {
                 }
                 .safeAreaInset(edge: .bottom) {
                     AdSlot(slot: .bannerAlarmList)
+                }
+                .onChange(of: controlOpenKind) { _, _ in
+                    applyControlOpenIfNeeded()
                 }
 
                 if showingOnboarding {
@@ -226,6 +250,29 @@ struct ContentView: View {
                 )
                 .presentationDetents([.medium])
             }
+            .sheet(item: $fixingSilentAlarm) { alarm in
+                NavigationStack {
+                    AlarmSoundChoiceView(
+                        playlistID: Binding(
+                            get: { alarmStore.alarms.first { $0.id == alarm.id }?.playlistID },
+                            set: { _ in }
+                        ),
+                        selectedSound: Binding(
+                            get: {
+                                guard let fileName = alarmStore.alarms
+                                    .first(where: { $0.id == alarm.id })?.soundFileName
+                                else { return nil }
+                                return soundStore.sounds.first { $0.fileName == fileName }
+                            },
+                            set: { _ in }
+                        ),
+                        volumeBoostedFileName: .constant(nil),
+                        onSelection: { sound, playlistID in
+                            repairSilentAlarm(alarm, sound: sound, playlistID: playlistID)
+                        }
+                    )
+                }
+            }
             .sheet(isPresented: $showingPermissionSettings) {
                 PermissionSettingsSheet {
                     AnalyticsService.shared.capture(.permissionBannerTapped(
@@ -243,6 +290,11 @@ struct ContentView: View {
             }
         }
         .onChange(of: scenePhase) { _, phase in
+            if phase == .background {
+                // 提案を見たまま一覧を離れたら、二度と出さない（#247）
+                ignoreFirstAlarmFollowupIfNeeded()
+                return
+            }
             // ユーザーが自ら落ち着いてアプリを前面に出したタイミングで、
             // 定着ユーザー（発火実績あり・同一バージョン未依頼・当セッションで発火なし）にのみ
             // App Store レビューを依頼する。実際に表示するか否かは OS が最終判断する。
@@ -273,8 +325,19 @@ struct ContentView: View {
                     .accessibilityIdentifier("skip.row.toast")
             }
         }
+        .overlay(alignment: .bottom) {
+            if let quickSaveToast {
+                SaveConfirmationToast(text: quickSaveToast)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, dynamicTypeSize.isAccessibilitySize ? 100 : 12)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .accessibilityIdentifier("emptyState.toast")
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: quickSaveToast)
         .animation(.easeInOut(duration: 0.25), value: skipToast)
         .sensoryFeedback(.success, trigger: permissionFeedbackTrigger)
+        .sensoryFeedback(.success, trigger: quickSaveFeedbackTrigger)
         .onChange(of: soundStore.hasPendingPlaylistUnlock) { _, hasPending in
             if hasPending { schedulePlaylistUnlockAttempt() }
         }
@@ -316,6 +379,10 @@ struct ContentView: View {
                 addAlarmRequest = AddAlarmRequest(source: nil, initialSound: sound)
                 shareLanding.addAlarmSound = nil
             }
+        }
+        .onDisappear {
+            // タブ移動などで一覧を離れたら、押されなかった提案は終わり（#247）
+            ignoreFirstAlarmFollowupIfNeeded()
         }
     }
 
@@ -466,27 +533,170 @@ struct ContentView: View {
 
     // MARK: - Empty State
 
-    private var emptyState: some View {
-        ContentUnavailableView {
-            Label {
-                Text("empty_title")
-            } icon: {
-                SoundWaveDecoration()
-                    .padding(.bottom, 4)
-            }
-        } description: {
-            Text("empty_description")
-        } actions: {
-            Button {
-                addScreenVisible = true
-                addAlarmRequest = AddAlarmRequest(source: nil)
-            } label: {
-                Text("add_alarm")
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(Color.actionFillEnd)
+    /// コントロールからの要求を、オンボーディング判定後に反映する（#272）。
+    private func applyControlOpenIfNeeded() {
+        guard didEvaluateOnboarding, let kind = controlOpenKind else { return }
+        controlOpenKind = nil
+        switch ControlOpenLogic.destination(
+            kind: kind,
+            isOnboardingVisible: showingOnboarding
+        ) {
+        case .onboarding, .list:
+            break
+        case .add:
+            addScreenVisible = true
+            addAlarmRequest = AddAlarmRequest(source: nil)
         }
-        .accessibilityIdentifier("empty.title")
+    }
+
+    private var emptyState: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                if colorScheme != .dark {
+                    Image("onboarding_hero")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: dynamicTypeSize.isAccessibilitySize ? 110 : 160)
+                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .accessibilityHidden(true)
+                }
+
+                Text("empty_quick_title")
+                    .font(.title2.weight(.semibold))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                timeButtons
+
+                Button("empty_quick_other") {
+                    addScreenVisible = true
+                    addAlarmRequest = AddAlarmRequest(source: nil)
+                }
+                .buttonStyle(.borderless)
+                .font(.subheadline.weight(.medium))
+                .tint(Color.actionText)
+                .accessibilityIdentifier("emptyState.other")
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 24)
+            .padding(.bottom, 100)
+            .frame(maxWidth: .infinity)
+        }
+        .accessibilityIdentifier("emptyState.root")
+    }
+
+    @ViewBuilder
+    private var timeButtons: some View {
+        let times = EmptyStateQuickAlarmLogic.times
+        if dynamicTypeSize.isAccessibilitySize {
+            LazyVGrid(
+                columns: [GridItem(.flexible())],
+                spacing: 10
+            ) {
+                ForEach(times) { time in
+                    quickTimeButton(time)
+                }
+            }
+        } else {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 8) {
+                    ForEach(times) { time in
+                        quickTimeButton(time)
+                    }
+                }
+                timeGrid(times)
+            }
+        }
+    }
+
+    private func timeGrid(_ times: [QuickAlarmTime]) -> some View {
+        LazyVGrid(
+            columns: [GridItem(.flexible()), GridItem(.flexible())],
+            spacing: 10
+        ) {
+            ForEach(times) { time in
+                quickTimeButton(time)
+            }
+        }
+        .frame(maxWidth: 360)
+    }
+
+    private func quickTimeButton(_ time: QuickAlarmTime) -> some View {
+        Button {
+            createQuickAlarm(time)
+        } label: {
+            Text(time.label)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.large)
+        .accessibilityHint(Text("empty_quick_hint"))
+        .accessibilityIdentifier("emptyState.quick.\(time.id)")
+    }
+
+    /// 時刻を1回押して、明日の朝の一回限りのアラームを作る（#231）。
+    private func createQuickAlarm(_ time: QuickAlarmTime) {
+        let soundFileName = EmptyStateQuickAlarmLogic.soundFileName(
+            imported: soundStore.sounds,
+            lastUsedFileName: SoundUsageHistory.lastUsedFileName,
+            availableFileNames: Set(soundStore.sounds.map(\.fileName))
+        )
+        let carryOver = AlarmCarryOverLogic.carryOver(
+            from: AlarmCarryOverStore.last,
+            playlistExists: { PlaylistStore.shared.playlist(id: $0) != nil }
+        )
+        let entry = EmptyStateQuickAlarmLogic.makeEntry(
+            time: time,
+            soundFileName: soundFileName,
+            label: String(localized: "alarm_placeholder"),
+            snoozeMinutes: carryOver.snoozeMinutes,
+            fadeIn: carryOver.fadeIn
+        )
+        AlarmUIDStore.recordCreation(entry.id)
+        alarmStore.add(entry)
+        SoundUsageHistory.recordUsage(soundFileName)
+        AlarmCarryOverStore.save(from: entry)
+
+        var context = AlarmHistoryLogic.context(for: entry)
+        context.list = AlarmHistoryLogic.listSnapshot([])
+        let isCustomSound = soundStore.sounds
+            .first { $0.fileName == soundFileName }?
+            .isPreset == false
+        AnalyticsService.shared.capture(.alarmCreated(
+            hasCustomSound: isCustomSound,
+            isRepeating: false,
+            snoozeMinutes: entry.snoozeMinutes,
+            backupMinutes: 0,
+            soundMode: .single,
+            fadeIn: .off,
+            context: context,
+            source: .emptyQuick
+        ))
+
+        AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
+        quickSaveFeedbackTrigger += 1
+
+        if let message = PostSaveFeedback.resolve(for: entry, currentDate: Date())
+            .localizedMessage(entry: entry, currentDate: Date()) {
+            quickSaveToastTask?.cancel()
+            quickSaveToast = message
+            quickSaveToastTask = Task {
+                try? await Task.sleep(for: .seconds(2))
+                quickSaveToast = nil
+            }
+        }
+
+        Task {
+            if scheduler.permissionStatus == .notDetermined {
+                _ = await scheduler.requestAuthorization()
+                scheduler.refreshPermissionStatus()
+                if scheduler.permissionStatus == .authorized {
+                    AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .foreground)
+                }
+            }
+            reportPermissionBannerIfNeeded()
+        }
     }
 
     // MARK: - Skip (#197)
@@ -543,12 +753,25 @@ struct ContentView: View {
                     alarm: alarm,
                     soundName: AlarmSoundDisplay.name(for: alarm),
                     sound: AlarmSoundDisplay.representativeSound(for: alarm),
+                    hasSilentSound: silentAlarmLevels[alarm.id] != nil,
+                    showsFirstAlarmFollowup: firstAlarmFollowupAlarmID == alarm.id,
+                    onFixSilentSound: {
+                        ignoreFirstAlarmFollowupIfNeeded()
+                        fixingSilentAlarm = alarm
+                    },
+                    onFirstAlarmFollowup: { action in
+                        applyFirstAlarmFollowup(action, to: alarm)
+                    },
                     onToggle: {
+                        if firstAlarmFollowupAlarmID == alarm.id {
+                            ignoreFirstAlarmFollowupIfNeeded()
+                        }
                         alarmStore.toggleEnabled(alarm)
                         AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
                         refreshGlobalSkip()
                     },
                     onTap: {
+                        ignoreFirstAlarmFollowupIfNeeded()
                         editScreenVisible = true
                         selectedAlarm = alarm
                     }
@@ -667,6 +890,146 @@ struct ContentView: View {
         case nil:
             break
         }
+    }
+
+    /// 起動時に一度だけ、既存アラームの音を調べる（#256）。
+    private func scanSilentAlarms() {
+        guard !didScanSilentAlarms else { return }
+        didScanSilentAlarms = true
+        let entries = alarmStore.alarms
+        let directory = AudioConverter.shared.soundsDirectory
+        let cached = AppGroup.silentAlarmScanCache
+        Task.detached {
+            let result = SilentAlarmScanner.scan(
+                entries: entries,
+                soundsDirectory: directory,
+                cached: cached,
+                measure: { LoudnessMeter.measure(fileURL: $0) }
+            )
+            await MainActor.run {
+                // 測った結果は次回起動のために残す（#256 レビュー）
+                AppGroup.silentAlarmScanCache = result.cache
+                silentAlarmLevels = result.levels
+            }
+        }
+    }
+
+    private func repairSilentAlarm(
+        _ alarm: AlarmEntry,
+        sound: AlarmSound?,
+        playlistID: UUID?
+    ) {
+        guard var updated = alarmStore.alarms.first(where: { $0.id == alarm.id }) else {
+            fixingSilentAlarm = nil
+            return
+        }
+        if let sound {
+            updated.soundFileName = sound.fileName
+            updated.playlistID = nil
+        } else if let playlistID {
+            updated.soundFileName = ""
+            updated.playlistID = playlistID
+        }
+        alarmStore.update(updated)
+        AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
+        if let level = silentAlarmLevels.removeValue(forKey: alarm.id) {
+            AnalyticsService.shared.capture(.silentSoundBlocked(
+                level: level,
+                source: .existing,
+                action: .fixedExisting
+            ))
+        }
+        fixingSilentAlarm = nil
+    }
+
+    // MARK: - First alarm follow-up (#247)
+
+    /// 起動時に一度だけ、初めての1回きりアラームの提案を出すか決める。
+    /// 許可の行 → プレイリストの解放 → この提案、の順で1つだけ出す。
+    private func evaluateFirstAlarmFollowup() {
+        guard !AppGroup.firstAlarmFollowupHandled else { return }
+
+        // 前回の起動で表示したまま閉じられた（強制終了を含む）＝無視。
+        if AppGroup.firstAlarmFollowupShown {
+            AppGroup.firstAlarmFollowupHandled = true
+            AppGroup.firstAlarmFollowupShown = false
+            AnalyticsService.shared.capture(.firstAlarmFollowupAction(action: .ignored))
+            return
+        }
+
+        let unlockWouldShow = PlaylistUnlockLogic.canPresent(
+            hasPending: soundStore.hasPendingPlaylistUnlock,
+            hasShown: AppGroup.playlistUnlockShown,
+            isRinging: scheduler.isAlarmRinging,
+            isNightMode: BedsideModeTracker.shared.isActive,
+            hasAnotherSheet: false
+        )
+        guard FirstAlarmFollowupLogic.shouldShow(
+            hasPermissionBanner: permissionBannerStatus != nil,
+            unlockWouldShow: unlockWouldShow
+        ) else { return }
+        guard !addScreenVisible,
+              !editScreenVisible,
+              !showingSettings,
+              !showingOnboarding,
+              shareImportItem == nil,
+              updateChecker.prompt == nil else { return }
+
+        // 履歴（1.8.3 以降）が入れたときから揃っている人だけ（#247 レビュー）
+        guard FirstAlarmFollowupLogic.isFirstInstallVersionEligible(
+            AppGroup.firstInstallVersion
+        ) else { return }
+
+        let history = AlarmLocalHistoryStore.recentLines(
+            limit: AlarmLocalHistoryStore.maxLines
+        )
+        let candidate = FirstAlarmFollowupLogic.candidate(
+            historyLines: history,
+            alarms: alarmStore.alarms,
+            uidForAlarm: { AlarmUIDStore.uid(for: $0) }
+        )
+        switch FirstAlarmFollowupLogic.eligibility(
+            candidate: candidate,
+            alarms: alarmStore.alarms
+        ) {
+        case let .offer(alarmID):
+            firstAlarmFollowupAlarmID = alarmID
+            AppGroup.firstAlarmFollowupShown = true
+            AnalyticsService.shared.capture(.firstAlarmFollowupShown)
+        case .changedOrRemoved, .tooOld:
+            // 自分でオン・繰り返しにした／古すぎる。提案は出さず、以後も出さない。
+            // ユーザーの操作を「無視」として送らない。
+            AppGroup.firstAlarmFollowupHandled = true
+        case .none:
+            break
+        }
+    }
+
+    private func applyFirstAlarmFollowup(
+        _ action: FirstAlarmFollowupAction,
+        to alarm: AlarmEntry
+    ) {
+        guard var updated = alarmStore.alarms.first(where: { $0.id == alarm.id }),
+              let changed = FirstAlarmFollowupLogic.updatedAlarm(updated, for: action)
+        else { return }
+        updated = changed
+        alarmStore.update(updated)
+        AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
+        refreshGlobalSkip()
+
+        firstAlarmFollowupAlarmID = nil
+        AppGroup.firstAlarmFollowupHandled = true
+        AppGroup.firstAlarmFollowupShown = false
+        AnalyticsService.shared.capture(.firstAlarmFollowupAction(action: action))
+    }
+
+    /// 押さずに一覧を離れたとき（設定・追加・編集・バックグラウンド）。
+    private func ignoreFirstAlarmFollowupIfNeeded() {
+        guard firstAlarmFollowupAlarmID != nil else { return }
+        firstAlarmFollowupAlarmID = nil
+        AppGroup.firstAlarmFollowupHandled = true
+        AppGroup.firstAlarmFollowupShown = false
+        AnalyticsService.shared.capture(.firstAlarmFollowupAction(action: .ignored))
     }
 
     private func reportPermissionBannerIfNeeded() {
@@ -795,24 +1158,77 @@ struct AlarmRow: View {
     let alarm: AlarmEntry
     let soundName: String
     let sound: AlarmSound?
+    let hasSilentSound: Bool
+    let showsFirstAlarmFollowup: Bool
+    let onFixSilentSound: () -> Void
+    let onFirstAlarmFollowup: (FirstAlarmFollowupAction) -> Void
     let onToggle: () -> Void
     let onTap: () -> Void
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        Button(action: onTap) {
-            Group {
-                if dynamicTypeSize.isAccessibilitySize {
-                    accessibilityLayout
-                } else {
-                    regularLayout
+        VStack(alignment: .leading, spacing: 10) {
+            Button(action: hasSilentSound ? onFixSilentSound : onTap) {
+                Group {
+                    if dynamicTypeSize.isAccessibilitySize {
+                        accessibilityLayout
+                    } else {
+                        regularLayout
+                    }
                 }
+                .padding(.vertical, dynamicTypeSize.isAccessibilitySize ? 8 : 4)
             }
-            .padding(.vertical, dynamicTypeSize.isAccessibilitySize ? 8 : 4)
+            .foregroundStyle(.primary)
+            .accessibilityIdentifier("alarm.row")
+
+            // 初めての1回きりアラームのあとの提案（#247）。押すまで何も変えない。
+            if showsFirstAlarmFollowup {
+                followupButtons
+            }
         }
-        .foregroundStyle(.primary)
-        .accessibilityIdentifier("alarm.row")
+    }
+
+    // MARK: - First alarm follow-up (#247)
+
+    @ViewBuilder
+    private var followupButtons: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(spacing: 8) {
+                followupButton(.tomorrow)
+                followupButton(.weekdays)
+                followupButton(.everyday)
+            }
+        } else {
+            HStack(spacing: 8) {
+                followupButton(.tomorrow)
+                followupButton(.weekdays)
+                followupButton(.everyday)
+            }
+        }
+    }
+
+    private func followupButton(_ action: FirstAlarmFollowupAction) -> some View {
+        Button {
+            onFirstAlarmFollowup(action)
+        } label: {
+            Text(followupTitle(action))
+                .font(.subheadline.weight(.medium))
+                .frame(maxWidth: .infinity)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .buttonStyle(.bordered)
+        .tint(Color.actionText)
+        .accessibilityIdentifier("alarm.followup.\(action.rawValue)")
+    }
+
+    private func followupTitle(_ action: FirstAlarmFollowupAction) -> LocalizedStringKey {
+        switch action {
+        case .tomorrow: "followup_tomorrow"
+        case .weekdays: "followup_weekdays"
+        case .everyday: "followup_everyday"
+        case .ignored: "followup_tomorrow"
+        }
     }
 
     // MARK: - Layouts
@@ -845,6 +1261,7 @@ struct AlarmRow: View {
                         .lineLimit(1)
                 }
                 metadataLine(vertical: false)
+                if hasSilentSound { silentSoundWarning }
                 if let holidaySummary {
                     Text(holidaySummary)
                         .font(.caption)
@@ -893,6 +1310,7 @@ struct AlarmRow: View {
             }
 
             metadataLine(vertical: true)
+            if hasSilentSound { silentSoundWarning }
             if let holidaySummary {
                 Text(holidaySummary)
                     .font(.caption)
@@ -901,6 +1319,14 @@ struct AlarmRow: View {
                     .accessibilityIdentifier("holiday.summary")
             }
         }
+    }
+
+    private var silentSoundWarning: some View {
+        Text("silent_alarm_warning")
+            .font(.caption)
+            .foregroundStyle(.orange)
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityIdentifier("alarm.silentSoundWarning")
     }
 
     private var timeText: some View {
@@ -970,6 +1396,7 @@ struct AlarmRow: View {
             time: alarm.timeString,
             label: alarm.label
         )))
+        .accessibilityIdentifier("alarm.toggle")
     }
 
     private var timeColor: Color {

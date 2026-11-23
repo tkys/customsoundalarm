@@ -207,7 +207,6 @@
 "backup_alarm_minutes" = "Zazvonit znovu po";
 "backup_alarm_minutes_fmt" = "po %d min";
 "backup_alarm_before_snooze" = "Zazvoní před koncem odložení.";
-"backup_alarm_early_access_note" = "Pokud ji začneš používat během předběžného přístupu, zůstane ti i po ostrém vydání.";
 "backup_alarm_row_badge" = "Ochrana proti zaspání zapnuta";
 
 /* Update gate (#116) */
@@ -265,8 +264,6 @@
 "end_fade_footer" = "Krátké prolnutí na konci smyčky.";
 "fade_backup_note" = "Jemný start se na hlídání přespání nepoužívá.";
 "playlist_backup_note" = "U playlistových budíků přehrává hlídání přespání první skladbu zesílenou.";
-"pro_early_access" = "PRO · Předběžný přístup";
-"playlist_early_access_note" = "Pokud jej začnete používat během předběžného přístupu, můžete jej používat i po plném vydání.";
 "playlist_title" = "Playlisty";
 "playlist_new" = "Nový playlist";
 "playlist_new_default_name" = "Nový playlist";
@@ -393,3 +390,27 @@
 "permission_settings_open" = "Otevřít nastavení";
 "received_title" = "Přijato";
 "received_detail" = "Otevřete My Sound Alarm a vyberte část, která má znít.";
+"empty_quick_title" = "V kolik vstáváte?";
+"empty_quick_other" = "Jiný čas";
+"empty_quick_hint" = "Vytvoří budík.";
+"silent_sound_message" = "Tato část je téměř tichá. Vyberte jinou část nebo jiný zvuk.";
+"silent_sound_reselect" = "Vybrat jinou část";
+"silent_sound_other" = "Vybrat jiný zvuk";
+"silent_sound_use_anyway" = "Přesto použít";
+"silent_alarm_warning" = "Zvuk je sotva slyšet";
+"silent_sound_whole_file_message" = "Toto audio neobsahuje žádný zvuk. Vyberte jiný zvuk.";
+"settings_mail_diagnostics_notice" = "Pro pomoc s vyšetřením je přiložen stav aplikace (neobsahuje názvy skladeb ani zvukové soubory). Přílohu můžete před odesláním odstranit.\n";
+"settings_support_page" = "Stránka podpory";
+"followup_tomorrow" = "Zítra";
+"followup_weekdays" = "Všední dny";
+"followup_everyday" = "Každý den";
+"add_from_music" = "Přidat z Hudby";
+"music_library_unavailable" = "Tuto skladbu nelze importovat.";
+"music_library_permission_denied" = "Povolte přístup k Hudbě v Nastavení.";
+"more" = "Další";
+"more_label_fmt" = "Popisek: %@";
+"more_no_label" = "Bez popisku";
+"more_separator" = " · ";
+"more_accessibility_fmt" = "%1$@, %2$@";
+
+"control_open_list" = "My Sound Alarm";

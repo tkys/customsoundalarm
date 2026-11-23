@@ -1,15 +1,15 @@
-■ Escolha o trecho que vai tocar, direto do Compartilhar
-Compartilhe um vídeo ou áudio do Fotos ou do Arquivos e escolha o My Sound Alarm. Ao abrir o app, a tela de corte se abre.
+■ Use músicas do app Música
+Ao adicionar um som, escolha "Adicionar da Música" para escolher o trecho que vai tocar entre as músicas do seu app Música.
 
-■ Crie alarmes mais rápido
-• Novos alarmes mantêm suas últimas configurações de Soneca, Playlist e Início suave.
-• Acima do horário aparecem 5 e 10 minutos depois do seu alarme mais tarde. Toque para escolher.
+■ Abra pela Central de Controle
+Adicione "My Sound Alarm" e "Adicionar alarme" à Central de Controle. Toque para abrir a lista de alarmes ou a tela de adicionar.
 
-■ Saiba quando os alarmes não podem tocar
-Se a permissão de alarmes estiver desativada, o topo da lista mostra "Os alarmes não vão tocar". Toque em "Permitir" para resolver.
+■ Um editor de alarmes mais simples
+Soneca, Etiqueta e Início suave agora estão em "Mais".
 
-■ Também
-• Quando um som baixo é ajustado para um volume normal, aparece um aviso curto embaixo dele.
-• Quando você tiver dois sons seus, o app avisa que já dá para criar uma playlist.
+■ Além disso
+• Se você escolher um trecho quase sem som, o app avisa.
+• O e-mail de "Relatar um problema ou perguntar" nos Ajustes agora anexa o estado do app para nos ajudar a investigar problemas. Ele não inclui nomes de músicas nem arquivos de som. Você pode remover o anexo antes de enviar.
+• Corrigido o texto sobreposto na tela de corte com o maior tamanho de texto.
 
 Obrigado por usar o My Sound Alarm.

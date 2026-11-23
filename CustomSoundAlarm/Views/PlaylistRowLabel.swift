@@ -31,26 +31,9 @@ struct PlaylistRowLabel: View {
     }
 }
 
-/// プレイリスト見出し（「PRO・先行公開中」付き）。
+/// プレイリスト見出し。
 struct PlaylistSectionHeader: View {
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-
     var body: some View {
-        if dynamicTypeSize.isAccessibilitySize {
-            // AX では見出しとバッジを横に並べると重なるため、縦に分ける（#183）。
-            VStack(alignment: .leading, spacing: 4) {
-                title
-                EarlyAccessBadge()
-            }
-        } else {
-            HStack(spacing: 8) {
-                title
-                EarlyAccessBadge()
-            }
-        }
-    }
-
-    private var title: some View {
         Text("playlist_title")
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(Brand.heading)
