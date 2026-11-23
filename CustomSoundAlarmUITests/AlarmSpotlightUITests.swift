@@ -225,6 +225,7 @@ final class AlarmSpotlightUITests: XCTestCase {
         }
         XCTAssertTrue(newRow.isHittable, app.debugDescription)
         Thread.sleep(forTimeInterval: 0.8)
+        attach("top-edge-04-00")
         assertRowInsideBars("04:00")
 
         let window = app.windows.firstMatch.frame
@@ -238,7 +239,6 @@ final class AlarmSpotlightUITests: XCTestCase {
             window.height * 0.05,
             "new row should keep a small inset at the top: \(newRow.frame)"
         )
-        attach("top-edge-04-00")
     }
 
 
@@ -335,6 +335,52 @@ final class AlarmSpotlightUITests: XCTestCase {
             newRow.frame.minY,
             window.height * 0.5,
             "middle row should stop near the top: \(newRow.frame)"
+        )
+    }
+
+    /// 一覧が短い（2本）ときは、最後の行をスクロールせずその場で開いて見せる（#282 レビュー）。
+    func testAddingLatestAlarmToShortListRevealsWithoutScrolling() {
+        launch([
+            "-uitest-seed-two-alarms",
+            "-uitest-add-time=23:50",
+            "-uitest-save-alarm-disabled"
+        ])
+        XCTAssertTrue(
+            app.buttons["alarmList.add"].waitForExistence(timeout: 15),
+            app.debugDescription
+        )
+        let existing = app.staticTexts["23:44"]
+        XCTAssertTrue(existing.waitForExistence(timeout: 10), app.debugDescription)
+        let before = existing.frame.midY
+
+        app.buttons["alarmList.add"].tap()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10),
+            app.debugDescription
+        )
+        app.buttons["addAlarm.save"].tap()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForNonExistence(timeout: 10),
+            "add screen should close: \(app.debugDescription)"
+        )
+
+        let newRow = app.staticTexts["23:50"]
+        XCTAssertTrue(newRow.waitForExistence(timeout: 15), app.debugDescription)
+        // 開く動き（高さ）が終わるまで待ってから位置を見る
+        Thread.sleep(forTimeInterval: 2.0)
+        assertRowInsideBars("23:50")
+
+        let after = existing.frame.midY
+        XCTAssertEqual(
+            after,
+            before,
+            accuracy: 2.0,
+            "short list should not scroll: before=\(before) after=\(after)"
+        )
+        XCTAssertLessThan(
+            newRow.frame.maxY,
+            app.tabBars.firstMatch.frame.minY - 8,
+            "new row should be fully inside the list: \(newRow.frame)"
         )
     }
 

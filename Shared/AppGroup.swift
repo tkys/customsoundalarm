@@ -407,6 +407,15 @@ enum AppGroup {
 #endif
     }
 
+    /// UIテスト用: アラームを2本だけ並べる（DEBUGのみ・#282 レビュー）。
+    static var isUITestSeedTwoAlarms: Bool {
+#if DEBUG
+        return CommandLine.arguments.contains("-uitest-seed-two-alarms")
+#else
+        return false
+#endif
+    }
+
     /// UIテスト用: 広告枠を強制表示する（DEBUGのみ・#282 レビュー）。
     static var isUITestForceAdSlot: Bool {
 #if DEBUG

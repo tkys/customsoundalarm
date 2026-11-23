@@ -23,6 +23,8 @@ private struct AlarmSpotlightRequest: Equatable {
     let startOffset: CGFloat
     /// スクロールが止まってから行を入れる（上・中に入る場合）
     let insertAfterScroll: Bool
+    /// 画面内に入る最後の行を、その場で開いて見せる（短い一覧・#282 レビュー）
+    let revealInPlace: Bool
 }
 
 /// 自分で動かすスクロールの開始・終了位置（#282 レビュー）。
@@ -993,6 +995,25 @@ struct ContentView: View {
         }.count
         let insertAfterScroll = visibleBefore < displayedAlarms.count
 
+        // 一番下に入る行が、今の位置のまま画面内に収まるか（短い一覧・#282 レビュー）。
+        // 収まるなら開く動きを見せ、収まらないなら今までどおり一覧の一番下へ送る。
+        var revealInPlace = false
+        if !insertAfterScroll,
+           let scrollView = listScrollView,
+           let last = displayedAlarms.last,
+           let lastFrame = alarmFrameStore.frame(for: last.id) {
+            let visibleBottomScreen = scrollView.convert(
+                CGPoint(
+                    x: 0,
+                    y: scrollView.bounds.height - scrollView.adjustedContentInset.bottom
+                ),
+                to: nil
+            ).y
+            let newRowHeight = max(lastFrame.height, 96)
+            revealInPlace = lastFrame.maxY + newRowHeight
+                + RowSpotlightTiming.minimumVisibleInset <= visibleBottomScreen + 0.5
+        }
+
         // 前の演出が残っていたら、その行は出し切ってから次へ
         if !pendingRevealAlarmIDs.isEmpty {
             revealedAlarmIDs.formUnion(pendingRevealAlarmIDs)
@@ -1001,8 +1022,14 @@ struct ContentView: View {
 
         if insertAfterScroll {
             // まだ一覧に足さない。スクロール後に insertRowsAfterScroll で入れる
+        } else if revealInPlace {
+            // 画面内に入る行は collapsed で足して、スクロールせずに開く動きを見せる
+            hiddenUntilDismissAlarmIDs.subtract(ids)
+            pendingRevealAlarmIDs.formUnion(ids)
+            revealedAlarmIDs.subtract(ids)
+            syncDisplayedAlarms()
         } else {
-            // 一番下に入る行は、一覧の一番下まで送るため先に通常の行として入れる
+            // 画面外に入る行は、一覧の一番下まで送るため先に通常の行として入れる
             // （画面外なので、開く動きは見えない。光りはスクロール後に付ける）
             hiddenUntilDismissAlarmIDs.subtract(ids)
             pendingRevealAlarmIDs.subtract(ids)
@@ -1019,14 +1046,17 @@ struct ContentView: View {
                 ids.count,
                 visibleBefore,
                 displayedAlarms.count,
-                insertAfterScroll ? "after-scroll" : "bottom-now"
+                insertAfterScroll
+                    ? "after-scroll"
+                    : (revealInPlace ? "bottom-reveal" : "bottom-now")
             )
         )
         #endif
         spotlightRequest = AlarmSpotlightRequest(
             alarmIDs: ids,
             startOffset: startOffset,
-            insertAfterScroll: insertAfterScroll
+            insertAfterScroll: insertAfterScroll,
+            revealInPlace: revealInPlace
         )
     }
 
@@ -1314,7 +1344,7 @@ struct ContentView: View {
             #if DEBUG
             NSLog("%@", "[SpotlightScroll] custom unavailable -> fallback")
             #endif
-            if request.insertAfterScroll {
+            if request.insertAfterScroll || request.revealInPlace {
                 hiddenUntilDismissAlarmIDs.subtract(ids)
                 pendingRevealAlarmIDs.formUnion(ids)
                 syncDisplayedAlarms()
@@ -1335,9 +1365,11 @@ struct ContentView: View {
             }
         }
 
-        // スクロールが止まってから行を入れる
+        // スクロールが止まってから行を入れて開く
         if request.insertAfterScroll {
             insertRowsAfterScroll(ids)
+        }
+        if request.insertAfterScroll || request.revealInPlace {
             revealedAlarmIDs.formUnion(ids)
             let revealWait = reduceMotion
                 ? RowSpotlightTiming.revealOpacity
