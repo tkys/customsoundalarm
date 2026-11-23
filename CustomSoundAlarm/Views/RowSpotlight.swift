@@ -26,8 +26,6 @@ enum RowSpotlightTiming {
 
     // MARK: スクロール（オーナー決定・D）
 
-    /// 保存して閉じ始めてから動き出すまで（閉じきる約0.12秒前）
-    static let sheetCloseDelay: TimeInterval = 0.25
     /// 距離に関係なく足す基本の時間
     static let scrollBase: TimeInterval = 0.45
     /// 距離1ptあたりに足す時間の分母
@@ -35,10 +33,10 @@ enum RowSpotlightTiming {
     static let scrollMinimum: TimeInterval = 0.5
     static let scrollMaximum: TimeInterval = 1.0
 
-    /// スクロール後の行の位置（画面の中ほど・やや上）
+    /// 共有後の着地（#246）で使うスクロール位置（アラームの追加は最小移動・#282）
     static let scrollAnchor = UnitPoint(x: 0.5, y: 0.45)
-    /// 最後の行も45%まで送れるようにする、一覧の下端の余白（#282）
-    static let bottomScrollSpace: CGFloat = 400
+    /// 行を画面内に残すときの上下の余白（#282）
+    static let minimumVisibleInset: CGFloat = 16
 
     /// 距離からスクロール時間を求める（0.5〜1.0秒）。
     static func scrollDuration(for distance: CGFloat) -> TimeInterval {

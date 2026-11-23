@@ -50,15 +50,16 @@ final class AlarmSpotlightUITests: XCTestCase {
         XCTAssertTrue(newRow.isHittable, "new row should be visible")
 
         let window = app.windows.firstMatch.frame
+        // 一番遅い時刻は一覧の自然な下端に入る（400ptの余白を足さない）
         XCTAssertGreaterThan(
-            newRow.frame.midY,
-            window.height * 0.2,
-            "new row should not stick to the top: \(newRow.frame)"
+            newRow.frame.maxY,
+            window.height * 0.7,
+            "new row should sit at the bottom: \(newRow.frame)"
         )
         XCTAssertLessThan(
-            newRow.frame.midY,
-            window.height * 0.8,
-            "new row should not stick to the bottom: \(newRow.frame)"
+            newRow.frame.maxY,
+            window.height - 20,
+            "new row should not be clipped by the tab bar: \(newRow.frame)"
         )
     }
 
@@ -182,6 +183,101 @@ final class AlarmSpotlightUITests: XCTestCase {
             app.debugDescription
         )
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 5))
+    }
+
+
+    /// 画面の外・上（一番早い時刻）に追加すると、上端に少し余白を残して止まる（#282 レビュー）。
+    func testAddingAlarmAboveTheViewportScrollsUpToIt() {
+        launch([
+            "-uitest-seed-morning-alarms",
+            "-uitest-add-time=04:00",
+            "-uitest-save-alarm-disabled"
+        ])
+        XCTAssertTrue(
+            app.buttons["alarmList.add"].waitForExistence(timeout: 15),
+            app.debugDescription
+        )
+
+        // 04:00 が画面の外・上に来るよう、一覧を下まで送っておく
+        for _ in 0..<3 {
+            app.swipeUp()
+        }
+        app.buttons["alarmList.add"].tap()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10),
+            app.debugDescription
+        )
+        app.buttons["addAlarm.save"].tap()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForNonExistence(timeout: 10),
+            app.debugDescription
+        )
+
+        let newRow = app.staticTexts["04:00"]
+        XCTAssertTrue(newRow.waitForExistence(timeout: 15), app.debugDescription)
+        let deadline = Date().addingTimeInterval(5)
+        while !newRow.isHittable && Date() < deadline {
+            Thread.sleep(forTimeInterval: 0.05)
+        }
+        XCTAssertTrue(newRow.isHittable, app.debugDescription)
+
+        let window = app.windows.firstMatch.frame
+        XCTAssertLessThan(
+            newRow.frame.minY,
+            window.height * 0.4,
+            "new row should stop near the top: \(newRow.frame)"
+        )
+        XCTAssertGreaterThan(
+            newRow.frame.minY,
+            window.height * 0.05,
+            "new row should keep a small inset at the top: \(newRow.frame)"
+        )
+    }
+
+
+    /// すでに見えている位置（3本目と4本目のあいだ）に入れるときは、
+    /// スクロールせず、その場で開いて光る（#282 レビュー）。
+    func testAddingAlarmInTheMiddleDoesNotScroll() {
+        launch([
+            "-uitest-seed-morning-alarms",
+            "-uitest-add-time=05:45",
+            "-uitest-save-alarm-disabled"
+        ])
+        XCTAssertTrue(
+            app.buttons["alarmList.add"].waitForExistence(timeout: 15),
+            app.debugDescription
+        )
+        let existing = app.staticTexts["05:30"]
+        XCTAssertTrue(existing.waitForExistence(timeout: 15), app.debugDescription)
+        let before = existing.frame.midY
+
+        app.buttons["alarmList.add"].tap()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10),
+            app.debugDescription
+        )
+        app.buttons["addAlarm.save"].tap()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForNonExistence(timeout: 10),
+            app.debugDescription
+        )
+
+        let newRow = app.staticTexts["05:45"]
+        XCTAssertTrue(newRow.waitForExistence(timeout: 15), app.debugDescription)
+        let deadline = Date().addingTimeInterval(5)
+        while !newRow.isHittable && Date() < deadline {
+            Thread.sleep(forTimeInterval: 0.05)
+        }
+        XCTAssertTrue(newRow.isHittable, app.debugDescription)
+
+        // 入る行より上にある行は動かない（スクロールしていない）
+        let after = existing.frame.midY
+        XCTAssertEqual(
+            after,
+            before,
+            accuracy: 2.0,
+            "rows above the inserted row should not move: before=\(before) after=\(after)"
+        )
     }
 
     /// 追加直後（光っている間）に削除しても落ちない（#282 レビュー）。

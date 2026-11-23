@@ -19,6 +19,10 @@ struct AddAlarmRequest: Identifiable {
 private struct AlarmSpotlightRequest: Equatable {
     let token = UUID()
     let alarmIDs: [UUID]
+    /// スクロールを始める位置（保存したときの一覧の位置）
+    let startOffset: CGFloat
+    /// スクロールが止まってから行を入れる（上・中に入る場合）
+    let insertAfterScroll: Bool
 }
 
 /// 自分で動かすスクロールの開始・終了位置（#282 レビュー）。
@@ -45,6 +49,12 @@ struct ContentView: View {
     @State private var revealedAlarmIDs: Set<UUID> = []
     /// 一覧の準備ができてから処理する演出要求（#282）
     @State private var spotlightRequest: AlarmSpotlightRequest?
+    /// シートが閉じるまで一覧に出さない行（#282 レビュー）
+    @State private var hiddenUntilDismissAlarmIDs: Set<UUID> = []
+    /// シートが閉じたら演出を始める行（#282 レビュー）
+    @State private var pendingSpotlightAlarmIDs: Set<UUID> = []
+    /// 保存したときの一覧の位置（#282 レビュー）
+    @State private var pendingSpotlightStartOffset: CGFloat?
     /// `List` の下の UIScrollView（#282 レビュー）
     @State private var listScrollView: UIScrollView?
     @State private var scrollAnimator = SpotlightScrollAnimator()
@@ -211,6 +221,7 @@ struct ContentView: View {
                 addScreenVisible = false
                 addAlarmRequest = nil
                 schedulePlaylistUnlockAttempt()
+                startPendingSpotlight()
             }) { request in
                 AlarmDetailView(
                     mode: .add,
@@ -235,6 +246,7 @@ struct ContentView: View {
                 editScreenVisible = false
                 selectedAlarm = nil
                 schedulePlaylistUnlockAttempt()
+                startPendingSpotlight()
             }) { alarm in
                 AlarmDetailView(
                     mode: .edit(alarm),
@@ -783,7 +795,10 @@ struct ContentView: View {
 
     /// 一覧に出す配列を1か所で更新する（#282 レビュー）。
     private func syncDisplayedAlarms(animated: Bool = false) {
-        let sorted = AlarmListOrdering.sortedForDisplay(alarmStore.alarms)
+        let visible = alarmStore.alarms.filter {
+            !hiddenUntilDismissAlarmIDs.contains($0.id)
+        }
+        let sorted = AlarmListOrdering.sortedForDisplay(visible)
         guard sorted != displayedAlarms else { return }
         if animated {
             withAnimation(.default) {
@@ -864,12 +879,6 @@ struct ContentView: View {
                 }
 
             }
-            // 最後の行でも45%まで送れるよう、スクロール内容の下端に余白を持たせる（#282）
-            .contentMargins(
-                .bottom,
-                RowSpotlightTiming.bottomScrollSpace,
-                for: .scrollContent
-            )
             .warmListBackground()
             .onGeometryChange(for: CGRect.self) { geometry in
                 // 一覧として実際に見えている範囲（画面座標）。下端の広告・タブを除く。
@@ -938,9 +947,45 @@ struct ContentView: View {
         }
     }
 
-    /// 保存された行を、スクロールが止まるまで高さ0で待たせる（#282）。
+    /// 保存された行を、シートが閉じるまで一覧に出さない（#282 レビュー）。
+    /// 保存から `onDismiss` のあいだに contentOffset が動かないようにする。
     private func handleAlarmSaved(_ alarm: AlarmEntry, shouldSpotlight: Bool) {
         guard shouldSpotlight else { return }
+
+        pendingSpotlightStartOffset = listScrollView?.contentOffset.y
+        hiddenUntilDismissAlarmIDs.insert(alarm.id)
+        pendingSpotlightAlarmIDs.insert(alarm.id)
+        syncDisplayedAlarms()
+        #if DEBUG
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightScroll] saved offset=%.1f hidden=%d",
+                Double(listScrollView?.contentOffset.y ?? .nan),
+                hiddenUntilDismissAlarmIDs.count
+            )
+        )
+        #endif
+    }
+
+    /// シートが閉じきってから、行を入れてスクロール・光り方を始める（#282 レビュー）。
+    private func startPendingSpotlight() {
+        guard !pendingSpotlightAlarmIDs.isEmpty else { return }
+        let ids = Array(pendingSpotlightAlarmIDs)
+        pendingSpotlightAlarmIDs.removeAll()
+        let startOffset = pendingSpotlightStartOffset
+            ?? listScrollView?.contentOffset.y
+            ?? 0
+        pendingSpotlightStartOffset = nil
+
+        // 上・中に入る行はスクロールが止まるまで一覧に足さない（下に入る行だけ先に入れる）
+        let sorted = AlarmListOrdering.sortedForDisplay(alarmStore.alarms)
+        let firstID = ids[0]
+        let fullIndex = sorted.firstIndex(where: { $0.id == firstID }) ?? sorted.count
+        let visibleBefore = sorted[..<fullIndex].filter {
+            !hiddenUntilDismissAlarmIDs.contains($0.id)
+        }.count
+        let insertAfterScroll = visibleBefore < displayedAlarms.count
 
         // 前の演出が残っていたら、その行は出し切ってから次へ
         if !pendingRevealAlarmIDs.isEmpty {
@@ -948,76 +993,206 @@ struct ContentView: View {
             pendingRevealAlarmIDs.removeAll()
         }
 
-        pendingRevealAlarmIDs.insert(alarm.id)
-        revealedAlarmIDs.remove(alarm.id)
-        spotlightRequest = AlarmSpotlightRequest(alarmIDs: [alarm.id])
+        if insertAfterScroll {
+            // まだ一覧に足さない。スクロール後に insertRowsAfterScroll で入れる
+        } else {
+            // 一番下に入る行は、下端の自然な位置まで送るため先に collapsed で入れる
+            hiddenUntilDismissAlarmIDs.subtract(ids)
+            pendingRevealAlarmIDs.formUnion(ids)
+            revealedAlarmIDs.subtract(ids)
+            syncDisplayedAlarms()
+        }
+
+        #if DEBUG
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightScroll] dismiss offset=%.1f ids=%d visibleBefore=%d shown=%d mode=%@",
+                Double(listScrollView?.contentOffset.y ?? .nan),
+                ids.count,
+                visibleBefore,
+                displayedAlarms.count,
+                insertAfterScroll ? "after-scroll" : "bottom-now"
+            )
+        )
+        #endif
+        spotlightRequest = AlarmSpotlightRequest(
+            alarmIDs: ids,
+            startOffset: startOffset,
+            insertAfterScroll: insertAfterScroll
+        )
     }
 
-    /// 行の位置から、自分で動かすスクロールの開始・終了位置を求める（#282 レビュー）。
+    /// スクロールが止まったあとで、上・中に入る行を collapsed で足す（#282 レビュー）。
+    private func insertRowsAfterScroll(_ ids: [UUID]) {
+        guard let scrollView = listScrollView else { return }
+        let offsetBeforeInsert = scrollView.contentOffset.y
+        hiddenUntilDismissAlarmIDs.subtract(ids)
+        pendingRevealAlarmIDs.formUnion(ids)
+        revealedAlarmIDs.subtract(ids)
+        syncDisplayedAlarms()
+        if let collectionView = scrollView as? UICollectionView {
+            collectionView.layoutIfNeeded()
+        }
+        // 行の挿入で一覧が自分で offset を動かしても、見えている位置を変えない
+        scrollView.setContentOffset(
+            CGPoint(x: scrollView.contentOffset.x, y: offsetBeforeInsert),
+            animated: false
+        )
+        #if DEBUG
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightScroll] inserted offset=%.1f (kept %.1f)",
+                Double(scrollView.contentOffset.y),
+                Double(offsetBeforeInsert)
+            )
+        )
+        #endif
+    }
+
+    /// 行が「見えるところまで最小限」になるスクロール位置を求める（#282 レビュー）。
+    /// `scrollRectToVisible` と同じ考え方で、上下のバーに隠れる部分は見えていないとみなす。
+    /// - Parameter rowIsInserted: false のときは、まだ一覧に足していない行の入る位置を
+    ///   次の行（または最後の行の下端）から求める。
     private func spotlightScrollTarget(
         for alarmID: UUID,
-        scrollView: UIScrollView
+        scrollView: UIScrollView,
+        startOffset: CGFloat,
+        rowIsInserted: Bool
     ) -> SpotlightScrollTarget? {
         guard spotlightViewport.height > 0,
-              let collectionView = scrollView as? UICollectionView,
-              let index = displayedAlarms.firstIndex(where: { $0.id == alarmID })
+              let collectionView = scrollView as? UICollectionView
         else { return nil }
 
         // 上に許可バナー・全体の休みの行があれば、その分だけ indexPath をずらす
         let leadingRows = (permissionBannerStatus != nil ? 1 : 0)
             + (activeGlobalSkip != nil ? 1 : 0)
-        let indexPath = IndexPath(row: leadingRows + index, section: 0)
-        // 追加直後は行のレイアウトが古いことがあるため、一度整えてから読む
+
+        // 追加直後は行のレイアウトが古いことがあるため、一度整えてから読む。
+        // その前後で contentOffset が飛んでいないかを DEBUG ログで確認する。
+        let offsetBeforeLayout = scrollView.contentOffset.y
+        #if DEBUG
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightScroll] layout before offset=%.1f",
+                Double(offsetBeforeLayout)
+            )
+        )
+        #endif
         collectionView.collectionViewLayout.invalidateLayout()
         collectionView.layoutIfNeeded()
+        let offsetAfterLayout = scrollView.contentOffset.y
         #if DEBUG
         NSLog(
             "%@",
             String(
-                format: "[SpotlightScroll] collection sections=%d rows0=%d index=%d indexPath=%@ offset=%.1f size=%.1fx%.1f bounds=%.1fx%.1f",
-                collectionView.numberOfSections,
-                collectionView.numberOfItems(inSection: 0),
-                index,
-                indexPath.description,
-                Double(collectionView.contentOffset.y),
-                Double(collectionView.contentSize.width),
-                Double(collectionView.contentSize.height),
-                Double(collectionView.bounds.width),
-                Double(collectionView.bounds.height)
+                format: "[SpotlightScroll] layout after offset=%.1f",
+                Double(offsetAfterLayout)
             )
         )
         #endif
-        guard let attributes = collectionView.layoutAttributesForItem(at: indexPath)
-            ?? collectionView.collectionViewLayout.layoutAttributesForItem(at: indexPath)
-        else { return nil }
-        #if DEBUG
-        NSLog(
-            "%@",
-            String(
-                format: "[SpotlightScroll] attributes frame=%@ midY=%.1f",
-                NSCoder.string(for: attributes.frame),
-                Double(attributes.frame.midY)
+        if abs(offsetAfterLayout - startOffset) > 0.5 {
+            // レイアウト更新で位置が飛んだら、保存したときの位置に戻す
+            scrollView.setContentOffset(
+                CGPoint(x: scrollView.contentOffset.x, y: startOffset),
+                animated: false
             )
-        )
-        #endif
+            #if DEBUG
+            NSLog(
+                "%@",
+                String(
+                    format: "[SpotlightScroll] offset restored to %.1f",
+                    Double(startOffset)
+                )
+            )
+            #endif
+        }
 
-        let from = scrollView.contentOffset.y
-        let naturalHeight = alarmFrameStore.frame(for: alarmID)?.height
-            ?? max(attributes.frame.height, 96)
-        let rowTop = attributes.frame.minY - from
-        let rowBottom = rowTop + naturalHeight
+        let from = startOffset
+        let rowTop: CGFloat
+        let rowHeight: CGFloat
 
+        if rowIsInserted,
+           let index = displayedAlarms.firstIndex(where: { $0.id == alarmID }) {
+            let indexPath = IndexPath(row: leadingRows + index, section: 0)
+            guard let attributes = collectionView.layoutAttributesForItem(at: indexPath)
+                ?? collectionView.collectionViewLayout.layoutAttributesForItem(at: indexPath)
+            else { return nil }
+            rowTop = attributes.frame.minY
+            rowHeight = alarmFrameStore.frame(for: alarmID)?.height
+                ?? max(attributes.frame.height, 96)
+        } else {
+            // まだ足していない行の入る位置：次の可視行の上端、なければ最後の行の下端
+            let sorted = AlarmListOrdering.sortedForDisplay(alarmStore.alarms)
+            let fullIndex = sorted.firstIndex(where: { $0.id == alarmID }) ?? sorted.count
+            let visibleBefore = sorted[..<fullIndex].filter {
+                !hiddenUntilDismissAlarmIDs.contains($0.id)
+            }.count
+
+            if visibleBefore < displayedAlarms.count {
+                let indexPath = IndexPath(row: leadingRows + visibleBefore, section: 0)
+                guard let attributes = collectionView.layoutAttributesForItem(at: indexPath)
+                    ?? collectionView.collectionViewLayout.layoutAttributesForItem(at: indexPath)
+                else { return nil }
+                rowTop = attributes.frame.minY
+                rowHeight = max(attributes.frame.height, 96)
+            } else if let last = displayedAlarms.last,
+                      let index = displayedAlarms.firstIndex(where: { $0.id == last.id }) {
+                let indexPath = IndexPath(row: leadingRows + index, section: 0)
+                guard let attributes = collectionView.layoutAttributesForItem(at: indexPath)
+                    ?? collectionView.collectionViewLayout.layoutAttributesForItem(at: indexPath)
+                else { return nil }
+                rowTop = attributes.frame.maxY
+                rowHeight = max(attributes.frame.height, 96)
+            } else {
+                rowTop = -scrollView.adjustedContentInset.top
+                rowHeight = 96
+            }
+        }
+
+        let rowBottom = rowTop + rowHeight
         let scrollFrame = scrollView.convert(
             CGRect(origin: .zero, size: scrollView.bounds.size),
             to: nil
         )
-        let viewportTop = spotlightViewport.minY - scrollFrame.minY
-        let viewportBottom = spotlightViewport.maxY - scrollFrame.minY
-        let isVisible = rowTop >= viewportTop && rowBottom <= viewportBottom
+        #if DEBUG
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightScroll] insets top=%.1f bottom=%.1f adjusted=%.1f/%.1f frame=%@ windowSafe=%.1f/%.1f",
+                Double(scrollView.contentInset.top),
+                Double(scrollView.contentInset.bottom),
+                Double(scrollView.adjustedContentInset.top),
+                Double(scrollView.adjustedContentInset.bottom),
+                NSCoder.string(for: scrollFrame),
+                Double(scrollView.window?.safeAreaInsets.top ?? -1),
+                Double(scrollView.window?.safeAreaInsets.bottom ?? -1)
+            )
+        )
+        #endif
+        // 画面に見えている範囲。下は調整済みインセット（タブバー・広告枠）を除く。
+        let screenBounds = scrollView.window?.bounds ?? scrollView.bounds
+        let visibleTopScreen = max(scrollFrame.minY, screenBounds.minY)
+        let visibleBottomScreen = min(scrollFrame.maxY, screenBounds.maxY)
+            - scrollView.adjustedContentInset.bottom
+        let visibleTop = visibleTopScreen - scrollFrame.minY
+        let visibleBottom = visibleBottomScreen - scrollFrame.minY
+        let rowTopScreen = rowTop - from
+        let rowBottomScreen = rowBottom - from
+        let inset = RowSpotlightTiming.minimumVisibleInset
 
-        let viewportHeight = max(1, viewportBottom - viewportTop)
-        let targetScreenY = viewportTop + viewportHeight * 0.45
-        let targetOffset = attributes.frame.midY - targetScreenY
+        var reason = "visible"
+        var targetOffset = from
+        if rowTopScreen < visibleTop + inset {
+            reason = "above"
+            targetOffset = from - ((visibleTop + inset) - rowTopScreen)
+        } else if rowBottomScreen > visibleBottom - inset {
+            reason = "below"
+            targetOffset = from + (rowBottomScreen - (visibleBottom - inset))
+        }
+        let isVisible = reason == "visible"
 
         let minOffset = -scrollView.adjustedContentInset.top
         let maxOffset = max(
@@ -1027,6 +1202,25 @@ struct ContentView: View {
                 + scrollView.adjustedContentInset.bottom
         )
         let clamped = min(max(targetOffset, minOffset), maxOffset)
+
+        #if DEBUG
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightScroll] target reason=%@ inserted=%d from=%.1f to=%.1f rowScreen=%.1f...%.1f visible=%.1f...%.1f size=%.1f bounds=%.1f",
+                reason,
+                rowIsInserted ? 1 : 0,
+                Double(from),
+                Double(clamped),
+                Double(rowTopScreen),
+                Double(rowBottomScreen),
+                Double(visibleTop),
+                Double(visibleBottom),
+                Double(collectionView.contentSize.height),
+                Double(scrollView.bounds.height)
+            )
+        )
+        #endif
         return SpotlightScrollTarget(from: from, to: clamped, isVisible: isVisible)
     }
 
@@ -1035,43 +1229,36 @@ struct ContentView: View {
         _ request: AlarmSpotlightRequest,
         proxy: ScrollViewProxy
     ) async {
-        // シートが閉じきる約0.12秒前から動き出す
-        try? await Task.sleep(for: .seconds(RowSpotlightTiming.sheetCloseDelay))
-        guard !Task.isCancelled else { return }
-
         let ids = request.alarmIDs
         guard let first = ids.first else { return }
 
-        // List の scrollTo は指定した時間・カーブを使わないため、
-        // UIScrollView を CADisplayLink で自分で動かす（#282 レビュー）
+        // シートが閉じきった直後から動き出す（閉じる動きには重ねない）
         #if DEBUG
         NSLog(
             "%@",
-            "[SpotlightScroll] resolve scrollView=\(listScrollView == nil ? "nil" : "ok")"
+            String(
+                format: "[SpotlightScroll] start offset=%.1f wanted=%.1f scrollView=%@ mode=%@",
+                Double(listScrollView?.contentOffset.y ?? .nan),
+                Double(request.startOffset),
+                listScrollView == nil ? "nil" : "ok",
+                request.insertAfterScroll ? "after-scroll" : "bottom-now"
+            )
         )
         #endif
-        let measuredFrame = alarmFrameStore.frame(for: first)
-        let shouldScroll = RowSpotlightLogic.shouldScroll(
-            rowFrame: measuredFrame,
-            viewport: spotlightViewport
-        )
+
+        // List の scrollTo は指定した時間・カーブを使わないため、
+        // UIScrollView を CADisplayLink で自分で動かす（#282 レビュー）
         var handledByCustomScroll = false
         if let scrollView = listScrollView,
-           let target = spotlightScrollTarget(for: first, scrollView: scrollView) {
+           let target = spotlightScrollTarget(
+               for: first,
+               scrollView: scrollView,
+               startOffset: request.startOffset,
+               rowIsInserted: !request.insertAfterScroll
+           ) {
             handledByCustomScroll = true
-            #if DEBUG
-            NSLog(
-                "%@",
-                String(
-                    format: "[SpotlightScroll] target from=%.1f to=%.1f visible=%d shouldScroll=%d",
-                    Double(target.from),
-                    Double(target.to),
-                    target.isVisible ? 1 : 0,
-                    shouldScroll ? 1 : 0
-                )
-            )
-            #endif
-            if shouldScroll {
+            // 見えているなら送らない。送る場合も「見えるところまで」の最小距離だけ
+            if !target.isVisible, abs(target.to - target.from) >= 0.5 {
                 let distance = abs(target.to - target.from)
                 if reduceMotion {
                     scrollView.setContentOffset(
@@ -1101,6 +1288,11 @@ struct ContentView: View {
             #if DEBUG
             NSLog("%@", "[SpotlightScroll] custom unavailable -> fallback")
             #endif
+            if request.insertAfterScroll {
+                hiddenUntilDismissAlarmIDs.subtract(ids)
+                pendingRevealAlarmIDs.formUnion(ids)
+                syncDisplayedAlarms()
+            }
             // スクロールビューが取れないときだけのフォールバック（位置合わせのみ）
             let frames = ids.compactMap { alarmFrameStore.frame(for: $0) }
             let rowFrame: CGRect? = {
@@ -1118,6 +1310,9 @@ struct ContentView: View {
         }
 
         // スクロールが止まってから行を入れる
+        if request.insertAfterScroll {
+            insertRowsAfterScroll(ids)
+        }
         revealedAlarmIDs.formUnion(ids)
         let revealWait = reduceMotion
             ? RowSpotlightTiming.revealOpacity

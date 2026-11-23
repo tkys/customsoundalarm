@@ -1209,6 +1209,9 @@ struct AlarmDetailView: View {
             shouldSpotlight = true
         }
 
+        // 保存した時点で一覧側へ知らせ、シートが閉じるまでは行を出さない（#282 レビュー）
+        onSaved?(savedEntry, shouldSpotlight)
+
         if BackupAlarmAccess.shouldGrantEarlyAccess(isEnabled: backupMinutes != nil) {
             AppGroup.backupEarlyAccessGranted = true
         }
@@ -1246,13 +1249,10 @@ struct AlarmDetailView: View {
             Task {
                 try? await Task.sleep(for: .seconds(1.6))
                 saveConfirmation = nil
-                // 閉じ始めに合わせて一覧の演出を始める（#282）
-                onSaved?(savedEntry, shouldSpotlight)
                 onClose?()
                 dismiss()
             }
         } else {
-            onSaved?(savedEntry, shouldSpotlight)
             onClose?()
             dismiss()
         }
