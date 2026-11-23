@@ -118,3 +118,123 @@ date,country,group,term,rank,results
 2026-11-17,us,mid,chorus alarm,1,161
 2026-11-17,de,big,alarm,73,171
 2026-11-17,us,mid,alarm sound,23,170
+2026-11-23,jp,big,アラーム,,156
+2026-11-23,jp,big,目覚まし,116,168
+2026-11-23,jp,big,目覚まし時計,,174
+2026-11-23,jp,big,アラームアプリ,,173
+2026-11-23,jp,big,着信音,,141
+2026-11-23,jp,big,時計,,163
+2026-11-23,jp,big,目覚ましアプリ,166,186
+2026-11-23,jp,mid,アラーム 曲,21,168
+2026-11-23,jp,mid,目覚まし 曲,46,178
+2026-11-23,jp,mid,アラーム 音楽,140,186
+2026-11-23,jp,mid,目覚まし 音楽,80,169
+2026-11-23,jp,mid,アラーム 好きな曲,10,163
+2026-11-23,jp,mid,目覚まし 好きな曲,2,161
+2026-11-23,jp,mid,アラーム 好きな音,14,44
+2026-11-23,jp,mid,アラーム サビ,7,165
+2026-11-23,jp,mid,目覚まし サビ,1,5
+2026-11-23,jp,mid,アラーム 動画,18,82
+2026-11-23,jp,mid,目覚まし 動画,47,156
+2026-11-23,jp,mid,アラーム 声,,154
+2026-11-23,jp,mid,アラーム 録音,,180
+2026-11-23,jp,mid,アラーム 音声,,184
+2026-11-23,jp,mid,アラーム mp3,55,173
+2026-11-23,jp,mid,アラーム カスタム,29,189
+2026-11-23,jp,mid,アラーム 長い,1,6
+2026-11-23,jp,mid,アラーム ループ,3,54
+2026-11-23,jp,mid,アラーム 大音量,29,194
+2026-11-23,jp,mid,目覚まし 大音量,119,178
+2026-11-23,jp,mid,アラーム マナーモード,,186
+2026-11-23,jp,mid,アラーム プレイリスト,,172
+2026-11-23,jp,mid,着信音 作成,,167
+2026-11-23,jp,mid,着信音 長い,1,1
+2026-11-23,jp,mid,着信音 mp3,159,175
+2026-11-23,jp,mid,音楽 切り取り,,180
+2026-11-23,jp,long,起きれない,21,91
+2026-11-23,jp,long,二度寝 防止,136,194
+2026-11-23,jp,long,寝坊 防止,114,193
+2026-11-23,jp,long,GarageBand 着信音,,25
+2026-11-23,jp,long,アラーム 音 変更,,7
+2026-11-23,jp,long,好きな曲で起きる,,11
+2026-11-23,us,big,alarm,,195
+2026-11-23,us,big,alarm clock,,177
+2026-11-23,us,big,alarm app,,191
+2026-11-23,us,big,wake up,,185
+2026-11-23,us,big,ringtone,,185
+2026-11-23,us,big,ringtones,,179
+2026-11-23,us,big,clock,,197
+2026-11-23,us,mid,custom alarm,47,162
+2026-11-23,us,mid,custom alarm sound,3,148
+2026-11-23,us,mid,alarm custom sound,2,167
+2026-11-23,us,mid,music alarm,56,147
+2026-11-23,us,mid,music alarm clock,85,157
+2026-11-23,us,mid,song alarm,4,144
+2026-11-23,us,mid,alarm song,33,154
+2026-11-23,us,mid,alarm sound,43,168
+2026-11-23,us,mid,alarm sounds,141,172
+2026-11-23,us,mid,alarm mp3,5,179
+2026-11-23,us,mid,alarm from video,7,176
+2026-11-23,us,mid,video to alarm,11,173
+2026-11-23,us,mid,voice alarm,171,175
+2026-11-23,us,mid,record alarm,36,162
+2026-11-23,us,mid,alarm loop,6,162
+2026-11-23,us,mid,loud alarm,,188
+2026-11-23,us,mid,alarm silent mode,38,182
+2026-11-23,us,mid,alarm playlist,90,175
+2026-11-23,us,mid,chorus alarm,1,162
+2026-11-23,us,mid,ringtone maker,,179
+2026-11-23,us,mid,ringtone mp3,,172
+2026-11-23,us,mid,long ringtone,,179
+2026-11-23,us,long,wake up song,72,168
+2026-11-23,us,long,heavy sleeper alarm,86,191
+2026-11-23,us,long,oversleep,59,180
+2026-11-23,us,long,garageband ringtone,,154
+2026-11-23,us,long,alarmkit,94,151
+2026-11-23,us,long,wake up to music,,162
+2026-11-23,gb,big,alarm,61,195
+2026-11-23,gb,big,alarm clock,,179
+2026-11-23,gb,big,ringtone,,187
+2026-11-23,gb,mid,custom alarm sound,1,162
+2026-11-23,gb,mid,music alarm,31,154
+2026-11-23,gb,mid,song alarm,8,156
+2026-11-23,gb,mid,alarm mp3,1,179
+2026-11-23,gb,mid,ringtone maker,,171
+2026-11-23,gb,mid,loud alarm,,190
+2026-11-23,gb,long,wake up song,23,168
+2026-11-23,gb,long,heavy sleeper alarm,49,188
+2026-11-23,de,big,wecker,,184
+2026-11-23,de,big,wecker app,,182
+2026-11-23,de,big,klingelton,,186
+2026-11-23,de,big,alarm,103,170
+2026-11-23,de,mid,wecker lied,4,176
+2026-11-23,de,mid,wecker musik,25,175
+2026-11-23,de,mid,alarm musik,4,155
+2026-11-23,de,mid,eigener weckton,2,7
+2026-11-23,de,mid,weckton,2,22
+2026-11-23,de,mid,wecker laut,65,175
+2026-11-23,de,mid,wecker video,1,44
+2026-11-23,de,mid,klingelton erstellen,,147
+2026-11-23,de,long,mit musik aufwachen,,18
+2026-11-23,de,long,verschlafen,48,170
+2026-11-23,fr,big,réveil,179,182
+2026-11-23,fr,big,alarme,,182
+2026-11-23,fr,big,sonnerie,,172
+2026-11-23,fr,mid,réveil musique,46,171
+2026-11-23,fr,mid,alarme musique,63,162
+2026-11-23,fr,mid,réveil chanson,11,50
+2026-11-23,fr,mid,sonnerie personnalisée,,177
+2026-11-23,fr,mid,alarme personnalisée,,36
+2026-11-23,fr,mid,réveil fort,19,174
+2026-11-23,fr,mid,créer sonnerie,,53
+2026-11-23,fr,long,se réveiller en musique,,3
+2026-11-23,br,big,alarme,,185
+2026-11-23,br,big,despertador,,181
+2026-11-23,br,big,toque,,176
+2026-11-23,br,mid,despertador música,31,112
+2026-11-23,br,mid,alarme música,92,173
+2026-11-23,br,mid,alarme personalizado,,181
+2026-11-23,br,mid,toque personalizado,,61
+2026-11-23,br,mid,despertador alto,,183
+2026-11-23,br,mid,alarme com música,23,43
+2026-11-23,br,long,acordar com música,23,65

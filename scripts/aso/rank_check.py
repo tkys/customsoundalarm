@@ -18,6 +18,7 @@ import http.client
 import datetime as dt
 import json
 import os
+import ssl
 import sys
 import time
 import urllib.error
@@ -28,6 +29,22 @@ APP_ID = 6760616800
 LIMIT = 200
 INTERVAL_SECONDS = 3.2
 FIELDS = ["date", "country", "group", "term", "rank", "results"]
+# 続けてこの回数失敗したら、つながらないとみなして打ち切る（35分止まる事故の防止）
+MAX_CONSECUTIVE_FAILURES = 5
+
+
+def ssl_context() -> ssl.SSLContext:
+    """既定の証明書で検証できない環境（python.org 版の macOS など）では、OS の証明書を使う。"""
+    context = ssl.create_default_context()
+    if not context.get_ca_certs():
+        for cafile in ("/etc/ssl/cert.pem", "/etc/ssl/certs/ca-certificates.crt"):
+            if os.path.exists(cafile):
+                context.load_verify_locations(cafile)
+                break
+    return context
+
+
+SSL_CONTEXT = ssl_context()
 
 
 def search_rank(term: str, country: str) -> tuple[int | None, int]:
@@ -38,7 +55,7 @@ def search_rank(term: str, country: str) -> tuple[int | None, int]:
     for attempt in range(3):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "rank-check/1.0"})
-            with urllib.request.urlopen(req, timeout=30) as resp:
+            with urllib.request.urlopen(req, timeout=30, context=SSL_CONTEXT) as resp:
                 data = json.load(resp)
             ids = [r.get("trackId") for r in data.get("results", [])]
             rank = ids.index(APP_ID) + 1 if APP_ID in ids else None
@@ -73,7 +90,7 @@ def main() -> int:
     done = existing_keys(args.out)
     # 途中で止まって空のまま残ったファイルにも見出し行を書く
     new_file = not os.path.exists(args.out) or os.path.getsize(args.out) == 0
-    written = failed = 0
+    written = failed = consecutive = 0
 
     with open(args.out, "a", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=FIELDS)
@@ -87,16 +104,22 @@ def main() -> int:
                     try:
                         rank, results = search_rank(term, country)
                     except RuntimeError as error:
-                        print(f"skip: {error}", file=sys.stderr)
+                        print(f"skip: {error}", file=sys.stderr, flush=True)
                         failed += 1
+                        consecutive += 1
+                        if consecutive >= MAX_CONSECUTIVE_FAILURES:
+                            print(f"abort: {consecutive} failures in a row", file=sys.stderr, flush=True)
+                            print(f"written={written} failed={failed}", file=sys.stderr, flush=True)
+                            return 1
                         continue
+                    consecutive = 0
                     writer.writerow({
                         "date": args.date, "country": country, "group": group,
                         "term": term, "rank": rank if rank else "", "results": results,
                     })
                     f.flush()
                     written += 1
-                    print(f"{country}\t{group}\t{term}\t{rank or '-'}")
+                    print(f"{country}\t{group}\t{term}\t{rank or '-'}", flush=True)
                     time.sleep(INTERVAL_SECONDS)
 
     print(f"written={written} failed={failed}", file=sys.stderr)
