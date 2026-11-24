@@ -219,7 +219,10 @@ struct RowSpotlightModifier: ViewModifier {
 /// 閉じている間も中身は自然な高さで組み立てておき、入る瞬間に
 /// 高さと不透明度だけを動かす。Reduce Motion では高さを動かさない。
 struct SpotlightRevealRow<Content: View>: View {
+    /// すき間が開いたか（高さ）
     let isRevealed: Bool
+    /// カードと中身を出したか（不透明度）
+    let isShown: Bool
     let reduceMotion: Bool
     /// 中身の自然な高さが測れたことを親に知らせる（#282 レビュー）。
     /// 測れる前に開くと、高さ0から自然な高さへアニメーションせずに跳ぶ。
@@ -230,11 +233,13 @@ struct SpotlightRevealRow<Content: View>: View {
 
     init(
         isRevealed: Bool,
+        isShown: Bool,
         reduceMotion: Bool,
         onMeasured: @escaping (CGFloat) -> Void = { _ in },
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.isRevealed = isRevealed
+        self.isShown = isShown
         self.reduceMotion = reduceMotion
         self.onMeasured = onMeasured
         self.content = content
@@ -259,8 +264,8 @@ struct SpotlightRevealRow<Content: View>: View {
                                 }
                         }
                     }
-                    .opacity(isRevealed ? 1 : 0)
-                    .animation(RowSpotlightTiming.revealOpacityAnimation, value: isRevealed)
+                    .opacity(isShown ? 1 : 0)
+                    .animation(RowSpotlightTiming.revealOpacityAnimation, value: isShown)
             }
             .clipped()
             .animation(

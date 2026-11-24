@@ -55,6 +55,8 @@ struct ContentView: View {
     @State private var hiddenUntilDismissAlarmIDs: Set<UUID> = []
     /// 開く前の中身の自然な高さ（#282 レビュー）
     @State private var measuredRevealHeights: [UUID: CGFloat] = [:]
+    /// すき間が開ききって、カードと中身を出した行（#282 レビュー）
+    @State private var shownRevealAlarmIDs: Set<UUID> = []
     /// シートが閉じたら演出を始める行（#282 レビュー）
     @State private var pendingSpotlightAlarmIDs: Set<UUID> = []
     /// 保存したときの一覧の位置（#282 レビュー）
@@ -835,6 +837,7 @@ struct ContentView: View {
                         if pendingRevealAlarmIDs.contains(alarm.id) {
                             SpotlightRevealRow(
                                 isRevealed: revealedAlarmIDs.contains(alarm.id),
+                                isShown: shownRevealAlarmIDs.contains(alarm.id),
                                 reduceMotion: reduceMotion,
                                 onMeasured: { height in
                                     guard abs(
@@ -851,8 +854,8 @@ struct ContentView: View {
                     }
                     .warmCard(
                         spotlight: spotlightStore.controller(for: alarm.id),
-                        revealProgress: pendingRevealAlarmIDs.contains(alarm.id)
-                            ? (revealedAlarmIDs.contains(alarm.id) ? 1 : 0)
+                        revealOpacity: pendingRevealAlarmIDs.contains(alarm.id)
+                            ? (shownRevealAlarmIDs.contains(alarm.id) ? 1 : 0)
                             : 1
                     )
                     .swipeActions(edge: .leading, allowsFullSwipe: false) {
@@ -976,6 +979,7 @@ struct ContentView: View {
         pendingSpotlightStartOffset = listScrollView?.contentOffset.y
         hiddenUntilDismissAlarmIDs.insert(alarm.id)
         measuredRevealHeights.removeValue(forKey: alarm.id)
+        shownRevealAlarmIDs.remove(alarm.id)
         pendingSpotlightAlarmIDs.insert(alarm.id)
         syncDisplayedAlarms()
         #if DEBUG
@@ -1079,6 +1083,7 @@ struct ContentView: View {
         guard let scrollView = listScrollView else { return }
         let offsetBeforeInsert = scrollView.contentOffset.y
         ids.forEach { measuredRevealHeights.removeValue(forKey: $0) }
+        shownRevealAlarmIDs.subtract(ids)
         hiddenUntilDismissAlarmIDs.subtract(ids)
         pendingRevealAlarmIDs.formUnion(ids)
         revealedAlarmIDs.subtract(ids)
@@ -1426,21 +1431,28 @@ struct ContentView: View {
             // 中身の自然な高さが測れてから開く（測れる前に開くと全高で出る）
             await waitForRevealMeasurement(ids)
             guard !Task.isCancelled else { return }
-            revealedAlarmIDs.formUnion(ids)
             #if DEBUG
             let heights = ids
                 .map { String(format: "%.1f", measuredRevealHeights[$0] ?? 0) }
                 .joined(separator: ",")
             NSLog(
                 "%@",
-                "[SpotlightReveal] reveal start mode=\(mode) heights=\(heights)"
+                "[SpotlightReveal] gap start mode=\(mode) heights=\(heights)"
             )
             #endif
-            let revealWait = reduceMotion
-                ? RowSpotlightTiming.revealOpacity
-                : RowSpotlightTiming.revealHeight
-            try? await Task.sleep(for: .seconds(revealWait))
-            guard !Task.isCancelled else { return }
+            // 1) すき間だけを開ける（カードと中身は見えない）
+            revealedAlarmIDs.formUnion(ids)
+            if !reduceMotion {
+                try? await Task.sleep(for: .seconds(RowSpotlightTiming.revealHeight))
+                guard !Task.isCancelled else { return }
+            }
+            // 2) 開ききってから、カードと中身を一緒に出す
+            #if DEBUG
+            NSLog("%@", "[SpotlightReveal] show start mode=\(mode)")
+            #endif
+            withAnimation(RowSpotlightTiming.revealOpacityAnimation) {
+                shownRevealAlarmIDs.formUnion(ids)
+            }
         }
 
         // 入り終わってから約0.08秒後に光らせる
@@ -1460,6 +1472,7 @@ struct ContentView: View {
         guard !Task.isCancelled else { return }
         pendingRevealAlarmIDs.subtract(ids)
         revealedAlarmIDs.subtract(ids)
+        shownRevealAlarmIDs.subtract(ids)
     }
 
     // MARK: - Permission Banner (#230)
