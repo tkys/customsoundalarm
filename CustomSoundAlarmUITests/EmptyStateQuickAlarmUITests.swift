@@ -22,7 +22,8 @@ final class EmptyStateQuickAlarmUITests: XCTestCase {
             "-uitest-reset-sounds",
             "-uitest-force-light",
             "-uitest-alarm-permission-authorized",
-            "-uitest-skip-alarm-sync"
+            "-uitest-skip-alarm-sync",
+            "-uitest-expose-until-ring"
         ]
         app.launch()
 
@@ -35,7 +36,7 @@ final class EmptyStateQuickAlarmUITests: XCTestCase {
         button.tap()
 
         XCTAssertTrue(
-            app.staticTexts["alarmList.untilRing"].waitForExistence(timeout: 5),
+            app.staticTexts["alarm.row.untilRing"].waitForExistence(timeout: 5),
             "next ring should appear after creating a quick alarm: \(app.debugDescription)"
         )
         XCTAssertTrue(
