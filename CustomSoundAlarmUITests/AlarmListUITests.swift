@@ -29,6 +29,53 @@ final class AlarmListUITests: XCTestCase {
         XCTAssertTrue(y2 < y3, "18:00 should be above 23:44 (y2=\(y2) y3=\(y3))")
     }
 
+    /// 時刻は端末の言語と12／24時間制に従う（#283）。
+    func testTimesFollowDeviceHourCycle() {
+        app.launchArguments = [
+            "-uitest-seed-alarms",
+            "-AppleLanguages", "(ja)",
+            "-AppleLocale", "ja_JP"
+        ]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["6:24"].waitForExistence(timeout: 15), app.debugDescription)
+        XCTAssertTrue(app.staticTexts["18:00"].exists, app.debugDescription)
+        XCTAssertFalse(app.staticTexts["06:24"].exists, "ja should drop the leading zero")
+        XCTAssertFalse(app.staticTexts["AM"].exists, "ja should be 24-hour")
+
+        app.terminate()
+
+        app.launchArguments = [
+            "-uitest-seed-alarms",
+            "-AppleLanguages", "(en-US)",
+            "-AppleLocale", "en_US"
+        ]
+        app.launch()
+        XCTAssertTrue(
+            app.buttons["alarmList.add"].waitForExistence(timeout: 15),
+            app.debugDescription
+        )
+        XCTAssertTrue(
+            app.staticTexts["6:24"].waitForExistence(timeout: 10),
+            app.debugDescription
+        )
+        XCTAssertTrue(app.staticTexts["AM"].exists, app.debugDescription)
+        XCTAssertTrue(app.staticTexts["6:00"].exists, app.debugDescription)
+        XCTAssertTrue(app.staticTexts["PM"].exists, app.debugDescription)
+        XCTAssertFalse(app.staticTexts["18:00"].exists, "en-US should be 12-hour")
+
+        app.terminate()
+
+        app.launchArguments = [
+            "-uitest-seed-alarms",
+            "-AppleLanguages", "(en-GB)",
+            "-AppleLocale", "en_GB"
+        ]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["06:24"].waitForExistence(timeout: 15), app.debugDescription)
+        XCTAssertTrue(app.staticTexts["18:00"].exists, app.debugDescription)
+        XCTAssertFalse(app.staticTexts["6:24"].exists, "en-GB should keep the leading zero")
+    }
+
     func testAccessibilitySizeKeepsLabelsAndSoundNames() {
         app.launchArguments = [
             "-uitest-seed-design-audit",

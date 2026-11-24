@@ -15,11 +15,6 @@ struct SettingsView: View {
     @State private var mailAttachment: MailAttachment?
     @State private var sharePayload: SharePayload?
     @State private var isPreparingContact = false
-    #if DEBUG
-    /// 一覧の時刻の大きさの比較（DEBUGのみ・#283）
-    @AppStorage(AlarmTimeSizeOption.debugDefaultsKey)
-    private var alarmTimeSizeRaw = AlarmTimeSizeOption.current.rawValue
-    #endif
 
     var body: some View {
         NavigationStack {
@@ -85,22 +80,6 @@ struct SettingsView: View {
 
                     versionRow
                 }
-
-                #if DEBUG
-                // 実機で時刻の大きさを見比べるための切り替え（#283）。決まったら削除する。
-                Section {
-                    Picker("一覧の時刻の大きさ（比較）", selection: $alarmTimeSizeRaw) {
-                        ForEach(AlarmTimeSizeOption.allCases) { option in
-                            Text(option.displayName).tag(option.rawValue)
-                        }
-                    }
-                    .accessibilityIdentifier("settings.alarmTimeSize")
-                } header: {
-                    Text("開発者向け")
-                } footer: {
-                    Text("実機で見比べて決めるための切り替えです（DEBUGのみ）。")
-                }
-                #endif
             }
             .warmListBackground()
             .accessibilityIdentifier("settings.root")

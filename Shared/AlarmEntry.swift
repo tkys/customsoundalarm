@@ -115,11 +115,6 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
         AlarmTimeFormat.display(hour: hour, minute: minute)
     }
 
-    /// 画面に出す時刻の内訳（AM／PM を小さく出すため・#283）。
-    var displayTimeParts: AlarmTimeFormat.Parts {
-        AlarmTimeFormat.parts(hour: hour, minute: minute)
-    }
-
     /// 次回の発火予定日時を計算する。AlarmKit のスケジュール状態には依存せず、
     /// 純粋に `hour` / `minute` / `repeatWeekdays` と基準日時から算出する。
     ///

@@ -1833,11 +1833,6 @@ struct AlarmRow: View {
     let onTap: () -> Void
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    #if DEBUG
-    /// 一覧の時刻の大きさの比較（DEBUGのみ・#283）
-    @AppStorage(AlarmTimeSizeOption.debugDefaultsKey)
-    private var alarmTimeSizeRaw = AlarmTimeSizeOption.current.rawValue
-    #endif
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -2006,21 +2001,11 @@ struct AlarmRow: View {
         AlarmTimeText(
             hour: alarm.hour,
             minute: alarm.minute,
-            typography: timeSizeOption.typography(
+            typography: .alarmList(
                 isAccessibilitySize: dynamicTypeSize.isAccessibilitySize
             ),
             color: timeColor
         )
-    }
-
-    /// 表示する時刻の大きさ（DEBUGでは比較用に切り替えられる・#283）。
-    private var timeSizeOption: AlarmTimeSizeOption {
-        #if DEBUG
-        if let launch = AlarmTimeSizeOption.launchSelection { return launch }
-        return AlarmTimeSizeOption(rawValue: alarmTimeSizeRaw) ?? .current
-        #else
-        return .current
-        #endif
     }
 
     /// 1行目＝ラベル、2行目＝「曜日・音」（#174 PR-2）。

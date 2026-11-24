@@ -512,7 +512,9 @@ final class AlarmSpotlightUITests: XCTestCase {
         )
         XCTAssertLessThan(
             rowFrame.maxY,
-            tabFrame.minY - 8,
+            tabFrame.minY,
+            // 時刻を大きくしたぶん行が高くなり、最後の行は一覧の下端まで来る（#283）。
+            // タブバーに重ならなければよい。
             "row should be above the tab bar: row=\(rowFrame) tab=\(tabFrame)",
             file: file,
             line: line

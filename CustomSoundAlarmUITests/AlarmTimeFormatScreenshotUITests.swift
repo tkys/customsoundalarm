@@ -62,37 +62,22 @@ final class AlarmTimeFormatScreenshotUITests: XCTestCase {
         )
         attach("alarm-time-en-us-add")
 
-        for size in ["current", "clock56", "clock60"] {
-            launch(["-uitest-seed-alarms", "-uitest-alarm-time-size=\(size)"] + ja)
-            attach("alarm-time-size-\(size)")
-        }
-
         launch([
             "-uitest-seed-alarms",
-            "-uitest-alarm-time-size=clock56",
             "-UIPreferredContentSizeCategoryName",
             "UICTContentSizeCategoryAccessibilityXXXL"
         ] + ja)
-        attach("alarm-time-ax-clock56")
+        attach("alarm-time-ax-ja")
 
         launch([
             "-uitest-seed-alarms",
-            "-uitest-alarm-time-size=clock56",
             "-UIPreferredContentSizeCategoryName",
             "UICTContentSizeCategoryAccessibilityXXXL"
         ] + enUS)
-        attach("alarm-time-ax-en-us-clock56")
+        attach("alarm-time-ax-en-us")
 
-        launch([
-            "-uitest-seed-alarms",
-            "-uitest-alarm-time-size=current",
-            "-UIPreferredContentSizeCategoryName",
-            "UICTContentSizeCategoryAccessibilityXXXL"
-        ] + ja)
-        attach("alarm-time-ax-current")
-
-        launch(["-uitest-seed-alarms", "-uitest-alarm-time-size=clock56", "-uitest-force-dark"] + ja)
-        attach("alarm-time-dark-clock56")
+        launch(["-uitest-seed-alarms", "-uitest-force-dark"] + ja)
+        attach("alarm-time-dark-ja")
 
         // ナイトモードの時計も端末の書き方に従う（#283）
         launch(["-uitest-seed-alarms"] + enUS)
