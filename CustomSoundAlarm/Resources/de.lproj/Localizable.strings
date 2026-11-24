@@ -205,6 +205,7 @@
 "backup_alarm_toggle" = "Verschlafschutz";
 "backup_alarm_title_fmt" = "Verschlafschutz: %@";
 "backup_alarm_description_fmt" = "Wenn du den Wecker um %@ nicht bis %@ gestoppt hast, spielt er denselben Ton erneut, lauter.";
+"backup_alarm_timeline_louder" = "Lauter";
 "backup_alarm_minutes" = "Erneut klingeln nach";
 "backup_alarm_minutes_fmt" = "%d Min. später";
 "backup_alarm_before_snooze" = "Er klingelt, bevor dein Schlummern endet.";
@@ -228,8 +229,6 @@
 "volume_guide_link" = "Zu leise?";
 "test_ring_ringing_now" = "Klingelt jetzt";
 "backup_alarm_info_title" = "Verschlafschutz";
-"backup_alarm_info_mechanism" = "Wird der Wecker nicht innerhalb der eingestellten Zeit gestoppt, klingelt er erneut.";
-"backup_alarm_info_louder" = "Er spielt denselben Ton, lauter und ohne Verzerrung. Je leiser der Originalton, desto stärker wird er angehoben.";
 "backup_alarm_info_volume" = "Wie laut er tatsächlich klingelt, hängt von der Lautstärke für Klingel- und Hinweistöne in den Einstellungen ab.";
 "backup_alarm_info_accessibility" = "Über den Verschlafschutz";
 

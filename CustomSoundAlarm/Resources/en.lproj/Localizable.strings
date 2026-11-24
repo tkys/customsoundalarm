@@ -205,6 +205,7 @@
 "backup_alarm_toggle" = "Oversleep guard";
 "backup_alarm_title_fmt" = "Oversleep guard: %@";
 "backup_alarm_description_fmt" = "If you haven't turned off the %@ alarm by %@, it plays the same sound again, louder.";
+"backup_alarm_timeline_louder" = "Louder";
 "backup_alarm_minutes" = "Ring again after";
 "backup_alarm_minutes_fmt" = "%d min after";
 "backup_alarm_before_snooze" = "This rings before your snooze ends.";
@@ -228,8 +229,6 @@
 "volume_guide_link" = "Too quiet?";
 "test_ring_ringing_now" = "Ringing now";
 "backup_alarm_info_title" = "Oversleep guard";
-"backup_alarm_info_mechanism" = "If the alarm isn't stopped within the time you set, it rings again.";
-"backup_alarm_info_louder" = "It plays the same sound, made louder without distortion. The quieter the original sound, the more it is raised.";
 "backup_alarm_info_volume" = "How loud it actually rings depends on Ringtone and Alerts volume in Settings.";
 "backup_alarm_info_accessibility" = "About oversleep guard";
 

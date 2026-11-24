@@ -205,6 +205,7 @@
 "backup_alarm_toggle" = "Anti-sonno";
 "backup_alarm_title_fmt" = "Anti-sonno: %@";
 "backup_alarm_description_fmt" = "Se non hai fermato la sveglia delle %@ entro le %@, riproduce lo stesso suono, più forte.";
+"backup_alarm_timeline_louder" = "Più forte";
 "backup_alarm_minutes" = "Suona di nuovo dopo";
 "backup_alarm_minutes_fmt" = "%d min dopo";
 "backup_alarm_before_snooze" = "Suona prima che finisca il posticipo.";
@@ -228,8 +229,6 @@
 "volume_guide_link" = "Volume basso?";
 "test_ring_ringing_now" = "In riproduzione";
 "backup_alarm_info_title" = "Anti-sonno";
-"backup_alarm_info_mechanism" = "Se la sveglia non viene fermata entro il tempo impostato, suona di nuovo.";
-"backup_alarm_info_louder" = "Riproduce lo stesso suono, più forte e senza distorsioni. Più il suono originale è basso, più viene alzato.";
 "backup_alarm_info_volume" = "Il volume effettivo dipende dal volume di Suoneria e avvisi in Impostazioni.";
 "backup_alarm_info_accessibility" = "Informazioni sull’Anti-sonno";
 

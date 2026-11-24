@@ -205,6 +205,7 @@
 "backup_alarm_toggle" = "Ochrona przed zaspaniem";
 "backup_alarm_title_fmt" = "Ochrona przed zaspaniem: %@";
 "backup_alarm_description_fmt" = "Jeśli nie wyłączysz budzika o %@ do %@, odtworzy ten sam dźwięk ponownie, głośniej.";
+"backup_alarm_timeline_louder" = "Głośniej";
 "backup_alarm_minutes" = "Zadzwoń ponownie po";
 "backup_alarm_minutes_fmt" = "po %d min";
 "backup_alarm_before_snooze" = "Dzwoni przed końcem drzemki.";
@@ -228,8 +229,6 @@
 "volume_guide_link" = "Za cicho?";
 "test_ring_ringing_now" = "Dzwoni teraz";
 "backup_alarm_info_title" = "Ochrona przed zaspaniem";
-"backup_alarm_info_mechanism" = "Jeśli budzik nie zostanie zatrzymany w ustawionym czasie, zadzwoni ponownie.";
-"backup_alarm_info_louder" = "Odtwarza ten sam dźwięk, głośniej i bez zniekształceń. Im cichszy oryginalny dźwięk, tym bardziej jest podgłaśniany.";
 "backup_alarm_info_volume" = "Rzeczywista głośność zależy od głośności Dzwonek i alerty w Ustawieniach.";
 "backup_alarm_info_accessibility" = "O ochronie przed zaspaniem";
 

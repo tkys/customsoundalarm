@@ -205,6 +205,7 @@
 "backup_alarm_toggle" = "Verslaapbeveiliging";
 "backup_alarm_title_fmt" = "Verslaapbeveiliging: %@";
 "backup_alarm_description_fmt" = "Als je de wekker van %@ niet voor %@ hebt uitgezet, speelt hij hetzelfde geluid opnieuw, harder.";
+"backup_alarm_timeline_louder" = "Luider";
 "backup_alarm_minutes" = "Opnieuw afgaan na";
 "backup_alarm_minutes_fmt" = "%d min later";
 "backup_alarm_before_snooze" = "Hij gaat af voordat je sluimeren eindigt.";
@@ -228,8 +229,6 @@
 "volume_guide_link" = "Te zacht?";
 "test_ring_ringing_now" = "Gaat nu af";
 "backup_alarm_info_title" = "Verslaapbeveiliging";
-"backup_alarm_info_mechanism" = "Als de wekker niet binnen de ingestelde tijd wordt gestopt, gaat hij opnieuw af.";
-"backup_alarm_info_louder" = "Hij speelt hetzelfde geluid, harder en zonder vervorming. Hoe zachter het originele geluid, hoe meer het wordt verhoogd.";
 "backup_alarm_info_volume" = "Hoe hard hij echt gaat, hangt af van het volume van Beltoon en meldingen in Instellingen.";
 "backup_alarm_info_accessibility" = "Over de verslaapbeveiliging";
 

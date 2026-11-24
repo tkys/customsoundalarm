@@ -205,6 +205,7 @@
 "backup_alarm_toggle" = "Anti-grasse matinée";
 "backup_alarm_title_fmt" = "Anti-grasse matinée : %@";
 "backup_alarm_description_fmt" = "Si vous n’avez pas arrêté l’alarme de %@ avant %@, elle rejoue le même son, plus fort.";
+"backup_alarm_timeline_louder" = "Plus fort";
 "backup_alarm_minutes" = "Sonner à nouveau après";
 "backup_alarm_minutes_fmt" = "Après %d min";
 "backup_alarm_before_snooze" = "Elle sonne avant la fin de votre rappel.";
@@ -228,8 +229,6 @@
 "volume_guide_link" = "Trop faible ?";
 "test_ring_ringing_now" = "Sonnerie en cours";
 "backup_alarm_info_title" = "Anti-grasse matinée";
-"backup_alarm_info_mechanism" = "Si l’alarme n’est pas arrêtée dans le délai que vous avez défini, elle sonne de nouveau.";
-"backup_alarm_info_louder" = "Elle joue le même son, rendu plus fort sans distorsion. Plus le son d’origine est faible, plus il est augmenté.";
 "backup_alarm_info_volume" = "Le volume réel de la sonnerie dépend du volume Sonnerie et alertes dans Réglages.";
 "backup_alarm_info_accessibility" = "À propos de l’anti-grasse matinée";
 

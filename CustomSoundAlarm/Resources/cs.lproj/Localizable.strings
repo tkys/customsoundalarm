@@ -205,6 +205,7 @@
 "backup_alarm_toggle" = "Ochrana proti zaspání";
 "backup_alarm_title_fmt" = "Ochrana proti zaspání: %@";
 "backup_alarm_description_fmt" = "Pokud budík na %@ nevypneš do %@, přehraje stejný zvuk znovu a hlasitěji.";
+"backup_alarm_timeline_louder" = "Hlasitěji";
 "backup_alarm_minutes" = "Zazvonit znovu po";
 "backup_alarm_minutes_fmt" = "po %d min";
 "backup_alarm_before_snooze" = "Zazvoní před koncem odložení.";
@@ -228,8 +229,6 @@
 "volume_guide_link" = "Moc potichu?";
 "test_ring_ringing_now" = "Zvoní teď";
 "backup_alarm_info_title" = "Ochrana proti zaspání";
-"backup_alarm_info_mechanism" = "Pokud budík nezastavíš v nastaveném čase, zazvoní znovu.";
-"backup_alarm_info_louder" = "Přehraje stejný zvuk, hlasitěji a bez zkreslení. Čím tišší je původní zvuk, tím více se zesílí.";
 "backup_alarm_info_volume" = "Skutečná hlasitost závisí na hlasitosti Vyzvánění a upozornění v Nastavení.";
 "backup_alarm_info_accessibility" = "O ochraně proti zaspání";
 

@@ -205,6 +205,7 @@
 "backup_alarm_toggle" = "Protección contra quedarse dormido";
 "backup_alarm_title_fmt" = "Protección contra quedarse dormido: %@";
 "backup_alarm_description_fmt" = "Si no has detenido la alarma de las %@ antes de las %@, volverá a sonar el mismo sonido, más alto.";
+"backup_alarm_timeline_louder" = "Más alto";
 "backup_alarm_minutes" = "Volver a sonar después de";
 "backup_alarm_minutes_fmt" = "%d min después";
 "backup_alarm_before_snooze" = "Suena antes de que termine la posposición.";
@@ -228,8 +229,6 @@
 "volume_guide_link" = "¿Suena bajo?";
 "test_ring_ringing_now" = "Sonando ahora";
 "backup_alarm_info_title" = "Protección contra quedarse dormido";
-"backup_alarm_info_mechanism" = "Si la alarma no se detiene dentro del tiempo que has fijado, vuelve a sonar.";
-"backup_alarm_info_louder" = "Reproduce el mismo sonido, más alto y sin distorsión. Cuanto más bajo sea el sonido original, más se sube.";
 "backup_alarm_info_volume" = "El volumen real depende del volumen de Tonos y avisos en Ajustes.";
 "backup_alarm_info_accessibility" = "Acerca de la protección contra quedarse dormido";
 

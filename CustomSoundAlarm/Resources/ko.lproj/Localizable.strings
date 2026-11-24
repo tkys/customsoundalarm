@@ -205,6 +205,7 @@
 "backup_alarm_toggle" = "늦잠 방지";
 "backup_alarm_title_fmt" = "늦잠 방지: %@";
 "backup_alarm_description_fmt" = "%@ 알람을 %@까지 끄지 않으면 같은 소리를 더 크게 다시 울립니다.";
+"backup_alarm_timeline_louder" = "더 크게";
 "backup_alarm_minutes" = "다시 울릴 시간";
 "backup_alarm_minutes_fmt" = "%d분 후";
 "backup_alarm_before_snooze" = "다시 알림이 끝나기 전에 울립니다.";
@@ -228,8 +229,6 @@
 "volume_guide_link" = "소리가 작나요?";
 "test_ring_ringing_now" = "울리는 중";
 "backup_alarm_info_title" = "늦잠 방지";
-"backup_alarm_info_mechanism" = "설정한 시간 안에 알람을 끄지 않으면 다시 울립니다.";
-"backup_alarm_info_louder" = "같은 소리를 왜곡 없이 더 크게 재생합니다. 원래 소리가 작을수록 더 많이 키웁니다.";
 "backup_alarm_info_volume" = "실제 울리는 크기는 설정의 ‘벨소리 및 알림’ 볼륨에 따라 달라집니다.";
 "backup_alarm_info_accessibility" = "늦잠 방지 정보";
 

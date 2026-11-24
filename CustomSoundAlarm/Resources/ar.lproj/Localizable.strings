@@ -205,6 +205,7 @@
 "backup_alarm_toggle" = "الحماية من النوم الزائد";
 "backup_alarm_title_fmt" = "الحماية من النوم الزائد: %@";
 "backup_alarm_description_fmt" = "إذا لم توقف منبه %@ بحلول %@، فسيعيد تشغيل الصوت نفسه بصوت أعلى.";
+"backup_alarm_timeline_louder" = "أعلى صوتًا";
 "backup_alarm_minutes" = "الرنين مرة أخرى بعد";
 "backup_alarm_minutes_fmt" = "بعد %d د";
 "backup_alarm_before_snooze" = "يرن قبل انتهاء الغفوة.";
@@ -228,8 +229,6 @@
 "volume_guide_link" = "الصوت منخفض؟";
 "test_ring_ringing_now" = "يرن الآن";
 "backup_alarm_info_title" = "الحماية من النوم الزائد";
-"backup_alarm_info_mechanism" = "إذا لم يتم إيقاف المنبه خلال المدة التي حددتها، فسيرن مرة أخرى.";
-"backup_alarm_info_louder" = "يشغّل الصوت نفسه بصوت أعلى ودون تشويه. وكلما كان الصوت الأصلي أهدأ، زاد رفعه.";
 "backup_alarm_info_volume" = "مستوى الرنين الفعلي يعتمد على مستوى النغمات والتنبيهات في الإعدادات.";
 "backup_alarm_info_accessibility" = "حول الحماية من النوم الزائد";
 

@@ -407,8 +407,8 @@ final class DesignAuditScreenshotUITests: XCTestCase {
         XCTAssertTrue(
             app.collectionViews["addAlarm.root"].waitForExistence(timeout: 25)
         )
-        let reason = app.descendants(matching: .any)["addAlarm.testRingReason"]
-        scrollTo(reason, in: app)
+        let settings = app.descendants(matching: .any)["addAlarm.openSettings"]
+        scrollTo(settings, in: app)
         settle()
         capture(app, screen: "alarm-add-denied", context: context)
     }

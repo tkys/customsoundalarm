@@ -205,6 +205,7 @@
 "backup_alarm_toggle" = "Proteção contra perder a hora";
 "backup_alarm_title_fmt" = "Proteção contra perder a hora: %@";
 "backup_alarm_description_fmt" = "Se você não parar o alarme das %@ até as %@, ele toca o mesmo som de novo, mais alto.";
+"backup_alarm_timeline_louder" = "Mais alto";
 "backup_alarm_minutes" = "Tocar de novo depois de";
 "backup_alarm_minutes_fmt" = "%d min depois";
 "backup_alarm_before_snooze" = "Toca antes de a soneca terminar.";
@@ -228,8 +229,6 @@
 "volume_guide_link" = "Som baixo?";
 "test_ring_ringing_now" = "Tocando agora";
 "backup_alarm_info_title" = "Proteção contra perder a hora";
-"backup_alarm_info_mechanism" = "Se o alarme não for parado dentro do tempo definido, ele toca de novo.";
-"backup_alarm_info_louder" = "Ele toca o mesmo som, mais alto e sem distorção. Quanto mais baixo o som original, mais ele é aumentado.";
 "backup_alarm_info_volume" = "O volume real depende do volume de Toques e Alertas em Ajustes.";
 "backup_alarm_info_accessibility" = "Sobre a proteção contra perder a hora";
 

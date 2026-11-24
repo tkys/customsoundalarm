@@ -25,7 +25,7 @@ final class AlarmEditorScreenshotUITests: XCTestCase {
     }
 
     func testCaptureAll() {
-        let contexts: [Context] = [
+        let allContexts: [Context] = [
             Context(language: "ja", locale: "ja_JP", dark: false, ax5: false),
             Context(language: "ja", locale: "ja_JP", dark: true, ax5: false),
             Context(language: "ja", locale: "ja_JP", dark: false, ax5: true),
@@ -35,10 +35,15 @@ final class AlarmEditorScreenshotUITests: XCTestCase {
             Context(language: "en", locale: "en_US", dark: false, ax5: true),
             Context(language: "en", locale: "en_US", dark: true, ax5: true)
         ]
+        // 1つの条件だけ見直したいとき: TEST_RUNNER_EDITOR_SCREENSHOTS_ONLY=ja-light-standard
+        let only = ProcessInfo.processInfo.environment["EDITOR_SCREENSHOTS_ONLY"]
+        let contexts = only.map { name in allContexts.filter { $0.name == name } } ?? allContexts
         for context in contexts {
             captureAdd(context)
             captureEditBackup(context)
+            captureEditBackupInfo(context)
             captureEditBackupWarning(context)
+            captureDenied(context)
         }
     }
 
@@ -121,6 +126,56 @@ final class AlarmEditorScreenshotUITests: XCTestCase {
         }
         settle()
         attach(app, "alarm-editor-edit-backup-\(context.name)")
+        app.terminate()
+    }
+
+    // MARK: - Oversleep guard details
+
+    private func captureEditBackupInfo(_ context: Context) {
+        let app = launch(
+            context,
+            arguments: ["-uitest-seed-design-audit", "-uitest-open-edit-alarm"]
+        )
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 25),
+            "edit screen did not appear: \(app.debugDescription)"
+        )
+        allowPermissionIfAsked()
+
+        let toggle = app.descendants(matching: .any)["addAlarm.backupToggle"]
+        scrollTo(toggle, in: app)
+        toggle.tap()
+
+        let info = app.descendants(matching: .any)["addAlarm.backupInfo"]
+        scrollTo(info, in: app)
+        XCTAssertTrue(info.waitForExistence(timeout: 5), app.debugDescription)
+        info.tap()
+        XCTAssertTrue(
+            app.descendants(matching: .any)["backupInfo.root"].waitForExistence(timeout: 10),
+            "backup info sheet did not appear: \(app.debugDescription)"
+        )
+        settle()
+        attach(app, "alarm-editor-backup-info-\(context.name)")
+        app.terminate()
+    }
+
+    // MARK: - Permission denied
+
+    private func captureDenied(_ context: Context) {
+        let app = launch(
+            context,
+            arguments: ["-uitest-open-add-alarm", "-uitest-test-ring-denied"]
+        )
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 25),
+            "add screen did not appear: \(app.debugDescription)"
+        )
+
+        let settings = app.descendants(matching: .any)["addAlarm.openSettings"]
+        scrollTo(settings, in: app)
+        XCTAssertTrue(settings.waitForExistence(timeout: 5), app.debugDescription)
+        settle()
+        attach(app, "alarm-editor-denied-\(context.name)")
         app.terminate()
     }
 

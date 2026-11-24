@@ -246,10 +246,15 @@ struct AlarmDetailView: View {
             }
             .sheet(isPresented: $showingBackupInfo) {
                 BackupAlarmInfoView(
+                    hour: selectedHour,
+                    minute: selectedMinute,
+                    backupMinutes: backupMinutes ?? BackupAlarmLogic.defaultMinutes,
                     showsPlaylistNote: backupMinutes != nil && playlistID != nil,
                     showsFadeNote: backupMinutes != nil && fadeIn != .off
                 )
-                .presentationDetents([.medium])
+                .presentationDetents(
+                    dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium]
+                )
             }
             .alert("playlist_required_title", isPresented: $showingPlaylistRequired) {
                 Button("ok", role: .cancel) {}
@@ -654,13 +659,14 @@ struct AlarmDetailView: View {
                     .disabled(!isBackupAvailable && backupMinutes == nil)
             }
 
-            if backupMinutes != nil {
-                // #211: 長い説明はやめ、トグル直下に実時刻の1行だけ
-                Text(backupDescriptionText)
-                    .font(.footnote)
-                    .foregroundStyle(Color.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityIdentifier("addAlarm.backupDescription")
+            if let minutes = backupMinutes {
+                // #290: 文ではなく、その人の時刻で「元の時刻 → 大きく鳴る時刻」を図で見せる
+                BackupAlarmTimeline(
+                    hour: selectedHour,
+                    minute: selectedMinute,
+                    backupMinutes: minutes
+                )
+                .accessibilityIdentifier("addAlarm.backupDescription")
 
                 // 設定が食い違うときだけ出す、直すべき警告（#211 レビュー）
                 if let minutes = backupMinutes, minutes <= snoozeMinutes {
@@ -713,35 +719,12 @@ struct AlarmDetailView: View {
         }
     }
 
-    /// 「7:00 のアラームを 7:15 までに止めなかったら…」を端末の時刻書式で組み立てる（#119）
-    private var backupDescriptionText: String {
-        guard let minutes = backupMinutes else { return "" }
-        let components = Calendar.current.dateComponents([.hour, .minute], from: selectedTime)
-        let times = BackupAlarmLogic.displayTimes(
-            hour: components.hour ?? 7,
-            minute: components.minute ?? 0,
-            backupMinutes: minutes
-        )
-        let calendar = Calendar.current
-        let now = Date()
-        let originalDate = calendar.date(
-            bySettingHour: times.originalHour,
-            minute: times.originalMinute,
-            second: 0,
-            of: now
-        ) ?? now
-        let backupDate = calendar.date(
-            bySettingHour: times.backupHour,
-            minute: times.backupMinute,
-            second: 0,
-            of: now
-        ) ?? now
-        let style = Date.FormatStyle(date: .omitted, time: .shortened)
-        return String(
-            format: String(localized: "backup_alarm_description_fmt"),
-            originalDate.formatted(style),
-            backupDate.formatted(style)
-        )
+    private var selectedHour: Int {
+        Calendar.current.component(.hour, from: selectedTime)
+    }
+
+    private var selectedMinute: Int {
+        Calendar.current.component(.minute, from: selectedTime)
     }
 
     private var backupInfoButton: some View {
@@ -811,37 +794,49 @@ struct AlarmDetailView: View {
         }
     }
 
-    /// 理由の行：短い理由 + 直し方（許可の問題なら「設定を開く」）。
+    /// 理由の行：直し方が設定のときは、文を読ませずアイコン +「設定を開く」だけにする（#290）。
+    /// 理由そのものは VoiceOver のラベルに残し、見た目は1つの操作にまとめる。
     private func reasonRow(
         _ display: TestRingReasonDisplay,
         messageIdentifier: String
     ) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(String(localized: String.LocalizationValue(display.messageKey)))
-                .font(.footnote)
-                .foregroundStyle(Color.actionText)
-                .fixedSize(horizontal: false, vertical: true)
-                .accessibilityIdentifier(messageIdentifier)
-            if display.requestsPermission {
-                Button("allow_alarms") {
-                    Task {
-                        _ = await scheduler.requestAuthorization()
-                        scheduler.refreshTestRingPermission()
-                    }
-                }
-                .font(.footnote.weight(.medium))
-                .buttonStyle(.borderless)
-                .accessibilityIdentifier("addAlarm.allowAlarms")
-            }
             if display.showsOpenSettings {
-                Button("open_settings") {
+                Button {
                     if let url = URL(string: UIApplication.openSettingsURLString) {
                         openURL(url)
                     }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "bell.slash.fill")
+                        Text("open_settings")
+                    }
+                    .font(.footnote.weight(.medium))
                 }
-                .font(.footnote.weight(.medium))
                 .buttonStyle(.borderless)
+                .foregroundStyle(Color.actionText)
                 .accessibilityIdentifier("addAlarm.openSettings")
+                .accessibilityLabel(Text(verbatim: String(
+                    localized: String.LocalizationValue(display.messageKey)
+                )))
+                .accessibilityHint(Text("open_settings"))
+            } else {
+                Text(String(localized: String.LocalizationValue(display.messageKey)))
+                    .font(.footnote)
+                    .foregroundStyle(Color.actionText)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier(messageIdentifier)
+                if display.requestsPermission {
+                    Button("allow_alarms") {
+                        Task {
+                            _ = await scheduler.requestAuthorization()
+                            scheduler.refreshTestRingPermission()
+                        }
+                    }
+                    .font(.footnote.weight(.medium))
+                    .buttonStyle(.borderless)
+                    .accessibilityIdentifier("addAlarm.allowAlarms")
+                }
             }
         }
     }
@@ -1284,11 +1279,126 @@ struct AlarmDetailView: View {
     }
 }
 
+// MARK: - BackupAlarmTimeline
+
+/// 寝過ごし防止の「元の時刻 → 大きく鳴る時刻」を、その人の時刻で示す図（#290）。
+/// 文は VoiceOver のラベルにだけ残し、見た目は時刻とスピーカーの記号で伝える。
+struct BackupAlarmTimeline: View {
+    enum Prominence: Equatable {
+        case inline
+        case sheet
+    }
+
+    let hour: Int
+    let minute: Int
+    let backupMinutes: Int
+    var prominence: Prominence = .inline
+
+    private var times: (originalHour: Int, originalMinute: Int, backupHour: Int, backupMinute: Int) {
+        BackupAlarmLogic.displayTimes(
+            hour: hour,
+            minute: minute,
+            backupMinutes: backupMinutes
+        )
+    }
+
+    private var originalTime: String {
+        formattedTime(hour: times.originalHour, minute: times.originalMinute)
+    }
+
+    private var backupTime: String {
+        formattedTime(hour: times.backupHour, minute: times.backupMinute)
+    }
+
+    private var timeFont: Font {
+        prominence == .sheet ? .title3.weight(.semibold) : .subheadline.weight(.semibold)
+    }
+
+    private var soundFont: Font {
+        prominence == .sheet ? .body : .footnote
+    }
+
+    private var louderFont: Font {
+        prominence == .sheet ? .subheadline : .caption
+    }
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            horizontal
+            vertical
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: String(
+            format: String(localized: "backup_alarm_description_fmt"),
+            originalTime,
+            backupTime
+        )))
+    }
+
+    private var horizontal: some View {
+        HStack(spacing: 8) {
+            timeAndSound(originalTime, systemImage: "speaker.wave.2.fill")
+            Image(systemName: "arrow.forward")
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(Color.textMuted)
+            HStack(spacing: 4) {
+                timeAndSound(backupTime, systemImage: "speaker.wave.3.fill")
+                louderText
+            }
+        }
+    }
+
+    private var vertical: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            timeAndSound(originalTime, systemImage: "speaker.wave.2.fill")
+            HStack(spacing: 4) {
+                Image(systemName: "arrow.down")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(Color.textMuted)
+                timeAndSound(backupTime, systemImage: "speaker.wave.3.fill")
+            }
+            louderText
+                .padding(.leading, 16)
+        }
+    }
+
+    private func timeAndSound(_ time: String, systemImage: String) -> some View {
+        HStack(spacing: 4) {
+            Text(time)
+                .font(timeFont)
+                .monospacedDigit()
+            Image(systemName: systemImage)
+                .font(soundFont)
+                .foregroundStyle(Color.textSecondary)
+        }
+    }
+
+    private var louderText: some View {
+        Text("backup_alarm_timeline_louder")
+            .font(louderFont)
+            .foregroundStyle(Color.textSecondary)
+    }
+
+    private func formattedTime(hour: Int, minute: Int) -> String {
+        let now = Date()
+        let date = Calendar.current.date(
+            bySettingHour: hour,
+            minute: minute,
+            second: 0,
+            of: now
+        ) ?? now
+        return date.formatted(Date.FormatStyle(date: .omitted, time: .shortened))
+    }
+}
+
 // MARK: - BackupAlarmInfoView
 
 /// 寝過ごし防止の仕組みと先行公開の説明（#122）
 struct BackupAlarmInfoView: View {
     @Environment(\.dismiss) private var dismiss
+    var hour: Int
+    var minute: Int
+    var backupMinutes: Int
     /// 今の設定で当てはまる補足だけを出す（#211: 画面の長い説明をこちらへ）
     var showsPlaylistNote = false
     var showsFadeNote = false
@@ -1297,11 +1407,13 @@ struct BackupAlarmInfoView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("backup_alarm_info_mechanism")
-                        .font(.body)
-                    // もとの音が小さいほど大きく上げる（#134 の仕組みをそのまま説明）
-                    Text("backup_alarm_info_louder")
-                        .font(.body)
+                    // 文ではなく、その人の時刻を使った図で「もう一度、大きく鳴る」を伝える（#290）
+                    BackupAlarmTimeline(
+                        hour: hour,
+                        minute: minute,
+                        backupMinutes: backupMinutes,
+                        prominence: .sheet
+                    )
                     Text("backup_alarm_info_volume")
                         .font(.subheadline)
                         .foregroundStyle(Color.textSecondary)

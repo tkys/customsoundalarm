@@ -205,6 +205,7 @@
 "backup_alarm_toggle" = "防睡过头";
 "backup_alarm_title_fmt" = "防睡过头：%@";
 "backup_alarm_description_fmt" = "如果到 %@ 还没有停止 %@ 的闹钟，它会用同一个声音再响一次，声音更大。";
+"backup_alarm_timeline_louder" = "更大声";
 "backup_alarm_minutes" = "再次响铃时间";
 "backup_alarm_minutes_fmt" = "%d 分钟后";
 "backup_alarm_before_snooze" = "它会在稍后提醒结束前响铃。";
@@ -228,8 +229,6 @@
 "volume_guide_link" = "声音太小？";
 "test_ring_ringing_now" = "正在响铃";
 "backup_alarm_info_title" = "防睡过头";
-"backup_alarm_info_mechanism" = "如果在设定时间内没有停止闹钟，它会再次响铃。";
-"backup_alarm_info_louder" = "它会用同一个声音，在不失真的情况下调大音量。原始声音越小，提升得越多。";
 "backup_alarm_info_volume" = "实际响铃音量取决于“设置”中的“铃声和提醒”音量。";
 "backup_alarm_info_accessibility" = "关于防睡过头";
 
