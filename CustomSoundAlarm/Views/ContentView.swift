@@ -15,11 +15,56 @@ struct AddAlarmRequest: Identifiable {
     }
 }
 
+/// 一覧で行を入れて光らせる要求（#282 / #198）。
+private struct AlarmSpotlightRequest: Equatable {
+    let token = UUID()
+    let alarmIDs: [UUID]
+    /// スクロールを始める位置（保存したときの一覧の位置）
+    let startOffset: CGFloat
+    /// スクロールが止まってから行を入れる（上・中に入る場合）
+    let insertAfterScroll: Bool
+    /// 画面内に入る最後の行を、その場で開いて見せる（短い一覧・#282 レビュー）
+    let revealInPlace: Bool
+}
+
+/// 自分で動かすスクロールの開始・終了位置（#282 レビュー）。
+private struct SpotlightScrollTarget {
+    let from: CGFloat
+    let to: CGFloat
+    let isVisible: Bool
+}
+
 /// メイン画面：アラーム一覧
 /// OOUIの原則に従い、主オブジェクト（アラーム）のみを表示
 struct ContentView: View {
     /// コントロールセンターから開く要求（#272）。RootTabView が設定する。
     @Binding var controlOpenKind: ControlOpenKind?
+    /// 作った・時刻を変えた行のスポットライト（#282）
+    @State private var spotlightStore = RowSpotlightStore()
+    @State private var alarmFrameStore = RowFrameStore<UUID>()
+    @State private var spotlightViewport: CGRect = .zero
+    /// 一覧に出す配列（#282 レビュー）。ForEach はこの1か所だけを見る。
+    @State private var displayedAlarms: [AlarmEntry] = []
+    /// スクロール中は高さ0にしておく行（#282 / #198）
+    @State private var pendingRevealAlarmIDs: Set<UUID> = []
+    /// 高さを開いた行（#282 / #198）
+    @State private var revealedAlarmIDs: Set<UUID> = []
+    /// 一覧の準備ができてから処理する演出要求（#282）
+    @State private var spotlightRequest: AlarmSpotlightRequest?
+    /// シートが閉じるまで一覧に出さない行（#282 レビュー）
+    @State private var hiddenUntilDismissAlarmIDs: Set<UUID> = []
+    /// 開く前の中身の自然な高さ（#282 レビュー）
+    @State private var measuredRevealHeights: [UUID: CGFloat] = [:]
+    /// すき間が開ききって、カードと中身を出した行（#282 レビュー）
+    @State private var shownRevealAlarmIDs: Set<UUID> = []
+    /// シートが閉じたら演出を始める行（#282 レビュー）
+    @State private var pendingSpotlightAlarmIDs: Set<UUID> = []
+    /// 保存したときの一覧の位置（#282 レビュー）
+    @State private var pendingSpotlightStartOffset: CGFloat?
+    /// `List` の下の UIScrollView（#282 レビュー）
+    @State private var listScrollView: UIScrollView?
+    @State private var scrollAnimator = SpotlightScrollAnimator()
+    @AccessibilityFocusState private var spotlightFocusedAlarmID: UUID?
     @State private var alarmStore = AlarmStore.shared
     @State private var soundStore = SoundStore.shared
     @State private var selectedAlarm: AlarmEntry?
@@ -74,6 +119,16 @@ struct ContentView: View {
     @Environment(\.requestReview) private var requestReview
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    @MainActor
+    init(controlOpenKind: Binding<ControlOpenKind?>) {
+        _controlOpenKind = controlOpenKind
+        // 起動直後に一覧が空で描画されないよう、今の保存内容から始める（#282 レビュー）
+        _displayedAlarms = State(
+            initialValue: AlarmListOrdering.sortedForDisplay(AlarmStore.shared.alarms)
+        )
+    }
 
     var body: some View {
         NavigationStack {
@@ -123,6 +178,7 @@ struct ContentView: View {
                 .task {
                     refreshGlobalSkip()
                     syncSkipTimeZoneIfNeeded()
+                    syncDisplayedAlarms()
                     evaluateOnboarding()
                     didEvaluateOnboarding = true
                     applyControlOpenIfNeeded()
@@ -171,6 +227,7 @@ struct ContentView: View {
                 addScreenVisible = false
                 addAlarmRequest = nil
                 schedulePlaylistUnlockAttempt()
+                startPendingSpotlight()
             }) { request in
                 AlarmDetailView(
                     mode: .add,
@@ -180,6 +237,9 @@ struct ContentView: View {
                         addScreenVisible = false
                         addAlarmRequest = nil
                         schedulePlaylistUnlockAttempt()
+                    },
+                    onSaved: { saved, shouldSpotlight in
+                        handleAlarmSaved(saved, shouldSpotlight: shouldSpotlight)
                     }
                 )
                     .onDisappear {
@@ -192,6 +252,7 @@ struct ContentView: View {
                 editScreenVisible = false
                 selectedAlarm = nil
                 schedulePlaylistUnlockAttempt()
+                startPendingSpotlight()
             }) { alarm in
                 AlarmDetailView(
                     mode: .edit(alarm),
@@ -199,6 +260,9 @@ struct ContentView: View {
                         editScreenVisible = false
                         selectedAlarm = nil
                         schedulePlaylistUnlockAttempt()
+                    },
+                    onSaved: { saved, shouldSpotlight in
+                        handleAlarmSaved(saved, shouldSpotlight: shouldSpotlight)
                     }
                 )
                     .onDisappear {
@@ -288,6 +352,10 @@ struct ContentView: View {
                     dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium]
                 )
             }
+        }
+        .onChange(of: alarmStore.alarms) { _, _ in
+            // ForEach に渡す配列は1か所でだけ更新する（#282 レビュー）
+            syncDisplayedAlarms(animated: true)
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .background {
@@ -731,85 +799,680 @@ struct ContentView: View {
 
     // MARK: - Alarm List
 
+    /// 一覧に出す配列を1か所で更新する（#282 レビュー）。
+    private func syncDisplayedAlarms(animated: Bool = false) {
+        let visible = alarmStore.alarms.filter {
+            !hiddenUntilDismissAlarmIDs.contains($0.id)
+        }
+        let sorted = AlarmListOrdering.sortedForDisplay(visible)
+        guard sorted != displayedAlarms else { return }
+        if animated {
+            withAnimation(.default) {
+                displayedAlarms = sorted
+            }
+        } else {
+            displayedAlarms = sorted
+        }
+    }
+
     private var alarmList: some View {
-        let displayed = AlarmListOrdering.sortedForDisplay(alarmStore.alarms)
-        return List {
-            if let permissionStatus = permissionBannerStatus {
-                permissionBannerRow(permissionStatus)
-            }
-            if let skip = activeGlobalSkip {
-                GlobalSkipNoticeRow(
-                    skip: skip,
-                    entries: alarmStore.alarms,
-                    onUndo: {
-                        AlarmSkipService.undoAll()
-                        refreshGlobalSkip()
-                    }
-                )
-                .warmCard()
-            }
-            ForEach(displayed, id: \.id) { alarm in
-                AlarmRow(
-                    alarm: alarm,
-                    soundName: AlarmSoundDisplay.name(for: alarm),
-                    sound: AlarmSoundDisplay.representativeSound(for: alarm),
-                    hasSilentSound: silentAlarmLevels[alarm.id] != nil,
-                    showsFirstAlarmFollowup: firstAlarmFollowupAlarmID == alarm.id,
-                    onFixSilentSound: {
-                        ignoreFirstAlarmFollowupIfNeeded()
-                        fixingSilentAlarm = alarm
-                    },
-                    onFirstAlarmFollowup: { action in
-                        applyFirstAlarmFollowup(action, to: alarm)
-                    },
-                    onToggle: {
-                        if firstAlarmFollowupAlarmID == alarm.id {
-                            ignoreFirstAlarmFollowupIfNeeded()
+        ScrollViewReader { proxy in
+            List {
+                if let permissionStatus = permissionBannerStatus {
+                    permissionBannerRow(permissionStatus)
+                }
+                if let skip = activeGlobalSkip {
+                    GlobalSkipNoticeRow(
+                        skip: skip,
+                        entries: alarmStore.alarms,
+                        onUndo: {
+                            AlarmSkipService.undoAll()
+                            refreshGlobalSkip()
                         }
-                        alarmStore.toggleEnabled(alarm)
-                        AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
-                        refreshGlobalSkip()
-                    },
-                    onTap: {
-                        ignoreFirstAlarmFollowupIfNeeded()
-                        editScreenVisible = true
-                        selectedAlarm = alarm
+                    )
+                    .warmCard()
+                }
+                ForEach(displayedAlarms, id: \.id) { alarm in
+                    Group {
+                        if pendingRevealAlarmIDs.contains(alarm.id) {
+                            SpotlightRevealRow(
+                                isRevealed: revealedAlarmIDs.contains(alarm.id),
+                                isShown: shownRevealAlarmIDs.contains(alarm.id),
+                                reduceMotion: reduceMotion,
+                                onMeasured: { height in
+                                    guard abs(
+                                        (measuredRevealHeights[alarm.id] ?? 0) - height
+                                    ) > 0.5 else { return }
+                                    measuredRevealHeights[alarm.id] = height
+                                }
+                            ) {
+                                alarmRowContent(alarm)
+                            }
+                        } else {
+                            alarmRowContent(alarm)
+                        }
                     }
-                )
-                .warmCard()
-                .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                    if !alarm.repeatWeekdays.isEmpty {
-                        skipSwipeAction(for: alarm)
+                    .warmCard(
+                        spotlight: spotlightStore.controller(for: alarm.id),
+                        revealOpacity: pendingRevealAlarmIDs.contains(alarm.id)
+                            ? (shownRevealAlarmIDs.contains(alarm.id) ? 1 : 0)
+                            : 1
+                    )
+                    .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                        if !alarm.repeatWeekdays.isEmpty {
+                            skipSwipeAction(for: alarm)
+                        }
+                    }
+                    .contextMenu {
+                        if !alarm.repeatWeekdays.isEmpty {
+                            skipMenuButton(for: alarm)
+                        }
+                        Button {
+                            alarmStore.duplicate(alarm)
+                            AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
+                        } label: {
+                            Label("duplicate_alarm", systemImage: "plus.square.on.square")
+                        }
                     }
                 }
-                .contextMenu {
-                    if !alarm.repeatWeekdays.isEmpty {
-                        skipMenuButton(for: alarm)
+                .onDelete { indexSet in
+                    // ForEach と同じ配列から対象を取り、変更は1回の withAnimation で行う（#282 レビュー）
+                    let targets = indexSet.compactMap { index in
+                        displayedAlarms.indices.contains(index)
+                            ? displayedAlarms[index]
+                            : nil
                     }
-                    Button {
-                        alarmStore.duplicate(alarm)
-                        AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
-                    } label: {
-                        Label("duplicate_alarm", systemImage: "plus.square.on.square")
+                    guard !targets.isEmpty else { return }
+                    let ids = Set(targets.map(\.id))
+                    // 先に一覧の配列を1回だけ更新し、List の削除更新と重ねない（#282 レビュー）
+                    let remaining = AlarmListOrdering.sortedForDisplay(
+                        alarmStore.alarms.filter { !ids.contains($0.id) }
+                    )
+                    withAnimation(.default) {
+                        displayedAlarms = remaining
                     }
+                    alarmStore.remove(targets)
+                    AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
+                    refreshGlobalSkip()
                 }
+
             }
-            .onDelete { indexSet in
-                let idsToDelete = indexSet.map { displayed[$0].id }
-                for id in idsToDelete {
-                    if let alarm = alarmStore.alarms.first(where: { $0.id == id }) {
-                        alarmStore.remove(alarm)
-                    }
+            .warmListBackground()
+            // 先頭の行がナビゲーションバーのぼかしに重ならないための上端の余白
+            .contentMargins(
+                .top,
+                RowSpotlightTiming.minimumVisibleInset,
+                for: .scrollContent
+            )
+            .onGeometryChange(for: CGRect.self) { geometry in
+                // 一覧として実際に見えている範囲（画面座標）。下端の広告・タブを除く。
+                let frame = geometry.frame(in: .global)
+                let insets = geometry.safeAreaInsets
+                return CGRect(
+                    x: frame.minX + insets.leading,
+                    y: frame.minY + insets.top,
+                    width: max(0, frame.width - insets.leading - insets.trailing),
+                    height: max(0, frame.height - insets.top - insets.bottom)
+                )
+            } action: { viewport in
+                spotlightViewport = viewport
+            }
+            .task(id: spotlightRequest) {
+                guard let request = spotlightRequest else { return }
+                await runSpotlight(request, proxy: proxy)
+            }
+            .sheet(isPresented: $showingSkipAll, onDismiss: refreshGlobalSkip) {
+                SkipAllSheet(entries: alarmStore.alarms.filter(\.isEnabled))
+            }
+        }
+    }
+
+    // MARK: - Row spotlight (#282)
+
+    /// 一覧の1行（スポットライトの対象でも同じ中身を使う）。
+    private func alarmRowContent(_ alarm: AlarmEntry) -> some View {
+        AlarmRow(
+            alarm: alarm,
+            soundName: AlarmSoundDisplay.name(for: alarm),
+            sound: AlarmSoundDisplay.representativeSound(for: alarm),
+            hasSilentSound: silentAlarmLevels[alarm.id] != nil,
+            showsFirstAlarmFollowup: firstAlarmFollowupAlarmID == alarm.id,
+            spotlight: spotlightStore.controller(for: alarm.id),
+            spotlightFocus: $spotlightFocusedAlarmID,
+            onFixSilentSound: {
+                ignoreFirstAlarmFollowupIfNeeded()
+                fixingSilentAlarm = alarm
+            },
+            onFirstAlarmFollowup: { action in
+                applyFirstAlarmFollowup(action, to: alarm)
+            },
+            onToggle: {
+                if firstAlarmFollowupAlarmID == alarm.id {
+                    ignoreFirstAlarmFollowupIfNeeded()
                 }
+                alarmStore.toggleEnabled(alarm)
                 AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
                 refreshGlobalSkip()
+            },
+            onTap: {
+                ignoreFirstAlarmFollowupIfNeeded()
+                editScreenVisible = true
+                selectedAlarm = alarm
+            }
+        )
+        .rowSpotlightFrame(alarm.id, into: alarmFrameStore)
+        .background {
+            // 行の下にある List の UIScrollView を取得する（#282 レビュー）
+            ScrollViewResolver { scrollView in
+                if listScrollView !== scrollView {
+                    listScrollView = scrollView
+                }
             }
         }
-        .animation(.default, value: alarmStore.alarms)
-        .warmListBackground()
-        .sheet(isPresented: $showingSkipAll, onDismiss: refreshGlobalSkip) {
-            SkipAllSheet(entries: alarmStore.alarms.filter(\.isEnabled))
+    }
+
+    /// 保存された行を、シートが閉じるまで一覧に出さない（#282 レビュー）。
+    /// 保存から `onDismiss` のあいだに contentOffset が動かないようにする。
+    private func handleAlarmSaved(_ alarm: AlarmEntry, shouldSpotlight: Bool) {
+        guard shouldSpotlight else { return }
+
+        pendingSpotlightStartOffset = listScrollView?.contentOffset.y
+        hiddenUntilDismissAlarmIDs.insert(alarm.id)
+        measuredRevealHeights.removeValue(forKey: alarm.id)
+        shownRevealAlarmIDs.remove(alarm.id)
+        pendingSpotlightAlarmIDs.insert(alarm.id)
+        syncDisplayedAlarms()
+        #if DEBUG
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightScroll] saved offset=%.1f hidden=%d",
+                Double(listScrollView?.contentOffset.y ?? .nan),
+                hiddenUntilDismissAlarmIDs.count
+            )
+        )
+        #endif
+    }
+
+    /// シートが閉じきってから、行を入れてスクロール・光り方を始める（#282 レビュー）。
+    private func startPendingSpotlight() {
+        guard !pendingSpotlightAlarmIDs.isEmpty else { return }
+        let ids = Array(pendingSpotlightAlarmIDs)
+        pendingSpotlightAlarmIDs.removeAll()
+        let startOffset = pendingSpotlightStartOffset
+            ?? listScrollView?.contentOffset.y
+            ?? 0
+        pendingSpotlightStartOffset = nil
+
+        // 上・中に入る行はスクロールが止まるまで一覧に足さない（下に入る行だけ先に入れる）
+        let sorted = AlarmListOrdering.sortedForDisplay(alarmStore.alarms)
+        let firstID = ids[0]
+        let fullIndex = sorted.firstIndex(where: { $0.id == firstID }) ?? sorted.count
+        let visibleBefore = sorted[..<fullIndex].filter {
+            !hiddenUntilDismissAlarmIDs.contains($0.id)
+        }.count
+        let insertAfterScroll = visibleBefore < displayedAlarms.count
+
+        // 一番下に入る行が、今の位置のまま画面内に収まるか（短い一覧・#282 レビュー）。
+        // 収まるなら開く動きを見せ、収まらないなら今までどおり一覧の一番下へ送る。
+        var revealInPlace = false
+        if !insertAfterScroll,
+           let scrollView = listScrollView,
+           let last = displayedAlarms.last,
+           let lastFrame = alarmFrameStore.frame(for: last.id) {
+            let visibleBottomScreen = scrollView.convert(
+                CGPoint(
+                    x: 0,
+                    y: scrollView.bounds.height - scrollView.adjustedContentInset.bottom
+                ),
+                to: nil
+            ).y
+            let newRowHeight = max(lastFrame.height, 96)
+            revealInPlace = lastFrame.maxY + newRowHeight
+                + RowSpotlightTiming.minimumVisibleInset <= visibleBottomScreen + 0.5
         }
+
+        // 前の演出が残っていたら、その行は出し切ってから次へ
+        if !pendingRevealAlarmIDs.isEmpty {
+            revealedAlarmIDs.formUnion(pendingRevealAlarmIDs)
+            pendingRevealAlarmIDs.removeAll()
+        }
+
+        if insertAfterScroll {
+            // まだ一覧に足さない。スクロール後に insertRowsAfterScroll で入れる
+        } else if revealInPlace {
+            // 画面内に入る行は collapsed で足して、スクロールせずに開く動きを見せる
+            hiddenUntilDismissAlarmIDs.subtract(ids)
+            pendingRevealAlarmIDs.formUnion(ids)
+            revealedAlarmIDs.subtract(ids)
+            syncDisplayedAlarms()
+        } else {
+            // 画面外に入る行は、一覧の一番下まで送るため先に通常の行として入れる
+            // （画面外なので、開く動きは見えない。光りはスクロール後に付ける）
+            hiddenUntilDismissAlarmIDs.subtract(ids)
+            pendingRevealAlarmIDs.subtract(ids)
+            revealedAlarmIDs.subtract(ids)
+            syncDisplayedAlarms()
+        }
+
+        #if DEBUG
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightScroll] dismiss offset=%.1f ids=%d visibleBefore=%d shown=%d mode=%@",
+                Double(listScrollView?.contentOffset.y ?? .nan),
+                ids.count,
+                visibleBefore,
+                displayedAlarms.count,
+                insertAfterScroll
+                    ? "after-scroll"
+                    : (revealInPlace ? "bottom-reveal" : "bottom-now")
+            )
+        )
+        #endif
+        spotlightRequest = AlarmSpotlightRequest(
+            alarmIDs: ids,
+            startOffset: startOffset,
+            insertAfterScroll: insertAfterScroll,
+            revealInPlace: revealInPlace
+        )
+    }
+
+    /// スクロールが止まったあとで、上・中に入る行を collapsed で足す（#282 レビュー）。
+    private func insertRowsAfterScroll(_ ids: [UUID]) {
+        guard let scrollView = listScrollView else { return }
+        let offsetBeforeInsert = scrollView.contentOffset.y
+        ids.forEach { measuredRevealHeights.removeValue(forKey: $0) }
+        shownRevealAlarmIDs.subtract(ids)
+        hiddenUntilDismissAlarmIDs.subtract(ids)
+        pendingRevealAlarmIDs.formUnion(ids)
+        revealedAlarmIDs.subtract(ids)
+        syncDisplayedAlarms()
+        if let collectionView = scrollView as? UICollectionView {
+            collectionView.layoutIfNeeded()
+        }
+        // 行の挿入で一覧が自分で offset を動かしても、見えている位置を変えない
+        scrollView.setContentOffset(
+            CGPoint(x: scrollView.contentOffset.x, y: offsetBeforeInsert),
+            animated: false
+        )
+        #if DEBUG
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightScroll] inserted offset=%.1f (kept %.1f)",
+                Double(scrollView.contentOffset.y),
+                Double(offsetBeforeInsert)
+            )
+        )
+        #endif
+    }
+
+    /// 行が「見えるところまで最小限」になるスクロール位置を求める（#282 レビュー）。
+    /// `scrollRectToVisible` と同じ考え方で、上下のバーに隠れる部分は見えていないとみなす。
+    /// - Parameter rowIsInserted: false のときは、まだ一覧に足していない行の入る位置を
+    ///   次の行（または最後の行の下端）から求める。
+    private func spotlightScrollTarget(
+        for alarmID: UUID,
+        scrollView: UIScrollView,
+        startOffset: CGFloat,
+        rowIsInserted: Bool
+    ) -> SpotlightScrollTarget? {
+        guard spotlightViewport.height > 0,
+              let collectionView = scrollView as? UICollectionView
+        else { return nil }
+
+        // 上に許可バナー・全体の休みの行があれば、その分だけ indexPath をずらす
+        let leadingRows = (permissionBannerStatus != nil ? 1 : 0)
+            + (activeGlobalSkip != nil ? 1 : 0)
+
+        // 追加直後は行のレイアウトが古いことがあるため、一度整えてから読む。
+        // その前後で contentOffset が飛んでいないかを DEBUG ログで確認する。
+        let offsetBeforeLayout = scrollView.contentOffset.y
+        #if DEBUG
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightScroll] layout before offset=%.1f",
+                Double(offsetBeforeLayout)
+            )
+        )
+        #endif
+        collectionView.collectionViewLayout.invalidateLayout()
+        collectionView.layoutIfNeeded()
+        let offsetAfterLayout = scrollView.contentOffset.y
+        #if DEBUG
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightScroll] layout after offset=%.1f",
+                Double(offsetAfterLayout)
+            )
+        )
+        #endif
+        if abs(offsetAfterLayout - startOffset) > 0.5 {
+            // レイアウト更新で位置が飛んだら、保存したときの位置に戻す
+            scrollView.setContentOffset(
+                CGPoint(x: scrollView.contentOffset.x, y: startOffset),
+                animated: false
+            )
+            #if DEBUG
+            NSLog(
+                "%@",
+                String(
+                    format: "[SpotlightScroll] offset restored to %.1f",
+                    Double(startOffset)
+                )
+            )
+            #endif
+        }
+
+        let from = startOffset
+        let sorted = AlarmListOrdering.sortedForDisplay(alarmStore.alarms)
+        let fullIndex = sorted.firstIndex(where: { $0.id == alarmID }) ?? sorted.count
+        let fullCount = sorted.count
+
+        // 最後の行は一度だけ画面内まで送って高さを確定させ、contentSize を更新する。
+        // すぐ元の位置に戻すので、画面上には出ない（プローブ）。
+        if fullIndex == fullCount - 1,
+           rowIsInserted,
+           let index = displayedAlarms.firstIndex(where: { $0.id == alarmID }) {
+            let probeIndexPath = IndexPath(row: leadingRows + index, section: 0)
+            collectionView.scrollToItem(at: probeIndexPath, at: .bottom, animated: false)
+            collectionView.layoutIfNeeded()
+            #if DEBUG
+            NSLog(
+                "%@",
+                String(
+                    format: "[SpotlightScroll] probe offset=%.1f size=%.1f",
+                    Double(scrollView.contentOffset.y),
+                    Double(collectionView.contentSize.height)
+                )
+            )
+            #endif
+            scrollView.setContentOffset(
+                CGPoint(x: scrollView.contentOffset.x, y: startOffset),
+                animated: false
+            )
+        }
+
+        let rowTop: CGFloat
+        let rowHeight: CGFloat
+
+        if rowIsInserted,
+           let index = displayedAlarms.firstIndex(where: { $0.id == alarmID }) {
+            let indexPath = IndexPath(row: leadingRows + index, section: 0)
+            guard let attributes = collectionView.layoutAttributesForItem(at: indexPath)
+                ?? collectionView.collectionViewLayout.layoutAttributesForItem(at: indexPath)
+            else { return nil }
+            rowTop = attributes.frame.minY
+            rowHeight = alarmFrameStore.frame(for: alarmID)?.height
+                ?? max(attributes.frame.height, 96)
+        } else {
+            // まだ足していない行の入る位置：次の可視行の上端、なければ最後の行の下端
+            let visibleBefore = sorted[..<fullIndex].filter {
+                !hiddenUntilDismissAlarmIDs.contains($0.id)
+            }.count
+
+            if visibleBefore < displayedAlarms.count {
+                let indexPath = IndexPath(row: leadingRows + visibleBefore, section: 0)
+                guard let attributes = collectionView.layoutAttributesForItem(at: indexPath)
+                    ?? collectionView.collectionViewLayout.layoutAttributesForItem(at: indexPath)
+                else { return nil }
+                rowTop = attributes.frame.minY
+                rowHeight = max(attributes.frame.height, 96)
+            } else if let last = displayedAlarms.last,
+                      let index = displayedAlarms.firstIndex(where: { $0.id == last.id }) {
+                let indexPath = IndexPath(row: leadingRows + index, section: 0)
+                guard let attributes = collectionView.layoutAttributesForItem(at: indexPath)
+                    ?? collectionView.collectionViewLayout.layoutAttributesForItem(at: indexPath)
+                else { return nil }
+                rowTop = attributes.frame.maxY
+                rowHeight = max(attributes.frame.height, 96)
+            } else {
+                rowTop = -scrollView.adjustedContentInset.top
+                rowHeight = 96
+            }
+        }
+
+        let rowBottom = rowTop + rowHeight
+        // UIScrollView から見えている内容範囲を出す（バー・広告枠は adjustedContentInset）
+        let visibleTopContent = from + scrollView.adjustedContentInset.top
+        let visibleBottomContent = from + scrollView.bounds.height
+            - scrollView.adjustedContentInset.bottom
+        let rowTopScreen = rowTop - from
+        let rowBottomScreen = rowBottom - from
+        let inset = RowSpotlightTiming.minimumVisibleInset
+
+        var reason = "visible"
+        var targetOffset = from
+        if fullIndex == 0 {
+            // 先頭の行は一覧の一番上（大見出しが出る自然な位置）まで
+            reason = "top-edge"
+            targetOffset = -scrollView.adjustedContentInset.top
+        } else if fullIndex == fullCount - 1 {
+            // 最後の行は一覧の一番下まで
+            reason = "bottom-edge"
+            targetOffset = scrollView.contentSize.height
+                + scrollView.adjustedContentInset.bottom
+                - scrollView.bounds.height
+        } else if rowTop < visibleTopContent + inset {
+            reason = "above"
+            targetOffset = rowTop
+                - scrollView.adjustedContentInset.top
+                - inset
+        } else if rowBottom > visibleBottomContent - inset {
+            reason = "below"
+            targetOffset = rowBottom
+                - (scrollView.bounds.height - scrollView.adjustedContentInset.bottom - inset)
+        }
+        let isVisible = reason == "visible"
+
+        let minOffset = -scrollView.adjustedContentInset.top
+        let maxOffset = max(
+            minOffset,
+            scrollView.contentSize.height
+                - scrollView.bounds.height
+                + scrollView.adjustedContentInset.bottom
+        )
+        let clamped = min(max(targetOffset, minOffset), maxOffset)
+
+        #if DEBUG
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightScroll] target reason=%@ inserted=%d from=%.1f to=%.1f rowScreen=%.1f...%.1f visibleContent=%.1f...%.1f inset=%.1f/%.1f size=%.1f bounds=%.1f",
+                reason,
+                rowIsInserted ? 1 : 0,
+                Double(from),
+                Double(clamped),
+                Double(rowTopScreen),
+                Double(rowBottomScreen),
+                Double(visibleTopContent),
+                Double(visibleBottomContent),
+                Double(scrollView.adjustedContentInset.top),
+                Double(scrollView.adjustedContentInset.bottom),
+                Double(collectionView.contentSize.height),
+                Double(scrollView.bounds.height)
+            )
+        )
+        #endif
+        return SpotlightScrollTarget(from: from, to: clamped, isVisible: isVisible)
+    }
+
+    /// 開く行の中身の自然な高さが測れるまで待つ（#282 レビュー）。
+    /// 測れる前に `revealed` にすると、高さ0から自然な高さへ跳んでしまう。
+    private func waitForRevealMeasurement(
+        _ ids: [UUID],
+        timeout: TimeInterval = 0.5
+    ) async {
+        let started = Date()
+        while !ids.allSatisfy({ (measuredRevealHeights[$0] ?? 0) > 0 }) {
+            if Date().timeIntervalSince(started) >= timeout { break }
+            try? await Task.sleep(for: .milliseconds(8))
+            if Task.isCancelled { return }
+        }
+        #if DEBUG
+        let heights = ids
+            .map { String(format: "%.1f", measuredRevealHeights[$0] ?? 0) }
+            .joined(separator: ",")
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightReveal] measured heights=%@ waited=%.0fms",
+                heights,
+                Date().timeIntervalSince(started) * 1000
+            )
+        )
+        #endif
+    }
+
+    /// シートが閉じる動きにつなげて、止まってから行を入れて光らせる（#282）。
+    private func runSpotlight(
+        _ request: AlarmSpotlightRequest,
+        proxy: ScrollViewProxy
+    ) async {
+        let ids = request.alarmIDs
+        guard let first = ids.first else { return }
+
+        // シートが閉じきった直後から動き出す（閉じる動きには重ねない）
+        #if DEBUG
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightScroll] start offset=%.1f wanted=%.1f scrollView=%@ mode=%@",
+                Double(listScrollView?.contentOffset.y ?? .nan),
+                Double(request.startOffset),
+                listScrollView == nil ? "nil" : "ok",
+                request.insertAfterScroll ? "after-scroll" : "bottom-now"
+            )
+        )
+        #endif
+
+        // List の scrollTo は指定した時間・カーブを使わないため、
+        // UIScrollView を CADisplayLink で自分で動かす（#282 レビュー）
+        var handledByCustomScroll = false
+        if let scrollView = listScrollView {
+            // シートが閉じた直後はバーの余白がまだ確定していないことがある。
+            // 止まった位置でもう一度確かめ、ずれていたら合わせ直す（最大2回）。
+            for pass in 0..<2 {
+                guard let target = spotlightScrollTarget(
+                    for: first,
+                    scrollView: scrollView,
+                    startOffset: pass == 0
+                        ? request.startOffset
+                        : scrollView.contentOffset.y,
+                    rowIsInserted: !request.insertAfterScroll
+                ) else { break }
+                handledByCustomScroll = true
+                // 見えているなら送らない。送る場合も「見えるところまで」の最小距離だけ
+                guard !target.isVisible, abs(target.to - target.from) >= 0.5 else {
+                    break
+                }
+                let distance = abs(target.to - target.from)
+                if reduceMotion {
+                    scrollView.setContentOffset(
+                        CGPoint(x: scrollView.contentOffset.x, y: target.to),
+                        animated: false
+                    )
+                } else {
+                    let duration = RowSpotlightTiming.scrollDuration(for: distance)
+                    await withTaskCancellationHandler {
+                        await scrollAnimator.animate(
+                            scrollView: scrollView,
+                            from: target.from,
+                            to: target.to,
+                            duration: duration
+                        )
+                    } onCancel: {
+                        Task { @MainActor in
+                            scrollAnimator.stop()
+                        }
+                    }
+                    guard !Task.isCancelled else { return }
+                }
+            }
+        }
+
+        if !handledByCustomScroll {
+            #if DEBUG
+            NSLog("%@", "[SpotlightScroll] custom unavailable -> fallback")
+            #endif
+            if request.insertAfterScroll || request.revealInPlace {
+                hiddenUntilDismissAlarmIDs.subtract(ids)
+                pendingRevealAlarmIDs.formUnion(ids)
+                syncDisplayedAlarms()
+            }
+            // スクロールビューが取れないときだけのフォールバック（位置合わせのみ）
+            let frames = ids.compactMap { alarmFrameStore.frame(for: $0) }
+            let rowFrame: CGRect? = {
+                guard let frame = frames.first else { return nil }
+                let minY = frames.map(\.minY).min() ?? frame.minY
+                let maxY = frames.map(\.maxY).max() ?? frame.maxY
+                return CGRect(x: frame.minX, y: minY, width: frame.width, height: maxY - minY)
+            }()
+            if RowSpotlightLogic.shouldScroll(
+                rowFrame: rowFrame,
+                viewport: spotlightViewport
+            ) {
+                proxy.scrollTo(first, anchor: RowSpotlightTiming.scrollAnchor)
+            }
+        }
+
+        // スクロールが止まってから行を入れて開く
+        if request.insertAfterScroll || request.revealInPlace {
+            let mode = request.insertAfterScroll ? "after-scroll" : "bottom-reveal"
+            if request.insertAfterScroll {
+                insertRowsAfterScroll(ids)
+            }
+            #if DEBUG
+            NSLog("%@", "[SpotlightReveal] insert mode=\(mode) ids=\(ids.count)")
+            #endif
+            // 中身の自然な高さが測れてから開く（測れる前に開くと全高で出る）
+            await waitForRevealMeasurement(ids)
+            guard !Task.isCancelled else { return }
+            #if DEBUG
+            let heights = ids
+                .map { String(format: "%.1f", measuredRevealHeights[$0] ?? 0) }
+                .joined(separator: ",")
+            NSLog(
+                "%@",
+                "[SpotlightReveal] gap start mode=\(mode) heights=\(heights)"
+            )
+            #endif
+            // 1) すき間だけを開ける（カードと中身は見えない）
+            revealedAlarmIDs.formUnion(ids)
+            if !reduceMotion {
+                try? await Task.sleep(for: .seconds(RowSpotlightTiming.revealHeight))
+                guard !Task.isCancelled else { return }
+            }
+            // 2) 開ききってから、カードと中身を一緒に出す
+            #if DEBUG
+            NSLog("%@", "[SpotlightReveal] show start mode=\(mode)")
+            #endif
+            withAnimation(RowSpotlightTiming.revealOpacityAnimation) {
+                shownRevealAlarmIDs.formUnion(ids)
+            }
+        }
+
+        // 入り終わってから約0.08秒後に光らせる
+        try? await Task.sleep(for: .seconds(RowSpotlightTiming.glowDelayAfterReveal))
+        guard !Task.isCancelled else { return }
+        spotlightStore.play(ids)
+
+        if let first = ids.first, UIAccessibility.isVoiceOverRunning {
+            spotlightFocusedAlarmID = first
+        }
+
+        // 光り終わったら、通常の行に戻す
+        let glowDuration = RowSpotlightTiming.rise
+            + RowSpotlightTiming.hold
+            + RowSpotlightTiming.fade
+        try? await Task.sleep(for: .seconds(glowDuration + 0.1))
+        guard !Task.isCancelled else { return }
+        pendingRevealAlarmIDs.subtract(ids)
+        revealedAlarmIDs.subtract(ids)
+        shownRevealAlarmIDs.subtract(ids)
     }
 
     // MARK: - Permission Banner (#230)
@@ -1160,6 +1823,10 @@ struct AlarmRow: View {
     let sound: AlarmSound?
     let hasSilentSound: Bool
     let showsFirstAlarmFollowup: Bool
+    /// 作った・時刻を変えた行を一度だけ光らせる（#282）
+    let spotlight: RowSpotlightController
+    /// VoiceOver のフォーカスを移す（#282）
+    let spotlightFocus: AccessibilityFocusState<UUID?>.Binding
     let onFixSilentSound: () -> Void
     let onFirstAlarmFollowup: (FirstAlarmFollowupAction) -> Void
     let onToggle: () -> Void
@@ -1181,6 +1848,7 @@ struct AlarmRow: View {
             }
             .foregroundStyle(.primary)
             .accessibilityIdentifier("alarm.row")
+            .accessibilityFocused(spotlightFocus, equals: alarm.id)
 
             // 初めての1回きりアラームのあとの提案（#247）。押すまで何も変えない。
             if showsFirstAlarmFollowup {
