@@ -162,6 +162,7 @@
 "countdown_days_hours" = "%1$ld d %2$ld h";
 "countdown_until" = "za %@";
 "alarm_will_ring_in" = "Zazvoní za %@";
+"alarm_will_ring_on_weekday_fmt" = "Zazvoní %1$@ v %2$@";
 
 /* Alarm Edit */
 "alarm_is_off" = "Tento budík je vypnutý";

@@ -33,7 +33,8 @@ struct AlarmDetailView: View {
     var onClose: (() -> Void)?
     /// 保存したアラーム（#282: 一覧でその行に寄せるため）。
     /// 第2引数は光らせるか（新規作成、または時刻を変えた編集だけ true）。
-    var onSaved: ((AlarmEntry, Bool) -> Void)?
+    /// 第3引数は次に鳴るまでの1文を出すか（時刻・曜日・休み・オン/オフを変えた保存・#289）。
+    var onSaved: ((AlarmEntry, Bool, Bool) -> Void)?
     /// 新規作成時に引き継いだ値（#206）
     private let carryOver: AlarmCarryOver
     /// オンボ場面4からの指定（#98 Phase 4）。
@@ -89,7 +90,7 @@ struct AlarmDetailView: View {
         initialImport: OnboardingSource? = nil,
         initialSound: AlarmSound? = nil,
         onClose: (() -> Void)? = nil,
-        onSaved: ((AlarmEntry, Bool) -> Void)? = nil
+        onSaved: ((AlarmEntry, Bool, Bool) -> Void)? = nil
     ) {
         self.mode = mode
         self.initialImport = initialImport
@@ -207,18 +208,9 @@ struct AlarmDetailView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(Color.actionFillEnd)
-                    .disabled(saveConfirmation != nil)
                     .accessibilityIdentifier("addAlarm.save")
                 }
             }
-            .overlay(alignment: .top) {
-                if let saveConfirmation {
-                    SaveConfirmationToast(text: saveConfirmation)
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                        .padding(.top, 12)
-                }
-            }
-            .animation(.easeInOut(duration: 0.25), value: saveConfirmation)
             .soundImport(
                 selectedSound: $selectedSound,
                 isImporting: $isImporting,
@@ -1064,9 +1056,6 @@ struct AlarmDetailView: View {
 
     // MARK: - Save
 
-    /// 保存確定時の確認メッセージ（「7時間30分後に鳴ります」）。nil なら即時閉じる。
-    @State private var saveConfirmation: String?
-
     private func save() {
         let listBeforeSave = alarmStore.alarms
         // 試し聴きが残っていれば止める（#196）
@@ -1195,22 +1184,34 @@ struct AlarmDetailView: View {
         // 次に新規作成するときの初期値（#206）
         AlarmCarryOverStore.save(from: savedEntry)
 
-        // 光らせるのは新規作成と、時刻を変えた編集だけ（#282）
-        let shouldSpotlight: Bool
+        // 光らせるのは新規作成と、時刻を変えた編集だけ（#282）。
+        // 次に鳴るまでの1文は、時刻・曜日・休み・オン/オフを変えた保存でも出す（#289）。
+        let previous: AlarmEntry?
         if case .edit(let existing) = mode {
+            previous = existing
+        } else {
+            previous = nil
+        }
+        let shouldSpotlight: Bool
+        if let previous {
             shouldSpotlight = AlarmSpotlightLogic.shouldSpotlight(
                 isNew: false,
-                oldHour: existing.hour,
-                oldMinute: existing.minute,
+                oldHour: previous.hour,
+                oldMinute: previous.minute,
                 newHour: savedEntry.hour,
                 newMinute: savedEntry.minute
             )
         } else {
             shouldSpotlight = true
         }
+        let shouldAnnounce = NextRingAnnouncement.shouldAnnounce(
+            isNew: previous == nil,
+            previous: previous,
+            updated: savedEntry
+        )
 
         // 保存した時点で一覧側へ知らせ、シートが閉じるまでは行を出さない（#282 レビュー）
-        onSaved?(savedEntry, shouldSpotlight)
+        onSaved?(savedEntry, shouldSpotlight, shouldAnnounce)
 
         if BackupAlarmAccess.shouldGrantEarlyAccess(isEnabled: backupMinutes != nil) {
             AppGroup.backupEarlyAccessGranted = true
@@ -1242,20 +1243,10 @@ struct AlarmDetailView: View {
             )
         }
 
-        // 保存後のフィードバック（ON: 発火までの時間 / OFF: このアラームはオフです）
-        let feedback = PostSaveFeedback.resolve(for: savedEntry, currentDate: Date())
-        if let message = feedback.localizedMessage(entry: savedEntry, currentDate: Date()) {
-            saveConfirmation = message
-            Task {
-                try? await Task.sleep(for: .seconds(1.6))
-                saveConfirmation = nil
-                onClose?()
-                dismiss()
-            }
-        } else {
-            onClose?()
-            dismiss()
-        }
+        // 保存後のフィードバックは一覧の上に出す（#289）。
+        // シートはすぐ閉じ、一覧のスクロールが止まって光るときに1文を出す。
+        onClose?()
+        dismiss()
     }
 
     /// アラーム履歴の共通プロパティを作る（#241）。

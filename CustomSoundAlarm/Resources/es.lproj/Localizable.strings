@@ -162,6 +162,7 @@
 "countdown_days_hours" = "%1$ld d %2$ld h";
 "countdown_until" = "en %@";
 "alarm_will_ring_in" = "Suena en %@";
+"alarm_will_ring_on_weekday_fmt" = "Suena el %1$@ a las %2$@";
 
 /* Alarm Edit */
 "alarm_is_off" = "Esta alarma está desactivada";

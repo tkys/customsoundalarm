@@ -162,6 +162,7 @@
 "countdown_days_hours" = "%1$ld T %2$ld Std.";
 "countdown_until" = "in %@";
 "alarm_will_ring_in" = "Klingelt in %@";
+"alarm_will_ring_on_weekday_fmt" = "Klingelt %1$@ um %2$@";
 
 /* Alarm Edit */
 "alarm_is_off" = "Dieser Wecker ist aus";

@@ -162,6 +162,7 @@
 "countdown_days_hours" = "%1$ld ي %2$ld س";
 "countdown_until" = "بعد %@";
 "alarm_will_ring_in" = "يرن بعد %@";
+"alarm_will_ring_on_weekday_fmt" = "يرن %1$@ الساعة %2$@";
 
 /* Alarm Edit */
 "alarm_is_off" = "هذا المنبه متوقف";

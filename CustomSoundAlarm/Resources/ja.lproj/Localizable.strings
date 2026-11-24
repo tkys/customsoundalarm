@@ -162,6 +162,7 @@
 "countdown_days_hours" = "%1$ld日%2$ld時間";
 "countdown_until" = "あと%@";
 "alarm_will_ring_in" = "%@後に鳴ります";
+"alarm_will_ring_on_weekday_fmt" = "%1$@ %2$@ に鳴ります";
 
 /* Alarm Edit */
 "alarm_is_off" = "このアラームはオフです";

@@ -25,6 +25,8 @@ private struct AlarmSpotlightRequest: Equatable {
     let insertAfterScroll: Bool
     /// 画面内に入る最後の行を、その場で開いて見せる（短い一覧・#282 レビュー）
     let revealInPlace: Bool
+    /// 光るときに、次に鳴るまでの1文も出す（#289）
+    let announcesUntilRing: Bool
 }
 
 /// 自分で動かすスクロールの開始・終了位置（#282 レビュー）。
@@ -51,6 +53,10 @@ struct ContentView: View {
     @State private var revealedAlarmIDs: Set<UUID> = []
     /// 一覧の準備ができてから処理する演出要求（#282）
     @State private var spotlightRequest: AlarmSpotlightRequest?
+    /// 一覧の上に数秒だけ出す、次に鳴るまでの1文（#289）
+    @State private var untilRingNotice = UntilRingNoticeController()
+    /// この保存で一覧の上に1文を出すか（#289）
+    @State private var pendingUntilRing = false
     /// シートが閉じるまで一覧に出さない行（#282 レビュー）
     @State private var hiddenUntilDismissAlarmIDs: Set<UUID> = []
     /// 開く前の中身の自然な高さ（#282 レビュー）
@@ -102,9 +108,6 @@ struct ContentView: View {
     @State private var permissionFeedbackTrigger = 0
     @State private var skipToast: String?
     @State private var skipToastTask: Task<Void, Never>?
-    /// 空の一覧から作ったときの保存後の一言（#231）
-    @State private var quickSaveToast: String?
-    @State private var quickSaveToastTask: Task<Void, Never>?
     @State private var quickSaveFeedbackTrigger = 0
     /// 無音の音を使っている既存アラーム（#256）
     @State private var silentAlarmLevels: [UUID: SilentSoundLevel] = [:]
@@ -238,8 +241,12 @@ struct ContentView: View {
                         addAlarmRequest = nil
                         schedulePlaylistUnlockAttempt()
                     },
-                    onSaved: { saved, shouldSpotlight in
-                        handleAlarmSaved(saved, shouldSpotlight: shouldSpotlight)
+                    onSaved: { saved, shouldSpotlight, shouldAnnounce in
+                        handleAlarmSaved(
+                            saved,
+                            shouldSpotlight: shouldSpotlight,
+                            shouldAnnounce: shouldAnnounce
+                        )
                     }
                 )
                     .onDisappear {
@@ -261,8 +268,12 @@ struct ContentView: View {
                         selectedAlarm = nil
                         schedulePlaylistUnlockAttempt()
                     },
-                    onSaved: { saved, shouldSpotlight in
-                        handleAlarmSaved(saved, shouldSpotlight: shouldSpotlight)
+                    onSaved: { saved, shouldSpotlight, shouldAnnounce in
+                        handleAlarmSaved(
+                            saved,
+                            shouldSpotlight: shouldSpotlight,
+                            shouldAnnounce: shouldAnnounce
+                        )
                     }
                 )
                     .onDisappear {
@@ -393,16 +404,6 @@ struct ContentView: View {
                     .accessibilityIdentifier("skip.row.toast")
             }
         }
-        .overlay(alignment: .bottom) {
-            if let quickSaveToast {
-                SaveConfirmationToast(text: quickSaveToast)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, dynamicTypeSize.isAccessibilitySize ? 100 : 12)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .accessibilityIdentifier("emptyState.toast")
-            }
-        }
-        .animation(.easeInOut(duration: 0.25), value: quickSaveToast)
         .animation(.easeInOut(duration: 0.25), value: skipToast)
         .sensoryFeedback(.success, trigger: permissionFeedbackTrigger)
         .sensoryFeedback(.success, trigger: quickSaveFeedbackTrigger)
@@ -745,15 +746,8 @@ struct ContentView: View {
         AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
         quickSaveFeedbackTrigger += 1
 
-        if let message = PostSaveFeedback.resolve(for: entry, currentDate: Date())
-            .localizedMessage(entry: entry, currentDate: Date()) {
-            quickSaveToastTask?.cancel()
-            quickSaveToast = message
-            quickSaveToastTask = Task {
-                try? await Task.sleep(for: .seconds(2))
-                quickSaveToast = nil
-            }
-        }
+        // 作った直後も、一覧の上に次に鳴るまでの1文を出す（#289）
+        showUntilRing(for: entry)
 
         Task {
             if scheduler.permissionStatus == .notDetermined {
@@ -765,6 +759,12 @@ struct ContentView: View {
             }
             reportPermissionBannerIfNeeded()
         }
+    }
+
+    /// 次に鳴るまでの1文を、一覧の上に数秒だけ出す（#289）。
+    private func showUntilRing(for entry: AlarmEntry) {
+        guard let message = NextRingAnnouncement.message(for: entry) else { return }
+        untilRingNotice.show(message)
     }
 
     // MARK: - Skip (#197)
@@ -898,6 +898,18 @@ struct ContentView: View {
 
             }
             .warmListBackground()
+            // 一覧の上（ナビゲーションバーの下）に、次に鳴るまでの1文を出す（#289）。
+            // 行や広告枠に重ならないよう、高さを空けて置く。
+            .safeAreaInset(edge: .top, spacing: 0) {
+                if let text = untilRingNotice.text {
+                    UntilRingNoticeView(
+                        text: text,
+                        isPlaced: untilRingNotice.isPlaced,
+                        isVisible: untilRingNotice.isVisible,
+                        reduceMotion: reduceMotion
+                    )
+                }
+            }
             // 先頭の行がナビゲーションバーのぼかしに重ならないための上端の余白
             .contentMargins(
                 .top,
@@ -950,9 +962,15 @@ struct ContentView: View {
                 if firstAlarmFollowupAlarmID == alarm.id {
                     ignoreFirstAlarmFollowupIfNeeded()
                 }
+                let turningOn = !alarm.isEnabled
                 alarmStore.toggleEnabled(alarm)
                 AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
                 refreshGlobalSkip()
+                // オンにしたときは、次に鳴るまでの1文をその場で出す（#289）
+                if turningOn,
+                   let updated = alarmStore.alarms.first(where: { $0.id == alarm.id }) {
+                    showUntilRing(for: updated)
+                }
             },
             onTap: {
                 ignoreFirstAlarmFollowupIfNeeded()
@@ -973,7 +991,19 @@ struct ContentView: View {
 
     /// 保存された行を、シートが閉じるまで一覧に出さない（#282 レビュー）。
     /// 保存から `onDismiss` のあいだに contentOffset が動かないようにする。
-    private func handleAlarmSaved(_ alarm: AlarmEntry, shouldSpotlight: Bool) {
+    /// 次に鳴るまでの1文は、スクロール位置が決まる前に場所だけ空けておく（#289）。
+    private func handleAlarmSaved(
+        _ alarm: AlarmEntry,
+        shouldSpotlight: Bool,
+        shouldAnnounce: Bool
+    ) {
+        pendingUntilRing = false
+        if shouldAnnounce,
+           let message = NextRingAnnouncement.message(for: alarm) {
+            untilRingNotice.prepare(message)
+            pendingUntilRing = true
+        }
+
         guard shouldSpotlight else { return }
 
         pendingSpotlightStartOffset = listScrollView?.contentOffset.y
@@ -996,9 +1026,18 @@ struct ContentView: View {
 
     /// シートが閉じきってから、行を入れてスクロール・光り方を始める（#282 レビュー）。
     private func startPendingSpotlight() {
-        guard !pendingSpotlightAlarmIDs.isEmpty else { return }
+        guard !pendingSpotlightAlarmIDs.isEmpty else {
+            // 行を光らせない保存（曜日・休みだけ変えたとき）でも1文は出す（#289）
+            if pendingUntilRing {
+                pendingUntilRing = false
+                untilRingNotice.reveal()
+            }
+            return
+        }
         let ids = Array(pendingSpotlightAlarmIDs)
         pendingSpotlightAlarmIDs.removeAll()
+        let announcesUntilRing = pendingUntilRing
+        pendingUntilRing = false
         let startOffset = pendingSpotlightStartOffset
             ?? listScrollView?.contentOffset.y
             ?? 0
@@ -1074,7 +1113,8 @@ struct ContentView: View {
             alarmIDs: ids,
             startOffset: startOffset,
             insertAfterScroll: insertAfterScroll,
-            revealInPlace: revealInPlace
+            revealInPlace: revealInPlace,
+            announcesUntilRing: announcesUntilRing
         )
     }
 
@@ -1459,6 +1499,11 @@ struct ContentView: View {
         try? await Task.sleep(for: .seconds(RowSpotlightTiming.glowDelayAfterReveal))
         guard !Task.isCancelled else { return }
         spotlightStore.play(ids)
+
+        // 光るのと同じタイミングで、次に鳴るまでの1文を出す（#289）
+        if request.announcesUntilRing {
+            untilRingNotice.reveal()
+        }
 
         if let first = ids.first, UIAccessibility.isVoiceOverRunning {
             spotlightFocusedAlarmID = first

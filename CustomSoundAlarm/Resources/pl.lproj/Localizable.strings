@@ -162,6 +162,7 @@
 "countdown_days_hours" = "%1$ld dni %2$ld godz.";
 "countdown_until" = "za %@";
 "alarm_will_ring_in" = "Zadzwoni za %@";
+"alarm_will_ring_on_weekday_fmt" = "Zadzwoni w %1$@ o %2$@";
 
 /* Alarm Edit */
 "alarm_is_off" = "Ten budzik jest wyłączony";

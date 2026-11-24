@@ -162,6 +162,7 @@
 "countdown_days_hours" = "%1$ldd %2$ldh";
 "countdown_until" = "in %@";
 "alarm_will_ring_in" = "Rings in %@";
+"alarm_will_ring_on_weekday_fmt" = "Rings at %2$@ on %1$@";
 
 /* Alarm Edit */
 "alarm_is_off" = "This alarm is off";

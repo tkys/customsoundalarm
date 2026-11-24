@@ -38,6 +38,10 @@ final class EmptyStateQuickAlarmUITests: XCTestCase {
             app.staticTexts["7:00"].waitForExistence(timeout: 15),
             "quick alarm should appear in the list: \(app.debugDescription)"
         )
+        XCTAssertTrue(
+            app.staticTexts["alarmList.untilRing"].waitForExistence(timeout: 5),
+            "next ring should appear after creating a quick alarm: \(app.debugDescription)"
+        )
     }
 
     /// 「ほかの時刻」は今の追加画面を開く。

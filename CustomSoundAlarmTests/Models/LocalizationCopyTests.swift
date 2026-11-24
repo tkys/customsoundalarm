@@ -200,4 +200,17 @@ struct LocalizationCopyTests {
         #expect(strings["skip_row_toast_skipped_fmt"] == "%@ は鳴らしません")
         #expect(strings["skip_row_toast_undone_fmt"] == "%@ は鳴らします")
     }
+
+    @Test
+    func nextRingAnnouncementExistsInEveryLanguage() throws {
+        for language in Self.languages {
+            let strings = try strings(for: language)
+            let format = try #require(
+                strings["alarm_will_ring_on_weekday_fmt"],
+                "\(language): missing alarm_will_ring_on_weekday_fmt"
+            )
+            #expect(format.contains("%1$@"), "\(language): \(format)")
+            #expect(format.contains("%2$@"), "\(language): \(format)")
+        }
+    }
 }

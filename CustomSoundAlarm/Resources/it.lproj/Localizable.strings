@@ -162,6 +162,7 @@
 "countdown_days_hours" = "%1$ld g %2$ld h";
 "countdown_until" = "tra %@";
 "alarm_will_ring_in" = "Suona tra %@";
+"alarm_will_ring_on_weekday_fmt" = "Suona %1$@ alle %2$@";
 
 /* Alarm Edit */
 "alarm_is_off" = "Questa sveglia è disattivata";

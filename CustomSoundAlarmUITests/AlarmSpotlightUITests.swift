@@ -96,8 +96,9 @@ final class AlarmSpotlightUITests: XCTestCase {
             "new row should appear: \(app.debugDescription)"
         )
 
-        // スポットライトが終わるまで待ってから、保存前の位置のままかを見る。
-        Thread.sleep(forTimeInterval: 2.0)
+        // スポットライトと一覧の上の1文（#289）が終わるまで待ってから、
+        // 保存前の位置のままかを見る。
+        Thread.sleep(forTimeInterval: 4.2)
         assertRowInsideBars("23:50")
         let after = existing.frame.midY
         XCTAssertEqual(
