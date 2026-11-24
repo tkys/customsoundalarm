@@ -104,8 +104,15 @@ struct AlarmEntry: Identifiable, Codable, Hashable, Sendable {
         )
     }
 
+    /// 内部の比較・計測に使う時刻（常に `HH:mm`・#283 で表示には使わない）。
     var timeString: String {
         String(format: "%02d:%02d", hour, minute)
+    }
+
+    /// 画面に出す時刻（端末の言語・12／24時間制に従う・#283）。
+    /// 例: ja「5:15」/ en-US「5:15 AM」/ en-GB「05:15」
+    var displayTime: String {
+        AlarmTimeFormat.display(hour: hour, minute: minute)
     }
 
     /// 次回の発火予定日時を計算する。AlarmKit のスケジュール状態には依存せず、

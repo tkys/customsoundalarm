@@ -551,7 +551,7 @@ final class AddAlarmRedesignUITests: XCTestCase {
         app.buttons["addAlarm.save"].tap()
 
         XCTAssertTrue(
-            app.staticTexts["06:35"].waitForExistence(timeout: 15),
+            app.staticTexts["6:35"].waitForExistence(timeout: 15),
             "saved alarm should use the suggested time: \(app.debugDescription)"
         )
     }

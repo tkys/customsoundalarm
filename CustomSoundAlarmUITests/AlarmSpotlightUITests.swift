@@ -217,7 +217,7 @@ final class AlarmSpotlightUITests: XCTestCase {
             app.debugDescription
         )
 
-        let newRow = app.staticTexts["04:00"]
+        let newRow = app.staticTexts["4:00"]
         XCTAssertTrue(newRow.waitForExistence(timeout: 15), app.debugDescription)
         let deadline = Date().addingTimeInterval(5)
         while !newRow.isHittable && Date() < deadline {
@@ -226,7 +226,7 @@ final class AlarmSpotlightUITests: XCTestCase {
         XCTAssertTrue(newRow.isHittable, app.debugDescription)
         Thread.sleep(forTimeInterval: 0.8)
         attach("top-edge-04-00")
-        assertRowInsideBars("04:00")
+        assertRowInsideBars("4:00")
 
         let window = app.windows.firstMatch.frame
         XCTAssertLessThan(
@@ -254,7 +254,7 @@ final class AlarmSpotlightUITests: XCTestCase {
             app.buttons["alarmList.add"].waitForExistence(timeout: 15),
             app.debugDescription
         )
-        let existing = app.staticTexts["05:30"]
+        let existing = app.staticTexts["5:30"]
         XCTAssertTrue(existing.waitForExistence(timeout: 15), app.debugDescription)
         let before = existing.frame.midY
 
@@ -269,14 +269,14 @@ final class AlarmSpotlightUITests: XCTestCase {
             app.debugDescription
         )
 
-        let newRow = app.staticTexts["05:45"]
+        let newRow = app.staticTexts["5:45"]
         XCTAssertTrue(newRow.waitForExistence(timeout: 15), app.debugDescription)
         let deadline = Date().addingTimeInterval(5)
         while !newRow.isHittable && Date() < deadline {
             Thread.sleep(forTimeInterval: 0.05)
         }
         XCTAssertTrue(newRow.isHittable, app.debugDescription)
-        assertRowInsideBars("05:45")
+        assertRowInsideBars("5:45")
 
         // 入る行より上にある行は動かない（スクロールしていない）
         let after = existing.frame.midY
@@ -512,7 +512,9 @@ final class AlarmSpotlightUITests: XCTestCase {
         )
         XCTAssertLessThan(
             rowFrame.maxY,
-            tabFrame.minY - 8,
+            tabFrame.minY,
+            // 時刻を大きくしたぶん行が高くなり、最後の行は一覧の下端まで来る（#283）。
+            // タブバーに重ならなければよい。
             "row should be above the tab bar: row=\(rowFrame) tab=\(tabFrame)",
             file: file,
             line: line

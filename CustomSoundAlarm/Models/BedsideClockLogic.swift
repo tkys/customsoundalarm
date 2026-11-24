@@ -80,18 +80,6 @@ enum BedsideClockLogic {
         }
     }
 
-    // MARK: - 時計フォーマット
-
-    static func is24HourFormat(for date: Date = Date()) -> Bool {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.timeStyle = .short
-        formatter.locale = Locale.current
-        let formatted = formatter.string(from: date)
-        return !formatted.contains("AM") && !formatted.contains("PM")
-            && !formatted.contains("午前") && !formatted.contains("午後")
-    }
-
     // MARK: - 時計レイアウト
 
     /// ベッドサイド時計のレイアウト（時計面のデザイン）。
@@ -278,18 +266,24 @@ enum BedsideClockLogic {
         return base * fontScale
     }
 
-    /// 時刻文字列を生成する。
-    /// - Parameters:
-    ///   - date: 現在時刻
-    ///   - is24Hour: 24時間表示か
-    ///   - showSeconds: 秒表示するか
-    static func timeString(for date: Date, is24Hour: Bool, showSeconds: Bool) -> String {
-        let formatter = DateFormatter()
+    /// 時計の表示用（端末の言語・12／24時間制に従う・#283）。
+    /// 12時間制の AM／PM は数字と分けて、小さく出せるようにする。
+    static func display(
+        for date: Date,
+        showSeconds: Bool,
+        locale: Locale = .autoupdatingCurrent,
+        calendar: Calendar = .autoupdatingCurrent,
+        timeZone: TimeZone = .autoupdatingCurrent
+    ) -> AlarmTimeFormat.Parts {
+        var style = Date.FormatStyle()
+            .hour(.defaultDigits(amPM: .abbreviated))
+            .minute()
         if showSeconds {
-            formatter.dateFormat = is24Hour ? "HH:mm:ss" : "h:mm:ss"
-        } else {
-            formatter.dateFormat = is24Hour ? "HH:mm" : "h:mm"
+            style = style.second()
         }
-        return formatter.string(from: date)
+        style.locale = locale
+        style.calendar = calendar
+        style.timeZone = timeZone
+        return AlarmTimeFormat.parts(for: date, style: style)
     }
 }

@@ -30,7 +30,7 @@ final class PermissionBannerUITests: XCTestCase {
             "allow button should appear: \(app.debugDescription)"
         )
 
-        let alarmTime = app.staticTexts["06:24"]
+        let alarmTime = app.staticTexts["6:24"]
         XCTAssertTrue(
             alarmTime.waitForExistence(timeout: 10),
             app.debugDescription
@@ -51,7 +51,7 @@ final class PermissionBannerUITests: XCTestCase {
         ]
         app.launch()
 
-        XCTAssertTrue(app.staticTexts["06:24"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.staticTexts["6:24"].waitForExistence(timeout: 15))
         XCTAssertFalse(
             app.staticTexts["alarmList.permissionBanner"].waitForExistence(timeout: 3),
             "banner should be hidden when authorized: \(app.debugDescription)"

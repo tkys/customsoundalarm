@@ -15,7 +15,7 @@ final class EmptyStateQuickAlarmUITests: XCTestCase {
         app.descendants(matching: .any).matching(identifier: identifier).firstMatch
     }
 
-    /// 空の一覧で 7:00 を押すと、一覧に 07:00 のアラームが1本できる（#231）。
+    /// 空の一覧で 7:00 を押すと、一覧に 7:00 のアラームが1本できる（#231）。
     func testQuickTimeCreatesAlarm() {
         app.launchArguments = [
             "-uitest-clear-alarms",
@@ -35,7 +35,7 @@ final class EmptyStateQuickAlarmUITests: XCTestCase {
         button.tap()
 
         XCTAssertTrue(
-            app.staticTexts["07:00"].waitForExistence(timeout: 15),
+            app.staticTexts["7:00"].waitForExistence(timeout: 15),
             "quick alarm should appear in the list: \(app.debugDescription)"
         )
     }

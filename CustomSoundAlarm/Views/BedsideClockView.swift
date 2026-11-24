@@ -119,8 +119,10 @@ struct BedsideClockView: View {
     // MARK: - Clock Display
 
     private var clockDisplay: some View {
-        let is24 = BedsideClockLogic.is24HourFormat(for: now)
-        let timeStr = BedsideClockLogic.timeString(for: now, is24Hour: is24, showSeconds: settings.showSeconds)
+        let parts = BedsideClockLogic.display(
+            for: now,
+            showSeconds: settings.showSeconds
+        )
         let layout = clockLayout
         let baseFontSize = BedsideClockLogic.clockFontSize(
             visibleElementCount: settings.visibleElementCount,
@@ -128,10 +130,39 @@ struct BedsideClockView: View {
         )
         let fontSize = baseFontSize * layout.sizeMultiplier
 
-        return Text(timeStr)
-            .font(.system(size: fontSize, weight: layout.fontWeight, design: layout.fontDesign))
-            .foregroundStyle(theme.clockColor)
-            .minimumScaleFactor(0.5)
+        return HStack(alignment: .firstTextBaseline, spacing: fontSize * 0.05) {
+            if parts.periodFirst, let period = parts.period {
+                Text(period)
+                    .font(.system(
+                        size: fontSize * 0.22,
+                        weight: layout.fontWeight,
+                        design: layout.fontDesign
+                    ))
+                    .lineLimit(1)
+            }
+            Text(parts.time)
+                .font(.system(
+                    size: fontSize,
+                    weight: layout.fontWeight,
+                    design: layout.fontDesign
+                ))
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+                .layoutPriority(1)
+            if !parts.periodFirst, let period = parts.period {
+                Text(period)
+                    .font(.system(
+                        size: fontSize * 0.22,
+                        weight: layout.fontWeight,
+                        design: layout.fontDesign
+                    ))
+                    .lineLimit(1)
+            }
+        }
+        .foregroundStyle(theme.clockColor)
+        .lineLimit(1)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(parts.displayText))
     }
 
     // MARK: - Alarm Info

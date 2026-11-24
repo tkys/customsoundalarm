@@ -429,9 +429,15 @@ private struct SkipSilencedAlarmRow: View {
                 size: 26
             )
             VStack(alignment: .leading, spacing: 1) {
-                Text(alarm.timeString)
-                    .font(.subheadline)
-                    .foregroundStyle(.primary)
+                AlarmTimeText(
+                    hour: alarm.hour,
+                    minute: alarm.minute,
+                    typography: AlarmTimeTypography(
+                        digits: .subheadline,
+                        period: .caption2,
+                        spacing: 2
+                    )
+                )
                 Text(displayName)
                     .font(.caption)
                     .foregroundStyle(Color.textSecondary)
