@@ -26,7 +26,7 @@ private struct AlarmSpotlightRequest: Equatable {
     /// 画面内に入る最後の行を、その場で開いて見せる（短い一覧・#282 レビュー）
     let revealInPlace: Bool
     /// 光るときに、次に鳴るまでの1文も出す（#289）
-    let announcesUntilRing: Bool
+    let untilRingMessage: String?
 }
 
 /// 自分で動かすスクロールの開始・終了位置（#282 レビュー）。
@@ -53,10 +53,12 @@ struct ContentView: View {
     @State private var revealedAlarmIDs: Set<UUID> = []
     /// 一覧の準備ができてから処理する演出要求（#282）
     @State private var spotlightRequest: AlarmSpotlightRequest?
-    /// 一覧の上に数秒だけ出す、次に鳴るまでの1文（#289）
+    /// 一覧の下に数秒だけ出す、次に鳴るまでの1文（#289）
     @State private var untilRingNotice = UntilRingNoticeController()
-    /// この保存で一覧の上に1文を出すか（#289）
-    @State private var pendingUntilRing = false
+    /// この保存で一覧に出す1文（#289）
+    @State private var pendingUntilRingMessage: String?
+    /// 下端に浮かせる1文の高さ（#289・Dynamic Type に追従）
+    @ScaledMetric(relativeTo: .subheadline) private var untilRingToastHeight: CGFloat = 40
     /// シートが閉じるまで一覧に出さない行（#282 レビュー）
     @State private var hiddenUntilDismissAlarmIDs: Set<UUID> = []
     /// 開く前の中身の自然な高さ（#282 レビュー）
@@ -404,7 +406,18 @@ struct ContentView: View {
                     .accessibilityIdentifier("skip.row.toast")
             }
         }
+        .overlay(alignment: .bottom) {
+            // 次に鳴るまでの1文は、一覧の配置を動かさず下端に浮かせる（#289）
+            if untilRingNotice.isVisible, let text = untilRingNotice.text {
+                SaveConfirmationToast(text: text)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, dynamicTypeSize.isAccessibilitySize ? 100 : 12)
+                    .transition(untilRingTransition)
+                    .accessibilityIdentifier("alarmList.untilRing")
+            }
+        }
         .animation(.easeInOut(duration: 0.25), value: skipToast)
+        .animation(untilRingAnimation, value: untilRingNotice.isVisible)
         .sensoryFeedback(.success, trigger: permissionFeedbackTrigger)
         .sensoryFeedback(.success, trigger: quickSaveFeedbackTrigger)
         .onChange(of: soundStore.hasPendingPlaylistUnlock) { _, hasPending in
@@ -761,10 +774,33 @@ struct ContentView: View {
         }
     }
 
-    /// 次に鳴るまでの1文を、一覧の上に数秒だけ出す（#289）。
+    /// 次に鳴るまでの1文を、一覧の下に数秒だけ出す（#289）。
     private func showUntilRing(for entry: AlarmEntry) {
         guard let message = NextRingAnnouncement.message(for: entry) else { return }
+        // 休むのトーストと重ねない（新しい方で置き換える）
+        skipToastTask?.cancel()
+        skipToast = nil
         untilRingNotice.show(message)
+    }
+
+    /// 下から少しだけ持ち上がる／消えるときはフェード中心（#289）。
+    private var untilRingTransition: AnyTransition {
+        reduceMotion ? .opacity : .opacity.combined(with: .offset(y: 8))
+    }
+
+    private var untilRingAnimation: Animation {
+        if reduceMotion {
+            return .easeInOut(duration: UntilRingNoticeController.Timing.fade)
+        }
+        return untilRingNotice.isVisible
+            ? .timingCurve(0.05, 0.7, 0.1, 1, duration: 0.35)
+            : .timingCurve(0.4, 0, 0.2, 1, duration: UntilRingNoticeController.Timing.exit)
+    }
+
+    /// 下端に浮かせる1文の高さ＋余白（#289）。
+    /// スクロール先を決めるときは、光らせる行がこの分だけ上に来るようにする。
+    private var untilRingBottomReserve: CGFloat {
+        untilRingToastHeight + (dynamicTypeSize.isAccessibilitySize ? 100 : 12) + 8
     }
 
     // MARK: - Skip (#197)
@@ -898,18 +934,6 @@ struct ContentView: View {
 
             }
             .warmListBackground()
-            // 一覧の上（ナビゲーションバーの下）に、次に鳴るまでの1文を出す（#289）。
-            // 行や広告枠に重ならないよう、高さを空けて置く。
-            .safeAreaInset(edge: .top, spacing: 0) {
-                if let text = untilRingNotice.text {
-                    UntilRingNoticeView(
-                        text: text,
-                        isPlaced: untilRingNotice.isPlaced,
-                        isVisible: untilRingNotice.isVisible,
-                        reduceMotion: reduceMotion
-                    )
-                }
-            }
             // 先頭の行がナビゲーションバーのぼかしに重ならないための上端の余白
             .contentMargins(
                 .top,
@@ -991,17 +1015,15 @@ struct ContentView: View {
 
     /// 保存された行を、シートが閉じるまで一覧に出さない（#282 レビュー）。
     /// 保存から `onDismiss` のあいだに contentOffset が動かないようにする。
-    /// 次に鳴るまでの1文は、スクロール位置が決まる前に場所だけ空けておく（#289）。
+    /// 次に鳴るまでの1文は、光るときまで持ち越す（#289）。
     private func handleAlarmSaved(
         _ alarm: AlarmEntry,
         shouldSpotlight: Bool,
         shouldAnnounce: Bool
     ) {
-        pendingUntilRing = false
-        if shouldAnnounce,
-           let message = NextRingAnnouncement.message(for: alarm) {
-            untilRingNotice.prepare(message)
-            pendingUntilRing = true
+        pendingUntilRingMessage = nil
+        if shouldAnnounce {
+            pendingUntilRingMessage = NextRingAnnouncement.message(for: alarm)
         }
 
         guard shouldSpotlight else { return }
@@ -1026,18 +1048,18 @@ struct ContentView: View {
 
     /// シートが閉じきってから、行を入れてスクロール・光り方を始める（#282 レビュー）。
     private func startPendingSpotlight() {
+        let untilRingMessage = pendingUntilRingMessage
+        pendingUntilRingMessage = nil
+
         guard !pendingSpotlightAlarmIDs.isEmpty else {
             // 行を光らせない保存（曜日・休みだけ変えたとき）でも1文は出す（#289）
-            if pendingUntilRing {
-                pendingUntilRing = false
-                untilRingNotice.reveal()
+            if let untilRingMessage {
+                untilRingNotice.show(untilRingMessage)
             }
             return
         }
         let ids = Array(pendingSpotlightAlarmIDs)
         pendingSpotlightAlarmIDs.removeAll()
-        let announcesUntilRing = pendingUntilRing
-        pendingUntilRing = false
         let startOffset = pendingSpotlightStartOffset
             ?? listScrollView?.contentOffset.y
             ?? 0
@@ -1054,6 +1076,7 @@ struct ContentView: View {
 
         // 一番下に入る行が、今の位置のまま画面内に収まるか（短い一覧・#282 レビュー）。
         // 収まるなら開く動きを見せ、収まらないなら今までどおり一覧の一番下へ送る。
+        // 1文を出すときは、その分も下端の余白として数える（#289）。
         var revealInPlace = false
         if !insertAfterScroll,
            let scrollView = listScrollView,
@@ -1067,8 +1090,10 @@ struct ContentView: View {
                 to: nil
             ).y
             let newRowHeight = max(lastFrame.height, 96)
+            let bottomReserve = untilRingMessage == nil ? 0 : untilRingBottomReserve
             revealInPlace = lastFrame.maxY + newRowHeight
-                + RowSpotlightTiming.minimumVisibleInset <= visibleBottomScreen + 0.5
+                + RowSpotlightTiming.minimumVisibleInset
+                + bottomReserve <= visibleBottomScreen + 0.5
         }
 
         // 前の演出が残っていたら、その行は出し切ってから次へ
@@ -1114,7 +1139,7 @@ struct ContentView: View {
             startOffset: startOffset,
             insertAfterScroll: insertAfterScroll,
             revealInPlace: revealInPlace,
-            announcesUntilRing: announcesUntilRing
+            untilRingMessage: untilRingMessage
         )
     }
 
@@ -1156,7 +1181,8 @@ struct ContentView: View {
         for alarmID: UUID,
         scrollView: UIScrollView,
         startOffset: CGFloat,
-        rowIsInserted: Bool
+        rowIsInserted: Bool,
+        extraBottomInset: CGFloat = 0
     ) -> SpotlightScrollTarget? {
         guard spotlightViewport.height > 0,
               let collectionView = scrollView as? UICollectionView
@@ -1280,6 +1306,7 @@ struct ContentView: View {
         let visibleTopContent = from + scrollView.adjustedContentInset.top
         let visibleBottomContent = from + scrollView.bounds.height
             - scrollView.adjustedContentInset.bottom
+            - extraBottomInset
         let rowTopScreen = rowTop - from
         let rowBottomScreen = rowBottom - from
         let inset = RowSpotlightTiming.minimumVisibleInset
@@ -1291,11 +1318,12 @@ struct ContentView: View {
             reason = "top-edge"
             targetOffset = -scrollView.adjustedContentInset.top
         } else if fullIndex == fullCount - 1 {
-            // 最後の行は一覧の一番下まで
+            // 最後の行は一覧の一番下まで。1文を出すときは、その分だけ上に残す（#289）
             reason = "bottom-edge"
             targetOffset = scrollView.contentSize.height
                 + scrollView.adjustedContentInset.bottom
                 - scrollView.bounds.height
+                + extraBottomInset
         } else if rowTop < visibleTopContent + inset {
             reason = "above"
             targetOffset = rowTop
@@ -1304,7 +1332,10 @@ struct ContentView: View {
         } else if rowBottom > visibleBottomContent - inset {
             reason = "below"
             targetOffset = rowBottom
-                - (scrollView.bounds.height - scrollView.adjustedContentInset.bottom - inset)
+                - (scrollView.bounds.height
+                    - scrollView.adjustedContentInset.bottom
+                    - extraBottomInset
+                    - inset)
         }
         let isVisible = reason == "visible"
 
@@ -1314,6 +1345,7 @@ struct ContentView: View {
             scrollView.contentSize.height
                 - scrollView.bounds.height
                 + scrollView.adjustedContentInset.bottom
+                + extraBottomInset
         )
         let clamped = min(max(targetOffset, minOffset), maxOffset)
 
@@ -1402,7 +1434,10 @@ struct ContentView: View {
                     startOffset: pass == 0
                         ? request.startOffset
                         : scrollView.contentOffset.y,
-                    rowIsInserted: !request.insertAfterScroll
+                    rowIsInserted: !request.insertAfterScroll,
+                    extraBottomInset: request.untilRingMessage == nil
+                        ? 0
+                        : untilRingBottomReserve
                 ) else { break }
                 handledByCustomScroll = true
                 // 見えているなら送らない。送る場合も「見えるところまで」の最小距離だけ
@@ -1501,8 +1536,9 @@ struct ContentView: View {
         spotlightStore.play(ids)
 
         // 光るのと同じタイミングで、次に鳴るまでの1文を出す（#289）
-        if request.announcesUntilRing {
-            untilRingNotice.reveal()
+        // 休むのトーストが先に出ていたら、重ねずにそちらを優先する
+        if let untilRingMessage = request.untilRingMessage, skipToast == nil {
+            untilRingNotice.show(untilRingMessage)
         }
 
         if let first = ids.first, UIAccessibility.isVoiceOverRunning {
@@ -1774,6 +1810,9 @@ struct ContentView: View {
     }
 
     private func showSkipToast(_ text: String) {
+        // 次に鳴るまでの1文と重ねない（新しい方で置き換える・#289）
+        pendingUntilRingMessage = nil
+        untilRingNotice.dismiss()
         skipToastTask?.cancel()
         withAnimation(.easeInOut(duration: 0.2)) {
             skipToast = text

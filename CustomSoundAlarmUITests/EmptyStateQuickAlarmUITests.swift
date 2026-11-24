@@ -35,12 +35,12 @@ final class EmptyStateQuickAlarmUITests: XCTestCase {
         button.tap()
 
         XCTAssertTrue(
-            app.staticTexts["7:00"].waitForExistence(timeout: 15),
-            "quick alarm should appear in the list: \(app.debugDescription)"
-        )
-        XCTAssertTrue(
             app.staticTexts["alarmList.untilRing"].waitForExistence(timeout: 5),
             "next ring should appear after creating a quick alarm: \(app.debugDescription)"
+        )
+        XCTAssertTrue(
+            app.staticTexts["7:00"].waitForExistence(timeout: 15),
+            "quick alarm should appear in the list: \(app.debugDescription)"
         )
     }
 

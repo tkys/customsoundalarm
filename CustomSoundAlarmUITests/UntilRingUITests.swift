@@ -101,6 +101,67 @@ final class UntilRingUITests: XCTestCase {
         XCTAssertFalse(text.contains("\n"), text)
     }
 
+    /// 文が出て消える前後で、一番上の行が動かない（#289 実機レビュー）。
+    func testTopRowDoesNotMoveWhileNoticeAppearsAndDisappears() {
+        launch([
+            "-uitest-seed-two-alarms",
+            "-uitest-skip-alarm-sync",
+            "-uitest-alarm-permission-authorized"
+        ])
+
+        let topRow = app.staticTexts["6:24"]
+        XCTAssertTrue(topRow.waitForExistence(timeout: 15), app.debugDescription)
+        let before = topRow.frame.minY
+
+        let toggle = app.switches["alarm.toggle"].firstMatch
+        XCTAssertTrue(toggle.waitForExistence(timeout: 10), app.debugDescription)
+        toggle.tap()
+
+        XCTAssertTrue(notice.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertEqual(
+            topRow.frame.minY,
+            before,
+            accuracy: 1,
+            "the list should not move when the notice appears"
+        )
+
+        XCTAssertTrue(notice.waitForNonExistence(timeout: 8), app.debugDescription)
+        XCTAssertEqual(
+            topRow.frame.minY,
+            before,
+            accuracy: 1,
+            "the list should not move when the notice disappears"
+        )
+    }
+
+    /// 一覧の最後に保存した行が、光っている間トーストに隠れない（#289 実機レビュー）。
+    func testLastSavedRowDoesNotOverlapNotice() {
+        launch([
+            "-uitest-seed-morning-alarms",
+            "-uitest-skip-alarm-sync",
+            "-uitest-alarm-permission-authorized",
+            "-uitest-add-time=11:00"
+        ])
+
+        openAddAndSave()
+
+        XCTAssertTrue(notice.waitForExistence(timeout: 15), app.debugDescription)
+        // 行の検索中にトーストが消えないよう、先に証拠を残す
+        Thread.sleep(forTimeInterval: 0.3)
+        attach("until-ring-last-row")
+        // トーストの位置を先に取る（3秒で消えるため、行の検索中に消えないように）
+        let toastFrame = notice.frame
+        let cell = app.cells.containing(.staticText, identifier: "11:00").firstMatch
+        XCTAssertTrue(cell.waitForExistence(timeout: 3), app.debugDescription)
+
+        // トーストは文字の上下に余白を持つので、文字の上端からさらに余白を見る。
+        XCTAssertLessThanOrEqual(
+            cell.frame.maxY,
+            toastFrame.minY - 20,
+            "last row should stay above the toast: row=\(cell.frame) toast=\(toastFrame)"
+        )
+    }
+
     // MARK: - スクリーンショット（手動実行・#289）
 
     private func timeString(afterMinutes minutes: Int) -> String {
