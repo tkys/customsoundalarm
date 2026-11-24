@@ -53,6 +53,8 @@ struct ContentView: View {
     @State private var spotlightRequest: AlarmSpotlightRequest?
     /// シートが閉じるまで一覧に出さない行（#282 レビュー）
     @State private var hiddenUntilDismissAlarmIDs: Set<UUID> = []
+    /// 開く前の中身の自然な高さ（#282 レビュー）
+    @State private var measuredRevealHeights: [UUID: CGFloat] = [:]
     /// シートが閉じたら演出を始める行（#282 レビュー）
     @State private var pendingSpotlightAlarmIDs: Set<UUID> = []
     /// 保存したときの一覧の位置（#282 レビュー）
@@ -833,7 +835,13 @@ struct ContentView: View {
                         if pendingRevealAlarmIDs.contains(alarm.id) {
                             SpotlightRevealRow(
                                 isRevealed: revealedAlarmIDs.contains(alarm.id),
-                                reduceMotion: reduceMotion
+                                reduceMotion: reduceMotion,
+                                onMeasured: { height in
+                                    guard abs(
+                                        (measuredRevealHeights[alarm.id] ?? 0) - height
+                                    ) > 0.5 else { return }
+                                    measuredRevealHeights[alarm.id] = height
+                                }
                             ) {
                                 alarmRowContent(alarm)
                             }
@@ -841,7 +849,12 @@ struct ContentView: View {
                             alarmRowContent(alarm)
                         }
                     }
-                    .warmCard(spotlight: spotlightStore.controller(for: alarm.id))
+                    .warmCard(
+                        spotlight: spotlightStore.controller(for: alarm.id),
+                        revealProgress: pendingRevealAlarmIDs.contains(alarm.id)
+                            ? (revealedAlarmIDs.contains(alarm.id) ? 1 : 0)
+                            : 1
+                    )
                     .swipeActions(edge: .leading, allowsFullSwipe: false) {
                         if !alarm.repeatWeekdays.isEmpty {
                             skipSwipeAction(for: alarm)
@@ -962,6 +975,7 @@ struct ContentView: View {
 
         pendingSpotlightStartOffset = listScrollView?.contentOffset.y
         hiddenUntilDismissAlarmIDs.insert(alarm.id)
+        measuredRevealHeights.removeValue(forKey: alarm.id)
         pendingSpotlightAlarmIDs.insert(alarm.id)
         syncDisplayedAlarms()
         #if DEBUG
@@ -1064,6 +1078,7 @@ struct ContentView: View {
     private func insertRowsAfterScroll(_ ids: [UUID]) {
         guard let scrollView = listScrollView else { return }
         let offsetBeforeInsert = scrollView.contentOffset.y
+        ids.forEach { measuredRevealHeights.removeValue(forKey: $0) }
         hiddenUntilDismissAlarmIDs.subtract(ids)
         pendingRevealAlarmIDs.formUnion(ids)
         revealedAlarmIDs.subtract(ids)
@@ -1280,6 +1295,33 @@ struct ContentView: View {
         return SpotlightScrollTarget(from: from, to: clamped, isVisible: isVisible)
     }
 
+    /// 開く行の中身の自然な高さが測れるまで待つ（#282 レビュー）。
+    /// 測れる前に `revealed` にすると、高さ0から自然な高さへ跳んでしまう。
+    private func waitForRevealMeasurement(
+        _ ids: [UUID],
+        timeout: TimeInterval = 0.5
+    ) async {
+        let started = Date()
+        while !ids.allSatisfy({ (measuredRevealHeights[$0] ?? 0) > 0 }) {
+            if Date().timeIntervalSince(started) >= timeout { break }
+            try? await Task.sleep(for: .milliseconds(8))
+            if Task.isCancelled { return }
+        }
+        #if DEBUG
+        let heights = ids
+            .map { String(format: "%.1f", measuredRevealHeights[$0] ?? 0) }
+            .joined(separator: ",")
+        NSLog(
+            "%@",
+            String(
+                format: "[SpotlightReveal] measured heights=%@ waited=%.0fms",
+                heights,
+                Date().timeIntervalSince(started) * 1000
+            )
+        )
+        #endif
+    }
+
     /// シートが閉じる動きにつなげて、止まってから行を入れて光らせる（#282）。
     private func runSpotlight(
         _ request: AlarmSpotlightRequest,
@@ -1305,16 +1347,23 @@ struct ContentView: View {
         // List の scrollTo は指定した時間・カーブを使わないため、
         // UIScrollView を CADisplayLink で自分で動かす（#282 レビュー）
         var handledByCustomScroll = false
-        if let scrollView = listScrollView,
-           let target = spotlightScrollTarget(
-               for: first,
-               scrollView: scrollView,
-               startOffset: request.startOffset,
-               rowIsInserted: !request.insertAfterScroll
-           ) {
-            handledByCustomScroll = true
-            // 見えているなら送らない。送る場合も「見えるところまで」の最小距離だけ
-            if !target.isVisible, abs(target.to - target.from) >= 0.5 {
+        if let scrollView = listScrollView {
+            // シートが閉じた直後はバーの余白がまだ確定していないことがある。
+            // 止まった位置でもう一度確かめ、ずれていたら合わせ直す（最大2回）。
+            for pass in 0..<2 {
+                guard let target = spotlightScrollTarget(
+                    for: first,
+                    scrollView: scrollView,
+                    startOffset: pass == 0
+                        ? request.startOffset
+                        : scrollView.contentOffset.y,
+                    rowIsInserted: !request.insertAfterScroll
+                ) else { break }
+                handledByCustomScroll = true
+                // 見えているなら送らない。送る場合も「見えるところまで」の最小距離だけ
+                guard !target.isVisible, abs(target.to - target.from) >= 0.5 else {
+                    break
+                }
                 let distance = abs(target.to - target.from)
                 if reduceMotion {
                     scrollView.setContentOffset(
@@ -1366,11 +1415,27 @@ struct ContentView: View {
         }
 
         // スクロールが止まってから行を入れて開く
-        if request.insertAfterScroll {
-            insertRowsAfterScroll(ids)
-        }
         if request.insertAfterScroll || request.revealInPlace {
+            let mode = request.insertAfterScroll ? "after-scroll" : "bottom-reveal"
+            if request.insertAfterScroll {
+                insertRowsAfterScroll(ids)
+            }
+            #if DEBUG
+            NSLog("%@", "[SpotlightReveal] insert mode=\(mode) ids=\(ids.count)")
+            #endif
+            // 中身の自然な高さが測れてから開く（測れる前に開くと全高で出る）
+            await waitForRevealMeasurement(ids)
+            guard !Task.isCancelled else { return }
             revealedAlarmIDs.formUnion(ids)
+            #if DEBUG
+            let heights = ids
+                .map { String(format: "%.1f", measuredRevealHeights[$0] ?? 0) }
+                .joined(separator: ",")
+            NSLog(
+                "%@",
+                "[SpotlightReveal] reveal start mode=\(mode) heights=\(heights)"
+            )
+            #endif
             let revealWait = reduceMotion
                 ? RowSpotlightTiming.revealOpacity
                 : RowSpotlightTiming.revealHeight

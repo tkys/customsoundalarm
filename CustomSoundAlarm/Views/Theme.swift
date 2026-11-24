@@ -80,29 +80,44 @@ extension Color {
 /// Warm card-style row background
 struct WarmCardModifier: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// 作った行を一度だけ光らせる（#282）。nil なら通常のカード。
     var spotlight: RowSpotlightController?
+    /// 開く動きの進み具合（1で通常のカード・#282 レビュー）。
+    /// 行の高さは List が一気に変えるため、カード自体も一緒に伸ばす。
+    var revealProgress: CGFloat = 1
 
     func body(content: Content) -> some View {
         content
             .listRowBackground(
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(Color.warmCardBackground)
-                    .overlay {
-                        if let spotlight {
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .fill(RowSpotlightStyle.accent)
-                                .opacity(spotlight.isLit ? 1 : 0)
+                GeometryReader { proxy in
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(Color.warmCardBackground)
+                        .overlay {
+                            if let spotlight {
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .fill(RowSpotlightStyle.accent)
+                                    .opacity(spotlight.isLit ? 1 : 0)
+                            }
                         }
-                    }
-                    .shadow(
-                        color: colorScheme == .dark
-                            ? Color.black.opacity(0.3)
-                            : Color.orange.opacity(0.08),
-                        radius: 4, x: 0, y: 2
-                    )
-                    .padding(.horizontal, 4)
-                    .padding(.vertical, 3)
+                        .shadow(
+                            color: colorScheme == .dark
+                                ? Color.black.opacity(0.3)
+                                : Color.orange.opacity(0.08),
+                            radius: 4, x: 0, y: 2
+                        )
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 3)
+                        .frame(
+                            height: max(0, proxy.size.height) * revealProgress,
+                            alignment: .top
+                        )
+                        .frame(maxHeight: .infinity, alignment: .top)
+                }
+                .animation(
+                    reduceMotion ? nil : RowSpotlightTiming.revealHeightAnimation,
+                    value: revealProgress
+                )
             )
     }
 }
@@ -117,8 +132,11 @@ struct WarmListBackgroundModifier: ViewModifier {
 }
 
 extension View {
-    func warmCard(spotlight: RowSpotlightController? = nil) -> some View {
-        modifier(WarmCardModifier(spotlight: spotlight))
+    func warmCard(
+        spotlight: RowSpotlightController? = nil,
+        revealProgress: CGFloat = 1
+    ) -> some View {
+        modifier(WarmCardModifier(spotlight: spotlight, revealProgress: revealProgress))
     }
 
     func warmListBackground() -> some View {

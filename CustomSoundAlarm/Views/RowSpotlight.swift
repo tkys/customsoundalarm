@@ -221,6 +221,9 @@ struct RowSpotlightModifier: ViewModifier {
 struct SpotlightRevealRow<Content: View>: View {
     let isRevealed: Bool
     let reduceMotion: Bool
+    /// 中身の自然な高さが測れたことを親に知らせる（#282 レビュー）。
+    /// 測れる前に開くと、高さ0から自然な高さへアニメーションせずに跳ぶ。
+    let onMeasured: (CGFloat) -> Void
     let content: () -> Content
 
     @State private var naturalHeight: CGFloat = 0
@@ -228,10 +231,12 @@ struct SpotlightRevealRow<Content: View>: View {
     init(
         isRevealed: Bool,
         reduceMotion: Bool,
+        onMeasured: @escaping (CGFloat) -> Void = { _ in },
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.isRevealed = isRevealed
         self.reduceMotion = reduceMotion
+        self.onMeasured = onMeasured
         self.content = content
     }
 
@@ -244,9 +249,13 @@ struct SpotlightRevealRow<Content: View>: View {
                     .background {
                         GeometryReader { proxy in
                             Color.clear
-                                .onAppear { naturalHeight = proxy.size.height }
+                                .onAppear {
+                                    naturalHeight = proxy.size.height
+                                    onMeasured(proxy.size.height)
+                                }
                                 .onChange(of: proxy.size.height) { _, height in
                                     naturalHeight = height
+                                    onMeasured(height)
                                 }
                         }
                     }
