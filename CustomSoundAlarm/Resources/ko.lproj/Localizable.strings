@@ -162,6 +162,7 @@
 "countdown_days_hours" = "%1$ld일 %2$ld시간";
 "countdown_until" = "%@ 후";
 "alarm_will_ring_in" = "%@ 후 울림";
+"alarm_will_ring_on_weekday_fmt" = "%1$@ %2$@에 울립니다";
 
 /* Alarm Edit */
 "alarm_is_off" = "이 알람은 꺼져 있습니다";

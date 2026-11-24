@@ -483,6 +483,25 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: 行の2行目に出す1文をアクセシビリティツリーにも出す（DEBUGのみ・#289）。
+    /// 本番では行の accessibilityLabel を変えないため隠している。
+    static var isUITestExposeUntilRing: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-expose-until-ring")
+    #else
+        false
+    #endif
+    }
+
+    /// スクリーンショット用: 行の1文を長めに保つ（DEBUGのみ・#289）。
+    static var isUITestHoldUntilRing: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-hold-until-ring")
+    #else
+        false
+    #endif
+    }
+
     /// UIテスト用: ライブラリ取り込みの着地を再現する（DEBUGのみ・#246）
     static var isUITestLibraryImportLanding: Bool {
     #if DEBUG

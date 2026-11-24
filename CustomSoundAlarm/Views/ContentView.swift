@@ -15,6 +15,12 @@ struct AddAlarmRequest: Identifiable {
     }
 }
 
+/// 保存したときに、どの行へ何の1文を出すか（#289）。
+private struct PendingUntilRing: Equatable {
+    let alarmID: UUID
+    let message: String
+}
+
 /// 一覧で行を入れて光らせる要求（#282 / #198）。
 private struct AlarmSpotlightRequest: Equatable {
     let token = UUID()
@@ -25,6 +31,8 @@ private struct AlarmSpotlightRequest: Equatable {
     let insertAfterScroll: Bool
     /// 画面内に入る最後の行を、その場で開いて見せる（短い一覧・#282 レビュー）
     let revealInPlace: Bool
+    /// 光るときに、次に鳴るまでの1文も出す（#289）
+    let untilRing: PendingUntilRing?
 }
 
 /// 自分で動かすスクロールの開始・終了位置（#282 レビュー）。
@@ -51,6 +59,10 @@ struct ContentView: View {
     @State private var revealedAlarmIDs: Set<UUID> = []
     /// 一覧の準備ができてから処理する演出要求（#282）
     @State private var spotlightRequest: AlarmSpotlightRequest?
+    /// 一覧の行に数秒だけ出す、次に鳴るまでの1文（#289）
+    @State private var untilRingNotice = UntilRingNoticeController()
+    /// この保存で出す1文と行（#289）
+    @State private var pendingUntilRing: PendingUntilRing?
     /// シートが閉じるまで一覧に出さない行（#282 レビュー）
     @State private var hiddenUntilDismissAlarmIDs: Set<UUID> = []
     /// 開く前の中身の自然な高さ（#282 レビュー）
@@ -102,9 +114,6 @@ struct ContentView: View {
     @State private var permissionFeedbackTrigger = 0
     @State private var skipToast: String?
     @State private var skipToastTask: Task<Void, Never>?
-    /// 空の一覧から作ったときの保存後の一言（#231）
-    @State private var quickSaveToast: String?
-    @State private var quickSaveToastTask: Task<Void, Never>?
     @State private var quickSaveFeedbackTrigger = 0
     /// 無音の音を使っている既存アラーム（#256）
     @State private var silentAlarmLevels: [UUID: SilentSoundLevel] = [:]
@@ -238,8 +247,12 @@ struct ContentView: View {
                         addAlarmRequest = nil
                         schedulePlaylistUnlockAttempt()
                     },
-                    onSaved: { saved, shouldSpotlight in
-                        handleAlarmSaved(saved, shouldSpotlight: shouldSpotlight)
+                    onSaved: { saved, shouldSpotlight, shouldAnnounce in
+                        handleAlarmSaved(
+                            saved,
+                            shouldSpotlight: shouldSpotlight,
+                            shouldAnnounce: shouldAnnounce
+                        )
                     }
                 )
                     .onDisappear {
@@ -261,8 +274,12 @@ struct ContentView: View {
                         selectedAlarm = nil
                         schedulePlaylistUnlockAttempt()
                     },
-                    onSaved: { saved, shouldSpotlight in
-                        handleAlarmSaved(saved, shouldSpotlight: shouldSpotlight)
+                    onSaved: { saved, shouldSpotlight, shouldAnnounce in
+                        handleAlarmSaved(
+                            saved,
+                            shouldSpotlight: shouldSpotlight,
+                            shouldAnnounce: shouldAnnounce
+                        )
                     }
                 )
                     .onDisappear {
@@ -393,16 +410,6 @@ struct ContentView: View {
                     .accessibilityIdentifier("skip.row.toast")
             }
         }
-        .overlay(alignment: .bottom) {
-            if let quickSaveToast {
-                SaveConfirmationToast(text: quickSaveToast)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, dynamicTypeSize.isAccessibilitySize ? 100 : 12)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .accessibilityIdentifier("emptyState.toast")
-            }
-        }
-        .animation(.easeInOut(duration: 0.25), value: quickSaveToast)
         .animation(.easeInOut(duration: 0.25), value: skipToast)
         .sensoryFeedback(.success, trigger: permissionFeedbackTrigger)
         .sensoryFeedback(.success, trigger: quickSaveFeedbackTrigger)
@@ -745,15 +752,8 @@ struct ContentView: View {
         AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
         quickSaveFeedbackTrigger += 1
 
-        if let message = PostSaveFeedback.resolve(for: entry, currentDate: Date())
-            .localizedMessage(entry: entry, currentDate: Date()) {
-            quickSaveToastTask?.cancel()
-            quickSaveToast = message
-            quickSaveToastTask = Task {
-                try? await Task.sleep(for: .seconds(2))
-                quickSaveToast = nil
-            }
-        }
+        // 作った直後も、一覧の上に次に鳴るまでの1文を出す（#289）
+        showUntilRing(for: entry)
 
         Task {
             if scheduler.permissionStatus == .notDetermined {
@@ -765,6 +765,12 @@ struct ContentView: View {
             }
             reportPermissionBannerIfNeeded()
         }
+    }
+
+    /// 次に鳴るまでの1文を、その行に数秒だけ出す（#289）。
+    private func showUntilRing(for entry: AlarmEntry) {
+        guard let message = NextRingAnnouncement.message(for: entry) else { return }
+        untilRingNotice.show(message, for: entry.id)
     }
 
     // MARK: - Skip (#197)
@@ -939,6 +945,7 @@ struct ContentView: View {
             showsFirstAlarmFollowup: firstAlarmFollowupAlarmID == alarm.id,
             spotlight: spotlightStore.controller(for: alarm.id),
             spotlightFocus: $spotlightFocusedAlarmID,
+            untilRingNotice: untilRingNotice,
             onFixSilentSound: {
                 ignoreFirstAlarmFollowupIfNeeded()
                 fixingSilentAlarm = alarm
@@ -950,9 +957,15 @@ struct ContentView: View {
                 if firstAlarmFollowupAlarmID == alarm.id {
                     ignoreFirstAlarmFollowupIfNeeded()
                 }
+                let turningOn = !alarm.isEnabled
                 alarmStore.toggleEnabled(alarm)
                 AlarmScheduler.shared.syncAlarms(alarmStore.alarms, trigger: .edit)
                 refreshGlobalSkip()
+                // オンにしたときは、次に鳴るまでの1文をその場で出す（#289）
+                if turningOn,
+                   let updated = alarmStore.alarms.first(where: { $0.id == alarm.id }) {
+                    showUntilRing(for: updated)
+                }
             },
             onTap: {
                 ignoreFirstAlarmFollowupIfNeeded()
@@ -973,7 +986,21 @@ struct ContentView: View {
 
     /// 保存された行を、シートが閉じるまで一覧に出さない（#282 レビュー）。
     /// 保存から `onDismiss` のあいだに contentOffset が動かないようにする。
-    private func handleAlarmSaved(_ alarm: AlarmEntry, shouldSpotlight: Bool) {
+    /// 次に鳴るまでの1文は、光るときまで持ち越す（#289）。
+    private func handleAlarmSaved(
+        _ alarm: AlarmEntry,
+        shouldSpotlight: Bool,
+        shouldAnnounce: Bool
+    ) {
+        pendingUntilRing = nil
+        if shouldAnnounce,
+           let message = NextRingAnnouncement.message(for: alarm) {
+            pendingUntilRing = PendingUntilRing(
+                alarmID: alarm.id,
+                message: message
+            )
+        }
+
         guard shouldSpotlight else { return }
 
         pendingSpotlightStartOffset = listScrollView?.contentOffset.y
@@ -996,7 +1023,16 @@ struct ContentView: View {
 
     /// シートが閉じきってから、行を入れてスクロール・光り方を始める（#282 レビュー）。
     private func startPendingSpotlight() {
-        guard !pendingSpotlightAlarmIDs.isEmpty else { return }
+        let untilRing = pendingUntilRing
+        pendingUntilRing = nil
+
+        guard !pendingSpotlightAlarmIDs.isEmpty else {
+            // 行を光らせない保存（曜日・休みだけ変えたとき）でも1文は出す（#289）
+            if let untilRing {
+                untilRingNotice.show(untilRing.message, for: untilRing.alarmID)
+            }
+            return
+        }
         let ids = Array(pendingSpotlightAlarmIDs)
         pendingSpotlightAlarmIDs.removeAll()
         let startOffset = pendingSpotlightStartOffset
@@ -1074,7 +1110,8 @@ struct ContentView: View {
             alarmIDs: ids,
             startOffset: startOffset,
             insertAfterScroll: insertAfterScroll,
-            revealInPlace: revealInPlace
+            revealInPlace: revealInPlace,
+            untilRing: untilRing
         )
     }
 
@@ -1460,6 +1497,11 @@ struct ContentView: View {
         guard !Task.isCancelled else { return }
         spotlightStore.play(ids)
 
+        // 光るのと同じタイミングで、その行の2行目に次に鳴るまでの1文を出す（#289）
+        if let untilRing = request.untilRing {
+            untilRingNotice.show(untilRing.message, for: untilRing.alarmID)
+        }
+
         if let first = ids.first, UIAccessibility.isVoiceOverRunning {
             spotlightFocusedAlarmID = first
         }
@@ -1827,12 +1869,15 @@ struct AlarmRow: View {
     let spotlight: RowSpotlightController
     /// VoiceOver のフォーカスを移す（#282）
     let spotlightFocus: AccessibilityFocusState<UUID?>.Binding
+    /// 光っている行の2行目に出す1文（#289）
+    let untilRingNotice: UntilRingNoticeController
     let onFixSilentSound: () -> Void
     let onFirstAlarmFollowup: (FirstAlarmFollowupAction) -> Void
     let onToggle: () -> Void
     let onTap: () -> Void
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -1928,7 +1973,7 @@ struct AlarmRow: View {
                         .foregroundStyle(labelColor)
                         .lineLimit(1)
                 }
-                metadataLine(vertical: false)
+                metadataLineWithUntilRing(vertical: false)
                 if hasSilentSound { silentSoundWarning }
                 if let holidaySummary {
                     Text(holidaySummary)
@@ -1977,7 +2022,7 @@ struct AlarmRow: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            metadataLine(vertical: true)
+            metadataLineWithUntilRing(vertical: true)
             if hasSilentSound { silentSoundWarning }
             if let holidaySummary {
                 Text(holidaySummary)
@@ -2006,6 +2051,54 @@ struct AlarmRow: View {
             ),
             color: timeColor
         )
+    }
+
+    /// 1行目＝ラベル、2行目＝「曜日・音」（#174 PR-2）。
+    /// 光っている行だけ、2行目を次に鳴るまでの1文にクロスフェードする（#289）。
+    /// 行の高さを変えないよう、元の行は残したまま不透明度だけ下げ、上に重ねる。
+    @ViewBuilder
+    private func metadataLineWithUntilRing(vertical: Bool) -> some View {
+        metadataLine(vertical: vertical)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .opacity(showsUntilRing ? 0 : 1)
+            .overlay(alignment: .leading) {
+                if showsUntilRing, let text = untilRingNotice.text {
+                    untilRingLabel(text)
+                        .transition(.opacity)
+                }
+            }
+            .animation(untilRingAnimation, value: showsUntilRing)
+    }
+
+    private func untilRingLabel(_ text: String) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: "bell.fill")
+            Text(text)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+                .accessibilityIdentifier("alarm.row.untilRing")
+        }
+        .font(.footnote.weight(.medium))
+        .foregroundStyle(Color.actionText)
+        // 行の accessibilityLabel を変えない。UI テストのときだけ見えるようにする。
+        .accessibilityHidden(!AppGroup.isUITestExposeUntilRing)
+    }
+
+    private var showsUntilRing: Bool {
+        untilRingNotice.isVisible && untilRingNotice.alarmID == alarm.id
+    }
+
+    private var untilRingAnimation: Animation {
+        if reduceMotion {
+            // Reduce Motion はフェードのみ
+            return .easeInOut(duration: UntilRingNoticeController.Timing.fade)
+        }
+        return showsUntilRing
+            ? .timingCurve(0.05, 0.7, 0.1, 1, duration: 0.35)
+            : .timingCurve(
+                0.4, 0, 0.2, 1,
+                duration: UntilRingNoticeController.Timing.exit
+            )
     }
 
     /// 1行目＝ラベル、2行目＝「曜日・音」（#174 PR-2）。

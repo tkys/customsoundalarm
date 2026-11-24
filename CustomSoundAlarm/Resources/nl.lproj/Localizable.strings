@@ -162,6 +162,7 @@
 "countdown_days_hours" = "%1$ld d %2$ld u";
 "countdown_until" = "over %@";
 "alarm_will_ring_in" = "Gaat af over %@";
+"alarm_will_ring_on_weekday_fmt" = "Gaat af op %1$@ om %2$@";
 
 /* Alarm Edit */
 "alarm_is_off" = "Deze wekker staat uit";
