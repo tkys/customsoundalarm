@@ -187,6 +187,119 @@ struct WaveformCropMathTests {
         #expect(second == first)
     }
 
+    // MARK: - ピンチによるズーム（#292）
+
+    @Test
+    func zoomedWindow_zoomsInAroundAnchor() {
+        let window = CropWindow(start: 100, end: 130)
+        let zoomed = WaveformCropMath.zoomedWindow(
+            window,
+            magnification: 2,
+            anchorTime: 115,
+            duration: 600
+        )
+        #expect(approx(zoomed.width, 15))
+        #expect(approx(zoomed.start, 107.5))
+        #expect(approx(zoomed.end, 122.5))
+    }
+
+    @Test
+    func zoomedWindow_zoomsOut() {
+        let window = CropWindow(start: 100, end: 130)
+        let zoomed = WaveformCropMath.zoomedWindow(
+            window,
+            magnification: 0.5,
+            anchorTime: 115,
+            duration: 600
+        )
+        #expect(approx(zoomed.width, 60))
+        #expect(approx(zoomed.start, 85))
+        #expect(approx(zoomed.end, 145))
+    }
+
+    @Test
+    func zoomedWindow_clampsAtDuration() {
+        let window = CropWindow(start: 580, end: 600)
+        let zoomed = WaveformCropMath.zoomedWindow(
+            window,
+            magnification: 0.5,
+            anchorTime: 590,
+            duration: 600
+        )
+        #expect(approx(zoomed.width, 40))
+        #expect(approx(zoomed.start, 560))
+        #expect(approx(zoomed.end, 600))
+    }
+
+    @Test
+    func zoomedWindow_clampsAtFileStart() {
+        let window = CropWindow(start: 1, end: 9)
+        let zoomed = WaveformCropMath.zoomedWindow(
+            window,
+            magnification: 0.25,
+            anchorTime: 2,
+            duration: 20
+        )
+        #expect(approx(zoomed.start, 0))
+        #expect(approx(zoomed.width, 20))
+        #expect(approx(zoomed.end, 20))
+    }
+
+    @Test
+    func zoomedWindow_neverNarrowerThanMinimum() {
+        let window = CropWindow(start: 10, end: 20)
+        let zoomed = WaveformCropMath.zoomedWindow(
+            window,
+            magnification: 1000,
+            anchorTime: 15,
+            duration: 600
+        )
+        #expect(approx(zoomed.width, 0.5))
+    }
+
+    @Test
+    func zoomedWindow_invalidMagnification_keepsWindow() {
+        let window = CropWindow(start: 10, end: 20)
+        #expect(WaveformCropMath.zoomedWindow(window, magnification: 0, anchorTime: 15, duration: 600) == window)
+        #expect(WaveformCropMath.zoomedWindow(window, magnification: .nan, anchorTime: 15, duration: 600) == window)
+    }
+
+    @Test
+    func windowIncludingSelection_keepsWindowWhenSelectionInside() {
+        let range = TrimRange(start: 10, end: 20, duration: 600, maxRange: 600)
+        let window = CropWindow(start: 5, end: 25)
+        #expect(
+            WaveformCropMath.windowIncludingSelection(range, in: window, duration: 600) == window
+        )
+    }
+
+    @Test
+    func windowIncludingSelection_movesWindowToSelectionStart() {
+        let range = TrimRange(start: 10, end: 20, duration: 600, maxRange: 600)
+        let window = CropWindow(start: 15, end: 25)
+        let fixed = WaveformCropMath.windowIncludingSelection(range, in: window, duration: 600)
+        #expect(approx(fixed.start, 10))
+        #expect(approx(fixed.width, 10))
+    }
+
+    @Test
+    func windowIncludingSelection_movesWindowToSelectionEnd() {
+        let range = TrimRange(start: 10, end: 20, duration: 600, maxRange: 600)
+        let window = CropWindow(start: 0, end: 10)
+        let fixed = WaveformCropMath.windowIncludingSelection(range, in: window, duration: 600)
+        #expect(approx(fixed.start, 10))
+        #expect(approx(fixed.end, 20))
+    }
+
+    @Test
+    func windowIncludingSelection_keepsWindowWhenSelectionIsWider() {
+        let range = TrimRange(start: 10, end: 20, duration: 600, maxRange: 600)
+        let window = CropWindow(start: 15, end: 20)
+        #expect(
+            WaveformCropMath.windowIncludingSelection(range, in: window, duration: 600) == window
+        )
+    }
+
     // MARK: - ズーム窓の移動
 
     @Test

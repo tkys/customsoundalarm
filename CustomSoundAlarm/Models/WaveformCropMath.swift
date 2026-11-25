@@ -124,6 +124,54 @@ enum WaveformCropMath {
         return zoomWindow(range: range, duration: duration)
     }
 
+    /// ピンチでズーム窓を拡大・縮小する（#292）。
+    ///
+    /// 指の中心にある時刻（`anchorTime`）を動かさずに窓の幅だけを変える。
+    /// `magnification` はピンチ開始時からの累積倍率（2 で幅が半分＝拡大）。
+    /// 窓は `[0, duration]` に収め、`minimumWidth` より狭くしない。
+    static func zoomedWindow(
+        _ window: CropWindow,
+        magnification: Double,
+        anchorTime: Double,
+        duration: Double,
+        minimumWidth: Double = 0.5
+    ) -> CropWindow {
+        guard duration > 0, window.width > 0,
+              magnification.isFinite, magnification > 0 else {
+            return window
+        }
+        let minWidth = min(max(minimumWidth, 0.0001), duration)
+        let newWidth = min(max(window.width / magnification, minWidth), duration)
+        let anchorFraction = min(max((anchorTime - window.start) / window.width, 0), 1)
+        var start = anchorTime - anchorFraction * newWidth
+        start = min(max(start, 0), max(0, duration - newWidth))
+        return CropWindow(start: start, end: start + newWidth)
+    }
+
+    /// ピンチで拡大した窓に、選択範囲が入るよう寄せる（#292）。
+    ///
+    /// 窓が選択範囲より広いときだけ動かす。選択範囲の方が広いときは
+    /// どこかを切るしかないので、ピンチ位置のままにする。
+    static func windowIncludingSelection(
+        _ range: TrimRange,
+        in window: CropWindow,
+        duration: Double
+    ) -> CropWindow {
+        guard duration > 0, window.width > 0,
+              range.width > 0, window.width >= range.width else {
+            return window
+        }
+        if range.start < window.start {
+            let start = max(0, min(range.start, duration - window.width))
+            return CropWindow(start: start, end: start + window.width)
+        }
+        if range.end > window.end {
+            let start = max(0, min(range.end - window.width, duration - window.width))
+            return CropWindow(start: start, end: start + window.width)
+        }
+        return window
+    }
+
     /// ズーム窓の平行移動（下段の波形ドラッグ）。
     /// 移動量は「下段の表示幅に対する割合」で受け取り、窓の時間スケールに変換する。
     /// `[0, duration]` にクランプする。
