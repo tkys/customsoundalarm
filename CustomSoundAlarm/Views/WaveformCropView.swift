@@ -53,6 +53,9 @@ struct WaveformCropView: View {
     @State private var pinchBaseWindow: CropWindow?
     @State private var pinchAnchorTime: Double = 0
     @State private var isPinching = false
+    /// 上段のつまみを離したあと、下段の窓を横へ滑らせるアニメーション（#303）。
+    /// 下段に触れたらキャンセルし、その時点の位置から指の操作を優先する。
+    @State private var settleTask: Task<Void, Never>?
     /// ピンチの直後に、指を離した位置でスクラブ再生しないための印
     @State private var suppressScrubAfterPinch = false
     /// ピンチが始まったとき、同時に掴んでいたつまみ・範囲移動を止める印
@@ -65,6 +68,7 @@ struct WaveformCropView: View {
     /// アクセント色のアセット解決に使う（#81-2）
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// 目盛りラベルの幅と高さ（#237）。標準サイズでは従来と同じ 34 / 20。
     /// アクセシビリティサイズでは文字に合わせて広げ、下の開始・終了の行と重ねない。
@@ -134,6 +138,9 @@ struct WaveformCropView: View {
                 zoomWindow = WaveformCropMath.zoomWindow(range: range, duration: duration)
             }
         }
+        .onDisappear {
+            stopWindowSettle()
+        }
         .onChange(of: startTime) { _, _ in
             // 下段の拡大率は変えず、再生の範囲だけ伝える（#303）
             previewer?.updateRange(currentRange)
@@ -186,6 +193,9 @@ struct WaveformCropView: View {
 
     /// 触っている端が下段の窓の外に出たときだけ、窓を横にずらす（#303）。
     /// **窓の幅（拡大率）は変えない。**
+    ///
+    /// 下段のつまみ・下段の枠移動では、動かしている間ずっと追う（今までどおり）。
+    /// 上段のつまみは、離したときに `settleZoomWindow(showing:edge:)` で一度だけ寄せる。
     private func showEdge(_ edge: WaveformCropMath.CropEdge) {
         let time = edge == .start ? startTime : endTime
         zoomWindow = WaveformCropMath.window(
@@ -194,6 +204,55 @@ struct WaveformCropView: View {
             in: zoomWindow,
             duration: duration
         )
+    }
+
+    /// 上段のつまみを離したときに、下段の窓を一度だけ横へ滑らせる（#303）。
+    ///
+    /// 上段のドラッグ中は窓を動かさない（1pt で数秒動くため、追うと何度も跳ねる）。
+    /// 幅（拡大率）は変えず、`window(showing:)` の結果へ 0.35 秒の加速→減速で移る。
+    /// Reduce Motion のときは滑らせずに切り替える。
+    private func settleZoomWindow(showing edgeTime: Double, edge: WaveformCropMath.CropEdge) {
+        stopWindowSettle()
+        let settle = WaveformCropMath.OverviewWindowSettle.begin(
+            from: zoomWindow,
+            showing: edgeTime,
+            edge: edge,
+            duration: duration
+        )
+        guard settle.shouldAnimate else { return }
+
+        guard !reduceMotion else {
+            zoomWindow = settle.to
+            return
+        }
+
+        let curve = UnitCurve.bezier(
+            startControlPoint: UnitPoint(x: 0.65, y: 0),
+            endControlPoint: UnitPoint(x: 0.35, y: 1)
+        )
+        let animationSeconds: Double = 0.35
+        settleTask = Task { @MainActor in
+            let clock = ContinuousClock()
+            let began = clock.now
+            while !Task.isCancelled {
+                let elapsed = clock.now - began
+                let seconds = Double(elapsed.components.seconds)
+                    + Double(elapsed.components.attoseconds) / 1_000_000_000_000_000_000
+                let progress = min(max(seconds / animationSeconds, 0), 1)
+                zoomWindow = settle.window(at: curve.value(at: progress))
+                if progress >= 1 { break }
+                try? await Task.sleep(for: .milliseconds(16))
+            }
+            guard !Task.isCancelled else { return }
+            zoomWindow = settle.to
+            settleTask = nil
+        }
+    }
+
+    /// 滑っている途中に下段へ触れたら、そこで止める（#303）。
+    private func stopWindowSettle() {
+        settleTask?.cancel()
+        settleTask = nil
     }
 
     /// 再生の線を止めているときの位置（次に ▶ で鳴る位置・#303）。
@@ -309,6 +368,8 @@ struct WaveformCropView: View {
                     .onChanged { value in
                         guard abs(value.translation.width) >= tapThreshold else { return }
                         if draggingHandle != .panOverview {
+                            // 窓が滑っている途中でも、掴んだ位置から枠移動を優先する（#303）
+                            stopWindowSettle()
                             draggingHandle = .panOverview
                             // 基準はドラッグ開始時に1度だけ固定する（#36 累積バグ対策）
                             panBaseRange = currentRange
@@ -605,6 +666,8 @@ struct WaveformCropView: View {
             .gesture(
                 DragGesture(minimumDistance: 0, coordinateSpace: .named(zoomSpace))
                     .onChanged { value in
+                        // 滑っている途中に下段へ触れたら、そこで止める（#303）
+                        stopWindowSettle()
                         guard !isPinching, !suppressPanAfterPinch else { return }
                         if draggingHandle == nil {
                             // ピンチの後の最初の1本指は、新しい操作として扱う
@@ -653,6 +716,8 @@ struct WaveformCropView: View {
             .gesture(
                 DragGesture(minimumDistance: 0, coordinateSpace: .named(zoomSpace))
                     .onChanged { value in
+                        // 滑っている途中に下段へ触れたら、そこで止める（#303）
+                        stopWindowSettle()
                         guard !isPinching, !suppressHandleDrag else { return }
                         guard abs(value.translation.width) >= tapThreshold else { return }
                         if draggingHandle != .rangeZoom {
@@ -712,6 +777,8 @@ struct WaveformCropView: View {
     private var pinchGesture: some Gesture {
         MagnifyGesture(minimumScaleDelta: 0)
             .onChanged { value in
+                // 滑っている途中に下段へ触れたら、そこで止める（#303）
+                stopWindowSettle()
                 if pinchBaseWindow == nil {
                     guard abs(value.magnification - 1) > 0.001 else { return }
                     isPinching = true
@@ -810,6 +877,8 @@ struct WaveformCropView: View {
                 .onChanged { value in
                     guard !isPinching, !suppressHandleDrag else { return }
                     if draggingHandle != kind {
+                        // 滑っている途中に下段へ触れたら、そこで止める（#303）
+                        stopWindowSettle()
                         draggingHandle = kind
                         dragBaseRange = currentRange
                         dragBaseWindow = zoomWindow
@@ -819,12 +888,22 @@ struct WaveformCropView: View {
                     guard let base = dragBaseRange else { return }
                     let delta = Double(value.translation.width) * secondsPerPoint(dragBaseWindow)
                     switch kind {
-                    case .startOverview, .startZoom:
+                    case .startOverview:
+                        // 上段のドラッグ中は下段の窓を動かさない（#303）。
+                        // 1pt で数秒動くため、追うと端が見える位置へ何度も跳ねる。
+                        let desired = base.start + delta
+                        startTime = base.movingStart(to: desired).start
+                        noteLimitHit(for: kind, base: base, desired: desired)
+                    case .startZoom:
                         let desired = base.start + delta
                         startTime = base.movingStart(to: desired).start
                         noteLimitHit(for: kind, base: base, desired: desired)
                         showEdge(.start)
-                    case .endOverview, .endZoom:
+                    case .endOverview:
+                        let desired = base.end + delta
+                        endTime = base.movingEnd(to: desired).end
+                        noteLimitHit(for: kind, base: base, desired: desired)
+                    case .endZoom:
                         let desired = base.end + delta
                         endTime = base.movingEnd(to: desired).end
                         noteLimitHit(for: kind, base: base, desired: desired)
@@ -834,12 +913,22 @@ struct WaveformCropView: View {
                     }
                 }
                 .onEnded { _ in
-                    let movedStart = draggingHandle == .startOverview || draggingHandle == .startZoom
+                    let endedKind = draggingHandle
+                    let movedStart = endedKind == .startOverview || endedKind == .startZoom
                     draggingHandle = nil
                     dragBaseRange = nil
                     dragBaseWindow = nil
                     limitHitReason = nil
                     suppressHandleDrag = false
+                    // 上段のつまみを離したときだけ、一度窓を寄せる（#303）
+                    switch endedKind {
+                    case .startOverview:
+                        settleZoomWindow(showing: startTime, edge: .start)
+                    case .endOverview:
+                        settleZoomWindow(showing: endTime, edge: .end)
+                    default:
+                        break
+                    }
                     // 開始を離したら、新しい開始から鳴り直す（#303）。
                     // 30秒の範囲だと次の周回まで待つことになるため。
                     if movedStart, let playURL, let previewer, previewer.isPlaying {

@@ -138,6 +138,54 @@ final class CropHandlesUITests: XCTestCase {
         )
     }
 
+    /// 下の段をピンチで拡大したあと、上の段の終了のつまみを右へ大きく動かして離すと、
+    /// 下の段の窓が一度だけ寄って `crop.handle.end.zoom` が出ている（#303 2回目の手直し）。
+    ///
+    /// 修正前は上段のドラッグ中に窓を何度も寄せていたため、端がすぐ窓の外へ出て
+    /// ずらし直しが連続していた。離したときだけ窓を寄せるようになったことを確かめる。
+    func testReleasingOverviewEndHandleSlidesZoomWindowToShowEndHandle() {
+        launchFullRange(extra: [
+            "-uitest-long-crop",
+            "-uitestCropStart", "30",
+            "-uitestCropEnd", "60"
+        ])
+
+        let zoomBar = element("crop.zoomBar")
+        XCTAssertTrue(zoomBar.waitForExistence(timeout: 10), app.debugDescription)
+        let beforeSpacing = rulerSpacing()
+        zoomBar.pinch(withScale: 1.4, velocity: 1.0)
+        let zoomed = XCTNSPredicateExpectation(
+            predicate: NSPredicate { _, _ in
+                abs(self.rulerSpacing() - beforeSpacing) > 4
+            },
+            object: nil
+        )
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [zoomed], timeout: 5),
+            .completed,
+            "pinch should zoom the detailed waveform: \(app.debugDescription)"
+        )
+        let zoomedSpacing = rulerSpacing()
+
+        // 上の段で終了の端を右へ大きく動かして離す
+        let endHandle = element("crop.handle.end.overview")
+        XCTAssertTrue(endHandle.waitForExistence(timeout: 5), app.debugDescription)
+        drag(atX: endHandle.frame.midX, y: endHandle.frame.midY, by: 140)
+
+        let zoomEnd = element("crop.handle.end.zoom")
+        XCTAssertTrue(
+            zoomEnd.waitForExistence(timeout: 5),
+            "the end handle should appear in the detailed waveform after release: \(app.debugDescription)"
+        )
+        XCTAssertTrue(zoomEnd.isHittable, "the end handle should be hittable: \(zoomEnd)")
+        XCTAssertEqual(
+            rulerSpacing(),
+            zoomedSpacing,
+            accuracy: 2,
+            "sliding the window should not change the zoom level"
+        )
+    }
+
     /// ▶ は選択範囲をくり返し鳴らし、終了のつまみを動かしても止まらない（#303）。
     func testPlaybackKeepsPlayingWhileDraggingEndHandle() {
         launchFullRange(extra: [

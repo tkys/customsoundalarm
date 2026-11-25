@@ -175,6 +175,47 @@ enum WaveformCropMath {
         return CropWindow(start: start, end: start + window.width)
     }
 
+    /// 上段のつまみを離したときに、下段の窓を一度だけ横へ滑らせるための値（#303）。
+    ///
+    /// 上段のドラッグ中は窓を動かさない（`windowDuringDrag`）。触っているのは上段なので、
+    /// 端が下段の外へ出て見えなくなってもよい。離したときに `begin` で目標を1回だけ決め、
+    /// 幅（拡大率）を変えずに開始位置だけを滑らせる（端が両端10%の余白の内側なら動かさない）。
+    struct OverviewWindowSettle: Equatable, Sendable {
+        let from: CropWindow
+        let to: CropWindow
+
+        /// 動かす必要があるか（端が余白の内側なら目標＝現在）
+        var shouldAnimate: Bool { abs(to.start - from.start) > 0.0001 }
+
+        /// 上段のドラッグ中は窓を変えない
+        static func windowDuringDrag(_ window: CropWindow) -> CropWindow { window }
+
+        /// 上段のつまみを離したときの目標。`window(showing:)` の規則をそのまま使う
+        static func begin(
+            from window: CropWindow,
+            showing edgeTime: Double,
+            edge: CropEdge,
+            duration: Double
+        ) -> OverviewWindowSettle {
+            OverviewWindowSettle(
+                from: window,
+                to: WaveformCropMath.window(
+                    showing: edgeTime,
+                    edge: edge,
+                    in: window,
+                    duration: duration
+                )
+            )
+        }
+
+        /// 滑らせている途中の窓（`progress` は 0...1）。幅は変えない
+        func window(at progress: Double) -> CropWindow {
+            let p = min(max(progress, 0), 1)
+            let start = from.start + (to.start - from.start) * p
+            return CropWindow(start: start, end: start + from.width)
+        }
+    }
+
     /// ズーム窓の平行移動（下段の波形ドラッグ）。
     /// 移動量は「下段の表示幅に対する割合」で受け取り、窓の時間スケールに変換する。
     /// `[0, duration]` にクランプする。

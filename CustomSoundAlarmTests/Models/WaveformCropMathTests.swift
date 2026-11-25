@@ -244,6 +244,72 @@ struct WaveformCropMathTests {
         #expect(approx(atEnd.end, 600))
     }
 
+    // MARK: - 上段のつまみを離したときの窓寄せ（#303）
+
+    @Test
+    func overviewWindowSettle_duringDragKeepsWindow() {
+        // 上段のドラッグ中は、端がどこへ動いても下段の窓を変えない
+        let window = CropWindow(start: 40, end: 70)
+        #expect(WaveformCropMath.OverviewWindowSettle.windowDuringDrag(window) == window)
+    }
+
+    @Test
+    func overviewWindowSettle_beginUsesWindowShowingOnce() {
+        // 離したときに決まる目標は window(showing:) の結果そのもの（1回だけ呼ぶ）
+        let window = CropWindow(start: 40, end: 70)
+        let settle = WaveformCropMath.OverviewWindowSettle.begin(
+            from: window,
+            showing: 120,
+            edge: .end,
+            duration: 180
+        )
+        let expected = WaveformCropMath.window(
+            showing: 120,
+            edge: .end,
+            in: window,
+            duration: 180
+        )
+        #expect(settle.to == expected)
+        #expect(settle.shouldAnimate)
+        #expect(approx(settle.to.width, window.width))
+        #expect(settle.to.contains(120))
+    }
+
+    @Test
+    func overviewWindowSettle_insideMarginDoesNotAnimate() {
+        // 端が余白の内側なら、離しても窓を動かさない
+        let window = CropWindow(start: 20, end: 50)
+        let settle = WaveformCropMath.OverviewWindowSettle.begin(
+            from: window,
+            showing: 35,
+            edge: .start,
+            duration: 600
+        )
+        #expect(settle.to == window)
+        #expect(!settle.shouldAnimate)
+    }
+
+    @Test
+    func overviewWindowSettle_progressInterpolatesWithoutChangingWidth() {
+        // 滑らせている途中も幅は変わらず、0 で元の窓・1 で target になる
+        let window = CropWindow(start: 100, end: 130)
+        let settle = WaveformCropMath.OverviewWindowSettle.begin(
+            from: window,
+            showing: -50,
+            edge: .start,
+            duration: 600
+        )
+        #expect(settle.window(at: 0) == window)
+        #expect(settle.window(at: 1) == settle.to)
+        let middle = settle.window(at: 0.5)
+        #expect(approx(middle.width, window.width))
+        #expect(middle.start < window.start)
+        #expect(middle.start > settle.to.start)
+        // 範囲外の progress は端に丸める
+        #expect(settle.window(at: -1) == window)
+        #expect(settle.window(at: 2) == settle.to)
+    }
+
     // MARK: - ピンチによるズーム（#292）
 
     @Test
