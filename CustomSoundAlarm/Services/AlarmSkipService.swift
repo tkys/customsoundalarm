@@ -210,8 +210,9 @@ enum AlarmSkipService {
             AlarmSkipLogic.pruning($0, now: now)
         }
 
-        // 前の全体の休みで止めた1回きりのアラームを、新しい休みの判定に載せ直す。
+        // 1.8.4 までに全体の休みで止めた1回きりのアラームを、新しい休みの判定に載せ直す。
         // すでに予定時刻が過ぎたものは、鳴らずに終わったままにする（#197）。
+        // 1.8.5 からは1回きりもオンのまま休むため、このデータは増えない（#305）。
         if let previous = AppGroup.globalSkip {
             let previousDisabled = Set(previous.disabledOneTimeIDs)
             for index in alarms.indices
@@ -233,23 +234,13 @@ enum AlarmSkipService {
                 && !AlarmSkipLogic.occurrences(of: alarm, in: interval).isEmpty
         }.map(\.id))
 
-        var disabledOneTimeIDs: [UUID] = []
-        for index in alarms.indices where targetIDs.contains(alarms[index].id) {
-            guard alarms[index].repeatWeekdays.isEmpty else { continue }
-            guard let occurrence = AlarmSkipLogic.occurrences(
-                of: alarms[index],
-                in: interval
-            ).first else { continue }
-            alarms[index].isEnabled = false
-            alarms[index].skipDisabledDate = AlarmSkipLogic.dateKey(occurrence)
-            disabledOneTimeIDs.append(alarms[index].id)
-        }
-
+        // 1回きりもトグルは変えず、対象に入れるだけ（#305）。
+        // 鳴らさない判定は isGloballySkipped → nextFireDate が nil → 登録しない、で効く。
         AppGroup.globalSkip = GlobalSkip(
             start: interval.start,
             end: interval.end,
             entryIDs: Array(targetIDs),
-            disabledOneTimeIDs: disabledOneTimeIDs
+            disabledOneTimeIDs: []
         )
         AlarmStore.shared.replaceAll(alarms)
         AlarmScheduler.shared.syncAlarms(
@@ -262,6 +253,45 @@ enum AlarmSkipService {
             alarmCount: silencedIDs.count
         ))
         return targetIDs.count
+    }
+
+    /// 全体の休みの間に鳴るはずだった1回きりのアラームが、
+    /// 予定時刻を過ぎた時点でオフになり、休みの対象から外れる（#305）。
+    ///
+    /// 休みの間は鳴っていないので、発火の記録はしない。
+    /// 起動時と前面復帰時に呼ぶ。
+    /// - Returns: オフにしたアラームの ID
+    @discardableResult
+    static func expireGloballySkippedOneTimeAlarms(
+        now: Date = Date()
+    ) -> Set<UUID> {
+        guard var skip = AppGroup.globalSkip else { return [] }
+        var alarms = AlarmStore.shared.alarms.map {
+            AlarmSkipLogic.pruning($0, now: now)
+        }
+        var expired: Set<UUID> = []
+        for index in alarms.indices {
+            guard let occurrence = AlarmSkipLogic.globallySkippedOneTimeOccurrence(
+                for: alarms[index],
+                globalSkip: skip
+            ), occurrence <= now else { continue }
+            alarms[index].isEnabled = false
+            alarms[index].skipDisabledDate = nil
+            expired.insert(alarms[index].id)
+        }
+        guard !expired.isEmpty else { return [] }
+
+        skip.entryIDs.removeAll { expired.contains($0) }
+        skip.disabledOneTimeIDs.removeAll { expired.contains($0) }
+        AppGroup.globalSkip = skip.entryIDs.isEmpty ? nil : skip
+        AlarmStore.shared.replaceAll(alarms)
+        // 鳴っていない回の発火予定を残さない（起動時の突合で使う・#263）。
+        var fireDates = AppGroup.primaryScheduledFireDates
+        for id in expired {
+            fireDates.removeValue(forKey: id)
+        }
+        AppGroup.primaryScheduledFireDates = fireDates
+        return expired
     }
 
     /// 全体の休みを取り消す。個別の休みは残す。

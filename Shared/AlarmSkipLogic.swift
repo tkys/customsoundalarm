@@ -80,6 +80,29 @@ enum AlarmSkipLogic {
         return occurrence >= globalSkip.start && occurrence <= globalSkip.end
     }
 
+    /// 全体の休みで止めている1回きりのアラームの、鳴るはずだった日時（#305）。
+    ///
+    /// 休みの区間に入る次の1回だけを返す。区間の後に鳴るものは対象外（nil）。
+    /// `isEnabled` がオンのまま休んでいる1回きりを、時刻が過ぎたかどうかの判定に使う。
+    static func globallySkippedOneTimeOccurrence(
+        for entry: AlarmEntry,
+        globalSkip: GlobalSkip,
+        calendar: Calendar = .current
+    ) -> Date? {
+        guard entry.repeatWeekdays.isEmpty,
+              entry.isEnabled,
+              globalSkip.entryIDs.contains(entry.id),
+              let occurrence = rawNextFireDate(
+                  for: entry,
+                  after: globalSkip.start.addingTimeInterval(-1),
+                  calendar: calendar
+              ),
+              occurrence >= globalSkip.start,
+              occurrence <= globalSkip.end
+        else { return nil }
+        return occurrence
+    }
+
     /// `date` の日に鳴る予定の日時（休みは考えない）。鳴らない日は nil。
     static func occurrence(
         on date: Date,
@@ -715,8 +738,8 @@ enum AlarmSkipLogic {
 
     /// 行の時刻の下に出す「11/14（土）22:55 まで休み」の終わり。
     ///
-    /// 全体の休みの対象で、まだオンのアラームだけ。1回きりで止めた行は
-    /// オフのままなので、ここでは何も返さない（#197 レビュー）。
+    /// 全体の休みの対象で、まだオンのアラームだけ。1回きりもオンのまま
+    /// 休むため、帯の本数と同じ行に層がかかる（#305）。
     static func globalSkipRowEnd(
         for entry: AlarmEntry,
         now: Date = Date(),

@@ -9,7 +9,8 @@ struct GlobalSkip: Codable, Equatable, Sendable {
     var start: Date
     var end: Date
     var entryIDs: [UUID]
-    /// 全体の休みで止めた1回きりのアラーム（取り消すときに戻す）。
+    /// 1.8.4 までに全体の休みで止めた1回きりのアラーム（取り消すときに戻す）。
+    /// 1.8.5 からはトグルを変えずに休むため、新しくは増えない（#305）。
     var disabledOneTimeIDs: [UUID]
 
     init(

@@ -260,6 +260,36 @@ struct AlarmSchedulerSkipTests {
         }
     }
 
+    @Test
+    func globallySkippedOneTimeAlarm_isNotRegistered() async throws {
+        try await withCleanState {
+            let fake = RecordingAlarmManager()
+            let scheduler = AlarmScheduler(manager: fake)
+            let calendar = Calendar.current
+            let fire = Date().addingTimeInterval(3600)
+            let parts = calendar.dateComponents([.hour, .minute], from: fire)
+            let entry = AlarmEntry(
+                hour: parts.hour ?? 9,
+                minute: parts.minute ?? 0,
+                label: "one-time-awake",
+                repeatWeekdays: []
+            )
+            let now = Date()
+            AppGroup.globalSkip = GlobalSkip(
+                start: now,
+                end: now.addingTimeInterval(86400),
+                entryIDs: [entry.id]
+            )
+
+            // トグルはオンのままでも、休みの区間に入るので次回が無い＝登録しない（#305）。
+            #expect(entry.nextFireDate(from: now) == nil)
+            scheduler.syncAlarms([entry], trigger: .launch)
+            await scheduler.waitForPendingSync()
+
+            #expect(fake.registeredIDs.isEmpty)
+        }
+    }
+
     /// AlarmKit の登録上限の確認（レビュー用・シミュレータのみ）。
     /// 認可されていない環境ではスキップする。
     @Test

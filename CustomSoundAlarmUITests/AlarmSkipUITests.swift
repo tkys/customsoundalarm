@@ -23,6 +23,13 @@ final class AlarmSkipUITests: XCTestCase {
         return app
     }
 
+    private func attach(_ name: String) {
+        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
     private func apply24HourSkip(_ app: XCUIApplication) {
         let bell = app.buttons["alarmList.skipAll"]
         XCTAssertTrue(
@@ -44,7 +51,7 @@ final class AlarmSkipUITests: XCTestCase {
         )
     }
 
-    func testGlobalSkipShowsPausedRowsAndResumeRestores() {
+    func testGlobalSkipShowsPausedRowsIncludingOneTimeAndResumeRestores() {
         let app = launchSkipSeed()
 
         // 読書だけオフにして、休みの対象外の行を作る。
@@ -61,6 +68,17 @@ final class AlarmSkipUITests: XCTestCase {
         }
         XCTAssertEqual(readingToggle.value as? String, "0")
 
+        // 休みの間に鳴る1回きり（病院）はオンのまま。
+        let oneTimeToggle = app.switches
+            .matching(identifier: "alarm.toggle")
+            .matching(NSPredicate(format: "label CONTAINS %@", "病院"))
+            .firstMatch
+        XCTAssertTrue(
+            oneTimeToggle.waitForExistence(timeout: 10),
+            "one-time toggle should appear: \(app.debugDescription)"
+        )
+        XCTAssertEqual(oneTimeToggle.value as? String, "1")
+
         let rows = app.switches.matching(identifier: "alarm.row")
         XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 10))
         let heightBefore = rows.firstMatch.frame.height
@@ -75,17 +93,17 @@ final class AlarmSkipUITests: XCTestCase {
             "the old gray row line should be removed"
         )
 
-        // 対象の行（朝・ストレッチ）にだけ層が出る。読書は対象外。
+        // 対象の行（朝・ストレッチ・病院）に層が出る。読書は対象外。
         let overlays = app.descendants(matching: .any)
             .matching(identifier: "paused.row.overlay")
         XCTAssertEqual(
-            overlays.count, 2,
+            overlays.count, 3,
             "paused layers should appear on included rows: \(app.debugDescription)"
         )
         let pausedRows = rows.matching(
             NSPredicate(format: "label BEGINSWITH %@", "鳴りません")
         )
-        XCTAssertEqual(pausedRows.count, 2)
+        XCTAssertEqual(pausedRows.count, 3)
         XCTAssertFalse(
             rows.matching(NSPredicate(format: "label CONTAINS %@", "読書")).firstMatch
                 .label.contains("鳴りません"),
@@ -94,6 +112,10 @@ final class AlarmSkipUITests: XCTestCase {
 
         // 層をかぶせても行の高さは変わらない。
         XCTAssertEqual(rows.firstMatch.frame.height, heightBefore, accuracy: 1)
+
+        // 1回きりのトグルは、休みに入れても変わらない（#305）。
+        XCTAssertEqual(oneTimeToggle.value as? String, "1")
+        attach("skip-all-one-time-paused")
 
         app.buttons["skipAll.resume"].tap()
         // 再開は行が戻りきってから最後に帯を閉じる（#296 実機確認）。
@@ -107,6 +129,8 @@ final class AlarmSkipUITests: XCTestCase {
             0
         )
         XCTAssertEqual(readingToggle.value as? String, "0")
+        XCTAssertEqual(oneTimeToggle.value as? String, "1")
+        attach("skip-all-one-time-resumed")
     }
 
     func testPausedLayerTapOpensSheetAndDoesNotToggle() {
