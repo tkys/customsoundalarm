@@ -640,6 +640,9 @@ struct CustomSoundAlarmApp: App {
                         // 前面に戻るたびに再同期する（#110）。
                         // 差分同期は軽く、停止 Intent で取りこぼした最終アラームの保険にもなる。
                         AlarmStore.shared.reload()
+                        // 休みの間に鳴るはずだった1回きりが時刻を過ぎていたら、
+                        // 鳴った扱いにせずオフにして休みの対象から外す（#305）。
+                        AlarmSkipService.expireGloballySkippedOneTimeAlarms()
                         AlarmScheduler.shared.syncAlarms(
                             AlarmStore.shared.alarms,
                             trigger: .foreground

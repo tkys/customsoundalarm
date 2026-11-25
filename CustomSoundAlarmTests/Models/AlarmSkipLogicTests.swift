@@ -518,6 +518,42 @@ extension AlarmSkipLogicTests {
     }
 
     @Test
+    func globalSkip_hidesOneTimeInsideTheBreakWithoutDisablingIt() {
+        let entry = AlarmEntry(hour: 19, minute: 0, repeatWeekdays: [])
+        let now = date(2026, 11, 13, 12)
+        let skip = GlobalSkip(
+            start: now,
+            end: calendar.date(byAdding: .hour, value: 24, to: now)!,
+            entryIDs: [entry.id]
+        )
+
+        #expect(AlarmSkipLogic.globallySkippedOneTimeOccurrence(
+            for: entry, globalSkip: skip, calendar: calendar
+        ) == date(2026, 11, 13, 19))
+        #expect(AlarmSkipLogic.nextFireDate(
+            for: entry, after: now, calendar: calendar, globalSkip: skip
+        ) == nil)
+    }
+
+    @Test
+    func globalSkip_leavesOneTimeAfterTheBreak() {
+        let entry = AlarmEntry(hour: 17, minute: 0, repeatWeekdays: [])
+        let now = date(2026, 11, 13, 12)
+        let skip = GlobalSkip(
+            start: now,
+            end: calendar.date(byAdding: .hour, value: 3, to: now)!,
+            entryIDs: [entry.id]
+        )
+
+        #expect(AlarmSkipLogic.globallySkippedOneTimeOccurrence(
+            for: entry, globalSkip: skip, calendar: calendar
+        ) == nil)
+        #expect(AlarmSkipLogic.nextFireDate(
+            for: entry, after: now, calendar: calendar, globalSkip: skip
+        ) == date(2026, 11, 13, 17))
+    }
+
+    @Test
     func occurrenceCountMatchesThePresetWindow() {
         let entry = AlarmEntry(hour: 6, minute: 0, repeatWeekdays: [1, 2, 3, 4, 5, 6, 7])
         let now = date(2026, 11, 13, 12)
@@ -686,8 +722,10 @@ extension AlarmSkipServiceTests {
         let count = AlarmSkipService.skipAll(preset: .hours24)
         #expect(count == 2)
         #expect(AppGroup.globalSkip?.entryIDs.count == 2)
-        #expect(AppGroup.globalSkip?.disabledOneTimeIDs.contains(oneTime.id) == true)
-        #expect(AlarmStore.shared.alarms.first { $0.id == oneTime.id }?.isEnabled == false)
+        #expect(AppGroup.globalSkip?.disabledOneTimeIDs.isEmpty == true)
+        // 1回きりもトグルは変えず、休みの対象に入れるだけ（#305）。
+        #expect(AlarmStore.shared.alarms.first { $0.id == oneTime.id }?.isEnabled == true)
+        #expect(AlarmStore.shared.alarms.first { $0.id == oneTime.id }?.skipDisabledDate == nil)
 
         AlarmSkipService.undoAll()
         #expect(AppGroup.globalSkip == nil)
@@ -695,6 +733,135 @@ extension AlarmSkipServiceTests {
         #expect(restored.first { $0.id == repeating.id }?.skipDates == [key])
         #expect(restored.first { $0.id == oneTime.id }?.isEnabled == true)
         #expect(restored.first { $0.id == oneTime.id }?.skipDisabledDate == nil)
+
+        await AlarmScheduler.shared.waitForPendingSync()
+    }
+
+    @Test
+    func skipAll_keepsOneTimeEnabledAndUndoRestoresItsNextFire() async {
+        let original = AlarmStore.shared.alarms
+        let originalSkip = AppGroup.globalSkip
+        defer {
+            AlarmStore.shared.replaceAll(original)
+            AppGroup.globalSkip = originalSkip
+        }
+        AppGroup.globalSkip = nil
+
+        let calendar = Calendar.current
+        let fire = Date().addingTimeInterval(3600)
+        let parts = calendar.dateComponents([.hour, .minute], from: fire)
+        let entry = AlarmEntry(
+            hour: parts.hour ?? 9,
+            minute: parts.minute ?? 0,
+            label: "global-one-time-future",
+            repeatWeekdays: []
+        )
+        let expected = try? #require(AlarmSkipLogic.rawNextFireDate(
+            for: entry,
+            after: Date(),
+            calendar: calendar
+        ))
+        AlarmStore.shared.replaceAll([entry])
+
+        #expect(AlarmSkipService.skipAll(preset: .hours24) == 1)
+        let skipped = AlarmStore.shared.alarms.first { $0.id == entry.id }
+        #expect(skipped?.isEnabled == true)
+        #expect(skipped?.skipDisabledDate == nil)
+        #expect(AppGroup.globalSkip?.entryIDs == [entry.id])
+        #expect(AppGroup.globalSkip?.disabledOneTimeIDs.isEmpty == true)
+        #expect(skipped?.nextFireDate(from: Date()) == nil)
+
+        AlarmSkipService.undoAll()
+        #expect(AppGroup.globalSkip == nil)
+        let restored = AlarmStore.shared.alarms.first { $0.id == entry.id }
+        #expect(restored?.isEnabled == true)
+        #expect(restored?.nextFireDate(from: Date()) == expected)
+
+        await AlarmScheduler.shared.waitForPendingSync()
+    }
+
+    @Test
+    func expireGloballySkippedOneTime_turnsItOffWithoutFireRecord() async {
+        let original = AlarmStore.shared.alarms
+        let originalSkip = AppGroup.globalSkip
+        defer {
+            AlarmStore.shared.replaceAll(original)
+            AppGroup.globalSkip = originalSkip
+        }
+
+        let now = Date()
+        let calendar = Calendar.current
+        let past = now.addingTimeInterval(-3600)
+        let parts = calendar.dateComponents([.hour, .minute], from: past)
+        let entry = AlarmEntry(
+            hour: parts.hour ?? 7,
+            minute: parts.minute ?? 0,
+            label: "global-one-time-expired",
+            repeatWeekdays: []
+        )
+        let skip = GlobalSkip(
+            start: now.addingTimeInterval(-7200),
+            end: now.addingTimeInterval(7200),
+            entryIDs: [entry.id]
+        )
+        AppGroup.globalSkip = skip
+        AlarmStore.shared.replaceAll([entry])
+
+        let occurrence = try? #require(AlarmSkipLogic.globallySkippedOneTimeOccurrence(
+            for: entry,
+            globalSkip: skip
+        ))
+        #expect(AlarmSkipService.expireGloballySkippedOneTimeAlarms(now: now) == [entry.id])
+
+        let saved = AlarmStore.shared.alarms.first { $0.id == entry.id }
+        #expect(saved?.isEnabled == false)
+        #expect(saved?.skipDisabledDate == nil)
+        // 1本だけだったので、帯も消える。
+        #expect(AppGroup.globalSkip == nil)
+        if let occurrence {
+            #expect(!AlarmFireTracker.hasReported(
+                alarmUID: AlarmUIDStore.uid(for: entry.id),
+                occurrence: occurrence
+            ))
+        }
+
+        await AlarmScheduler.shared.waitForPendingSync()
+    }
+
+    @Test
+    func undoAll_restoresOneTimeDisabledByAnOlderGlobalSkip() async {
+        let original = AlarmStore.shared.alarms
+        let originalSkip = AppGroup.globalSkip
+        defer {
+            AlarmStore.shared.replaceAll(original)
+            AppGroup.globalSkip = originalSkip
+        }
+
+        let calendar = Calendar.current
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: Date())!
+        let key = AlarmSkipLogic.dateKey(tomorrow, calendar: calendar)
+        var entry = AlarmEntry(
+            hour: 7,
+            minute: 0,
+            label: "legacy-global-one-time",
+            repeatWeekdays: []
+        )
+        entry.isEnabled = false
+        entry.skipDisabledDate = key
+        AppGroup.globalSkip = GlobalSkip(
+            start: Date(),
+            end: Date().addingTimeInterval(86400),
+            entryIDs: [entry.id],
+            disabledOneTimeIDs: [entry.id]
+        )
+        AlarmStore.shared.replaceAll([entry])
+
+        AlarmSkipService.undoAll()
+
+        let restored = AlarmStore.shared.alarms.first { $0.id == entry.id }
+        #expect(restored?.isEnabled == true)
+        #expect(restored?.skipDisabledDate == nil)
+        #expect(AppGroup.globalSkip == nil)
 
         await AlarmScheduler.shared.waitForPendingSync()
     }

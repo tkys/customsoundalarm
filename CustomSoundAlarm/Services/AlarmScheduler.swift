@@ -216,7 +216,12 @@ final class AlarmScheduler {
         }
 
         let store = AlarmStore.shared
+        let reconcileNow = Date()
         var didChange = false
+
+        // 全体の休みの間に鳴るはずだった1回きりが時刻を過ぎたら、
+        // 鳴った扱いにせずオフにして休みの対象から外す（#305）。
+        AlarmSkipService.expireGloballySkippedOneTimeAlarms(now: reconcileNow)
 
         // 計測用の発火予定日時は、有効なアラームの分だけ残す（#263）
         var scheduledFireDates = AppGroup.primaryScheduledFireDates
@@ -224,11 +229,20 @@ final class AlarmScheduler {
         scheduledFireDates = scheduledFireDates.filter { enabledEntryIDs.contains($0.key) }
         AppGroup.primaryScheduledFireDates = scheduledFireDates
 
-        let reconcileNow = Date()
         let todayKey = AlarmSkipLogic.dateKey(reconcileNow)
         for alarm in store.alarms where alarm.isEnabled && alarm.repeatWeekdays.isEmpty {
             // まだ来ていない休みの日がある一回限りは、鳴らずに終わる日まで残す（#197）
             if alarm.skipDates.contains(where: { $0 >= todayKey }) {
+                continue
+            }
+            // 全体の休みで止めている1回きりも、鳴るはずの時刻までは残す（#305）。
+            // ここで continue しないと「AlarmKit に無い＝鳴った」と見なしてしまう。
+            if let skip = AppGroup.globalSkip,
+               let occurrence = AlarmSkipLogic.globallySkippedOneTimeOccurrence(
+                   for: alarm,
+                   globalSkip: skip
+               ),
+               occurrence > reconcileNow {
                 continue
             }
             if let mappedID = alarmIDMap[alarm.id], !activeAlarmIDs.contains(mappedID) {
