@@ -327,7 +327,7 @@
 
 // #197 skip days
 "skip_one_time_warning" = "منبه لمرة واحدة (%d) لن يرن.";
-"skip_undo" = "تراجع";
+"skip_resume" = "استئناف";
 "skip_apply" = "راحة";
 "holiday_skip_toggle" = "لا يرن في العطلات";
 "holiday_next_skipped" = "%@ بلا منبه";
@@ -343,7 +343,7 @@
 "skip_all_row_fmt" = "حتى %@ · %d مرات";
 "skip_all_custom" = "اختيار التواريخ";
 "skip_all_active_fmt" = "إيقاف مؤقت حتى %1$@ · %2$d";
-"skip_row_global_fmt" = "إيقاف مؤقت حتى %@";
+"skip_row_paused_a11y_fmt" = "لا يرن حتى %@.";
 "skip_row_skip_fmt" = "إيقاف مؤقت في %@";
 "skip_row_undo" = "إلغاء الإيقاف المؤقت";
 "skip_row_summary_fmt" = "إيقاف مؤقت في %@ · التالي %@";

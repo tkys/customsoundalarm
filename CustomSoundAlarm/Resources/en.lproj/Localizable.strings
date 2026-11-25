@@ -327,7 +327,7 @@
 
 // #197 skip days
 "skip_one_time_warning" = "A one-time alarm (%d) will not ring.";
-"skip_undo" = "Undo";
+"skip_resume" = "Resume";
 "skip_apply" = "Skip";
 "holiday_skip_toggle" = "Don't ring on holidays";
 "holiday_next_skipped" = "%@ is skipped";
@@ -343,7 +343,7 @@
 "skip_all_row_fmt" = "until %@ · %d times";
 "skip_all_custom" = "Choose dates";
 "skip_all_active_fmt" = "Resting until %1$@ · %2$d";
-"skip_row_global_fmt" = "Resting until %@";
+"skip_row_paused_a11y_fmt" = "Not ringing until %@.";
 "skip_row_skip_fmt" = "Rest on %@";
 "skip_row_undo" = "Cancel the rest";
 "skip_row_summary_fmt" = "Resting on %@ · next %@";

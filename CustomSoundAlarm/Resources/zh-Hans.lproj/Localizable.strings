@@ -327,7 +327,7 @@
 
 // #197 skip days
 "skip_one_time_warning" = "一次性闹钟 %d 个将不会响。";
-"skip_undo" = "撤销";
+"skip_resume" = "恢复";
 "skip_apply" = "休息";
 "holiday_skip_toggle" = "节假日不响";
 "holiday_next_skipped" = "%@ 休息";
@@ -343,7 +343,7 @@
 "skip_all_row_fmt" = "至 %@ · %d次";
 "skip_all_custom" = "选择日期";
 "skip_all_active_fmt" = "休息至 %1$@ · %2$d个";
-"skip_row_global_fmt" = "休息至 %@";
+"skip_row_paused_a11y_fmt" = "至 %@ 不会响。";
 "skip_row_skip_fmt" = "让 %@ 休息";
 "skip_row_undo" = "取消休息";
 "skip_row_summary_fmt" = "%@ 休息 · 下次 %@";

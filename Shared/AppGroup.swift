@@ -493,6 +493,16 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: 止まっている行の層をアクセシビリティツリーにも出す（DEBUGのみ・#296）。
+    /// 本番の読み上げは行の先頭に状態を足すだけにして、層は隠しておく。
+    static var isUITestExposePausedRow: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-expose-paused-row")
+    #else
+        false
+    #endif
+    }
+
     /// スクリーンショット用: 行の1文を長めに保つ（DEBUGのみ・#289）。
     static var isUITestHoldUntilRing: Bool {
     #if DEBUG

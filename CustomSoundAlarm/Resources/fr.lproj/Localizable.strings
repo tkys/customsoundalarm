@@ -327,7 +327,7 @@
 
 // #197 skip days
 "skip_one_time_warning" = "Une alarme unique (%d) ne sonnera pas.";
-"skip_undo" = "Annuler";
+"skip_resume" = "Reprendre";
 "skip_apply" = "Mettre en pause";
 "holiday_skip_toggle" = "Ne pas sonner les jours fériés";
 "holiday_next_skipped" = "%@ : pas d’alarme";
@@ -343,7 +343,7 @@
 "skip_all_row_fmt" = "jusqu’à %@ · %d fois";
 "skip_all_custom" = "Choisir des dates";
 "skip_all_active_fmt" = "En pause jusqu’à %1$@ · %2$d";
-"skip_row_global_fmt" = "En pause jusqu’à %@";
+"skip_row_paused_a11y_fmt" = "Aucune sonnerie avant %@.";
 "skip_row_skip_fmt" = "Mettre en pause le %@";
 "skip_row_undo" = "Annuler la pause";
 "skip_row_summary_fmt" = "En pause le %@ · prochaine %@";

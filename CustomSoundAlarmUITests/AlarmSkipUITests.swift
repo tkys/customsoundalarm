@@ -15,6 +15,7 @@ final class AlarmSkipUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = [
             "-uitest-seed-skip",
+            "-uitest-expose-paused-row",
             "-AppleLanguages", "(ja)",
             "-AppleLocale", "ja_JP"
         ]
@@ -22,9 +23,7 @@ final class AlarmSkipUITests: XCTestCase {
         return app
     }
 
-    func testSkipAllPresetShowsNoticeAndUndoRestores() {
-        let app = launchSkipSeed()
-
+    private func apply24HourSkip(_ app: XCUIApplication) {
         let bell = app.buttons["alarmList.skipAll"]
         XCTAssertTrue(
             bell.waitForExistence(timeout: 15),
@@ -37,41 +36,110 @@ final class AlarmSkipUITests: XCTestCase {
             preset.waitForExistence(timeout: 10),
             "skip-all sheet should open: \(app.debugDescription)"
         )
-        XCTAssertTrue(
-            app.descendants(matching: .any)["skipAll.silencedList"]
-                .waitForExistence(timeout: 5),
-            "silenced alarm rows should appear before applying"
-        )
-        XCTAssertTrue(
-            app.staticTexts["skipAll.oneTimeWarning"].waitForExistence(timeout: 5),
-            "one-time warning should appear when a one-time alarm is in range"
-        )
-
         preset.tap()
 
-        let notice = app.staticTexts["skipAll.notice"]
         XCTAssertTrue(
-            notice.waitForExistence(timeout: 10),
-            "rest notice should appear: \(app.debugDescription)"
+            app.staticTexts["skipAll.notice"].waitForExistence(timeout: 10),
+            "the band should appear: \(app.debugDescription)"
         )
-        let gridLine = app.staticTexts["skip.row.globalSummary"].firstMatch
-        XCTAssertTrue(
-            gridLine.waitForExistence(timeout: 10),
-            "included alarm rows should show the global rest line: \(app.debugDescription)"
-        )
-        let undo = app.buttons["skipAll.undo"]
-        XCTAssertTrue(undo.exists, "undo should appear: \(app.debugDescription)")
+    }
 
-        undo.tap()
-        XCTAssertFalse(
-            notice.waitForExistence(timeout: 5),
-            "notice should disappear after undo"
+    func testGlobalSkipShowsPausedRowsAndResumeRestores() {
+        let app = launchSkipSeed()
+
+        // 読書だけオフにして、休みの対象外の行を作る。
+        let readingToggle = app.switches
+            .matching(identifier: "alarm.toggle")
+            .matching(NSPredicate(format: "label CONTAINS %@", "読書"))
+            .firstMatch
+        XCTAssertTrue(
+            readingToggle.waitForExistence(timeout: 15),
+            "reading toggle should appear: \(app.debugDescription)"
         )
-        XCTAssertTrue(bell.waitForExistence(timeout: 5), "bell should remain")
+        if readingToggle.value as? String == "1" {
+            readingToggle.tap()
+        }
+        XCTAssertEqual(readingToggle.value as? String, "0")
+
+        let rows = app.switches.matching(identifier: "alarm.row")
+        XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 10))
+        let heightBefore = rows.firstMatch.frame.height
+
+        apply24HourSkip(app)
+
+        let notice = app.staticTexts["skipAll.notice"]
+        XCTAssertTrue(notice.label.contains("鳴りません"), notice.label)
+        XCTAssertTrue(notice.label.contains("3本"), notice.label)
         XCTAssertFalse(
             app.staticTexts["skip.row.globalSummary"].firstMatch.exists,
-            "global rest line should disappear after undo"
+            "the old gray row line should be removed"
         )
+
+        // 対象の行（朝・ストレッチ）にだけ層が出る。読書は対象外。
+        let overlays = app.descendants(matching: .any)
+            .matching(identifier: "paused.row.overlay")
+        XCTAssertEqual(
+            overlays.count, 2,
+            "paused layers should appear on included rows: \(app.debugDescription)"
+        )
+        let pausedRows = rows.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "鳴りません")
+        )
+        XCTAssertEqual(pausedRows.count, 2)
+        XCTAssertFalse(
+            rows.matching(NSPredicate(format: "label CONTAINS %@", "読書")).firstMatch
+                .label.contains("鳴りません"),
+            "an alarm outside the rest should not look paused"
+        )
+
+        // 層をかぶせても行の高さは変わらない。
+        XCTAssertEqual(rows.firstMatch.frame.height, heightBefore, accuracy: 1)
+
+        app.buttons["skipAll.resume"].tap()
+        // 再開は行が戻りきってから最後に帯を閉じる（#296 実機確認）。
+        XCTAssertTrue(
+            notice.waitForNonExistence(timeout: 5),
+            "the band should close after the rows come back"
+        )
+        XCTAssertEqual(overlays.count, 0, "paused layers should disappear after resume")
+        XCTAssertEqual(
+            rows.matching(NSPredicate(format: "label BEGINSWITH %@", "鳴りません")).count,
+            0
+        )
+        XCTAssertEqual(readingToggle.value as? String, "0")
+    }
+
+    func testPausedLayerTapOpensSheetAndDoesNotToggle() {
+        let app = launchSkipSeed()
+        apply24HourSkip(app)
+
+        let toggle = app.switches
+            .matching(identifier: "alarm.toggle")
+            .firstMatch
+        XCTAssertTrue(toggle.waitForExistence(timeout: 10))
+        XCTAssertEqual(toggle.value as? String, "1")
+        let overlay = app.descendants(matching: .any)
+            .matching(identifier: "paused.row.overlay").firstMatch
+        XCTAssertTrue(
+            overlay.waitForExistence(timeout: 5),
+            "paused layer should appear: \(app.debugDescription)"
+        )
+
+        // 層の下にあるスイッチの位置を押しても、層が受けてスイッチは動かない。
+        toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        XCTAssertTrue(
+            app.buttons["skipAll.preset.24h"].waitForExistence(timeout: 5),
+            "tapping the layer should open the skip sheet: \(app.debugDescription)"
+        )
+        XCTAssertEqual(toggle.value as? String, "1")
+        let sheetResume = app.buttons["skipAll.sheetResume"]
+        XCTAssertTrue(sheetResume.exists, "the sheet should offer resume")
+        sheetResume.tap()
+        XCTAssertTrue(
+            app.staticTexts["skipAll.notice"].waitForNonExistence(timeout: 5),
+            "resuming from the sheet should clear the rest"
+        )
+        XCTAssertEqual(toggle.value as? String, "1")
     }
 
     func testLeadingSwipeSkipsNextAndShowsRowSummary() {
@@ -168,9 +236,9 @@ final class AlarmSkipUITests: XCTestCase {
             app.staticTexts["skipAll.notice"].waitForExistence(timeout: 10),
             "custom rest should show the notice: \(app.debugDescription)"
         )
-        app.buttons["skipAll.undo"].tap()
-        XCTAssertFalse(
-            app.staticTexts["skipAll.notice"].waitForExistence(timeout: 5),
+        app.buttons["skipAll.resume"].tap()
+        XCTAssertTrue(
+            app.staticTexts["skipAll.notice"].waitForNonExistence(timeout: 5),
             "custom rest should be undone so later tests start clean"
         )
     }

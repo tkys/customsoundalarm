@@ -761,4 +761,40 @@ struct AlarmOffIconTests {
         #expect(AlarmOffIcon.badgeCenterInsetRatio < 0.5)
         #expect(AlarmOffIcon.badgeGapRatio > 0)
     }
+
+    @Test
+    func drawnBadgeStaysInsideTheCutout() {
+        #expect(AlarmOffIcon.badgeRingRadiusRatio > 0)
+        #expect(AlarmOffIcon.badgeRingStrokeRatio > 0)
+        #expect(AlarmOffIcon.badgeSlashRadiusRatio > 0)
+        #expect(
+            AlarmOffIcon.badgeRingRadiusRatio + AlarmOffIcon.badgeRingStrokeRatio / 2
+                < AlarmOffIcon.badgeDiameterRatio / 2 + AlarmOffIcon.badgeGapRatio
+        )
+    }
+
+    @Test
+    func pausedRowsStaggerFromTheTop() {
+        #expect(PausedRowTiming.delay(forPausedIndex: 0) == 0)
+        #expect(abs(PausedRowTiming.delay(forPausedIndex: 1) - 0.08) < 0.0001)
+        #expect(abs(PausedRowTiming.delay(forPausedIndex: 3) - 0.24) < 0.0001)
+        #expect(PausedRowTiming.delay(forPausedIndex: -1) == 0)
+        #expect(abs(PausedRowTiming.exitDelay(forPausedIndex: 1) - 0.06) < 0.0001)
+        #expect(PausedRowTiming.slashOut < PausedRowTiming.slashIn)
+        // 丸が戻りきってから、層と時計が消え始める（#296 実機確認）。
+        #expect(
+            PausedRowTiming.layerOutStart
+                > PausedRowTiming.circleOutStart + PausedRowTiming.circleOut
+        )
+        #expect(PausedRowTiming.layerOutStart >= 0.70 && PausedRowTiming.layerOutStart <= 0.75)
+        // 帯は、いちばん下の行が戻りきってから閉じる（#296 実機確認）。
+        #expect(
+            PausedRowTiming.exitEnd(pausedCount: 4)
+                == PausedRowTiming.exitDelay(forPausedIndex: 3)
+                    + PausedRowTiming.layerOutStart
+                    + PausedRowTiming.layerOut
+        )
+        #expect(PausedRowTiming.noticeCloseDelay(pausedCount: 4) == 1.25)
+        #expect(PausedRowTiming.noticeCloseDelay(pausedCount: 12) > 1.25)
+    }
 }
