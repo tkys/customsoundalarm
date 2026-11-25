@@ -125,6 +125,14 @@
 | `is_internal` | bool | DEBUG opt-in の内部利用（PostHog 側で除外） | 既存 |
 | `build_type` | string（debug） | DEBUG ビルドの super property | 既存 |
 
+## 全イベント共通のプロパティ（super property・#291）
+
+イベントごとではなく、すべてのイベントに自動で付く値です。`register` で登録し、起動時と外観が変わったとき（`colorScheme` の変化）に更新します。
+
+| プロパティ | 型 | 意味 | 追加版 |
+| --- | --- | --- | --- |
+| `ui_appearance` | string（light / dark） | 端末の外観。個人を特定しない | 1.8.5 |
+
 ## OOUI 再設計（#160 / 1.8.1）
 
 - `alarm_created` / `alarm_edited` の `sound_mode` は、アラームの `playlistID` とプレイリストの `playOrder` から導出します（`single` / `playlist_order` / `playlist_shuffle` / `playlist_random`）。

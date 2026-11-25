@@ -1001,6 +1001,8 @@ protocol AnalyticsBackend: AnyObject, Sendable {
     func capture(_ event: String, properties: [String: Any]?, timestamp: Date?)
     /// ユーザープロパティを設定する（identify）。PII は絶対に含めないこと。
     func setUserProperties(_ properties: [String: Any])
+    /// 以降のすべてのイベントに付く super property を登録する。PII は絶対に含めないこと。
+    func register(_ properties: [String: Any])
 }
 
 // MARK: - AnalyticsConfig
@@ -1085,6 +1087,10 @@ final class PostHogAnalyticsBackend: AnalyticsBackend {
     func setUserProperties(_ properties: [String: Any]) {
         PostHogSDK.shared.identify(PostHogSDK.shared.getDistinctId(), userProperties: properties)
     }
+
+    func register(_ properties: [String: Any]) {
+        PostHogSDK.shared.register(properties)
+    }
 }
 
 // MARK: - PlaylistEmptyViewTracker
@@ -1127,6 +1133,8 @@ final class AnalyticsService: @unchecked Sendable {
     private let logger = Logger(subsystem: "com.tkysdev.customsoundalarm", category: "Analytics")
     private let lock = NSLock()
     private var backend: AnalyticsBackend?
+    /// SDK 初期化前に登録された super property。`configure()` でまとめて登録する。
+    private var pendingSuperProperties: [String: Any] = [:]
     private(set) var isEnabled = false
 
     private init() {
@@ -1191,6 +1199,12 @@ final class AnalyticsService: @unchecked Sendable {
         isEnabled = true
         logger.info("PostHog configured (host=\(config.host, privacy: .public), debug=\(config.isDebug))")
 
+        // SDK 初期化前に登録された super property（端末の外観など・#291）を反映する。
+        if !pendingSuperProperties.isEmpty {
+            backend?.register(pendingSuperProperties)
+            pendingSuperProperties.removeAll()
+        }
+
         // DEBUG opt-in の場合は is_internal: true を付与（PostHog 側でフィルタ可能）
         if gate.isInternal {
             backend?.setUserProperties(["is_internal": true])
@@ -1246,6 +1260,20 @@ final class AnalyticsService: @unchecked Sendable {
 
         guard let backend else { return }
         backend.setUserProperties(properties)
+    }
+
+    /// 以降のすべてのイベントに付く super property を登録する（#291）。
+    /// SDK 初期化前に呼ばれた場合は、`configure()` でまとめて登録する。
+    /// PII は絶対に含めないこと。
+    func setSuperProperties(_ properties: [String: Any]) {
+        lock.lock()
+        let backend = self.backend
+        if backend == nil {
+            pendingSuperProperties.merge(properties) { _, new in new }
+        }
+        lock.unlock()
+
+        backend?.register(properties)
     }
 
     /// PendingAlarmEvent キューをフラッシュする。configure() 完了後に自動で呼ばれる。

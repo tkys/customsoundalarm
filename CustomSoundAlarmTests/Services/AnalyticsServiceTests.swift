@@ -10,6 +10,7 @@ private final class MockBackend: AnalyticsBackend, @unchecked Sendable {
     private let lock = NSLock()
     private var _captures: [(event: String, properties: [String: Any]?, timestamp: Date?)] = []
     private var _userProperties: [String: Any] = [:]
+    private var _superProperties: [String: Any] = [:]
 
     var captures: [(event: String, properties: [String: Any]?, timestamp: Date?)] {
         lock.withLock { _captures }
@@ -23,6 +24,10 @@ private final class MockBackend: AnalyticsBackend, @unchecked Sendable {
         lock.withLock { _userProperties }
     }
 
+    var superProperties: [String: Any] {
+        lock.withLock { _superProperties }
+    }
+
     func capture(_ event: String, properties: [String: Any]?, timestamp: Date?) {
         lock.withLock {
             _captures.append((event, properties, timestamp))
@@ -32,6 +37,12 @@ private final class MockBackend: AnalyticsBackend, @unchecked Sendable {
     func setUserProperties(_ properties: [String: Any]) {
         lock.withLock {
             _userProperties = properties
+        }
+    }
+
+    func register(_ properties: [String: Any]) {
+        lock.withLock {
+            _superProperties.merge(properties) { _, new in new }
         }
     }
 }
@@ -1400,6 +1411,40 @@ struct AnalyticsServiceCaptureTests {
         #expect(mock.userProperties["alarm_count"] as? Int == 5)
         #expect(mock.userProperties["custom_sound_count"] as? Int == 2)
         #expect(mock.userProperties.count == 2)
+    }
+
+    // MARK: setSuperProperties
+
+    @Test
+    func setSuperPropertiesForwardsToBackend() {
+        let mock = MockBackend()
+        let service = AnalyticsService(backend: mock)
+
+        service.setSuperProperties(AnalyticsAppearance.dark.superProperties)
+
+        #expect(mock.superProperties["ui_appearance"] as? String == "dark")
+        #expect(mock.superProperties.count == 1)
+    }
+
+    @Test
+    func setSuperPropertiesUpdatesExistingValue() {
+        let mock = MockBackend()
+        let service = AnalyticsService(backend: mock)
+
+        service.setSuperProperties(AnalyticsAppearance.light.superProperties)
+        service.setSuperProperties(AnalyticsAppearance.dark.superProperties)
+
+        #expect(mock.superProperties["ui_appearance"] as? String == "dark")
+    }
+
+    @Test
+    func setSuperPropertiesBeforeConfigureKeepsValue() {
+        // 計測が無効な間（configure 前）でもクラッシュせず、値は保持される。
+        let service = AnalyticsService(backend: nil)
+
+        service.setSuperProperties(AnalyticsAppearance.dark.superProperties)
+
+        #expect(service.isEnabled == false)
     }
 
 }

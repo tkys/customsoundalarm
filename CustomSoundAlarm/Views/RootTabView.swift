@@ -15,6 +15,7 @@ struct RootTabView: View {
     }()
     @State private var unlock = PlaylistUnlockCoordinator.shared
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.colorScheme) private var colorScheme
     /// 解放シートの表示（coordinator の変更をローカル状態に写す・#216）
     @State private var showingUnlock = false
     /// 解放から作ったプレイリストの詳細（#216）
@@ -46,6 +47,8 @@ struct RootTabView: View {
         // スクリーンショット撮影用の外観固定（DEBUGのみ・#173）。
         .preferredColorScheme(uiTestColorScheme)
         .task {
+            // 端末の外観を記録する（#291）。画面の見た目は変えない。
+            recordAnalyticsAppearance()
             if let kind = controlRouter.pending {
                 controlRouter.pending = nil
                 handleControlOpen(kind)
@@ -78,6 +81,10 @@ struct RootTabView: View {
             guard let kind else { return }
             controlRouter.pending = nil
             handleControlOpen(kind)
+        }
+        .onChange(of: colorScheme) { _, _ in
+            // ライト／ダークを切り替えたら、共通の計測値を更新する（#291）。
+            recordAnalyticsAppearance()
         }
         .sheet(isPresented: $showingUnlock, onDismiss: {
             if unlock.isPresented {
@@ -115,6 +122,13 @@ struct RootTabView: View {
         selection = .alarms
         AnalyticsService.shared.capture(.controlOpened(kind: kind))
         controlOpenKind = kind
+    }
+
+    /// 端末の外観（ライト／ダーク）を PostHog の super property として記録する（#291）。
+    private func recordAnalyticsAppearance() {
+        AnalyticsService.shared.setSuperProperties(
+            AnalyticsAppearance(colorScheme: colorScheme).superProperties
+        )
     }
 
     private var uiTestColorScheme: ColorScheme? {
