@@ -17,6 +17,16 @@ enum AlarmDetailMode: Identifiable {
 
 // MARK: - AlarmDetailView
 
+/// 試し鳴らしの待ち状態（#297）。
+/// 「試す」の準備中に「今すぐ鳴らす」まで止めないよう、種類ごとに持つ。
+private enum TestRingPhase: Equatable {
+    case idle
+    /// 大きくした版を準備中（「試す」だけ）
+    case preparing
+    /// アラームを登録中
+    case scheduling
+}
+
 /// アラーム追加・編集画面
 /// HIG: DatePickerで時刻選択、サウンドはナビゲーション遷移で選択
 struct AlarmDetailView: View {
@@ -70,8 +80,10 @@ struct AlarmDetailView: View {
     /// 取り込みで音量を上げた音のファイル名（#224）
     @State private var volumeBoostedFileName: String?
 
-    /// 試しに鳴らす（#109）
-    @State private var isSchedulingTestRing = false
+    /// 試しに鳴らす（#109）。待ち状態は「今すぐ鳴らす」と「試す」で分ける（#297）
+    @State private var testRingPhase: TestRingPhase = .idle
+    @State private var backupTestRingPhase: TestRingPhase = .idle
+    @State private var backupVariantPreparation: LoudVariantPreparation?
     @State private var testRingMessage: String?
     @State private var backupTestRingMessage: String?
 
@@ -179,6 +191,17 @@ struct AlarmDetailView: View {
                     }
                     return weekdays.contains(calendar.component(.weekday, from: date))
                 }
+            }
+            // 大きくした版を先に作り始める（#297）。
+            // 「試す」を押した時点でできていれば、待たずに鳴る。
+            .onChange(of: backupMinutes) { _, minutes in
+                if minutes != nil { prepareBackupVariantInBackground() }
+            }
+            .onChange(of: selectedSound) { _, _ in
+                prepareBackupVariantInBackground()
+            }
+            .onChange(of: playlistID) { _, _ in
+                prepareBackupVariantInBackground()
             }
             .navigationTitle(isEditing ? String(localized: "edit_alarm") : String(localized: "add_alarm"))
             .navigationBarTitleDisplayMode(.inline)
@@ -670,7 +693,13 @@ struct AlarmDetailView: View {
                         scheduleTestRing(kind: .backup)
                     } label: {
                         HStack(spacing: 4) {
-                            if isSchedulingTestRing {
+                            if backupTestRingPhase == .preparing {
+                                // まだできていないときは、進み具合の円を出す（#297）
+                                ProgressView(value: backupVariantPreparation?.progress ?? 0)
+                                    .progressViewStyle(.circular)
+                                    .controlSize(.mini)
+                                    .accessibilityIdentifier("addAlarm.backupTestRingProgress")
+                            } else if backupTestRingPhase == .scheduling {
                                 ProgressView()
                             } else {
                                 Image(systemName: "play.fill")
@@ -682,7 +711,7 @@ struct AlarmDetailView: View {
                     }
                     .buttonStyle(.borderless)
                     .foregroundStyle(Color.actionText)
-                    .disabled(isSchedulingTestRing)
+                    .disabled(backupTestRingPhase != .idle)
                     .accessibilityIdentifier("addAlarm.backupTestRing")
                 }
 
@@ -769,14 +798,14 @@ struct AlarmDetailView: View {
                     Image(systemName: "bell.badge.waveform.fill")
                     Text("test_ring_title")
                         .fixedSize(horizontal: false, vertical: true)
-                    if isSchedulingTestRing {
+                    if testRingPhase == .scheduling {
                         ProgressView()
                     }
                 }
             }
             .buttonStyle(.borderless)
             // 無効化したボタンだけを見せない（#150）: 押せるときは押させて理由を出す
-            .disabled(isSchedulingTestRing)
+            .disabled(testRingPhase != .idle)
             .accessibilityIdentifier("addAlarm.testRing")
 
             if let testRingPermissionReason {
@@ -855,12 +884,17 @@ struct AlarmDetailView: View {
     }
 
     private func scheduleTestRing(kind: TestRingKind) {
-        guard !isSchedulingTestRing else { return }
-        isSchedulingTestRing = true
-        if kind == .backup {
-            backupTestRingMessage = nil
-        } else {
+        // 待ち状態は種類ごとに分ける（#297）。
+        // 寝過ごし防止の準備中でも「今すぐ鳴らす」は押せる。
+        switch kind {
+        case .own:
+            guard testRingPhase == .idle else { return }
+            testRingPhase = .scheduling
             testRingMessage = nil
+        case .backup:
+            guard backupTestRingPhase == .idle else { return }
+            backupTestRingPhase = .scheduling
+            backupTestRingMessage = nil
         }
 
         Task {
@@ -868,10 +902,22 @@ struct AlarmDetailView: View {
             let fileName: String
             if kind == .backup {
                 // プレイリストなら存在する1曲目の大きくした版で試す（本番と同じ・#169）
-                let source = scheduler.backupSourceFileName(for: draft)
+                let source = scheduler.backupSourceFileName(for: draft) ?? ""
+                // まだできていないときだけ、生成の進み具合を出す（#297）
+                if !source.isEmpty,
+                   BackupLoudVariantService.existingVariantFileName(for: source) == nil {
+                    let preparation = BackupLoudVariantService.preparation(for: source)
+                        ?? BackupLoudVariantService.prepareInBackground(for: source)
+                    backupVariantPreparation = preparation
+                    if preparation != nil {
+                        backupTestRingPhase = .preparing
+                    }
+                }
                 fileName = await BackupLoudVariantService.ensureVariant(
-                    for: source ?? ""
+                    for: source
                 ) ?? BackupAlarmSound.fileName
+                backupVariantPreparation = nil
+                backupTestRingPhase = .scheduling
             } else {
                 switch TestRingSoundLogic.primaryPlan(
                     playlistID: draft.playlistID,
@@ -893,7 +939,13 @@ struct AlarmDetailView: View {
                 kind: kind,
                 hasBackup: backupMinutes != nil
             )
-            isSchedulingTestRing = false
+            switch kind {
+            case .own:
+                testRingPhase = .idle
+            case .backup:
+                backupTestRingPhase = .idle
+                backupVariantPreparation = nil
+            }
 
             // 許可の理由は常時行の下に出ているため、本体の行では重複表示しない（#150）
             let permissionReasonShown =
@@ -945,6 +997,16 @@ struct AlarmDetailView: View {
             playlistID: playlistID,
             fadeIn: fadeIn
         )
+    }
+
+    /// 大きくした版を裏で作り始める（#297）。
+    /// 寝過ごし防止をオンにしたとき・音を変えたとき・保存したときに呼ぶ。
+    private func prepareBackupVariantInBackground() {
+        guard let source = BackupLoudVariantService.sourceToPrepare(
+            backupMinutes: backupMinutes,
+            resolvedSourceFileName: scheduler.backupSourceFileName(for: testRingDraftEntry())
+        ) else { return }
+        BackupLoudVariantService.prepareInBackground(for: source)
     }
 
     // MARK: - Repeat
@@ -1228,6 +1290,14 @@ struct AlarmDetailView: View {
             usedPlaylistFeatures: savedEntry.usesPlaylistFeatures
         ) {
             AppGroup.playlistEarlyAccessGranted = true
+        }
+
+        // 保存した時点で、大きくした版を裏で作り始める（#297）
+        if let source = BackupLoudVariantService.sourceToPrepare(
+            backupMinutes: backupMinutes,
+            resolvedSourceFileName: scheduler.backupSourceFileName(for: savedEntry)
+        ) {
+            BackupLoudVariantService.prepareInBackground(for: source)
         }
 
         if backupMinutes != nil,

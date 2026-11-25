@@ -99,7 +99,10 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.backupAlarmCancelledByStop.name == "backup_alarm_cancelled_by_stop")
         // #119: 大きくした版
         #expect(AnalyticsEvent.backupLoudVariantGenerated(
-            gainDbBucket: "12~20", durationBucket: "60s", source: .imported
+            gainDbBucket: "12~20",
+            durationBucket: "60s",
+            source: .imported,
+            durationMsBucket: "3_10s"
         ).name == "backup_loud_variant_generated")
         #expect(AnalyticsEvent.backupLoudVariantFailed(reason: .silentSource).name == "backup_loud_variant_failed")
         // #121: 音量案内
@@ -485,13 +488,15 @@ struct AnalyticsEventTests {
         let props = AnalyticsEvent.backupLoudVariantGenerated(
             gainDbBucket: "12~20",
             durationBucket: "60s",
-            source: .imported
+            source: .imported,
+            durationMsBucket: "1_3s"
         ).properties
 
-        #expect(props.count == 3)
+        #expect(props.count == 4)
         #expect(props["gain_db_bucket"] as? String == "12~20")
         #expect(props["duration_bucket"] as? String == "60s")
         #expect(props["source"] as? String == "imported")
+        #expect(props["duration_ms_bucket"] as? String == "1_3s")
     }
 
     @Test
@@ -500,11 +505,13 @@ struct AnalyticsEventTests {
             gainDbBucket: "12~20",
             durationBucket: "60s",
             source: .imported,
-            outputLufsBucket: ">=-9"
+            outputLufsBucket: ">=-9",
+            durationMsBucket: "under_500ms"
         ).properties
 
-        #expect(props.count == 4)
+        #expect(props.count == 5)
         #expect(props["output_lufs_bucket"] as? String == ">=-9")
+        #expect(props["duration_ms_bucket"] as? String == "under_500ms")
     }
 
     @Test
