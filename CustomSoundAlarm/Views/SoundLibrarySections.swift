@@ -222,16 +222,27 @@ struct SoundLibrarySections: View {
                 .padding(.vertical, 12)
             } else {
                 ForEach(Array(imported.enumerated()), id: \.element.id) { index, sound in
-                    SoundSelectionRow(
-                        name: sound.name,
-                        sound: sound,
-                        isPreset: false,
-                        position: index + 1,
-                        isSelecting: isSelecting,
-                        selectionActive: selectionActive,
-                        selectedSound: $selectedSound,
-                        onSelect: onSelect
-                    )
+                    // 1要素 = 1行を保つ。要素ごとに行数が変わると、取り込み直後の List の差分更新で
+                    // UICollectionView の「行数が合わない」例外になりうる（1.8.1 のクラッシュ調査、11/18）
+                    VStack(alignment: .leading, spacing: 4) {
+                        SoundSelectionRow(
+                            name: sound.name,
+                            sound: sound,
+                            isPreset: false,
+                            position: index + 1,
+                            isSelecting: isSelecting,
+                            selectionActive: selectionActive,
+                            selectedSound: $selectedSound,
+                            onSelect: onSelect
+                        )
+                        if showVolumeNoticeRow,
+                           sound.fileName == volumeBoostedFileName {
+                            Label("volume_notice", systemImage: "speaker.wave.3")
+                                .font(.footnote)
+                                .foregroundStyle(Color.textSecondary)
+                                .accessibilityIdentifier("library.volumeNotice")
+                        }
+                    }
                     .id("library.sound.\(sound.fileName)")
                     .rowSpotlightFrame(sound.fileName, into: spotlightFrameStore)
                     // 普段はリスト標準の背景のまま（nil）。共有から着地したときだけ、
@@ -259,13 +270,6 @@ struct SoundLibrarySections: View {
                                 Label("delete", systemImage: "trash")
                             }
                         }
-                    }
-                    if showVolumeNoticeRow,
-                       sound.fileName == volumeBoostedFileName {
-                        Label("volume_notice", systemImage: "speaker.wave.3")
-                            .font(.footnote)
-                            .foregroundStyle(Color.textSecondary)
-                            .accessibilityIdentifier("library.volumeNotice")
                     }
                 }
                 .onDelete { indexSet in
