@@ -339,6 +339,14 @@ struct AlarmDetailView: View {
             )
             return
         }
+        // #303: 選択範囲が下段の窓（最大60秒）より広い状態を再現する
+        if AppGroup.isUITestLongCrop {
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent("LongCrop-\(UUID().uuidString).caf")
+            try? SilentTestAudioFactory.makeToneFile(at: url, seconds: 120)
+            pendingAudio = PendingAudioImport(url: url, name: "Long tone")
+            return
+        }
         // ストアのスクショ用: -uitestCropPath <音声ファイル> -uitestCropName <表示名> で差し替える。
         if AppGroup.isUITestSilentCrop {
             let url = FileManager.default.temporaryDirectory

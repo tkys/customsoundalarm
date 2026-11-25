@@ -103,27 +103,6 @@ enum WaveformCropMath {
         return CropWindow(start: start, end: end)
     }
 
-    /// ズーム窓の追従判定。
-    /// 選択範囲が窓の内側（両端に marginFraction 分の余白）にあれば現状維持、
-    /// はみ出したら選択範囲を中心に再配置する。
-    /// `zoomWindow` が返す窓は選択端が中央から1/3の位置にあるため、
-    /// marginFraction < 1/3 なら追従の安定性（発振しないこと）が保証される。
-    static func syncedWindow(
-        _ window: CropWindow,
-        to range: TrimRange,
-        duration: Double,
-        marginFraction: Double = 0.1
-    ) -> CropWindow {
-        guard window.width > 0 else {
-            return zoomWindow(range: range, duration: duration)
-        }
-        let margin = window.width * marginFraction
-        if range.start >= window.start + margin && range.end <= window.end - margin {
-            return window
-        }
-        return zoomWindow(range: range, duration: duration)
-    }
-
     /// ピンチでズーム窓を拡大・縮小する（#292）。
     ///
     /// 指の中心にある時刻（`anchorTime`）を動かさずに窓の幅だけを変える。
@@ -148,28 +127,52 @@ enum WaveformCropMath {
         return CropWindow(start: start, end: start + newWidth)
     }
 
-    /// ピンチで拡大した窓に、選択範囲が入るよう寄せる（#292）。
+    // MARK: - 触っている端が窓に入るよう横にずらす（#303）
+
+    /// 動かしている端。窓の幅は変えず、位置だけを決めるために使う。
+    enum CropEdge: Sendable {
+        case start
+        case end
+    }
+
+    /// 端が窓の外に出たときだけ、その端が見える位置へ窓を横にずらす（#303）。
     ///
-    /// 窓が選択範囲より広いときだけ動かす。選択範囲の方が広いときは
-    /// どこかを切るしかないので、ピンチ位置のままにする。
-    static func windowIncludingSelection(
-        _ range: TrimRange,
+    /// **窓の幅（拡大率）は変えない。** 以前は選択範囲から窓を作り直していたため、
+    /// ピンチで拡大したあとに上段へ触ると拡大がやり直しになり、選択範囲が窓より
+    /// 広いと左右の端が両方窓の外へ出て、下段のつまみが両方消えていた。
+    ///
+    /// - 端が両端 `marginFraction`（既定 10%）の内側にあれば動かさない
+    /// - 外に出たら、開始は窓の左から 30%、終了は 70% の位置へ寄せる
+    /// - 窓は `[0, duration]` に収める
+    static func window(
+        showing edgeTime: Double,
+        edge: CropEdge,
+        in window: CropWindow,
+        duration: Double,
+        marginFraction: Double = 0.1
+    ) -> CropWindow {
+        guard duration > 0, window.width > 0, window.width < duration else { return window }
+        let margin = window.width * marginFraction
+        if edgeTime >= window.start + margin, edgeTime <= window.end - margin {
+            return window
+        }
+        let fraction = edge == .start ? 0.3 : 0.7
+        let maxStart = max(0, duration - window.width)
+        let start = min(max(edgeTime - window.width * fraction, 0), maxStart)
+        return CropWindow(start: start, end: start + window.width)
+    }
+
+    /// 窓を秒数だけ横にずらす（#303）。幅は変えず、`[0, duration]` に収める。
+    /// 上段で枠ごと動かしたときに、範囲と窓の位置関係を保つために使う。
+    static func window(
+        shiftedBy seconds: Double,
         in window: CropWindow,
         duration: Double
     ) -> CropWindow {
-        guard duration > 0, window.width > 0,
-              range.width > 0, window.width >= range.width else {
-            return window
-        }
-        if range.start < window.start {
-            let start = max(0, min(range.start, duration - window.width))
-            return CropWindow(start: start, end: start + window.width)
-        }
-        if range.end > window.end {
-            let start = max(0, min(range.end - window.width, duration - window.width))
-            return CropWindow(start: start, end: start + window.width)
-        }
-        return window
+        guard duration > 0, window.width > 0, seconds.isFinite else { return window }
+        let maxStart = max(0, duration - window.width)
+        let start = min(max(window.start + seconds, 0), maxStart)
+        return CropWindow(start: start, end: start + window.width)
     }
 
     /// ズーム窓の平行移動（下段の波形ドラッグ）。
@@ -194,25 +197,6 @@ enum WaveformCropMath {
             start = max(0, duration - window.width)
         }
         return CropWindow(start: start, end: end)
-    }
-
-    /// 再生中のズーム窓追従（#79 バグ2）。
-    /// 再生ヘッドが窓の外に出たら、ヘッドが窓の先頭から `leadFraction`（既定0.25）の
-    /// 位置に来るよう窓を再配置する。窓内なら現状維持（再生中の不用意なスクロールを防ぐ）。
-    static func windowFollowingPlayback(
-        current: CropWindow,
-        playhead: Double,
-        duration: Double,
-        leadFraction: Double = 0.25
-    ) -> CropWindow {
-        guard current.width > 0, duration > 0 else { return current }
-        if current.contains(playhead) { return current }
-        var start = playhead - current.width * leadFraction
-        if start < 0 { start = 0 }
-        if start + current.width > duration {
-            start = max(0, duration - current.width)
-        }
-        return CropWindow(start: start, end: min(start + current.width, duration))
     }
 
     // MARK: - 時間表示フォーマット

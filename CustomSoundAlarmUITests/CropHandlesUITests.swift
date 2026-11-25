@@ -28,9 +28,16 @@ final class CropHandlesUITests: XCTestCase {
             XCTAssertTrue(target.waitForExistence(timeout: 20), app.debugDescription)
             XCTAssertTrue(target.isHittable, "handle should be hittable: \(target)")
             XCTAssertEqual(target.frame.width, 44, accuracy: 1, "touch target should be 44pt")
+            // 端いっぱいの範囲では、つまみの矩形が画面の端とちょうど重なる。
+            // CGRect.contains は接しているだけの矩形を「含まない」と判定するため、
+            // 丸め誤差ぶん（0.5pt）だけ許す
+            let screen = window.frame
             XCTAssertTrue(
-                window.frame.contains(target.frame),
-                "handle \(target.frame) should stay inside the screen \(window.frame)"
+                target.frame.minX >= screen.minX - 0.5
+                    && target.frame.maxX <= screen.maxX + 0.5
+                    && target.frame.minY >= screen.minY
+                    && target.frame.maxY <= screen.maxY,
+                "handle \(target.frame) should stay inside the screen \(screen)"
             )
         }
 
@@ -83,6 +90,89 @@ final class CropHandlesUITests: XCTestCase {
         XCTAssertEqual(endLabel.label, beforeEnd, "pinch should not move the range end")
     }
 
+    // MARK: - #303 手直し
+
+    /// 下の段をピンチで拡大したあとに上の段で終了の端を動かしても、
+    /// 下の段の拡大がやり直しにならず、動かしている終了のつまみが下の段に出ている。
+    ///
+    /// 修正前は範囲が変わるたびに窓を選択範囲から作り直していた。選択範囲
+    /// （120秒）が窓（最大60秒）より広いため、作り直した窓の左右どちらの端も
+    /// 外へ出て、下の段のつまみが両方消えていた。
+    func testTouchingOverviewAfterPinchKeepsZoomAndShowsEndHandle() {
+        launchFullRange(extra: ["-uitest-long-crop"])
+
+        let zoomBar = element("crop.zoomBar")
+        XCTAssertTrue(zoomBar.waitForExistence(timeout: 10), app.debugDescription)
+        let beforeSpacing = rulerSpacing()
+        zoomBar.pinch(withScale: 1.4, velocity: 1.0)
+        let zoomed = XCTNSPredicateExpectation(
+            predicate: NSPredicate { _, _ in
+                abs(self.rulerSpacing() - beforeSpacing) > 4
+            },
+            object: nil
+        )
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [zoomed], timeout: 5),
+            .completed,
+            "pinch should zoom the detailed waveform: \(app.debugDescription)"
+        )
+        let zoomedSpacing = rulerSpacing()
+
+        // 上の段で終了の端を左へ動かす（範囲いっぱいの状態から）
+        let window = app.windows.firstMatch
+        let endHandle = element("crop.handle.end.overview")
+        XCTAssertTrue(endHandle.waitForExistence(timeout: 5), app.debugDescription)
+        drag(atX: window.frame.maxX - 20, y: endHandle.frame.midY, by: -120)
+
+        let zoomEnd = element("crop.handle.end.zoom")
+        XCTAssertTrue(
+            zoomEnd.waitForExistence(timeout: 5),
+            "the end handle being moved should appear in the detailed waveform: \(app.debugDescription)"
+        )
+        XCTAssertTrue(zoomEnd.isHittable, "the end handle should be hittable: \(zoomEnd)")
+        XCTAssertEqual(
+            rulerSpacing(),
+            zoomedSpacing,
+            accuracy: 2,
+            "moving the range should not rebuild the zoom window (拡大率をやり直さない)"
+        )
+    }
+
+    /// ▶ は選択範囲をくり返し鳴らし、終了のつまみを動かしても止まらない（#303）。
+    func testPlaybackKeepsPlayingWhileDraggingEndHandle() {
+        launchFullRange(extra: [
+            "-uitest-long-crop",
+            "-uitestCropStart", "1",
+            "-uitestCropEnd", "4"
+        ])
+
+        let preview = app.buttons["audioCrop.preview"]
+        XCTAssertTrue(preview.waitForExistence(timeout: 10), app.debugDescription)
+        let idleLabel = preview.label
+        preview.tap()
+
+        let started = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "label != %@", idleLabel),
+            object: preview
+        )
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [started], timeout: 5),
+            .completed,
+            "tapping play should start playback: \(app.debugDescription)"
+        )
+        let playingLabel = preview.label
+
+        let handle = element("crop.handle.end.zoom")
+        XCTAssertTrue(handle.waitForExistence(timeout: 5), app.debugDescription)
+        drag(atX: handle.frame.maxX - 4, y: handle.frame.midY, by: -40)
+
+        XCTAssertEqual(
+            preview.label,
+            playingLabel,
+            "dragging a handle should keep playback running"
+        )
+    }
+
     // MARK: - Helpers
 
     private enum Edge {
@@ -90,14 +180,14 @@ final class CropHandlesUITests: XCTestCase {
         case end
     }
 
-    private func launchFullRange() {
+    private func launchFullRange(extra: [String] = []) {
         app.launchArguments = [
             "-uitest-open-add-alarm",
             "-uitest-open-waveform-crop",
             "-uitest-force-light",
             "-AppleLanguages", "(ja)",
             "-AppleLocale", "ja_JP"
-        ]
+        ] + extra
         app.launch()
         allowAlarmPermissionIfAsked()
         XCTAssertTrue(
@@ -105,9 +195,16 @@ final class CropHandlesUITests: XCTestCase {
             app.debugDescription
         )
         XCTAssertTrue(
-            element("crop.handle.start.overview").waitForExistence(timeout: 20),
+            element("crop.handle.start.overview").waitForExistence(timeout: 30),
             "crop screen should appear: \(app.debugDescription)"
         )
+    }
+
+    /// 指定の位置から横へドラッグする（掴んだ状態で動かす）
+    private func drag(atX x: CGFloat, y: CGFloat, by dx: CGFloat) {
+        let point = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
+            .withOffset(CGVector(dx: x, dy: y))
+        point.press(forDuration: 0.15, thenDragTo: point.withOffset(CGVector(dx: dx, dy: 0)))
     }
 
     private func element(_ identifier: String) -> XCUIElement {
@@ -162,6 +259,17 @@ final class CropHandlesUITests: XCTestCase {
         return (0..<rulers.count)
             .map { rulers.element(boundBy: $0).identifier }
             .sorted()
+    }
+
+    /// 目盛りラベルの間隔（pt）。窓の幅（拡大率）が変わると刻みの間隔が変わる。
+    private func rulerSpacing() -> CGFloat {
+        let rulers = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "crop.ruler.")
+        )
+        let xs = (0..<rulers.count).map { rulers.element(boundBy: $0).frame.midX }.sorted()
+        let gaps = zip(xs.dropFirst(), xs).map { $0 - $1 }.filter { $0 > 1 }
+        guard !gaps.isEmpty else { return 0 }
+        return gaps.sorted()[gaps.count / 2]
     }
 
     private func allowAlarmPermissionIfAsked() {

@@ -79,12 +79,17 @@ struct AudioCropView: View {
                         .frame(height: 120)
                     }
 
-                    // 再生 / 停止（スクラブと対の操作）
+                    // 再生 / 停止（選択範囲をくり返し鳴らす・#303）
                     Button {
                         if previewer.isPlaying {
                             previewer.stop()
                         } else {
-                            previewer.play(url: source.url, from: startTime, to: endTime)
+                            let range = currentTrimRange
+                            previewer.play(
+                                url: source.url,
+                                range: range,
+                                from: previewer.resumeTime(in: range)
+                            )
                         }
                     } label: {
                         Image(systemName: previewer.isPlaying ? "stop.fill" : "play.fill")
@@ -98,6 +103,7 @@ struct AudioCropView: View {
                     .buttonStyle(.plain)
                     .disabled(duration <= 0)
                     .accessibilityLabel(previewer.isPlaying ? String(localized: "stop") : String(localized: "preview_selection"))
+                    .accessibilityIdentifier("audioCrop.preview")
 
                     // 変換後サイズの見積りと警告（#79-8）
                     sizeEstimateRow
@@ -194,6 +200,16 @@ struct AudioCropView: View {
 
     private var canSave: Bool {
         duration > 0 && endTime > startTime && !soundName.isEmpty
+    }
+
+    /// 波形UIの選択範囲（再生のくり返しにも使う・#303）
+    private var currentTrimRange: TrimRange {
+        TrimRange(
+            start: startTime,
+            end: endTime,
+            duration: duration,
+            maxRange: max(duration, 1)
+        )
     }
 
     /// 変換後のサイズ見積り。音声は尺無制限のため生成前に見せる（#79-8）

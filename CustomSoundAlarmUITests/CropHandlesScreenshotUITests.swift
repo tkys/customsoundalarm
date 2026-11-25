@@ -41,6 +41,30 @@ final class CropHandlesScreenshotUITests: XCTestCase {
         settle(3)
     }
 
+    /// #303: くり返し鳴らしたまま、下の段の終了のつまみを動かす（録画用）。
+    func testLoopPlaybackWhileDraggingEndHandle() {
+        let app = launch(
+            appearanceArgument: "-uitest-force-light",
+            extra: ["-uitest-long-crop", "-uitestCropStart", "1", "-uitestCropEnd", "4"]
+        )
+        let preview = app.buttons["audioCrop.preview"]
+        XCTAssertTrue(preview.waitForExistence(timeout: 20), app.debugDescription)
+        XCTAssertTrue(
+            app.descendants(matching: .any)["crop.handle.end.zoom"]
+                .waitForExistence(timeout: 10),
+            app.debugDescription
+        )
+        preview.tap()
+        settle(2)
+
+        dragZoomEndHandle(in: app, distance: -60)
+        settle(2)
+        dragZoomEndHandle(in: app, distance: 40)
+        settle(3)
+        preview.tap()
+        settle(1)
+    }
+
     // MARK: - Capture
 
     private func captureAll(appearance: String, appearanceArgument: String) {
@@ -113,6 +137,17 @@ final class CropHandlesScreenshotUITests: XCTestCase {
             .withOffset(CGVector(dx: edgeX + offset, dy: handle.frame.midY))
         point.press(
             forDuration: 0.2,
+            thenDragTo: point.withOffset(CGVector(dx: distance, dy: 0))
+        )
+    }
+
+    private func dragZoomEndHandle(in app: XCUIApplication, distance: CGFloat) {
+        let handle = app.descendants(matching: .any)["crop.handle.end.zoom"]
+        guard handle.exists else { return }
+        let point = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
+            .withOffset(CGVector(dx: handle.frame.maxX - 6, dy: handle.frame.midY))
+        point.press(
+            forDuration: 0.3,
             thenDragTo: point.withOffset(CGVector(dx: distance, dy: 0))
         )
     }

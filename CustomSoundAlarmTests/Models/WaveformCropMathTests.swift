@@ -149,42 +149,99 @@ struct WaveformCropMathTests {
         #expect(window.start == 0 && window.end == 0)
     }
 
-    // MARK: - ズーム窓の同期
+    // MARK: - 触っている端が窓に入るよう横にずらす（#303）
 
     @Test
-    func syncedWindow_keepsWindowWhenSelectionInsideMargin() {
-        // 窓(20,50)・選択(30,40): margin 10% = 3秒 → 23<=30 && 40<=47 を満たす → 維持
+    func windowShowingStart_insideMargin_keepsWindow() {
+        // 窓(20,50)・余白10% = 3秒 → 23 <= 35 なので動かさない
         let window = CropWindow(start: 20, end: 50)
-        let range = TrimRange(start: 30, end: 40, duration: 600, maxRange: 600)
-        let synced = WaveformCropMath.syncedWindow(window, to: range, duration: 600)
-        #expect(synced == window)
+        #expect(WaveformCropMath.window(showing: 35, edge: .start, in: window, duration: 600) == window)
     }
 
     @Test
-    func syncedWindow_recentersWhenSelectionOutside() {
-        // 窓(20,50) から選択がはみ出た → 選択中心で再配置
+    func windowShowingStart_outsideMargin_placesStartAtThirtyPercent() {
+        // 窓(20,50) の開始が 19 秒（左の余白 23 秒より手前）→ 開始が左から30%へ
         let window = CropWindow(start: 20, end: 50)
-        let range = TrimRange(start: 45, end: 55, duration: 600, maxRange: 600)
-        let synced = WaveformCropMath.syncedWindow(window, to: range, duration: 600)
-        #expect(synced == WaveformCropMath.zoomWindow(range: range, duration: 600))
+        let shifted = WaveformCropMath.window(showing: 19, edge: .start, in: window, duration: 600)
+        #expect(approx(shifted.width, window.width))
+        #expect(approx(shifted.start, 19 - window.width * 0.3))
+        #expect(approx(shifted.start, 10))
     }
 
     @Test
-    func syncedWindow_zeroWindow_fallsBackToZoomWindow() {
+    func windowShowingEnd_outsideMargin_placesEndAtSeventyPercent() {
+        let window = CropWindow(start: 20, end: 50)
+        let shifted = WaveformCropMath.window(showing: 51, edge: .end, in: window, duration: 600)
+        #expect(approx(shifted.width, window.width))
+        // 終了が窓の左から 70% の位置に来る
+        #expect(approx(shifted.start + shifted.width * 0.7, 51))
+        #expect(approx(shifted.start, 30))
+    }
+
+    @Test
+    func windowShowingEnd_staysAtFileEnd() {
+        // 終了が音声の末尾を超える位置でも、窓は [0, duration] に収まる
+        let window = CropWindow(start: 100, end: 130)
+        let shifted = WaveformCropMath.window(showing: 600, edge: .end, in: window, duration: 600)
+        #expect(approx(shifted.start, 570))
+        #expect(approx(shifted.end, 600))
+    }
+
+    @Test
+    func windowShowingStart_staysAtFileStart() {
+        let window = CropWindow(start: 100, end: 130)
+        let shifted = WaveformCropMath.window(showing: -5, edge: .start, in: window, duration: 600)
+        #expect(approx(shifted.start, 0))
+        #expect(approx(shifted.end, 30))
+    }
+
+    @Test
+    func windowShowing_neverChangesWidth() {
+        // 窓幅（拡大率）は、どの端をどこへ動かしても変わらない
+        let window = CropWindow(start: 100, end: 108)
+        for time in stride(from: -20.0, through: 620, by: 13.7) {
+            let start = WaveformCropMath.window(showing: time, edge: .start, in: window, duration: 600)
+            let end = WaveformCropMath.window(showing: time, edge: .end, in: window, duration: 600)
+            #expect(approx(start.width, window.width))
+            #expect(approx(end.width, window.width))
+            #expect(start.start >= -0.0001 && start.end <= 600.0001)
+            #expect(end.start >= -0.0001 && end.end <= 600.0001)
+        }
+    }
+
+    @Test
+    func windowShowing_makesTouchedEdgeVisibleInNarrowWindow() {
+        // #303 の再現: 窓(40,70) の外にある終了 120 秒を触ったとき、
+        // 終了が窓の内側（余白より内側）に来る。以前は窓を作り直して
+        // 両方の端が窓の外へ出ていた。
+        let window = CropWindow(start: 40, end: 70)
+        let shifted = WaveformCropMath.window(showing: 120, edge: .end, in: window, duration: 180)
+        #expect(shifted.contains(120))
+        #expect(shifted.start + shifted.width * 0.1 <= 120)
+        #expect(120 <= shifted.end - shifted.width * 0.1)
+    }
+
+    @Test
+    func windowShowing_zeroWidth_keepsWindow() {
         let window = CropWindow(start: 0, end: 0)
-        let range = TrimRange(start: 30, end: 40, duration: 600, maxRange: 600)
-        let synced = WaveformCropMath.syncedWindow(window, to: range, duration: 600)
-        #expect(synced == WaveformCropMath.zoomWindow(range: range, duration: 600))
+        #expect(WaveformCropMath.window(showing: 10, edge: .start, in: window, duration: 600) == window)
     }
 
     @Test
-    func syncedWindow_isStable() {
-        // zoomWindow の結果は選択端が中央から1/3の位置 → margin(10%)より内側。
-        // よって再度同期しても窓は動かない（発振しない）
-        let range = TrimRange(start: 595, end: 600, duration: 600, maxRange: 600)
-        let first = WaveformCropMath.zoomWindow(range: range, duration: 600)
-        let second = WaveformCropMath.syncedWindow(first, to: range, duration: 600)
-        #expect(second == first)
+    func windowShiftedBy_movesWithoutChangingWidth() {
+        let window = CropWindow(start: 100, end: 130)
+        let shifted = WaveformCropMath.window(shiftedBy: 12.5, in: window, duration: 600)
+        #expect(approx(shifted.start, 112.5))
+        #expect(approx(shifted.width, 30))
+    }
+
+    @Test
+    func windowShiftedBy_clampsAtBothEnds() {
+        let window = CropWindow(start: 5, end: 35)
+        #expect(approx(WaveformCropMath.window(shiftedBy: -100, in: window, duration: 600).start, 0))
+        let atEnd = WaveformCropMath.window(shiftedBy: 1000, in: window, duration: 600)
+        #expect(approx(atEnd.start, 570))
+        #expect(approx(atEnd.end, 600))
     }
 
     // MARK: - ピンチによるズーム（#292）
@@ -262,42 +319,6 @@ struct WaveformCropMathTests {
         let window = CropWindow(start: 10, end: 20)
         #expect(WaveformCropMath.zoomedWindow(window, magnification: 0, anchorTime: 15, duration: 600) == window)
         #expect(WaveformCropMath.zoomedWindow(window, magnification: .nan, anchorTime: 15, duration: 600) == window)
-    }
-
-    @Test
-    func windowIncludingSelection_keepsWindowWhenSelectionInside() {
-        let range = TrimRange(start: 10, end: 20, duration: 600, maxRange: 600)
-        let window = CropWindow(start: 5, end: 25)
-        #expect(
-            WaveformCropMath.windowIncludingSelection(range, in: window, duration: 600) == window
-        )
-    }
-
-    @Test
-    func windowIncludingSelection_movesWindowToSelectionStart() {
-        let range = TrimRange(start: 10, end: 20, duration: 600, maxRange: 600)
-        let window = CropWindow(start: 15, end: 25)
-        let fixed = WaveformCropMath.windowIncludingSelection(range, in: window, duration: 600)
-        #expect(approx(fixed.start, 10))
-        #expect(approx(fixed.width, 10))
-    }
-
-    @Test
-    func windowIncludingSelection_movesWindowToSelectionEnd() {
-        let range = TrimRange(start: 10, end: 20, duration: 600, maxRange: 600)
-        let window = CropWindow(start: 0, end: 10)
-        let fixed = WaveformCropMath.windowIncludingSelection(range, in: window, duration: 600)
-        #expect(approx(fixed.start, 10))
-        #expect(approx(fixed.end, 20))
-    }
-
-    @Test
-    func windowIncludingSelection_keepsWindowWhenSelectionIsWider() {
-        let range = TrimRange(start: 10, end: 20, duration: 600, maxRange: 600)
-        let window = CropWindow(start: 15, end: 20)
-        #expect(
-            WaveformCropMath.windowIncludingSelection(range, in: window, duration: 600) == window
-        )
     }
 
     // MARK: - ズーム窓の移動
@@ -536,42 +557,6 @@ struct WaveformCropMathTests {
         for j in 1..<result.count {
             #expect(result[j] < result[j - 1])
         }
-    }
-
-    // MARK: - 再生中の窓追従（#79 バグ2）
-
-    @Test
-    func followPlayback_insideWindow_keepsWindow() {
-        let window = CropWindow(start: 100, end: 130)
-        let followed = WaveformCropMath.windowFollowingPlayback(current: window, playhead: 115, duration: 600)
-        #expect(followed == window)
-    }
-
-    @Test
-    func followPlayback_outsideWindow_recentersAtLeadFraction() {
-        // ヘッドが窓の終端を超えた → ヘッドが窓の25%位置に来るよう再配置
-        let window = CropWindow(start: 100, end: 130)
-        let followed = WaveformCropMath.windowFollowingPlayback(current: window, playhead: 135, duration: 600)
-        #expect(approx(followed.start, 135 - 30 * 0.25))
-        #expect(approx(followed.start, 127.5))
-        #expect(approx(followed.width, 30))
-        #expect(followed.contains(135))
-    }
-
-    @Test
-    func followPlayback_clampsAtEnd() {
-        let window = CropWindow(start: 580, end: 600)
-        // ヘッドが末尾を超えた → 末尾にクランプ（start = 600 - 窓幅20）
-        let followed = WaveformCropMath.windowFollowingPlayback(current: window, playhead: 601, duration: 600)
-        #expect(approx(followed.start, 580))
-        #expect(approx(followed.end, 600))
-    }
-
-    @Test
-    func followPlayback_zeroWidth_returnsCurrent() {
-        let window = CropWindow(start: 0, end: 0)
-        let followed = WaveformCropMath.windowFollowingPlayback(current: window, playhead: 10, duration: 600)
-        #expect(followed == window)
     }
 
     // MARK: - 時間フォーマット（#79-6）
