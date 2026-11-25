@@ -100,7 +100,8 @@ enum LoudVariantGenerator {
         sourceURL: URL,
         outputURL: URL,
         sourceFileName: String,
-        source: Source
+        source: Source,
+        progress: (@Sendable (Double) -> Void)? = nil
     ) throws -> Result {
         guard let buffer = AudioSampleLoader.loadMono44k(
             fileURL: sourceURL,
@@ -108,6 +109,7 @@ enum LoudVariantGenerator {
         ), let channel = buffer.floatChannelData?[0] else {
             throw GenerateError.unreadableSource
         }
+        progress?(0.1)
 
         let samples = Array(UnsafeBufferPointer(start: channel, count: Int(buffer.frameLength)))
         guard let sourceMeasurement = LoudnessMeter.measure(samples: samples) else {
@@ -140,11 +142,14 @@ enum LoudVariantGenerator {
 
         var candidates: [Candidate] = []
         var gain = startGain
+        let gainSpan = max(0.001, maxGainDb - startGain)
         while true {
             guard let candidate = evaluate(gain) else {
                 throw GenerateError.renderFailed
             }
             candidates.append(candidate)
+            // 探索の進み具合（0.1〜0.9）。ゲインを上げきる前に終わることもある
+            progress?(0.1 + 0.8 * min(1, (gain - startGain) / gainSpan))
 
             if gain >= maxGainDb { break }
             if candidate.lufs >= targetLufs { break }
@@ -175,6 +180,7 @@ enum LoudVariantGenerator {
         }
 
         try write(samples: selected.limiter.samples, to: outputURL)
+        progress?(1)
 
         return Result(
             fileName: outputURL.lastPathComponent,

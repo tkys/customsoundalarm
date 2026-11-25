@@ -288,12 +288,13 @@ enum AnalyticsEvent: Sendable {
     /// 対応表に無いのに AlarmKit に残っていたアラーム（取り残し）を取り消した
     case alarmOrphanCancelled(trigger: AlarmSyncTrigger, count: Int)
 
-    /// 大きくした版を生成した（#119）
+    /// 大きくした版を生成した（#119 / 生成時間は#297）
     case backupLoudVariantGenerated(
         gainDbBucket: String,
         durationBucket: String,
         source: LoudVariantGenerator.Source,
-        outputLufsBucket: String? = nil
+        outputLufsBucket: String? = nil,
+        durationMsBucket: String
     )
 
     /// 大きくした版の生成に失敗した（予備音を使う・#119）
@@ -715,11 +716,18 @@ enum AnalyticsEvent: Sendable {
                 "trigger": trigger.analyticsValue,
                 "count": count
             ]
-        case let .backupLoudVariantGenerated(gainDbBucket, durationBucket, source, outputLufsBucket):
+        case let .backupLoudVariantGenerated(
+            gainDbBucket,
+            durationBucket,
+            source,
+            outputLufsBucket,
+            durationMsBucket
+        ):
             var props: [String: Any] = [
                 "gain_db_bucket": gainDbBucket,
                 "duration_bucket": durationBucket,
-                "source": source.rawValue
+                "source": source.rawValue,
+                "duration_ms_bucket": durationMsBucket
             ]
             if let outputLufsBucket {
                 props["output_lufs_bucket"] = outputLufsBucket

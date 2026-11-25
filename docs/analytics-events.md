@@ -34,7 +34,7 @@
 | `backup_alarm_fired` | `snoozes_before` int（不明なら省略） | 寝過ごし防止の鳴動を監視で検知 | **補助指標**（アプリが開いていた場合のみ） | アプリ動作中のみ | 1.8.0 |
 | `backup_alarm_stopped` | `minutes` int, `snoozes_before` int（不明なら省略）, `hour` int | 寝過ごし防止が鳴って停止された（Intent） | **主指標**: 実際に人を起こした回数・人数、スヌーズ回数 | **届く** | 1.8.0 |
 | `backup_alarm_cancelled_by_stop` | — | 本体停止で寝過ごし防止が取り消された（Intent） | 締め切り前に止められた割合 | **届く** | 1.8.0 |
-| `backup_loud_variant_generated` | `gain_db_bucket` string, `duration_bucket` string, `source` string（imported/preset）, `output_lufs_bucket` string | 大きくした版の生成成功 | 生成品質・音源種別・出力音量 | アプリ動作中のみ | 1.8.0（`output_lufs_bucket` は1.8.0） |
+| `backup_loud_variant_generated` | `gain_db_bucket` string, `duration_bucket` string, `source` string（imported/preset）, `output_lufs_bucket` string, `duration_ms_bucket` string（under_500ms/500ms_1s/1_3s/3_10s/10_30s/over_30s） | 大きくした版の生成成功 | 生成品質・音源種別・出力音量・生成にかかる時間 | アプリ動作中のみ | 1.8.0（`output_lufs_bucket` は1.8.0、`duration_ms_bucket` は1.8.5） |
 | `backup_loud_variant_failed` | `reason` string（unreadable_source/silent_source/render_failed/write_failed/source_missing） | 生成失敗（予備音を使用） | 生成失敗率 | アプリ動作中のみ | 1.8.0 |
 | `volume_guide_opened` | `from` string（test_ring） | 音量案内を開いた | 案内の利用率 | アプリ動作中のみ | 1.8.0 |
 | `update_prompt_shown` | `kind` string（required/recommended）, `current_build` int, `target_build` int | アップデート案内の表示 | 案内の到達 | アプリ動作中のみ | 1.8.0 |

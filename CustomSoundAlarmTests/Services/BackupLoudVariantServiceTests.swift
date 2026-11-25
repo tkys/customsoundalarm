@@ -133,4 +133,86 @@ struct BackupLoudVariantServiceTests {
     func metadataVersion_missingMeansRegenerate() {
         #expect(LoudVariantMetadata.shouldRegenerate(nil))
     }
+
+    // MARK: - 先に作る（#297）
+
+    @Test
+    func sourceToPrepare_needsBackupOnAndSound() {
+        #expect(BackupLoudVariantService.sourceToPrepare(
+            backupMinutes: 15,
+            resolvedSourceFileName: "PresetBeep.caf"
+        ) == "PresetBeep.caf")
+        #expect(BackupLoudVariantService.sourceToPrepare(
+            backupMinutes: nil,
+            resolvedSourceFileName: "PresetBeep.caf"
+        ) == nil, "寝過ごし防止がオフなら作らない")
+        #expect(BackupLoudVariantService.sourceToPrepare(
+            backupMinutes: 15,
+            resolvedSourceFileName: ""
+        ) == nil, "鳴らす音が無ければ作らない")
+        #expect(BackupLoudVariantService.sourceToPrepare(
+            backupMinutes: 15,
+            resolvedSourceFileName: nil
+        ) == nil)
+    }
+
+    @Test
+    func prepareInBackground_generatesMissingVariantWithoutDuplicating() async throws {
+        let base = "UITestPrepare-\(UUID().uuidString)"
+        let source = base + ".caf"
+        let variant = base + ".loud.caf"
+        let metadata = base + ".loud.json"
+        removeIfExists([source, variant, metadata])
+        defer { removeIfExists([source, variant, metadata]) }
+
+        let preset = try #require(
+            Bundle.main.url(forResource: "PresetBeep", withExtension: "caf")
+        )
+        try FileManager.default.copyItem(
+            at: preset,
+            to: directory.appendingPathComponent(source)
+        )
+        #expect(BackupLoudVariantService.existingVariantFileName(for: source) == nil)
+
+        let first = try #require(BackupLoudVariantService.prepareInBackground(for: source))
+        let second = try #require(BackupLoudVariantService.prepareInBackground(for: source))
+        #expect(first === second, "作り始めていれば同じジョブにつなぐ")
+
+        _ = await BackupLoudVariantService.ensureVariant(for: source)
+
+        #expect(exists(variant))
+        #expect(BackupLoudVariantService.existingVariantFileName(for: source) == variant)
+        #expect(first.progress == 1)
+        #expect(!first.isRunning)
+    }
+
+    @Test
+    func prepareInBackground_doesNothingWhenVariantExists() throws {
+        let base = "UITestPrepared-\(UUID().uuidString)"
+        let source = base + ".caf"
+        let variant = base + ".loud.caf"
+        let metadata = base + ".loud.json"
+        removeIfExists([source, variant, metadata])
+        defer { removeIfExists([source, variant, metadata]) }
+
+        try touch(source)
+        try touch(variant)
+        try JSONEncoder().encode(
+            LoudVariantMetadata(version: LoudVariantGenerator.version)
+        ).write(to: directory.appendingPathComponent(metadata))
+
+        #expect(BackupLoudVariantService.prepareInBackground(for: source) == nil)
+        #expect(BackupLoudVariantService.preparation(for: source) == nil)
+    }
+
+    @Test
+    func generationDurationMsBuckets() {
+        #expect(LoudVariantGenerator.generationDurationMsBucket(0) == "under_500ms")
+        #expect(LoudVariantGenerator.generationDurationMsBucket(499) == "under_500ms")
+        #expect(LoudVariantGenerator.generationDurationMsBucket(500) == "500ms_1s")
+        #expect(LoudVariantGenerator.generationDurationMsBucket(1_000) == "1_3s")
+        #expect(LoudVariantGenerator.generationDurationMsBucket(3_000) == "3_10s")
+        #expect(LoudVariantGenerator.generationDurationMsBucket(10_000) == "10_30s")
+        #expect(LoudVariantGenerator.generationDurationMsBucket(30_000) == "over_30s")
+    }
 }

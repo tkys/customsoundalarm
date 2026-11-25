@@ -806,4 +806,60 @@ final class AddAlarmRedesignUITests: XCTestCase {
             )
         }
     }
+
+    /// #297: 寝過ごし防止の音を準備している間も、「今すぐ鳴らす」は押せる。
+    /// 準備中の「試す」は、ぐるぐるではなく進み具合の円を出す。
+    func testOwnTestRingStaysEnabledWhileBackupSoundPrepares() {
+        app.launchArguments = [
+            "-uitest-open-add-alarm",
+            "-uitest-slow-loud-variant",
+            "-AppleLanguages", "(ja)",
+            "-AppleLocale", "ja_JP"
+        ]
+        app.launch()
+        XCTAssertTrue(app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10))
+
+        // 大きくした版を持つ音を選ぶ（既定の音は大きくする対象が無い）
+        let choice = openSoundChoice()
+        let standard = app.buttons["library.standardSounds"]
+        scrollTo(standard, in: choice)
+        standard.tap()
+        let sound = app.buttons["library.preset.PresetMarimba.caf"]
+        XCTAssertTrue(sound.waitForExistence(timeout: 10))
+        sound.tap()
+        closeStandardSoundsSheet()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(findElement("addAlarm.soundRow").waitForExistence(timeout: 10))
+
+        // オンにすると、裏で大きくした版の生成が始まる（UIテストでは遅らせている）
+        let form = app.collectionViews["addAlarm.root"]
+        let toggle = findElement("addAlarm.backupToggle")
+        var swipes = 0
+        while !toggle.isHittable && swipes < 8 {
+            form.swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(toggle.isHittable, "寝過ごし防止のトグルまでスクロールできるはず")
+        toggle.tap()
+
+        let backupTestRing = findElement("addAlarm.backupTestRing")
+        swipes = 0
+        while !backupTestRing.isHittable && swipes < 6 {
+            form.swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(backupTestRing.isHittable, "『試す』までスクロールできるはず")
+        backupTestRing.tap()
+
+        let progress = findElement("addAlarm.backupTestRingProgress")
+        XCTAssertTrue(
+            progress.waitForExistence(timeout: 3),
+            "準備中は進み具合の円を出す: \(app.debugDescription)"
+        )
+        XCTAssertFalse(backupTestRing.isEnabled, "準備中に『試す』を重ねて押せない")
+        XCTAssertTrue(
+            findElement("addAlarm.testRing").isEnabled,
+            "寝過ごし防止の準備中でも『今すぐ鳴らす』は押せる"
+        )
+    }
 }
