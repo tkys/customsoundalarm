@@ -27,8 +27,9 @@ struct BackupInfoCopyTests {
             "backup_alarm_info_title",
             "backup_alarm_info_volume",
             "backup_alarm_info_accessibility",
-            "backup_alarm_description_fmt",
-            "backup_alarm_timeline_louder"
+            "backup_alarm_summary_fmt",
+            "backup_try",
+            "test_ring_status_alarms_off"
         ]
         for language in Self.languages {
             let localized = try strings(for: language)
@@ -38,12 +39,19 @@ struct BackupInfoCopyTests {
         }
     }
 
-    /// #290: 図に置き換えた長い説明のキーを残さない（13言語とも）。
+    /// #290: 使わなくなった長い説明・図のキーを残さない（13言語とも）。
     @Test
-    func replacedExplanationKeysAreGone() throws {
+    func replacedCopyKeysAreGone() throws {
+        let removed = [
+            "backup_alarm_info_mechanism",
+            "backup_alarm_info_louder",
+            "backup_alarm_description_fmt",
+            "backup_alarm_timeline_louder",
+            "test_ring_backup_title"
+        ]
         for language in Self.languages {
             let localized = try strings(for: language)
-            for key in ["backup_alarm_info_mechanism", "backup_alarm_info_louder"] {
+            for key in removed {
                 #expect(localized[key] == nil, "\(language) に \(key) が残っている")
             }
         }
@@ -53,7 +61,12 @@ struct BackupInfoCopyTests {
     func copyMakesNoAbsoluteOrFreeClaims() throws {
         for language in Self.languages {
             let localized = try strings(for: language)
-            for key in ["backup_alarm_info_volume", "backup_alarm_timeline_louder"] {
+            for key in [
+                "backup_alarm_info_volume",
+                "backup_alarm_summary_fmt",
+                "backup_try",
+                "test_ring_status_alarms_off"
+            ] {
                 let text = (localized[key] ?? "").lowercased()
                 for banned in ["必ず", "絶対", "無料", "always", "guarantee", "free"] {
                     #expect(!text.contains(banned), "\(language) \(key) contains \(banned)")
