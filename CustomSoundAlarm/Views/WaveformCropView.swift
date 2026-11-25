@@ -39,12 +39,36 @@ struct WaveformCropView: View {
     /// 下段 pan（窓移動）の基準（同上）
     @State private var panBaseWindow: CropWindow?
 
+    /// ドラッグ開始時の範囲（ハンドル・pan とも、移動量は開始時の値に足す）
+    @State private var dragBaseRange: TrimRange?
+    /// 下段ハンドルのドラッグ開始時のズーム窓（移動量の時間換算に使う）
+    @State private var dragBaseWindow: CropWindow?
+    /// 端に当たった振動を、同じ端にいるあいだ繰り返さないための記録
+    @State private var limitHitReason: LimitHitReason?
+    /// つまみを掴んだ回数・端に当たった回数（`.sensoryFeedback` の trigger）
+    @State private var handleGrabCount = 0
+    @State private var limitHitCount = 0
+
+    /// ピンチ拡大の基準窓と、指の中心にある時刻
+    @State private var pinchBaseWindow: CropWindow?
+    @State private var pinchAnchorTime: Double = 0
+    @State private var isPinching = false
+    /// 上段のつまみを離したあと、下段の窓を横へ滑らせるアニメーション（#303）。
+    /// 下段に触れたらキャンセルし、その時点の位置から指の操作を優先する。
+    @State private var settleTask: Task<Void, Never>?
+    /// ピンチの直後に、指を離した位置でスクラブ再生しないための印
+    @State private var suppressScrubAfterPinch = false
+    /// ピンチが始まったとき、同時に掴んでいたつまみ・範囲移動を止める印
+    @State private var suppressHandleDrag = false
+    @State private var suppressPanAfterPinch = false
+
     @State private var overviewWidth: CGFloat = 0
     @State private var zoomWidth: CGFloat = 0
 
     /// アクセント色のアセット解決に使う（#81-2）
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// 目盛りラベルの幅と高さ（#237）。標準サイズでは従来と同じ 34 / 20。
     /// アクセシビリティサイズでは文字に合わせて広げ、下の開始・終了の行と重ねない。
@@ -54,7 +78,14 @@ struct WaveformCropView: View {
     // 最大の文字サイズでは、下の目盛りと時刻の行に高さを譲る（#237）
     private var overviewHeight: CGFloat { dynamicTypeSize.isAccessibilitySize ? 48 : 64 }
     private var zoomHeight: CGFloat { dynamicTypeSize.isAccessibilitySize ? 100 : 140 }
-    private let handleWidth: CGFloat = 6
+    /// つまみの見た目（#292）。枠の左右の辺そのもの。
+    private let handleWidth: CGFloat = 16
+    /// つまみの当たり判定。見た目 16pt の内側へ広げる（Apple の指針の最低 44pt）。
+    private let handleHitWidth: CGFloat = 44
+    private let frameLineWidth: CGFloat = 3
+    private let frameCornerRadius: CGFloat = 10
+    /// 再生ヘッドの幅（縁を含む・#303）
+    private let playheadWidth: CGFloat = 12
     private let overviewSpace = "waveOverviewSpace"
     private let zoomSpace = "waveZoomSpace"
     /// 下段のサンプル解像度（600秒ファイルで窓8秒時に約100バケット）
@@ -85,7 +116,7 @@ struct WaveformCropView: View {
 
     enum Handle: Hashable {
         case startOverview, endOverview, panOverview
-        case startZoom, endZoom, panZoom
+        case startZoom, endZoom, rangeZoom, panZoom
     }
 
     var body: some View {
@@ -107,24 +138,28 @@ struct WaveformCropView: View {
                 zoomWindow = WaveformCropMath.zoomWindow(range: range, duration: duration)
             }
         }
+        .onDisappear {
+            stopWindowSettle()
+        }
         .onChange(of: startTime) { _, _ in
-            syncZoomWindow()
+            // 下段の拡大率は変えず、再生の範囲だけ伝える（#303）
+            previewer?.updateRange(currentRange)
         }
         .onChange(of: endTime) { _, _ in
-            syncZoomWindow()
-        }
-        // 再生位置にズーム窓を追従させる（#79 バグ2: 再生ヘッドが窓外に出たら再配置）
-        .onChange(of: previewer?.currentTime) { _, playhead in
-            guard let playhead, previewer?.isPlaying == true else { return }
-            zoomWindow = WaveformCropMath.windowFollowingPlayback(
-                current: zoomWindow,
-                playhead: playhead,
-                duration: duration
-            )
+            previewer?.updateRange(currentRange)
         }
         // 波形と選択範囲は時間軸なので、RTL でも左→右のまま（#149）。
         // ZStack(alignment: .leading) や offset が鏡像にならないよう固定する。
         .environment(\.layoutDirection, .leftToRight)
+        // 掴んだ瞬間は軽い選択、最短・上限・音の端に当たった瞬間だけ impact（#292）
+        .sensoryFeedback(.selection, trigger: handleGrabCount)
+        .sensoryFeedback(.impact(weight: .light), trigger: limitHitCount)
+    }
+
+    private enum LimitHitReason: Equatable {
+        case minimum
+        case maxRange
+        case audioEdge
     }
 
     // MARK: - 主役の現在時刻（#80-3）
@@ -156,13 +191,76 @@ struct WaveformCropView: View {
         )
     }
 
-    /// 選択範囲の変化にズーム窓を追従させる（はみ出したら再中心化）
-    private func syncZoomWindow() {
-        zoomWindow = WaveformCropMath.syncedWindow(
-            zoomWindow,
-            to: currentRange,
+    /// 触っている端が下段の窓の外に出たときだけ、窓を横にずらす（#303）。
+    /// **窓の幅（拡大率）は変えない。**
+    ///
+    /// 下段のつまみ・下段の枠移動では、動かしている間ずっと追う（今までどおり）。
+    /// 上段のつまみは、離したときに `settleZoomWindow(showing:edge:)` で一度だけ寄せる。
+    private func showEdge(_ edge: WaveformCropMath.CropEdge) {
+        let time = edge == .start ? startTime : endTime
+        zoomWindow = WaveformCropMath.window(
+            showing: time,
+            edge: edge,
+            in: zoomWindow,
             duration: duration
         )
+    }
+
+    /// 上段のつまみを離したときに、下段の窓を一度だけ横へ滑らせる（#303）。
+    ///
+    /// 上段のドラッグ中は窓を動かさない（1pt で数秒動くため、追うと何度も跳ねる）。
+    /// 幅（拡大率）は変えず、`window(showing:)` の結果へ 0.35 秒の加速→減速で移る。
+    /// Reduce Motion のときは滑らせずに切り替える。
+    private func settleZoomWindow(showing edgeTime: Double, edge: WaveformCropMath.CropEdge) {
+        stopWindowSettle()
+        let settle = WaveformCropMath.OverviewWindowSettle.begin(
+            from: zoomWindow,
+            showing: edgeTime,
+            edge: edge,
+            duration: duration
+        )
+        guard settle.shouldAnimate else { return }
+
+        guard !reduceMotion else {
+            zoomWindow = settle.to
+            return
+        }
+
+        let curve = UnitCurve.bezier(
+            startControlPoint: UnitPoint(x: 0.65, y: 0),
+            endControlPoint: UnitPoint(x: 0.35, y: 1)
+        )
+        let animationSeconds: Double = 0.35
+        settleTask = Task { @MainActor in
+            let clock = ContinuousClock()
+            let began = clock.now
+            while !Task.isCancelled {
+                let elapsed = clock.now - began
+                let seconds = Double(elapsed.components.seconds)
+                    + Double(elapsed.components.attoseconds) / 1_000_000_000_000_000_000
+                let progress = min(max(seconds / animationSeconds, 0), 1)
+                zoomWindow = settle.window(at: curve.value(at: progress))
+                if progress >= 1 { break }
+                try? await Task.sleep(for: .milliseconds(16))
+            }
+            guard !Task.isCancelled else { return }
+            zoomWindow = settle.to
+            settleTask = nil
+        }
+    }
+
+    /// 滑っている途中に下段へ触れたら、そこで止める（#303）。
+    private func stopWindowSettle() {
+        settleTask?.cancel()
+        settleTask = nil
+    }
+
+    /// 再生の線を止めているときの位置（次に ▶ で鳴る位置・#303）。
+    /// 鳴っている間は再生位置、止まっている間は残した位置。範囲の外なら開始。
+    private func playheadTime(range: TrimRange) -> Double {
+        guard let previewer else { return range.start }
+        let time = previewer.currentTime
+        return min(max(time, range.start), range.end)
     }
 
     private func loadSamples() async {
@@ -177,7 +275,7 @@ struct WaveformCropView: View {
                 samples = result
             }
         }
-        if !Task.isCancelled {
+        if !Task.isCancelled, zoomWindow.width <= 0 {
             zoomWindow = WaveformCropMath.zoomWindow(range: currentRange, duration: duration)
         }
     }
@@ -213,25 +311,35 @@ struct WaveformCropView: View {
                 .frame(height: overviewHeight)
                 .allowsHitTesting(false)
 
-                // 3. 選択範囲の枠線
-                Rectangle()
-                    .strokeBorder(Brand.orange.opacity(0.7), lineWidth: 1.5)
-                    .frame(width: max(selectedWidth, 0), height: overviewHeight)
-                    .offset(x: leading)
-                    .allowsHitTesting(false)
+                // 3. 選択範囲の枠（太い角丸・#292）
+                selectionFrame(
+                    width: max(selectedWidth, 0),
+                    height: overviewHeight,
+                    offset: leading
+                )
 
                 // 4. 選択範囲内タップでスクラブ / ドラッグで範囲移動
                 overviewScrubArea(width: max(selectedWidth, 0), offset: leading, range: range)
 
-                // 5. 左右ハンドル
-                overviewHandle(kind: .startOverview, x: leading)
-                overviewHandle(kind: .endOverview, x: leading + selectedWidth)
+                // 5. 左右ハンドル（枠の内側・当たり判定 44pt）
+                overviewHandle(
+                    kind: .startOverview,
+                    edge: .leading,
+                    boundaryX: leading,
+                    selectedWidth: selectedWidth
+                )
+                overviewHandle(
+                    kind: .endOverview,
+                    edge: .trailing,
+                    boundaryX: leading + selectedWidth,
+                    selectedWidth: selectedWidth
+                )
 
-                // 6. 再生ヘッド（縦線＋上下ノブ・#80-4）
-                if previewer?.isPlaying == true, let previewer {
-                    let x = WaveformCropMath.overviewX(for: previewer.currentTime, width: width, duration: duration)
+                // 6. 再生ヘッド（縦線＋上下ノブ・#80-4）。つまみより手前に描く（#303）
+                if previewer != nil {
+                    let x = WaveformCropMath.overviewX(for: playheadTime(range: range), width: width, duration: duration)
                     playhead()
-                        .offset(x: x - 5)
+                        .offset(x: x - playheadWidth / 2)
                 }
             }
             .coordinateSpace(name: overviewSpace)
@@ -245,8 +353,9 @@ struct WaveformCropView: View {
     }
 
     /// 上段の選択範囲内操作（VideoTrimmerBar と同一パターン）:
-    /// - 短いタップ → スクラブ（再生位置指定）
+    /// - 短いタップ → スクラブ（その位置からくり返し鳴らす）
     /// - ドラッグ → 選択範囲全体の平行移動（panBaseRange 基準・#36）
+    /// どちらも鳴っている間は止めない（#303）。
     private func overviewScrubArea(width: CGFloat, offset: CGFloat, range: TrimRange) -> some View {
         let tapThreshold: CGFloat = 8
 
@@ -259,60 +368,61 @@ struct WaveformCropView: View {
                     .onChanged { value in
                         guard abs(value.translation.width) >= tapThreshold else { return }
                         if draggingHandle != .panOverview {
+                            // 窓が滑っている途中でも、掴んだ位置から枠移動を優先する（#303）
+                            stopWindowSettle()
                             draggingHandle = .panOverview
                             // 基準はドラッグ開始時に1度だけ固定する（#36 累積バグ対策）
                             panBaseRange = currentRange
-                            previewer?.stop()
+                            panBaseWindow = zoomWindow
                         }
                         let delta = value.translation.width / max(overviewWidth, 1) * duration
                         let base = panBaseRange ?? currentRange
                         let clamped = base.movingRange(by: delta)
                         startTime = clamped.start
                         endTime = clamped.end
+                        // 枠ごと動かした分だけ下段の窓も横にずらす（#303）。端で止まった分は数えない
+                        if let baseWindow = panBaseWindow {
+                            zoomWindow = WaveformCropMath.window(
+                                shiftedBy: clamped.start - base.start,
+                                in: baseWindow,
+                                duration: duration
+                            )
+                        }
                     }
                     .onEnded { value in
                         if draggingHandle == .panOverview {
                             draggingHandle = nil
                             panBaseRange = nil
+                            panBaseWindow = nil
                         } else if let playURL, let previewer {
-                            // タップ → スクラブ
+                            // タップ → その位置からくり返し鳴らす
                             let time = WaveformCropMath.overviewTime(atX: value.location.x, width: max(overviewWidth, 1), duration: duration)
-                            let scrubTime = min(max(time, range.start), range.end)
-                            previewer.play(url: playURL, from: scrubTime, to: range.end)
+                            previewer.play(
+                                url: playURL,
+                                range: range,
+                                from: min(max(time, range.start), range.end)
+                            )
                         }
                     }
             )
     }
 
-    /// 上段ハンドル。⚠️ `.frame` / `.contentShape` を `.offset` の前に（#36 原因1）
-    private func overviewHandle(kind: Handle, x: CGFloat) -> some View {
-        handleShape(isActive: draggingHandle == kind)
-            .frame(width: handleWidth * 3, height: overviewHeight)
-            .contentShape(Rectangle())
-            .offset(x: x - handleWidth * 3 / 2)
-            .gesture(
-                DragGesture(minimumDistance: 0, coordinateSpace: .named(overviewSpace))
-                    .onChanged { value in
-                        if draggingHandle != kind {
-                            draggingHandle = kind
-                            previewer?.stop()
-                        }
-                        let target = WaveformCropMath.overviewTime(
-                            atX: max(0, value.location.x),
-                            width: max(overviewWidth, 1),
-                            duration: duration
-                        )
-                        switch kind {
-                        case .startOverview:
-                            startTime = currentRange.movingStart(to: target).start
-                        case .endOverview:
-                            endTime = currentRange.movingEnd(to: target).end
-                        default:
-                            break
-                        }
-                    }
-                    .onEnded { _ in draggingHandle = nil }
-            )
+    /// 上段ハンドル。枠の内側に置き、当たり判定は内側へ 44pt 広げる（#292）。
+    private func overviewHandle(
+        kind: Handle,
+        edge: HorizontalEdge,
+        boundaryX: CGFloat,
+        selectedWidth: CGFloat
+    ) -> some View {
+        cropHandle(
+            kind: kind,
+            edge: edge,
+            boundaryX: boundaryX,
+            selectedWidth: selectedWidth,
+            height: overviewHeight,
+            space: overviewSpace,
+            secondsPerPoint: { _ in duration / max(overviewWidth, 1) }
+        )
     }
 
     // MARK: - 下段（拡大波形）
@@ -355,25 +465,49 @@ struct WaveformCropView: View {
                 .frame(height: zoomHeight)
                 .allowsHitTesting(false)
 
-                // 3. 選択範囲の枠線
-                Rectangle()
-                    .strokeBorder(Brand.orange.opacity(0.7), lineWidth: 1.5)
-                    .frame(width: max(selectedWidth, 0), height: zoomHeight)
-                    .offset(x: leading)
-                    .allowsHitTesting(false)
+                // 3. 選択範囲の枠（太い角丸・#292）
+                selectionFrame(
+                    width: max(selectedWidth, 0),
+                    height: zoomHeight,
+                    offset: leading
+                )
 
-                // 4. ドラッグで窓移動 / タップでスクラブ
-                zoomPanArea(width: width, range: range)
+                // 4. 枠の外のドラッグで窓移動 / タップでスクラブ
+                zoomWindowPanArea(width: width, range: range)
 
-                // 5. 左右ハンドル（秒以下の微調整）
-                zoomHandle(kind: .startZoom, x: leading)
-                zoomHandle(kind: .endZoom, x: leading + selectedWidth)
+                // 5. 枠の中（つまみ以外）のドラッグで範囲ごと移動
+                zoomRangeArea(
+                    width: max(selectedWidth, 0),
+                    offset: leading,
+                    range: range
+                )
 
-                // 6. 再生ヘッド（縦線＋上下ノブ・窓の追従により常に窓内）
-                if previewer?.isPlaying == true, let previewer {
-                    let x = WaveformCropMath.zoomX(for: previewer.currentTime, width: width, window: zoomWindow)
+                // 6. 左右ハンドル（秒以下の微調整・枠の内側・当たり判定 44pt）
+                // 窓の外に出た端は、窓の端に張り付いたつまみを出さない
+                // （掴んだ瞬間に範囲が飛ぶのを防ぐ）。要素ごと出さないので、
+                // 見えないつまみが読み上げや UI テストに出ることもない（#303）
+                if range.start >= zoomWindow.start - 0.0001 {
+                    zoomHandle(
+                        kind: .startZoom,
+                        edge: .leading,
+                        boundaryX: leading,
+                        selectedWidth: selectedWidth
+                    )
+                }
+                if range.end <= zoomWindow.end + 0.0001 {
+                    zoomHandle(
+                        kind: .endZoom,
+                        edge: .trailing,
+                        boundaryX: leading + selectedWidth,
+                        selectedWidth: selectedWidth
+                    )
+                }
+
+                // 7. 再生ヘッド（縦線＋上下ノブ）。つまみより手前に描く（#303）
+                if previewer != nil {
+                    let x = WaveformCropMath.zoomX(for: playheadTime(range: range), width: width, window: zoomWindow)
                     playhead()
-                        .offset(x: x - 5)
+                        .offset(x: x - playheadWidth / 2)
                 }
                 }
                 .coordinateSpace(name: zoomSpace)
@@ -382,6 +516,9 @@ struct WaveformCropView: View {
                         .onAppear { zoomWidth = width }
                         .onChange(of: width) { _, newWidth in zoomWidth = newWidth }
                 )
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("crop.zoomBar")
+                .simultaneousGesture(pinchGesture)
 
                 // 7. 時間目盛り（ズーム窓の絶対時刻・#80-5）
                 ruler(width: width)
@@ -519,8 +656,8 @@ struct WaveformCropView: View {
     }
 
     /// 下段のドラッグでズーム窓を移動（panBaseWindow 基準・#36 と同じ累積対策）。
-    /// 短いタップはスクラブ（タップ位置から再生）。
-    private func zoomPanArea(width: CGFloat, range: TrimRange) -> some View {
+    /// 短いタップはスクラブ（タップ位置からくり返し鳴らす）。再生は止めない（#303）。
+    private func zoomWindowPanArea(width: CGFloat, range: TrimRange) -> some View {
         let tapThreshold: CGFloat = 8
 
         return Color.clear
@@ -529,11 +666,17 @@ struct WaveformCropView: View {
             .gesture(
                 DragGesture(minimumDistance: 0, coordinateSpace: .named(zoomSpace))
                     .onChanged { value in
+                        // 滑っている途中に下段へ触れたら、そこで止める（#303）
+                        stopWindowSettle()
+                        guard !isPinching, !suppressPanAfterPinch else { return }
+                        if draggingHandle == nil {
+                            // ピンチの後の最初の1本指は、新しい操作として扱う
+                            suppressScrubAfterPinch = false
+                        }
                         guard abs(value.translation.width) >= tapThreshold else { return }
                         if draggingHandle != .panZoom {
                             draggingHandle = .panZoom
                             panBaseWindow = zoomWindow
-                            previewer?.stop()
                         }
                         guard let base = panBaseWindow else { return }
                         zoomWindow = WaveformCropMath.pannedWindow(
@@ -544,68 +687,359 @@ struct WaveformCropView: View {
                         )
                     }
                     .onEnded { value in
+                        suppressPanAfterPinch = false
                         if draggingHandle == .panZoom {
                             draggingHandle = nil
                             panBaseWindow = nil
-                        } else if let playURL, let previewer {
+                        } else if !isPinching, !suppressScrubAfterPinch,
+                                  let playURL, let previewer {
                             let time = WaveformCropMath.zoomTime(atX: value.location.x, width: max(zoomWidth, 1), window: zoomWindow)
-                            let scrubTime = min(max(time, range.start), range.end)
-                            previewer.play(url: playURL, from: scrubTime, to: range.end)
+                            previewer.play(
+                                url: playURL,
+                                range: range,
+                                from: min(max(time, range.start), range.end)
+                            )
+                        }
+                    }
+            )
+    }
+
+    /// 下段の枠の中（つまみ以外）のドラッグで、選択範囲ごと動かす（#292）。
+    /// 短いタップはスクラブ（タップ位置からくり返し鳴らす）。再生は止めない（#303）。
+    private func zoomRangeArea(width: CGFloat, offset: CGFloat, range: TrimRange) -> some View {
+        let tapThreshold: CGFloat = 8
+
+        return Color.clear
+            .frame(width: width, height: zoomHeight)
+            .contentShape(Rectangle())
+            .offset(x: offset)
+            .gesture(
+                DragGesture(minimumDistance: 0, coordinateSpace: .named(zoomSpace))
+                    .onChanged { value in
+                        // 滑っている途中に下段へ触れたら、そこで止める（#303）
+                        stopWindowSettle()
+                        guard !isPinching, !suppressHandleDrag else { return }
+                        guard abs(value.translation.width) >= tapThreshold else { return }
+                        if draggingHandle != .rangeZoom {
+                            draggingHandle = .rangeZoom
+                            dragBaseRange = currentRange
+                            dragBaseWindow = zoomWindow
+                        }
+                        guard let base = dragBaseRange else { return }
+                        let window = dragBaseWindow ?? zoomWindow
+                        let delta = value.translation.width / max(zoomWidth, 1) * window.width
+                        let clamped = base.movingRange(by: Double(delta))
+                        startTime = clamped.start
+                        endTime = clamped.end
+                        // 枠ごと動かしたときは開始の端の規則に従う（#303）
+                        showEdge(.start)
+                    }
+                    .onEnded { value in
+                        if draggingHandle == .rangeZoom {
+                            draggingHandle = nil
+                            dragBaseRange = nil
+                            dragBaseWindow = nil
+                            suppressHandleDrag = false
+                        } else if !isPinching, !suppressScrubAfterPinch, !suppressHandleDrag,
+                                  let playURL, let previewer {
+                            let time = WaveformCropMath.zoomTime(atX: value.location.x, width: max(zoomWidth, 1), window: zoomWindow)
+                            previewer.play(
+                                url: playURL,
+                                range: range,
+                                from: min(max(time, range.start), range.end)
+                            )
                         }
                     }
             )
     }
 
     /// 下段ハンドル。位置→時間の変換はズーム窓スケール（#76 の高精度調整）。
-    /// ⚠️ `.frame` / `.contentShape` を `.offset` の前に（#36 原因1）
-    private func zoomHandle(kind: Handle, x: CGFloat) -> some View {
-        handleShape(isActive: draggingHandle == kind)
-            .frame(width: handleWidth * 3, height: zoomHeight)
-            .contentShape(Rectangle())
-            .offset(x: x - handleWidth * 3 / 2)
-            .gesture(
-                DragGesture(minimumDistance: 0, coordinateSpace: .named(zoomSpace))
-                    .onChanged { value in
-                        if draggingHandle != kind {
-                            draggingHandle = kind
-                            previewer?.stop()
+    private func zoomHandle(
+        kind: Handle,
+        edge: HorizontalEdge,
+        boundaryX: CGFloat,
+        selectedWidth: CGFloat
+    ) -> some View {
+        cropHandle(
+            kind: kind,
+            edge: edge,
+            boundaryX: boundaryX,
+            selectedWidth: selectedWidth,
+            height: zoomHeight,
+            space: zoomSpace,
+            secondsPerPoint: { window in
+                (window ?? zoomWindow).width / max(zoomWidth, 1)
+            }
+        )
+    }
+
+    /// 2本指のピンチで拡大・縮小（#292・拡大表示の下段）。
+    private var pinchGesture: some Gesture {
+        MagnifyGesture(minimumScaleDelta: 0)
+            .onChanged { value in
+                // 滑っている途中に下段へ触れたら、そこで止める（#303）
+                stopWindowSettle()
+                if pinchBaseWindow == nil {
+                    guard abs(value.magnification - 1) > 0.001 else { return }
+                    isPinching = true
+                    suppressScrubAfterPinch = true
+                    pinchBaseWindow = zoomWindow
+                    pinchAnchorTime = zoomWindow.start
+                        + Double(value.startAnchor.x) * zoomWindow.width
+                    switch draggingHandle {
+                    case .startOverview, .startZoom, .endOverview, .endZoom, .rangeZoom:
+                        // 2本目の指がつまみ・枠に触れただけのときは、範囲を動かさない
+                        if let base = dragBaseRange {
+                            startTime = base.start
+                            endTime = base.end
                         }
-                        let target = WaveformCropMath.zoomTime(
-                            atX: max(0, value.location.x),
-                            width: max(zoomWidth, 1),
-                            window: zoomWindow
-                        )
-                        switch kind {
-                        case .startZoom:
-                            startTime = currentRange.movingStart(to: target).start
-                        case .endZoom:
-                            endTime = currentRange.movingEnd(to: target).end
-                        default:
-                            break
+                        draggingHandle = nil
+                        dragBaseRange = nil
+                        dragBaseWindow = nil
+                        limitHitReason = nil
+                        suppressHandleDrag = true
+                    case .panZoom:
+                        if let base = panBaseWindow {
+                            zoomWindow = base
                         }
+                        draggingHandle = nil
+                        panBaseWindow = nil
+                        suppressPanAfterPinch = true
+                    default:
+                        break
                     }
-                    .onEnded { _ in draggingHandle = nil }
-            )
+                }
+                guard let base = pinchBaseWindow else { return }
+                // 指の位置を中心に拡大・縮小するだけ。窓を選択範囲へ寄せない（#303）
+                zoomWindow = WaveformCropMath.zoomedWindow(
+                    base,
+                    magnification: value.magnification,
+                    anchorTime: pinchAnchorTime,
+                    duration: duration
+                )
+            }
+            .onEnded { _ in
+                pinchBaseWindow = nil
+                isPinching = false
+            }
     }
 
     // MARK: - 共通パーツ
 
-    /// 再生ヘッド: 縦線＋上下の丸ノブ（#80-4）。アクセント色・掴める感のある形状。
-    /// 幅10ptで、中心が再生位置に来るよう呼び出し側で offset(x: x - 5) する
+    /// 選択範囲の枠（上下 3pt・角丸 10・不透明のブランド色・#292）。
+    private func selectionFrame(width: CGFloat, height: CGFloat, offset: CGFloat) -> some View {
+        RoundedRectangle(cornerRadius: frameCornerRadius, style: .continuous)
+            .strokeBorder(Brand.orange, lineWidth: frameLineWidth)
+            .frame(width: max(width, 0), height: height)
+            .offset(x: offset)
+            .allowsHitTesting(false)
+    }
+
+    /// 枠の内側に付くつまみ（見た目 16pt・当たり判定 44pt・#292）。
+    ///
+    /// - 見た目は枠の左右の辺そのもの。外側の角だけ枠に合わせて丸める
+    /// - 当たり判定は範囲の内側へ広げる。端が画面端でも全部画面内に残る
+    /// - 範囲が狭く 44pt どうしが重なるときは、選択範囲を半分に分ける
+    ///   （触れた場所に近い側のつまみが動く）
+    private func cropHandle(
+        kind: Handle,
+        edge: HorizontalEdge,
+        boundaryX: CGFloat,
+        selectedWidth: CGFloat,
+        height: CGFloat,
+        space: String,
+        secondsPerPoint: @escaping (CropWindow?) -> Double
+    ) -> some View {
+        let safeSelectedWidth = max(selectedWidth, 0)
+        // 44pt どうしが重なるときは選択範囲を半分に分ける（触れた側が動く）
+        let hitWidth = min(handleHitWidth, safeSelectedWidth / 2)
+        let hitOffset = edge == .leading
+            ? boundaryX
+            : boundaryX - hitWidth
+        let visualWidth = min(handleWidth, hitWidth)
+        let visualOffset = edge == .leading
+            ? 0
+            : hitWidth - visualWidth
+        let side = (kind == .startOverview || kind == .startZoom) ? "start" : "end"
+        let tier = (kind == .startOverview || kind == .endOverview) ? "overview" : "zoom"
+
+        return ZStack(alignment: .leading) {
+            cropHandleShape(edge: edge, width: visualWidth, height: height)
+                .frame(width: visualWidth, height: height)
+                .offset(x: visualOffset)
+                .allowsHitTesting(false)
+        }
+        .frame(width: hitWidth, height: height, alignment: .leading)
+        .contentShape(Rectangle())
+        .offset(x: hitOffset)
+        .gesture(
+            DragGesture(minimumDistance: 0, coordinateSpace: .named(space))
+                .onChanged { value in
+                    guard !isPinching, !suppressHandleDrag else { return }
+                    if draggingHandle != kind {
+                        // 滑っている途中に下段へ触れたら、そこで止める（#303）
+                        stopWindowSettle()
+                        draggingHandle = kind
+                        dragBaseRange = currentRange
+                        dragBaseWindow = zoomWindow
+                        limitHitReason = nil
+                        handleGrabCount += 1
+                    }
+                    guard let base = dragBaseRange else { return }
+                    let delta = Double(value.translation.width) * secondsPerPoint(dragBaseWindow)
+                    switch kind {
+                    case .startOverview:
+                        // 上段のドラッグ中は下段の窓を動かさない（#303）。
+                        // 1pt で数秒動くため、追うと端が見える位置へ何度も跳ねる。
+                        let desired = base.start + delta
+                        startTime = base.movingStart(to: desired).start
+                        noteLimitHit(for: kind, base: base, desired: desired)
+                    case .startZoom:
+                        let desired = base.start + delta
+                        startTime = base.movingStart(to: desired).start
+                        noteLimitHit(for: kind, base: base, desired: desired)
+                        showEdge(.start)
+                    case .endOverview:
+                        let desired = base.end + delta
+                        endTime = base.movingEnd(to: desired).end
+                        noteLimitHit(for: kind, base: base, desired: desired)
+                    case .endZoom:
+                        let desired = base.end + delta
+                        endTime = base.movingEnd(to: desired).end
+                        noteLimitHit(for: kind, base: base, desired: desired)
+                        showEdge(.end)
+                    case .panOverview, .rangeZoom, .panZoom:
+                        break
+                    }
+                }
+                .onEnded { _ in
+                    let endedKind = draggingHandle
+                    let movedStart = endedKind == .startOverview || endedKind == .startZoom
+                    draggingHandle = nil
+                    dragBaseRange = nil
+                    dragBaseWindow = nil
+                    limitHitReason = nil
+                    suppressHandleDrag = false
+                    // 上段のつまみを離したときだけ、一度窓を寄せる（#303）
+                    switch endedKind {
+                    case .startOverview:
+                        settleZoomWindow(showing: startTime, edge: .start)
+                    case .endOverview:
+                        settleZoomWindow(showing: endTime, edge: .end)
+                    default:
+                        break
+                    }
+                    // 開始を離したら、新しい開始から鳴り直す（#303）。
+                    // 30秒の範囲だと次の周回まで待つことになるため。
+                    if movedStart, let playURL, let previewer, previewer.isPlaying {
+                        previewer.play(url: playURL, range: currentRange, from: startTime)
+                    }
+                }
+        )
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(side == "start" ? "time_start" : "time_end"))
+        .accessibilityIdentifier("crop.handle.\(side).\(tier)")
+    }
+
+    /// つまみの見た目。外側（枠の端）だけ角丸 10 の連続カーブにする。
+    private func cropHandleShape(edge: HorizontalEdge, width: CGFloat, height: CGFloat) -> some View {
+        UnevenRoundedRectangle(
+            topLeadingRadius: edge == .leading ? frameCornerRadius : 0,
+            bottomLeadingRadius: edge == .leading ? frameCornerRadius : 0,
+            bottomTrailingRadius: edge == .trailing ? frameCornerRadius : 0,
+            topTrailingRadius: edge == .trailing ? frameCornerRadius : 0,
+            style: .continuous
+        )
+        .fill(Brand.orange)
+        .overlay {
+            Image(systemName: edge == .leading ? "chevron.compact.left" : "chevron.compact.right")
+                .resizable()
+                .scaledToFit()
+                .frame(width: max(0, min(handleWidth * 0.75, width - 4)), height: height * 0.4)
+                .fontWeight(.semibold)
+                .foregroundStyle(.white)
+        }
+    }
+
+    /// ハンドルが最短・上限・音の端に当たった瞬間だけ振動させる（#292）。
+    /// 同じ端にいるあいだは繰り返さない。
+    private func noteLimitHit(for kind: Handle, base: TrimRange, desired: Double) {
+        let reason: LimitHitReason?
+        switch kind {
+        case .startOverview, .startZoom:
+            if desired > base.start {
+                if desired >= base.end {
+                    reason = .minimum
+                } else if base.end - desired >= base.maxRange {
+                    reason = .maxRange
+                } else {
+                    reason = nil
+                }
+            } else if desired < base.start {
+                if desired <= 0 {
+                    reason = .audioEdge
+                } else if base.end - desired >= base.maxRange {
+                    reason = .maxRange
+                } else {
+                    reason = nil
+                }
+            } else {
+                reason = nil
+            }
+        case .endOverview, .endZoom:
+            if desired > base.end {
+                if desired >= duration {
+                    reason = .audioEdge
+                } else if desired - base.start >= base.maxRange {
+                    reason = .maxRange
+                } else {
+                    reason = nil
+                }
+            } else if desired < base.end {
+                if desired <= base.start {
+                    reason = .minimum
+                } else {
+                    reason = nil
+                }
+            } else {
+                reason = nil
+            }
+        case .panOverview, .rangeZoom, .panZoom:
+            reason = nil
+        }
+
+        if let reason, reason != limitHitReason {
+            limitHitCount += 1
+        }
+        limitHitReason = reason
+    }
+
+    /// 再生ヘッド: 縦線＋上下の丸ノブ（#80-4 / #303）。
+    ///
+    /// - 線は `Color.primary`（明るい画面で黒・暗い画面で白）・太さ 2pt
+    /// - 外側に背景色の縁を 1.5pt 付け、オレンジのつまみの上でも見えるようにする
+    /// - 幅 `playheadWidth` で、中心が再生位置に来るよう呼び出し側で offset する
     private func playhead() -> some View {
+        ZStack {
+            playheadShape(circleDiameter: 12, lineWidth: 5, color: Color.warmListBackground)
+            playheadShape(circleDiameter: 9, lineWidth: 2, color: Color.primary)
+        }
+        .frame(width: playheadWidth)
+        .allowsHitTesting(false)
+    }
+
+    private func playheadShape(circleDiameter: CGFloat, lineWidth: CGFloat, color: Color) -> some View {
         VStack(spacing: 0) {
             Circle()
-                .frame(width: 9, height: 9)
+                .frame(width: circleDiameter, height: circleDiameter)
             Rectangle()
-                .fill(Brand.orange)
-                .frame(width: 2)
+                .fill(color)
+                .frame(width: lineWidth)
             Circle()
-                .frame(width: 9, height: 9)
+                .frame(width: circleDiameter, height: circleDiameter)
         }
-        .frame(width: 10)
-        .foregroundStyle(Brand.orange)
-        .shadow(color: Brand.orange.opacity(0.35), radius: 3)
-        .allowsHitTesting(false)
+        .frame(maxHeight: .infinity)
+        .foregroundStyle(color)
     }
 
     /// 4つの値をラベル付きで明示（#79-6: どれが何か分からない状態を解消する）
@@ -659,11 +1093,4 @@ struct WaveformCropView: View {
         .accessibilityIdentifier(identifier)
     }
 
-    private func handleShape(isActive: Bool) -> some View {
-        RoundedRectangle(cornerRadius: 2)
-            .fill(isActive ? Brand.orange : Brand.orange.opacity(0.85))
-            .frame(width: handleWidth, height: nil)
-            .frame(maxHeight: .infinity)
-            .shadow(color: .black.opacity(0.3), radius: isActive ? 4 : 2)
-    }
 }

@@ -549,6 +549,16 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: 長い音声（120秒）で波形クロップ画面を開く（DEBUGのみ・#303）。
+    /// 選択範囲がズーム窓（最大60秒）より広い状態を再現するために使う。
+    static var isUITestLongCrop: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-long-crop")
+    #else
+        false
+    #endif
+    }
+
     /// プレイリストの解放を一度でも出したか（#216）。
     static var playlistUnlockShown: Bool {
         get { userDefaults.bool(forKey: "playlistUnlockShown") }

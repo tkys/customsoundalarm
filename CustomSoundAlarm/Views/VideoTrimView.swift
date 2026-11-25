@@ -242,6 +242,16 @@ struct VideoImportFlow: View {
         extractedAudioURL != nil && endTime > startTime && !soundName.isEmpty
     }
 
+    /// 波形UIの選択範囲（再生のくり返しにも使う・#303）
+    private var currentTrimRange: TrimRange {
+        TrimRange(
+            start: startTime,
+            end: endTime,
+            duration: videoDuration,
+            maxRange: maxRangeSeconds
+        )
+    }
+
     private func trimView(url: URL) -> some View {
         VStack(spacing: 0) {
             // 波形エリア（画面幅いっぱい・#80-1）。フォームの体裁を使わない
@@ -273,12 +283,17 @@ struct VideoImportFlow: View {
                     // 補助: サムネイル（通常の動画では位置の手がかりになる）
                     FilmstripView(videoURL: url)
 
-                    // 再生 / 停止（スクラブと対の操作）
+                    // 再生 / 停止（選択範囲をくり返し鳴らす・#303）
                     Button {
                         if previewer.isPlaying {
                             previewer.stop()
                         } else {
-                            previewer.play(url: extractedAudioURL ?? url, from: startTime, to: endTime)
+                            let range = currentTrimRange
+                            previewer.play(
+                                url: extractedAudioURL ?? url,
+                                range: range,
+                                from: previewer.resumeTime(in: range)
+                            )
                         }
                     } label: {
                         Image(systemName: previewer.isPlaying ? "stop.fill" : "play.fill")
@@ -676,73 +691,180 @@ struct VideoImportFlow: View {
 
 // MARK: - TrimPreviewer
 
-/// 選択範囲のプレビュー再生を管理
+/// 選択範囲のプレビュー再生を管理する（#303 でくり返し再生に対応）。
+///
+/// - ▶ は選択範囲 `[開始, 終了]` をくり返し鳴らす。止めるのは ■・画面を閉じる・保存のときだけ
+/// - 鳴っている間に範囲を変えても止めない。終了が再生位置より手前に来たら、すぐ開始へ戻る
+/// - AVPlayer は使い回し、くり返しはシークで戻す（作り直すとつなぎ目で音が途切れる）
+/// - 止めたあとも再生位置を残し、▶ はそこから鳴らす（範囲の外なら開始から）
 @Observable
 @MainActor
 final class TrimPreviewer {
     private var player: AVPlayer?
+    private var playerURL: URL?
     private var timeObserver: Any?
-    private var boundaryObserver: Any?
+    private var endObserver: NSObjectProtocol?
+
+    /// くり返す範囲（秒）。範囲を変えるたびに updateRange で置き換える
+    private var loopStart: Double = 0
+    private var loopEnd: Double = 0
+    /// 頭へ戻すシークの途中で、古い再生位置により二重に戻さないための印
+    private var isLooping = false
 
     private(set) var isPlaying = false
+
+    /// 再生位置。止めたあとも最後の位置を残す（▶ はここから・#303）
     private(set) var currentTime: Double = 0
 
-    func play(url: URL, from start: Double, to end: Double) {
-        stop()
+    // MARK: - 再生
 
+    /// `range` を `from` からくり返し鳴らす。
+    /// 鳴っている途中で呼ばれたら、その位置へ移ってそのまま続ける（止めない）。
+    func play(url: URL, range: TrimRange, from: Double) {
+        guard range.isValid, range.width > 0 else { return }
+        activateAudioSession()
+
+        let player = player(for: url)
+        loopStart = range.start
+        loopEnd = range.end
+        isLooping = false
+
+        // 終了ちょうどからは鳴らさず、開始から（#303）
+        let start = from < range.end ? min(max(from, range.start), range.end) : range.start
+        isPlaying = true
+        currentTime = start
+        player.pause()
+        player.seek(to: Self.time(start), toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] _ in
+            Task { @MainActor in
+                guard let self, self.isPlaying else { return }
+                self.player?.play()
+            }
+        }
+    }
+
+    /// ■。再生位置は止めた位置のまま残す（#303）。
+    func stop() {
+        player?.pause()
+        isPlaying = false
+        isLooping = false
+    }
+
+    /// 次に ▶ で鳴らす位置。範囲の外なら開始から（#303）。
+    func resumeTime(in range: TrimRange) -> Double {
+        guard range.isValid else { return 0 }
+        let isInside = currentTime >= range.start && currentTime < range.end
+        return isInside ? currentTime : range.start
+    }
+
+    /// 選択範囲の変更を反映する（#303）。
+    ///
+    /// - 止めているとき: 開始が動いたら再生位置を新しい開始へ戻す。
+    ///   開始が同じで範囲の外に出ただけなら、開始へ寄せる
+    /// - 鳴っているとき: 終了が再生位置より手前に来たら、すぐ開始へ戻す
+    func updateRange(_ range: TrimRange) {
+        guard range.isValid, range.width > 0 else { return }
+        let previousStart = loopStart
+        loopStart = range.start
+        loopEnd = range.end
+
+        guard isPlaying else {
+            if range.start != previousStart
+                || currentTime < range.start
+                || currentTime >= range.end {
+                currentTime = range.start
+            }
+            return
+        }
+        guard let player else { return }
+        if currentTime >= loopEnd - 0.001 || currentTime < loopStart {
+            seekToLoopStart(player)
+        }
+    }
+
+    // MARK: - Private
+
+    /// URL が同じ間は同じ AVPlayer を使い回す（#303）。
+    private func player(for url: URL) -> AVPlayer {
+        if let player, playerURL == url { return player }
+        teardownPlayer()
+
+        let item = AVPlayerItem(url: url)
+        let newPlayer = AVPlayer(playerItem: item)
+
+        // 再生位置を 0.05 秒ごとに受け取り、終わりを越えたら頭へ戻す。
+        // 終わりは毎回ここで判定するので、範囲が変わってもオブザーバーを付け直さなくてよい
+        // （ファイル末尾＝終了のときも確実に戻る）。
+        let interval = CMTime(seconds: 0.05, preferredTimescale: 600)
+        timeObserver = newPlayer.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
+            Task { @MainActor in
+                self?.handleTime(CMTimeGetSeconds(time))
+            }
+        }
+        // 末尾で止まったときの保険（境界の取りこぼし対策）
+        endObserver = NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: item,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                guard let self, let player = self.player else { return }
+                self.seekToLoopStart(player)
+            }
+        }
+
+        player = newPlayer
+        playerURL = url
+        return newPlayer
+    }
+
+    private func handleTime(_ time: Double) {
+        guard isPlaying, !isLooping, time.isFinite else { return }
+        if time >= loopEnd - 0.001 {
+            if let player { seekToLoopStart(player) }
+            return
+        }
+        currentTime = max(0, time)
+    }
+
+    private func seekToLoopStart(_ player: AVPlayer) {
+        guard isPlaying, !isLooping else { return }
+        isLooping = true
+        currentTime = loopStart
+        player.seek(to: Self.time(loopStart), toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] _ in
+            Task { @MainActor in
+                guard let self else { return }
+                self.isLooping = false
+                guard self.isPlaying else { return }
+                self.player?.play()
+            }
+        }
+    }
+
+    private func activateAudioSession() {
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback)
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
-            return
+            // 音が出せなくても、再生位置の表示は続ける
         }
-
-        let playerItem = AVPlayerItem(url: url)
-        let avPlayer = AVPlayer(playerItem: playerItem)
-
-        // 開始位置にシーク
-        let startCMTime = CMTime(seconds: start, preferredTimescale: 600)
-        avPlayer.seek(to: startCMTime, toleranceBefore: .zero, toleranceAfter: .zero)
-
-        // 定期的に再生位置を更新（UIアニメーション用）
-        let interval = CMTime(seconds: 0.05, preferredTimescale: 600)
-        timeObserver = avPlayer.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
-            Task { @MainActor in
-                guard let self else { return }
-                self.currentTime = CMTimeGetSeconds(time)
-            }
-        }
-
-        // 終了位置で自動停止
-        let endCMTime = CMTime(seconds: end, preferredTimescale: 600)
-        boundaryObserver = avPlayer.addBoundaryTimeObserver(
-            forTimes: [NSValue(time: endCMTime)],
-            queue: .main
-        ) { [weak self] in
-            Task { @MainActor in
-                self?.stop()
-            }
-        }
-
-        self.player = avPlayer
-        avPlayer.play()
-        isPlaying = true
-        currentTime = start
     }
 
-    func stop() {
-        if let timeObserver {
-            player?.removeTimeObserver(timeObserver)
-        }
-        if let boundaryObserver {
-            player?.removeTimeObserver(boundaryObserver)
+    private static func time(_ seconds: Double) -> CMTime {
+        CMTime(seconds: seconds, preferredTimescale: 600)
+    }
+
+    private func teardownPlayer() {
+        if let timeObserver, let player {
+            player.removeTimeObserver(timeObserver)
         }
         timeObserver = nil
-        boundaryObserver = nil
+        if let endObserver {
+            NotificationCenter.default.removeObserver(endObserver)
+        }
+        endObserver = nil
         player?.pause()
         player = nil
-        isPlaying = false
-        currentTime = 0
+        playerURL = nil
     }
 }
 
