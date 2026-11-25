@@ -330,7 +330,7 @@ final class AddAlarmRedesignUITests: XCTestCase {
 
         toggle.tap()
 
-        // #211: トグル直下に実時刻の1行（長い説明はⓘへ）
+        // #290: トグル直下は「鳴る時刻の1文 + 試す」の1行（長い説明はⓘへ）
         let description = findElement("addAlarm.backupDescription")
         XCTAssertTrue(description.waitForExistence(timeout: 3))
         XCTAssertTrue(findElement("addAlarm.backupMinutes").waitForExistence(timeout: 3))
@@ -342,6 +342,11 @@ final class AddAlarmRedesignUITests: XCTestCase {
             swipes += 1
         }
         XCTAssertTrue(backupTestRing.waitForExistence(timeout: 3))
+        XCTAssertLessThan(
+            abs(description.frame.midY - backupTestRing.frame.midY),
+            24,
+            "『試す』は説明の1文と同じ行の右に置く"
+        )
     }
 
     /// #211 レビュー: 寝過ごし防止がスヌーズより先に鳴るときは、画面に警告を出す。

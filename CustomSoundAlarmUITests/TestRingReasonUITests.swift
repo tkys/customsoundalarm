@@ -1,8 +1,8 @@
 import XCTest
 
 /// 「今すぐ鳴らす」が鳴らせない理由をその場で表示する（#150）。
-/// 許可が無い／拒否済みの状態で、行の下に理由と『設定を開く』が出ることを
-/// 表示文字列・識別子の完全一致で検証する。
+/// 許可が無いときは理由の文と『許可する』、拒否済みのときは
+/// 短い状態 +『設定を開く』を出すことを検証する（#290）。
 @MainActor
 final class TestRingReasonUITests: XCTestCase {
 
@@ -51,16 +51,34 @@ final class TestRingReasonUITests: XCTestCase {
         )
         XCTAssertTrue(scrollToTestRing(), "今すぐ鳴らすの行が出るはず")
 
-        let reason = findElement("addAlarm.testRingReason")
-        XCTAssertTrue(
-            reason.waitForExistence(timeout: 5),
-            "拒否済みなら『今すぐ鳴らす』の下に理由が出るはず: \(app.debugDescription)"
+        // #290: 理由の長い文は出さず、短い状態 +『設定を開く』にする。
+        // 理由は VoiceOver のラベルに残す。
+        XCTAssertFalse(
+            findElement("addAlarm.testRingReason").exists,
+            "拒否済みでも理由の長い文は画面に出さない: \(app.debugDescription)"
         )
-        XCTAssertEqual(reason.label, "アラームの許可がオフのため、アラームは鳴りません。設定を開いて「アラーム」をオンにしてください。")
+
+        let status = findElement("addAlarm.testRingStatus")
+        var swipes = 0
+        while !status.exists && swipes < 3 {
+            app.collectionViews["addAlarm.root"].swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(status.waitForExistence(timeout: 3), "何が困っているかの一言を出す")
+        XCTAssertEqual(status.label, "アラームが鳴りません")
 
         let settings = findElement("addAlarm.openSettings")
+        swipes = 0
+        while !settings.exists && swipes < 3 {
+            app.collectionViews["addAlarm.root"].swipeUp()
+            swipes += 1
+        }
         XCTAssertTrue(settings.waitForExistence(timeout: 3), "直し方に『設定を開く』が出るはず")
-        XCTAssertEqual(settings.label, "設定を開く")
+        XCTAssertEqual(
+            settings.label,
+            "アラームの許可がオフのため、アラームは鳴りません。設定を開いて「アラーム」をオンにしてください。",
+            "VoiceOver には理由を伝える"
+        )
 
         // 無効化したボタンだけを見せない（#150）
         XCTAssertTrue(findElement("addAlarm.testRing").isEnabled, "ボタンは無効化しっぱなしにしない")
@@ -74,16 +92,34 @@ final class TestRingReasonUITests: XCTestCase {
         )
         XCTAssertTrue(scrollToTestRing(), "test ring row should be reachable")
 
-        let reason = findElement("addAlarm.testRingReason")
-        XCTAssertTrue(
-            reason.waitForExistence(timeout: 5),
-            "denied: the reason should appear below 'Ring now': \(app.debugDescription)"
+        // #290: the long sentence is replaced by a short status + 'Open Settings'.
+        // VoiceOver keeps the reason.
+        XCTAssertFalse(
+            findElement("addAlarm.testRingReason").exists,
+            "denied: the long sentence should not be shown: \(app.debugDescription)"
         )
-        XCTAssertEqual(reason.label, "Alarms are turned off for My Sound Alarm, so they won't ring. Open Settings and turn on Alarms.")
+
+        let status = findElement("addAlarm.testRingStatus")
+        var swipes = 0
+        while !status.exists && swipes < 3 {
+            app.collectionViews["addAlarm.root"].swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(status.waitForExistence(timeout: 3), "the short status should appear")
+        XCTAssertEqual(status.label, "Alarms won't ring")
 
         let settings = findElement("addAlarm.openSettings")
+        swipes = 0
+        while !settings.exists && swipes < 3 {
+            app.collectionViews["addAlarm.root"].swipeUp()
+            swipes += 1
+        }
         XCTAssertTrue(settings.waitForExistence(timeout: 3), "'Open Settings' should appear")
-        XCTAssertEqual(settings.label, "Open Settings")
+        XCTAssertEqual(
+            settings.label,
+            "Alarms are turned off for My Sound Alarm, so they won't ring. Open Settings and turn on Alarms.",
+            "VoiceOver should still hear why alarms are off"
+        )
     }
 
     func testNotDeterminedShowsReasonAndAllowButtonJapanese() {

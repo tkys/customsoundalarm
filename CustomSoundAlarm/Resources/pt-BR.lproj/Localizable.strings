@@ -192,11 +192,11 @@
 "test_ring_failed" = "Não foi possível programar o alarme de teste. Tente novamente.";
 "test_ring_simulator_unavailable" = "O teste de toque está disponível apenas em um dispositivo real.";
 "test_ring_alarm_title" = "Alarme de teste";
-"test_ring_backup_title" = "Testar o som da proteção contra perder a hora";
 
 /* Why the trial ring can't ring (#150) */
 "test_ring_reason_not_authorized" = "Os alarmes ainda não foram permitidos, então não vão tocar até que você os permita.";
 "test_ring_reason_denied" = "Os alarmes estão desativados para o My Sound Alarm, então não vão tocar. Abra Ajustes e ative os alarmes.";
+"test_ring_status_alarms_off" = "Os alarmes não tocam";
 "allow_alarms" = "Permitir alarmes";
 
 /* Loudness (#109 C) */
@@ -204,7 +204,8 @@
 /* Backup alarm (#110) */
 "backup_alarm_toggle" = "Proteção contra perder a hora";
 "backup_alarm_title_fmt" = "Proteção contra perder a hora: %@";
-"backup_alarm_description_fmt" = "Se você não parar o alarme das %@ até as %@, ele toca o mesmo som de novo, mais alto.";
+"backup_alarm_summary_fmt" = "Toca de novo às %@, mais alto";
+"backup_try" = "Testar";
 "backup_alarm_minutes" = "Tocar de novo depois de";
 "backup_alarm_minutes_fmt" = "%d min depois";
 "backup_alarm_before_snooze" = "Toca antes de a soneca terminar.";
@@ -228,8 +229,6 @@
 "volume_guide_link" = "Som baixo?";
 "test_ring_ringing_now" = "Tocando agora";
 "backup_alarm_info_title" = "Proteção contra perder a hora";
-"backup_alarm_info_mechanism" = "Se o alarme não for parado dentro do tempo definido, ele toca de novo.";
-"backup_alarm_info_louder" = "Ele toca o mesmo som, mais alto e sem distorção. Quanto mais baixo o som original, mais ele é aumentado.";
 "backup_alarm_info_volume" = "O volume real depende do volume de Toques e Alertas em Ajustes.";
 "backup_alarm_info_accessibility" = "Sobre a proteção contra perder a hora";
 

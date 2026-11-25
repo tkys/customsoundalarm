@@ -192,11 +192,11 @@
 "test_ring_failed" = "Testovací budík se nepodařilo naplánovat. Zkus to znovu.";
 "test_ring_simulator_unavailable" = "Test zvonění je dostupný jen na skutečném zařízení.";
 "test_ring_alarm_title" = "Testovací budík";
-"test_ring_backup_title" = "Vyzkoušet zvuk ochrany proti zaspání";
 
 /* Why the trial ring can't ring (#150) */
 "test_ring_reason_not_authorized" = "Budíky zatím nejsou povolené, takže nezazvoní, dokud je nepovolíš.";
 "test_ring_reason_denied" = "Budíky jsou pro My Sound Alarm vypnuté, takže nezazvoní. Otevři Nastavení a zapni budíky.";
+"test_ring_status_alarms_off" = "Budíky nezazvoní";
 "allow_alarms" = "Povolit budíky";
 
 /* Loudness (#109 C) */
@@ -204,7 +204,8 @@
 /* Backup alarm (#110) */
 "backup_alarm_toggle" = "Ochrana proti zaspání";
 "backup_alarm_title_fmt" = "Ochrana proti zaspání: %@";
-"backup_alarm_description_fmt" = "Pokud budík na %@ nevypneš do %@, přehraje stejný zvuk znovu a hlasitěji.";
+"backup_alarm_summary_fmt" = "Zazvoní znovu v %@, hlasitěji";
+"backup_try" = "Vyzkoušet";
 "backup_alarm_minutes" = "Zazvonit znovu po";
 "backup_alarm_minutes_fmt" = "po %d min";
 "backup_alarm_before_snooze" = "Zazvoní před koncem odložení.";
@@ -228,8 +229,6 @@
 "volume_guide_link" = "Moc potichu?";
 "test_ring_ringing_now" = "Zvoní teď";
 "backup_alarm_info_title" = "Ochrana proti zaspání";
-"backup_alarm_info_mechanism" = "Pokud budík nezastavíš v nastaveném čase, zazvoní znovu.";
-"backup_alarm_info_louder" = "Přehraje stejný zvuk, hlasitěji a bez zkreslení. Čím tišší je původní zvuk, tím více se zesílí.";
 "backup_alarm_info_volume" = "Skutečná hlasitost závisí na hlasitosti Vyzvánění a upozornění v Nastavení.";
 "backup_alarm_info_accessibility" = "O ochraně proti zaspání";
 

@@ -192,11 +192,11 @@
 "test_ring_failed" = "Impossible de programmer l’alarme de test. Réessayez.";
 "test_ring_simulator_unavailable" = "Le test de sonnerie n’est disponible que sur un appareil réel.";
 "test_ring_alarm_title" = "Alarme de test";
-"test_ring_backup_title" = "Tester le son de l’anti-grasse matinée";
 
 /* Why the trial ring can't ring (#150) */
 "test_ring_reason_not_authorized" = "Les alarmes ne sont pas encore autorisées : elles ne sonneront pas tant que vous ne les autorisez pas.";
 "test_ring_reason_denied" = "Les alarmes sont désactivées pour My Sound Alarm : elles ne sonneront pas. Ouvrez Réglages et activez les alarmes.";
+"test_ring_status_alarms_off" = "Les alarmes ne sonnent pas";
 "allow_alarms" = "Autoriser les alarmes";
 
 /* Loudness (#109 C) */
@@ -204,7 +204,8 @@
 /* Backup alarm (#110) */
 "backup_alarm_toggle" = "Anti-grasse matinée";
 "backup_alarm_title_fmt" = "Anti-grasse matinée : %@";
-"backup_alarm_description_fmt" = "Si vous n’avez pas arrêté l’alarme de %@ avant %@, elle rejoue le même son, plus fort.";
+"backup_alarm_summary_fmt" = "Sonne de nouveau à %@, plus fort";
+"backup_try" = "Essayer";
 "backup_alarm_minutes" = "Sonner à nouveau après";
 "backup_alarm_minutes_fmt" = "Après %d min";
 "backup_alarm_before_snooze" = "Elle sonne avant la fin de votre rappel.";
@@ -228,8 +229,6 @@
 "volume_guide_link" = "Trop faible ?";
 "test_ring_ringing_now" = "Sonnerie en cours";
 "backup_alarm_info_title" = "Anti-grasse matinée";
-"backup_alarm_info_mechanism" = "Si l’alarme n’est pas arrêtée dans le délai que vous avez défini, elle sonne de nouveau.";
-"backup_alarm_info_louder" = "Elle joue le même son, rendu plus fort sans distorsion. Plus le son d’origine est faible, plus il est augmenté.";
 "backup_alarm_info_volume" = "Le volume réel de la sonnerie dépend du volume Sonnerie et alertes dans Réglages.";
 "backup_alarm_info_accessibility" = "À propos de l’anti-grasse matinée";
 

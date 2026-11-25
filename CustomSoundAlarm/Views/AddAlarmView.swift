@@ -246,10 +246,12 @@ struct AlarmDetailView: View {
             }
             .sheet(isPresented: $showingBackupInfo) {
                 BackupAlarmInfoView(
+                    hour: selectedHour,
+                    minute: selectedMinute,
+                    backupMinutes: backupMinutes ?? BackupAlarmLogic.defaultMinutes,
                     showsPlaylistNote: backupMinutes != nil && playlistID != nil,
                     showsFadeNote: backupMinutes != nil && fadeIn != .off
                 )
-                .presentationDetents([.medium])
             }
             .alert("playlist_required_title", isPresented: $showingPlaylistRequired) {
                 Button("ok", role: .cancel) {}
@@ -654,13 +656,35 @@ struct AlarmDetailView: View {
                     .disabled(!isBackupAvailable && backupMinutes == nil)
             }
 
-            if backupMinutes != nil {
-                // #211: 長い説明はやめ、トグル直下に実時刻の1行だけ
-                Text(backupDescriptionText)
-                    .font(.footnote)
-                    .foregroundStyle(Color.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityIdentifier("addAlarm.backupDescription")
+            if let minutes = backupMinutes {
+                // #290: 条件は行の名前「寝過ごし防止」に任せ、鳴る時刻の1文だけにする。
+                // 「試す」は同じ行の右にまとめ、行を増やさない。
+                AdaptiveDetailRow {
+                    Text(backupSummaryText(minutes: minutes))
+                        .font(.footnote)
+                        .foregroundStyle(Color.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityIdentifier("addAlarm.backupDescription")
+                } content: {
+                    Button {
+                        scheduleTestRing(kind: .backup)
+                    } label: {
+                        HStack(spacing: 4) {
+                            if isSchedulingTestRing {
+                                ProgressView()
+                            } else {
+                                Image(systemName: "play.fill")
+                                    .font(.caption2)
+                            }
+                            Text("backup_try")
+                        }
+                        .font(.footnote.weight(.medium))
+                    }
+                    .buttonStyle(.borderless)
+                    .foregroundStyle(Color.actionText)
+                    .disabled(isSchedulingTestRing)
+                    .accessibilityIdentifier("addAlarm.backupTestRing")
+                }
 
                 // 設定が食い違うときだけ出す、直すべき警告（#211 レビュー）
                 if let minutes = backupMinutes, minutes <= snoozeMinutes {
@@ -688,22 +712,6 @@ struct AlarmDetailView: View {
                     .accessibilityIdentifier("addAlarm.backupMinutes")
                 }
 
-                Button {
-                    scheduleTestRing(kind: .backup)
-                } label: {
-                    HStack(spacing: 10) {
-                        Image(systemName: "speaker.wave.3.fill")
-                        Text("test_ring_backup_title")
-                            .fixedSize(horizontal: false, vertical: true)
-                        Spacer()
-                        if isSchedulingTestRing {
-                            ProgressView()
-                        }
-                    }
-                }
-                .disabled(isSchedulingTestRing)
-                .accessibilityIdentifier("addAlarm.backupTestRing")
-
                 if let backupTestRingMessage {
                     Text(backupTestRingMessage)
                         .font(.footnote)
@@ -713,34 +721,19 @@ struct AlarmDetailView: View {
         }
     }
 
-    /// 「7:00 のアラームを 7:15 までに止めなかったら…」を端末の時刻書式で組み立てる（#119）
-    private var backupDescriptionText: String {
-        guard let minutes = backupMinutes else { return "" }
-        let components = Calendar.current.dateComponents([.hour, .minute], from: selectedTime)
-        let times = BackupAlarmLogic.displayTimes(
-            hour: components.hour ?? 7,
-            minute: components.minute ?? 0,
+    private var selectedHour: Int {
+        Calendar.current.component(.hour, from: selectedTime)
+    }
+
+    private var selectedMinute: Int {
+        Calendar.current.component(.minute, from: selectedTime)
+    }
+
+    private func backupSummaryText(minutes: Int) -> String {
+        backupAlarmSummaryText(
+            hour: selectedHour,
+            minute: selectedMinute,
             backupMinutes: minutes
-        )
-        let calendar = Calendar.current
-        let now = Date()
-        let originalDate = calendar.date(
-            bySettingHour: times.originalHour,
-            minute: times.originalMinute,
-            second: 0,
-            of: now
-        ) ?? now
-        let backupDate = calendar.date(
-            bySettingHour: times.backupHour,
-            minute: times.backupMinute,
-            second: 0,
-            of: now
-        ) ?? now
-        let style = Date.FormatStyle(date: .omitted, time: .shortened)
-        return String(
-            format: String(localized: "backup_alarm_description_fmt"),
-            originalDate.formatted(style),
-            backupDate.formatted(style)
         )
     }
 
@@ -811,37 +804,52 @@ struct AlarmDetailView: View {
         }
     }
 
-    /// 理由の行：短い理由 + 直し方（許可の問題なら「設定を開く」）。
+    /// 理由の行：直し方が設定のときは、短い状態の一言 +「設定を開く」にする（#290）。
+    /// 理由そのものは VoiceOver のラベルに残す。
     private func reasonRow(
         _ display: TestRingReasonDisplay,
         messageIdentifier: String
     ) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(String(localized: String.LocalizationValue(display.messageKey)))
-                .font(.footnote)
-                .foregroundStyle(Color.actionText)
-                .fixedSize(horizontal: false, vertical: true)
-                .accessibilityIdentifier(messageIdentifier)
-            if display.requestsPermission {
-                Button("allow_alarms") {
-                    Task {
-                        _ = await scheduler.requestAuthorization()
-                        scheduler.refreshTestRingPermission()
-                    }
-                }
-                .font(.footnote.weight(.medium))
-                .buttonStyle(.borderless)
-                .accessibilityIdentifier("addAlarm.allowAlarms")
-            }
             if display.showsOpenSettings {
-                Button("open_settings") {
-                    if let url = URL(string: UIApplication.openSettingsURLString) {
-                        openURL(url)
+                AdaptiveDetailRow {
+                    Label("test_ring_status_alarms_off", systemImage: "bell.slash.fill")
+                        .font(.footnote)
+                        .foregroundStyle(Color.textSecondary)
+                        .accessibilityLabel(Text("test_ring_status_alarms_off"))
+                        .accessibilityIdentifier("addAlarm.testRingStatus")
+                } content: {
+                    Button("open_settings") {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            openURL(url)
+                        }
                     }
+                    .font(.footnote.weight(.medium))
+                    .buttonStyle(.borderless)
+                    .foregroundStyle(Color.actionText)
+                    .accessibilityIdentifier("addAlarm.openSettings")
+                    .accessibilityLabel(Text(verbatim: String(
+                        localized: String.LocalizationValue(display.messageKey)
+                    )))
+                    .accessibilityHint(Text("open_settings"))
                 }
-                .font(.footnote.weight(.medium))
-                .buttonStyle(.borderless)
-                .accessibilityIdentifier("addAlarm.openSettings")
+            } else {
+                Text(String(localized: String.LocalizationValue(display.messageKey)))
+                    .font(.footnote)
+                    .foregroundStyle(Color.actionText)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier(messageIdentifier)
+                if display.requestsPermission {
+                    Button("allow_alarms") {
+                        Task {
+                            _ = await scheduler.requestAuthorization()
+                            scheduler.refreshTestRingPermission()
+                        }
+                    }
+                    .font(.footnote.weight(.medium))
+                    .buttonStyle(.borderless)
+                    .accessibilityIdentifier("addAlarm.allowAlarms")
+                }
             }
         }
     }
@@ -1284,49 +1292,131 @@ struct AlarmDetailView: View {
     }
 }
 
+// MARK: - Backup alarm copy
+
+/// 寝過ごし防止の1文（#290）。条件は書かず、鳴る時刻だけを端末の書式で出す。
+private func backupAlarmSummaryText(
+    hour: Int,
+    minute: Int,
+    backupMinutes: Int
+) -> String {
+    let times = BackupAlarmLogic.displayTimes(
+        hour: hour,
+        minute: minute,
+        backupMinutes: backupMinutes
+    )
+    let backupTime = AlarmTimeFormat.display(
+        hour: times.backupHour,
+        minute: times.backupMinute
+    )
+    return String(
+        format: String(localized: "backup_alarm_summary_fmt"),
+        backupTime
+    )
+}
+
 // MARK: - BackupAlarmInfoView
+
+private struct BackupInfoHeightKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
+    }
+}
 
 /// 寝過ごし防止の仕組みと先行公開の説明（#122）
 struct BackupAlarmInfoView: View {
     @Environment(\.dismiss) private var dismiss
+    var hour: Int
+    var minute: Int
+    var backupMinutes: Int
     /// 今の設定で当てはまる補足だけを出す（#211: 画面の長い説明をこちらへ）
     var showsPlaylistNote = false
     var showsFadeNote = false
+    @State private var contentHeight: CGFloat = 0
 
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("backup_alarm_info_mechanism")
-                        .font(.body)
-                    // もとの音が小さいほど大きく上げる（#134 の仕組みをそのまま説明）
-                    Text("backup_alarm_info_louder")
-                        .font(.body)
-                    Text("backup_alarm_info_volume")
-                        .font(.subheadline)
-                        .foregroundStyle(Color.textSecondary)
-                    if showsPlaylistNote {
-                        Text("playlist_backup_note")
-                            .font(.subheadline)
-                            .foregroundStyle(Color.textSecondary)
-                    }
-                    if showsFadeNote {
-                        Text("fade_backup_note")
-                            .font(.subheadline)
-                            .foregroundStyle(Color.textSecondary)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(20)
+    /// 大きい文字では閉じるボタンと横に並べず、タイトルに幅を全部使わせる
+    private var header: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack {
+                title
+                Spacer(minLength: 12)
+                closeButton
             }
-            .navigationTitle(String(localized: "backup_alarm_info_title"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("close") { dismiss() }
+            VStack(alignment: .leading, spacing: 8) {
+                title
+                HStack {
+                    Spacer()
+                    closeButton
                 }
             }
         }
+    }
+
+    private var title: some View {
+        Text("backup_alarm_info_title")
+            .font(.headline)
+            .accessibilityAddTraits(.isHeader)
+    }
+
+    private var closeButton: some View {
+        Button("close") { dismiss() }
+            .font(.body.weight(.medium))
+            .foregroundStyle(Color.actionText)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            header
+                .padding(.horizontal, 20)
+                .padding(.top, 18)
+                .padding(.bottom, 12)
+
+            VStack(alignment: .leading, spacing: 12) {
+                // #290: 図はやめ、行と同じ1文 + 音量の注意だけにする
+                Text(backupAlarmSummaryText(
+                    hour: hour,
+                    minute: minute,
+                    backupMinutes: backupMinutes
+                ))
+                .font(.body)
+                .fixedSize(horizontal: false, vertical: true)
+                Text("backup_alarm_info_volume")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if showsPlaylistNote {
+                    Text("playlist_backup_note")
+                        .font(.subheadline)
+                        .foregroundStyle(Color.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if showsFadeNote {
+                    Text("fade_backup_note")
+                        .font(.subheadline)
+                        .foregroundStyle(Color.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .background {
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: BackupInfoHeightKey.self,
+                    value: proxy.size.height
+                )
+            }
+        }
+        .onPreferenceChange(BackupInfoHeightKey.self) { height in
+            contentHeight = height
+        }
+        // 中身の高さに合わせ、medium の空白を残さない（#290）
+        .presentationDetents([.height(max(180, contentHeight))])
         .accessibilityIdentifier("backupInfo.root")
     }
 }

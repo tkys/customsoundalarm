@@ -192,11 +192,11 @@
 "test_ring_failed" = "Nie udało się zaplanować budzika testowego. Spróbuj ponownie.";
 "test_ring_simulator_unavailable" = "Test dzwonienia jest dostępny tylko na prawdziwym urządzeniu.";
 "test_ring_alarm_title" = "Budzik testowy";
-"test_ring_backup_title" = "Wypróbuj dźwięk ochrony przed zaspaniem";
 
 /* Why the trial ring can't ring (#150) */
 "test_ring_reason_not_authorized" = "Budziki nie są jeszcze dozwolone, więc nie zadzwonią, dopóki nie wyrazisz zgody.";
 "test_ring_reason_denied" = "Budziki są wyłączone dla My Sound Alarm, więc nie zadzwonią. Otwórz Ustawienia i włącz budziki.";
+"test_ring_status_alarms_off" = "Budziki nie zadzwonią";
 "allow_alarms" = "Zezwól na budziki";
 
 /* Loudness (#109 C) */
@@ -204,7 +204,8 @@
 /* Backup alarm (#110) */
 "backup_alarm_toggle" = "Ochrona przed zaspaniem";
 "backup_alarm_title_fmt" = "Ochrona przed zaspaniem: %@";
-"backup_alarm_description_fmt" = "Jeśli nie wyłączysz budzika o %@ do %@, odtworzy ten sam dźwięk ponownie, głośniej.";
+"backup_alarm_summary_fmt" = "Zadzwoni ponownie o %@, głośniej";
+"backup_try" = "Wypróbuj";
 "backup_alarm_minutes" = "Zadzwoń ponownie po";
 "backup_alarm_minutes_fmt" = "po %d min";
 "backup_alarm_before_snooze" = "Dzwoni przed końcem drzemki.";
@@ -228,8 +229,6 @@
 "volume_guide_link" = "Za cicho?";
 "test_ring_ringing_now" = "Dzwoni teraz";
 "backup_alarm_info_title" = "Ochrona przed zaspaniem";
-"backup_alarm_info_mechanism" = "Jeśli budzik nie zostanie zatrzymany w ustawionym czasie, zadzwoni ponownie.";
-"backup_alarm_info_louder" = "Odtwarza ten sam dźwięk, głośniej i bez zniekształceń. Im cichszy oryginalny dźwięk, tym bardziej jest podgłaśniany.";
 "backup_alarm_info_volume" = "Rzeczywista głośność zależy od głośności Dzwonek i alerty w Ustawieniach.";
 "backup_alarm_info_accessibility" = "O ochronie przed zaspaniem";
 
