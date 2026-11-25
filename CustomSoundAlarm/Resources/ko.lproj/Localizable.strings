@@ -327,7 +327,7 @@
 
 // #197 skip days
 "skip_one_time_warning" = "1회성 알람 %d개는 울리지 않고 끝납니다.";
-"skip_undo" = "되돌리기";
+"skip_resume" = "재개";
 "skip_apply" = "쉬기";
 "holiday_skip_toggle" = "공휴일에는 울리지 않기";
 "holiday_next_skipped" = "%@은(는) 쉬는 날";
@@ -343,7 +343,7 @@
 "skip_all_row_fmt" = "%@ 까지 · %d회";
 "skip_all_custom" = "날짜 선택";
 "skip_all_active_fmt" = "%1$@ 까지 쉬기 · %2$d개";
-"skip_row_global_fmt" = "%@ 까지 쉬기";
+"skip_row_paused_a11y_fmt" = "%@ 까지 울리지 않습니다.";
 "skip_row_skip_fmt" = "%@ 쉬기";
 "skip_row_undo" = "쉬기 취소";
 "skip_row_summary_fmt" = "%@ 쉬기 · 다음은 %@";

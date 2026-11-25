@@ -327,7 +327,7 @@
 
 // #197 skip days
 "skip_one_time_warning" = "Een eenmalige wekker (%d) gaat niet af.";
-"skip_undo" = "Ongedaan maken";
+"skip_resume" = "Hervatten";
 "skip_apply" = "Pauzeren";
 "holiday_skip_toggle" = "Niet afgaan op feestdagen";
 "holiday_next_skipped" = "%@ geen wekker";
@@ -343,7 +343,7 @@
 "skip_all_row_fmt" = "tot %@ · %d keer";
 "skip_all_custom" = "Kies datums";
 "skip_all_active_fmt" = "Gepauzeerd tot %1$@ · %2$d";
-"skip_row_global_fmt" = "Gepauzeerd tot %@";
+"skip_row_paused_a11y_fmt" = "Gaat niet af tot %@.";
 "skip_row_skip_fmt" = "Pauzeer op %@";
 "skip_row_undo" = "Pauze ongedaan maken";
 "skip_row_summary_fmt" = "Gepauzeerd op %@ · volgende %@";

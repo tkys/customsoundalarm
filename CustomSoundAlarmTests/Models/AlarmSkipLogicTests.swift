@@ -761,4 +761,25 @@ struct AlarmOffIconTests {
         #expect(AlarmOffIcon.badgeCenterInsetRatio < 0.5)
         #expect(AlarmOffIcon.badgeGapRatio > 0)
     }
+
+    @Test
+    func drawnBadgeStaysInsideTheCutout() {
+        #expect(AlarmOffIcon.badgeRingRadiusRatio > 0)
+        #expect(AlarmOffIcon.badgeRingStrokeRatio > 0)
+        #expect(AlarmOffIcon.badgeSlashRadiusRatio > 0)
+        #expect(
+            AlarmOffIcon.badgeRingRadiusRatio + AlarmOffIcon.badgeRingStrokeRatio / 2
+                < AlarmOffIcon.badgeDiameterRatio / 2 + AlarmOffIcon.badgeGapRatio
+        )
+    }
+
+    @Test
+    func pausedRowsStaggerFromTheTop() {
+        #expect(PausedRowTiming.delay(forPausedIndex: 0) == 0)
+        #expect(abs(PausedRowTiming.delay(forPausedIndex: 1) - 0.06) < 0.0001)
+        #expect(abs(PausedRowTiming.delay(forPausedIndex: 3) - 0.18) < 0.0001)
+        #expect(PausedRowTiming.delay(forPausedIndex: -1) == 0)
+        #expect(PausedRowTiming.slashOut < PausedRowTiming.slashIn)
+        #expect(PausedRowTiming.layerOut < PausedRowTiming.layerIn)
+    }
 }

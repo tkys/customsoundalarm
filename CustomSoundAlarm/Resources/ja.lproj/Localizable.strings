@@ -327,7 +327,7 @@
 
 // #197 skip days
 "skip_one_time_warning" = "1回きりのアラーム %d本は鳴らずに終わります";
-"skip_undo" = "取り消す";
+"skip_resume" = "再開";
 "skip_apply" = "鳴らさない";
 "holiday_skip_toggle" = "祝日は鳴らさない";
 "holiday_next_skipped" = "%@ は鳴らさない";
@@ -342,8 +342,8 @@
 "skip_all_7d" = "7日間";
 "skip_all_row_fmt" = "%@ まで・%d回";
 "skip_all_custom" = "日付を選ぶ";
-"skip_all_active_fmt" = "%1$@ まで鳴らさない・%2$d本";
-"skip_row_global_fmt" = "%@ まで鳴らさない";
+"skip_all_active_fmt" = "%1$@ まで鳴りません・%2$d本";
+"skip_row_paused_a11y_fmt" = "鳴りません、%@ まで。";
 "skip_row_skip_fmt" = "%@ は鳴らさない";
 "skip_row_undo" = "元に戻す";
 "skip_row_summary_fmt" = "%@ は鳴らさない・次は %@";

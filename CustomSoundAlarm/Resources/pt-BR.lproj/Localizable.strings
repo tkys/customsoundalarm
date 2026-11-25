@@ -327,7 +327,7 @@
 
 // #197 skip days
 "skip_one_time_warning" = "Um alarme único (%d) não vai tocar.";
-"skip_undo" = "Desfazer";
+"skip_resume" = "Retomar";
 "skip_apply" = "Pausar";
 "holiday_skip_toggle" = "Não tocar em feriados";
 "holiday_next_skipped" = "%@ sem alarme";
@@ -343,7 +343,7 @@
 "skip_all_row_fmt" = "até %@ · %d vezes";
 "skip_all_custom" = "Escolher datas";
 "skip_all_active_fmt" = "Em pausa até %1$@ · %2$d";
-"skip_row_global_fmt" = "Em pausa até %@";
+"skip_row_paused_a11y_fmt" = "Não toca até %@.";
 "skip_row_skip_fmt" = "Pausar em %@";
 "skip_row_undo" = "Cancelar a pausa";
 "skip_row_summary_fmt" = "Em pausa em %@ · próxima %@";

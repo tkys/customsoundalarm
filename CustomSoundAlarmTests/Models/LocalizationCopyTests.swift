@@ -100,28 +100,18 @@ struct LocalizationCopyTests {
     }
 
     @Test
-    func globalSkipRowCopyExistsInEveryLanguage() throws {
-        let expected = [
-            "en": "Resting until %@",
-            "ja": "%@ まで鳴らさない",
-            "fr": "En pause jusqu’à %@",
-            "de": "Pause bis %@",
-            "es": "En pausa hasta el %@",
-            "pt-BR": "Em pausa até %@",
-            "it": "In pausa fino a %@",
-            "nl": "Gepauzeerd tot %@",
-            "ko": "%@ 까지 쉬기",
-            "zh-Hans": "休息至 %@",
-            "ar": "إيقاف مؤقت حتى %@",
-            "pl": "Wstrzymane do %@",
-            "cs": "Pozastaveno do %@",
-        ]
+    func pausedRowCopyExistsInEveryLanguage() throws {
         for language in Self.languages {
             let strings = try strings(for: language)
             #expect(
-                strings["skip_row_global_fmt"] == expected[language],
-                "\(language): \(strings["skip_row_global_fmt"] ?? "nil")"
+                strings["skip_resume"]?.isEmpty == false,
+                "\(language): missing skip_resume"
             )
+            let a11y = try #require(
+                strings["skip_row_paused_a11y_fmt"],
+                "\(language): missing skip_row_paused_a11y_fmt"
+            )
+            #expect(a11y.contains("%@"), "\(language): \(a11y)")
         }
     }
 
@@ -177,8 +167,9 @@ struct LocalizationCopyTests {
         #expect(strings["skip_all_title"] == "しばらく鳴らさない")
         #expect(strings["skip_alarms_intent"] == "しばらく鳴らさない")
         #expect(strings["skip_apply"] == "鳴らさない")
-        #expect(strings["skip_all_active_fmt"] == "%1$@ まで鳴らさない・%2$d本")
-        #expect(strings["skip_row_global_fmt"] == "%@ まで鳴らさない")
+        #expect(strings["skip_all_active_fmt"] == "%1$@ まで鳴りません・%2$d本")
+        #expect(strings["skip_resume"] == "再開")
+        #expect(strings["skip_row_paused_a11y_fmt"] == "鳴りません、%@ まで。")
         #expect(strings["skip_row_skip_fmt"] == "%@ は鳴らさない")
         #expect(strings["skip_row_undo"] == "元に戻す")
         #expect(strings["skip_row_summary_fmt"] == "%@ は鳴らさない・次は %@")

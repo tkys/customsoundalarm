@@ -327,7 +327,7 @@
 
 // #197 skip days
 "skip_one_time_warning" = "Una sveglia singola (%d) non suonerà.";
-"skip_undo" = "Annulla";
+"skip_resume" = "Riprendi";
 "skip_apply" = "Metti in pausa";
 "holiday_skip_toggle" = "Non suonare nei giorni festivi";
 "holiday_next_skipped" = "%@ senza sveglia";
@@ -343,7 +343,7 @@
 "skip_all_row_fmt" = "fino a %@ · %d volte";
 "skip_all_custom" = "Scegli le date";
 "skip_all_active_fmt" = "In pausa fino a %1$@ · %2$d";
-"skip_row_global_fmt" = "In pausa fino a %@";
+"skip_row_paused_a11y_fmt" = "Non suona fino a %@.";
 "skip_row_skip_fmt" = "Metti in pausa il %@";
 "skip_row_undo" = "Annulla la pausa";
 "skip_row_summary_fmt" = "In pausa il %@ · prossima %@";

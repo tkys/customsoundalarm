@@ -327,7 +327,7 @@
 
 // #197 skip days
 "skip_one_time_warning" = "Jednorázový budík (%d) nezazvoní.";
-"skip_undo" = "Zpět";
+"skip_resume" = "Obnovit";
 "skip_apply" = "Pozastavit";
 "holiday_skip_toggle" = "Nezvonit o svátcích";
 "holiday_next_skipped" = "%@ bez budíku";
@@ -343,7 +343,7 @@
 "skip_all_row_fmt" = "do %@ · %d krát";
 "skip_all_custom" = "Vybrat data";
 "skip_all_active_fmt" = "Pozastaveno do %1$@ · %2$d";
-"skip_row_global_fmt" = "Pozastaveno do %@";
+"skip_row_paused_a11y_fmt" = "Nezazvoní do %@.";
 "skip_row_skip_fmt" = "Pozastavit %@";
 "skip_row_undo" = "Zrušit pozastavení";
 "skip_row_summary_fmt" = "Pozastaveno %@ · další %@";

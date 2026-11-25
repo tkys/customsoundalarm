@@ -791,6 +791,16 @@ struct ContentView: View {
         globalSkip = AppGroup.globalSkip
     }
 
+    /// 上から何番目に止まっている行か（層と線を 0.06 秒ずつずらす・#296）。
+    private func pausedRowIndex(for alarmID: UUID) -> Int {
+        guard let skip = activeGlobalSkip,
+              let index = displayedAlarms.firstIndex(where: { $0.id == alarmID })
+        else { return 0 }
+        return displayedAlarms[..<index].filter {
+            AlarmSkipLogic.globalSkipRowEnd(for: $0, globalSkip: skip) != nil
+        }.count
+    }
+
     /// タイムゾーンが変わったら、補いのアラームを登録し直す（#197）。
     private func syncSkipTimeZoneIfNeeded() {
         let current = TimeZone.current.identifier
@@ -831,12 +841,13 @@ struct ContentView: View {
                     GlobalSkipNoticeRow(
                         skip: skip,
                         entries: alarmStore.alarms,
-                        onUndo: {
+                        onResume: {
                             AlarmSkipService.undoAll()
                             refreshGlobalSkip()
                         }
                     )
-                    .warmCard()
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                 }
                 ForEach(displayedAlarms, id: \.id) { alarm in
                     Group {
@@ -928,7 +939,10 @@ struct ContentView: View {
                 await runSpotlight(request, proxy: proxy)
             }
             .sheet(isPresented: $showingSkipAll, onDismiss: refreshGlobalSkip) {
-                SkipAllSheet(entries: alarmStore.alarms.filter(\.isEnabled))
+                SkipAllSheet(
+                    entries: alarmStore.alarms.filter(\.isEnabled),
+                    hasActiveSkip: activeGlobalSkip != nil
+                )
             }
         }
     }
@@ -937,7 +951,10 @@ struct ContentView: View {
 
     /// 一覧の1行（スポットライトの対象でも同じ中身を使う）。
     private func alarmRowContent(_ alarm: AlarmEntry) -> some View {
-        AlarmRow(
+        let pausedUntil = activeGlobalSkip.flatMap {
+            AlarmSkipLogic.globalSkipRowEnd(for: alarm, globalSkip: $0)
+        }
+        return AlarmRow(
             alarm: alarm,
             soundName: AlarmSoundDisplay.name(for: alarm),
             sound: AlarmSoundDisplay.representativeSound(for: alarm),
@@ -946,6 +963,9 @@ struct ContentView: View {
             spotlight: spotlightStore.controller(for: alarm.id),
             spotlightFocus: $spotlightFocusedAlarmID,
             untilRingNotice: untilRingNotice,
+            pausedUntil: pausedUntil,
+            pausedIndex: pausedRowIndex(for: alarm.id),
+            onPausedTap: { showingSkipAll = true },
             onFixSilentSound: {
                 ignoreFirstAlarmFollowupIfNeeded()
                 fixingSilentAlarm = alarm
@@ -1871,6 +1891,12 @@ struct AlarmRow: View {
     let spotlightFocus: AccessibilityFocusState<UUID?>.Binding
     /// 光っている行の2行目に出す1文（#289）
     let untilRingNotice: UntilRingNoticeController
+    /// 全体の休みで止まっている行の終わり（#296）。nil なら止まっていない。
+    let pausedUntil: Date?
+    /// 上から何番目に止まっている行か（#296）。
+    let pausedIndex: Int
+    /// 層をタップしたときに「しばらく鳴らさない」を開く（#296）。
+    let onPausedTap: () -> Void
     let onFixSilentSound: () -> Void
     let onFirstAlarmFollowup: (FirstAlarmFollowupAction) -> Void
     let onToggle: () -> Void
@@ -1892,6 +1918,7 @@ struct AlarmRow: View {
                 .padding(.vertical, dynamicTypeSize.isAccessibilitySize ? 8 : 4)
             }
             .foregroundStyle(.primary)
+            .accessibilityLabel(Text(rowAccessibilityLabel))
             .accessibilityIdentifier("alarm.row")
             .accessibilityFocused(spotlightFocus, equals: alarm.id)
 
@@ -1900,6 +1927,35 @@ struct AlarmRow: View {
                 followupButtons
             }
         }
+        // 止まっている行は、カードと同じ形の層をかぶせる。行の高さは変えない（#296）。
+        .overlay {
+            PausedAlarmOverlay(
+                isPaused: pausedUntil != nil,
+                pausedIndex: pausedIndex,
+                reduceMotion: reduceMotion,
+                onTap: onPausedTap
+            )
+        }
+    }
+
+    /// 行の読み上げ。止まっている行は先頭に「鳴りません、6:00 まで。」を足す（#296）。
+    private var rowAccessibilityLabel: String {
+        var parts = [alarm.displayTime]
+        if !alarm.label.isEmpty { parts.append(alarm.label) }
+        if let skipSummaryText { parts.append(skipSummaryText) }
+        if !alarm.repeatWeekdays.isEmpty { parts.append(repeatSummary) }
+        parts.append(soundDisplayName)
+        if let holidaySummary { parts.append(holidaySummary) }
+        if hasSilentSound {
+            parts.append(String(localized: "silent_alarm_warning"))
+        }
+        let rest = ListFormatter.localizedString(byJoining: parts)
+        guard let pausedUntil else { return rest }
+        let lead = String(
+            format: String(localized: "skip_row_paused_a11y_fmt"),
+            AlarmSkipFormat.dayAndTime(pausedUntil)
+        )
+        return "\(lead) \(rest)"
     }
 
     // MARK: - First alarm follow-up (#247)
@@ -1960,13 +2016,6 @@ struct AlarmRow: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .accessibilityIdentifier("skip.row.summary")
                 }
-                if let globalSkipSummaryText {
-                    Text(globalSkipSummaryText)
-                        .font(.caption)
-                        .foregroundStyle(metaColor)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .accessibilityIdentifier("skip.row.globalSummary")
-                }
                 if !alarm.label.isEmpty {
                     Text(alarm.label)
                         .font(.subheadline)
@@ -2005,14 +2054,6 @@ struct AlarmRow: View {
                     .foregroundStyle(metaColor)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("skip.row.summary")
-            }
-
-            if let globalSkipSummaryText {
-                Text(globalSkipSummaryText)
-                    .font(.caption)
-                    .foregroundStyle(metaColor)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityIdentifier("skip.row.globalSummary")
             }
 
             if !alarm.label.isEmpty {
@@ -2198,14 +2239,6 @@ struct AlarmRow: View {
         return String(
             format: String(localized: "skip_row_summary_no_next_fmt"),
             AlarmSkipFormat.day(summary.skipped)
-        )
-    }
-
-    private var globalSkipSummaryText: String? {
-        guard let end = AlarmSkipLogic.globalSkipRowEnd(for: alarm) else { return nil }
-        return String(
-            format: String(localized: "skip_row_global_fmt"),
-            AlarmSkipFormat.dayAndTime(end)
         )
     }
 

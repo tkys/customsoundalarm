@@ -327,7 +327,7 @@
 
 // #197 skip days
 "skip_one_time_warning" = "Budzik jednorazowy (%d) nie zadzwoni.";
-"skip_undo" = "Cofnij";
+"skip_resume" = "Wznów";
 "skip_apply" = "Pauza";
 "holiday_skip_toggle" = "Nie dzwoń w święta";
 "holiday_next_skipped" = "%@ bez budzika";
@@ -343,7 +343,7 @@
 "skip_all_row_fmt" = "do %@ · %d razy";
 "skip_all_custom" = "Wybierz daty";
 "skip_all_active_fmt" = "Wstrzymane do %1$@ · %2$d";
-"skip_row_global_fmt" = "Wstrzymane do %@";
+"skip_row_paused_a11y_fmt" = "Nie zadzwoni do %@.";
 "skip_row_skip_fmt" = "Wstrzymaj %@";
 "skip_row_undo" = "Anuluj wstrzymanie";
 "skip_row_summary_fmt" = "Wstrzymany %@ · następny %@";
