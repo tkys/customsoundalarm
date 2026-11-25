@@ -423,6 +423,8 @@ private final class MockBackend: AnalyticsBackend, @unchecked Sendable {
 
     func setUserProperties(_ properties: [String: Any]) {}
 
+    func register(_ properties: [String: Any]) {}
+
     @Test
     func postHogProperties_mergesIntProperties() {
         let event = PendingAlarmEvent(

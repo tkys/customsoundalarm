@@ -146,4 +146,12 @@ struct AnalyticsEventsDocTests {
             #expect(doc.contains("| `\(name)` |"), "docs/analytics-events.md の表に `\(name)` がありません")
         }
     }
+
+    @Test
+    func appearanceSuperPropertyIsDocumented() throws {
+        let doc = try String(contentsOf: docURL, encoding: .utf8)
+        #expect(doc.contains("| `ui_appearance` |"))
+        #expect(doc.contains("light"))
+        #expect(doc.contains("dark"))
+    }
 }
