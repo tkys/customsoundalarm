@@ -96,9 +96,10 @@ final class AlarmSkipUITests: XCTestCase {
         XCTAssertEqual(rows.firstMatch.frame.height, heightBefore, accuracy: 1)
 
         app.buttons["skipAll.resume"].tap()
-        XCTAssertFalse(
-            notice.waitForExistence(timeout: 5),
-            "the band should disappear after resume"
+        // 再開は行が戻りきってから最後に帯を閉じる（#296 実機確認）。
+        XCTAssertTrue(
+            notice.waitForNonExistence(timeout: 5),
+            "the band should close after the rows come back"
         )
         XCTAssertEqual(overlays.count, 0, "paused layers should disappear after resume")
         XCTAssertEqual(
@@ -134,8 +135,8 @@ final class AlarmSkipUITests: XCTestCase {
         let sheetResume = app.buttons["skipAll.sheetResume"]
         XCTAssertTrue(sheetResume.exists, "the sheet should offer resume")
         sheetResume.tap()
-        XCTAssertFalse(
-            app.staticTexts["skipAll.notice"].waitForExistence(timeout: 5),
+        XCTAssertTrue(
+            app.staticTexts["skipAll.notice"].waitForNonExistence(timeout: 5),
             "resuming from the sheet should clear the rest"
         )
         XCTAssertEqual(toggle.value as? String, "1")
@@ -236,8 +237,8 @@ final class AlarmSkipUITests: XCTestCase {
             "custom rest should show the notice: \(app.debugDescription)"
         )
         app.buttons["skipAll.resume"].tap()
-        XCTAssertFalse(
-            app.staticTexts["skipAll.notice"].waitForExistence(timeout: 5),
+        XCTAssertTrue(
+            app.staticTexts["skipAll.notice"].waitForNonExistence(timeout: 5),
             "custom rest should be undone so later tests start clean"
         )
     }

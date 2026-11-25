@@ -118,7 +118,10 @@ private struct BadgeCutoutMask: Shape {
     }
 }
 
-/// 禁止マークの斜線（左下から右上へ）。`trim` で引かれるようにする。
+/// 禁止マークの斜線（左上から右下へ）。`trim` で引かれるようにする（#296 実機確認）。
+///
+/// `nosign` と同じ「＼」の向き。`trim` は始点から終点へ描くので、
+/// 引くときは左上から右下へ、戻るときは右下から左上へ消える。
 private struct AlarmOffSlash: Shape {
     /// 中心から斜線の端までの距離（斜線の枠の幅に対する比ではなく実寸）。
     let endRadius: CGFloat
@@ -127,8 +130,8 @@ private struct AlarmOffSlash: Shape {
         let center = CGPoint(x: rect.midX, y: rect.midY)
         let offset = endRadius / sqrt(2)
         var path = Path()
-        path.move(to: CGPoint(x: center.x - offset, y: center.y + offset))
-        path.addLine(to: CGPoint(x: center.x + offset, y: center.y - offset))
+        path.move(to: CGPoint(x: center.x - offset, y: center.y - offset))
+        path.addLine(to: CGPoint(x: center.x + offset, y: center.y + offset))
         return path
     }
 }
@@ -294,41 +297,70 @@ struct GlobalSkipNoticeRow: View {
 
 // MARK: - 止まっている行の層（#296）
 
-/// 止めるとき・再開するときの時間（#296）。
+/// 止めるとき・再開するときの時間（#296。実機確認でゆっくりにした）。
 enum PausedRowTiming {
-    /// 上の行からずらす幅。
-    static let stagger: TimeInterval = 0.06
-    /// 層が出る（消えるときは少し速い）。
+    /// 出るときに、上の行からずらす幅。
+    static let stagger: TimeInterval = 0.08
+    /// 戻るときに、上の行からずらす幅。
+    static let exitStagger: TimeInterval = 0.06
+    /// 帯が開く時間と、開ききってから行を動かすまでの待ち。
+    static let noticeIn: TimeInterval = 0.30
+    static let noticeSettle: TimeInterval = 0.40
+    /// 帯が閉じる時間。
+    static let noticeOut: TimeInterval = 0.30
+    /// 行が戻りきってから、帯を閉じ始めるまで（いちばん下の行が 4 本のとき約 1.25 秒）。
+    static let noticeCloseFloor: TimeInterval = 1.25
+
+    /// 出るとき：層 → 時計 → 丸 → 斜線。時間は行が動き始めてから。
     static let layerIn: TimeInterval = 0.30
-    static let layerOut: TimeInterval = 0.20
-    /// 時計が出る。
-    static let clockIn: TimeInterval = 0.16
-    static let clockDelay: TimeInterval = 0.10
-    /// 禁止の丸を描く。
-    static let circleIn: TimeInterval = 0.30
-    static let circleDelay: TimeInterval = 0.28
-    /// 斜線を引く。
-    static let slashIn: TimeInterval = 0.22
-    /// 再開：斜線が戻る → 丸が戻る → 層が消える。
-    static let slashOut: TimeInterval = 0.14
-    static let circleOut: TimeInterval = 0.18
-    static let circleOutDelay: TimeInterval = 0.12
-    static let layerOutDelay: TimeInterval = 0.28
+    static let clockStart: TimeInterval = 0.12
+    static let clockIn: TimeInterval = 0.25
+    static let circleStart: TimeInterval = 0.30
+    static let circleIn: TimeInterval = 0.45
+    static let slashStart: TimeInterval = 0.78
+    static let slashIn: TimeInterval = 0.30
+
+    /// 戻るとき：斜線 → 丸 → 層と時計（#296 実機確認）。
+    static let slashOut: TimeInterval = 0.28
+    static let circleOutStart: TimeInterval = 0.25
+    static let circleOut: TimeInterval = 0.40
+    static let layerOutStart: TimeInterval = 0.72
+    static let layerOut: TimeInterval = 0.30
 
     /// 何番目に止まった行か（上から）でずらす。
     static func delay(forPausedIndex index: Int) -> TimeInterval {
         max(0, Double(index)) * stagger
     }
+
+    /// 戻るときのずらし幅。
+    static func exitDelay(forPausedIndex index: Int) -> TimeInterval {
+        max(0, Double(index)) * exitStagger
+    }
+
+    /// 再開してから、いちばん下の行まで戻りきるまで（#296 実機確認）。
+    static func exitEnd(pausedCount: Int) -> TimeInterval {
+        exitDelay(forPausedIndex: max(0, pausedCount - 1))
+            + layerOutStart
+            + layerOut
+    }
+
+    /// 帯を閉じ始めるまで。行が戻りきるのを待ち、4 本なら約 1.25 秒。
+    static func noticeCloseDelay(pausedCount: Int) -> TimeInterval {
+        max(noticeCloseFloor, exitEnd(pausedCount: pausedCount))
+    }
 }
 
 /// 止まっている行に、カードと同じ形でかぶせる層（#296）。
 ///
-/// 出るとき：層 → 時計 → 丸 → 斜線。消えるときは逆に、少し速く。
+/// 出るとき：帯が開ききってから 0.4 秒待ち、層 → 時計 → 丸 → 斜線。
+/// 消えるときは逆に、斜線 → 丸 → 層と時計（#296 実機確認）。
 /// 行の高さは変えず、タップはこの層が受ける（下のスイッチには届かない）。
 struct PausedAlarmOverlay: View {
     let isPaused: Bool
     /// 上から何番目に止まっている行か（ずらす順番）。
     let pausedIndex: Int
+    /// 帯が開ききるまでの待ち。止めた瞬間に画面に出ていた行だけが使う。
+    var entryDelay: TimeInterval = 0
     let reduceMotion: Bool
     let onTap: () -> Void
 
@@ -410,29 +442,33 @@ struct PausedAlarmOverlay: View {
             }
             return
         }
-        let delay = PausedRowTiming.delay(forPausedIndex: pausedIndex)
+        let delay = entryDelay + PausedRowTiming.delay(forPausedIndex: pausedIndex)
         transitionTask = Task { @MainActor in
             if delay > 0 {
                 try? await Task.sleep(for: .seconds(delay))
                 guard !Task.isCancelled else { return }
             }
-            withAnimation(.timingCurve(0.1, 0.7, 0.2, 1, duration: PausedRowTiming.layerIn)) {
+            withAnimation(.timingCurve(0.05, 0.7, 0.1, 1, duration: PausedRowTiming.layerIn)) {
                 layerOpacity = 1
             }
-            try? await Task.sleep(for: .seconds(PausedRowTiming.clockDelay))
+            try? await Task.sleep(for: .seconds(PausedRowTiming.clockStart))
             guard !Task.isCancelled else { return }
-            withAnimation(.easeOut(duration: PausedRowTiming.clockIn)) {
+            withAnimation(.timingCurve(0.05, 0.7, 0.1, 1, duration: PausedRowTiming.clockIn)) {
                 clockOpacity = 1
             }
-            try? await Task.sleep(for: .seconds(PausedRowTiming.circleDelay))
+            try? await Task.sleep(for: .seconds(
+                PausedRowTiming.circleStart - PausedRowTiming.clockStart
+            ))
             guard !Task.isCancelled else { return }
-            withAnimation(.timingCurve(0.2, 0.7, 0.3, 1, duration: PausedRowTiming.circleIn)) {
+            withAnimation(.timingCurve(0.4, 0, 0.2, 1, duration: PausedRowTiming.circleIn)) {
                 circleProgress = 1
                 gapProgress = 1
             }
-            try? await Task.sleep(for: .seconds(PausedRowTiming.circleIn))
+            try? await Task.sleep(for: .seconds(
+                PausedRowTiming.slashStart - PausedRowTiming.circleStart
+            ))
             guard !Task.isCancelled else { return }
-            withAnimation(.easeOut(duration: PausedRowTiming.slashIn)) {
+            withAnimation(.timingCurve(0.4, 0, 0.2, 1, duration: PausedRowTiming.slashIn)) {
                 slashProgress = 1
             }
         }
@@ -452,18 +488,28 @@ struct PausedAlarmOverlay: View {
             return
         }
         transitionTask = Task { @MainActor in
-            withAnimation(.easeIn(duration: PausedRowTiming.slashOut)) {
+            let delay = PausedRowTiming.exitDelay(forPausedIndex: pausedIndex)
+            if delay > 0 {
+                try? await Task.sleep(for: .seconds(delay))
+                guard !Task.isCancelled else { return }
+            }
+            // 斜線は右下から左上へ戻る（`trim` の終点が縮む）。
+            withAnimation(.timingCurve(0.4, 0, 0.2, 1, duration: PausedRowTiming.slashOut)) {
                 slashProgress = 0
             }
-            try? await Task.sleep(for: .seconds(PausedRowTiming.circleOutDelay))
+            try? await Task.sleep(for: .seconds(PausedRowTiming.circleOutStart))
             guard !Task.isCancelled else { return }
-            withAnimation(.easeIn(duration: PausedRowTiming.circleOut)) {
+            // 丸は反時計回りに戻る。
+            withAnimation(.timingCurve(0.4, 0, 0.2, 1, duration: PausedRowTiming.circleOut)) {
                 circleProgress = 0
                 gapProgress = 0
             }
-            try? await Task.sleep(for: .seconds(PausedRowTiming.layerOutDelay))
+            // 行が戻り始めてから layerOutStart 後に、層と時計を消す。
+            try? await Task.sleep(for: .seconds(
+                PausedRowTiming.layerOutStart - PausedRowTiming.circleOutStart
+            ))
             guard !Task.isCancelled else { return }
-            withAnimation(.easeInOut(duration: PausedRowTiming.layerOut)) {
+            withAnimation(.timingCurve(0.4, 0, 0.2, 1, duration: PausedRowTiming.layerOut)) {
                 layerOpacity = 0
                 clockOpacity = 0
             }

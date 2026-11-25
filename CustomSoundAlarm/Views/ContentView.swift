@@ -105,7 +105,18 @@ struct ContentView: View {
     @State private var editScreenVisible = false
     /// すべてのアラームを休む（#197 画面作り直し）
     @State private var showingSkipAll = false
-    @State private var globalSkip: GlobalSkip?
+    /// 起動直後から止まっていた行を、動かさずにそのまま見せる（#296）。
+    @State private var globalSkip: GlobalSkip? = AppGroup.globalSkip
+    /// 一覧の上に出す帯のデータ（#296 実機確認）。閉じ終わるまで残す。
+    @State private var noticeSkip: GlobalSkip? = AppGroup.globalSkip
+    /// 帯を開いているか。0 のときは高さも 0。
+    @State private var noticeOpen = AppGroup.globalSkip?.isActive == true
+    /// 帯の自然な高さ。開く前に測ってから高さを動かす。
+    @State private var noticeHeight: CGFloat = 0
+    @State private var pendingNoticeOpen = false
+    @State private var noticeCloseTask: Task<Void, Never>?
+    /// 帯が開ききるまで、行の層とアイコンを待たせる（#296 実機確認）。
+    @State private var pausedEntryDelay: TimeInterval = 0
     /// 許可バナーの表示済み計測（#230）
     @State private var reportedPermissionBannerStatus: AlarmPermissionStatus?
     /// 設定アプリへ移る前のシート（#239）
@@ -788,12 +799,101 @@ struct ContentView: View {
         if let skip = AppGroup.globalSkip, !skip.isActive {
             AppGroup.globalSkip = nil
         }
-        globalSkip = AppGroup.globalSkip
+        let next = AppGroup.globalSkip
+        let previous = activeGlobalSkip
+
+        // 再開：行だけ先に戻し、戻りきってから帯を閉じる（#296 実機確認）。
+        if let previous, next?.isActive != true {
+            noticeCloseTask?.cancel()
+            globalSkip = next
+            guard !reduceMotion else {
+                closeNoticeNow()
+                return
+            }
+            noticeSkip = previous
+            scheduleNoticeClose()
+            return
+        }
+
+        // 休みに入った：帯を先に開き、一覧が下がりきってから行を動かす（#296 実機確認）。
+        if let next, next.isActive, previous == nil {
+            noticeCloseTask?.cancel()
+            pausedEntryDelay = reduceMotion
+                ? 0
+                : PausedRowTiming.noticeIn + PausedRowTiming.noticeSettle
+            globalSkip = next
+            openNotice(next)
+            return
+        }
+
+        globalSkip = next
     }
 
-    /// 上から何番目に止まっている行か（層と線を 0.06 秒ずつずらす・#296）。
+    /// 帯を開く。高さを測ってから 0.3 秒で開き、一覧を下げる（#296 実機確認）。
+    private func openNotice(_ skip: GlobalSkip) {
+        noticeSkip = skip
+        guard !reduceMotion else {
+            noticeOpen = true
+            return
+        }
+        if noticeHeight > 0 {
+            withAnimation(.timingCurve(0.05, 0.7, 0.1, 1, duration: PausedRowTiming.noticeIn)) {
+                noticeOpen = true
+            }
+            return
+        }
+        noticeOpen = false
+        pendingNoticeOpen = true
+    }
+
+    /// 行が戻りきってから、帯を閉じる（#296 実機確認）。
+    private func scheduleNoticeClose() {
+        noticeCloseTask?.cancel()
+        guard let skip = noticeSkip else { return }
+        let pausedCount = displayedAlarms.filter {
+            AlarmSkipLogic.globalSkipRowEnd(for: $0, globalSkip: skip) != nil
+        }.count
+        let delay = PausedRowTiming.noticeCloseDelay(pausedCount: pausedCount)
+        noticeCloseTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(delay))
+            guard !Task.isCancelled else { return }
+            withAnimation(.timingCurve(0.4, 0, 0.2, 1, duration: PausedRowTiming.noticeOut)) {
+                noticeOpen = false
+            }
+            try? await Task.sleep(for: .seconds(PausedRowTiming.noticeOut))
+            guard !Task.isCancelled else { return }
+            noticeSkip = nil
+        }
+    }
+
+    /// Reduce Motion では帯も行と同時に消す（#296 実機確認）。
+    private func closeNoticeNow() {
+        noticeCloseTask?.cancel()
+        noticeOpen = false
+        noticeSkip = nil
+    }
+
+    /// 帯の高さ。開いていてまだ測れていなければ、自然な高さに任せる。
+    private var noticeFrameHeight: CGFloat? {
+        guard noticeOpen else { return 0 }
+        return noticeHeight > 0 ? noticeHeight : nil
+    }
+
+    /// 帯の自然な高さを測り、準備ができていたら 0.3 秒で開く（#296 実機確認）。
+    private func measureNotice(_ height: CGFloat) {
+        guard height > 0, abs(height - noticeHeight) > 0.5 else { return }
+        noticeHeight = height
+        guard pendingNoticeOpen else { return }
+        pendingNoticeOpen = false
+        withAnimation(.timingCurve(0.05, 0.7, 0.1, 1, duration: PausedRowTiming.noticeIn)) {
+            noticeOpen = true
+        }
+    }
+
+    /// 上から何番目に止まっている行か（層と線を 0.08 秒ずつずらす・#296）。
     private func pausedRowIndex(for alarmID: UUID) -> Int {
-        guard let skip = activeGlobalSkip,
+        // 再開のときも、戻る順番が変わらないように控えの帯を使う。
+        guard let skip = activeGlobalSkip ?? noticeSkip,
               let index = displayedAlarms.firstIndex(where: { $0.id == alarmID })
         else { return 0 }
         return displayedAlarms[..<index].filter {
@@ -837,7 +937,7 @@ struct ContentView: View {
                 if let permissionStatus = permissionBannerStatus {
                     permissionBannerRow(permissionStatus)
                 }
-                if let skip = activeGlobalSkip {
+                if let skip = noticeSkip {
                     GlobalSkipNoticeRow(
                         skip: skip,
                         entries: alarmStore.alarms,
@@ -846,8 +946,26 @@ struct ContentView: View {
                             refreshGlobalSkip()
                         }
                     )
+                    .opacity(noticeOpen ? 1 : 0)
+                    .frame(height: noticeFrameHeight, alignment: .top)
+                    .clipped()
+                    .allowsHitTesting(noticeOpen)
+                    .accessibilityHidden(!noticeOpen)
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
+                    .background(alignment: .top) {
+                        // 開く前に、閉じたまま同じ幅で自然な高さを測る。
+                        GlobalSkipNoticeRow(
+                            skip: skip,
+                            entries: alarmStore.alarms,
+                            onResume: {}
+                        )
+                        .fixedSize(horizontal: false, vertical: true)
+                        .hidden()
+                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                            measureNotice(height)
+                        }
+                    }
                 }
                 ForEach(displayedAlarms, id: \.id) { alarm in
                     Group {
@@ -965,6 +1083,7 @@ struct ContentView: View {
             untilRingNotice: untilRingNotice,
             pausedUntil: pausedUntil,
             pausedIndex: pausedRowIndex(for: alarm.id),
+            pausedEntryDelay: pausedEntryDelay,
             onPausedTap: { showingSkipAll = true },
             onFixSilentSound: {
                 ignoreFirstAlarmFollowupIfNeeded()
@@ -1895,6 +2014,8 @@ struct AlarmRow: View {
     let pausedUntil: Date?
     /// 上から何番目に止まっている行か（#296）。
     let pausedIndex: Int
+    /// 帯が開ききるまで、層とアイコンを待たせる（#296 実機確認）。
+    let pausedEntryDelay: TimeInterval
     /// 層をタップしたときに「しばらく鳴らさない」を開く（#296）。
     let onPausedTap: () -> Void
     let onFixSilentSound: () -> Void
@@ -1932,6 +2053,7 @@ struct AlarmRow: View {
             PausedAlarmOverlay(
                 isPaused: pausedUntil != nil,
                 pausedIndex: pausedIndex,
+                entryDelay: pausedEntryDelay,
                 reduceMotion: reduceMotion,
                 onTap: onPausedTap
             )
