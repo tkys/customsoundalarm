@@ -242,7 +242,7 @@ struct PlaylistRenderServiceTests {
     @Test
     func missingPlaylist_fallsBackAndReports() async {
         let entryID = UUID()
-        var reported: PlaylistRenderFailureReason?
+        var reported: PlaylistRenderFailure?
         var fallbackCalled = false
         PlaylistRenderService.shared.onRenderFailed = { reported = $0 }
         PlaylistRenderService.shared.onFallback = { fallbackCalled = true }
@@ -261,7 +261,9 @@ struct PlaylistRenderServiceTests {
 
         #expect(result.fileName == "PresetMarimba.caf")
         #expect(result.usedFallback)
-        #expect(reported == .missingPlaylist)
+        #expect(reported?.reason == .missingPlaylist)
+        #expect(reported?.isPlaylist == true)
+        #expect(reported?.soundKind == .preset)
         #expect(fallbackCalled)
         removeGeneratedFiles(entryID: entryID)
     }
@@ -520,5 +522,130 @@ struct PlaylistRenderServiceTests {
         #expect(!result.usedFallback)
         let samples = loadSamples(result.fileName)
         #expect(abs(Double(samples.count) / 44_100 - 5) < 0.1)
+    }
+
+    // MARK: - #307 書き出し失敗の扱い
+
+    @Test
+    func standardSoundWithFadeIn_keepsDefaultAndDoesNotReport() async {
+        var reported: [PlaylistRenderFailure] = []
+        PlaylistRenderService.shared.onRenderFailed = { reported.append($0) }
+        defer { PlaylistRenderService.shared.onRenderFailed = nil }
+
+        let input = PlaylistRenderInput(
+            entryID: UUID(),
+            fallbackFileName: "",
+            fadeIn: .fifteen
+        )
+        let result = await PlaylistRenderService.shared.prepareSound(for: input)
+
+        #expect(result.fileName == "")
+        #expect(!result.usedFallback)
+        #expect(!result.isProcessed)
+        #expect(reported.isEmpty)
+    }
+
+    @Test
+    func standardSoundWithFadeIn_testRingKeepsDefaultAndDoesNotReport() async {
+        var reported: [PlaylistRenderFailure] = []
+        PlaylistRenderService.shared.onRenderFailed = { reported.append($0) }
+        defer { PlaylistRenderService.shared.onRenderFailed = nil }
+
+        let input = PlaylistRenderInput(
+            entryID: UUID(),
+            fallbackFileName: "",
+            fadeIn: .thirty
+        )
+        let result = await PlaylistRenderService.shared.prepareTestRingSound(
+            for: input
+        )
+
+        #expect(result.fileName == "")
+        #expect(!result.usedFallback)
+        #expect(reported.isEmpty)
+    }
+
+    @Test
+    func emptyPlaylist_reportsEmptySound() async {
+        let playlist = PlaylistStore.shared.add(
+            name: "empty-\(UUID().uuidString)",
+            tracks: []
+        )
+        defer { PlaylistStore.shared.remove(id: playlist.id) }
+        let input = PlaylistRenderInput(
+            entryID: UUID(),
+            playlistID: playlist.id
+        )
+
+        var reported: PlaylistRenderFailure?
+        PlaylistRenderService.shared.onRenderFailed = { reported = $0 }
+        defer { PlaylistRenderService.shared.onRenderFailed = nil }
+
+        let result = await PlaylistRenderService.shared.prepareSound(for: input)
+
+        #expect(result.usedFallback)
+        #expect(reported?.reason == .emptySound)
+        #expect(reported?.isPlaylist == true)
+        #expect(reported?.soundKind == .default)
+    }
+
+    @Test
+    func missingCustomFile_reportsMissingFile() async {
+        let input = PlaylistRenderInput(
+            entryID: UUID(),
+            fallbackFileName: "UITestMissing-\(UUID().uuidString).caf",
+            fadeIn: .fifteen
+        )
+
+        var reported: PlaylistRenderFailure?
+        PlaylistRenderService.shared.onRenderFailed = { reported = $0 }
+        defer { PlaylistRenderService.shared.onRenderFailed = nil }
+
+        let result = await PlaylistRenderService.shared.prepareSound(for: input)
+
+        #expect(result.usedFallback)
+        #expect(reported?.reason == .missingFile)
+        #expect(reported?.isPlaylist == false)
+        #expect(reported?.soundKind == .custom)
+    }
+
+    @Test
+    func unreadableFile_reportsUnreadableSource() async throws {
+        let name = "UITestUnreadable-\(UUID().uuidString).caf"
+        let url = AudioConverter.shared.soundsDirectory
+            .appendingPathComponent(name)
+        try Data("not audio".utf8).write(to: url)
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        let input = PlaylistRenderInput(
+            entryID: UUID(),
+            fallbackFileName: name,
+            fadeIn: .five
+        )
+
+        var reported: PlaylistRenderFailure?
+        PlaylistRenderService.shared.onRenderFailed = { reported = $0 }
+        defer { PlaylistRenderService.shared.onRenderFailed = nil }
+
+        let result = await PlaylistRenderService.shared.prepareSound(for: input)
+
+        #expect(result.usedFallback)
+        #expect(reported?.reason == .unreadableSource)
+        #expect(reported?.isPlaylist == false)
+        #expect(reported?.soundKind == .custom)
+    }
+
+    @Test
+    func soundKind_separatesPresetCustomAndDefault() {
+        #expect(PlaylistRenderService.soundKind(forFileName: "") == .default)
+        #expect(
+            PlaylistRenderService.soundKind(
+                forFileName: "PresetMarimba.caf"
+            ) == .preset
+        )
+        #expect(
+            PlaylistRenderService.soundKind(forFileName: "MyRecording.caf")
+                == .custom
+        )
     }
 }

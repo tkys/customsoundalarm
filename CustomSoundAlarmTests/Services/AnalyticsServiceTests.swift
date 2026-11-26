@@ -142,7 +142,7 @@ struct AnalyticsEventTests {
             hasOwnSounds: false
         ).name == "playlist_empty_viewed")
         #expect(AnalyticsEvent.playlistEdited().name == "playlist_edited")
-        #expect(AnalyticsEvent.playlistRenderFailed(reason: .tooLong).name == "playlist_render_failed")
+        #expect(AnalyticsEvent.playlistRenderFailed(reason: .tooLong, isPlaylist: false, soundKind: .default).name == "playlist_render_failed")
         #expect(AnalyticsEvent.playlistRenderFallback.name == "playlist_render_fallback")
         #expect(AnalyticsEvent.playlistRescheduleFailed(
             reason: "schedule_failed"
@@ -694,7 +694,7 @@ struct AnalyticsEventTests {
             .playlistSuggestionShown,
             .playlistEmptyViewed(source: .library, hasOwnSounds: false),
             .playlistEdited(),
-            .playlistRenderFailed(reason: .renderFailed),
+            .playlistRenderFailed(reason: .renderFailed, isPlaylist: true, soundKind: .custom),
             .playlistRenderFallback,
             .playlistRescheduleFailed(reason: "schedule_failed"),
             .alarmSyncRescheduled(trigger: .foreground, changed: 1, missing: 0, forced: 0),
@@ -1027,9 +1027,15 @@ struct AnalyticsEventTests {
 
     @Test
     func playlistRenderFailedProperties() {
-        let props = AnalyticsEvent.playlistRenderFailed(reason: .tooLong).properties
-        #expect(props.count == 1)
+        let props = AnalyticsEvent.playlistRenderFailed(
+            reason: .tooLong,
+            isPlaylist: false,
+            soundKind: .custom
+        ).properties
+        #expect(props.count == 3)
         #expect(props["reason"] as? String == "too_long")
+        #expect(props["is_playlist"] as? Bool == false)
+        #expect(props["sound_kind"] as? String == "custom")
     }
 
     @Test

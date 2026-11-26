@@ -2,21 +2,40 @@ import Foundation
 
 /// プレイリスト書き出しの失敗理由（計測用・#151）。
 enum PlaylistRenderFailureReason: String, Sendable, Equatable {
-    case noTracks = "no_tracks"
-    case tooLong = "too_long"
+    /// 標準の音（ファイル名が空）で書き出す元が無い
+    case emptySound = "empty_sound"
+    /// 音源ファイルが見つからない
+    case missingFile = "missing_file"
+    /// 音源ファイルはあるが読み込めない
+    case unreadableSource = "unreadable_source"
     case renderFailed = "render_failed"
     case writeFailed = "write_failed"
     case missingPlaylist = "missing_playlist"
+    /// 以前の版で使っていた理由（#307 で上限を超えても切って書き出すようにした）
+    case tooLong = "too_long"
 
     init(_ error: PlaylistRenderError) {
         switch error {
-        case .noTracks: self = .noTracks
-        case .unreadableSource: self = .noTracks
+        case .noTracks: self = .unreadableSource
+        case .unreadableSource: self = .unreadableSource
         case .renderFailed: self = .renderFailed
         case .writeFailed: self = .writeFailed
-        case .tooLong: self = .tooLong
         }
     }
+}
+
+/// 失敗したときの音の種類（計測用・#307）。
+enum PlaylistSoundKind: String, Sendable, Equatable {
+    case preset
+    case custom
+    case `default`
+}
+
+/// 書き出し失敗の内容（計測用・#307）。
+struct PlaylistRenderFailure: Sendable, Equatable {
+    let reason: PlaylistRenderFailureReason
+    let isPlaylist: Bool
+    let soundKind: PlaylistSoundKind
 }
 
 /// 書き出し結果。`fileName` を AlarmKit の `.named()` に渡す。
@@ -58,7 +77,7 @@ final class PlaylistRenderService {
     private static let tempLifetime: TimeInterval = 10 * 60
 
     /// 書き出し失敗・フォールバックの計測フック。
-    var onRenderFailed: ((PlaylistRenderFailureReason) -> Void)?
+    var onRenderFailed: ((PlaylistRenderFailure) -> Void)?
     var onFallback: (() -> Void)?
 
     private var cache: [String: PlaylistRenderCacheEntry] = [:]
@@ -96,6 +115,17 @@ final class PlaylistRenderService {
             )
         }
 
+        // 標準の音（ファイル名が空）は書き出す元が無い。#307 では
+        // マリンバ等に差し替えず、AlarmKit の既定音のまま鳴らす。
+        // やさしく鳴り始めるは付けられないが、利用者の設定は変えない。
+        if !input.isPlaylist, input.fallbackFileName.isEmpty {
+            return PlaylistSoundResolution(
+                fileName: "",
+                usedFallback: false,
+                isProcessed: false
+            )
+        }
+
         let playlist = PlaylistStore.shared.playlist(id: input.playlistID)
         if input.isPlaylist, playlist == nil {
             return fallback(for: input, reason: .missingPlaylist, reportEvents: reportEvents)
@@ -103,7 +133,7 @@ final class PlaylistRenderService {
 
         let tracks = sourceTracks(for: input, playlist: playlist)
         guard !tracks.isEmpty else {
-            return fallback(for: input, reason: .noTracks, reportEvents: reportEvents)
+            return fallback(for: input, reason: .emptySound, reportEvents: reportEvents)
         }
 
         let key = "primary:\(input.entryID.uuidString)"
@@ -152,7 +182,11 @@ final class PlaylistRenderService {
             return (track, url)
         }
         guard !resolved.isEmpty else {
-            return fallback(for: input, reason: .noTracks, reportEvents: reportEvents)
+            return fallback(
+                for: input,
+                reason: missingReason(for: ordered),
+                reportEvents: reportEvents
+            )
         }
 
         let signature = signature(
@@ -220,6 +254,9 @@ final class PlaylistRenderService {
     func cachedSoundFileName(for input: PlaylistRenderInput) -> String? {
         guard input.usesPlaylistFeatures else {
             return input.fallbackFileName
+        }
+        if !input.isPlaylist, input.fallbackFileName.isEmpty {
+            return ""
         }
         let key = "primary:\(input.entryID.uuidString)"
         guard let cached = cache[key], fileExists(cached.fileName) else {
@@ -320,6 +357,35 @@ final class PlaylistRenderService {
         return FileManager.default.fileExists(atPath: url.path) ? url : nil
     }
 
+    /// 書き出せなかった理由を、空の音・ファイル無し・読み込めないで分ける（#307）。
+    private func missingReason(
+        for tracks: [PlaylistTrack]
+    ) -> PlaylistRenderFailureReason {
+        tracks.allSatisfy { $0.soundFileName.isEmpty } ? .emptySound : .missingFile
+    }
+
+    private func soundKind(
+        for input: PlaylistRenderInput,
+        playlist: Playlist?
+    ) -> PlaylistSoundKind {
+        if input.isPlaylist,
+           let playlist,
+           !playlist.tracks.isEmpty {
+            let presetFileNames = Set(SoundStore.presetDefinitions.map(\.fileName))
+            return playlist.tracks.allSatisfy {
+                presetFileNames.contains($0.soundFileName)
+            } ? .preset : .custom
+        }
+        return Self.soundKind(forFileName: input.fallbackFileName)
+    }
+
+    static func soundKind(forFileName fileName: String) -> PlaylistSoundKind {
+        if fileName.isEmpty { return .default }
+        return SoundStore.presetDefinitions.contains {
+            $0.fileName == fileName
+        } ? .preset : .custom
+    }
+
     // MARK: - Test ring (#169)
 
     /// 試し鳴らし専用の書き出しファイル名。停止・60秒経過・次回起動で削除する。
@@ -341,6 +407,15 @@ final class PlaylistRenderService {
             )
         }
 
+        // 標準の音は書き出さず、既定音のまま試し鳴らしする（#307）。
+        if !input.isPlaylist, input.fallbackFileName.isEmpty {
+            return PlaylistSoundResolution(
+                fileName: "",
+                usedFallback: false,
+                isProcessed: false
+            )
+        }
+
         let playlist = PlaylistStore.shared.playlist(id: input.playlistID)
         if input.isPlaylist, playlist == nil {
             return fallback(for: input, reason: .missingPlaylist)
@@ -348,7 +423,7 @@ final class PlaylistRenderService {
 
         let tracks = sourceTracks(for: input, playlist: playlist)
         guard !tracks.isEmpty else {
-            return fallback(for: input, reason: .noTracks)
+            return fallback(for: input, reason: .emptySound)
         }
 
         let playOrder = playlist?.playOrder ?? .inOrder
@@ -365,7 +440,7 @@ final class PlaylistRenderService {
             return (track, url)
         }
         guard !resolved.isEmpty else {
-            return fallback(for: input, reason: .noTracks)
+            return fallback(for: input, reason: missingReason(for: ordered))
         }
 
         let outputURL = soundsDirectory.appendingPathComponent(
@@ -554,11 +629,6 @@ final class PlaylistRenderService {
         ].joined(separator: "|")
     }
 
-    private func reportFailure(_ reason: PlaylistRenderFailureReason) {
-        onRenderFailed?(reason)
-        onFallback?()
-    }
-
     private static func newOrderSeed() -> UInt64 {
         UInt64.random(in: 0...UInt64.max)
     }
@@ -576,7 +646,11 @@ final class PlaylistRenderService {
             defaultFileName: defaultFallbackFileName
         )
         if reportEvents {
-            onRenderFailed?(reason)
+            onRenderFailed?(PlaylistRenderFailure(
+                reason: reason,
+                isPlaylist: input.isPlaylist,
+                soundKind: soundKind(for: input, playlist: playlist)
+            ))
             onFallback?()
         }
         return PlaylistSoundResolution(

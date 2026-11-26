@@ -7,7 +7,6 @@ enum PlaylistRenderError: String, Error, Equatable, Sendable {
     case unreadableSource = "unreadable_source"
     case renderFailed = "render_failed"
     case writeFailed = "write_failed"
-    case tooLong = "too_long"
 }
 
 /// プレイリスト書き出しの入力。
@@ -20,6 +19,9 @@ struct PlaylistRenderRequest: Sendable {
     /// バックアップ用は false（最初から大きく鳴らす）
     let applyFadeIn: Bool
     let outputURL: URL
+    /// 書き出しの上限。超えた分は末尾フェード付きで切る（#307）。
+    /// テストでは短い音源で上限を下げて確かめる。
+    var maxDurationSeconds: TimeInterval = Playlist.maxTotalSeconds
 }
 
 struct PlaylistRenderResult: Sendable, Equatable {
@@ -36,7 +38,7 @@ struct PlaylistRenderResult: Sendable, Equatable {
 enum PlaylistRenderer {
 
     static func generate(_ request: PlaylistRenderRequest) throws -> PlaylistRenderResult {
-        // 1周分のリーダーで長さを測り、10分上限は1周の長さで判定する（#181）。
+        // 読み込める音源だけで1周分の長さを測る（#181）。
         let basePairs = request.trackURLs.compactMap { url -> (URL, TrackReader)? in
             guard let reader = TrackReader(url: url) else { return nil }
             return (url, reader)
@@ -46,15 +48,6 @@ enum PlaylistRenderer {
         var baseReaders = basePairs.map(\.1)
         let baseURLs = basePairs.map(\.0)
         let baseFrames = baseReaders.map(\.totalOutputFrames)
-        let baseDurations = baseFrames.map {
-            Double($0) / PlaylistRenderLogic.sampleRate
-        }
-        guard PlaylistRenderLogic.isWithinLimit(
-            trackDurations: baseDurations,
-            transition: request.transition
-        ) else {
-            throw PlaylistRenderError.tooLong
-        }
 
         // やさしく鳴り始めるが短い音源で終わらないよう、実際の書き出し長に
         // 基づいて周回数を決める（#181）。
@@ -79,9 +72,17 @@ enum PlaylistRenderer {
 
         // 実際のストリーミングと同じ重なり方で、書き出されるフレーム数を
         // 予測する（エンドフェードの基準を実際の長さに合わせる）。
-        let totalOutputFrames = PlaylistRenderLogic.renderedFrameCount(
-            trackFrames: trackFrames,
-            crossfadeFrames: crossfadeFrames
+        // 上限を超える場合は、上限で切る（末尾 0.5 秒は StreamingWriter が
+        // フェードアウトする・#307）。1曲でもプレイリストでも同じ扱い。
+        let maxOutputFrames = max(0, Int(
+            (request.maxDurationSeconds * PlaylistRenderLogic.sampleRate).rounded()
+        ))
+        let totalOutputFrames = min(
+            PlaylistRenderLogic.renderedFrameCount(
+                trackFrames: trackFrames,
+                crossfadeFrames: crossfadeFrames
+            ),
+            maxOutputFrames
         )
 
         let writer = try StreamingWriter(
@@ -95,7 +96,7 @@ enum PlaylistRenderer {
         let totalTrackCount = trackFrames.count
         var globalIndex = 0
 
-        for _ in 0..<cycles {
+        outer: for _ in 0..<cycles {
             let cycleReaders: [TrackReader]
             if let first = firstCycleReaders {
                 cycleReaders = first
@@ -108,6 +109,7 @@ enum PlaylistRenderer {
             }
 
             for (index, reader) in cycleReaders.enumerated() {
+                if writer.isFull { break outer }
                 let frames = baseFrames[index]
                 guard frames > 0 else {
                     globalIndex += 1
@@ -144,6 +146,7 @@ enum PlaylistRenderer {
                     var restTail: [Float] = []
                     var readFromRest = 0
                     while readFromRest < frames - head.count {
+                        if writer.isFull { break outer }
                         let remaining = frames - head.count - readFromRest
                         let chunk = reader.readFrames(min(4096, remaining))
                         if chunk.isEmpty { break }
@@ -159,6 +162,7 @@ enum PlaylistRenderer {
                 } else {
                     var trackWritten = 0
                     while trackWritten < frames {
+                        if writer.isFull { break outer }
                         let chunk = reader.readFrames(min(4096, frames - trackWritten))
                         if chunk.isEmpty { break }
                         var samples = chunk
@@ -179,7 +183,7 @@ enum PlaylistRenderer {
             }
         }
 
-        if !pendingTail.isEmpty {
+        if !writer.isFull, !pendingTail.isEmpty {
             try writer.write(pendingTail)
         }
         try writer.finish()
@@ -352,6 +356,9 @@ private final class StreamingWriter {
 
     private(set) var writtenFrames = 0
 
+    /// 上限まで書き終えた（#307）。読み込み側はこれ以上書き出さない。
+    var isFull: Bool { writtenFrames >= totalFrames }
+
     init(
         outputURL: URL,
         totalOutputFrames: Int,
@@ -395,8 +402,10 @@ private final class StreamingWriter {
     }
 
     func write(_ samples: [Float]) throws {
-        guard !samples.isEmpty else { return }
-        for sample in samples {
+        guard !samples.isEmpty, !isFull else { return }
+        // 上限を超える分は書かない（切った末尾は endFade でフェードアウトする・#307）。
+        let writableCount = min(samples.count, totalFrames - writtenFrames)
+        for sample in samples.prefix(writableCount) {
             var value = sample
             if applyFadeIn, writtenFrames < fadeInFrames {
                 value *= PlaylistRenderLogic.fadeInGain(

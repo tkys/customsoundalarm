@@ -563,8 +563,12 @@ struct CustomSoundAlarmApp: App {
 
                     // プレイリスト書き出しの計測フックと、起動時のシャッフル順更新（#151）
                     PlaylistRenderService.shared.beginNewSession()
-                    PlaylistRenderService.shared.onRenderFailed = { reason in
-                        AnalyticsService.shared.capture(.playlistRenderFailed(reason: reason))
+                    PlaylistRenderService.shared.onRenderFailed = { failure in
+                        AnalyticsService.shared.capture(.playlistRenderFailed(
+                            reason: failure.reason,
+                            isPlaylist: failure.isPlaylist,
+                            soundKind: failure.soundKind
+                        ))
                     }
                     PlaylistRenderService.shared.onFallback = {
                         AnalyticsService.shared.capture(.playlistRenderFallback)
