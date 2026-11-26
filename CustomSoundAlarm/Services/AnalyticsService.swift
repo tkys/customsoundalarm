@@ -264,7 +264,11 @@ enum AnalyticsEvent: Sendable {
     )
 
     /// プレイリストの書き出しに失敗した（フォールバックした）
-    case playlistRenderFailed(reason: PlaylistRenderFailureReason)
+    case playlistRenderFailed(
+        reason: PlaylistRenderFailureReason,
+        isPlaylist: Bool,
+        soundKind: PlaylistSoundKind
+    )
 
     /// 書き出し失敗時に1曲目／既定音で鳴らした
     case playlistRenderFallback
@@ -697,8 +701,12 @@ enum AnalyticsEvent: Sendable {
                 "play_order": playOrder.analyticsValue,
                 "transition": transition.analyticsValue
             ]
-        case let .playlistRenderFailed(reason):
-            return ["reason": reason.rawValue]
+        case let .playlistRenderFailed(reason, isPlaylist, soundKind):
+            return [
+                "reason": reason.rawValue,
+                "is_playlist": isPlaylist,
+                "sound_kind": soundKind.rawValue
+            ]
         case .playlistRenderFallback:
             return [:]
         case let .playlistRescheduleFailed(reason):

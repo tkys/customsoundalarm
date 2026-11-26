@@ -368,6 +368,90 @@ struct PlaylistRendererTests {
     }
 
     @Test
+    func singleTrackLongerThanLimit_isTruncatedWithEndFade() throws {
+        let a = try makeCAF(seconds: 5, value: 0.5)
+        let output = outputURL()
+        defer {
+            try? FileManager.default.removeItem(at: a)
+            try? FileManager.default.removeItem(at: output)
+        }
+
+        // 3秒を上限にして、5秒の1曲が失敗せず3秒で書き出されること（#307）。
+        let result = try PlaylistRenderer.generate(PlaylistRenderRequest(
+            trackURLs: [a],
+            fadeIn: .off,
+            transition: .off,
+            applyFadeIn: true,
+            outputURL: output,
+            maxDurationSeconds: 3
+        ))
+
+        #expect(abs(result.durationSeconds - 3) < 0.05)
+        let samples = loadOutput(output)
+        #expect(samples.count == Int(3 * sampleRate))
+        // 切った末尾は短くフェードアウトする。
+        #expect(abs(samples.last ?? 1) < 0.01)
+        let beforeEndFade = Array(samples.prefix(Int(2.4 * sampleRate)))
+        #expect(peak(beforeEndFade) > 0.49)
+    }
+
+    @Test
+    func playlistLongerThanLimit_isTruncatedAtLimit() throws {
+        let a = try makeCAF(seconds: 2, value: 0.5)
+        let b = try makeCAF(seconds: 2, value: 0.5)
+        let output = outputURL()
+        defer {
+            try? FileManager.default.removeItem(at: a)
+            try? FileManager.default.removeItem(at: b)
+            try? FileManager.default.removeItem(at: output)
+        }
+
+        let result = try PlaylistRenderer.generate(PlaylistRenderRequest(
+            trackURLs: [a, b],
+            fadeIn: .off,
+            transition: .off,
+            applyFadeIn: true,
+            outputURL: output,
+            maxDurationSeconds: 3
+        ))
+
+        #expect(abs(result.durationSeconds - 3) < 0.05)
+        #expect(result.trackCount == 2)
+        let samples = loadOutput(output)
+        #expect(samples.count == Int(3 * sampleRate))
+        #expect(abs(samples.last ?? 1) < 0.01)
+    }
+
+    @Test
+    func longTrackWithFadeIn_isTruncatedAndFadesIn() throws {
+        let a = try makeCAF(seconds: 5, value: 0.5)
+        let output = outputURL()
+        defer {
+            try? FileManager.default.removeItem(at: a)
+            try? FileManager.default.removeItem(at: output)
+        }
+
+        // 1周5秒 + 30秒フェードなら本来35秒。上限3秒で切ってもやさしく始まる。
+        let result = try PlaylistRenderer.generate(PlaylistRenderRequest(
+            trackURLs: [a],
+            fadeIn: .thirty,
+            transition: .off,
+            applyFadeIn: true,
+            outputURL: output,
+            maxDurationSeconds: 3
+        ))
+
+        #expect(abs(result.durationSeconds - 3) < 0.05)
+        let samples = loadOutput(output)
+        let firstTenth = Array(samples.prefix(Int(0.1 * sampleRate)))
+        let beforeEndFade = Array(
+            samples.suffix(Int(0.6 * sampleRate)).prefix(Int(0.1 * sampleRate))
+        )
+        #expect(peak(firstTenth) < peak(beforeEndFade))
+        #expect(abs(samples.last ?? 1) < 0.01)
+    }
+
+    @Test
     func threeTrackCrossfade_usesEachTracksTail() throws {
         let a = try makeCAF(seconds: 5, value: 0.1)
         let b = try makeCAF(seconds: 5, value: 0.2)
