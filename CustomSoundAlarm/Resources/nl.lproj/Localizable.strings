@@ -385,8 +385,8 @@
 "skip_result_footer" = "Alleen feestdagen op een dag dat de wekker afgaat worden getoond.";
 "skip_row_toast_skipped_fmt" = "%@ gaat niet af";
 "skip_row_toast_undone_fmt" = "%@ gaat af";
-"playlist_unlock_title" = "Playlists ontgrendeld";
-"playlist_unlock_create" = "Maak een playlist met deze twee";
+"playlist_unlock_title" = "Refrein na refrein";
+"playlist_unlock_create" = "Playlist maken";
 "playlist_unlock_later" = "Niet nu";
 "volume_notice" = "Volume verhoogd zodat je het beter hoort.";
 "permission_banner_title" = "Alarmtoestemming staat uit";

@@ -138,9 +138,11 @@ struct AnalyticsEventTests {
             trackCount: 3, totalSecondsBucket: "5_10min"
         ).name == "playlist_created")
         #expect(AnalyticsEvent.playlistSuggestionShown.name == "playlist_suggestion_shown")
-        #expect(AnalyticsEvent.featureUnlockShown(feature: .playlist).name == "feature_unlock_shown")
+        #expect(AnalyticsEvent.featureUnlockShown(
+            feature: .playlist, trigger: .secondImport
+        ).name == "feature_unlock_shown")
         #expect(AnalyticsEvent.featureUnlockAction(
-            feature: .playlist, action: .later
+            feature: .playlist, action: .later, trigger: .existingUser
         ).name == "feature_unlock_action")
         #expect(AnalyticsEvent.playlistEmptyViewed(
             source: .library,
@@ -257,21 +259,26 @@ struct AnalyticsEventTests {
 
     @Test
     func featureUnlockProperties_areTyped() {
-        let shown = AnalyticsEvent.featureUnlockShown(feature: .playlist).properties
-        #expect(shown.count == 1)
+        let shown = AnalyticsEvent.featureUnlockShown(
+            feature: .playlist, trigger: .existingUser
+        ).properties
+        #expect(shown.count == 2)
         #expect(shown["feature"] as? String == "playlist")
+        #expect(shown["trigger"] as? String == "existing_user")
 
         let created = AnalyticsEvent.featureUnlockAction(
-            feature: .playlist, action: .create
+            feature: .playlist, action: .create, trigger: .secondImport
         ).properties
-        #expect(created.count == 2)
+        #expect(created.count == 3)
         #expect(created["feature"] as? String == "playlist")
         #expect(created["action"] as? String == "create")
+        #expect(created["trigger"] as? String == "second_import")
 
         let later = AnalyticsEvent.featureUnlockAction(
-            feature: .playlist, action: .later
+            feature: .playlist, action: .later, trigger: .existingUser
         ).properties
         #expect(later["action"] as? String == "later")
+        #expect(later["trigger"] as? String == "existing_user")
     }
 
     @Test

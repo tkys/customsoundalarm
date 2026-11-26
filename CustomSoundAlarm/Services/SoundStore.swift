@@ -50,7 +50,8 @@ final class SoundStore {
         hasPendingPlaylistUnlock = false
     }
 
-    private var customSoundCount: Int {
+    /// 取り込んだ音（プリセットを除く）の数（#280）。
+    var customSoundCount: Int {
         sounds.filter { !$0.isPreset }.count
     }
 

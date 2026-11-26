@@ -385,8 +385,8 @@
 "skip_result_footer" = "Es werden nur Feiertage an einem klingelnden Wochentag angezeigt.";
 "skip_row_toast_skipped_fmt" = "%@ klingelt nicht";
 "skip_row_toast_undone_fmt" = "%@ klingelt";
-"playlist_unlock_title" = "Playlists freigeschaltet";
-"playlist_unlock_create" = "Playlist aus diesen beiden erstellen";
+"playlist_unlock_title" = "Refrain um Refrain";
+"playlist_unlock_create" = "Playlist erstellen";
 "playlist_unlock_later" = "Später";
 "volume_notice" = "Lauter gemacht, damit du es gut hörst.";
 "permission_banner_title" = "Alarm-Berechtigung ist aus";

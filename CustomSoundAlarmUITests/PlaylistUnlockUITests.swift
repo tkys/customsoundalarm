@@ -83,4 +83,77 @@ final class PlaylistUnlockUITests: XCTestCase {
             "add screen should close after save: \(app.debugDescription)"
         )
     }
+
+    // MARK: - 既存の人への1回だけの提案 (#280)
+
+    /// 2つ以上取り込んでいてプレイリストがない既存の人に、起動時に1回だけ出る。
+    /// ［あとで］で閉じたら、同じ状態で再起動しても出ない。
+    func testExistingUserUnlockShowsOnceThenNeverAgain() {
+        app.launchArguments = existingUserArguments(seeding: ["-uitest-seed-existing-unlock"])
+        app.launch()
+
+        let title = findElement("playlistUnlock.title")
+        XCTAssertTrue(
+            title.waitForExistence(timeout: 15),
+            "unlock sheet should appear for an existing user: \(app.debugDescription)"
+        )
+
+        app.buttons["playlistUnlock.later"].tap()
+        waitForDisappearance(title)
+
+        app.terminate()
+        app.launchArguments = existingUserArguments(seeding: [])
+        app.launch()
+
+        XCTAssertTrue(
+            app.buttons["alarmList.add"].waitForExistence(timeout: 15),
+            "alarm list should appear on the second launch: \(app.debugDescription)"
+        )
+        XCTAssertFalse(
+            title.waitForExistence(timeout: 3),
+            "unlock should not appear again after later: \(app.debugDescription)"
+        )
+    }
+
+    func testExistingUserUnlockDoesNotShowForOneSound() {
+        assertUnlockDoesNotAppear(seeding: "-uitest-seed-existing-unlock-one-sound")
+    }
+
+    func testExistingUserUnlockDoesNotShowWhenPlaylistExists() {
+        assertUnlockDoesNotAppear(seeding: "-uitest-seed-existing-unlock-playlist")
+    }
+
+    func testExistingUserUnlockDoesNotShowWhenAlreadyShown() {
+        assertUnlockDoesNotAppear(seeding: "-uitest-seed-existing-unlock-shown")
+    }
+
+    private func existingUserArguments(seeding: [String]) -> [String] {
+        ["-uitest-playlist-unlock", "-uitest-force-light"] + seeding
+    }
+
+    private func assertUnlockDoesNotAppear(seeding: String) {
+        app.launchArguments = existingUserArguments(seeding: [seeding])
+        app.launch()
+
+        XCTAssertTrue(
+            app.buttons["alarmList.add"].waitForExistence(timeout: 15),
+            "alarm list should appear: \(app.debugDescription)"
+        )
+        XCTAssertFalse(
+            findElement("playlistUnlock.title").waitForExistence(timeout: 5),
+            "unlock should not appear for this state: \(app.debugDescription)"
+        )
+    }
+
+    private func waitForDisappearance(_ element: XCUIElement, timeout: TimeInterval = 5) {
+        let expectation = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "exists == false"),
+            object: element
+        )
+        XCTAssertEqual(
+            XCTWaiter().wait(for: [expectation], timeout: timeout),
+            .completed,
+            "element should disappear: \(element)"
+        )
+    }
 }

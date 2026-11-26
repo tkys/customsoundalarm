@@ -362,6 +362,52 @@ struct CustomSoundAlarmApp: App {
                         }
                     }
 
+                    // UIテスト用: 1.8.5 より前から2つ以上の音を取り込んでいた状態（#280）
+                    if AppGroup.isUITestSeedExistingUnlock
+                        || AppGroup.isUITestSeedExistingUnlockOneSound
+                        || AppGroup.isUITestSeedExistingUnlockPlaylist
+                        || AppGroup.isUITestSeedExistingUnlockShown {
+                        AppGroup.hasCompletedOnboarding = true
+                        AlarmStore.shared.resetForUITest()
+                        PlaylistStore.shared.resetForUITest()
+                        AppGroup.dismissedPresetFileNames = []
+                        SoundStore.shared.resetForUITest()
+                        SoundStore.shared.resetPresetNamesForUITest()
+                        AppGroup.playlistUnlockShown = AppGroup.isUITestSeedExistingUnlockShown
+
+                        let soundCount = AppGroup.isUITestSeedExistingUnlockOneSound ? 1 : 2
+                        let presets = [
+                            ("PresetBell", "ExistingFirst.caf"),
+                            ("PresetMarimba", "ExistingSecond.caf")
+                        ]
+                        for (preset, fileName) in presets.prefix(soundCount) {
+                            let url = AudioConverter.shared.soundsDirectory
+                                .appendingPathComponent(fileName)
+                            try? FileManager.default.removeItem(at: url)
+                            if let source = Bundle.main.url(
+                                forResource: preset,
+                                withExtension: "caf"
+                            ) {
+                                try? FileManager.default.copyItem(at: source, to: url)
+                                SoundStore.shared.add(AlarmSound(
+                                    name: fileName,
+                                    fileName: fileName,
+                                    isPreset: false
+                                ))
+                            }
+                        }
+                        if AppGroup.isUITestSeedExistingUnlockPlaylist {
+                            PlaylistStore.shared.add(
+                                name: "Existing",
+                                tracks: [PlaylistTrack(soundFileName: "ExistingFirst.caf")],
+                                playOrder: .inOrder,
+                                transition: .short
+                            )
+                        }
+                        // 2曲目の取り込みトリガーと二重にならないよう、待ち状態は消す。
+                        SoundStore.shared.clearPendingPlaylistUnlock()
+                    }
+
                     // UIテスト用: 初めての1回きりアラームが鳴って止まった状態（#247）
                     if AppGroup.isUITestSeedFirstAlarmFollowup {
                         AppGroup.hasCompletedOnboarding = true
