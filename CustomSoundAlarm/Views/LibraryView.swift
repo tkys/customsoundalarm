@@ -75,6 +75,10 @@ struct LibraryView: View {
                 else { return }
                 didRunLibraryLandingUITest = true
                 try? await Task.sleep(for: .milliseconds(700))
+                // UIテスト用: 小さい音を取り込んで音量を上げた状態を再現する（#224）
+                if AppGroup.isUITestQuietCrop {
+                    volumeBoostedFileName = sound.fileName
+                }
                 handleLibraryImportSaved(sound)
                 #endif
             }

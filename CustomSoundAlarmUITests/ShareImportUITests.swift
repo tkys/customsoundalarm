@@ -183,4 +183,63 @@ final class ShareImportUITests: XCTestCase {
             app.debugDescription
         )
     }
+
+    /// 小さい音を取り込んだ直後、音量の一言は音の行の中に出す（#253）。
+    func testLibraryImportShowsVolumeNoticeInTheSameRow() {
+        app.launchArguments = [
+            "-uitest-seed-suggestion",
+            "-uitest-seed-alarms",
+            "-uitest-open-library",
+            "-uitest-library-import-landing",
+            "-uitest-quiet-crop",
+            "-uitest-force-light"
+        ]
+        app.launch()
+
+        XCTAssertTrue(
+            app.collectionViews["library.root"].waitForExistence(timeout: 20),
+            app.debugDescription
+        )
+
+        let notice = findElement("library.volumeNotice")
+        XCTAssertTrue(
+            notice.waitForExistence(timeout: 10),
+            "quiet import should show the volume notice: \(app.debugDescription)"
+        )
+
+        let sound = app.buttons["library.sound.SuggestionBell.caf"]
+        XCTAssertTrue(
+            sound.waitForExistence(timeout: 5),
+            "imported sound should be visible: \(app.debugDescription)"
+        )
+
+        let row = app.cells.containing(
+            .button,
+            identifier: "library.sound.SuggestionBell.caf"
+        ).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(
+            row.descendants(matching: .any)
+                .matching(identifier: "library.volumeNotice")
+                .firstMatch
+                .exists,
+            "the notice should be inside the sound row: \(app.debugDescription)"
+        )
+        XCTAssertTrue(
+            row.frame.insetBy(dx: -1, dy: -1).contains(notice.frame),
+            "the notice should stay inside one row (row \(row.frame), notice \(notice.frame))"
+        )
+        XCTAssertEqual(
+            app.cells.containing(
+                .button,
+                identifier: "library.sound.SuggestionBell.caf"
+            ).count,
+            1,
+            "one sound should stay one row"
+        )
+        XCTAssertTrue(
+            notice.frame.minY >= sound.frame.maxY,
+            "the notice should sit below the sound name (sound \(sound.frame), notice \(notice.frame))"
+        )
+    }
 }
