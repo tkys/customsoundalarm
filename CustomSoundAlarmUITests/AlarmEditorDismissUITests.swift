@@ -168,9 +168,7 @@ final class AlarmEditorDismissUITests: XCTestCase {
         XCTAssertTrue(setHour(from: 7, to: 9), "hour wheel should be adjustable")
 
         // シートの上端から下へ払う（行の上だとスクロールになる）
-        let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.09))
-        let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.98))
-        start.press(forDuration: 0.5, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.3)
+        swipeDownFromSheet()
 
         let discard = app.buttons.matching(
             NSPredicate(format: "label == 'Discard Changes'")
@@ -184,5 +182,111 @@ final class AlarmEditorDismissUITests: XCTestCase {
         tapOutsideConfirmation()
         XCTAssertTrue(root.waitForExistence(timeout: 5))
         XCTAssertTrue(shownHour(9))
+    }
+
+    // MARK: - 閉じたあとに、もう一度開ける（#308 レビュー）
+
+    private func swipeDownFromSheet() {
+        // シートの上端から下へ払う（行の上だとスクロールになる）
+        let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.09))
+        let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.98))
+        start.press(forDuration: 0.5, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.3)
+    }
+
+    private func launchList() {
+        app.launchArguments = [
+            "-uitest-seed-alarms",
+            "-uitest-skip-alarm-sync",
+            "-uitest-force-light",
+            "-AppleLanguages", "(en)",
+            "-AppleLocale", "en_GB"
+        ]
+        app.launch()
+        XCTAssertTrue(
+            findElement("alarm.row").waitForExistence(timeout: 15),
+            app.debugDescription
+        )
+    }
+
+    private func openFirstAlarmFromList() {
+        let row = findElement("alarm.row")
+        XCTAssertTrue(row.waitForExistence(timeout: 10), app.debugDescription)
+        row.tap()
+        XCTAssertTrue(
+            root.waitForExistence(timeout: 10),
+            "the edit screen should open: \(app.debugDescription)"
+        )
+    }
+
+    /// 時刻のホイールを1時間進める（一覧の1本目の時刻に依存しない）。
+    @discardableResult
+    private func advanceHour() -> Bool {
+        let wheel = app.pickerWheels.element(boundBy: 0)
+        let value = wheel.value as? String ?? ""
+        let digits = value.prefix(while: \.isNumber)
+        guard let hour = Int(digits) else { return false }
+        let next = (hour + 1) % 24
+        let target = digits.count == 2 ? String(format: "%02d", next) : "\(next)"
+        wheel.adjust(toPickerWheelValue: target)
+        return true
+    }
+
+    /// 変更なしで払って閉じたあとも、同じアラームをもう一度開ける。
+    func testSwipeDownWithoutChangesCanReopenTheSameAlarm() {
+        launchList()
+        openFirstAlarmFromList()
+
+        swipeDownFromSheet()
+        XCTAssertTrue(
+            root.waitForNonExistence(timeout: 10),
+            "the editor should close: \(app.debugDescription)"
+        )
+        XCTAssertFalse(app.buttons["Discard Changes"].exists)
+
+        // 親の選択状態が残っていると、ここで開けない
+        openFirstAlarmFromList()
+    }
+
+    /// 新規作成も、変更なしで払って閉じたあと「＋」からもう一度開ける。
+    func testSwipeDownOnNewAlarmCanOpenItAgain() {
+        launchList()
+        app.buttons["alarmList.add"].tap()
+        XCTAssertTrue(root.waitForExistence(timeout: 10), app.debugDescription)
+
+        swipeDownFromSheet()
+        XCTAssertTrue(
+            root.waitForNonExistence(timeout: 10),
+            "the editor should close: \(app.debugDescription)"
+        )
+        XCTAssertFalse(app.buttons["Discard Changes"].exists)
+
+        app.buttons["alarmList.add"].tap()
+        XCTAssertTrue(
+            root.waitForExistence(timeout: 10),
+            "add should open again: \(app.debugDescription)"
+        )
+    }
+
+    /// 変更ありで払って「変更を破棄」で閉じたあとも、同じアラームをもう一度開ける。
+    func testDiscardingChangesThenReopeningTheSameAlarm() {
+        launchList()
+        openFirstAlarmFromList()
+        XCTAssertTrue(advanceHour(), "hour wheel should be adjustable")
+
+        swipeDownFromSheet()
+        let discard = app.buttons.matching(
+            NSPredicate(format: "label == 'Discard Changes'")
+        ).firstMatch
+        XCTAssertTrue(
+            discard.waitForExistence(timeout: 5),
+            "swiping down with changes should ask before closing: \(app.debugDescription)"
+        )
+        discard.tap()
+        XCTAssertTrue(
+            root.waitForNonExistence(timeout: 10),
+            "the editor should close: \(app.debugDescription)"
+        )
+
+        openFirstAlarmFromList()
     }
 }

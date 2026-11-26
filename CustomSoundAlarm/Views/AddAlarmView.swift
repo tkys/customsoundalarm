@@ -2032,6 +2032,8 @@ private struct InteractiveDismissAttemptReader: UIViewControllerRepresentable {
     final class Controller: UIViewController, UIAdaptivePresentationControllerDelegate {
         var hasChanges = false
         var onAttempt: () -> Void = {}
+        /// SwiftUI が付けていた元のデリゲート。奪ったあともそのまま動けるよう転送する。
+        private weak var originalDelegate: UIAdaptivePresentationControllerDelegate?
 
         override func viewDidAppear(_ animated: Bool) {
             super.viewDidAppear(animated)
@@ -2056,18 +2058,52 @@ private struct InteractiveDismissAttemptReader: UIViewControllerRepresentable {
                 }
                 controller = current.parent
             }
-            target?.delegate = self
+            guard let target, target.delegate !== self else { return }
+            // 置き換えるのは1回だけ。元のデリゲートは残して、呼び出しを転送する。
+            originalDelegate = target.delegate
+            target.delegate = self
+        }
+
+        /// 自分が実装していないメソッド（シートの detent など）は元のデリゲートへ渡す。
+        override func responds(to aSelector: Selector!) -> Bool {
+            if super.responds(to: aSelector) {
+                return true
+            }
+            return originalDelegate?.responds(to: aSelector) ?? false
+        }
+
+        override func forwardingTarget(for aSelector: Selector!) -> Any? {
+            if let originalDelegate, originalDelegate.responds(to: aSelector) {
+                return originalDelegate
+            }
+            return super.forwardingTarget(for: aSelector)
         }
 
         func presentationControllerShouldDismiss(
             _ presentationController: UIPresentationController
         ) -> Bool {
-            return !hasChanges
+            let originalAllows = originalDelegate?
+                .presentationControllerShouldDismiss?(presentationController) ?? true
+            return !hasChanges && originalAllows
+        }
+
+        func presentationControllerWillDismiss(
+            _ presentationController: UIPresentationController
+        ) {
+            originalDelegate?.presentationControllerWillDismiss?(presentationController)
+        }
+
+        func presentationControllerDidDismiss(
+            _ presentationController: UIPresentationController
+        ) {
+            originalDelegate?.presentationControllerDidDismiss?(presentationController)
         }
 
         func presentationControllerDidAttemptToDismiss(
             _ presentationController: UIPresentationController
         ) {
+            originalDelegate?
+                .presentationControllerDidAttemptToDismiss?(presentationController)
             onAttempt()
         }
     }
