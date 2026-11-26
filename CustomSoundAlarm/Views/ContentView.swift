@@ -207,6 +207,8 @@ struct ContentView: View {
                     reportPermissionBannerIfNeeded()
                     scanSilentAlarms()
                     evaluateFirstAlarmFollowup()
+                    // 既存の人（2曲以上・プレイリストなし・未表示）にも1回だけ出す（#280）
+                    schedulePlaylistUnlockAttempt()
                     #if DEBUG
                     if AppGroup.isUITestOpenAddAlarm {
                         addScreenVisible = true
@@ -446,7 +448,10 @@ struct ContentView: View {
             }
         }
         .onChange(of: showingOnboarding) { _, isShowing in
-            if !isShowing { presentNextShareImportIfNeeded() }
+            if !isShowing {
+                schedulePlaylistUnlockAttempt()
+                presentNextShareImportIfNeeded()
+            }
         }
         .onChange(of: addAlarmRequest == nil) { _, isClosed in
             if isClosed { presentNextShareImportIfNeeded() }
@@ -455,7 +460,14 @@ struct ContentView: View {
             if isClosed { presentNextShareImportIfNeeded() }
         }
         .onChange(of: updateChecker.prompt == nil) { _, isClosed in
-            if isClosed { presentNextShareImportIfNeeded() }
+            if isClosed {
+                schedulePlaylistUnlockAttempt()
+                presentNextShareImportIfNeeded()
+            }
+        }
+        .onChange(of: permissionBannerStatus) { _, status in
+            // 許可の1行が消えたら、次の提案（解放）に進む（#280）
+            if status == nil { schedulePlaylistUnlockAttempt() }
         }
         .onChange(of: shareLanding.addAlarmSound) { _, sound in
             guard let sound else { return }
@@ -558,7 +570,20 @@ struct ContentView: View {
               !editScreenVisible,
               !showingSettings,
               !showingOnboarding,
+              !showingPermissionSettings,
+              !showingSkipAll,
+              shareImportItem == nil,
+              fixingSilentAlarm == nil,
               updateChecker.prompt == nil else { return }
+        // 起動時に既存の人へ出すときは、許可の1行を先に出す（#280）。
+        // 2つ目の取り込みの直後は、取り込みの文脈を優先して出す（#216）。
+        let trigger = PlaylistUnlockLogic.trigger(
+            hasPending: soundStore.hasPendingPlaylistUnlock,
+            customSoundCount: soundStore.customSoundCount,
+            playlistCount: PlaylistStore.shared.playlists.count,
+            hasShown: AppGroup.playlistUnlockShown
+        )
+        if trigger == .existingUser, permissionBannerStatus != nil { return }
         _ = unlock.presentIfNeeded(
             isRinging: scheduler.isAlarmRinging,
             isNightMode: BedsideModeTracker.shared.isActive
@@ -1801,13 +1826,12 @@ struct ContentView: View {
             return
         }
 
-        let unlockWouldShow = PlaylistUnlockLogic.canPresent(
+        let unlockWouldShow = PlaylistUnlockLogic.trigger(
             hasPending: soundStore.hasPendingPlaylistUnlock,
-            hasShown: AppGroup.playlistUnlockShown,
-            isRinging: scheduler.isAlarmRinging,
-            isNightMode: BedsideModeTracker.shared.isActive,
-            hasAnotherSheet: false
-        )
+            customSoundCount: soundStore.customSoundCount,
+            playlistCount: PlaylistStore.shared.playlists.count,
+            hasShown: AppGroup.playlistUnlockShown
+        ) != nil
         guard FirstAlarmFollowupLogic.shouldShow(
             hasPermissionBanner: permissionBannerStatus != nil,
             unlockWouldShow: unlockWouldShow

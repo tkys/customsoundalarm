@@ -604,6 +604,42 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: 1.8.5 より前から音を2つ取り込んでいた状態（#280）
+    static var isUITestSeedExistingUnlock: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-existing-unlock")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: 既存の人のうち、取り込んだ音が1つだけの状態（#280）
+    static var isUITestSeedExistingUnlockOneSound: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-existing-unlock-one-sound")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: 既存の人のうち、プレイリストが1つある状態（#280）
+    static var isUITestSeedExistingUnlockPlaylist: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-existing-unlock-playlist")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: 既存の人のうち、解放カードをすでに見た状態（#280）
+    static var isUITestSeedExistingUnlockShown: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-existing-unlock-shown")
+    #else
+        false
+    #endif
+    }
+
     /// オンボーディングを完了したか（#98）。
     /// 未完了かつアラーム0件・取り込み音源0件の新規インストールにだけオンボを出す。
     /// 既存ユーザーは初回起動時に条件を満たさなければ立てて以後出さない

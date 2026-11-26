@@ -385,8 +385,8 @@
 "skip_result_footer" = "Zobrazujeme jen svátky připadající na den zvonění.";
 "skip_row_toast_skipped_fmt" = "%@ nezazvoní";
 "skip_row_toast_undone_fmt" = "%@ zazvoní";
-"playlist_unlock_title" = "Playlisty odemčené";
-"playlist_unlock_create" = "Vytvořit playlist z těchto dvou";
+"playlist_unlock_title" = "Refrén za refrénem";
+"playlist_unlock_create" = "Vytvořit playlist";
 "playlist_unlock_later" = "Teď ne";
 "volume_notice" = "Zvýšili jsme hlasitost, aby to bylo lépe slyšet.";
 "permission_banner_title" = "Oprávnění k budíkům je vypnuté";

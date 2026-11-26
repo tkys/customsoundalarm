@@ -257,11 +257,15 @@ enum AnalyticsEvent: Sendable {
     /// プレイリストの「作る1行」を出した（#207）
     case playlistSuggestionShown
 
-    /// 機能の解放シートを出した（#216）
-    case featureUnlockShown(feature: UnlockFeature)
+    /// 機能の解放シートを出した（#216 / #280）
+    case featureUnlockShown(feature: UnlockFeature, trigger: PlaylistUnlockTrigger)
 
-    /// 機能の解放シートで選んだ行動（#216）
-    case featureUnlockAction(feature: UnlockFeature, action: UnlockAction)
+    /// 機能の解放シートで選んだ行動（#216 / #280）
+    case featureUnlockAction(
+        feature: UnlockFeature,
+        action: UnlockAction,
+        trigger: PlaylistUnlockTrigger
+    )
 
     /// プレイリストが空の状態を見た（#183）
     /// 起動ごと・source ごとに1回だけ送る（PlaylistEmptyViewTracker が制御）。
@@ -675,10 +679,14 @@ enum AnalyticsEvent: Sendable {
             ]
         case .playlistSuggestionShown:
             return [:]
-        case let .featureUnlockShown(feature):
-            return ["feature": feature.rawValue]
-        case let .featureUnlockAction(feature, action):
-            return ["feature": feature.rawValue, "action": action.rawValue]
+        case let .featureUnlockShown(feature, trigger):
+            return ["feature": feature.rawValue, "trigger": trigger.rawValue]
+        case let .featureUnlockAction(feature, action, trigger):
+            return [
+                "feature": feature.rawValue,
+                "action": action.rawValue,
+                "trigger": trigger.rawValue
+            ]
         case let .alarmSkipSet(scope, days, alarmCount):
             return [
                 "scope": scope.rawValue,
