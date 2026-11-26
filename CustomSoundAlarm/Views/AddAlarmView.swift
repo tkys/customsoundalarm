@@ -360,7 +360,7 @@ struct AlarmDetailView: View {
                     minute: selectedMinute,
                     backupMinutes: backupMinutes ?? BackupAlarmLogic.defaultMinutes,
                     showsPlaylistNote: backupMinutes != nil && playlistID != nil,
-                    showsFadeNote: backupMinutes != nil && fadeIn != .off
+                    showsFadeNote: backupMinutes != nil && fadeIn != .off && isFadeInAvailable
                 )
             }
             .alert("playlist_required_title", isPresented: $showingPlaylistRequired) {
@@ -423,6 +423,14 @@ struct AlarmDetailView: View {
         return false
     }
 
+    /// 保存される音のファイル名（プレイリストを選んでいるときは空・#307）。
+    private var currentSoundFileName: String {
+        AlarmDraftLogic.soundFileName(
+            playlistID: playlistID,
+            selectedSoundFileName: selectedSound?.fileName
+        )
+    }
+
     /// いま画面に出ている、保存される項目（#308）。
     private var currentDraft: AlarmDraft {
         AlarmDraft(
@@ -430,10 +438,7 @@ struct AlarmDetailView: View {
             minute: selectedMinute,
             label: label,
             repeatWeekdays: repeatWeekdays.sorted(),
-            soundFileName: AlarmDraftLogic.soundFileName(
-                playlistID: playlistID,
-                selectedSoundFileName: selectedSound?.fileName
-            ),
+            soundFileName: currentSoundFileName,
             snoozeMinutes: snoozeMinutes,
             backupMinutes: backupMinutes,
             playlistID: playlistID,
@@ -692,6 +697,15 @@ struct AlarmDetailView: View {
         }
     }
 
+    /// 音がデフォルト（ファイル名が空）でプレイリストも無いときは選べない（#312）。
+    /// 保存されている値は変えないので、ほかの音に戻すとそのまま押せるようになる。
+    private var isFadeInAvailable: Bool {
+        FadeInAvailability.isAvailable(
+            soundFileName: currentSoundFileName,
+            playlistID: playlistID
+        )
+    }
+
     private var fadeInRow: some View {
         AdaptiveDetailRow {
             Text("fade_in")
@@ -705,6 +719,7 @@ struct AlarmDetailView: View {
             .labelsHidden()
             .accessibilityIdentifier("addAlarm.fadeIn")
         }
+        .disabled(!isFadeInAvailable)
     }
 
     // MARK: - More (#211)
@@ -762,6 +777,7 @@ struct AlarmDetailView: View {
             snoozeValue: SnoozeDisplay.text(for: snoozeMinutes),
             fadeIn: fadeIn,
             fadeValue: fadeInSummaryValue,
+            fadeInAvailable: isFadeInAvailable,
             strings: AlarmEditorMoreSummary.Strings(
                 labelFormat: String(localized: "more_label_fmt"),
                 noLabel: String(localized: "more_no_label"),
@@ -1983,6 +1999,7 @@ enum SnoozeDisplay {
 
 /// 「その他」1行の要約（#211・単体テスト対象）。
 /// 変えたものを先頭に2つまで。何も変えていなければスヌーズの初期値を1つ。
+/// 音がデフォルトで「やさしく鳴り始める」が効かないとき（#312）は、そこから外す。
 enum AlarmEditorMoreSummary {
 
     struct Strings {
@@ -2007,6 +2024,7 @@ enum AlarmEditorMoreSummary {
         snoozeValue: String,
         fadeIn: PlaylistFadeIn,
         fadeValue: String,
+        fadeInAvailable: Bool = true,
         strings: Strings
     ) -> Result {
         let trimmedLabel = label.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -2024,7 +2042,8 @@ enum AlarmEditorMoreSummary {
         if snoozeMinutes != AlarmCarryOver.defaults.snoozeMinutes {
             changed.append(snoozeItem)
         }
-        if fadeIn != .off {
+        // 音がデフォルトの間は効かないので、要約にも出さない（#312）
+        if fadeIn != .off, fadeInAvailable {
             changed.append(fadeItem)
         }
 
@@ -2039,7 +2058,7 @@ enum AlarmEditorMoreSummary {
 
         // VoiceOver は「その他、スヌーズ 9分・ラベルなし」の順で読む（#211 レビュー）。
         var accessibilityItems = [snoozeItem, labelItem]
-        if fadeIn != .off {
+        if fadeIn != .off, fadeInAvailable {
             accessibilityItems.append(fadeItem)
         }
         let accessibilityText = String(
