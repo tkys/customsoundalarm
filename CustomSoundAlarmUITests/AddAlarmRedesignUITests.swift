@@ -79,6 +79,10 @@ final class AddAlarmRedesignUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "standard row should appear")
         let preview = app.buttons["soundPicker.preview.PresetMarimba.caf"]
         XCTAssertTrue(preview.waitForExistence(timeout: 5), "play button should exist")
+        // 前回保存した音が初期選択になる（#6）。既定の音に戻してから確かめる
+        let defaultRow = app.buttons["library.preset.default"]
+        XCTAssertTrue(defaultRow.waitForExistence(timeout: 5), "default row should appear")
+        defaultRow.tap()
         XCTAssertFalse(row.isSelected, "not selected before tap")
         XCTAssertTrue(waitForPreviewLabel(preview, playing: false), "preview should be idle")
 
@@ -157,6 +161,48 @@ final class AddAlarmRedesignUITests: XCTestCase {
                 return
             }
         }
+    }
+
+    /// 追加画面から「その他」を開く。
+    private func openMoreScreen() {
+        let more = findElement("addAlarm.moreRow")
+        scrollTo(more, in: app.collectionViews["addAlarm.root"])
+        XCTAssertTrue(more.waitForExistence(timeout: 5), app.debugDescription)
+        more.tap()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.more.root"].waitForExistence(timeout: 10),
+            "more screen should open: \(app.debugDescription)"
+        )
+    }
+
+    /// 「その他」から追加画面へ戻る。
+    private func closeMoreScreen() {
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10),
+            "editor should come back: \(app.debugDescription)"
+        )
+    }
+
+    /// 音を選んで追加画面へ戻る（標準の音のシート）。
+    private func selectSound(_ identifier: String) {
+        _ = openSoundChoice()
+        let standard = app.buttons["library.standardSounds"]
+        XCTAssertTrue(standard.waitForExistence(timeout: 10), app.debugDescription)
+        standard.tap()
+
+        let row = app.buttons[identifier]
+        XCTAssertTrue(
+            row.waitForExistence(timeout: 10),
+            "\(identifier) should exist: \(app.debugDescription)"
+        )
+        row.tap()
+        closeStandardSoundsSheet()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10),
+            "editor should come back: \(app.debugDescription)"
+        )
     }
 
     /// 再生中は再生ボタンのラベルが「停止 / Stop」に変わる（#196）。
@@ -590,6 +636,8 @@ final class AddAlarmRedesignUITests: XCTestCase {
             app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10),
             app.debugDescription
         )
+        // 音がデフォルトの間は「やさしく鳴り始める」を押せない（#312）ので、先に音を選ぶ
+        selectSound("library.preset.PresetMarimba.caf")
         let list = app.collectionViews["addAlarm.root"]
         let more = findElement("addAlarm.moreRow")
         scrollTo(more, in: list)
@@ -639,6 +687,54 @@ final class AddAlarmRedesignUITests: XCTestCase {
             app.staticTexts["Gym"].waitForExistence(timeout: 15),
             "saved alarm should show the label: \(app.debugDescription)"
         )
+    }
+
+    /// #312: 音がデフォルトの間は「やさしく鳴り始める」を押せない。
+    /// 押せない間も値はそのまま見せ、音を戻すとその値のまま押せるようになる。
+    func testFadeInUnavailableOnlyForDefaultSound() {
+        app.launchArguments = [
+            "-uitest-open-add-alarm",
+            "-AppleLanguages", "(en)",
+            "-AppleLocale", "en_US"
+        ]
+        app.launch()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10),
+            app.debugDescription
+        )
+
+        let fade = findElement("addAlarm.fadeIn")
+
+        // マリンバを選ぶと押せて、15秒を選べる
+        selectSound("library.preset.PresetMarimba.caf")
+        openMoreScreen()
+        XCTAssertTrue(fade.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(fade.isEnabled, "a preset: the fade row should be enabled")
+        fade.tap()
+        let fifteenSeconds = app.buttons["15 seconds"]
+        XCTAssertTrue(fifteenSeconds.waitForExistence(timeout: 5), app.debugDescription)
+        fifteenSeconds.tap()
+        closeMoreScreen()
+
+        // デフォルトに戻すと押せないが、15秒の値は残る
+        selectSound("library.preset.default")
+        let more = findElement("addAlarm.moreRow")
+        XCTAssertFalse(
+            more.label.contains("Gentle start"),
+            "an ineffective setting should leave the summary: \(more.label)"
+        )
+        openMoreScreen()
+        XCTAssertTrue(fade.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertFalse(fade.isEnabled, "default sound: the fade row should be disabled")
+        XCTAssertEqual(fade.label, "15 seconds", app.debugDescription)
+        closeMoreScreen()
+
+        // マリンバに戻すと、前の値のまま押せる
+        selectSound("library.preset.PresetMarimba.caf")
+        openMoreScreen()
+        XCTAssertTrue(fade.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(fade.isEnabled, "a preset: the fade row should be enabled again")
+        XCTAssertEqual(fade.label, "15 seconds", app.debugDescription)
     }
 
     /// #224: 小さい音声を取り込んだときだけ、音量を上げた1行を出す。
@@ -861,5 +957,45 @@ final class AddAlarmRedesignUITests: XCTestCase {
             findElement("addAlarm.testRing").isEnabled,
             "寝過ごし防止の準備中でも『今すぐ鳴らす』は押せる"
         )
+    }
+
+    /// PR 用: 音がデフォルトで「やさしく鳴り始める」が押せない画面を1枚だけ撮る。
+    /// `TEST_RUNNER_FADE_SCREENSHOTS=1` のときだけ実行する。
+    func testCaptureFadeUnavailableScreenshot() throws {
+        try XCTSkipUnless(
+            ProcessInfo.processInfo.environment["FADE_SCREENSHOTS"] == "1",
+            "Fade screenshots run only with TEST_RUNNER_FADE_SCREENSHOTS=1"
+        )
+        app.launchArguments = [
+            "-uitest-open-add-alarm",
+            "-AppleLanguages", "(ja)",
+            "-AppleLocale", "ja_JP"
+        ]
+        app.launch()
+        XCTAssertTrue(
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10),
+            app.debugDescription
+        )
+
+        // 15秒を選んでから、音だけデフォルトに戻す（値が残ることを見せる）
+        selectSound("library.preset.PresetMarimba.caf")
+        openMoreScreen()
+        let fade = findElement("addAlarm.fadeIn")
+        XCTAssertTrue(fade.waitForExistence(timeout: 5), app.debugDescription)
+        fade.tap()
+        let fifteenSeconds = app.buttons["15秒"]
+        XCTAssertTrue(fifteenSeconds.waitForExistence(timeout: 5), app.debugDescription)
+        fifteenSeconds.tap()
+        closeMoreScreen()
+
+        selectSound("library.preset.default")
+        openMoreScreen()
+        XCTAssertTrue(fade.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertFalse(fade.isEnabled, "default sound: the fade row should be disabled")
+
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "fade-default-disabled"
+        attachment.lifetime = .keepAlways
+        add(attachment)
     }
 }

@@ -246,7 +246,8 @@ struct AlarmEditorMoreSummaryTests {
     private func make(
         label: String = "Alarm",
         snooze: Int = 9,
-        fadeIn: PlaylistFadeIn = .off
+        fadeIn: PlaylistFadeIn = .off,
+        fadeInAvailable: Bool = true
     ) -> AlarmEditorMoreSummary.Result {
         AlarmEditorMoreSummary.make(
             label: label,
@@ -255,6 +256,7 @@ struct AlarmEditorMoreSummaryTests {
             snoozeValue: "\(snooze) min",
             fadeIn: fadeIn,
             fadeValue: fadeIn == .off ? "Off" : "\(fadeIn.rawValue) sec",
+            fadeInAvailable: fadeInAvailable,
             strings: strings
         )
     }
@@ -301,6 +303,14 @@ struct AlarmEditorMoreSummaryTests {
         let result = make(label: "Gym", snooze: 5, fadeIn: .thirty)
         #expect(result.displayItems.count == 2)
         #expect(result.displayItems == ["Label: Gym", "Snooze 5 min"])
+    }
+
+    /// #312: 音がデフォルトで効かない間は、やさしく鳴り始めるを要約に残さない。
+    @Test
+    func gentleStartIsHiddenWhileUnavailable() {
+        let result = make(label: "Gym", fadeIn: .fifteen, fadeInAvailable: false)
+        #expect(result.displayItems == ["Label: Gym", "Snooze 9 min"])
+        #expect(result.accessibilityText == "More, Snooze 9 min · Label: Gym")
     }
 
     @Test
