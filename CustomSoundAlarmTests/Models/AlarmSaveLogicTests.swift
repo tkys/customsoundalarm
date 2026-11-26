@@ -379,4 +379,100 @@ struct SkipResultLogicTests {
         )
         #expect(result.isEmpty)
     }
+
+    // MARK: - 変更ありの判定（#308）
+
+    private func draft(
+        hour: Int = 7,
+        minute: Int = 0,
+        label: String = "Alarm",
+        repeatWeekdays: [Int] = [],
+        soundFileName: String = "a.caf",
+        snoozeMinutes: Int = 9,
+        backupMinutes: Int? = nil,
+        playlistID: UUID? = nil,
+        fadeIn: PlaylistFadeIn = .off,
+        skipsHolidays: Bool = false,
+        holidayRingOverrides: [String] = [],
+        skipDates: [String] = []
+    ) -> AlarmDraft {
+        AlarmDraft(
+            hour: hour,
+            minute: minute,
+            label: label,
+            repeatWeekdays: repeatWeekdays,
+            soundFileName: soundFileName,
+            snoozeMinutes: snoozeMinutes,
+            backupMinutes: backupMinutes,
+            playlistID: playlistID,
+            fadeIn: fadeIn,
+            skipsHolidays: skipsHolidays,
+            holidayRingOverrides: holidayRingOverrides,
+            skipDates: skipDates
+        )
+    }
+
+    @Test
+    func draftIsUnchangedRightAfterOpening() {
+        // 新規は開いたときの初期値がそのまま下書きになる。
+        let initial = draft()
+        #expect(!AlarmDraftLogic.hasChanges(initial: initial, current: initial))
+    }
+
+    @Test
+    func changingTimeIsAChange() {
+        let initial = draft(hour: 7, minute: 0)
+        let edited = draft(hour: 8, minute: 0)
+        #expect(AlarmDraftLogic.hasChanges(initial: initial, current: edited))
+    }
+
+    @Test
+    func revertingAChangeIsNotAChange() {
+        let initial = draft(hour: 7, minute: 0, label: "Alarm")
+        var edited = initial
+        edited.hour = 8
+        edited.label = "Gym"
+        #expect(AlarmDraftLogic.hasChanges(initial: initial, current: edited))
+
+        edited = initial
+        #expect(!AlarmDraftLogic.hasChanges(initial: initial, current: edited))
+    }
+
+    @Test
+    func everySavedFieldIsCompared() {
+        let initial = draft()
+        let variants: [AlarmDraft] = [
+            draft(minute: 1),
+            draft(label: "Gym"),
+            draft(repeatWeekdays: [2, 3]),
+            draft(soundFileName: "b.caf"),
+            draft(snoozeMinutes: 5),
+            draft(backupMinutes: 15),
+            draft(playlistID: UUID()),
+            draft(fadeIn: .thirty),
+            draft(skipsHolidays: true),
+            draft(holidayRingOverrides: ["2026-01-01"]),
+            draft(skipDates: ["2026-01-02"])
+        ]
+        for variant in variants {
+            #expect(AlarmDraftLogic.hasChanges(initial: initial, current: variant))
+        }
+    }
+
+    @Test
+    func playlistSelectionIgnoresTheSelectedSound() {
+        // プレイリストを選んでいる間は音のファイル名を保存しない（AlarmSaveLogic と同じ）。
+        #expect(AlarmDraftLogic.soundFileName(
+            playlistID: UUID(),
+            selectedSoundFileName: "a.caf"
+        ) == "")
+        #expect(AlarmDraftLogic.soundFileName(
+            playlistID: nil,
+            selectedSoundFileName: "a.caf"
+        ) == "a.caf")
+        #expect(AlarmDraftLogic.soundFileName(
+            playlistID: nil,
+            selectedSoundFileName: nil
+        ) == "")
+    }
 }

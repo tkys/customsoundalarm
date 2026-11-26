@@ -70,6 +70,10 @@
 "discard_edits_title" = "تجاهل التعديلات؟";
 "discard_edits_message" = "لن يتم حفظ تحديدك.";
 
+/* Closing the alarm editor with unsaved changes (#308) */
+"discard_changes" = "تجاهل التغييرات";
+"keep_editing" = "متابعة التحرير";
+
 /* Sound name formatting (#93) */
 "imported_sound_default" = "صوت مستورد";
 "my_sounds_empty_title" = "اجعل أي صوت منبهك";

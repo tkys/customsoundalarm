@@ -67,6 +67,10 @@ struct AlarmDetailView: View {
     @State private var holidayRingOverrides: Set<String>
     /// 日付を選んで休む（#197 画面作り直し）
     @State private var skipDates: Set<String>
+    /// 開いたときの保存項目（#308）。ここから変わったときだけ、閉じる前に確認する。
+    @State private var initialDraft: AlarmDraft
+    /// 変更を破棄するかの確認（#308）
+    @State private var showingDiscardConfirmation = false
 
     /// オンボ指定の初期動作を1回だけ適用したか
     @State private var didApplyInitialImport = false
@@ -120,43 +124,84 @@ struct AlarmDetailView: View {
         }
         self.carryOver = carryOver
 
+        let startTime: Date
+        let startLabel: String
+        let startSound: AlarmSound?
+        let startWeekdays: Set<Int>
+        let startSnoozeMinutes: Int
+        let startBackupMinutes: Int?
+        let startPlaylistID: UUID?
+        let startFadeIn: PlaylistFadeIn
+        let startSkipsHolidays: Bool
+        let startHolidayRingOverrides: Set<String>
+        let startSkipDates: Set<String>
+
         if case .edit(let entry) = mode {
             var components = DateComponents()
             components.hour = entry.hour
             components.minute = entry.minute
-            _selectedTime = State(initialValue: Calendar.current.date(from: components) ?? Date())
-            _label = State(initialValue: entry.label)
-            _repeatWeekdays = State(initialValue: Set(entry.repeatWeekdays))
-            _selectedSound = State(
-                initialValue: SoundStore.shared.sounds.first { $0.fileName == entry.soundFileName }
-            )
-            _snoozeMinutes = State(initialValue: entry.snoozeMinutes)
-            _backupMinutes = State(initialValue: entry.backupMinutes)
-            _playlistID = State(initialValue: entry.playlistID)
-            _fadeIn = State(initialValue: entry.fadeIn)
-            _skipsHolidays = State(initialValue: entry.skipsHolidays)
-            _holidayRingOverrides = State(initialValue: Set(entry.holidayRingOverrides))
-            _skipDates = State(initialValue: Set(entry.skipDates))
+            startTime = Calendar.current.date(from: components) ?? Date()
+            startLabel = entry.label
+            startWeekdays = Set(entry.repeatWeekdays)
+            startSound = SoundStore.shared.sounds.first { $0.fileName == entry.soundFileName }
+            startSnoozeMinutes = entry.snoozeMinutes
+            startBackupMinutes = entry.backupMinutes
+            startPlaylistID = entry.playlistID
+            startFadeIn = entry.fadeIn
+            startSkipsHolidays = entry.skipsHolidays
+            startHolidayRingOverrides = Set(entry.holidayRingOverrides)
+            startSkipDates = Set(entry.skipDates)
         } else {
             // UIテスト・録画用: 追加画面の初期時刻を固定する（DEBUGのみ・#282）
             let presetTime = AppGroup.uitestAddAlarmTime
                 .flatMap { Calendar.current.date(from: $0) }
-            _selectedTime = State(initialValue: presetTime ?? Date())
-            _label = State(initialValue: String(localized: "alarm_placeholder"))
+            startTime = presetTime ?? Date()
+            startLabel = String(localized: "alarm_placeholder")
             // 前回保存時に使った音をデフォルト選択（存在しない/削除済みなら nil）
             let lastUsedSound = SoundUsageHistory.lastUsedFileName.flatMap { fileName in
                 SoundStore.shared.sounds.first { $0.fileName == fileName }
             }
-            _selectedSound = State(initialValue: initialSound ?? lastUsedSound)
-            _repeatWeekdays = State(initialValue: [])
-            _snoozeMinutes = State(initialValue: carryOver.snoozeMinutes)
-            _backupMinutes = State(initialValue: nil)
-            _playlistID = State(initialValue: carryOver.playlistID)
-            _fadeIn = State(initialValue: carryOver.fadeIn)
-            _skipsHolidays = State(initialValue: false)
-            _holidayRingOverrides = State(initialValue: [])
-            _skipDates = State(initialValue: [])
+            startSound = initialSound ?? lastUsedSound
+            startWeekdays = []
+            startSnoozeMinutes = carryOver.snoozeMinutes
+            startBackupMinutes = nil
+            startPlaylistID = carryOver.playlistID
+            startFadeIn = carryOver.fadeIn
+            startSkipsHolidays = false
+            startHolidayRingOverrides = []
+            startSkipDates = []
         }
+
+        _selectedTime = State(initialValue: startTime)
+        _label = State(initialValue: startLabel)
+        _selectedSound = State(initialValue: startSound)
+        _repeatWeekdays = State(initialValue: startWeekdays)
+        _snoozeMinutes = State(initialValue: startSnoozeMinutes)
+        _backupMinutes = State(initialValue: startBackupMinutes)
+        _playlistID = State(initialValue: startPlaylistID)
+        _fadeIn = State(initialValue: startFadeIn)
+        _skipsHolidays = State(initialValue: startSkipsHolidays)
+        _holidayRingOverrides = State(initialValue: startHolidayRingOverrides)
+        _skipDates = State(initialValue: startSkipDates)
+
+        let calendar = Calendar.current
+        _initialDraft = State(initialValue: AlarmDraft(
+            hour: calendar.component(.hour, from: startTime),
+            minute: calendar.component(.minute, from: startTime),
+            label: startLabel,
+            repeatWeekdays: startWeekdays.sorted(),
+            soundFileName: AlarmDraftLogic.soundFileName(
+                playlistID: startPlaylistID,
+                selectedSoundFileName: startSound?.fileName
+            ),
+            snoozeMinutes: startSnoozeMinutes,
+            backupMinutes: startBackupMinutes,
+            playlistID: startPlaylistID,
+            fadeIn: startFadeIn,
+            skipsHolidays: startSkipsHolidays,
+            holidayRingOverrides: startHolidayRingOverrides.sorted(),
+            skipDates: startSkipDates.sorted()
+        ))
     }
 
     var body: some View {
@@ -217,8 +262,7 @@ struct AlarmDetailView: View {
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     Button {
-                        onClose?()
-                        dismiss()
+                        requestClose()
                     } label: {
                         Text("cancel")
                     }
@@ -291,6 +335,25 @@ struct AlarmDetailView: View {
                     Text(importErrorMessage)
                 }
             }
+            // 下に払う操作（#308）。UIKit のデリゲートで拾い、変更があるときだけ確認を出す。
+            .interactiveDismissDisabled(hasChanges)
+            .background {
+                InteractiveDismissAttemptReader(hasChanges: hasChanges) {
+                    showingDiscardConfirmation = true
+                }
+                .frame(width: 0, height: 0)
+            }
+            // 確認は2つだけ。タイトル・説明文は付けない（iOS のカレンダー・リマインダーと同じ）。
+            .confirmationDialog(
+                "",
+                isPresented: $showingDiscardConfirmation,
+                titleVisibility: .hidden
+            ) {
+                Button("discard_changes", role: .destructive) {
+                    close()
+                }
+                Button("keep_editing", role: .cancel) {}
+            }
         }
     }
 
@@ -315,6 +378,47 @@ struct AlarmDetailView: View {
     private var isEditing: Bool {
         if case .edit = mode { return true }
         return false
+    }
+
+    /// いま画面に出ている、保存される項目（#308）。
+    private var currentDraft: AlarmDraft {
+        AlarmDraft(
+            hour: selectedHour,
+            minute: selectedMinute,
+            label: label,
+            repeatWeekdays: repeatWeekdays.sorted(),
+            soundFileName: AlarmDraftLogic.soundFileName(
+                playlistID: playlistID,
+                selectedSoundFileName: selectedSound?.fileName
+            ),
+            snoozeMinutes: snoozeMinutes,
+            backupMinutes: backupMinutes,
+            playlistID: playlistID,
+            fadeIn: fadeIn,
+            skipsHolidays: skipsHolidays,
+            holidayRingOverrides: holidayRingOverrides.sorted(),
+            skipDates: skipDates.sorted()
+        )
+    }
+
+    /// 開いたときから、保存される項目が1つでも変わっているか（#308）。
+    private var hasChanges: Bool {
+        AlarmDraftLogic.hasChanges(initial: initialDraft, current: currentDraft)
+    }
+
+    /// 「キャンセル」と下に払う操作の共通の入り口（#308）。
+    /// 変更があるときだけ確認を出し、なければ今まで通り閉じる。
+    private func requestClose() {
+        if hasChanges {
+            showingDiscardConfirmation = true
+        } else {
+            close()
+        }
+    }
+
+    private func close() {
+        onClose?()
+        dismiss()
     }
 
     private var editingAlarmID: UUID? {
@@ -1897,6 +2001,74 @@ struct AdaptiveDetailRow<Title: View, Content: View>: View {
                 Spacer(minLength: 12)
                 content
             }
+        }
+    }
+}
+
+// MARK: - Interactive dismiss attempt (#308)
+
+/// 下に払おうとしたことを UIKit から受け取る（SwiftUI だけでは取れない）。
+/// シートの presentationController に自分をデリゲートとして付け、
+/// 変更があるときは閉じずに `onAttempt` を呼ぶ。
+private struct InteractiveDismissAttemptReader: UIViewControllerRepresentable {
+    let hasChanges: Bool
+    let onAttempt: () -> Void
+
+    func makeUIViewController(context: Context) -> Controller {
+        let controller = Controller()
+        controller.view.backgroundColor = .clear
+        controller.view.isUserInteractionEnabled = false
+        controller.hasChanges = hasChanges
+        controller.onAttempt = onAttempt
+        return controller
+    }
+
+    func updateUIViewController(_ controller: Controller, context: Context) {
+        controller.hasChanges = hasChanges
+        controller.onAttempt = onAttempt
+        controller.installDelegateIfNeeded()
+    }
+
+    final class Controller: UIViewController, UIAdaptivePresentationControllerDelegate {
+        var hasChanges = false
+        var onAttempt: () -> Void = {}
+
+        override func viewDidAppear(_ animated: Bool) {
+            super.viewDidAppear(animated)
+            installDelegateIfNeeded()
+        }
+
+        override func didMove(toParent parent: UIViewController?) {
+            super.didMove(toParent: parent)
+            installDelegateIfNeeded()
+        }
+
+        /// 自分から親をたどり、シート本体の presentationController を探す。
+        /// 子のコントローラーも同じ型の presentationController を持つため、
+        /// presentedViewController がそのコントローラー自身になるものを選ぶ。
+        func installDelegateIfNeeded() {
+            var controller: UIViewController? = self
+            var target: UIPresentationController?
+            while let current = controller {
+                if let presentationController = current.presentationController,
+                   presentationController.presentedViewController === current {
+                    target = presentationController
+                }
+                controller = current.parent
+            }
+            target?.delegate = self
+        }
+
+        func presentationControllerShouldDismiss(
+            _ presentationController: UIPresentationController
+        ) -> Bool {
+            return !hasChanges
+        }
+
+        func presentationControllerDidAttemptToDismiss(
+            _ presentationController: UIPresentationController
+        ) {
+            onAttempt()
         }
     }
 }

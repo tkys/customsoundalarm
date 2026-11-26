@@ -70,6 +70,10 @@
 "discard_edits_title" = "編集内容を破棄しますか？";
 "discard_edits_message" = "選択した範囲は保存されません。";
 
+/* Closing the alarm editor with unsaved changes (#308) */
+"discard_changes" = "変更を破棄";
+"keep_editing" = "編集を続ける";
+
 /* Sound name formatting (#93) */
 "imported_sound_default" = "取り込んだ音源";
 "my_sounds_empty_title" = "好きな音をアラームにしよう";

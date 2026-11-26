@@ -70,6 +70,10 @@
 "discard_edits_title" = "편집 내용을 버릴까요?";
 "discard_edits_message" = "선택한 내용은 저장되지 않습니다.";
 
+/* Closing the alarm editor with unsaved changes (#308) */
+"discard_changes" = "변경 사항 폐기";
+"keep_editing" = "편집 계속하기";
+
 /* Sound name formatting (#93) */
 "imported_sound_default" = "가져온 사운드";
 "my_sounds_empty_title" = "어떤 소리든 알람으로";

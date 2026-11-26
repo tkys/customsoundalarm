@@ -70,6 +70,10 @@
 "discard_edits_title" = "Zahodit úpravy?";
 "discard_edits_message" = "Výběr se neuloží.";
 
+/* Closing the alarm editor with unsaved changes (#308) */
+"discard_changes" = "Zahodit změny";
+"keep_editing" = "Pokračovat v úpravách";
+
 /* Sound name formatting (#93) */
 "imported_sound_default" = "Importovaný zvuk";
 "my_sounds_empty_title" = "Udělej budík z jakéhokoli zvuku";

@@ -70,6 +70,10 @@
 "discard_edits_title" = "Wijzigingen verwerpen?";
 "discard_edits_message" = "Je selectie wordt niet bewaard.";
 
+/* Closing the alarm editor with unsaved changes (#308) */
+"discard_changes" = "Wijzigingen verwerpen";
+"keep_editing" = "Doorgaan met bewerken";
+
 /* Sound name formatting (#93) */
 "imported_sound_default" = "Geïmporteerd geluid";
 "my_sounds_empty_title" = "Maak van elk geluid je wekker";
