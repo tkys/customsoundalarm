@@ -309,7 +309,14 @@ struct AlarmDetailView: View {
                 scheduler.refreshTestRingPermission()
             }
             .sheet(isPresented: $showingVolumeGuide) {
-                AlarmVolumeGuideView(source: .testRing)
+                AlarmVolumeGuideView(
+                    source: .testRing,
+                    // ガイドを閉じたあと、追加・編集画面の「今すぐ鳴らす」と同じ処理を始める（#309）
+                    onRingNow: { scheduleTestRing(kind: .own) },
+                    isRingNowEnabled: scheduler.canScheduleTestRing
+                        && testRingPhase == .idle
+                        && !scheduler.isTestRingActive
+                )
             }
             .sheet(isPresented: $showingBackupInfo) {
                 BackupAlarmInfoView(

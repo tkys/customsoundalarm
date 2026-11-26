@@ -142,6 +142,98 @@ final class TestRingReasonUITests: XCTestCase {
         XCTAssertFalse(findElement("addAlarm.openSettings").exists, "許可がまだなら設定へは送らない")
     }
 
+    /// #309: 追加画面から開いたガイドの一番下に「今すぐ鳴らす」があり、
+    /// 押すとガイドが閉じて、追加画面の試し鳴らしが始まる。
+    func testVolumeGuideFromEditorRingsNowAtBottomAndClosesToStartTestRing() {
+        launchAdd(
+            permissionFlag: "-uitest-test-ring-allowed",
+            language: "en",
+            locale: "en_US"
+        )
+
+        let form = app.collectionViews["addAlarm.root"]
+        let link = findElement("addAlarm.volumeGuide")
+        for _ in 0..<4 {
+            if link.isHittable { break }
+            form.swipeUp()
+        }
+        XCTAssertTrue(link.isHittable, "the volume guide link should be reachable")
+        let editorRingLabel = findElement("addAlarm.testRing").label
+        // 行の中央は空白で、押せるのは左の文字のところ（#150 の小さなリンク）。
+        link.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.5)).tap()
+
+        let guide = findElement("volumeGuide.root")
+        XCTAssertTrue(guide.waitForExistence(timeout: 10), app.debugDescription)
+
+        let scroll = app.scrollViews.firstMatch
+        let warning = findElement("volumeGuide.warning")
+        let ringNow = findElement("volumeGuide.testRing")
+        for _ in 0..<5 {
+            if ringNow.isHittable { break }
+            scroll.swipeUp()
+        }
+        XCTAssertTrue(ringNow.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(ringNow.isHittable, "the button should be at the bottom of the guide")
+        XCTAssertEqual(
+            ringNow.label,
+            editorRingLabel,
+            "the guide should use the same title as the editor's test ring"
+        )
+        XCTAssertTrue(ringNow.isEnabled, "allowed: the button should be tappable")
+        XCTAssertGreaterThan(
+            ringNow.frame.minY,
+            warning.frame.maxY,
+            "the button should come after the warning, at the bottom"
+        )
+        XCTAssertGreaterThan(
+            ringNow.frame.width,
+            guide.frame.width * 0.8,
+            "the button should be full width"
+        )
+
+        ringNow.tap()
+
+        // 結果の文は4秒で消えるため、ガイドの閉じ待ちより先に拾う（#297）。
+        XCTAssertTrue(
+            app.staticTexts["Trial ring is available on a real device only."]
+                .waitForExistence(timeout: 5),
+            "the editor's test ring should have run: \(app.debugDescription)"
+        )
+        XCTAssertTrue(
+            guide.waitForNonExistence(timeout: 5),
+            "the guide should close before the test ring starts"
+        )
+        XCTAssertTrue(form.waitForExistence(timeout: 5), app.debugDescription)
+    }
+
+    /// #309: アラームの許可がないときは、ガイドの「今すぐ鳴らす」を押せない。
+    func testVolumeGuideRingNowDisabledWithoutPermission() {
+        launchAdd(
+            permissionFlag: "-uitest-test-ring-denied",
+            language: "en",
+            locale: "en_US"
+        )
+
+        let form = app.collectionViews["addAlarm.root"]
+        let link = findElement("addAlarm.volumeGuide")
+        for _ in 0..<4 {
+            if link.isHittable { break }
+            form.swipeUp()
+        }
+        XCTAssertTrue(link.isHittable, "the volume guide link should be reachable")
+        link.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.5)).tap()
+
+        let guide = findElement("volumeGuide.root")
+        XCTAssertTrue(guide.waitForExistence(timeout: 10), app.debugDescription)
+        let ringNow = findElement("volumeGuide.testRing")
+        for _ in 0..<5 {
+            if ringNow.isHittable { break }
+            app.scrollViews.firstMatch.swipeUp()
+        }
+        XCTAssertTrue(ringNow.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertFalse(ringNow.isEnabled, "denied: the button should not be tappable")
+    }
+
     /// 「音が小さいときは」はメインのボタンと同じ行の右端ではなく、行の下（#150）。
     func testVolumeGuideLinkIsBelowTestRingRow() {
         launchAdd(

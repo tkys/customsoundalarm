@@ -49,4 +49,11 @@ struct VolumeGuideLogicTests {
     func sourceRawValues() {
         #expect(VolumeGuideSource.testRing.rawValue == "test_ring")
     }
+
+    /// #309: 一番下の「今すぐ鳴らす」は、追加・編集画面から開いたときだけ出す。
+    @Test
+    func ringNowButtonOnlyWhenEditorPassesHandler() {
+        #expect(!AlarmVolumeGuideView(source: .testRing).showsRingNow)
+        #expect(AlarmVolumeGuideView(source: .testRing, onRingNow: {}).showsRingNow)
+    }
 }

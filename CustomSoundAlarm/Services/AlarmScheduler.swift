@@ -133,6 +133,8 @@ final class AlarmScheduler {
     static var uiTestPermissionOverride: TestRingPermission? {
         if CommandLine.arguments.contains("-uitest-test-ring-denied") { return .denied }
         if CommandLine.arguments.contains("-uitest-test-ring-not-determined") { return .unknown }
+        // シミュレータで「押すと試し鳴らしが始まる」ところまで確かめる用（#309）
+        if CommandLine.arguments.contains("-uitest-test-ring-allowed") { return .allowed }
         return nil
     }
     #endif
