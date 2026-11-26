@@ -5,8 +5,18 @@ import SwiftUI
 /// 入口（「今すぐ鳴らす」の下・音の大きさの下）は #122 で付ける。
 struct AlarmVolumeGuideView: View {
     let source: VolumeGuideSource
+    /// 一番下の「試しに鳴らす」（#309）。
+    /// 追加・編集画面から開いたときだけ渡し、ほかの入口では nil のままボタンを出さない。
+    var onRingNow: (() -> Void)?
+    /// 押せるか（許可がないとき・鳴らしている途中は押せない）。
+    var isRingNowEnabled: Bool = true
 
     @Environment(\.dismiss) private var dismiss
+
+    /// 一番下のボタンを出すか。渡されていない入口では出さない（#309）。
+    var showsRingNow: Bool {
+        onRingNow != nil
+    }
 
     var body: some View {
         NavigationStack {
@@ -27,6 +37,23 @@ struct AlarmVolumeGuideView: View {
                         .accessibilityIdentifier("volumeGuide.step2")
 
                     warning
+
+                    // 設定で音量を上げたあと、この画面を閉じて探し直さずに試せるようにする（#309）。
+                    // 説明文や見出しは足さない。
+                    if showsRingNow, let onRingNow {
+                        Button {
+                            dismiss()
+                            onRingNow()
+                        } label: {
+                            Text("test_ring_title")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
+                        .tint(Color.actionFillEnd)
+                        .disabled(!isRingNowEnabled)
+                        .accessibilityIdentifier("volumeGuide.testRing")
+                    }
                 }
                 .padding(20)
             }
