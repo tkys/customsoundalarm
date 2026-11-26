@@ -15,7 +15,8 @@ enum TestRingPermission: Equatable, Sendable {
 /// 試し鳴らしの登録結果（#150）。
 /// 失敗時は理由を添え、画面のその場表示と `test_ring_failed` 計測に使う。
 enum TestRingResult: Equatable, Sendable {
-    case scheduled
+    /// 登録した試しアラームの ID（鳴り始めの検知に使う・#310）。
+    case scheduled(id: UUID)
     case failed(TestRingFailureReason)
 }
 
@@ -44,6 +45,16 @@ final class AlarmScheduler {
     var isTestRingActive: Bool {
         !AppGroup.testAlarmRecords.isEmpty
     }
+
+    /// 登録中の試しアラームの ID（#310）。止めた・掃除されたら減る。
+    private(set) var testRingActiveIDs: Set<UUID> = []
+
+    /// いま鳴っている試しアラームの ID（#310）。`.alerting` の間だけ入る。
+    private(set) var testRingAlertedIDs: Set<UUID> = []
+
+    /// `test_ring_alerted` を同じアラームで二重に送らないための記録
+    @ObservationIgnored
+    private var reportedTestRingAlertIDs: Set<UUID> = []
 
     /// 試しアラームの記録ごとの掃除タスク（60秒後にキャンセルする）
     @ObservationIgnored
@@ -1278,7 +1289,9 @@ final class AlarmScheduler {
         soundFileName: String,
         kind: TestRingKind,
         hasBackup: Bool = false,
-        now: Date = Date()
+        now: Date = Date(),
+        pressedAt: Date? = nil,
+        rendered: Bool = false
     ) async -> TestRingResult {
         refreshTestRingPermission()
         guard canScheduleTestRing else {
@@ -1308,12 +1321,19 @@ final class AlarmScheduler {
         do {
             try await manager.schedule(id: alarmID, configuration: config)
             var records = AppGroup.testAlarmRecords
-            records.append(TestAlarmRecord(id: alarmID, scheduledAt: now, kind: kind))
+            records.append(TestAlarmRecord(
+                id: alarmID,
+                // 待ち時間は音を作る前、押した瞬間から数える（#310）
+                scheduledAt: pressedAt ?? now,
+                kind: kind,
+                rendered: rendered
+            ))
             AppGroup.testAlarmRecords = records
+            testRingActiveIDs.insert(alarmID)
             AnalyticsService.shared.capture(.testRingScheduled(kind: kind, hasBackup: hasBackup))
             scheduleTestRingCleanup(for: alarmID)
             logger.info("Scheduled test ring in \(TestRingLogic.delay)s (kind=\(kind.rawValue))")
-            return .scheduled
+            return .scheduled(id: alarmID)
         } catch {
             logger.error("Failed to schedule test ring: \(error.localizedDescription)")
             AnalyticsService.shared.capture(.testRingFailed(reason: .scheduleError, kind: kind))
@@ -1356,6 +1376,16 @@ final class AlarmScheduler {
         )
     }
 
+    /// 試しアラームを1つだけ止めて記録から消す（#310 の 60 秒待ち）。
+    func cancelTestRing(id: UUID) {
+        try? manager.cancel(id: id)
+        AppGroup.testAlarmRecords = AppGroup.testAlarmRecords.filter { $0.id != id }
+        testRingActiveIDs.remove(id)
+        testRingAlertedIDs.remove(id)
+        reportedTestRingAlertIDs.remove(id)
+        deleteTestRingSoundIfIdle()
+    }
+
     /// 60 秒経過した試しアラームをキャンセルして記録から消す。
     func cleanupTestAlarms(now: Date = Date()) {
         let records = AppGroup.testAlarmRecords
@@ -1367,6 +1397,9 @@ final class AlarmScheduler {
         }
         if !result.expiredIDs.isEmpty {
             AppGroup.testAlarmRecords = result.remaining
+            testRingActiveIDs.subtract(result.expiredIDs)
+            testRingAlertedIDs.subtract(result.expiredIDs)
+            reportedTestRingAlertIDs.subtract(result.expiredIDs)
             logger.info("Cleaned up \(result.expiredIDs.count) test ring alarm(s)")
         }
         if result.remaining.isEmpty {
@@ -1381,6 +1414,9 @@ final class AlarmScheduler {
             try? manager.cancel(id: record.id)
         }
         AppGroup.testAlarmRecords = []
+        testRingActiveIDs.removeAll()
+        testRingAlertedIDs.removeAll()
+        reportedTestRingAlertIDs.removeAll()
         // 記録が無くても、前回クラッシュ等で残った試し鳴らし用ファイルを掃除する。
         PlaylistRenderService.shared.deleteTestRingSound()
         if !records.isEmpty {
@@ -1414,6 +1450,7 @@ final class AlarmScheduler {
             for await alarms in AlarmManager.shared.alarmUpdates {
                 guard !Task.isCancelled else { break }
                 isAlarmRinging = alarms.contains { $0.state == .alerting }
+                updateTestRingObservation(alarms: alarms)
                 for alarm in alarms {
                     switch alarm.state {
                     case .alerting:
@@ -1445,6 +1482,30 @@ final class AlarmScheduler {
                     }
                 }
             }
+        }
+    }
+
+    /// 試しアラームの「登録中」「鳴っている」を更新する（#310）。
+    /// 鳴り始めは時間ではなく `alarmUpdates` の `.alerting` で判定する。
+    private func updateTestRingObservation(alarms: [Alarm]) {
+        let records = AppGroup.testAlarmRecords
+        let testIDs = Set(records.map(\.id))
+        testRingActiveIDs = testIDs.intersection(Set(alarms.map(\.id)))
+
+        let alertingIDs = Set(
+            alarms.filter { $0.state == .alerting }.map(\.id)
+        )
+        testRingAlertedIDs = testIDs.intersection(alertingIDs)
+
+        for record in records where alertingIDs.contains(record.id) {
+            guard reportedTestRingAlertIDs.insert(record.id).inserted else { continue }
+            let waited = max(0, Date().timeIntervalSince(record.scheduledAt))
+            AnalyticsService.shared.capture(.testRingAlerted(
+                kind: record.kind,
+                waitBucket: TestRingLogic.waitBucket(seconds: waited),
+                rendered: record.rendered ?? false
+            ))
+            logger.info("Test ring alerted: \(record.id) kind=\(record.kind.rawValue)")
         }
     }
 

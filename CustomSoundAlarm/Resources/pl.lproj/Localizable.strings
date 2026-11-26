@@ -192,7 +192,9 @@
 "onb.later" = "Później";
 
 /* Trial ring (#109) */
-"test_ring_title" = "Zadzwoń teraz";
+"test_ring_title" = "Przetestuj dzwonek";
+"test_ring_waiting" = "Zaraz zadzwoni";
+"test_ring_ringing" = "Dzwoni teraz";
 "test_ring_failed" = "Nie udało się zaplanować budzika testowego. Spróbuj ponownie.";
 "test_ring_simulator_unavailable" = "Test dzwonienia jest dostępny tylko na prawdziwym urządzeniu.";
 "test_ring_alarm_title" = "Budzik testowy";
@@ -231,7 +233,6 @@
 "alarm_permission_required" = "Wymagane pozwolenie na budziki";
 "open_settings" = "Otwórz Ustawienia";
 "volume_guide_link" = "Za cicho?";
-"test_ring_ringing_now" = "Dzwoni teraz";
 "backup_alarm_info_title" = "Ochrona przed zaspaniem";
 "backup_alarm_info_volume" = "Rzeczywista głośność zależy od głośności Dzwonek i alerty w Ustawieniach.";
 "backup_alarm_info_accessibility" = "O ochronie przed zaspaniem";

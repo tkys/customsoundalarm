@@ -186,4 +186,80 @@ struct TestRingLogicTests {
         #expect(diff.cancelEntryIDs.isEmpty)
         #expect(!diff.cancelEntryIDs.contains(testRecord.id))
     }
+
+    // MARK: - Wait bucket (#310)
+
+    @Test
+    func waitBucket_boundaries() {
+        #expect(TestRingLogic.waitBucket(seconds: 0) == .under2)
+        #expect(TestRingLogic.waitBucket(seconds: 1.99) == .under2)
+        #expect(TestRingLogic.waitBucket(seconds: 2) == .twoToFour)
+        #expect(TestRingLogic.waitBucket(seconds: 3.99) == .twoToFour)
+        #expect(TestRingLogic.waitBucket(seconds: 4) == .fourToSeven)
+        #expect(TestRingLogic.waitBucket(seconds: 6.99) == .fourToSeven)
+        #expect(TestRingLogic.waitBucket(seconds: 7) == .sevenToFifteen)
+        #expect(TestRingLogic.waitBucket(seconds: 14.99) == .sevenToFifteen)
+        #expect(TestRingLogic.waitBucket(seconds: 15) == .fifteenPlus)
+        #expect(TestRingLogic.waitBucket(seconds: 300) == .fifteenPlus)
+    }
+
+    @Test
+    func waitBucket_rawValuesAreStableAnalyticsIdentifiers() {
+        #expect(TestRingLogic.WaitBucket.under2.rawValue == "<2")
+        #expect(TestRingLogic.WaitBucket.twoToFour.rawValue == "2-4")
+        #expect(TestRingLogic.WaitBucket.fourToSeven.rawValue == "4-7")
+        #expect(TestRingLogic.WaitBucket.sevenToFifteen.rawValue == "7-15")
+        #expect(TestRingLogic.WaitBucket.fifteenPlus.rawValue == "15+")
+    }
+
+    // MARK: - Button state (#310)
+
+    @Test
+    func buttonState_idleToWaitingToRingingToIdle() {
+        let waiting = TestRingLogic.next(state: .idle, event: .press)
+        #expect(waiting == .waiting)
+        #expect(!waiting.isEnabled)
+        #expect(waiting.wigglesIcon)
+
+        let ringing = TestRingLogic.next(state: waiting, event: .alerting)
+        #expect(ringing == .ringing)
+        #expect(!ringing.isEnabled)
+        #expect(!ringing.wigglesIcon, "鳴っている間は揺らさない")
+
+        #expect(TestRingLogic.next(state: ringing, event: .disappeared) == .idle)
+    }
+
+    @Test
+    func buttonState_timeoutReturnsToIdleOnlyWhileWaiting() {
+        #expect(TestRingLogic.next(state: .waiting, event: .timeout) == .idle)
+        // 鳴っている間の 60 秒では止めない
+        #expect(TestRingLogic.next(state: .ringing, event: .timeout) == .ringing)
+    }
+
+    @Test
+    func buttonState_failureReturnsToIdle() {
+        #expect(TestRingLogic.next(state: .waiting, event: .failed) == .idle)
+    }
+
+    @Test
+    func buttonState_disappearedWhileWaitingReturnsToIdle() {
+        #expect(TestRingLogic.next(state: .waiting, event: .disappeared) == .idle)
+    }
+
+    @Test
+    func buttonState_idleIgnoresUnexpectedEvents() {
+        #expect(TestRingLogic.next(state: .idle, event: .alerting) == .idle)
+        #expect(TestRingLogic.next(state: .idle, event: .disappeared) == .idle)
+        #expect(TestRingLogic.next(state: .idle, event: .timeout) == .idle)
+        #expect(TestRingLogic.next(state: .idle, event: .failed) == .idle)
+    }
+
+    @Test
+    func buttonState_titlesAndFlags() {
+        #expect(TestRingLogic.ButtonState.idle.titleKey == "test_ring_title")
+        #expect(TestRingLogic.ButtonState.waiting.titleKey == "test_ring_waiting")
+        #expect(TestRingLogic.ButtonState.ringing.titleKey == "test_ring_ringing")
+        #expect(TestRingLogic.ButtonState.idle.isEnabled)
+        #expect(TestRingLogic.ButtonState.idle.wigglesIcon == false)
+    }
 }

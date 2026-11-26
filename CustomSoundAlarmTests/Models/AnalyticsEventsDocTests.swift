@@ -23,6 +23,7 @@ struct AnalyticsEventsDocTests {
         "alarm_orphan_cancelled",
         "test_ring_scheduled",
         "test_ring_stopped",
+        "test_ring_alerted",
         "test_ring_failed",
         "backup_alarm_enabled",
         "backup_alarm_disabled",

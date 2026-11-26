@@ -192,7 +192,9 @@
 "onb.later" = "Later";
 
 /* Trial ring (#109) */
-"test_ring_title" = "Ring now";
+"test_ring_title" = "Test Ring";
+"test_ring_waiting" = "Ringing soon";
+"test_ring_ringing" = "Ringing";
 "test_ring_failed" = "Couldn't schedule the test alarm. Please try again.";
 "test_ring_simulator_unavailable" = "Trial ring is available on a real device only.";
 "test_ring_alarm_title" = "Test Alarm";
@@ -231,7 +233,6 @@
 "alarm_permission_required" = "Alarm permission is required";
 "open_settings" = "Open Settings";
 "volume_guide_link" = "Too quiet?";
-"test_ring_ringing_now" = "Ringing now";
 "backup_alarm_info_title" = "Oversleep guard";
 "backup_alarm_info_volume" = "How loud it actually rings depends on Ringtone and Alerts volume in Settings.";
 "backup_alarm_info_accessibility" = "About oversleep guard";

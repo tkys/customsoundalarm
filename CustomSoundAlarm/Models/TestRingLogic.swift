@@ -70,6 +70,85 @@ enum TestRingLogic {
         return CleanupResult(remaining: remaining, expiredIDs: expiredIDs)
     }
 
+    /// 押してから鳴るまでの秒数の区分（#310）。
+    /// `test_ring_alerted` の `wait_bucket` にそのまま送る。
+    enum WaitBucket: String, CaseIterable, Equatable, Sendable {
+        case under2 = "<2"
+        case twoToFour = "2-4"
+        case fourToSeven = "4-7"
+        case sevenToFifteen = "7-15"
+        case fifteenPlus = "15+"
+    }
+
+    /// 押してから鳴るまでの秒数を区分に分ける。
+    /// 音を作る時間も含めるため、押した瞬間から数えた秒数を渡す。
+    static func waitBucket(seconds: TimeInterval) -> WaitBucket {
+        if seconds < 2 { return .under2 }
+        if seconds < 4 { return .twoToFour }
+        if seconds < 7 { return .fourToSeven }
+        if seconds < 15 { return .sevenToFifteen }
+        return .fifteenPlus
+    }
+
+    // MARK: - ボタンの状態（#310）
+
+    /// 「試しに鳴らす」ボタン1つの中身。行を増やさず、文字とアイコンだけを変える。
+    enum ButtonState: String, Equatable, Sendable {
+        /// 待機。押せる。
+        case idle
+        /// 押した瞬間から鳴るまで。音を作る時間も含む。押せない。
+        case waiting
+        /// 試しのアラームが `.alerting` になった。押せない。
+        case ringing
+
+        /// ボタンに出す文言のキー。
+        var titleKey: String {
+            switch self {
+            case .idle: "test_ring_title"
+            case .waiting: "test_ring_waiting"
+            case .ringing: "test_ring_ringing"
+            }
+        }
+
+        /// 押せるのは待機のときだけ。
+        var isEnabled: Bool { self == .idle }
+
+        /// アイコンを小さく揺らすのは、鳴るのを待っている間だけ。
+        var wigglesIcon: Bool { self == .waiting }
+    }
+
+    /// ボタンの状態を変えるきっかけ。
+    enum ButtonEvent: Equatable, Sendable {
+        /// 押した（音を作る前）。
+        case press
+        /// 試しのアラームが鳴り始めた（`alarmUpdates` の `.alerting`）。
+        case alerting
+        /// 試しのアラームが一覧から消えた（止めた・掃除された）。
+        case disappeared
+        /// 登録に失敗した。
+        case failed
+        /// 60 秒たっても鳴らなかった。
+        case timeout
+    }
+
+    /// 状態の移り変わり。時間ではなく、押した・鳴った・消えたで決める。
+    /// 60 秒の待ちは押した瞬間から数える（`cleanupAfter`）。
+    static func next(state: ButtonState, event: ButtonEvent) -> ButtonState {
+        switch (state, event) {
+        case (.idle, .press):
+            return .waiting
+        case (.waiting, .alerting):
+            return .ringing
+        case (.waiting, .disappeared), (.waiting, .failed), (.waiting, .timeout):
+            return .idle
+        case (.ringing, .disappeared):
+            return .idle
+        default:
+            // 鳴っている間の timeout では止めない。止めたときだけ待機へ戻す。
+            return state
+        }
+    }
+
     /// 停止 Intent が「試しアラームの停止」かどうか。
     ///
     /// 停止 Intent にはアラーム ID が渡らないため、AlarmKit の現在の一覧と

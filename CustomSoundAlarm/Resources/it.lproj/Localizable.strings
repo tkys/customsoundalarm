@@ -192,7 +192,9 @@
 "onb.later" = "Più tardi";
 
 /* Trial ring (#109) */
-"test_ring_title" = "Suona ora";
+"test_ring_title" = "Prova la sveglia";
+"test_ring_waiting" = "Sta per suonare";
+"test_ring_ringing" = "Sta suonando";
 "test_ring_failed" = "Impossibile programmare la sveglia di prova. Riprova.";
 "test_ring_simulator_unavailable" = "La prova suoneria è disponibile solo su un dispositivo reale.";
 "test_ring_alarm_title" = "Sveglia di prova";
@@ -231,7 +233,6 @@
 "alarm_permission_required" = "È necessaria l’autorizzazione per le sveglie";
 "open_settings" = "Apri Impostazioni";
 "volume_guide_link" = "Volume basso?";
-"test_ring_ringing_now" = "In riproduzione";
 "backup_alarm_info_title" = "Anti-sonno";
 "backup_alarm_info_volume" = "Il volume effettivo dipende dal volume di Suoneria e avvisi in Impostazioni.";
 "backup_alarm_info_accessibility" = "Informazioni sull’Anti-sonno";

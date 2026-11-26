@@ -192,7 +192,9 @@
 "onb.later" = "Plus tard";
 
 /* Trial ring (#109) */
-"test_ring_title" = "Faire sonner";
+"test_ring_title" = "Tester la sonnerie";
+"test_ring_waiting" = "Va bientôt sonner";
+"test_ring_ringing" = "Sonnerie en cours";
 "test_ring_failed" = "Impossible de programmer l’alarme de test. Réessayez.";
 "test_ring_simulator_unavailable" = "Le test de sonnerie n’est disponible que sur un appareil réel.";
 "test_ring_alarm_title" = "Alarme de test";
@@ -231,7 +233,6 @@
 "alarm_permission_required" = "L’autorisation des alarmes est requise";
 "open_settings" = "Ouvrir Réglages";
 "volume_guide_link" = "Trop faible ?";
-"test_ring_ringing_now" = "Sonnerie en cours";
 "backup_alarm_info_title" = "Anti-grasse matinée";
 "backup_alarm_info_volume" = "Le volume réel de la sonnerie dépend du volume Sonnerie et alertes dans Réglages.";
 "backup_alarm_info_accessibility" = "À propos de l’anti-grasse matinée";

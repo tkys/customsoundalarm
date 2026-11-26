@@ -192,7 +192,9 @@
 "onb.later" = "나중에";
 
 /* Trial ring (#109) */
-"test_ring_title" = "지금 울리기";
+"test_ring_title" = "알람 테스트";
+"test_ring_waiting" = "곧 울립니다";
+"test_ring_ringing" = "울리는 중";
 "test_ring_failed" = "테스트 알람을 예약하지 못했습니다. 다시 시도해 주세요.";
 "test_ring_simulator_unavailable" = "테스트 울리기는 실제 기기에서만 사용할 수 있습니다.";
 "test_ring_alarm_title" = "테스트 알람";
@@ -231,7 +233,6 @@
 "alarm_permission_required" = "알람 권한이 필요합니다";
 "open_settings" = "설정 열기";
 "volume_guide_link" = "소리가 작나요?";
-"test_ring_ringing_now" = "울리는 중";
 "backup_alarm_info_title" = "늦잠 방지";
 "backup_alarm_info_volume" = "실제 울리는 크기는 설정의 ‘벨소리 및 알림’ 볼륨에 따라 달라집니다.";
 "backup_alarm_info_accessibility" = "늦잠 방지 정보";

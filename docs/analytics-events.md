@@ -28,6 +28,7 @@
 | `time_suggestion_shown` | `suggestions` string（HH:mm カンマ区切り） | 追加画面で時刻の候補を出した（1画面1回） | 候補の効果 | アプリ動作中のみ | 1.8.3 |
 | `test_ring_scheduled` | `kind` string（own/backup）, `has_backup` bool | 「今すぐ鳴らす」「寝過ごし防止の音を試す」の登録成功時 | 試し鳴らしの利用率 | アプリ動作中のみ | 1.8.0（`has_backup` も1.8.0） |
 | `test_ring_stopped` | `hour` int | 試し鳴らしの停止（Intent） | 試し鳴らしの完了率 | **届く** | 1.8.0 |
+| `test_ring_alerted` | `kind` string（own/backup）, `wait_bucket` string（<2/2-4/4-7/7-15/15+）, `rendered` bool | 試しのアラームが実際に鳴り始めた（`alarmUpdates` の `.alerting`） | 押してから鳴るまでの時間・音作りの有無 | アプリ動作中のみ | 1.8.5 |
 | `test_ring_failed` | `reason` string（not_authorized/denied/schedule_error/simulator）, `kind` string（own/backup） | 「今すぐ鳴らす」「寝過ごし防止の音を試す」の失敗時 | 鳴らせない理由（許可・拒否・登録失敗・シミュレータ） | アプリ動作中のみ | 1.8.1 |
 | `backup_alarm_enabled` | `minutes` int | 寝過ごし防止をオンにして保存 | 寝過ごし防止の採用率 | アプリ動作中のみ | 1.8.0 |
 | `backup_alarm_disabled` | `minutes` int（オフにする前の値） | 寝過ごし防止をオフにして保存 | 解除率 | アプリ動作中のみ | 1.8.0 |

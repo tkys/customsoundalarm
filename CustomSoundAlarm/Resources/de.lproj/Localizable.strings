@@ -192,7 +192,9 @@
 "onb.later" = "Später";
 
 /* Trial ring (#109) */
-"test_ring_title" = "Jetzt klingeln";
+"test_ring_title" = "Klingelton testen";
+"test_ring_waiting" = "Klingelt gleich";
+"test_ring_ringing" = "Klingelt jetzt";
 "test_ring_failed" = "Der Testwecker konnte nicht geplant werden. Bitte versuche es erneut.";
 "test_ring_simulator_unavailable" = "Der Testton ist nur auf einem echten Gerät verfügbar.";
 "test_ring_alarm_title" = "Testwecker";
@@ -231,7 +233,6 @@
 "alarm_permission_required" = "Alarmberechtigung erforderlich";
 "open_settings" = "Einstellungen öffnen";
 "volume_guide_link" = "Zu leise?";
-"test_ring_ringing_now" = "Klingelt jetzt";
 "backup_alarm_info_title" = "Verschlafschutz";
 "backup_alarm_info_volume" = "Wie laut er tatsächlich klingelt, hängt von der Lautstärke für Klingel- und Hinweistöne in den Einstellungen ab.";
 "backup_alarm_info_accessibility" = "Über den Verschlafschutz";

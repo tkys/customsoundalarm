@@ -192,7 +192,9 @@
 "onb.later" = "Později";
 
 /* Trial ring (#109) */
-"test_ring_title" = "Zazvonit teď";
+"test_ring_title" = "Vyzkoušet zvonění";
+"test_ring_waiting" = "Brzy zazvoní";
+"test_ring_ringing" = "Zvoní teď";
 "test_ring_failed" = "Testovací budík se nepodařilo naplánovat. Zkus to znovu.";
 "test_ring_simulator_unavailable" = "Test zvonění je dostupný jen na skutečném zařízení.";
 "test_ring_alarm_title" = "Testovací budík";
@@ -231,7 +233,6 @@
 "alarm_permission_required" = "Je vyžadováno povolení k budíkům";
 "open_settings" = "Otevřít Nastavení";
 "volume_guide_link" = "Moc potichu?";
-"test_ring_ringing_now" = "Zvoní teď";
 "backup_alarm_info_title" = "Ochrana proti zaspání";
 "backup_alarm_info_volume" = "Skutečná hlasitost závisí na hlasitosti Vyzvánění a upozornění v Nastavení.";
 "backup_alarm_info_accessibility" = "O ochraně proti zaspání";

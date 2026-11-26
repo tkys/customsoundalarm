@@ -34,6 +34,7 @@ struct AlarmDetailView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.layoutDirection) private var layoutDirection
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var alarmStore = AlarmStore.shared
     @State private var soundStore = SoundStore.shared
     @State private var scheduler = AlarmScheduler.shared
@@ -84,8 +85,12 @@ struct AlarmDetailView: View {
     /// 取り込みで音量を上げた音のファイル名（#224）
     @State private var volumeBoostedFileName: String?
 
-    /// 試しに鳴らす（#109）。待ち状態は「今すぐ鳴らす」と「試す」で分ける（#297）
-    @State private var testRingPhase: TestRingPhase = .idle
+    /// 試しに鳴らす（#109）。待ち状態は「試しに鳴らす」と「試す」で分ける（#297）
+    @State private var testRingState: TestRingLogic.ButtonState = .idle
+    /// 登録した試しアラームの ID（#310）。鳴り始め・停止をこの ID で見分ける。
+    @State private var testRingAlarmID: UUID?
+    /// 押した瞬間の時刻（#310）。60 秒の待ちを音作りの時間も含めて数える。
+    @State private var testRingPressedAt: Date?
     @State private var backupTestRingPhase: TestRingPhase = .idle
     @State private var backupVariantPreparation: LoudVariantPreparation?
     @State private var testRingMessage: String?
@@ -308,13 +313,44 @@ struct AlarmDetailView: View {
             .onAppear {
                 scheduler.refreshTestRingPermission()
             }
+            // 試しのアラームが鳴り始めたら「鳴っています」にする（時間では決めない・#310）
+            .onChange(of: scheduler.testRingAlertedIDs) { _, ids in
+                guard let id = testRingAlarmID, ids.contains(id) else { return }
+                testRingPressedAt = nil
+                applyTestRingEvent(.alerting)
+            }
+            // 止めた・掃除されて一覧から消えたら待機へ戻す（#310）
+            .onChange(of: scheduler.testRingActiveIDs) { _, ids in
+                guard let id = testRingAlarmID, !ids.contains(id) else { return }
+                testRingPressedAt = nil
+                applyTestRingEvent(.disappeared)
+                testRingAlarmID = nil
+            }
+            // 押した瞬間から 60 秒たっても鳴らなければ待機へ戻す（#310）
+            .task(id: testRingPressedAt) {
+                guard let pressedAt = testRingPressedAt else { return }
+                let remaining = TestRingLogic.cleanupAfter - Date().timeIntervalSince(pressedAt)
+                if remaining > 0 {
+                    try? await Task.sleep(for: .seconds(remaining))
+                }
+                guard !Task.isCancelled else { return }
+                // まだ鳴っていない試しアラームが残っていたら止める
+                if let id = testRingAlarmID {
+                    scheduler.cancelTestRing(id: id)
+                }
+                applyTestRingEvent(.timeout)
+                if testRingState == .idle {
+                    testRingAlarmID = nil
+                    testRingPressedAt = nil
+                }
+            }
             .sheet(isPresented: $showingVolumeGuide) {
                 AlarmVolumeGuideView(
                     source: .testRing,
                     // ガイドを閉じたあと、追加・編集画面の「今すぐ鳴らす」と同じ処理を始める（#309）
                     onRingNow: { scheduleTestRing(kind: .own) },
                     isRingNowEnabled: scheduler.canScheduleTestRing
-                        && testRingPhase == .idle
+                        && testRingState == .idle
                         && !scheduler.isTestRingActive
                 )
             }
@@ -915,16 +951,31 @@ struct AlarmDetailView: View {
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "bell.badge.waveform.fill")
-                    Text("test_ring_title")
-                        .fixedSize(horizontal: false, vertical: true)
-                    if testRingPhase == .scheduling {
-                        ProgressView()
+                        // 鳴るのを待つ間だけ小さく揺らす（Reduce Motion では動かさない・#310）
+                        .symbolEffect(
+                            .wiggle,
+                            options: .repeating,
+                            isActive: testRingState.wigglesIcon && !reduceMotion
+                        )
+                    // 3つの文言を重ねて、どれに変わっても行の高さが跳ねないようにする（#310）
+                    ZStack(alignment: .leading) {
+                        Text("test_ring_title")
+                            .opacity(testRingState == .idle ? 1 : 0)
+                            .accessibilityHidden(testRingState != .idle)
+                        Text("test_ring_waiting")
+                            .opacity(testRingState == .waiting ? 1 : 0)
+                            .accessibilityHidden(testRingState != .waiting)
+                        Text("test_ring_ringing")
+                            .opacity(testRingState == .ringing ? 1 : 0)
+                            .accessibilityHidden(testRingState != .ringing)
                     }
+                    .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .buttonStyle(.borderless)
             // 無効化したボタンだけを見せない（#150）: 押せるときは押させて理由を出す
-            .disabled(testRingPhase != .idle)
+            .disabled(!testRingState.isEnabled)
+            .accessibilityLabel(Text(LocalizedStringKey(testRingState.titleKey)))
             .accessibilityIdentifier("addAlarm.testRing")
 
             if let testRingPermissionReason {
@@ -1004,11 +1055,15 @@ struct AlarmDetailView: View {
 
     private func scheduleTestRing(kind: TestRingKind) {
         // 待ち状態は種類ごとに分ける（#297）。
-        // 寝過ごし防止の準備中でも「今すぐ鳴らす」は押せる。
+        // 寝過ごし防止の準備中でも「試しに鳴らす」は押せる。
+        let pressedAt = Date()
         switch kind {
         case .own:
-            guard testRingPhase == .idle else { return }
-            testRingPhase = .scheduling
+            guard testRingState == .idle else { return }
+            // 押した瞬間から「まもなく鳴ります」にする（音を作る時間も含む・#310）
+            applyTestRingEvent(.press)
+            testRingAlarmID = nil
+            testRingPressedAt = pressedAt
             testRingMessage = nil
         case .backup:
             guard backupTestRingPhase == .idle else { return }
@@ -1017,11 +1072,22 @@ struct AlarmDetailView: View {
         }
 
         Task {
+            #if DEBUG
+            // UIテスト用: シミュレータではすぐ失敗して待機へ戻るため、
+            // 「まもなく鳴ります」を確かめられるよう少しだけ待つ（#310）。
+            if CommandLine.arguments.contains("-uitest-test-ring-waiting-hold") {
+                try? await Task.sleep(for: .seconds(3))
+            }
+            #endif
+
             let draft = testRingDraftEntry()
             let fileName: String
+            var rendered = false
             if kind == .backup {
                 // プレイリストなら存在する1曲目の大きくした版で試す（本番と同じ・#169）
                 let source = scheduler.backupSourceFileName(for: draft) ?? ""
+                // プレイリストの音はこの押下で作る（#310）
+                rendered = draft.playlistID != nil
                 // まだできていないときだけ、生成の進み具合を出す（#297）
                 if !source.isEmpty,
                    BackupLoudVariantService.existingVariantFileName(for: source) == nil {
@@ -1047,6 +1113,8 @@ struct AlarmDetailView: View {
                 case .direct(let directFileName):
                     fileName = directFileName
                 case .render(let input):
+                    // プレイリスト・フェードインはこの押下で音を作った（#310）
+                    rendered = true
                     let resolution = await PlaylistRenderService.shared
                         .prepareTestRingSound(for: input)
                     fileName = resolution.fileName
@@ -1056,11 +1124,25 @@ struct AlarmDetailView: View {
             let result = await scheduler.scheduleTestRing(
                 soundFileName: fileName,
                 kind: kind,
-                hasBackup: backupMinutes != nil
+                hasBackup: backupMinutes != nil,
+                pressedAt: pressedAt,
+                rendered: rendered
             )
             switch kind {
             case .own:
-                testRingPhase = .idle
+                switch result {
+                case .scheduled(let id):
+                    if testRingState == .waiting {
+                        // 鳴り始め（.alerting）はこの ID で受け取る（#310）
+                        testRingAlarmID = id
+                    } else {
+                        // 音作りに 60 秒かかり、待機へ戻ったあとに登録できた場合は鳴らさない
+                        scheduler.cancelTestRing(id: id)
+                    }
+                case .failed:
+                    testRingPressedAt = nil
+                    applyTestRingEvent(.failed)
+                }
             case .backup:
                 backupTestRingPhase = .idle
                 backupVariantPreparation = nil
@@ -1071,7 +1153,7 @@ struct AlarmDetailView: View {
                 TestRingReasonLogic.permissionReason(permission: scheduler.testRingPermission) != nil
             let message: String? = switch result {
             case .scheduled:
-                String(localized: "test_ring_ringing_now")
+                nil
             case .failed(let reason):
                 kind == .own && permissionReasonShown
                     ? nil
@@ -1096,6 +1178,27 @@ struct AlarmDetailView: View {
             } else if testRingMessage == message {
                 testRingMessage = nil
             }
+        }
+    }
+
+    /// ボタンの状態を純ロジックで進める（#310）。
+    private func applyTestRingEvent(_ event: TestRingLogic.ButtonEvent) {
+        let next = TestRingLogic.next(state: testRingState, event: event)
+        guard next != testRingState else { return }
+        withAnimation(.easeInOut(duration: 0.2)) {
+            testRingState = next
+        }
+        switch next {
+        case .waiting:
+            AccessibilityNotification.Announcement(
+                String(localized: "test_ring_waiting")
+            ).post()
+        case .ringing:
+            AccessibilityNotification.Announcement(
+                String(localized: "test_ring_ringing")
+            ).post()
+        case .idle:
+            break
         }
     }
 

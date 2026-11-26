@@ -192,7 +192,9 @@
 "onb.later" = "Later";
 
 /* Trial ring (#109) */
-"test_ring_title" = "Laat nu afgaan";
+"test_ring_title" = "Wekker testen";
+"test_ring_waiting" = "Gaat zo af";
+"test_ring_ringing" = "Gaat nu af";
 "test_ring_failed" = "Kon de testwekker niet inplannen. Probeer het opnieuw.";
 "test_ring_simulator_unavailable" = "De testwekker is alleen beschikbaar op een echt apparaat.";
 "test_ring_alarm_title" = "Testwekker";
@@ -231,7 +233,6 @@
 "alarm_permission_required" = "Toestemming voor wekkers vereist";
 "open_settings" = "Open Instellingen";
 "volume_guide_link" = "Te zacht?";
-"test_ring_ringing_now" = "Gaat nu af";
 "backup_alarm_info_title" = "Verslaapbeveiliging";
 "backup_alarm_info_volume" = "Hoe hard hij echt gaat, hangt af van het volume van Beltoon en meldingen in Instellingen.";
 "backup_alarm_info_accessibility" = "Over de verslaapbeveiliging";

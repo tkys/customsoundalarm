@@ -192,7 +192,9 @@
 "onb.later" = "لاحقًا";
 
 /* Trial ring (#109) */
-"test_ring_title" = "رنّ الآن";
+"test_ring_title" = "جرّب الرنين";
+"test_ring_waiting" = "سيرنّ قريبًا";
+"test_ring_ringing" = "يرن الآن";
 "test_ring_failed" = "تعذّر جدولة منبه الاختبار. يُرجى المحاولة مرة أخرى.";
 "test_ring_simulator_unavailable" = "تجربة الرنين متاحة على جهاز حقيقي فقط.";
 "test_ring_alarm_title" = "منبه اختبار";
@@ -231,7 +233,6 @@
 "alarm_permission_required" = "إذن المنبهات مطلوب";
 "open_settings" = "فتح الإعدادات";
 "volume_guide_link" = "الصوت منخفض؟";
-"test_ring_ringing_now" = "يرن الآن";
 "backup_alarm_info_title" = "الحماية من النوم الزائد";
 "backup_alarm_info_volume" = "مستوى الرنين الفعلي يعتمد على مستوى النغمات والتنبيهات في الإعدادات.";
 "backup_alarm_info_accessibility" = "حول الحماية من النوم الزائد";

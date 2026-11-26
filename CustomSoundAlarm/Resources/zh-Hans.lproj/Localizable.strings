@@ -192,7 +192,9 @@
 "onb.later" = "稍后";
 
 /* Trial ring (#109) */
-"test_ring_title" = "立即响铃";
+"test_ring_title" = "测试响铃";
+"test_ring_waiting" = "即将响铃";
+"test_ring_ringing" = "正在响铃";
 "test_ring_failed" = "无法安排测试闹钟。请重试。";
 "test_ring_simulator_unavailable" = "试听响铃仅在真实设备上可用。";
 "test_ring_alarm_title" = "测试闹钟";
@@ -231,7 +233,6 @@
 "alarm_permission_required" = "需要闹钟权限";
 "open_settings" = "打开设置";
 "volume_guide_link" = "声音太小？";
-"test_ring_ringing_now" = "正在响铃";
 "backup_alarm_info_title" = "防睡过头";
 "backup_alarm_info_volume" = "实际响铃音量取决于“设置”中的“铃声和提醒”音量。";
 "backup_alarm_info_accessibility" = "关于防睡过头";
