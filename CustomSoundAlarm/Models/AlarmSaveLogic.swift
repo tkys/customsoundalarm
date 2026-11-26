@@ -83,6 +83,40 @@ enum AlarmSaveLogic {
     }
 }
 
+// MARK: - 下書きの比較（#308）
+
+/// 追加・編集画面で保存される項目だけを持つ下書き。
+/// 開いたときの下書きと比べ、違いがあるときだけ閉じる前に確認する。
+struct AlarmDraft: Equatable {
+    var hour: Int
+    var minute: Int
+    var label: String
+    var repeatWeekdays: [Int]
+    var soundFileName: String
+    var snoozeMinutes: Int
+    var backupMinutes: Int?
+    var playlistID: UUID?
+    var fadeIn: PlaylistFadeIn
+    var skipsHolidays: Bool
+    var holidayRingOverrides: [String]
+    var skipDates: [String]
+}
+
+enum AlarmDraftLogic {
+    /// 音は、プレイリストを選んでいるときだけ保存されない（`AlarmSaveLogic` と同じ扱い）。
+    static func soundFileName(
+        playlistID: UUID?,
+        selectedSoundFileName: String?
+    ) -> String {
+        playlistID == nil ? (selectedSoundFileName ?? "") : ""
+    }
+
+    /// 触って元に戻したら変更なし。保存される項目が1つでも違えば変更あり。
+    static func hasChanges(initial: AlarmDraft, current: AlarmDraft) -> Bool {
+        initial != current
+    }
+}
+
 // MARK: - 繰り返し行の要約（#197 レビュー）
 
 /// 繰り返し行に出す文言の材料。テストでは日本語の lproj を渡せる。

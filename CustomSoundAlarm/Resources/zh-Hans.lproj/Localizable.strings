@@ -70,6 +70,10 @@
 "discard_edits_title" = "要丢弃所做的更改吗？";
 "discard_edits_message" = "你的选择不会被存储。";
 
+/* Closing the alarm editor with unsaved changes (#308) */
+"discard_changes" = "放弃更改";
+"keep_editing" = "继续编辑";
+
 /* Sound name formatting (#93) */
 "imported_sound_default" = "导入的声音";
 "my_sounds_empty_title" = "让任何声音成为你的闹钟";

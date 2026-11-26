@@ -70,6 +70,10 @@
 "discard_edits_title" = "Vuoi scartare le modifiche?";
 "discard_edits_message" = "La selezione non verrà salvata.";
 
+/* Closing the alarm editor with unsaved changes (#308) */
+"discard_changes" = "Scarta modifiche";
+"keep_editing" = "Continua a modificare";
+
 /* Sound name formatting (#93) */
 "imported_sound_default" = "Suono importato";
 "my_sounds_empty_title" = "Trasforma qualsiasi suono nella tua sveglia";

@@ -70,6 +70,10 @@
 "discard_edits_title" = "Änderungen verwerfen?";
 "discard_edits_message" = "Deine Auswahl wird nicht gesichert.";
 
+/* Closing the alarm editor with unsaved changes (#308) */
+"discard_changes" = "Änderungen verwerfen";
+"keep_editing" = "Weiter bearbeiten";
+
 /* Sound name formatting (#93) */
 "imported_sound_default" = "Importierter Ton";
 "my_sounds_empty_title" = "Mach jeden Ton zu deinem Wecker";

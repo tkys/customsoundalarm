@@ -70,6 +70,10 @@
 "discard_edits_title" = "Abandonner vos modifications ?";
 "discard_edits_message" = "Votre sélection ne sera pas enregistrée.";
 
+/* Closing the alarm editor with unsaved changes (#308) */
+"discard_changes" = "Supprimer les modifications";
+"keep_editing" = "Continuer l’édition";
+
 /* Sound name formatting (#93) */
 "imported_sound_default" = "Son importé";
 "my_sounds_empty_title" = "Faites de n’importe quel son votre alarme";

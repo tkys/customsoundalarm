@@ -70,6 +70,10 @@
 "discard_edits_title" = "Odrzucić zmiany?";
 "discard_edits_message" = "Zaznaczenie nie zostanie zapisane.";
 
+/* Closing the alarm editor with unsaved changes (#308) */
+"discard_changes" = "Odrzuć zmiany";
+"keep_editing" = "Kontynuuj edycję";
+
 /* Sound name formatting (#93) */
 "imported_sound_default" = "Zaimportowany dźwięk";
 "my_sounds_empty_title" = "Zrób budzik z dowolnego dźwięku";
