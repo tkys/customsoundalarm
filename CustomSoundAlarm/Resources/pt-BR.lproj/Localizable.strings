@@ -192,7 +192,9 @@
 "onb.later" = "Mais tarde";
 
 /* Trial ring (#109) */
-"test_ring_title" = "Tocar agora";
+"test_ring_title" = "Testar o alarme";
+"test_ring_waiting" = "Vai tocar em breve";
+"test_ring_ringing" = "Tocando agora";
 "test_ring_failed" = "Não foi possível programar o alarme de teste. Tente novamente.";
 "test_ring_simulator_unavailable" = "O teste de toque está disponível apenas em um dispositivo real.";
 "test_ring_alarm_title" = "Alarme de teste";
@@ -231,7 +233,6 @@
 "alarm_permission_required" = "Permissão para alarmes necessária";
 "open_settings" = "Abrir Ajustes";
 "volume_guide_link" = "Som baixo?";
-"test_ring_ringing_now" = "Tocando agora";
 "backup_alarm_info_title" = "Proteção contra perder a hora";
 "backup_alarm_info_volume" = "O volume real depende do volume de Toques e Alertas em Ajustes.";
 "backup_alarm_info_accessibility" = "Sobre a proteção contra perder a hora";

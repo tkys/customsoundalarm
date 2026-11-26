@@ -192,7 +192,9 @@
 "onb.later" = "Más tarde";
 
 /* Trial ring (#109) */
-"test_ring_title" = "Hacer sonar ahora";
+"test_ring_title" = "Probar la alarma";
+"test_ring_waiting" = "Sonará en breve";
+"test_ring_ringing" = "Sonando ahora";
 "test_ring_failed" = "No se ha podido programar la alarma de prueba. Inténtalo de nuevo.";
 "test_ring_simulator_unavailable" = "La prueba de sonido solo está disponible en un dispositivo real.";
 "test_ring_alarm_title" = "Alarma de prueba";
@@ -231,7 +233,6 @@
 "alarm_permission_required" = "Se requiere permiso para alarmas";
 "open_settings" = "Abrir Ajustes";
 "volume_guide_link" = "¿Suena bajo?";
-"test_ring_ringing_now" = "Sonando ahora";
 "backup_alarm_info_title" = "Protección contra quedarse dormido";
 "backup_alarm_info_volume" = "El volumen real depende del volumen de Tonos y avisos en Ajustes.";
 "backup_alarm_info_accessibility" = "Acerca de la protección contra quedarse dormido";

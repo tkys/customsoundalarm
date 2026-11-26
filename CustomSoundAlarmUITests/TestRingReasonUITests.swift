@@ -18,13 +18,18 @@ final class TestRingReasonUITests: XCTestCase {
         app.descendants(matching: .any).matching(identifier: identifier).firstMatch
     }
 
-    private func launchAdd(permissionFlag: String, language: String, locale: String) {
+    private func launchAdd(
+        permissionFlag: String,
+        language: String,
+        locale: String,
+        extraArguments: [String] = []
+    ) {
         app.launchArguments = [
             "-uitest-open-add-alarm",
             permissionFlag,
             "-AppleLanguages", "(\(language))",
             "-AppleLocale", locale
-        ]
+        ] + extraArguments
         app.launch()
         XCTAssertTrue(
             app.collectionViews["addAlarm.root"].waitForExistence(timeout: 10),
@@ -261,5 +266,143 @@ final class TestRingReasonUITests: XCTestCase {
             button.frame.maxY,
             "『音が小さいときは』は『今すぐ鳴らす』と同じ行の右端ではなく行の下にあるべき"
         )
+    }
+
+    // MARK: - 押した直後の状態（#310）
+
+    /// 押した瞬間に「まもなく鳴ります」になり、押せなくなる。
+    /// シミュレータでは鳴らせないため、失敗して待機に戻り理由が出るところまで。
+    func testPressedShowsWaitingThenReturnsToIdleOnSimulatorFailure() {
+        launchAdd(
+            permissionFlag: "-uitest-test-ring-allowed",
+            language: "ja",
+            locale: "ja_JP",
+            extraArguments: ["-uitest-test-ring-waiting-hold"]
+        )
+        XCTAssertTrue(scrollToTestRing(), "試しに鳴らすの行が出るはず")
+
+        let button = findElement("addAlarm.testRing")
+        XCTAssertEqual(button.label, "試しに鳴らす")
+        XCTAssertTrue(button.isEnabled, "待機中は押せる")
+
+        // 行の中央は空白。押せるのは左の文字のところ（#150）。
+        button.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.5)).tap()
+
+        XCTAssertTrue(
+            waitForLabel("まもなく鳴ります", on: button, timeout: 3),
+            "押した瞬間から待機の文言になる: \(app.debugDescription)"
+        )
+        XCTAssertFalse(button.isEnabled, "鳴るまでの間は押せない")
+
+        XCTAssertTrue(
+            waitForLabel("試しに鳴らす", on: button, timeout: 10),
+            "シミュレータでは失敗して待機へ戻る: \(app.debugDescription)"
+        )
+        XCTAssertTrue(button.isEnabled, "待機へ戻ったら押せる")
+        XCTAssertTrue(
+            app.staticTexts["試しに鳴らすは実機でのみ使えます。"]
+                .waitForExistence(timeout: 5),
+            "失敗の理由は残す: \(app.debugDescription)"
+        )
+    }
+
+    /// 失敗したときは、理由を出して待機に戻る（#310）。
+    func testSimulatorFailureReturnsToIdleAndShowsReason() {
+        launchAdd(
+            permissionFlag: "-uitest-test-ring-allowed",
+            language: "en",
+            locale: "en_US"
+        )
+        XCTAssertTrue(scrollToTestRing(), "test ring row should be reachable")
+
+        let button = findElement("addAlarm.testRing")
+        XCTAssertEqual(button.label, "Test Ring")
+        // 行の中央は空白。押せるのは左の文字のところ（#150）。
+        button.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.5)).tap()
+
+        XCTAssertTrue(
+            app.staticTexts["Trial ring is available on a real device only."]
+                .waitForExistence(timeout: 8),
+            "the failure reason should appear: \(app.debugDescription)"
+        )
+        XCTAssertTrue(
+            waitForLabel("Test Ring", on: button, timeout: 5),
+            "failure should return the button to idle: \(app.debugDescription)"
+        )
+        XCTAssertTrue(button.isEnabled, "idle: the button should be tappable again")
+    }
+
+    /// 文字が変わっても行の高さが跳ねない（Dynamic Type の最大でも・#310）。
+    func testWaitingKeepsRowHeightAtAccessibilitySize() {
+        launchAdd(
+            permissionFlag: "-uitest-test-ring-allowed",
+            language: "ja",
+            locale: "ja_JP",
+            extraArguments: [
+                "-uitest-test-ring-waiting-hold",
+                "-UIPreferredContentSizeCategoryName",
+                "UICTContentSizeCategoryAccessibilityXXXL"
+            ]
+        )
+        XCTAssertTrue(scrollToTestRing(), "試しに鳴らすの行が出るはず")
+
+        let button = findElement("addAlarm.testRing")
+        let idleHeight = button.frame.height
+
+        button.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.5)).tap()
+        XCTAssertTrue(
+            waitForLabel("まもなく鳴ります", on: button, timeout: 3),
+            "押した瞬間から待機の文言になる: \(app.debugDescription)"
+        )
+
+        XCTAssertEqual(
+            button.frame.height,
+            idleHeight,
+            accuracy: 0.5,
+            "「まもなく鳴ります」に変わっても行の高さを変えない"
+        )
+    }
+
+    /// PR 用: 押した直後の「まもなく鳴ります」を1枚だけ撮る。
+    /// `TEST_RUNNER_TEST_RING_SCREENSHOTS=1` のときだけ実行する。
+    func testCaptureWaitingScreenshot() throws {
+        try XCTSkipUnless(
+            ProcessInfo.processInfo.environment["TEST_RING_SCREENSHOTS"] == "1",
+            "Test ring screenshots run only with TEST_RUNNER_TEST_RING_SCREENSHOTS=1"
+        )
+        launchAdd(
+            permissionFlag: "-uitest-test-ring-allowed",
+            language: "ja",
+            locale: "ja_JP",
+            extraArguments: ["-uitest-test-ring-waiting-hold"]
+        )
+        XCTAssertTrue(scrollToTestRing(), "試しに鳴らすの行が出るはず")
+
+        let button = findElement("addAlarm.testRing")
+        // 行の中央は空白。押せるのは左の文字のところ（#150）。
+        button.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.5)).tap()
+        XCTAssertTrue(
+            waitForLabel("まもなく鳴ります", on: button, timeout: 3),
+            app.debugDescription
+        )
+        Thread.sleep(forTimeInterval: 0.5)
+
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "test-ring-waiting"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
+    private func waitForLabel(
+        _ label: String,
+        on element: XCUIElement,
+        timeout: TimeInterval
+    ) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if element.exists && element.label == label { return true }
+            Thread.sleep(forTimeInterval: 0.1)
+        }
+        return element.exists && element.label == label
     }
 }

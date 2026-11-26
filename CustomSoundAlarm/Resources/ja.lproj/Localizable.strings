@@ -192,7 +192,9 @@
 "onb.later" = "あとで";
 
 /* Trial ring (#109) */
-"test_ring_title" = "今すぐ鳴らす";
+"test_ring_title" = "試しに鳴らす";
+"test_ring_waiting" = "まもなく鳴ります";
+"test_ring_ringing" = "鳴っています";
 "test_ring_failed" = "試しに鳴らせませんでした。もう一度お試しください。";
 "test_ring_simulator_unavailable" = "試しに鳴らすは実機でのみ使えます。";
 "test_ring_alarm_title" = "試しのアラーム";
@@ -231,7 +233,6 @@
 "alarm_permission_required" = "アラームの許可が必要です";
 "open_settings" = "設定を開く";
 "volume_guide_link" = "音が小さいときは";
-"test_ring_ringing_now" = "鳴らしています";
 "backup_alarm_info_title" = "寝過ごし防止";
 "backup_alarm_info_volume" = "実際に鳴る大きさは、設定の「着信音と通知音」の音量で決まります。";
 "backup_alarm_info_accessibility" = "寝過ごし防止の説明";

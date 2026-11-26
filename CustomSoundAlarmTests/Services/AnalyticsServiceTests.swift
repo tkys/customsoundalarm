@@ -98,6 +98,11 @@ struct AnalyticsEventTests {
         #expect(AnalyticsEvent.testRingScheduled(kind: .own).name == "test_ring_scheduled")
         #expect(AnalyticsEvent.testRingScheduled(kind: .backup).name == "test_ring_scheduled")
         #expect(AnalyticsEvent.testRingStopped(hour: 8).name == "test_ring_stopped")
+        #expect(AnalyticsEvent.testRingAlerted(
+            kind: .own,
+            waitBucket: .twoToFour,
+            rendered: true
+        ).name == "test_ring_alerted")
         // #150: 今すぐ鳴らすの失敗
         #expect(AnalyticsEvent.testRingFailed(reason: .notAuthorized, kind: .own).name == "test_ring_failed")
         #expect(AnalyticsEvent.testRingFailed(reason: .denied, kind: .backup).name == "test_ring_failed")
@@ -409,6 +414,22 @@ struct AnalyticsEventTests {
 
         #expect(props.count == 1)
         #expect(props["hour"] as? Int == 6)
+    }
+
+    // MARK: test_ring_alerted (#310)
+
+    @Test
+    func testRingAlertedProperties_kindWaitAndRendered() {
+        let props = AnalyticsEvent.testRingAlerted(
+            kind: .backup,
+            waitBucket: .sevenToFifteen,
+            rendered: true
+        ).properties
+
+        #expect(props.count == 3)
+        #expect(props["kind"] as? String == "backup")
+        #expect(props["wait_bucket"] as? String == "7-15")
+        #expect(props["rendered"] as? Bool == true)
     }
 
     // MARK: test_ring_failed (#150)
