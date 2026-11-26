@@ -221,6 +221,88 @@ final class CropHandlesUITests: XCTestCase {
         )
     }
 
+    // MARK: - #316 ピンチ後に触れた指
+
+    /// ピンチで拡大したあと、指を離すだけでは鳴らない。そのあと下段の枠の中を
+    /// タップすると、そこから選択範囲が鳴り始める。枠の外のタップも同じ（#316）。
+    ///
+    /// 1.8.5 の後退では、抑止の印がピンチ後のタップにも残り、枠の外に触れるまで
+    /// 下段の枠の中をタップしても鳴らなかった。
+    func testTapOnDetailedWaveformAfterPinchStartsPlayback() {
+        launchFullRange(extra: [
+            "-uitest-long-crop",
+            "-uitestCropStart", "1",
+            "-uitestCropEnd", "4"
+        ])
+
+        let preview = app.buttons["audioCrop.preview"]
+        XCTAssertTrue(preview.waitForExistence(timeout: 10), app.debugDescription)
+        let idleLabel = preview.label
+
+        let zoomBar = element("crop.zoomBar")
+        XCTAssertTrue(zoomBar.waitForExistence(timeout: 10), app.debugDescription)
+        let beforeSpacing = rulerSpacing()
+        XCTAssertGreaterThan(beforeSpacing, 0, "ruler should be drawn before pinching: \(app.debugDescription)")
+        // この環境の XCUI のピンチは withScale によらず約3倍まで拡大する（1.1 でも同じ）。
+        // 選択範囲をファイル先頭寄り（0:01〜0:04）にして、拡大後も枠の右側に
+        // 枠の外（窓移動エリア）が残るようにしている。
+        zoomBar.pinch(withScale: 1.4, velocity: 1.0)
+        let zoomed = XCTNSPredicateExpectation(
+            predicate: NSPredicate { _, _ in
+                abs(self.rulerSpacing() - beforeSpacing) > 4
+            },
+            object: nil
+        )
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [zoomed], timeout: 5),
+            .completed,
+            "pinch should zoom the detailed waveform: \(app.debugDescription)"
+        )
+
+        // ピンチの指を離しただけでは鳴らない（1.8.4 までの抑止の目的は保つ）
+        let accidentallyPlaying = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "label != %@", idleLabel),
+            object: preview
+        )
+        accidentallyPlaying.isInverted = true
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [accidentallyPlaying], timeout: 1.5),
+            .completed,
+            "releasing the pinch should not start playback: \(app.debugDescription)"
+        )
+
+        // 枠の中をタップ → そこから鳴る。
+        // ファイルの先頭寄りの範囲なので、ピンチ後も枠の右側に外の余白が残る。
+        // 開始のつまみは窓の外に出て消えることがあるため、終了のつまみだけを使う。
+        let endZoom = element("crop.handle.end.zoom")
+        XCTAssertTrue(endZoom.waitForExistence(timeout: 5), app.debugDescription)
+        let insideX = (zoomBar.frame.minX + endZoom.frame.minX) / 2
+        XCTAssertLessThan(insideX, endZoom.frame.minX, "tap point should be inside the frame: \(app.debugDescription)")
+        tap(atX: insideX, y: zoomBar.frame.midY)
+        assertStartsPlayback(preview, idleLabel: idleLabel, because: "tapping inside the frame after a pinch")
+
+        // 止めてから、枠の外をタップ → 同じように鳴る
+        preview.tap()
+        let stopped = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "label == %@", idleLabel),
+            object: preview
+        )
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [stopped], timeout: 5),
+            .completed,
+            "tapping the preview button should stop playback: \(app.debugDescription)"
+        )
+
+        let outsideX = endZoom.frame.maxX + 30
+        XCTAssertLessThanOrEqual(
+            outsideX,
+            zoomBar.frame.maxX - 4,
+            "there should be room outside the frame to tap: \(app.debugDescription)"
+        )
+        tap(atX: outsideX, y: zoomBar.frame.midY)
+        assertStartsPlayback(preview, idleLabel: idleLabel, because: "tapping outside the frame after a pinch")
+    }
+
     // MARK: - Helpers
 
     private enum Edge {
@@ -253,6 +335,30 @@ final class CropHandlesUITests: XCTestCase {
         let point = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
             .withOffset(CGVector(dx: x, dy: y))
         point.press(forDuration: 0.15, thenDragTo: point.withOffset(CGVector(dx: dx, dy: 0)))
+    }
+
+    /// 指定の位置をタップする
+    private func tap(atX x: CGFloat, y: CGFloat) {
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
+            .withOffset(CGVector(dx: x, dy: y))
+            .tap()
+    }
+
+    /// タップで再生が始まったこと（▶ が ■ に変わる）を確かめる
+    private func assertStartsPlayback(
+        _ preview: XCUIElement,
+        idleLabel: String,
+        because reason: String
+    ) {
+        let started = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "label != %@", idleLabel),
+            object: preview
+        )
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [started], timeout: 5),
+            .completed,
+            "\(reason) should start playback: \(app.debugDescription)"
+        )
     }
 
     private func element(_ identifier: String) -> XCUIElement {

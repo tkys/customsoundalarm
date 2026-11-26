@@ -890,3 +890,66 @@ struct WaveformOverviewScalingTests {
         #expect(bounds.maxY <= height, "maxY \(bounds.maxY) is below the frame")
     }
 }
+
+// MARK: - ピンチ後に触れた指を抑止しないこと（#316）
+
+/// 1.8.5 の後退: 一度ピンチすると、下段の枠の中をタップしても鳴らなくなっていた。
+/// 抑止の対象を「ピンチと重なっていた指」だけに絞る判定を確認する。
+/// スクラブ・つまみ・枠移動の3つとも、この同じ判定を使う。
+struct PinchSuppressionTests {
+
+    private let t0 = Date(timeIntervalSinceReferenceDate: 1_000)
+
+    /// ピンチしたことがなければ、何も抑止しない
+    @Test
+    func noPinch_neverSuppresses() {
+        let suppression = PinchSuppression()
+        #expect(!suppression.suppresses(operationStartedAt: t0))
+    }
+
+    /// ピンチ中に触れた指は、ピンチより前に始まっていても抑止する
+    @Test
+    func duringPinch_suppressesEvenIfStartedBefore() {
+        var suppression = PinchSuppression()
+        suppression.begin()
+        #expect(suppression.isPinching)
+        #expect(suppression.suppresses(operationStartedAt: t0.addingTimeInterval(-1)))
+        #expect(suppression.suppresses(operationStartedAt: t0))
+    }
+
+    /// ピンチが終わったあとに新しく触れた指は抑止しない（1.8.5 の後退の本体）
+    @Test
+    func afterPinch_doesNotSuppressNewTouch() {
+        var suppression = PinchSuppression()
+        suppression.begin()
+        suppression.end(at: t0)
+
+        #expect(!suppression.isPinching)
+        #expect(!suppression.suppresses(operationStartedAt: t0.addingTimeInterval(0.001)))
+        #expect(!suppression.suppresses(operationStartedAt: t0.addingTimeInterval(1)))
+    }
+
+    /// ピンチと重なっていた指（終わる前から触れていた指）は、離したときに抑止する
+    @Test
+    func afterPinch_suppressesFingerThatWasDownDuringPinch() {
+        var suppression = PinchSuppression()
+        suppression.begin()
+        suppression.end(at: t0)
+
+        #expect(suppression.suppresses(operationStartedAt: t0))
+        #expect(suppression.suppresses(operationStartedAt: t0.addingTimeInterval(-0.5)))
+    }
+
+    /// 2回目のピンチでも同じ。終わったあとの新しい指は抑止しない
+    @Test
+    func secondPinch_keepsTheSameRule() {
+        var suppression = PinchSuppression()
+        suppression.begin()
+        suppression.end(at: t0)
+        suppression.begin()
+        suppression.end(at: t0.addingTimeInterval(2))
+
+        #expect(suppression.suppresses(operationStartedAt: t0.addingTimeInterval(1)))
+        #expect(!suppression.suppresses(operationStartedAt: t0.addingTimeInterval(2.001)))
+    }
+}
