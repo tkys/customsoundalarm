@@ -19,6 +19,50 @@ struct CropWindow: Equatable, Sendable {
     }
 }
 
+/// ピンチと重なった操作だけを抑止する判定（#316）。
+///
+/// ピンチの最中に触れていた指を離した瞬間に、その位置でスクラブ再生が始まったり
+/// 選択範囲・窓が動いたりしないようにする。一方、**ピンチが終わったあとに
+/// 新しく触れた指は抑止しない**（普通のタップ・ドラッグとして扱う）。
+///
+/// 判定は「操作が始まった時刻」と「ピンチが終わった時刻」の比較だけで行う。
+/// 操作がピンチより先に始まっていれば、ピンチと重なっているとみなす。
+///
+/// ⚠️ 時刻は同じ出どころのものを使うこと。View では `Date()` ではなく、
+/// ピンチとドラッグの両方の `gesture.value.time` を渡している
+/// （`DragGesture.Value.time` と `MagnifyGesture.Value.time` は同じ時計で、
+/// `Date()` とは基準が違う）。混ぜると比較が常に「ピンチより前」になる。
+///
+/// - ピンチ中に始めた操作: 抑止する
+/// - ピンチが終わったあとに始めた操作: 抑止しない
+struct PinchSuppression: Equatable, Sendable {
+    /// いまピンチ中か
+    private(set) var isPinching = false
+    /// 最後にピンチが終わった時刻。一度もピンチしていなければ nil
+    private(set) var endedAt: Date?
+
+    /// ピンチが始まった
+    mutating func begin() {
+        isPinching = true
+    }
+
+    /// ピンチが終わった。`time` より後に始まった操作は抑止しない
+    mutating func end(at time: Date) {
+        isPinching = false
+        endedAt = time
+    }
+
+    /// `startedAt` に触れ始めた操作を抑止するか。
+    ///
+    /// ピンチ中は常に抑止する。ピンチが終わっていれば、終わった時刻より前に
+    /// 始まっていた操作（＝ピンチと重なっていた指）だけを抑止する。
+    func suppresses(operationStartedAt startedAt: Date) -> Bool {
+        if isPinching { return true }
+        guard let endedAt else { return false }
+        return startedAt <= endedAt
+    }
+}
+
 /// 波形クロップUI（#77）の座標→時間変換・ズーム窓の算出・同期の純粋関数群。
 ///
 /// 設計意図:

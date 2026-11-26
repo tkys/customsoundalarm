@@ -52,15 +52,18 @@ struct WaveformCropView: View {
     /// ピンチ拡大の基準窓と、指の中心にある時刻
     @State private var pinchBaseWindow: CropWindow?
     @State private var pinchAnchorTime: Double = 0
-    @State private var isPinching = false
     /// 上段のつまみを離したあと、下段の窓を横へ滑らせるアニメーション（#303）。
     /// 下段に触れたらキャンセルし、その時点の位置から指の操作を優先する。
     @State private var settleTask: Task<Void, Never>?
-    /// ピンチの直後に、指を離した位置でスクラブ再生しないための印
-    @State private var suppressScrubAfterPinch = false
-    /// ピンチが始まったとき、同時に掴んでいたつまみ・範囲移動を止める印
-    @State private var suppressHandleDrag = false
-    @State private var suppressPanAfterPinch = false
+    /// ピンチと重なった操作だけを抑止する判定（#316）。
+    /// ピンチ後に新しく触れた指は抑止しない。
+    @State private var pinchSuppression = PinchSuppression()
+    /// 各操作が始まった時刻（最初の onChanged）。ピンチと重なったかの判定に使う。
+    /// 指を離す（onEnded）まで保持する。ピンチの終了時刻と同じく
+    /// `gesture.value.time` の時計で揃える（`Date()` は使わない）。
+    @State private var panTouchStartedAt: Date?
+    @State private var rangeTouchStartedAt: Date?
+    @State private var handleTouchStartedAt: Date?
 
     @State private var overviewWidth: CGFloat = 0
     @State private var zoomWidth: CGFloat = 0
@@ -668,11 +671,10 @@ struct WaveformCropView: View {
                     .onChanged { value in
                         // 滑っている途中に下段へ触れたら、そこで止める（#303）
                         stopWindowSettle()
-                        guard !isPinching, !suppressPanAfterPinch else { return }
-                        if draggingHandle == nil {
-                            // ピンチの後の最初の1本指は、新しい操作として扱う
-                            suppressScrubAfterPinch = false
-                        }
+                        // 触れ始めの時刻を覚えておく。ピンチと重なった指だけを抑止する（#316）
+                        let startedAt = panTouchStartedAt ?? value.time
+                        if panTouchStartedAt == nil { panTouchStartedAt = startedAt }
+                        guard !pinchSuppression.suppresses(operationStartedAt: startedAt) else { return }
                         guard abs(value.translation.width) >= tapThreshold else { return }
                         if draggingHandle != .panZoom {
                             draggingHandle = .panZoom
@@ -687,12 +689,14 @@ struct WaveformCropView: View {
                         )
                     }
                     .onEnded { value in
-                        suppressPanAfterPinch = false
+                        let startedAt = panTouchStartedAt ?? value.time
+                        panTouchStartedAt = nil
+                        // ピンチと重なっていた指は、離した位置で鳴らさない（#316）
+                        let suppressed = pinchSuppression.suppresses(operationStartedAt: startedAt)
                         if draggingHandle == .panZoom {
                             draggingHandle = nil
                             panBaseWindow = nil
-                        } else if !isPinching, !suppressScrubAfterPinch,
-                                  let playURL, let previewer {
+                        } else if !suppressed, let playURL, let previewer {
                             let time = WaveformCropMath.zoomTime(atX: value.location.x, width: max(zoomWidth, 1), window: zoomWindow)
                             previewer.play(
                                 url: playURL,
@@ -718,7 +722,10 @@ struct WaveformCropView: View {
                     .onChanged { value in
                         // 滑っている途中に下段へ触れたら、そこで止める（#303）
                         stopWindowSettle()
-                        guard !isPinching, !suppressHandleDrag else { return }
+                        // 触れ始めの時刻を覚えておく。ピンチと重なった指だけを抑止する（#316）
+                        let startedAt = rangeTouchStartedAt ?? value.time
+                        if rangeTouchStartedAt == nil { rangeTouchStartedAt = startedAt }
+                        guard !pinchSuppression.suppresses(operationStartedAt: startedAt) else { return }
                         guard abs(value.translation.width) >= tapThreshold else { return }
                         if draggingHandle != .rangeZoom {
                             draggingHandle = .rangeZoom
@@ -735,13 +742,15 @@ struct WaveformCropView: View {
                         showEdge(.start)
                     }
                     .onEnded { value in
+                        let startedAt = rangeTouchStartedAt ?? value.time
+                        rangeTouchStartedAt = nil
+                        // ピンチと重なっていた指は、離した位置で鳴らさない（#316）
+                        let suppressed = pinchSuppression.suppresses(operationStartedAt: startedAt)
                         if draggingHandle == .rangeZoom {
                             draggingHandle = nil
                             dragBaseRange = nil
                             dragBaseWindow = nil
-                            suppressHandleDrag = false
-                        } else if !isPinching, !suppressScrubAfterPinch, !suppressHandleDrag,
-                                  let playURL, let previewer {
+                        } else if !suppressed, let playURL, let previewer {
                             let time = WaveformCropMath.zoomTime(atX: value.location.x, width: max(zoomWidth, 1), window: zoomWindow)
                             previewer.play(
                                 url: playURL,
@@ -781,8 +790,7 @@ struct WaveformCropView: View {
                 stopWindowSettle()
                 if pinchBaseWindow == nil {
                     guard abs(value.magnification - 1) > 0.001 else { return }
-                    isPinching = true
-                    suppressScrubAfterPinch = true
+                    pinchSuppression.begin()
                     pinchBaseWindow = zoomWindow
                     pinchAnchorTime = zoomWindow.start
                         + Double(value.startAnchor.x) * zoomWindow.width
@@ -797,14 +805,12 @@ struct WaveformCropView: View {
                         dragBaseRange = nil
                         dragBaseWindow = nil
                         limitHitReason = nil
-                        suppressHandleDrag = true
                     case .panZoom:
                         if let base = panBaseWindow {
                             zoomWindow = base
                         }
                         draggingHandle = nil
                         panBaseWindow = nil
-                        suppressPanAfterPinch = true
                     default:
                         break
                     }
@@ -818,9 +824,12 @@ struct WaveformCropView: View {
                     duration: duration
                 )
             }
-            .onEnded { _ in
+            .onEnded { value in
                 pinchBaseWindow = nil
-                isPinching = false
+                // ここより後に触れ始めた指は抑止しない（#316）
+                if pinchSuppression.isPinching {
+                    pinchSuppression.end(at: value.time)
+                }
             }
     }
 
@@ -875,7 +884,10 @@ struct WaveformCropView: View {
         .gesture(
             DragGesture(minimumDistance: 0, coordinateSpace: .named(space))
                 .onChanged { value in
-                    guard !isPinching, !suppressHandleDrag else { return }
+                    // 触れ始めの時刻を覚えておく。ピンチと重なった指だけを抑止する（#316）
+                    let startedAt = handleTouchStartedAt ?? value.time
+                    if handleTouchStartedAt == nil { handleTouchStartedAt = startedAt }
+                    guard !pinchSuppression.suppresses(operationStartedAt: startedAt) else { return }
                     if draggingHandle != kind {
                         // 滑っている途中に下段へ触れたら、そこで止める（#303）
                         stopWindowSettle()
@@ -913,13 +925,13 @@ struct WaveformCropView: View {
                     }
                 }
                 .onEnded { _ in
+                    handleTouchStartedAt = nil
                     let endedKind = draggingHandle
                     let movedStart = endedKind == .startOverview || endedKind == .startZoom
                     draggingHandle = nil
                     dragBaseRange = nil
                     dragBaseWindow = nil
                     limitHitReason = nil
-                    suppressHandleDrag = false
                     // 上段のつまみを離したときだけ、一度窓を寄せる（#303）
                     switch endedKind {
                     case .startOverview:
