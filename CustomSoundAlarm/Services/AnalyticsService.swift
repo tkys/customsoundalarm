@@ -25,6 +25,12 @@ enum UnlockAction: String, Sendable, CaseIterable {
     case later
 }
 
+/// alarm_edited を保存した入口（#324）。
+enum AlarmEditedVia: String, Sendable, CaseIterable {
+    case editor
+    case playlistApply = "playlist_apply"
+}
+
 /// アラーム作成の入口（#231）
 enum AlarmCreatedSource: String, Sendable, CaseIterable {
     case emptyQuick = "empty_quick"
@@ -100,6 +106,7 @@ enum AnalyticsEvent: Sendable {
         soundMode: PlaylistSoundMode = .single,
         fadeIn: PlaylistFadeIn = .off,
         soundChanged: Bool = false,
+        via: AlarmEditedVia = .editor,
         context: AlarmEventContext? = nil
     )
 
@@ -575,6 +582,7 @@ enum AnalyticsEvent: Sendable {
             soundMode,
             fadeIn,
             soundChanged,
+            via,
             context
         ):
             var d: [String: Any] = [
@@ -585,7 +593,8 @@ enum AnalyticsEvent: Sendable {
                 "was_enabled": wasEnabled,
                 "sound_mode": soundMode.analyticsValue,
                 "fade_in": fadeIn.analyticsValue,
-                "sound_changed": soundChanged
+                "sound_changed": soundChanged,
+                "via": via.rawValue
             ]
             if let context { d.merge(context.properties) { _, new in new } }
             return d
@@ -1355,6 +1364,46 @@ final class AnalyticsService: @unchecked Sendable {
             )
         }
         logger.info("Flushed \(events.count) pending alarm events")
+    }
+}
+
+// MARK: - alarm_edited の組み立て（#324）
+
+/// エディタ保存と「使うアラームを選ぶ」で共通の alarm_edited を作る。
+@MainActor
+enum AlarmSaveAnalytics {
+    static func editedEvent(
+        entry: AlarmEntry,
+        wasEnabled: Bool,
+        soundChanged: Bool,
+        via: AlarmEditedVia,
+        context: AlarmEventContext
+    ) -> AnalyticsEvent {
+        .alarmEdited(
+            hasCustomSound: hasCustomSound(entry),
+            isRepeating: !entry.repeatWeekdays.isEmpty,
+            snoozeMinutes: entry.snoozeMinutes,
+            backupMinutes: entry.backupMinutes ?? 0,
+            wasEnabled: wasEnabled,
+            soundMode: AlarmSoundModeResolver.soundMode(for: entry),
+            fadeIn: entry.fadeIn,
+            soundChanged: soundChanged,
+            via: via,
+            context: context
+        )
+    }
+
+    /// 次回発火までの時間（整数時間）。無効・計算不能なら付けない。
+    static func hoursUntilProperties(for entry: AlarmEntry) -> [String: Any]? {
+        guard entry.isEnabled, let fire = entry.nextFireDate(from: Date()) else { return nil }
+        return ["hours_until": AlarmCountdown.hoursUntil(from: Date(), to: fire)]
+    }
+
+    private static func hasCustomSound(_ entry: AlarmEntry) -> Bool {
+        guard entry.playlistID == nil else { return false }
+        return SoundStore.shared.sounds
+            .first { $0.fileName == entry.soundFileName }?
+            .isPreset == false
     }
 }
 

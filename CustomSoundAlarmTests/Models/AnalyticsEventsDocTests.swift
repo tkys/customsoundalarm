@@ -104,6 +104,7 @@ struct AnalyticsEventsDocTests {
             doc.split(separator: "\n").first { $0.hasPrefix("| `alarm_edited` |") }
         )
         #expect(row.contains("sound_changed"))
+        #expect(row.contains("via"))
     }
 
     @Test

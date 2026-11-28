@@ -1444,7 +1444,7 @@ struct AlarmDetailView: View {
                         prevAlarmTime: nil
                     )
                 ),
-                properties: hoursUntilProperties(for: entry)
+                properties: AlarmSaveAnalytics.hoursUntilProperties(for: entry)
             )
             if let backupMinutes {
                 AnalyticsService.shared.capture(.backupAlarmEnabled(minutes: backupMinutes))
@@ -1468,18 +1468,14 @@ struct AlarmDetailView: View {
             )
             alarmStore.update(updated)
             AnalyticsService.shared.capture(
-                .alarmEdited(
-                    hasCustomSound: hasCustomSound,
-                    isRepeating: isRepeating,
-                    snoozeMinutes: snoozeMinutes,
-                    backupMinutes: backupMinutes ?? 0,
+                AlarmSaveAnalytics.editedEvent(
+                    entry: updated,
                     wasEnabled: existing.isEnabled,
-                    soundMode: AlarmSoundModeResolver.soundMode(for: updated),
-                    fadeIn: fadeIn,
                     soundChanged: AlarmSaveLogic.soundChanged(
                         before: existing,
                         after: updated
                     ),
+                    via: .editor,
                     context: makeHistoryContext(
                         entry: updated,
                         list: listBeforeSave,
@@ -1488,7 +1484,7 @@ struct AlarmDetailView: View {
                         prevAlarmTime: existing.timeString
                     )
                 ),
-                properties: hoursUntilProperties(for: updated)
+                properties: AlarmSaveAnalytics.hoursUntilProperties(for: updated)
             )
             if existing.backupMinutes != updated.backupMinutes {
                 if let newMinutes = updated.backupMinutes {
@@ -1593,13 +1589,6 @@ struct AlarmDetailView: View {
         context.secondsToSave = secondsToSave
         context.prevAlarmTime = prevAlarmTime
         return context
-    }
-
-    /// 保存したアラームの次回発火までの時間（整数時間）をアナリティクス用に返す。
-    /// 計算不能・無効時は空（プロパティを付与しない）。
-    private func hoursUntilProperties(for entry: AlarmEntry) -> [String: Any]? {
-        guard entry.isEnabled, let fire = entry.nextFireDate(from: Date()) else { return nil }
-        return ["hours_until": AlarmCountdown.hoursUntil(from: Date(), to: fire)]
     }
 
     private var repeatSummary: String {

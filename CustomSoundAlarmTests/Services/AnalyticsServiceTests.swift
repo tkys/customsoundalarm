@@ -784,9 +784,9 @@ struct AnalyticsEventTests {
         let edited = AnalyticsEvent.alarmEdited(hasCustomSound: true, isRepeating: false, snoozeMinutes: 9).properties
         let created = AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: false, snoozeMinutes: 9).properties
 
-        #expect(edited.count == 8)
+        #expect(edited.count == 9)
         #expect(
-            Set(edited.keys).subtracting(["was_enabled", "sound_changed"])
+            Set(edited.keys).subtracting(["was_enabled", "sound_changed", "via"])
                 == Set(created.keys).subtracting(["time_suggestion_used", "carried_over"])
         )
         #expect(edited["has_custom_sound"] as? Bool == true)
@@ -795,6 +795,7 @@ struct AnalyticsEventTests {
         #expect(edited["backup_minutes"] as? Int == 0)
         #expect(edited["was_enabled"] as? Bool == true)
         #expect(edited["sound_changed"] as? Bool == false)
+        #expect(edited["via"] as? String == "editor")
     }
 
     @Test
@@ -803,10 +804,12 @@ struct AnalyticsEventTests {
             hasCustomSound: true,
             isRepeating: false,
             snoozeMinutes: 9,
-            soundChanged: true
+            soundChanged: true,
+            via: .playlistApply
         ).properties
 
         #expect(props["sound_changed"] as? Bool == true)
+        #expect(props["via"] as? String == "playlist_apply")
     }
 
     @Test
@@ -1695,6 +1698,51 @@ struct AnalyticsThrottleTests {
         #expect(AnalyticsThrottle.shouldSendPermissionStatus(current: .denied, lastSent: .authorized) == true)
         #expect(AnalyticsThrottle.shouldSendPermissionStatus(current: .authorized, lastSent: .notDetermined) == true)
         #expect(AnalyticsThrottle.shouldSendPermissionStatus(current: nil, lastSent: .authorized) == true)
+    }
+}
+
+
+// MARK: - alarm_edited from the apply sheet (#324)
+
+@MainActor
+struct AlarmSaveAnalyticsTests {
+    @Test
+    func playlistApplyEditedEventUsesPlaylistModeAndVia() {
+        let entry = AlarmEntry(
+            hour: 7,
+            minute: 0,
+            isEnabled: false,
+            soundFileName: "",
+            playlistID: UUID()
+        )
+        let context = AlarmEventContext(
+            alarmUID: "uid-1",
+            alarmTime: "07:00",
+            repeatDays: "",
+            localTime: "12:00",
+            localWeekday: 1,
+            tzOffsetMin: 540,
+            list: nil,
+            suggestionIndex: nil,
+            secondsToSave: nil,
+            prevAlarmTime: nil
+        )
+
+        let event = AlarmSaveAnalytics.editedEvent(
+            entry: entry,
+            wasEnabled: false,
+            soundChanged: true,
+            via: .playlistApply,
+            context: context
+        )
+        let props = event.properties
+
+        #expect(event.name == "alarm_edited")
+        #expect((props["sound_mode"] as? String)?.hasPrefix("playlist_") == true)
+        #expect(props["sound_changed"] as? Bool == true)
+        #expect(props["via"] as? String == "playlist_apply")
+        #expect(props["was_enabled"] as? Bool == false)
+        #expect(props["has_custom_sound"] as? Bool == false)
     }
 }
 

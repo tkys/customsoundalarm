@@ -50,7 +50,10 @@ enum PlaylistApplyLogic {
             guard selectedIDs.contains(alarm.id) else { return alarm }
             var updated = alarm
             updated.playlistID = playlistID
-            updated.soundFileName = ""
+            updated.soundFileName = AlarmDraftLogic.soundFileName(
+                playlistID: playlistID,
+                selectedSoundFileName: alarm.soundFileName
+            )
             return updated
         }
     }

@@ -80,16 +80,16 @@ struct PlaylistApplyView: View {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
                     Text(alarm.displayTime)
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(alarm.isEnabled ? .primary : Color.textMuted)
                     if !alarm.label.isEmpty {
                         Text(alarm.label)
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(alarm.isEnabled ? .primary : Color.textMuted)
                             .lineLimit(1)
                     }
                 }
                 Text(AlarmSoundDisplay.name(for: alarm))
                     .font(.footnote)
-                    .foregroundStyle(Color.textSecondary)
+                    .foregroundStyle(alarm.isEnabled ? Color.textSecondary : Color.textMuted)
                     .lineLimit(1)
             }
             Spacer(minLength: 0)
@@ -116,6 +116,7 @@ struct PlaylistApplyView: View {
 
     private func apply() {
         guard !selectedIDs.isEmpty else { return }
+        let listBefore = alarmStore.alarms
         let updated = PlaylistApplyLogic.appliedAlarms(
             alarmStore.alarms,
             selectedIDs: selectedIDs,
@@ -123,7 +124,23 @@ struct PlaylistApplyView: View {
         )
         let changed = updated.filter { selectedIDs.contains($0.id) }
         for alarm in changed {
+            guard let previous = listBefore.first(where: { $0.id == alarm.id }) else {
+                continue
+            }
             alarmStore.update(alarm)
+            var context = AlarmHistoryLogic.context(for: alarm)
+            context.list = AlarmHistoryLogic.listSnapshot(listBefore)
+            context.prevAlarmTime = previous.timeString
+            AnalyticsService.shared.capture(
+                AlarmSaveAnalytics.editedEvent(
+                    entry: alarm,
+                    wasEnabled: previous.isEnabled,
+                    soundChanged: true,
+                    via: .playlistApply,
+                    context: context
+                ),
+                properties: AlarmSaveAnalytics.hoursUntilProperties(for: alarm)
+            )
         }
         for alarm in changed {
             if let source = BackupLoudVariantService.sourceToPrepare(
