@@ -80,14 +80,24 @@ struct SoundKindAnalysisTests {
     }
 
     @Test
-    func otherOnlyBecomesUnknownLikeRunPy() {
+    func otherOnlyBecomesOther() {
         let windows = [
             window(0, [("alarm_clock", 0.9)]),
             window(1, [("siren", 0.8)])
         ]
 
-        // run.py の decide は other を順位から外す。
-        #expect(SoundKindDecision.decide(windows: windows).contentKind == .unknown)
+        #expect(SoundKindDecision.decide(windows: windows).contentKind == .other)
+    }
+
+    @Test
+    func oneSpecificKindWinsEvenWhenOtherWindowsExist() {
+        let windows = [
+            window(0, [("alarm_clock", 0.9)]),
+            window(1, [("siren", 0.8)]),
+            window(2, [("cat_meow", 0.7)])
+        ]
+
+        #expect(SoundKindDecision.decide(windows: windows).contentKind == .cat)
     }
 
     @Test
@@ -144,7 +154,7 @@ struct SoundKindAnalysisTests {
         )
         let result = await SoundKindClassifier.analyze(
             fileURL: url,
-            skipSilentCheck: false
+            checksSilence: false
         )
         #expect(result.contentKind == .instrumental)
         #expect(result.analysisVersion == SoundKindAnalysisResult.currentVersion)
@@ -165,7 +175,7 @@ struct SoundKindAnalysisTests {
         for url in urls {
             let result = await SoundKindClassifier.analyze(
                 fileURL: url,
-                skipSilentCheck: true
+                checksSilence: true
             )
             print(
                 "SOUNDKIND_SMOKE \(url.lastPathComponent) "

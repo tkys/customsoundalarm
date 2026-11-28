@@ -5,8 +5,8 @@ import Foundation
 import SoundAnalysis
 import os
 
-/// 取り込み時に送る既存の計測値（#202）。判定が終わってから
-/// `custom_sound_imported` を1回だけ送るために持つ。
+/// 取り込み時の既存の計測値（#202）。`custom_sound_imported` は保存直後に送り、
+/// 判定後の `sound_analyzed` には source だけを引き継ぐ。
 struct SoundImportAnalytics: Sendable, Equatable {
     let source: SoundImportSource
     let peakDbBucket: String?
@@ -36,7 +36,8 @@ final class SoundKindAnalysisService {
     private struct Job {
         let soundID: UUID
         let origin: Origin
-        let importAnalytics: SoundImportAnalytics?
+        /// 取り込みの判定なら、sound_analyzed に付ける source。
+        let source: SoundImportSource?
     }
 
     private var queue: [Job] = []
@@ -45,29 +46,28 @@ final class SoundKindAnalysisService {
 
     private init() {}
 
-    /// 取り込み直後に呼ぶ。UI は待たせない。
+    /// 取り込み直後に呼ぶ。`custom_sound_imported` は今までどおり保存直後に送り、
+    /// 判定は待ち行列の先頭（既存の音より前）に積む。UI は待たせない。
     func analyzeNewImport(soundID: UUID, analytics: SoundImportAnalytics) {
+        // 取り込みの記録は判定を待たせない（#202 レビュー）。
+        AnalyticsService.shared.capture(.customSoundImported(
+            source: analytics.source,
+            peakDbBucket: analytics.peakDbBucket,
+            gainDbBucket: analytics.gainDbBucket,
+            lufsBucket: analytics.lufsBucket,
+            shareMedia: analytics.shareMedia,
+            volumeNoticeShown: analytics.volumeNoticeShown
+        ))
+
         #if DEBUG
         // UIテストでは、判定を明示したとき以外は走らせない。
-        if AppGroup.isUITestRun && !AppGroup.isUITestSoundKindAnalysis {
-            AnalyticsService.shared.capture(.customSoundImported(
-                source: analytics.source,
-                peakDbBucket: analytics.peakDbBucket,
-                gainDbBucket: analytics.gainDbBucket,
-                lufsBucket: analytics.lufsBucket,
-                shareMedia: analytics.shareMedia,
-                volumeNoticeShown: analytics.volumeNoticeShown,
-                contentKind: .unknown,
-                bpmBucket: "none"
-            ))
-            return
-        }
+        guard !AppGroup.isUITestRun || AppGroup.isUITestSoundKindAnalysis else { return }
         #endif
         enqueue(Job(
             soundID: soundID,
             origin: .imported,
-            importAnalytics: analytics
-        ))
+            source: analytics.source
+        ), atFront: true)
     }
 
     /// 判定前に取り込まれた音を、前面にいる間に1本ずつ判定する。
@@ -81,7 +81,7 @@ final class SoundKindAnalysisService {
             enqueue(Job(
                 soundID: sound.id,
                 origin: .backfill,
-                importAnalytics: nil
+                source: nil
             ))
         }
     }
@@ -91,10 +91,16 @@ final class SoundKindAnalysisService {
         startNextIfPossible()
     }
 
-    private func enqueue(_ job: Job) {
+    private func enqueue(_ job: Job, atFront: Bool = false) {
         guard !queuedIDs.contains(job.soundID) else { return }
         queuedIDs.insert(job.soundID)
-        queue.append(job)
+        if atFront {
+            // 新しい取り込みは、すでに並んでいる取り込みの後・既存の音より前に入れる。
+            let index = queue.firstIndex { $0.origin != .imported } ?? queue.endIndex
+            queue.insert(job, at: index)
+        } else {
+            queue.append(job)
+        }
         startNextIfPossible()
     }
 
@@ -117,7 +123,7 @@ final class SoundKindAnalysisService {
             .appendingPathComponent(sound.fileName)
         let result = await SoundKindClassifier.analyze(
             fileURL: url,
-            skipSilentCheck: job.origin == .backfill
+            checksSilence: job.origin == .backfill
         )
         complete(job, result: result, soundExists: true)
     }
@@ -142,18 +148,13 @@ final class SoundKindAnalysisService {
 
         switch job.origin {
         case .imported:
-            if let analytics = job.importAnalytics {
-                AnalyticsService.shared.capture(.customSoundImported(
-                    source: analytics.source,
-                    peakDbBucket: analytics.peakDbBucket,
-                    gainDbBucket: analytics.gainDbBucket,
-                    lufsBucket: analytics.lufsBucket,
-                    shareMedia: analytics.shareMedia,
-                    volumeNoticeShown: analytics.volumeNoticeShown,
-                    contentKind: result.contentKind,
-                    bpmBucket: AnalyticsBuckets.bpmBucket(bpm: result.bpm)
-                ))
-            }
+            guard soundExists else { break }
+            AnalyticsService.shared.capture(.soundAnalyzed(
+                contentKind: result.contentKind,
+                bpmBucket: AnalyticsBuckets.bpmBucket(bpm: result.bpm),
+                trigger: .imported,
+                source: job.source
+            ))
         case .backfill:
             guard soundExists else { break }
             AnalyticsService.shared.capture(.soundAnalyzed(
@@ -181,10 +182,10 @@ enum SoundKindClassifier {
 
     static func analyze(
         fileURL: URL,
-        skipSilentCheck: Bool
+        checksSilence: Bool
     ) async -> SoundKindAnalysisResult {
         await Task.detached(priority: .utility) {
-            if skipSilentCheck, SoundKindSilence.isSilent(fileURL: fileURL) {
+            if checksSilence, SoundKindSilence.isSilent(fileURL: fileURL) {
                 return SoundKindAnalysisResult.unknown
             }
             let windows = classifyWindows(fileURL: fileURL)

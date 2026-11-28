@@ -64,20 +64,25 @@ enum SoundKindDecision {
         }
 
         // それ以外：窓ごとの1位を区分に置き換え、いちばん多い区分を答えにする。
-        // run.py と同じく other（警告音・その他の動物・無音・対応表に無いラベル）と
-        // 自信不足の窓は数えない。同数のときは先に出た区分を選ぶ。
+        // 自信0.3以上の窓が1つも無ければ unknown。窓はあるが7区分に当たらなければ other。
+        // 7区分に当たる窓が1つでもあれば、run.py と同じくその中でいちばん多い区分を選ぶ。
+        var validWindowCount = 0
         var counts: [SoundContentKind: Int] = [:]
         var order: [SoundContentKind] = []
         for window in windows {
             guard let top = window.top.first,
                   top.confidence >= minimumConfidence else { continue }
+            validWindowCount += 1
             let kind = SoundKindLabelMap.kind(for: top.label)
             guard kind != .other else { continue }
             if counts[kind] == nil { order.append(kind) }
             counts[kind, default: 0] += 1
         }
-        guard var best = order.first else {
+        guard validWindowCount > 0 else {
             return Result(contentKind: .unknown, vocalStartSeconds: nil)
+        }
+        guard var best = order.first else {
+            return Result(contentKind: .other, vocalStartSeconds: nil)
         }
         var bestCount = counts[best] ?? 0
         for kind in order.dropFirst() {

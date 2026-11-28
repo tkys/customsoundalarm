@@ -227,32 +227,18 @@ struct AnalyticsEventTests {
     func customSoundImportedProperties_videoSource() {
         let props = AnalyticsEvent.customSoundImported(source: .video).properties
 
-        #expect(props.count == 4)
+        #expect(props.count == 2)
         #expect(props["source"] as? String == "video")
         #expect(props["volume_notice_shown"] as? Bool == false)
-        #expect(props["content_kind"] as? String == "unknown")
-        #expect(props["bpm_bucket"] as? String == "none")
     }
 
     @Test
     func customSoundImportedProperties_audioSource() {
         let props = AnalyticsEvent.customSoundImported(source: .audio).properties
 
-        #expect(props.count == 4)
+        #expect(props.count == 2)
         #expect(props["source"] as? String == "audio")
         #expect(props["volume_notice_shown"] as? Bool == false)
-    }
-
-    @Test
-    func customSoundImportedProperties_soundKind() {
-        let props = AnalyticsEvent.customSoundImported(
-            source: .audio,
-            contentKind: .singing,
-            bpmBucket: "100-120"
-        ).properties
-
-        #expect(props["content_kind"] as? String == "singing")
-        #expect(props["bpm_bucket"] as? String == "100-120")
     }
 
     @Test
@@ -267,6 +253,22 @@ struct AnalyticsEventTests {
         #expect(props["content_kind"] as? String == "cat")
         #expect(props["bpm_bucket"] as? String == "none")
         #expect(props["trigger"] as? String == "backfill")
+    }
+
+    @Test
+    func soundAnalyzedProperties_importIncludesSource() {
+        let props = AnalyticsEvent.soundAnalyzed(
+            contentKind: .singing,
+            bpmBucket: "100-120",
+            trigger: .imported,
+            source: .audio
+        ).properties
+
+        #expect(props.count == 4)
+        #expect(props["content_kind"] as? String == "singing")
+        #expect(props["bpm_bucket"] as? String == "100-120")
+        #expect(props["trigger"] as? String == "import")
+        #expect(props["source"] as? String == "audio")
     }
 
     @Test
