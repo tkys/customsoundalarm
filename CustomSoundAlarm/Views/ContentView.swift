@@ -459,6 +459,7 @@ struct ContentView: View {
             if !isRinging {
                 schedulePlaylistUnlockAttempt()
                 presentNextShareImportIfNeeded()
+                SoundKindAnalysisService.shared.resumeIfNeeded()
             }
         }
         .onChange(of: showingOnboarding) { _, isShowing in

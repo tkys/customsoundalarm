@@ -23,6 +23,14 @@ struct AlarmSound: Identifiable, Codable, Hashable, Sendable {
     var lufsAtImport: Double?
     /// 取り込み時に適用したゲイン dB。診断用（#255）。
     var gainDbAtImport: Double?
+    /// 端末内で判定した音の種類（#202）。画面には出さない。
+    var contentKind: SoundContentKind?
+    /// 判定した BPM の目安（#202）。歌・歌の無い曲のときだけ。
+    var bpm: Int?
+    /// 歌声のラベルが最初に上位3に入った窓の開始秒（#202）。singing のときだけ。
+    var vocalStartSeconds: Double?
+    /// 判定の版（#202）。未判定は nil。判定規則を変えたら上げる。
+    var analysisVersion: Int?
 
     init(
         id: UUID = UUID(),
@@ -32,7 +40,11 @@ struct AlarmSound: Identifiable, Codable, Hashable, Sendable {
         durationSeconds: Double? = nil,
         thumbnailFileName: String? = nil,
         lufsAtImport: Double? = nil,
-        gainDbAtImport: Double? = nil
+        gainDbAtImport: Double? = nil,
+        contentKind: SoundContentKind? = nil,
+        bpm: Int? = nil,
+        vocalStartSeconds: Double? = nil,
+        analysisVersion: Int? = nil
     ) {
         self.id = id
         self.name = name
@@ -43,5 +55,9 @@ struct AlarmSound: Identifiable, Codable, Hashable, Sendable {
         self.thumbnailFileName = thumbnailFileName
         self.lufsAtImport = lufsAtImport
         self.gainDbAtImport = gainDbAtImport
+        self.contentKind = contentKind
+        self.bpm = bpm
+        self.vocalStartSeconds = vocalStartSeconds
+        self.analysisVersion = analysisVersion
     }
 }

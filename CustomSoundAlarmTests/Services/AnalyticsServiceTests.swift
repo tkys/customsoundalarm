@@ -227,18 +227,46 @@ struct AnalyticsEventTests {
     func customSoundImportedProperties_videoSource() {
         let props = AnalyticsEvent.customSoundImported(source: .video).properties
 
-        #expect(props.count == 2)
+        #expect(props.count == 4)
         #expect(props["source"] as? String == "video")
         #expect(props["volume_notice_shown"] as? Bool == false)
+        #expect(props["content_kind"] as? String == "unknown")
+        #expect(props["bpm_bucket"] as? String == "none")
     }
 
     @Test
     func customSoundImportedProperties_audioSource() {
         let props = AnalyticsEvent.customSoundImported(source: .audio).properties
 
-        #expect(props.count == 2)
+        #expect(props.count == 4)
         #expect(props["source"] as? String == "audio")
         #expect(props["volume_notice_shown"] as? Bool == false)
+    }
+
+    @Test
+    func customSoundImportedProperties_soundKind() {
+        let props = AnalyticsEvent.customSoundImported(
+            source: .audio,
+            contentKind: .singing,
+            bpmBucket: "100-120"
+        ).properties
+
+        #expect(props["content_kind"] as? String == "singing")
+        #expect(props["bpm_bucket"] as? String == "100-120")
+    }
+
+    @Test
+    func soundAnalyzedProperties_areTyped() {
+        let props = AnalyticsEvent.soundAnalyzed(
+            contentKind: .cat,
+            bpmBucket: "none",
+            trigger: .backfill
+        ).properties
+
+        #expect(props.count == 3)
+        #expect(props["content_kind"] as? String == "cat")
+        #expect(props["bpm_bucket"] as? String == "none")
+        #expect(props["trigger"] as? String == "backfill")
     }
 
     @Test
@@ -729,6 +757,7 @@ struct AnalyticsEventTests {
             .alarmCreated(hasCustomSound: true, isRepeating: true, snoozeMinutes: 0),
             .customSoundImported(source: .video),
             .customSoundImported(source: .audio),
+            .soundAnalyzed(contentKind: .cat, bpmBucket: "none", trigger: .backfill),
             .soundPreviewPlayed(source: .selectTap),
             .alarmSkipSet(scope: .day, days: 1, alarmCount: 1),
             .alarmSkipUndone,

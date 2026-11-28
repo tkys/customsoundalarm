@@ -8,6 +8,23 @@ enum AnalyticsUserProperties {
         alarms.filter { $0.backupMinutes != nil }.count
     }
 
+    /// 音の種類のユーザープロパティ（#202）。すべて bool。
+    /// 未判定の音は含めない。画面には出さない。
+    static func soundKindProperties(sounds: [AlarmSound]) -> [String: Any] {
+        let kinds = Set(
+            sounds
+                .filter { !$0.isPreset }
+                .compactMap(\.contentKind)
+        )
+        return [
+            "has_music_sound": kinds.contains(.singing) || kinds.contains(.instrumental),
+            "has_voice_sound": kinds.contains(.voice),
+            "has_animal_sound": kinds.contains(.cat)
+                || kinds.contains(.dog)
+                || kinds.contains(.bird)
+        ]
+    }
+
     /// `AppTransaction.originalAppVersion`（CFBundleVersion）を Int にする。
     /// 取れない・数値でない場合は nil（送らない）。
     static func firstInstallBuild(fromOriginalAppVersion version: String?) -> Int? {

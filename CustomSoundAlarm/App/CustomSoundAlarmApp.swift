@@ -628,6 +628,14 @@ struct CustomSoundAlarmApp: App {
                     AnalyticsService.shared.configure()
                     setUserProperties()
 
+                    // 判定前に取り込まれた音を、前面にいる間に1本ずつ判定する（#202）。
+                    // 起動直後の処理を重ねないよう、少し待ってから始める。
+                    Task {
+                        try? await Task.sleep(for: .seconds(2))
+                        SoundKindAnalysisService.shared.enqueueBackfillIfNeeded()
+                        SoundKindAnalysisService.shared.resumeIfNeeded()
+                    }
+
                     // プレイリスト書き出しの計測フックと、起動時のシャッフル順更新（#151）
                     PlaylistRenderService.shared.beginNewSession()
                     PlaylistRenderService.shared.onRenderFailed = { failure in
@@ -718,6 +726,9 @@ struct CustomSoundAlarmApp: App {
                             AlarmStore.shared.alarms,
                             trigger: .foreground
                         )
+                        // 判定前に取り込まれた音の続きを、前面にいる間に進める（#202）
+                        SoundKindAnalysisService.shared.enqueueBackfillIfNeeded()
+                        SoundKindAnalysisService.shared.resumeIfNeeded()
                     }
                 }
         }
@@ -783,6 +794,9 @@ private func userPropertiesPayload(firstInstallBuild: Int? = nil) -> [String: An
         "playlist_count": PlaylistStore.shared.playlists.count,
         "playlist_early_access": AppGroup.playlistEarlyAccessGranted
     ]
+    payload.merge(
+        AnalyticsUserProperties.soundKindProperties(sounds: SoundStore.shared.sounds)
+    ) { _, new in new }
     if let firstInstallBuild {
         payload["first_install_build"] = firstInstallBuild
     }

@@ -76,7 +76,16 @@ enum AnalyticsEvent: Sendable {
         gainDbBucket: String? = nil,
         lufsBucket: String? = nil,
         shareMedia: ShareImportMedia? = nil,
-        volumeNoticeShown: Bool = false
+        volumeNoticeShown: Bool = false,
+        contentKind: SoundContentKind = .unknown,
+        bpmBucket: String = "none"
+    )
+
+    /// 既存の音を後から端末内で判定した（#202）
+    case soundAnalyzed(
+        contentKind: SoundContentKind,
+        bpmBucket: String,
+        trigger: SoundAnalysisTrigger
     )
 
     /// サウンドプレビュー再生
@@ -432,6 +441,7 @@ enum AnalyticsEvent: Sendable {
         switch self {
         case .alarmCreated: return "alarm_created"
         case .customSoundImported: return "custom_sound_imported"
+        case .soundAnalyzed: return "sound_analyzed"
         case .soundPreviewPlayed: return "sound_preview_played"
         case .musicLibraryUnavailable: return "music_library_unavailable"
         case .alarmEditorMoreOpened: return "alarm_editor_more_opened"
@@ -554,17 +564,27 @@ enum AnalyticsEvent: Sendable {
             gainDbBucket,
             lufsBucket,
             shareMedia,
-            volumeNoticeShown
+            volumeNoticeShown,
+            contentKind,
+            bpmBucket
         ):
             var d: [String: Any] = [
                 "source": source.rawValue,
-                "volume_notice_shown": volumeNoticeShown
+                "volume_notice_shown": volumeNoticeShown,
+                "content_kind": contentKind.rawValue,
+                "bpm_bucket": bpmBucket
             ]
             if let peakDbBucket { d["peak_db_bucket"] = peakDbBucket }
             if let gainDbBucket { d["gain_db_bucket"] = gainDbBucket }
             if let lufsBucket { d["lufs_bucket"] = lufsBucket }
             if let shareMedia { d["share_media"] = shareMedia.rawValue }
             return d
+        case let .soundAnalyzed(contentKind, bpmBucket, trigger):
+            return [
+                "content_kind": contentKind.rawValue,
+                "bpm_bucket": bpmBucket,
+                "trigger": trigger.rawValue
+            ]
         case let .soundPreviewPlayed(source):
             return ["source": source.rawValue]
         case .musicLibraryUnavailable:
@@ -988,6 +1008,11 @@ enum SoundImportSource: String, Sendable, CaseIterable {
 enum ShareImportMedia: String, Sendable, CaseIterable {
     case audio
     case video
+}
+
+/// 音の種類を後から判定したきっかけ（#202）
+enum SoundAnalysisTrigger: String, Sendable, CaseIterable {
+    case backfill
 }
 
 // MARK: - SoundPreviewSource

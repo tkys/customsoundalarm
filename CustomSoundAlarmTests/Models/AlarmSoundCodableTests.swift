@@ -30,6 +30,10 @@ struct AlarmSoundCodableTests {
         #expect(sound.isPreset == false)
         // 追加フィールドは nil として扱われ、データが消えない
         #expect(sound.durationSeconds == nil)
+        #expect(sound.contentKind == nil)
+        #expect(sound.bpm == nil)
+        #expect(sound.vocalStartSeconds == nil)
+        #expect(sound.analysisVersion == nil)
     }
 
     @Test
@@ -78,5 +82,25 @@ struct AlarmSoundCodableTests {
     func defaultDurationIsNil() {
         let sound = AlarmSound(name: "D", fileName: "d.caf")
         #expect(sound.durationSeconds == nil)
+    }
+
+    @Test
+    func roundTripWithSoundKind_preservesAnalysis() throws {
+        let sound = AlarmSound(
+            name: "Song",
+            fileName: "song.caf",
+            contentKind: .singing,
+            bpm: 120,
+            vocalStartSeconds: 1.5,
+            analysisVersion: 1
+        )
+
+        let data = try JSONEncoder().encode(sound)
+        let decoded = try JSONDecoder().decode(AlarmSound.self, from: data)
+
+        #expect(decoded.contentKind == .singing)
+        #expect(decoded.bpm == 120)
+        #expect(decoded.vocalStartSeconds == 1.5)
+        #expect(decoded.analysisVersion == 1)
     }
 }

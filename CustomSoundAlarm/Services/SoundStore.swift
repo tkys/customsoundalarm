@@ -91,6 +91,22 @@ final class SoundStore {
         sounds.contains { !$0.isPreset && $0.durationSeconds == nil }
     }
 
+    /// 端末内の判定結果を保存する（#202）。
+    func updateAnalysis(
+        soundID: UUID,
+        contentKind: SoundContentKind,
+        bpm: Int?,
+        vocalStartSeconds: Double?,
+        analysisVersion: Int
+    ) {
+        guard let index = sounds.firstIndex(where: { $0.id == soundID }) else { return }
+        sounds[index].contentKind = contentKind
+        sounds[index].bpm = bpm
+        sounds[index].vocalStartSeconds = vocalStartSeconds
+        sounds[index].analysisVersion = analysisVersion
+        save()
+    }
+
     func rename(_ sound: AlarmSound, to newName: String) {
         guard let index = sounds.firstIndex(where: { $0.id == sound.id }) else { return }
         sounds[index].name = newName
