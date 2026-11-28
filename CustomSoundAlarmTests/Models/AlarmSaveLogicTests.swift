@@ -475,4 +475,35 @@ struct SkipResultLogicTests {
             selectedSoundFileName: nil
         ) == "")
     }
+
+    // MARK: - sound_changed (#324)
+
+    @Test
+    func soundChangedIsTrueWhenOnlyTheSoundChanges() {
+        let before = AlarmEntry(hour: 7, minute: 0, soundFileName: "a.caf")
+        var after = before
+        after.soundFileName = "b.caf"
+
+        #expect(AlarmSaveLogic.soundChanged(before: before, after: after))
+    }
+
+    @Test
+    func soundChangedIsTrueWhenTheAlarmChangesToAPlaylist() {
+        let before = AlarmEntry(hour: 7, minute: 0, soundFileName: "a.caf")
+        var after = before
+        after.soundFileName = ""
+        after.playlistID = UUID()
+
+        #expect(AlarmSaveLogic.soundChanged(before: before, after: after))
+    }
+
+    @Test
+    func soundChangedIsFalseWhenOnlyTheTimeChanges() {
+        let before = AlarmEntry(hour: 7, minute: 0, soundFileName: "a.caf")
+        var after = before
+        after.hour = 8
+        after.minute = 15
+
+        #expect(!AlarmSaveLogic.soundChanged(before: before, after: after))
+    }
 }

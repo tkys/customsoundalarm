@@ -388,6 +388,9 @@
 "playlist_unlock_title" = "Refrão após refrão";
 "playlist_unlock_create" = "Criar uma playlist";
 "playlist_unlock_later" = "Agora não";
+"playlist_apply_title" = "Escolher alarmes";
+"playlist_apply_later" = "Agora não";
+"playlist_apply_apply" = "Usar";
 "volume_notice" = "Aumentamos o volume para você ouvir melhor.";
 "permission_banner_title" = "A permissão de alarmes está desativada";
 "permission_banner_allow" = "Ativar";

@@ -388,6 +388,9 @@
 "playlist_unlock_title" = "Refrein na refrein";
 "playlist_unlock_create" = "Playlist maken";
 "playlist_unlock_later" = "Niet nu";
+"playlist_apply_title" = "Wekkers kiezen";
+"playlist_apply_later" = "Niet nu";
+"playlist_apply_apply" = "Gebruiken";
 "volume_notice" = "Volume verhoogd zodat je het beter hoort.";
 "permission_banner_title" = "Alarmtoestemming staat uit";
 "permission_banner_allow" = "Aanzetten";

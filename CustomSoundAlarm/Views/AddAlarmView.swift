@@ -48,6 +48,8 @@ struct AlarmDetailView: View {
     var onSaved: ((AlarmEntry, Bool, Bool) -> Void)?
     /// 新規作成時に引き継いだ値（#206）
     private let carryOver: AlarmCarryOver
+    /// プレイリストを作った直後に、そのプレイリストを選んだ状態で開く（#324）
+    private let initialPlaylistID: UUID?
     /// オンボ場面4からの指定（#98 Phase 4）。
     /// video/audio → 表示直後にサウンド選択を開き該当の取り込みを直接開く。
     /// preset → プリセット先頭を選択済みにする。nil なら従来どおり
@@ -110,11 +112,13 @@ struct AlarmDetailView: View {
         mode: AlarmDetailMode,
         initialImport: OnboardingSource? = nil,
         initialSound: AlarmSound? = nil,
+        initialPlaylistID: UUID? = nil,
         onClose: (() -> Void)? = nil,
         onSaved: ((AlarmEntry, Bool, Bool) -> Void)? = nil
     ) {
         self.mode = mode
         self.initialImport = initialImport
+        self.initialPlaylistID = initialPlaylistID
         self.onClose = onClose
         self.onSaved = onSaved
 
@@ -170,7 +174,10 @@ struct AlarmDetailView: View {
             startWeekdays = []
             startSnoozeMinutes = carryOver.snoozeMinutes
             startBackupMinutes = nil
-            startPlaylistID = carryOver.playlistID
+            let explicitPlaylistID = initialPlaylistID.flatMap {
+                PlaylistStore.shared.playlist(id: $0) != nil ? $0 : nil
+            }
+            startPlaylistID = explicitPlaylistID ?? carryOver.playlistID
             startFadeIn = carryOver.fadeIn
             startSkipsHolidays = false
             startHolidayRingOverrides = []
@@ -1437,7 +1444,7 @@ struct AlarmDetailView: View {
                         prevAlarmTime: nil
                     )
                 ),
-                properties: hoursUntilProperties(for: entry)
+                properties: AlarmSaveAnalytics.hoursUntilProperties(for: entry)
             )
             if let backupMinutes {
                 AnalyticsService.shared.capture(.backupAlarmEnabled(minutes: backupMinutes))
@@ -1461,14 +1468,14 @@ struct AlarmDetailView: View {
             )
             alarmStore.update(updated)
             AnalyticsService.shared.capture(
-                .alarmEdited(
-                    hasCustomSound: hasCustomSound,
-                    isRepeating: isRepeating,
-                    snoozeMinutes: snoozeMinutes,
-                    backupMinutes: backupMinutes ?? 0,
+                AlarmSaveAnalytics.editedEvent(
+                    entry: updated,
                     wasEnabled: existing.isEnabled,
-                    soundMode: AlarmSoundModeResolver.soundMode(for: updated),
-                    fadeIn: fadeIn,
+                    soundChanged: AlarmSaveLogic.soundChanged(
+                        before: existing,
+                        after: updated
+                    ),
+                    via: .editor,
                     context: makeHistoryContext(
                         entry: updated,
                         list: listBeforeSave,
@@ -1477,7 +1484,7 @@ struct AlarmDetailView: View {
                         prevAlarmTime: existing.timeString
                     )
                 ),
-                properties: hoursUntilProperties(for: updated)
+                properties: AlarmSaveAnalytics.hoursUntilProperties(for: updated)
             )
             if existing.backupMinutes != updated.backupMinutes {
                 if let newMinutes = updated.backupMinutes {
@@ -1582,13 +1589,6 @@ struct AlarmDetailView: View {
         context.secondsToSave = secondsToSave
         context.prevAlarmTime = prevAlarmTime
         return context
-    }
-
-    /// 保存したアラームの次回発火までの時間（整数時間）をアナリティクス用に返す。
-    /// 計算不能・無効時は空（プロパティを付与しない）。
-    private func hoursUntilProperties(for entry: AlarmEntry) -> [String: Any]? {
-        guard entry.isEnabled, let fire = entry.nextFireDate(from: Date()) else { return nil }
-        return ["hours_until": AlarmCountdown.hoursUntil(from: Date(), to: fire)]
     }
 
     private var repeatSummary: String {

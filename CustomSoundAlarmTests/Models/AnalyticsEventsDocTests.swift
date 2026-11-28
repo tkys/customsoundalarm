@@ -51,6 +51,8 @@ struct AnalyticsEventsDocTests {
         "custom_sound_imported",
         "feature_unlock_shown",
         "feature_unlock_action",
+        "playlist_apply_shown",
+        "playlist_apply_action",
         "video_import_started",
         "video_import_failed",
         "sound_picker_recent_used",
@@ -93,6 +95,39 @@ struct AnalyticsEventsDocTests {
         )
         #expect(row.contains("time_suggestion_used"))
         #expect(row.contains("carried_over"))
+    }
+
+    @Test
+    func alarmEditedSoundChangedIsDocumented() throws {
+        let doc = try String(contentsOf: docURL, encoding: .utf8)
+        let row = try #require(
+            doc.split(separator: "\n").first { $0.hasPrefix("| `alarm_edited` |") }
+        )
+        #expect(row.contains("sound_changed"))
+        #expect(row.contains("via"))
+    }
+
+    @Test
+    func featureUnlockFiredBeforeIsDocumented() throws {
+        let doc = try String(contentsOf: docURL, encoding: .utf8)
+        let row = try #require(
+            doc.split(separator: "\n").first { $0.hasPrefix("| `feature_unlock_shown` |") }
+        )
+        #expect(row.contains("fired_before"))
+    }
+
+    @Test
+    func playlistApplyPropertiesAreDocumented() throws {
+        let doc = try String(contentsOf: docURL, encoding: .utf8)
+        let shown = try #require(
+            doc.split(separator: "\n").first { $0.hasPrefix("| `playlist_apply_shown` |") }
+        )
+        #expect(shown.contains("source"))
+        #expect(shown.contains("alarm_count_bucket"))
+        let action = try #require(
+            doc.split(separator: "\n").first { $0.hasPrefix("| `playlist_apply_action` |") }
+        )
+        #expect(action.contains("selected_count"))
     }
 
     @Test

@@ -388,6 +388,9 @@
 "playlist_unlock_title" = "Refrain um Refrain";
 "playlist_unlock_create" = "Playlist erstellen";
 "playlist_unlock_later" = "Später";
+"playlist_apply_title" = "Wecker auswählen";
+"playlist_apply_later" = "Später";
+"playlist_apply_apply" = "Verwenden";
 "volume_notice" = "Lauter gemacht, damit du es gut hörst.";
 "permission_banner_title" = "Alarm-Berechtigung ist aus";
 "permission_banner_allow" = "Einschalten";

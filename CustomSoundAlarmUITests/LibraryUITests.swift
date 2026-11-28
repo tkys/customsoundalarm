@@ -108,7 +108,7 @@ final class LibraryUITests: XCTestCase {
         )
     }
 
-    func testPlaylistSuggestionCreatesPlaylist() {
+    func testPlaylistSuggestionOpensAddAlarmWithThePlaylist() {
         let app = launch(["-uitest-seed-suggestion", "-uitest-open-library"])
         XCTAssertTrue(
             app.collectionViews["library.root"].waitForExistence(timeout: 15),
@@ -124,11 +124,15 @@ final class LibraryUITests: XCTestCase {
         )
         suggestion.tap()
 
+        // アラームが0本なので、シートではなく追加画面が開く（#324）。
         XCTAssertTrue(
-            app.buttons["library.playlist.マイプレイリスト"].waitForExistence(timeout: 10),
-            "created playlist should appear: \(app.debugDescription)"
+            app.collectionViews["addAlarm.root"].waitForExistence(timeout: 15),
+            "add screen should open after the suggestion: \(app.debugDescription)"
         )
-        XCTAssertFalse(app.buttons["library.playlistSuggestion"].exists)
+        let soundName = app.descendants(matching: .any)
+            .matching(identifier: "addAlarm.soundName").firstMatch
+        XCTAssertTrue(soundName.waitForExistence(timeout: 10), app.debugDescription)
+        XCTAssertEqual(soundName.label, "マイプレイリスト")
     }
 
     func testPlaylistsShowRowsAndAddButton() {

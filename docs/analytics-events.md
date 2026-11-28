@@ -13,7 +13,7 @@
 | イベント名 | プロパティ（型） | 送るタイミング | 答えたい問い | App closed? | 追加版 |
 | --- | --- | --- | --- | --- | --- |
 | `alarm_created` | `has_custom_sound` bool, `is_repeating` bool, `snooze_minutes` int, `backup_minutes` int（オフは0）, `sound_mode` string（single/playlist_order/playlist_shuffle/playlist_random）, `fade_in` string（off/5/15/30）, `time_suggestion_used` bool, `carried_over` bool, `source` string（empty_quick・任意）, `hours_until` int（任意） | アラーム新規作成時 | 作成行動・寝過ごし防止・プレイリストの利用率 | アプリ動作中のみ | 既存（`sound_mode` は1.8.2、`time_suggestion_used`/`carried_over` は1.8.3、`source` は1.8.4） |
-| `alarm_edited` | `has_custom_sound` bool, `is_repeating` bool, `snooze_minutes` int, `backup_minutes` int（オフは0）, `was_enabled` bool, `sound_mode` string, `fade_in` string, `hours_until` int（任意） | アラーム編集保存時 | 編集で自動オンにした割合・プレイリスト設定 | アプリ動作中のみ | 既存（`sound_mode` は1.8.2） |
+| `alarm_edited` | `has_custom_sound` bool, `is_repeating` bool, `snooze_minutes` int, `backup_minutes` int（オフは0）, `was_enabled` bool, `sound_mode` string, `fade_in` string, `sound_changed` bool（音またはプレイリストが変わった）, `via` string（editor/playlist_apply）, `hours_until` int（任意） | アラーム編集保存時 | 編集で自動オンにした割合・プレイリスト設定・音の変更・設定した入口 | アプリ動作中のみ | 既存（`sound_mode` は1.8.2、`sound_changed` は1.8.6、`via` は1.8.6） |
 | `alarm_deleted` | — | アラーム削除時 | 離脱・整理行動 | アプリ動作中のみ | 既存 |
 | `alarm_duplicated` | — | アラーム複製時 | 複製の利用 | アプリ動作中のみ | 既存 |
 | `alarm_permission` | `status` string（authorized/denied/not_determined/request_failed/unknown） | 権限状態が変わったとき（永続化比較） | 許可率・拒否の影響 | アプリ動作中のみ | 既存 |
@@ -44,8 +44,10 @@
 | `sound_selected` | `kind` string（imported/preset/default）, `rank_bucket` string（1/2-3/4-10/11+） | サウンド選択で音を選んだ | 音の種類・並び順の影響 | アプリ動作中のみ | 1.8.0 |
 | `playlist_created` | `track_count` int, `total_seconds_bucket` string（under_1min/1_5min/5_10min/10min）, `play_order` string（in_order/shuffle/one_random）, `transition` string（off/short/long/crossfade）, `source` string（library/sound_choice/suggestion/unlock） | プレイリストを新規作成 | プレイリスト作成者の割合・規模・再生設定・作成導線 | アプリ動作中のみ | 1.8.2（`play_order`/`transition` は1.8.1、`source` は1.8.1） |
 | `playlist_suggestion_shown` | — | プレイリストの「作る1行」を出した | 提案の表示回数 | アプリ動作中のみ | 1.8.2 |
-| `feature_unlock_shown` | `feature` string（playlist）, `trigger` string（second_import/existing_user） | 機能の解放シートを出した | 解放の表示回数・きっかけ別の到達 | アプリ動作中のみ | 1.8.3（`trigger` は1.8.5。`existing_user` は 1.8.5 では出さない・#322） |
+| `feature_unlock_shown` | `feature` string（playlist）, `trigger` string（second_import/existing_user）, `fired_before` bool | 機能の解放シートを出した | 解放の表示回数・きっかけ別の到達 | アプリ動作中のみ | 1.8.3（`trigger` は1.8.5、`fired_before` は1.8.6） |
 | `feature_unlock_action` | `feature` string（playlist）, `action` string（create/later）, `trigger` string（second_import/existing_user） | 解放シートで選んだ行動 | 解放からの作成率・きっかけ別の成果 | アプリ動作中のみ | 1.8.3（`trigger` は1.8.5） |
+| `playlist_apply_shown` | `source` string（unlock/suggestion）, `alarm_count_bucket` string（0/1/2-3/4-9/10+） | プレイリストを作ったあとの「使うアラームを選ぶ」を出した（0本で追加画面へ進むときも含む） | 作成後の設定導線の到達 | アプリ動作中のみ | 1.8.6 |
+| `playlist_apply_action` | `action` string（apply/later/dismissed）, `selected_count` int | 「使うアラームを選ぶ」で選んだ行動 | 作成後の設定率・選んだ本数 | アプリ動作中のみ | 1.8.6 |
 | `playlist_empty_viewed` | `source` string（library/sound_choice/suggestion）, `has_own_sounds` bool | 空のプレイリスト状態が表示されたとき（起動ごと・source ごと1回） | 空状態の到達と作成転換 | アプリ動作中のみ | 1.8.1 |
 | `playlist_edited` | `play_order` string, `transition` string | プレイリストを編集 | 編集の利用・再生設定 | アプリ動作中のみ | 1.8.2（`play_order`/`transition` は1.8.1） |
 | `playlist_render_failed` | `reason` string（no_tracks/too_long/render_failed/write_failed/missing_playlist） | プレイリストの書き出し失敗 | 失敗原因 | アプリ動作中のみ | 1.8.2 |

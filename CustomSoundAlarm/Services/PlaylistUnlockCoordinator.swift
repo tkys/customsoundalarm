@@ -27,14 +27,20 @@ final class PlaylistUnlockCoordinator {
         isNightMode: Bool,
         hasAnotherSheet: Bool = false
     ) -> Bool {
-        guard !isPresented else { return false }
+        guard !isPresented, !AppGroup.playlistUnlockShown else { return false }
         #if DEBUG
         // UIテストでは、解放の確認をするテストだけ有効にする（#216 / #280）
         guard !AppGroup.isUITestRun || AppGroup.isUITestPlaylistUnlock else { return false }
         #endif
 
+        let hasFiredAlarm = FirstAlarmFollowupLogic.hasFiredAlarm(
+            historyLines: AlarmLocalHistoryStore.recentLines(
+                limit: AlarmLocalHistoryStore.maxLines
+            )
+        )
         let trigger = PlaylistUnlockLogic.trigger(
             hasPending: SoundStore.shared.hasPendingPlaylistUnlock,
+            hasFiredAlarm: hasFiredAlarm,
             customSoundCount: SoundStore.shared.customSoundCount,
             playlistCount: PlaylistStore.shared.playlists.count,
             hasShown: AppGroup.playlistUnlockShown
@@ -52,7 +58,11 @@ final class PlaylistUnlockCoordinator {
         didRecordAction = false
         createdPlaylistID = nil
         self.trigger = trigger
-        AnalyticsService.shared.capture(.featureUnlockShown(feature: .playlist, trigger: trigger))
+        AnalyticsService.shared.capture(.featureUnlockShown(
+            feature: .playlist,
+            trigger: trigger,
+            firedBefore: hasFiredAlarm
+        ))
         isPresented = true
         logger.info("Playlist unlock presented (trigger: \(trigger.rawValue, privacy: .public))")
         return true

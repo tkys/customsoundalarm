@@ -35,6 +35,18 @@ enum FirstAlarmFollowupLogic {
     /// 止めてから提案を出せる日数。
     static let maximumDaysSinceStopped: Double = 3
 
+    /// 端末内の履歴に `alarm_fired` が1件以上あるか（#324）。
+    /// 2つ目の取り込みで出すカードを、アラームが一度鳴るまで待たせるために使う。
+    static func hasFiredAlarm(historyLines: [String]) -> Bool {
+        historyLines.contains { line in
+            guard let data = line.data(using: .utf8),
+                  let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let event = object["event"] as? String
+            else { return false }
+            return event == "alarm_fired"
+        }
+    }
+
     /// 履歴の中で最初の `alarm_fired` が1回きりで、その `alarm_stopped` まで揃っているもの。
     static func candidate(
         historyLines: [String],

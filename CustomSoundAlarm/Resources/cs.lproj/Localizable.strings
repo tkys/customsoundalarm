@@ -388,6 +388,9 @@
 "playlist_unlock_title" = "Refrén za refrénem";
 "playlist_unlock_create" = "Vytvořit playlist";
 "playlist_unlock_later" = "Teď ne";
+"playlist_apply_title" = "Vybrat budíky";
+"playlist_apply_later" = "Teď ne";
+"playlist_apply_apply" = "Použít";
 "volume_notice" = "Zvýšili jsme hlasitost, aby to bylo lépe slyšet.";
 "permission_banner_title" = "Oprávnění k budíkům je vypnuté";
 "permission_banner_allow" = "Zapnout";

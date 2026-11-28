@@ -8,10 +8,17 @@ struct AddAlarmRequest: Identifiable {
     let id = UUID()
     let source: OnboardingSource?
     let initialSound: AlarmSound?
+    /// プレイリストを作った直後に、そのプレイリストを選んだ状態で開く（#324）
+    let initialPlaylistID: UUID?
 
-    init(source: OnboardingSource?, initialSound: AlarmSound? = nil) {
+    init(
+        source: OnboardingSource?,
+        initialSound: AlarmSound? = nil,
+        initialPlaylistID: UUID? = nil
+    ) {
         self.source = source
         self.initialSound = initialSound
+        self.initialPlaylistID = initialPlaylistID
     }
 }
 
@@ -98,6 +105,8 @@ struct ContentView: View {
     @State private var shareImportVolumeBoostedFileName: String?
     /// プレイリストの解放（#216）
     @State private var unlock = PlaylistUnlockCoordinator.shared
+    /// 作ったあとに使うアラームを選ぶ（#324）
+    @State private var apply = PlaylistApplyCoordinator.shared
     /// 許可状態（#230）
     @State private var scheduler = AlarmScheduler.shared
     /// 追加・編集画面が実際に開いているか（sheet の item より確実・#216）
@@ -255,6 +264,7 @@ struct ContentView: View {
                     mode: .add,
                     initialImport: request.source,
                     initialSound: request.initialSound,
+                    initialPlaylistID: request.initialPlaylistID,
                     onClose: {
                         addScreenVisible = false
                         addAlarmRequest = nil
@@ -429,6 +439,10 @@ struct ContentView: View {
         .onChange(of: soundStore.hasPendingPlaylistUnlock) { _, hasPending in
             if hasPending { schedulePlaylistUnlockAttempt() }
         }
+        .onChange(of: apply.pendingAddAlarmPlaylistID) { _, playlistID in
+            guard playlistID != nil else { return }
+            openAddAlarmForPlaylistApply()
+        }
         .onChange(of: addScreenVisible) { _, isVisible in
             if !isVisible { schedulePlaylistUnlockAttempt() }
         }
@@ -565,6 +579,22 @@ struct ContentView: View {
         }
     }
 
+    /// アラームが0本のとき、作ったプレイリストを選んだ状態で追加画面を開く（#324）。
+    private func openAddAlarmForPlaylistApply() {
+        guard let playlistID = apply.takePendingAddAlarmPlaylistID() else { return }
+        addScreenVisible = true
+        addAlarmRequest = AddAlarmRequest(source: nil, initialPlaylistID: playlistID)
+    }
+
+    /// 端末内の履歴に鳴った記録があるか（#324）。
+    private func hasAlarmFired() -> Bool {
+        FirstAlarmFollowupLogic.hasFiredAlarm(
+            historyLines: AlarmLocalHistoryStore.recentLines(
+                limit: AlarmLocalHistoryStore.maxLines
+            )
+        )
+    }
+
     private func attemptPlaylistUnlock() {
         guard !addScreenVisible,
               !editScreenVisible,
@@ -574,11 +604,13 @@ struct ContentView: View {
               !showingSkipAll,
               shareImportItem == nil,
               fixingSilentAlarm == nil,
-              updateChecker.prompt == nil else { return }
+              updateChecker.prompt == nil,
+              !AppGroup.playlistUnlockShown else { return }
         // 起動時に既存の人へ出すときは、許可の1行を先に出す（#280）。
         // 2つ目の取り込みの直後は、取り込みの文脈を優先して出す（#216）。
         let trigger = PlaylistUnlockLogic.trigger(
             hasPending: soundStore.hasPendingPlaylistUnlock,
+            hasFiredAlarm: hasAlarmFired(),
             customSoundCount: soundStore.customSoundCount,
             playlistCount: PlaylistStore.shared.playlists.count,
             hasShown: AppGroup.playlistUnlockShown
@@ -1826,12 +1858,14 @@ struct ContentView: View {
             return
         }
 
-        let unlockWouldShow = PlaylistUnlockLogic.trigger(
-            hasPending: soundStore.hasPendingPlaylistUnlock,
-            customSoundCount: soundStore.customSoundCount,
-            playlistCount: PlaylistStore.shared.playlists.count,
-            hasShown: AppGroup.playlistUnlockShown
-        ) != nil
+        let unlockWouldShow = !AppGroup.playlistUnlockShown
+            && PlaylistUnlockLogic.trigger(
+                hasPending: soundStore.hasPendingPlaylistUnlock,
+                hasFiredAlarm: hasAlarmFired(),
+                customSoundCount: soundStore.customSoundCount,
+                playlistCount: PlaylistStore.shared.playlists.count,
+                hasShown: AppGroup.playlistUnlockShown
+            ) != nil
         guard FirstAlarmFollowupLogic.shouldShow(
             hasPermissionBanner: permissionBannerStatus != nil,
             unlockWouldShow: unlockWouldShow

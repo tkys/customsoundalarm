@@ -81,6 +81,12 @@ enum AlarmSaveLogic {
         updated.isEnabled = true
         return updated
     }
+
+    /// 保存の前後で音（1曲の音か、プレイリストか）が変わったか（#324）。
+    static func soundChanged(before: AlarmEntry, after: AlarmEntry) -> Bool {
+        before.soundFileName != after.soundFileName
+            || before.playlistID != after.playlistID
+    }
 }
 
 // MARK: - 下書きの比較（#308）

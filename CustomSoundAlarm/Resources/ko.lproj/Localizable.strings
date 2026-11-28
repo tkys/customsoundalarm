@@ -388,6 +388,9 @@
 "playlist_unlock_title" = "좋아하는 후렴이 잇따라";
 "playlist_unlock_create" = "플레이리스트 만들기";
 "playlist_unlock_later" = "나중에";
+"playlist_apply_title" = "사용할 알람 선택";
+"playlist_apply_later" = "나중에";
+"playlist_apply_apply" = "사용";
 "volume_notice" = "소리를 키워 잘 들리게 했습니다.";
 "permission_banner_title" = "알람 권한이 꺼져 있습니다";
 "permission_banner_allow" = "켜기";

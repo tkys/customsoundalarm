@@ -71,6 +71,26 @@ struct FirstAlarmFollowupLogicTests {
         #expect(candidate(lines) == alarmID)
     }
 
+    // MARK: - 鳴った記録の有無（#324）
+
+    @Test
+    func hasFiredAlarmIsTrueWhenAnyFiredEventExists() {
+        #expect(FirstAlarmFollowupLogic.hasFiredAlarm(historyLines: [
+            line("alarm_stopped", uid: "uid-1"),
+            line("alarm_fired", uid: "uid-1")
+        ]))
+    }
+
+    @Test
+    func hasFiredAlarmIsFalseWithoutFiredEvent() {
+        #expect(!FirstAlarmFollowupLogic.hasFiredAlarm(historyLines: [
+            line("alarm_stopped", uid: "uid-1"),
+            line("alarm_snoozed", uid: "uid-1")
+        ]))
+        #expect(!FirstAlarmFollowupLogic.hasFiredAlarm(historyLines: []))
+        #expect(!FirstAlarmFollowupLogic.hasFiredAlarm(historyLines: ["not json"]))
+    }
+
     @Test
     func repeatingAlarmIsIgnored() {
         let lines = [

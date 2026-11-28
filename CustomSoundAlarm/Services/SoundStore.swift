@@ -19,6 +19,7 @@ final class SoundStore {
     private init() {
         migrateFromStandard()
         load()
+        hasPendingPlaylistUnlock = AppGroup.hasPendingPlaylistUnlock
         registerPresets()
     }
 
@@ -41,13 +42,15 @@ final class SoundStore {
             )
             if shouldPend {
                 hasPendingPlaylistUnlock = true
+                AppGroup.hasPendingPlaylistUnlock = true
             }
         }
     }
 
-    /// 解放の待ち状態を消す（表示したとき・#216）。
+    /// 解放の待ち状態を消す（表示したとき・#216 / #324）。
     func clearPendingPlaylistUnlock() {
         hasPendingPlaylistUnlock = false
+        AppGroup.hasPendingPlaylistUnlock = false
     }
 
     /// 取り込んだ音（プリセットを除く）の数（#280）。
@@ -134,6 +137,7 @@ final class SoundStore {
     func resetForUITest() {
         sounds = sounds.filter(\.isPreset)
         hasPendingPlaylistUnlock = false
+        AppGroup.hasPendingPlaylistUnlock = false
         save()
     }
 

@@ -25,6 +25,17 @@ struct CustomSoundAlarmApp: App {
                         AlarmStore.shared.resetForUITest()
                     }
 
+                    // UIテスト用: 鳴った記録の有無を作る（#324）
+                    if AppGroup.isUITestClearAlarmHistory || AppGroup.isUITestSeedAlarmFired {
+                        try? FileManager.default.removeItem(at: AlarmLocalHistoryStore.fileURL)
+                    }
+                    if AppGroup.isUITestSeedAlarmFired {
+                        AlarmLocalHistoryStore.append(
+                            event: "alarm_fired",
+                            properties: ["alarm_uid": "uitest-fired"]
+                        )
+                    }
+
                     // UIテスト用: 共有の staging を分離する（#222）
                     if AppGroup.isUITestRun
                         && !AppGroup.isUITestSeedShareImportAudio
@@ -366,7 +377,8 @@ struct CustomSoundAlarmApp: App {
                     if AppGroup.isUITestSeedExistingUnlock
                         || AppGroup.isUITestSeedExistingUnlockOneSound
                         || AppGroup.isUITestSeedExistingUnlockPlaylist
-                        || AppGroup.isUITestSeedExistingUnlockShown {
+                        || AppGroup.isUITestSeedExistingUnlockShown
+                        || AppGroup.isUITestSeedExistingUnlockAlarm {
                         AppGroup.hasCompletedOnboarding = true
                         AlarmStore.shared.resetForUITest()
                         PlaylistStore.shared.resetForUITest()
@@ -377,10 +389,10 @@ struct CustomSoundAlarmApp: App {
 
                         let soundCount = AppGroup.isUITestSeedExistingUnlockOneSound ? 1 : 2
                         let presets = [
-                            ("PresetBell", "ExistingFirst.caf"),
-                            ("PresetMarimba", "ExistingSecond.caf")
+                            ("PresetBell", "ExistingFirst.caf", "First Sound"),
+                            ("PresetMarimba", "ExistingSecond.caf", "Second Sound")
                         ]
-                        for (preset, fileName) in presets.prefix(soundCount) {
+                        for (preset, fileName, displayName) in presets.prefix(soundCount) {
                             let url = AudioConverter.shared.soundsDirectory
                                 .appendingPathComponent(fileName)
                             try? FileManager.default.removeItem(at: url)
@@ -390,7 +402,7 @@ struct CustomSoundAlarmApp: App {
                             ) {
                                 try? FileManager.default.copyItem(at: source, to: url)
                                 SoundStore.shared.add(AlarmSound(
-                                    name: fileName,
+                                    name: displayName,
                                     fileName: fileName,
                                     isPreset: false
                                 ))
@@ -403,6 +415,15 @@ struct CustomSoundAlarmApp: App {
                                 playOrder: .inOrder,
                                 transition: .short
                             )
+                        }
+                        if AppGroup.isUITestSeedExistingUnlockAlarm {
+                            AlarmStore.shared.add(AlarmEntry(
+                                hour: 6,
+                                minute: 30,
+                                isEnabled: false,
+                                label: "Existing Alarm",
+                                soundFileName: "ExistingFirst.caf"
+                            ))
                         }
                         // 2曲目の取り込みトリガーと二重にならないよう、待ち状態は消す。
                         SoundStore.shared.clearPendingPlaylistUnlock()

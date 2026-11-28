@@ -25,6 +25,12 @@ enum UnlockAction: String, Sendable, CaseIterable {
     case later
 }
 
+/// alarm_edited を保存した入口（#324）。
+enum AlarmEditedVia: String, Sendable, CaseIterable {
+    case editor
+    case playlistApply = "playlist_apply"
+}
+
 /// アラーム作成の入口（#231）
 enum AlarmCreatedSource: String, Sendable, CaseIterable {
     case emptyQuick = "empty_quick"
@@ -99,6 +105,8 @@ enum AnalyticsEvent: Sendable {
         wasEnabled: Bool = true,
         soundMode: PlaylistSoundMode = .single,
         fadeIn: PlaylistFadeIn = .off,
+        soundChanged: Bool = false,
+        via: AlarmEditedVia = .editor,
         context: AlarmEventContext? = nil
     )
 
@@ -257,8 +265,12 @@ enum AnalyticsEvent: Sendable {
     /// プレイリストの「作る1行」を出した（#207）
     case playlistSuggestionShown
 
-    /// 機能の解放シートを出した（#216 / #280）
-    case featureUnlockShown(feature: UnlockFeature, trigger: PlaylistUnlockTrigger)
+    /// 機能の解放シートを出した（#216 / #280 / #324）
+    case featureUnlockShown(
+        feature: UnlockFeature,
+        trigger: PlaylistUnlockTrigger,
+        firedBefore: Bool
+    )
 
     /// 機能の解放シートで選んだ行動（#216 / #280）
     case featureUnlockAction(
@@ -266,6 +278,15 @@ enum AnalyticsEvent: Sendable {
         action: UnlockAction,
         trigger: PlaylistUnlockTrigger
     )
+
+    /// プレイリストを作ったあとの「使うアラームを選ぶ」を出した（#324）
+    case playlistApplyShown(
+        source: PlaylistApplySource,
+        alarmCountBucket: PlaylistApplyAlarmCountBucket
+    )
+
+    /// 「使うアラームを選ぶ」で選んだ行動（#324）
+    case playlistApplyAction(action: PlaylistApplyAction, selectedCount: Int)
 
     /// プレイリストが空の状態を見た（#183）
     /// 起動ごと・source ごとに1回だけ送る（PlaylistEmptyViewTracker が制御）。
@@ -453,6 +474,8 @@ enum AnalyticsEvent: Sendable {
         case .playlistSuggestionShown: return "playlist_suggestion_shown"
         case .featureUnlockShown: return "feature_unlock_shown"
         case .featureUnlockAction: return "feature_unlock_action"
+        case .playlistApplyShown: return "playlist_apply_shown"
+        case .playlistApplyAction: return "playlist_apply_action"
         case .playlistEmptyViewed: return "playlist_empty_viewed"
         case .playlistEdited: return "playlist_edited"
         case .playlistRenderFailed: return "playlist_render_failed"
@@ -558,6 +581,8 @@ enum AnalyticsEvent: Sendable {
             wasEnabled,
             soundMode,
             fadeIn,
+            soundChanged,
+            via,
             context
         ):
             var d: [String: Any] = [
@@ -567,7 +592,9 @@ enum AnalyticsEvent: Sendable {
                 "backup_minutes": backupMinutes,
                 "was_enabled": wasEnabled,
                 "sound_mode": soundMode.analyticsValue,
-                "fade_in": fadeIn.analyticsValue
+                "fade_in": fadeIn.analyticsValue,
+                "sound_changed": soundChanged,
+                "via": via.rawValue
             ]
             if let context { d.merge(context.properties) { _, new in new } }
             return d
@@ -679,13 +706,27 @@ enum AnalyticsEvent: Sendable {
             ]
         case .playlistSuggestionShown:
             return [:]
-        case let .featureUnlockShown(feature, trigger):
-            return ["feature": feature.rawValue, "trigger": trigger.rawValue]
+        case let .featureUnlockShown(feature, trigger, firedBefore):
+            return [
+                "feature": feature.rawValue,
+                "trigger": trigger.rawValue,
+                "fired_before": firedBefore
+            ]
         case let .featureUnlockAction(feature, action, trigger):
             return [
                 "feature": feature.rawValue,
                 "action": action.rawValue,
                 "trigger": trigger.rawValue
+            ]
+        case let .playlistApplyShown(source, alarmCountBucket):
+            return [
+                "source": source.rawValue,
+                "alarm_count_bucket": alarmCountBucket.rawValue
+            ]
+        case let .playlistApplyAction(action, selectedCount):
+            return [
+                "action": action.rawValue,
+                "selected_count": selectedCount
             ]
         case let .alarmSkipSet(scope, days, alarmCount):
             return [
@@ -1323,6 +1364,46 @@ final class AnalyticsService: @unchecked Sendable {
             )
         }
         logger.info("Flushed \(events.count) pending alarm events")
+    }
+}
+
+// MARK: - alarm_edited の組み立て（#324）
+
+/// エディタ保存と「使うアラームを選ぶ」で共通の alarm_edited を作る。
+@MainActor
+enum AlarmSaveAnalytics {
+    static func editedEvent(
+        entry: AlarmEntry,
+        wasEnabled: Bool,
+        soundChanged: Bool,
+        via: AlarmEditedVia,
+        context: AlarmEventContext
+    ) -> AnalyticsEvent {
+        .alarmEdited(
+            hasCustomSound: hasCustomSound(entry),
+            isRepeating: !entry.repeatWeekdays.isEmpty,
+            snoozeMinutes: entry.snoozeMinutes,
+            backupMinutes: entry.backupMinutes ?? 0,
+            wasEnabled: wasEnabled,
+            soundMode: AlarmSoundModeResolver.soundMode(for: entry),
+            fadeIn: entry.fadeIn,
+            soundChanged: soundChanged,
+            via: via,
+            context: context
+        )
+    }
+
+    /// 次回発火までの時間（整数時間）。無効・計算不能なら付けない。
+    static func hoursUntilProperties(for entry: AlarmEntry) -> [String: Any]? {
+        guard entry.isEnabled, let fire = entry.nextFireDate(from: Date()) else { return nil }
+        return ["hours_until": AlarmCountdown.hoursUntil(from: Date(), to: fire)]
+    }
+
+    private static func hasCustomSound(_ entry: AlarmEntry) -> Bool {
+        guard entry.playlistID == nil else { return false }
+        return SoundStore.shared.sounds
+            .first { $0.fileName == entry.soundFileName }?
+            .isPreset == false
     }
 }
 
