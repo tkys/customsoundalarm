@@ -49,6 +49,7 @@ struct AnalyticsEventsDocTests {
         "holiday_skip_toggled",
         "holiday_ring_override",
         "custom_sound_imported",
+        "sound_analyzed",
         "feature_unlock_shown",
         "feature_unlock_action",
         "playlist_apply_shown",
@@ -128,6 +129,26 @@ struct AnalyticsEventsDocTests {
             doc.split(separator: "\n").first { $0.hasPrefix("| `playlist_apply_action` |") }
         )
         #expect(action.contains("selected_count"))
+    }
+
+    @Test
+    func soundKindAnalyticsAreDocumented() throws {
+        let doc = try String(contentsOf: docURL, encoding: .utf8)
+        let imported = try #require(
+            doc.split(separator: "\n").first { $0.hasPrefix("| `custom_sound_imported` |") }
+        )
+        #expect(!imported.contains("content_kind"))
+        #expect(!imported.contains("bpm_bucket"))
+        let analyzed = try #require(
+            doc.split(separator: "\n").first { $0.hasPrefix("| `sound_analyzed` |") }
+        )
+        #expect(analyzed.contains("content_kind"))
+        #expect(analyzed.contains("bpm_bucket"))
+        #expect(analyzed.contains("trigger"))
+        #expect(analyzed.contains("source"))
+        for key in ["has_music_sound", "has_voice_sound", "has_animal_sound"] {
+            #expect(doc.contains("| `\(key)` |"))
+        }
     }
 
     @Test

@@ -242,6 +242,36 @@ struct AnalyticsEventTests {
     }
 
     @Test
+    func soundAnalyzedProperties_areTyped() {
+        let props = AnalyticsEvent.soundAnalyzed(
+            contentKind: .cat,
+            bpmBucket: "none",
+            trigger: .backfill
+        ).properties
+
+        #expect(props.count == 3)
+        #expect(props["content_kind"] as? String == "cat")
+        #expect(props["bpm_bucket"] as? String == "none")
+        #expect(props["trigger"] as? String == "backfill")
+    }
+
+    @Test
+    func soundAnalyzedProperties_importIncludesSource() {
+        let props = AnalyticsEvent.soundAnalyzed(
+            contentKind: .singing,
+            bpmBucket: "100-120",
+            trigger: .imported,
+            source: .audio
+        ).properties
+
+        #expect(props.count == 4)
+        #expect(props["content_kind"] as? String == "singing")
+        #expect(props["bpm_bucket"] as? String == "100-120")
+        #expect(props["trigger"] as? String == "import")
+        #expect(props["source"] as? String == "audio")
+    }
+
+    @Test
     func customSoundImportedProperties_shareMedia() {
         let props = AnalyticsEvent.customSoundImported(
             source: .share,
@@ -729,6 +759,7 @@ struct AnalyticsEventTests {
             .alarmCreated(hasCustomSound: true, isRepeating: true, snoozeMinutes: 0),
             .customSoundImported(source: .video),
             .customSoundImported(source: .audio),
+            .soundAnalyzed(contentKind: .cat, bpmBucket: "none", trigger: .backfill),
             .soundPreviewPlayed(source: .selectTap),
             .alarmSkipSet(scope: .day, days: 1, alarmCount: 1),
             .alarmSkipUndone,

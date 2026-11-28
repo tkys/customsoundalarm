@@ -98,4 +98,20 @@ struct AnalyticsBucketsTests {
         #expect(AnalyticsBuckets.playlistSecondsBucket(seconds: 599.999) == "5_10min")
         #expect(AnalyticsBuckets.playlistSecondsBucket(seconds: 600) == "10min")
     }
+
+    // MARK: - bpmBucket（#202）
+
+    @Test
+    func bpmBucket_boundaries() {
+        #expect(AnalyticsBuckets.bpmBucket(bpm: nil) == "none")
+        #expect(AnalyticsBuckets.bpmBucket(bpm: 79) == "<80")
+        #expect(AnalyticsBuckets.bpmBucket(bpm: 80) == "80-100")
+        #expect(AnalyticsBuckets.bpmBucket(bpm: 99) == "80-100")
+        #expect(AnalyticsBuckets.bpmBucket(bpm: 100) == "100-120")
+        #expect(AnalyticsBuckets.bpmBucket(bpm: 119) == "100-120")
+        #expect(AnalyticsBuckets.bpmBucket(bpm: 120) == "120-140")
+        #expect(AnalyticsBuckets.bpmBucket(bpm: 139) == "120-140")
+        #expect(AnalyticsBuckets.bpmBucket(bpm: 140) == "140+")
+        #expect(AnalyticsBuckets.bpmBucket(bpm: 200) == "140+")
+    }
 }

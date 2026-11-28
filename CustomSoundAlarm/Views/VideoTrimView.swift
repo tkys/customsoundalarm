@@ -560,14 +560,17 @@ struct VideoImportFlow: View {
         }
 
         onSaved?()
-        AnalyticsService.shared.capture(.customSoundImported(
-            source: customSoundSource,
-            peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
-            gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
-            lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore),
-            shareMedia: shareMedia,
-            volumeNoticeShown: showsVolumeNotice
-        ))
+        SoundKindAnalysisService.shared.analyzeNewImport(
+            soundID: sound.id,
+            analytics: SoundImportAnalytics(
+                source: customSoundSource,
+                peakDbBucket: LoudnessNormalizer.peakDbBucket(forPeakDb: result.peakDb),
+                gainDbBucket: LoudnessNormalizer.gainDbBucket(forGainDb: result.gainDb),
+                lufsBucket: LoudnessMeter.bucket(forLufs: result.lufsBefore),
+                shareMedia: shareMedia,
+                volumeNoticeShown: showsVolumeNotice
+            )
+        )
         await AdPresenter.presentInterstitialIfAllowed(after: .importSaved)
         dismiss()
     }

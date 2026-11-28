@@ -51,4 +51,16 @@ enum AnalyticsBuckets {
         default: return "10min"
         }
     }
+
+    /// BPM → 区分（#202）。出せなかったときは none。
+    static func bpmBucket(bpm: Int?) -> String {
+        guard let bpm else { return "none" }
+        switch bpm {
+        case ..<80: return "<80"
+        case ..<100: return "80-100"
+        case ..<120: return "100-120"
+        case ..<140: return "120-140"
+        default: return "140+"
+        }
+    }
 }

@@ -674,6 +674,15 @@ enum AppGroup {
     #endif
     }
 
+    /// UIテスト用: 音の種類の判定を有効にする（#202）
+    static var isUITestSoundKindAnalysis: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-sound-kind-analysis")
+    #else
+        false
+    #endif
+    }
+
     /// オンボーディングを完了したか（#98）。
     /// 未完了かつアラーム0件・取り込み音源0件の新規インストールにだけオンボを出す。
     /// 既存ユーザーは初回起動時に条件を満たさなければ立てて以後出さない

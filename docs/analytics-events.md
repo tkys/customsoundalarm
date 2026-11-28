@@ -73,6 +73,7 @@
 | `holiday_skip_toggled` | `enabled` bool | 「祝日は鳴らさない」を切り替えた | 祝日スキップの利用率 | アプリ動作中のみ | 1.8.2 |
 | `holiday_ring_override` | — | 「この祝日は鳴らす」を切り替えた | 祝日に出勤する人の利用 | アプリ動作中のみ | 1.8.2 |
 | `custom_sound_imported` | `source` string（video/audio/share/music_library）, `peak_db_bucket` string, `gain_db_bucket` string, `lufs_bucket` string（取り込み前のLUFS区分）, `share_media` string（audio/video・共有経路のみ）, `volume_notice_shown` bool（+3dB以上上げたか） | カスタムサウンド取り込み成功 | 取り込み経路・音量 | アプリ動作中のみ | 既存（`lufs_bucket` は1.8.0、`volume_notice_shown` は1.8.3、`source=share` と `share_media` は1.8.3） |
+| `sound_analyzed` | `content_kind` string（singing/instrumental/voice/cat/dog/bird/nature/other/unknown）, `bpm_bucket` string（<80/80-100/100-120/120-140/140+/none）, `trigger` string（import/backfill）, `source` string（video/audio/share/music_library・import のみ） | 取り込んだ音を端末内で判定した（既存の音は後から） | 音の種類・テンポ・取り込み経路 | アプリ動作中のみ | 1.8.6 |
 | `video_import_started` | `source` string（photo_library/file） | 動画取り込み開始 | 動画経路 | アプリ動作中のみ | 既存 |
 | `video_import_failed` | `reason` string（安定識別子） | 動画取り込み失敗 | 失敗原因 | アプリ動作中のみ | 既存 |
 | `sound_picker_recent_used` | — | **送られなくなった**（#123 で「最近使った」を削除） | （過去データのみ） | — | 既存・1.8.0で停止 |
@@ -124,6 +125,9 @@
 | `backup_early_access` | bool | 先行公開の権利を持っているか | 1.8.0 |
 | `playlist_count` | int | 作成したプレイリストの数 | 1.8.2 |
 | `playlist_early_access` | bool | プレイリスト先行公開の権利を持っているか | 1.8.2 |
+| `has_music_sound` | bool | 歌（singing）か歌の無い曲（instrumental）の音がある | 1.8.6 |
+| `has_voice_sound` | bool | 声（voice）の音がある | 1.8.6 |
+| `has_animal_sound` | bool | 猫・犬・鳥のいずれかの音がある | 1.8.6 |
 | `first_install_build` | int（取れなければ送らない） | 最初にインストールしたビルド番号（`CFBundleVersion`） | 1.8.0 |
 | `is_internal` | bool | DEBUG opt-in の内部利用（PostHog 側で除外） | 既存 |
 | `build_type` | string（debug） | DEBUG ビルドの super property | 既存 |
