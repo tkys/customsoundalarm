@@ -88,7 +88,8 @@ final class PlaylistUnlockUITests: XCTestCase {
 
     /// 2つ以上取り込んでいてプレイリストがない既存の人に、起動時に1回だけ出る。
     /// ［あとで］で閉じたら、同じ状態で再起動しても出ない。
-    func testExistingUserUnlockShowsOnceThenNeverAgain() {
+    func testExistingUserUnlockShowsOnceThenNeverAgain() throws {
+        throw XCTSkip("1.8.5 では既存の人に出さない（#322）。使うアラームを選ぶ流れと一緒に戻す")
         app.launchArguments = existingUserArguments(seeding: ["-uitest-seed-existing-unlock"])
         app.launch()
 
@@ -113,6 +114,11 @@ final class PlaylistUnlockUITests: XCTestCase {
             title.waitForExistence(timeout: 3),
             "unlock should not appear again after later: \(app.debugDescription)"
         )
+    }
+
+    /// 1.8.5 では、条件を満たす既存の人にも出さない（#322）。
+    func testExistingUserUnlockIsOffIn185() {
+        assertUnlockDoesNotAppear(seeding: "-uitest-seed-existing-unlock")
     }
 
     func testExistingUserUnlockDoesNotShowForOneSound() {
