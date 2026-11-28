@@ -388,6 +388,9 @@
 "playlist_unlock_title" = "Refren za refrenem";
 "playlist_unlock_create" = "Utwórz playlistę";
 "playlist_unlock_later" = "Nie teraz";
+"playlist_apply_title" = "Wybierz budziki";
+"playlist_apply_later" = "Nie teraz";
+"playlist_apply_apply" = "Użyj";
 "volume_notice" = "Zwiększyliśmy głośność, żeby było lepiej słychać.";
 "permission_banner_title" = "Uprawnienie do alarmów jest wyłączone";
 "permission_banner_allow" = "Włącz";

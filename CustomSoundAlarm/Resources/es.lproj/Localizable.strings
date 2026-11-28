@@ -388,6 +388,9 @@
 "playlist_unlock_title" = "Estribillo tras estribillo";
 "playlist_unlock_create" = "Crear una playlist";
 "playlist_unlock_later" = "Ahora no";
+"playlist_apply_title" = "Elegir alarmas";
+"playlist_apply_later" = "Ahora no";
+"playlist_apply_apply" = "Usar";
 "volume_notice" = "Subimos el volumen para que se oiga mejor.";
 "permission_banner_title" = "El permiso de alarmas está desactivado";
 "permission_banner_allow" = "Activar";

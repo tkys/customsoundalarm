@@ -388,6 +388,9 @@
 "playlist_unlock_title" = "Refrain après refrain";
 "playlist_unlock_create" = "Créer une playlist";
 "playlist_unlock_later" = "Plus tard";
+"playlist_apply_title" = "Choisir les alarmes";
+"playlist_apply_later" = "Plus tard";
+"playlist_apply_apply" = "Utiliser";
 "volume_notice" = "Volume augmenté pour mieux l’entendre.";
 "permission_banner_title" = "L’autorisation des alarmes est désactivée";
 "permission_banner_allow" = "Activer";

@@ -18,8 +18,8 @@ struct RootTabView: View {
     @Environment(\.colorScheme) private var colorScheme
     /// 解放シートの表示（coordinator の変更をローカル状態に写す・#216）
     @State private var showingUnlock = false
-    /// 解放から作ったプレイリストの詳細（#216）
-    @State private var unlockPlaylist: Playlist?
+    /// 作ったあとに使うアラームを選ぶ（#324）
+    @State private var apply = PlaylistApplyCoordinator.shared
     @State private var shareLanding = ShareImportLanding.shared
     /// スクリーンショット用（DEBUGのみ・#239）
     @State private var showingShareReceipt = false
@@ -71,6 +71,9 @@ struct RootTabView: View {
         .onChange(of: unlock.isPresented) { _, isPresented in
             showingUnlock = isPresented
         }
+        .onChange(of: apply.pendingAddAlarmPlaylistID) { _, playlistID in
+            if playlistID != nil { selection = .alarms }
+        }
         .onChange(of: shareLanding.librarySoundFileName) { _, fileName in
             if fileName != nil { selection = .library }
         }
@@ -93,7 +96,7 @@ struct RootTabView: View {
             unlock.handleDismiss()
             if let id = unlock.takeCreatedPlaylistID(),
                let playlist = PlaylistStore.shared.playlist(id: id) {
-                unlockPlaylist = playlist
+                apply.offer(playlist: playlist, source: .unlock)
             }
         }) {
             PlaylistUnlockSheet(
@@ -104,9 +107,17 @@ struct RootTabView: View {
                 dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium]
             )
         }
-        .sheet(item: $unlockPlaylist) { playlist in
-            NavigationStack {
-                PlaylistEditorView(playlist: playlist, onSave: { _ in })
+        .sheet(item: $apply.request) { request in
+            if let playlist = PlaylistStore.shared.playlist(id: request.playlistID) {
+                PlaylistApplyView(
+                    playlist: playlist,
+                    onFinish: { action, selectedCount in
+                        if action == .apply {
+                            selection = .alarms
+                        }
+                        apply.finish(action, selectedCount: selectedCount)
+                    }
+                )
             }
         }
         #if DEBUG

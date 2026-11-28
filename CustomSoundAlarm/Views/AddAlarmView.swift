@@ -48,6 +48,8 @@ struct AlarmDetailView: View {
     var onSaved: ((AlarmEntry, Bool, Bool) -> Void)?
     /// 新規作成時に引き継いだ値（#206）
     private let carryOver: AlarmCarryOver
+    /// プレイリストを作った直後に、そのプレイリストを選んだ状態で開く（#324）
+    private let initialPlaylistID: UUID?
     /// オンボ場面4からの指定（#98 Phase 4）。
     /// video/audio → 表示直後にサウンド選択を開き該当の取り込みを直接開く。
     /// preset → プリセット先頭を選択済みにする。nil なら従来どおり
@@ -110,11 +112,13 @@ struct AlarmDetailView: View {
         mode: AlarmDetailMode,
         initialImport: OnboardingSource? = nil,
         initialSound: AlarmSound? = nil,
+        initialPlaylistID: UUID? = nil,
         onClose: (() -> Void)? = nil,
         onSaved: ((AlarmEntry, Bool, Bool) -> Void)? = nil
     ) {
         self.mode = mode
         self.initialImport = initialImport
+        self.initialPlaylistID = initialPlaylistID
         self.onClose = onClose
         self.onSaved = onSaved
 
@@ -170,7 +174,10 @@ struct AlarmDetailView: View {
             startWeekdays = []
             startSnoozeMinutes = carryOver.snoozeMinutes
             startBackupMinutes = nil
-            startPlaylistID = carryOver.playlistID
+            let explicitPlaylistID = initialPlaylistID.flatMap {
+                PlaylistStore.shared.playlist(id: $0) != nil ? $0 : nil
+            }
+            startPlaylistID = explicitPlaylistID ?? carryOver.playlistID
             startFadeIn = carryOver.fadeIn
             startSkipsHolidays = false
             startHolidayRingOverrides = []
@@ -1469,6 +1476,10 @@ struct AlarmDetailView: View {
                     wasEnabled: existing.isEnabled,
                     soundMode: AlarmSoundModeResolver.soundMode(for: updated),
                     fadeIn: fadeIn,
+                    soundChanged: AlarmSaveLogic.soundChanged(
+                        before: existing,
+                        after: updated
+                    ),
                     context: makeHistoryContext(
                         entry: updated,
                         list: listBeforeSave,

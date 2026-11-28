@@ -139,11 +139,17 @@ struct AnalyticsEventTests {
         ).name == "playlist_created")
         #expect(AnalyticsEvent.playlistSuggestionShown.name == "playlist_suggestion_shown")
         #expect(AnalyticsEvent.featureUnlockShown(
-            feature: .playlist, trigger: .secondImport
+            feature: .playlist, trigger: .secondImport, firedBefore: true
         ).name == "feature_unlock_shown")
         #expect(AnalyticsEvent.featureUnlockAction(
             feature: .playlist, action: .later, trigger: .existingUser
         ).name == "feature_unlock_action")
+        #expect(AnalyticsEvent.playlistApplyShown(
+            source: .unlock, alarmCountBucket: .twoToThree
+        ).name == "playlist_apply_shown")
+        #expect(AnalyticsEvent.playlistApplyAction(
+            action: .apply, selectedCount: 2
+        ).name == "playlist_apply_action")
         #expect(AnalyticsEvent.playlistEmptyViewed(
             source: .library,
             hasOwnSounds: false
@@ -260,11 +266,12 @@ struct AnalyticsEventTests {
     @Test
     func featureUnlockProperties_areTyped() {
         let shown = AnalyticsEvent.featureUnlockShown(
-            feature: .playlist, trigger: .existingUser
+            feature: .playlist, trigger: .existingUser, firedBefore: true
         ).properties
-        #expect(shown.count == 2)
+        #expect(shown.count == 3)
         #expect(shown["feature"] as? String == "playlist")
         #expect(shown["trigger"] as? String == "existing_user")
+        #expect(shown["fired_before"] as? Bool == true)
 
         let created = AnalyticsEvent.featureUnlockAction(
             feature: .playlist, action: .create, trigger: .secondImport
@@ -279,6 +286,25 @@ struct AnalyticsEventTests {
         ).properties
         #expect(later["action"] as? String == "later")
         #expect(later["trigger"] as? String == "existing_user")
+    }
+
+    @Test
+    func playlistApplyProperties_areTyped() {
+        let shown = AnalyticsEvent.playlistApplyShown(
+            source: .suggestion,
+            alarmCountBucket: .fourToNine
+        ).properties
+        #expect(shown.count == 2)
+        #expect(shown["source"] as? String == "suggestion")
+        #expect(shown["alarm_count_bucket"] as? String == "4-9")
+
+        let applied = AnalyticsEvent.playlistApplyAction(
+            action: .apply,
+            selectedCount: 3
+        ).properties
+        #expect(applied.count == 2)
+        #expect(applied["action"] as? String == "apply")
+        #expect(applied["selected_count"] as? Int == 3)
     }
 
     @Test
@@ -758,9 +784,9 @@ struct AnalyticsEventTests {
         let edited = AnalyticsEvent.alarmEdited(hasCustomSound: true, isRepeating: false, snoozeMinutes: 9).properties
         let created = AnalyticsEvent.alarmCreated(hasCustomSound: true, isRepeating: false, snoozeMinutes: 9).properties
 
-        #expect(edited.count == 7)
+        #expect(edited.count == 8)
         #expect(
-            Set(edited.keys).subtracting(["was_enabled"])
+            Set(edited.keys).subtracting(["was_enabled", "sound_changed"])
                 == Set(created.keys).subtracting(["time_suggestion_used", "carried_over"])
         )
         #expect(edited["has_custom_sound"] as? Bool == true)
@@ -768,6 +794,19 @@ struct AnalyticsEventTests {
         #expect(edited["snooze_minutes"] as? Int == 9)
         #expect(edited["backup_minutes"] as? Int == 0)
         #expect(edited["was_enabled"] as? Bool == true)
+        #expect(edited["sound_changed"] as? Bool == false)
+    }
+
+    @Test
+    func alarmEditedProperties_soundChanged() {
+        let props = AnalyticsEvent.alarmEdited(
+            hasCustomSound: true,
+            isRepeating: false,
+            snoozeMinutes: 9,
+            soundChanged: true
+        ).properties
+
+        #expect(props["sound_changed"] as? Bool == true)
     }
 
     @Test

@@ -94,12 +94,14 @@ struct PlaylistUnlockLogicTests {
     func secondImportTriggerWinsOverExistingUserTrigger() {
         #expect(PlaylistUnlockLogic.trigger(
             hasPending: true,
+            hasFiredAlarm: true,
             customSoundCount: 2,
             playlistCount: 0,
             hasShown: false
         ) == .secondImport)
         #expect(PlaylistUnlockLogic.trigger(
             hasPending: false,
+            hasFiredAlarm: false,
             customSoundCount: 2,
             playlistCount: 0,
             hasShown: false,
@@ -107,34 +109,67 @@ struct PlaylistUnlockLogicTests {
         ) == .existingUser)
     }
 
-    /// 1.8.5 では既存の人に出さない（#322）。2つ目の取り込みは今まで通り。
+    /// 新しく入れた人は、アラームが一度鳴るまで2つ目の取り込みのカードを待つ（#324）。
     @Test
-    func existingUserOfferIsOffByDefaultIn185() {
-        #expect(!PlaylistUnlockLogic.offersToExistingUsers)
+    func secondImportWaitsUntilAnAlarmHasFired() {
+        // 待ちあり × 鳴った記録なし → 出さない
         #expect(PlaylistUnlockLogic.trigger(
-            hasPending: false,
-            customSoundCount: 5,
+            hasPending: true,
+            hasFiredAlarm: false,
+            customSoundCount: 2,
             playlistCount: 0,
             hasShown: false
         ) == nil)
+        // 待ちあり × 鳴った記録あり → 2つ目の取り込みとして出す
         #expect(PlaylistUnlockLogic.trigger(
             hasPending: true,
+            hasFiredAlarm: true,
             customSoundCount: 2,
             playlistCount: 0,
             hasShown: false
         ) == .secondImport)
+        // 待ちなし × 鳴った記録なし → 既存の人として出す
+        #expect(PlaylistUnlockLogic.trigger(
+            hasPending: false,
+            hasFiredAlarm: false,
+            customSoundCount: 2,
+            playlistCount: 0,
+            hasShown: false
+        ) == .existingUser)
+        // 待ちなし × 鳴った記録あり → 既存の人として出す
+        #expect(PlaylistUnlockLogic.trigger(
+            hasPending: false,
+            hasFiredAlarm: true,
+            customSoundCount: 2,
+            playlistCount: 0,
+            hasShown: false
+        ) == .existingUser)
+    }
+
+    @Test
+    func existingUserOfferIsOn() {
+        #expect(PlaylistUnlockLogic.offersToExistingUsers)
+        #expect(PlaylistUnlockLogic.trigger(
+            hasPending: false,
+            hasFiredAlarm: false,
+            customSoundCount: 5,
+            playlistCount: 0,
+            hasShown: false
+        ) == .existingUser)
     }
 
     @Test
     func existingUserTriggerDoesNotDoubleWithSecondImportAfterShown() {
         #expect(PlaylistUnlockLogic.trigger(
             hasPending: false,
+            hasFiredAlarm: true,
             customSoundCount: 2,
             playlistCount: 0,
             hasShown: true
         ) == nil)
         #expect(PlaylistUnlockLogic.trigger(
             hasPending: true,
+            hasFiredAlarm: true,
             customSoundCount: 2,
             playlistCount: 0,
             hasShown: true
@@ -145,6 +180,7 @@ struct PlaylistUnlockLogicTests {
     func existingUserTriggerIsSkippedWhenConditionsAreNotMet() {
         #expect(PlaylistUnlockLogic.trigger(
             hasPending: false,
+            hasFiredAlarm: false,
             customSoundCount: 1,
             playlistCount: 0,
             hasShown: false,
@@ -152,6 +188,7 @@ struct PlaylistUnlockLogicTests {
         ) == nil)
         #expect(PlaylistUnlockLogic.trigger(
             hasPending: false,
+            hasFiredAlarm: false,
             customSoundCount: 2,
             playlistCount: 1,
             hasShown: false,

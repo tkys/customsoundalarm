@@ -13,10 +13,8 @@ enum PlaylistUnlockLogic {
     /// 解放を出す取り込み音の数。
     static let requiredCustomSoundCount = 2
 
-    /// 既存の人にも出すか（#280）。1.8.5 では止める（#322）。
-    /// 作った後に「使うアラームを選ぶ」流れが無いまま出すと、
-    /// 一度きりの表示が行き止まりで終わるため。選ぶ流れと一緒に戻す。
-    static let offersToExistingUsers = false
+    /// 既存の人にも出すか（#280 / #324）。
+    static let offersToExistingUsers = true
 
     /// 取り込んだ音が2つになった時点で、解放を待たせるか。
     /// プレイリストがある・すでに出した・2つ以外（3つ目以降）は出さない。
@@ -43,16 +41,23 @@ enum PlaylistUnlockLogic {
     }
 
     /// いま出す理由。2つ目の取り込みが待っているならそれを優先する（#280）。
+    /// 新しく入れた人には、アラームが一度鳴った記録があるまで出さない（#324）。
     /// 表示済みなら nil。
     static func trigger(
         hasPending: Bool,
+        hasFiredAlarm: Bool,
         customSoundCount: Int,
         playlistCount: Int,
         hasShown: Bool,
         offersToExistingUsers: Bool = PlaylistUnlockLogic.offersToExistingUsers
     ) -> PlaylistUnlockTrigger? {
         guard !hasShown else { return nil }
-        if hasPending { return .secondImport }
+        if hasPending {
+            guard customSoundCount >= requiredCustomSoundCount, playlistCount == 0 else {
+                return nil
+            }
+            return hasFiredAlarm ? .secondImport : nil
+        }
         guard offersToExistingUsers, shouldOfferToExistingUser(
             customSoundCount: customSoundCount,
             playlistCount: playlistCount,

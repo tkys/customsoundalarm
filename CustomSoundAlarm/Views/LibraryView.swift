@@ -174,7 +174,12 @@ struct LibraryView: View {
                         importedCount: importedCount,
                         subtitle: "playlist_suggestion_library_subtitle"
                     ) {
-                        _ = PlaylistSuggestionService.create()
+                        if let playlist = PlaylistSuggestionService.create() {
+                            PlaylistApplyCoordinator.shared.offer(
+                                playlist: playlist,
+                                source: .suggestion
+                            )
+                        }
                     }
                     .accessibilityIdentifier("library.playlistSuggestion")
                 }

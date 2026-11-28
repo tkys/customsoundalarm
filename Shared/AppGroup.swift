@@ -565,6 +565,13 @@ enum AppGroup {
         set { userDefaults.set(newValue, forKey: "playlistUnlockShown") }
     }
 
+    /// 2つ目の取り込みの解放カードを待っているか（#216 / #324）。
+    /// アラームが鳴るまで待つため、起動をまたいで残す。
+    static var hasPendingPlaylistUnlock: Bool {
+        get { userDefaults.bool(forKey: "hasPendingPlaylistUnlock") }
+        set { userDefaults.set(newValue, forKey: "hasPendingPlaylistUnlock") }
+    }
+
     /// 初めての1回きりアラームの提案を出し終えたか（#247）。
     static var firstAlarmFollowupHandled: Bool {
         get { userDefaults.bool(forKey: "firstAlarmFollowupHandled") }
@@ -635,6 +642,33 @@ enum AppGroup {
     static var isUITestSeedExistingUnlockShown: Bool {
     #if DEBUG
         CommandLine.arguments.contains("-uitest-seed-existing-unlock-shown")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: 既存の人の状態に、音を設定したアラームを1本足す（#324）
+    static var isUITestSeedExistingUnlockAlarm: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-existing-unlock-alarm")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: 端末内の履歴に「鳴った」記録を1件入れる（#324）
+    static var isUITestSeedAlarmFired: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-seed-alarm-fired")
+    #else
+        false
+    #endif
+    }
+
+    /// UIテスト用: 端末内の履歴を空にする（#324）
+    static var isUITestClearAlarmHistory: Bool {
+    #if DEBUG
+        CommandLine.arguments.contains("-uitest-clear-alarm-history")
     #else
         false
     #endif

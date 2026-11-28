@@ -388,6 +388,9 @@
 "playlist_unlock_title" = "Chorus after chorus";
 "playlist_unlock_create" = "Make a playlist";
 "playlist_unlock_later" = "Not now";
+"playlist_apply_title" = "Choose alarms";
+"playlist_apply_later" = "Not now";
+"playlist_apply_apply" = "Use";
 "volume_notice" = "Made louder so it's easy to hear.";
 "permission_banner_title" = "Alarm permission is off";
 "permission_banner_allow" = "Turn On";

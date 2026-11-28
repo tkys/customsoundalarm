@@ -388,6 +388,9 @@
 "playlist_unlock_title" = "好きなサビがつぎつぎに";
 "playlist_unlock_create" = "プレイリストを作る";
 "playlist_unlock_later" = "あとで";
+"playlist_apply_title" = "使うアラームを選ぶ";
+"playlist_apply_later" = "あとで";
+"playlist_apply_apply" = "使う";
 "volume_notice" = "音量を上げて、聞こえやすくしました";
 "permission_banner_title" = "アラームの許可がオフです";
 "permission_banner_allow" = "オンにする";

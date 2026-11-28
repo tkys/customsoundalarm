@@ -388,6 +388,9 @@
 "playlist_unlock_title" = "كورس بعد كورس";
 "playlist_unlock_create" = "إنشاء قائمة تشغيل";
 "playlist_unlock_later" = "لاحقًا";
+"playlist_apply_title" = "اختيار المنبهات";
+"playlist_apply_later" = "لاحقًا";
+"playlist_apply_apply" = "استخدام";
 "volume_notice" = "رفعنا مستوى الصوت ليسهل سماعه.";
 "permission_banner_title" = "إذن المنبهات غير مفعّل";
 "permission_banner_allow" = "تفعيل";
