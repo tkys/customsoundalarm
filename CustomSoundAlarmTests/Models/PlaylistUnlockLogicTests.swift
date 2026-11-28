@@ -102,8 +102,27 @@ struct PlaylistUnlockLogicTests {
             hasPending: false,
             customSoundCount: 2,
             playlistCount: 0,
-            hasShown: false
+            hasShown: false,
+            offersToExistingUsers: true
         ) == .existingUser)
+    }
+
+    /// 1.8.5 では既存の人に出さない（#322）。2つ目の取り込みは今まで通り。
+    @Test
+    func existingUserOfferIsOffByDefaultIn185() {
+        #expect(!PlaylistUnlockLogic.offersToExistingUsers)
+        #expect(PlaylistUnlockLogic.trigger(
+            hasPending: false,
+            customSoundCount: 5,
+            playlistCount: 0,
+            hasShown: false
+        ) == nil)
+        #expect(PlaylistUnlockLogic.trigger(
+            hasPending: true,
+            customSoundCount: 2,
+            playlistCount: 0,
+            hasShown: false
+        ) == .secondImport)
     }
 
     @Test
@@ -128,13 +147,15 @@ struct PlaylistUnlockLogicTests {
             hasPending: false,
             customSoundCount: 1,
             playlistCount: 0,
-            hasShown: false
+            hasShown: false,
+            offersToExistingUsers: true
         ) == nil)
         #expect(PlaylistUnlockLogic.trigger(
             hasPending: false,
             customSoundCount: 2,
             playlistCount: 1,
-            hasShown: false
+            hasShown: false,
+            offersToExistingUsers: true
         ) == nil)
     }
 
