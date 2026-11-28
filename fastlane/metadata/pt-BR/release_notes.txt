@@ -1,15 +1,17 @@
-■ Use músicas do app Música
-Ao adicionar um som, escolha "Adicionar da Música" para escolher o trecho que vai tocar entre as músicas do seu app Música.
+■ "Testar o alarme" mais claro
+Um único botão mostra "Vai tocar em breve" enquanto você espera e "Tocando agora" enquanto toca. Você também pode testar no fim de "Como aumentar o volume dos alarmes".
 
-■ Abra pela Central de Controle
-Adicione "My Sound Alarm" e "Adicionar alarme" à Central de Controle. Toque para abrir a lista de alarmes ou a tela de adicionar.
+■ Lista de alarmes
+• Ao salvar ou ativar um alarme, o tempo até ele tocar aparece por alguns instantes.
+• Os horários seguem o formato de 12 ou 24 horas do aparelho e aparecem maiores.
+• Durante "Pausar alarmes", dá para ver de relance quais alarmes não vão tocar. Alarmes de uma vez continuam ativados.
+• A lista vai até o alarme que você acabou de adicionar para você ver qual é.
 
-■ Um editor de alarmes mais simples
-Soneca, Etiqueta e Início suave agora estão em "Mais".
-
-■ Além disso
-• Se você escolher um trecho quase sem som, o app avisa.
-• O e-mail de "Relatar um problema ou perguntar" nos Ajustes agora anexa o estado do app para nos ajudar a investigar problemas. Ele não inclui nomes de músicas nem arquivos de som. Você pode remover o anexo antes de enviar.
-• Corrigido o texto sobreposto na tela de corte com o maior tamanho de texto.
+■ Correções
+• Corrigido: alarmes com "Início suave" às vezes tocavam outro som, e sons com mais de 10 minutos não aumentavam aos poucos.
+• Corrigido: "Testar" da Proteção contra perder a hora às vezes demorava alguns minutos para tocar.
+• Corrigido: as alças de corte eram difíceis de pegar quando o trecho ocupava toda a largura.
+• Ao fechar o editor, a confirmação só aparece se você mudou algo.
+• Corrigido um caso raro em que o app podia fechar logo depois de adicionar um som de um vídeo.
 
 Obrigado por usar o My Sound Alarm.

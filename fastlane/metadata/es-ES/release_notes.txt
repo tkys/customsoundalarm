@@ -1,15 +1,17 @@
-■ Usa canciones de la app Música
-Al añadir un sonido, elige "Añadir desde Música" para escoger la parte que sonará entre las canciones de tu app Música.
+■ «Probar la alarma» más claro
+Un solo botón muestra «Sonará en breve» mientras esperas y «Sonando ahora» mientras suena. También puedes probar desde el final de «Cómo subir el volumen de las alarmas».
 
-■ Ábrela desde el centro de control
-Añade "My Sound Alarm" y "Añadir alarma" al centro de control. Al tocarlos se abre la lista de alarmas o la pantalla para añadir.
+■ Lista de alarmas
+• Al guardar o activar una alarma, se muestra un momento el tiempo que falta para que suene.
+• Las horas siguen el ajuste de 12 o 24 horas del dispositivo y se muestran más grandes.
+• Durante «Pausar alarmas», se ve de un vistazo qué alarmas no sonarán. Las alarmas de una sola vez siguen activadas.
+• La lista se desplaza hasta la alarma que acabas de añadir para que veas cuál es.
 
-■ Un editor de alarmas más sencillo
-Posponer, Etiqueta e Inicio suave ahora están en "Más".
-
-■ Además
-• Si eliges una parte casi en silencio, la app te avisa.
-• El correo de "Informar de un problema o preguntar" en Ajustes ahora adjunta el estado de la app para ayudarnos a revisar problemas. No incluye nombres de canciones ni archivos de sonido. Puedes quitar el adjunto antes de enviarlo.
-• Corregido el texto que se superponía en la pantalla de recorte con el tamaño de texto más grande.
+■ Correcciones
+• Se corrigió que las alarmas con «Inicio suave» a veces sonaran con otro sonido y que los sonidos de más de 10 minutos no subieran de volumen poco a poco.
+• Se corrigió que «Probar» de la Protección contra quedarse dormido a veces tardara unos minutos en sonar.
+• Se corrigió que los tiradores de recorte fueran difíciles de agarrar cuando el rango ocupa todo el ancho.
+• Al cerrar el editor, la confirmación solo aparece si cambiaste algo.
+• Se corrigió un caso poco frecuente en que la app podía cerrarse justo después de añadir un sonido desde un vídeo.
 
 Gracias por usar My Sound Alarm.

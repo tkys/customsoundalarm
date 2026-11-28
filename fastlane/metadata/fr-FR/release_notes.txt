@@ -1,15 +1,17 @@
-■ Utilisez les morceaux de l'app Musique
-En ajoutant un son, choisissez « Ajouter depuis Musique » pour choisir le passage qui sonnera parmi les morceaux de votre app Musique.
+■ « Tester la sonnerie » plus clair
+Un seul bouton affiche « Va bientôt sonner » pendant l'attente et « Sonnerie en cours » pendant la lecture. Vous pouvez aussi tester depuis le bas de « Comment augmenter le volume des alarmes ».
 
-■ Ouvrir depuis le Centre de contrôle
-Ajoutez « My Sound Alarm » et « Ajouter une alarme » au Centre de contrôle. Touchez pour ouvrir la liste des alarmes ou l'écran d'ajout.
+■ Liste des alarmes
+• Après avoir enregistré ou activé une alarme, le temps restant avant la sonnerie s'affiche un court instant.
+• Les heures suivent le réglage 12 h ou 24 h de l'appareil et sont affichées en plus grand.
+• Pendant « Mettre les alarmes en pause », vous voyez d'un coup d'œil quelles alarmes ne sonneront pas. Les alarmes ponctuelles restent activées.
+• La liste se déplace jusqu'à l'alarme ajoutée pour que vous la repériez.
 
-■ Un éditeur d'alarme plus simple
-Rappel, Étiquette et Démarrage en douceur sont désormais sous « Plus ».
-
-■ Aussi
-• Si vous choisissez un passage presque silencieux, l'app vous le signale.
-• L'e-mail envoyé depuis « Signaler un problème ou poser une question » dans les Réglages joint maintenant l'état de l'app pour nous aider à analyser les problèmes. Il ne contient ni noms de morceaux ni fichiers audio. Vous pouvez retirer la pièce jointe avant l'envoi.
-• Correction du texte qui se chevauchait sur l'écran de découpe avec la plus grande taille de texte.
+■ Corrections
+• Correction des alarmes avec « Démarrage en douceur » qui jouaient parfois un autre son, et des sons de plus de 10 minutes dont le volume n'augmentait pas progressivement.
+• Correction du bouton « Essayer » de l'Anti-grasse matinée qui mettait parfois plusieurs minutes à sonner.
+• Correction des poignées de découpage difficiles à saisir quand la sélection occupe toute la largeur.
+• La confirmation à la fermeture de l'éditeur n'apparaît plus que si vous avez modifié quelque chose.
+• Correction d'un cas rare où l'app pouvait se fermer juste après l'ajout d'un son depuis une vidéo.
 
 Merci d'utiliser My Sound Alarm.

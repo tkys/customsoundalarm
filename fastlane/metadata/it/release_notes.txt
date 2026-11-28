@@ -1,15 +1,17 @@
-■ Usa i brani dell'app Musica
-Quando aggiungi un suono, scegli "Aggiungi da Musica" per scegliere la parte che suonerà tra i brani della tua app Musica.
+■ «Prova la sveglia» più chiaro
+Un solo pulsante mostra «Sta per suonare» mentre aspetti e «Sta suonando» mentre suona. Puoi provare anche dal fondo di «Come aumentare il volume delle sveglie».
 
-■ Apri dal Centro di Controllo
-Aggiungi "My Sound Alarm" e "Aggiungi sveglia" al Centro di Controllo. Toccali per aprire l'elenco delle sveglie o la schermata per aggiungerne una.
+■ Elenco delle sveglie
+• Dopo aver salvato o attivato una sveglia, compare per un momento il tempo che manca allo squillo.
+• Gli orari seguono l'impostazione a 12 o 24 ore del dispositivo e sono più grandi.
+• Durante «Metti in pausa le sveglie» vedi subito quali sveglie non suoneranno. Le sveglie singole restano attive.
+• L'elenco scorre fino alla sveglia appena aggiunta, così vedi qual è.
 
-■ Un editor delle sveglie più semplice
-Posticipa, Etichetta e Avvio delicato ora sono in "Altro".
-
-■ Inoltre
-• Se scegli una parte quasi silenziosa, l'app te lo segnala.
-• L'e-mail di "Segnala un problema o fai una domanda" nelle Impostazioni ora allega lo stato dell'app per aiutarci a esaminare i problemi. Non include nomi dei brani né file audio. Puoi rimuovere l'allegato prima di inviare.
-• Corretto il testo sovrapposto nella schermata di taglio con la dimensione del testo più grande.
+■ Correzioni
+• Corretto: le sveglie con «Avvio delicato» a volte riproducevano un suono diverso e i suoni oltre i 10 minuti non aumentavano gradualmente di volume.
+• Corretto: «Prova» dell'Anti-sonno a volte impiegava qualche minuto a suonare.
+• Corretto: le maniglie di taglio erano difficili da afferrare quando l'intervallo occupava tutta la larghezza.
+• Chiudendo l'editor, la conferma compare solo se hai modificato qualcosa.
+• Corretto un caso raro in cui l'app poteva chiudersi subito dopo aver aggiunto un suono da un video.
 
 Grazie per usare My Sound Alarm.

@@ -1,15 +1,17 @@
-■ Gebruik nummers uit de Muziek-app
-Kies bij het toevoegen van een geluid "Toevoegen uit Muziek" en kies het deel dat moet afgaan uit nummers in je Muziek-app.
+■ Duidelijker "Wekker testen"
+Eén knop toont "Gaat zo af" terwijl je wacht en "Gaat nu af" terwijl hij afgaat. Je kunt ook testen onderaan "Zo maak je wekkers harder".
 
-■ Openen vanuit het bedieningspaneel
-Voeg "My Sound Alarm" en "Wekker toevoegen" toe aan het bedieningspaneel. Tik om je wekkerlijst of het toevoegscherm te openen.
+■ Wekkerlijst
+• Na het bewaren of aanzetten van een wekker zie je even hoe lang het nog duurt tot hij afgaat.
+• Tijden volgen de 12- of 24-uursinstelling van je toestel en worden groter getoond.
+• Tijdens "Wekkers pauzeren" zie je in één oogopslag welke wekkers niet afgaan. Eenmalige wekkers blijven aan.
+• De lijst gaat naar de wekker die je net hebt toegevoegd, zodat je ziet welke het is.
 
-■ Een eenvoudigere wekkereditor
-Sluimeren, Label en Zachte start staan nu onder "Meer".
-
-■ Verder
-• Kies je een deel dat bijna stil is, dan laat de app het je weten.
-• De e-mail via "Probleem melden of vraag stellen" in Instellingen voegt nu de status van de app toe, zodat we problemen kunnen onderzoeken. Namen van nummers en geluidsbestanden zitten er niet in. Je kunt de bijlage verwijderen voordat je verstuurt.
-• Overlappende tekst op het knipscherm bij de grootste tekstgrootte opgelost.
+■ Opgelost
+• Wekkers met "Zachte start" speelden soms een ander geluid af, en geluiden langer dan 10 minuten werden niet geleidelijk harder.
+• "Testen" bij Verslaapbeveiliging duurde soms een paar minuten voordat hij afging.
+• De bijsnijgrepen waren moeilijk vast te pakken als het bereik de hele breedte besloeg.
+• Bij het sluiten van de editor wordt alleen nog om bevestiging gevraagd als je iets hebt gewijzigd.
+• In zeldzame gevallen kon de app sluiten direct nadat je een geluid uit een video had toegevoegd.
 
 Bedankt voor het gebruik van My Sound Alarm.

@@ -1,15 +1,17 @@
-■ Müzik uygulamasındaki şarkıları kullanın
-Ses eklerken Müzik'ten eklemeyi seçin ve Müzik uygulamanızdaki şarkılardan çalacak bölümü belirleyin.
+■ Zil testi daha anlaşılır
+Tek bir düğme, beklerken alarmın birazdan çalacağını, çalarken de çaldığını gösterir. Alarm sesini artırma rehberinin en altından da test edebilirsiniz.
 
-■ Denetim Merkezi'nden açın
-Alarm listesi ve alarm ekleme düğmelerini Denetim Merkezi'ne ekleyebilirsiniz. Dokununca ilgili ekran açılır.
+■ Alarm listesi
+• Bir alarmı kaydettiğinizde veya açtığınızda, çalmasına ne kadar kaldığı kısa bir süre gösterilir.
+• Saatler cihazınızın 12 veya 24 saat ayarına göre ve daha büyük gösterilir.
+• Alarmlar duraklatıldığında hangi alarmların çalmayacağı bir bakışta görülür. Tek seferlik alarmlar açık kalır.
+• Liste yeni eklediğiniz alarma gider, böylece hangisi olduğunu görürsünüz.
 
-■ Daha sade alarm düzenleme ekranı
-Az kullanılan ayarlar tek bir yerde toplandı.
-
-■ Ayrıca
-• Neredeyse sessiz bir bölüm seçerseniz uygulama sizi uyarır.
-• Ayarlardaki destek e-postası artık sorunları incelememize yardımcı olmak için uygulamanın durumunu ekler. Şarkı adları ve ses dosyaları dahil değildir; eki göndermeden önce kaldırabilirsiniz.
-• En büyük yazı boyutunda kırpma ekranında üst üste binen metin düzeltildi.
+■ Düzeltmeler
+• Yavaş başlangıç açık alarmların bazen farklı bir ses çalması ve 10 dakikadan uzun seslerin giderek yükselmemesi düzeltildi.
+• Uyuya kalma korumasını denerken çalmanın bazen birkaç dakika sürmesi düzeltildi.
+• Aralık tüm genişliği kapladığında kırpma tutamaçlarının zor tutulması düzeltildi.
+• Düzenleme ekranını kapatırken onay yalnızca bir şeyi değiştirdiyseniz sorulur.
+• Videodan ses ekledikten hemen sonra uygulamanın nadiren kapanabildiği bir durum düzeltildi.
 
 My Sound Alarm'ı kullandığınız için teşekkürler.

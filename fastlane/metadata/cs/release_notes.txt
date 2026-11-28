@@ -1,15 +1,17 @@
-■ Používej skladby z aplikace Hudba
-Při přidávání zvuku zvol „Přidat z Hudby“ a vyber část, která bude zvonit, ze skladeb v aplikaci Hudba.
+■ Srozumitelnější „Vyzkoušet zvonění“
+Jedno tlačítko ukazuje „Brzy zazvoní“, když čekáš, a „Zvoní teď“, když zvoní. Vyzkoušet to můžeš i ze spodní části obrazovky „Jak zesílit budíky“.
 
-■ Otevírej z ovládacího centra
-Přidej „My Sound Alarm“ a „Přidat budík“ do ovládacího centra. Klepnutím otevřeš seznam budíků nebo obrazovku pro přidání.
+■ Seznam budíků
+• Po uložení nebo zapnutí budíku se na chvíli ukáže, za jak dlouho zazvoní.
+• Časy se řídí nastavením 12 nebo 24 hodin v zařízení a jsou větší.
+• Během „Pozastavit budíky“ hned vidíš, které budíky nezazvoní. Jednorázové budíky zůstávají zapnuté.
+• Seznam se posune k právě přidanému budíku, abys viděl, který to je.
 
-■ Jednodušší editor budíku
-Odložit, Popisek a Jemný start najdeš teď v části „Další“.
-
-■ Dále
-• Když vybereš téměř tichou část, aplikace tě upozorní.
-• E-mail z volby „Nahlásit problém nebo se zeptat“ v Nastavení teď přikládá stav aplikace, abychom mohli problémy prošetřit. Neobsahuje názvy skladeb ani zvukové soubory. Přílohu můžeš před odesláním odebrat.
-• Opraven překrývající se text na obrazovce střihu při největší velikosti písma.
+■ Opravy
+• Opraveno: budíky s „Jemný start“ někdy přehrály jiný zvuk a zvuky delší než 10 minut se postupně nezesilovaly.
+• Opraveno: „Vyzkoušet“ u Ochrany proti zaspání někdy zazvonilo až po několika minutách.
+• Opraveno: úchyty pro oříznutí se špatně chytaly, když výběr zabíral celou šířku.
+• Při zavírání editoru se potvrzení zobrazí jen tehdy, když jsi něco změnil.
+• Opraven vzácný případ, kdy se aplikace mohla zavřít hned po přidání zvuku z videa.
 
 Díky, že používáš My Sound Alarm.
