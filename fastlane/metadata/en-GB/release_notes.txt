@@ -1,15 +1,17 @@
-■ Use songs from the Music app
-When adding a sound, choose "Add from Music" to pick the part to ring from songs in your Music app.
+■ Clearer "Test Ring"
+One button now shows "Ringing soon" while you wait and "Ringing" while it plays. You can also test from the bottom of "How to make alarms louder".
 
-■ Open from Control Center
-Add "My Sound Alarm" and "Add Alarm" to Control Center. Tap to open your alarm list or the add screen.
+■ Alarm list
+• After you save an alarm or turn it on, the time until it rings appears for a moment.
+• Times follow your device's 12-hour or 24-hour setting and are shown larger.
+• During "Rest alarms", you can see at a glance which alarms will not ring. One-time alarms stay on.
+• The list moves to the alarm you just added so you can see which one it is.
 
-■ A simpler alarm editor
-Snooze, Label and Gentle start are now under "More".
-
-■ Also
-• If you pick a part that is nearly silent, the app tells you.
-• The email from "Report a bug or ask a question" in Settings now attaches the app's status to help us look into problems. It does not include song names or sound files. You can remove it before sending.
-• Fixed overlapping text on the trim screen at the largest text size.
+■ Fixes
+• Fixed alarms with "Gentle start" sometimes playing a different sound, and sounds longer than 10 minutes not getting louder gradually.
+• Fixed the Oversleep guard "Try" button sometimes taking a few minutes to ring.
+• Fixed the trim handles being hard to grab when the range covers the full width.
+• Closing the editor now asks for confirmation only when you changed something.
+• Fixed a rare case where the app could close right after adding a sound from a video.
 
 Thank you for using My Sound Alarm.

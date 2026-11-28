@@ -1,15 +1,17 @@
-■ Songs aus der Musik-App verwenden
-Wähle beim Hinzufügen eines Tons „Aus Musik hinzufügen“ und such dir den Weckteil aus Songs in deiner Musik-App aus.
+■ „Klingelton testen“ ist klarer
+Ein einziger Button zeigt „Klingelt gleich“, solange du wartest, und „Klingelt jetzt“, während es klingelt. Du kannst auch ganz unten in „So machst du Wecker lauter“ testen.
 
-■ Aus dem Kontrollzentrum öffnen
-Füge „My Sound Alarm“ und „Wecker hinzufügen“ zum Kontrollzentrum hinzu. Ein Tippen öffnet die Weckerliste oder den Bildschirm zum Hinzufügen.
+■ Weckerliste
+• Nach dem Speichern oder Einschalten eines Weckers wird kurz die Zeit bis zum Klingeln angezeigt.
+• Uhrzeiten folgen der 12- oder 24-Stunden-Einstellung deines Geräts und werden größer angezeigt.
+• Während „Wecker pausieren“ siehst du auf einen Blick, welche Wecker nicht klingeln. Einmalige Wecker bleiben eingeschaltet.
+• Die Liste springt zum gerade hinzugefügten Wecker, damit du ihn sofort siehst.
 
-■ Aufgeräumter Wecker-Editor
-Schlummern, Bezeichnung und Sanfter Start findest du jetzt unter „Mehr“.
-
-■ Außerdem
-• Wählst du einen fast stillen Teil, weist dich die App darauf hin.
-• Die E-Mail über „Problem melden oder Frage stellen“ in den Einstellungen hängt jetzt den App-Status an, damit wir Probleme untersuchen können. Songnamen und Tondateien sind nicht enthalten. Du kannst den Anhang vor dem Senden entfernen.
-• Überlappender Text im Zuschneide-Bildschirm bei größter Schrift behoben.
+■ Korrekturen
+• Behoben: Wecker mit „Sanfter Start“ spielten manchmal einen anderen Ton, und Töne über 10 Minuten wurden nicht allmählich lauter.
+• Behoben: „Testen“ beim Verschlafschutz brauchte manchmal einige Minuten bis zum Klingeln.
+• Behoben: Die Griffe zum Zuschneiden waren schwer zu fassen, wenn der Bereich die ganze Breite einnahm.
+• Beim Schließen des Editors wird nur noch nachgefragt, wenn du etwas geändert hast.
+• Behoben: In seltenen Fällen konnte sich die App direkt nach dem Hinzufügen eines Tons aus einem Video schließen.
 
 Danke, dass du My Sound Alarm nutzt.

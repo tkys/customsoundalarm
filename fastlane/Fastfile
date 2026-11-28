@@ -23,7 +23,7 @@ platform :ios do
       run_precheck_before_submit: false,
       submit_for_review: false,
       primary_category: "UTILITIES",
-      app_version: "1.8.4",
+      app_version: "1.8.5",
       languages: ["en-US", "en-GB", "ja", "fr-FR", "de-DE", "es-ES", "es-MX", "pt-BR", "it", "nl-NL", "ko", "zh-Hans", "ar-SA", "pl", "cs", "ru", "tr", "zh-Hant"]
     )
   end
@@ -42,13 +42,14 @@ platform :ios do
       run_precheck_before_submit: false,
       submit_for_review: false,
       primary_category: "UTILITIES",
-      app_version: "1.8.4",
+      app_version: "1.8.5",
       languages: ["en-US", "en-GB", "ja", "fr-FR", "de-DE", "es-ES", "es-MX", "pt-BR", "it", "nl-NL", "ko", "zh-Hans", "ar-SA", "pl", "cs", "ru", "tr", "zh-Hant"]
     )
   end
 
   desc "リリースビルドを作成し App Store Connect にアップロード＆審査提出（v1.4.0）"
-  lane :release do
+  # `fastlane release submit:false` でアップロードまでで止める（提出はオーナー確認の後に submit_only）
+  lane :release do |options|
     build_app(
       scheme: "CustomSoundAlarm",
       configuration: "Release",
@@ -81,7 +82,7 @@ platform :ios do
       skip_metadata: false,
       force: true,
       run_precheck_before_submit: false,
-      submit_for_review: true,
+      submit_for_review: ![false, "false"].include?(options[:submit]),
       # 審査通過後に自動公開する（手動リリース待ちにしない）
       automatic_release: true,
       submission_information: {
@@ -91,7 +92,7 @@ platform :ios do
         export_compliance_uses_encryption: false,
         export_compliance_is_exempt: false
       },
-      app_version: "1.8.4",
+      app_version: "1.8.5",
       languages: ["en-US", "en-GB", "ja", "fr-FR", "de-DE", "es-ES", "es-MX", "pt-BR", "it", "nl-NL", "ko", "zh-Hans", "ar-SA", "pl", "cs", "ru", "tr", "zh-Hant"]
     )
   end
@@ -115,8 +116,8 @@ platform :ios do
         export_compliance_uses_encryption: false,
         export_compliance_is_exempt: false
       },
-      app_version: "1.8.4",
-      build_number: "16",
+      app_version: "1.8.5",
+      build_number: "17",
       languages: ["en-US", "en-GB", "ja", "fr-FR", "de-DE", "es-ES", "es-MX", "pt-BR", "it", "nl-NL", "ko", "zh-Hans", "ar-SA", "pl", "cs", "ru", "tr", "zh-Hant"]
     )
   end

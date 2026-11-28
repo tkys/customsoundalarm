@@ -1,15 +1,17 @@
-■ Używaj utworów z aplikacji Muzyka
-Dodając dźwięk, wybierz „Dodaj z Muzyki”, aby wybrać fragment budzika z utworów w aplikacji Muzyka.
+■ Czytelniejsze „Przetestuj dzwonek”
+Jeden przycisk pokazuje „Zaraz zadzwoni” podczas czekania i „Dzwoni teraz” w trakcie dzwonienia. Możesz też testować z dołu ekranu „Jak zwiększyć głośność budzików”.
 
-■ Otwieraj z centrum sterowania
-Dodaj „My Sound Alarm” i „Dodaj budzik” do centrum sterowania. Stuknij, aby otworzyć listę budzików lub ekran dodawania.
+■ Lista budzików
+• Po zapisaniu lub włączeniu budzika przez chwilę widać, ile zostało do dzwonka.
+• Godziny są w formacie 12- lub 24-godzinnym zgodnie z ustawieniem urządzenia i są większe.
+• Podczas „Wstrzymaj budziki” od razu widać, które budziki nie zadzwonią. Budziki jednorazowe pozostają włączone.
+• Lista przewija się do właśnie dodanego budzika, żeby było widać, który to.
 
-■ Prostszy edytor budzika
-Drzemka, Etykieta i Łagodny start są teraz w sekcji „Więcej”.
-
-■ Poza tym
-• Jeśli wybierzesz prawie cichy fragment, aplikacja Cię o tym poinformuje.
-• E-mail z opcji „Zgłoś problem lub zapytaj” w Ustawieniach dołącza teraz stan aplikacji, aby pomóc nam zbadać problemy. Nie zawiera nazw utworów ani plików dźwiękowych. Możesz usunąć załącznik przed wysłaniem.
-• Naprawiono nakładający się tekst na ekranie przycinania przy największym rozmiarze tekstu.
+■ Poprawki
+• Naprawiono budziki z „Łagodny start”, które czasem odtwarzały inny dźwięk, oraz dźwięki dłuższe niż 10 minut, które nie stawały się stopniowo głośniejsze.
+• Naprawiono przycisk „Wypróbuj” w Ochronie przed zaspaniem, który czasem dzwonił dopiero po kilku minutach.
+• Naprawiono uchwyty przycinania, które trudno było chwycić, gdy zakres zajmował całą szerokość.
+• Przy zamykaniu edytora potwierdzenie pojawia się tylko wtedy, gdy coś zmieniono.
+• Naprawiono rzadki przypadek, w którym aplikacja mogła się zamknąć tuż po dodaniu dźwięku z filmu.
 
 Dziękujemy za korzystanie z My Sound Alarm.
